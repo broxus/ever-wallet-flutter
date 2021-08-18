@@ -1,0 +1,112 @@
+name: crystal
+description: TON Crystal Wallet
+
+publish_to: "none"
+
+version: 1.0.0+14
+
+environment:
+  sdk: ">=2.13.0 <3.0.0"
+  flutter: ">=2.2.0"
+
+dependencies:
+  another_flushbar: ^1.10.23
+  auto_route: ^2.2.0
+  auto_size_text: 3.0.0-nullsafety.0
+  back_button_interceptor: ^5.0.0
+  cupertino_icons: ^1.0.3
+  dio: ^4.0.0
+  easy_localization: ^3.0.0
+  expand_tap_area: ^1.1.0
+  extended_text: ^7.0.0
+  fading_edge_scrollview: ^2.0.0
+  faker: ^2.0.0
+  firebase_analytics: ^8.0.2
+  firebase_core: ^1.1.0
+  firebase_crashlytics: ^2.0.2
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^7.1.0
+  flutter_dotenv: ^5.0.2
+  flutter_gravatar: ^2.0.2
+  flutter_launcher_icons: ^0.9.0
+  flutter_native_splash: ^1.1.8+4
+  flutter_platform_widgets: ^1.9.0
+  flutter_secure_storage: ^4.2.0
+  flutter_svg: ^0.22.0
+  freezed_annotation: ^0.14.2
+  get_it: ^7.1.3
+  hive: ^2.0.4
+  injectable: ^1.2.2
+  intl: ^0.17.0
+  json_annotation: ^4.0.1
+  local_auth: ^1.1.6
+  logger: ^1.0.0
+  lottie: ^1.0.1
+  modal_bottom_sheet: ^2.0.0
+  nekoton_flutter:
+    path: ../nekoton-flutter
+  qr_flutter: ^4.0.0
+  rect_getter: ^1.0.0
+  rxdart: ^0.27.0
+  share_plus: ^2.1.4
+  shared_preferences: ^2.0.5
+  shimmer: ^2.0.0
+  sortedmap: ^0.5.1
+  timeago: ^3.0.2
+  tuple: ^2.0.0
+  url_launcher: ^6.0.3
+
+dev_dependencies:
+  auto_route_generator: ^2.1.0
+  build_runner: ^2.0.4
+  flutter_gen_runner: ^3.1.1
+  flutter_test:
+    sdk: flutter
+  freezed: ^0.14.2
+  hive_generator: ^1.1.0
+  import_sorter: ^4.5.0
+  injectable_generator: ^1.3.0
+  json_serializable: ^4.1.3
+  lint: ^1.5.3
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo/logo.png"
+  adaptive_icon_background: "assets/logo/logo_background.png"
+  adaptive_icon_foreground: "assets/logo/logo_foreground.png"
+
+flutter_native_splash:
+  image: "assets/logo/logo_splash.png"
+  color: "1a1b39"
+  android_gravity: "center"
+  ios_content_mode: "scaleAspectFit"
+
+flutter_gen:
+  output: lib/generated/
+  line_length: 80
+  integrations:
+    flutter_svg: true
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+    - assets/font/
+    - assets/images/
+    - assets/animations/
+    - assets/localizations/
+
+  fonts:
+    - family: PT
+      fonts:
+        - asset: assets/font/PT-Root-UI/PT-Root-UI_Light.ttf
+          weight: 300
+        - asset: assets/font/PT-Root-UI/PT-Root-UI_Regular.ttf
+          weight: 400
+        - asset: assets/font/PT-Root-UI/PT-Root-UI_Medium.ttf
+          weight: 500
+        - asset: assets/font/PT-Root-UI/PT-Root-UI_Bold.ttf
+          weight: 700

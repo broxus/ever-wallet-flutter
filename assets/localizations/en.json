@@ -1,0 +1,347 @@
+{
+  "application_title": "TON Crystal Wallet",
+  "actions": {
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "send": "Send",
+    "reject": "Reject",
+    "update": "Update",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "skip": "Skip",
+    "ok": "OK",
+    "deploy": "Deploy",
+    "receive": "Receive",
+    "copy": "Copy",
+    "cancel": "Cancel",
+    "proceed": "Proceed",
+    "share": "Share",
+    "remove_account": "Remove account",
+    "paste": "Paste",
+    "clear": "Clear"
+  },
+  "fields": {
+    "public_key": "Public key",
+    "address": "Address",
+    "type": "Type",
+    "account_balance": "Account balance",
+    "blockchain_fee": "Blockchain fee",
+    "fee": "Fee",
+    "sender": "Sender",
+    "recipient": "Recipient",
+    "comment": "Comment",
+    "password": "Password",
+    "history": "History",
+    "search": "Search",
+    "amount": "Amount",
+    "debit": "Debit",
+    "not_created": "Not created",
+    "date_time": "Date and time",
+    "hash_id": "Hash (ID)",
+    "validation_errors": {
+      "wrong_address": "Invalid address"
+    }
+  },
+  "welcome_screen": {
+    "title": "Welcome to\nTON Crystal Wallet",
+    "subtitle": "Create a new wallet or sign in",
+    "action": {
+      "create": "Create a new wallet",
+      "sign_in": "Sign in with seed phrase or private key"
+    }
+  },
+  "welcome_policy_screen": {
+    "title": "Sign the decentralization policy to proceed",
+    "description": {
+      "common": "I accept the",
+      "link": "the decentralization policy",
+      "application": "of TON Crystal Wallet",
+      "text": "@:welcome_policy_screen_description.common @:welcome_policy_screen_description.link @:welcome_policy_screen_description.application"
+    }
+  },
+  "seed_phrase_save_screen": {
+    "title": "Save the seed phrase",
+    "action": {
+      "confirm": "I wrote it down on paper",
+      "copy": "Copy all words"
+    },
+    "message": {
+      "copied": "Words copied"
+    }
+  },
+  "seed_phrase_check_screen": {
+    "title": "Let’s check the seed phrase",
+    "hint": "Enter the word",
+    "validation_errors": {
+      "incorrect_word": "Incorrect word"
+    }
+  },
+  "password_creation_screen": {
+    "protection": {
+      "title": "Password protection",
+      "description": "So no one else but you can unlock your wallet.",
+      "action": "Sign on the wallet"
+    },
+    "creation": {
+      "title": "Create a password",
+      "description": "We will ask for it at each transaction. If you forget it, you will need to restore the wallet from the seed phrase",
+      "action": "Create a wallet"
+    },
+    "password": {
+      "hint": "Your password…",
+      "confirmation": "Confirm password…"
+    }
+  },
+  "seed_phrase_import_screen": {
+    "title": "Enter your seed phrase",
+    "hint": "Enter the word",
+    "validation_errors": {
+      "incorrect_word": "Incorrect word"
+    }
+  },
+  "wallet_screen": {
+    "title": "Wallet",
+    "actions": {
+      "add_asset": "Add asset"
+    },
+    "add_account": {
+      "title": "Add account",
+      "description": "You can create a new account or add created one",
+      "hint": "Enter account name"
+    }
+  },
+  "wallet_creation_modal": {
+    "title": "Select wallet type to create",
+    "actions": {
+      "create": "Create wallet address"
+    }
+  },
+  "wallet_history_modal": {
+    "tabs": {
+      "assets": "Assets",
+      "transactions": "Transactions"
+    },
+    "placeholder": {
+      "asset_empty": "There is not any asset",
+      "transactions_empty": "History is empty"
+    },
+    "holder": {
+      "value": "{} {}",
+      "fee": "Fees: {} {}"
+    },
+    "status": {
+      "failed": "Failed transaction",
+      "in_progress": "Transaction in progress"
+    }
+  },
+  "notifications_modal": {
+    "title": "Notifications",
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "placeholder": {
+      "empty": "List of notifications is empty."
+    }
+  },
+  "deploy_wallet_modal": {
+    "title": "Deploy your wallet",
+    "available_message": "Funds will be debited from your balance to deploy.",
+    "unavailable_message": "You need to have at least {} TON on your account balance to deploy.",
+    "password": "Enter password to deploy",
+    "deploying": "Wallet is deploying…",
+    "success": "Wallet has been deployed successfully",
+    "loading": "Loading…"
+  },
+  "receive_wallet_modal": {
+    "title": "Your address to receive {} funds",
+    "actions": {
+      "copy": "Copy address"
+    },
+    "message": {
+      "copied": "Address copied",
+      "share": "Wallet address is {}"
+    }
+  },
+  "preferences_modal": {
+    "title": "Preferences",
+    "actions": {
+      "look_in_the_explorer": "Look in the explorer",
+      "export_private_key": "Export private key"
+    },
+    "message": {
+      "renamed": "Wallet renamed",
+      "renaming_error": "Wallet renaming error"
+    }
+  },
+  "connected_sites_modal": {
+    "title": "Connected sites",
+    "options": {
+      "edit": "Edit the site address",
+      "delete": "Are you sure you want to delete this site?"
+    }
+  },
+  "add_assets_modal": {
+    "title": "Select new assets",
+    "search_layout": {
+      "tab": "Search",
+      "hint": "Enter the asset name…"
+    },
+    "create_layout": {
+      "tab": "Custom token",
+      "contract_hint": "Root token contract…",
+      "symbol_hint": "Token symbol…",
+      "decimals_hint": "Number of decimal places"
+    }
+  },
+  "deploy_asset_modal": {
+    "title": "Deploy asset",
+    "description": "Select the account you want to use for payment blockchain fee. There is minimum 1 TON.",
+    "not_enough_money_error": "You don’t have enough money on this account balance.",
+    "value": "{} {}",
+    "states": {
+      "deploying": "Deploying…",
+      "success": "Deploy has been completed successfully",
+      "loading": "Loading…",
+      "password": "Enter password to deploy"
+    }
+  },
+  "send_transaction_modal": {
+    "input": {
+      "title": "Enter receiver address",
+      "balance": "Your balance: {} {}",
+      "value": "{} {}",
+      "hints": {
+        "amount": "@:fields.amount…",
+        "address": "Receiver address…",
+        "comment": "@:fields.comment…"
+      },
+      "actions": {
+        "max": "Max",
+        "half": "Half",
+        "paste": "Paste address"
+      }
+    },
+    "confirm": {
+      "title": "Confirm transaction",
+      "errors": {
+        "insufficient_funds": "You don’t have enough money on this account balance.",
+        "insufficient_owner_funds": "You don’t have enough money on owner account balance."
+      },
+      "action": "Confirm transaction"
+    },
+    "password": "Enter password to send",
+    "sending": "Transaction is sending…",
+    "success": "Transaction has been sent successfully"
+  },
+  "transaction_observer": {
+    "title": "Transaction information",
+    "open_explorer": "See in explorer"
+  },
+  "settings_screen": {
+    "title": "Settings",
+    "sections": {
+      "seeds": {
+        "title": "Seeds",
+        "add_seed": "Add seed"
+      },
+      "current_seed_preferences": {
+        "title": "Current seed preferences ({})",
+        "export_seed": "Export seed phrase",
+        "export_key": "Export private key",
+        "remove_seed": "Remove seed phrase",
+        "change_seed_password": "Change seed phrase password",
+        "derive_key": "Derive key",
+        "rename_key": "Rename seed phrase"
+      },
+      "wallet_preferences": {
+        "title": "Wallet preferences",
+        "seeds": "Seeds preferences",
+        "settings": "Wallet settings",
+        "information": "Information and help"
+      },
+      "logout": {
+        "action": "Log out",
+        "confirmation": "Logout confirmation"
+      }
+    }
+  },
+  "new_seed_name": {
+    "headline": "Name new seed",
+    "hint": "Name",
+    "actions": {
+      "create": "Create new seed",
+      "import": "Import seed"
+    }
+  },
+  "change_seed_password_modal": {
+    "hints": {
+      "new": "New password",
+      "old": "Old password"
+    },
+    "actions": {
+      "submit": "@:actions.submit"
+    },
+    "messages": {
+      "success": "Password changed successfully."
+    }
+  },
+  "remove_seed_modal": {
+    "title": "Remove key",
+    "description": "Are you sure you want to remove key?",
+    "actions": {
+      "remove": "Remove key"
+    }
+  },
+  "remove_account_modal": {
+    "title": "Remove account",
+    "description": "Are you sure you want to remove account?",
+    "actions": {
+      "remove": "@actions.remove_account"
+    }
+  },
+  "add_site_dialog": {
+    "title": "Add site",
+    "actions": {
+      "add": "Add"
+    }
+  },
+  "create_account_modal": {
+    "title": "Select type to create account",
+    "actions": {
+      "add": "Create account"
+    }
+  },
+  "derive_key_modal": {
+    "title": "Enter password to derive",
+    "actions": {
+      "derive": "Derive key"
+    }
+  },
+  "export_seed_modal": {
+    "title": "Enter password to export"
+  },
+  "biometry": {
+    "title": "Biometry",
+    "checkbox": "Enable biometry"
+  },
+  "error": {
+    "message": {
+      "ton_wallet": "Wallet error.",
+      "password": "Invalid password.",
+      "unknown": "Unknown error."
+    }
+  },
+  "rename_key_modal": {
+    "title": "Enter new name",
+    "actions": {
+      "rename": "Rename"
+    },
+    "message": {
+      "success": "Seed phrase renamed successfully"
+    }
+  }
+}

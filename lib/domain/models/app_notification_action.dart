@@ -1,0 +1,4 @@
+enum AppNotificationAction {
+  none,
+  update,
+}
