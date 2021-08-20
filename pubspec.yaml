@@ -3,7 +3,7 @@ description: TON Crystal Wallet
 
 publish_to: "none"
 
-version: 1.0.0+14
+version: 1.0.1+15
 
 environment:
   sdk: ">=2.13.0 <3.0.0"

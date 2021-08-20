@@ -19,7 +19,7 @@ class HiveSource {
     final hiveSource = HiveSource();
 
     final hiveAesCipherKeyString = dotenv.env['HIVE_AES_CIPHER_KEY'];
-    final hiveAesCipherKeyList = hiveAesCipherKeyString?.split(" ").cast<int>();
+    final hiveAesCipherKeyList = hiveAesCipherKeyString?.split(" ").map((e) => int.parse(e)).toList();
     final hiveAesCipherKey = hiveAesCipherKeyList != null ? Uint8List.fromList(hiveAesCipherKeyList) : null;
 
     if (hiveAesCipherKey == null) {
