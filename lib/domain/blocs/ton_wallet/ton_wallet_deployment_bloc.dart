@@ -31,7 +31,7 @@ class TonWalletDeploymentBloc extends Bloc<TonWalletDeploymentEvent, TonWalletDe
         try {
           final contractState = await _tonWallet!.contractState;
           final balance = contractState.balance;
-          yield TonWalletDeploymentState.initial(balance);
+          yield TonWalletDeploymentState.initial(balance.toTokens());
           _message = await _tonWallet!.prepareDeploy(defaultMessageExpiration);
           feesBloc.add(TonWalletDeploymentFeesEvent.estimateFees(balance: balance, message: _message!));
         } on Exception catch (err, st) {
