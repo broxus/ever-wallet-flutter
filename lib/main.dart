@@ -12,26 +12,29 @@ import 'logger.dart';
 import 'presentation/application/application.dart';
 
 Future<void> main() async {
-  await dotenv.load();
+  try {
+    final rawReceivePort = RawReceivePort((pair) async {
+      final errorAndStackTrace = pair as List<dynamic>;
+      final exception = errorAndStackTrace.first as String;
+      final stack = StackTrace.fromString(errorAndStackTrace.last as String);
 
-  EasyLocalization.logger.enableBuildModes = [];
-  WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  await configureDependencies();
+      logger.e(exception, exception, stack);
+    });
+    Isolate.current.addErrorListener(rawReceivePort.sendPort);
 
-  final rawReceivePort = RawReceivePort((pair) async {
-    final errorAndStackTrace = pair as List<dynamic>;
-    final exception = errorAndStackTrace.first as String;
-    final stack = StackTrace.fromString(errorAndStackTrace.last as String);
+    await dotenv.load();
 
-    logger.e(exception, exception, stack);
-  });
+    WidgetsFlutterBinding.ensureInitialized();
+    await EasyLocalization.ensureInitialized();
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  Isolate.current.addErrorListener(rawReceivePort.sendPort);
+    await configureDependencies();
 
-  runZonedGuarded(
-    () => runApp(Application()),
-    FirebaseCrashlytics.instance.recordError,
-  );
+    runZonedGuarded(
+      () => runApp(Application()),
+      FirebaseCrashlytics.instance.recordError,
+    );
+  } catch (err, st) {
+    logger.e(err, err, st);
+  }
 }
