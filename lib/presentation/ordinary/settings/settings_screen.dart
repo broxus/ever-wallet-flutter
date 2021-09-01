@@ -166,7 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                                         _sectionAction(
                                           title: LocaleKeys.settings_screen_sections_current_seed_preferences_derive_key
                                               .tr(),
-                                          onTap: keys.isNotEmpty && currentKey != null
+                                          onTap: keys.isNotEmpty
                                               ? () async {
                                                   final name = await CrystalBottomSheet.show<String>(
                                                     context,

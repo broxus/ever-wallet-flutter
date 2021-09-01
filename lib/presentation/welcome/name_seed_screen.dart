@@ -96,7 +96,6 @@ class _NameSeedScreenState extends State<NameSeedScreen> {
                     ),
             ),
           );
-          ;
         },
       );
 
