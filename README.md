@@ -13,3 +13,9 @@ TON Wallet Flutter application. Manage Free TON wallets and access dApps directl
 
 4. Create ```.env``` file in root of the project with ```HIVE_AES_CIPHER_KEY``` string contains 32 integers separated with spaces  
 Example: ```HIVE_AES_CIPHER_KEY='4 8 15 16 23 42 ... 42 23 16 15 8 4'```  
+
+5. Build commands
+```flutter build appbundle --release --no-tree-shake-icons --no-shrink```
+```flutter build apk --release --no-tree-shake-icons --no-shrink```
+```flutter build apk --release --no-tree-shake-icons --no-shrink --split-per-abi```
+```flutter build ios --release --no-tree-shake-icons --no-codesign```
