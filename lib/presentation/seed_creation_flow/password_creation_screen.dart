@@ -42,7 +42,6 @@ class _PasswordCreationScreenState extends State<PasswordCreationScreen> {
 
   @override
   Widget build(BuildContext context) => WelcomeScaffold(
-        allowIosBackSwipe: false,
         onScaffoldTap: FocusScope.of(context).unfocus,
         headline: LocaleKeys.password_creation_screen_creation_title.tr(),
         body: buildBody(),

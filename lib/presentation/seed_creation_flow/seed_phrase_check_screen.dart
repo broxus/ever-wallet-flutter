@@ -65,7 +65,6 @@ class _SeedPhraseCheckScreenState extends State<SeedPhraseCheckScreen> {
 
   @override
   Widget build(BuildContext context) => WelcomeScaffold(
-        allowIosBackSwipe: false,
         onScaffoldTap: FocusScope.of(context).unfocus,
         headline: LocaleKeys.seed_phrase_check_screen_title.tr(),
         body: Padding(

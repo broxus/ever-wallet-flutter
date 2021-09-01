@@ -32,7 +32,6 @@ class _NameNewAccountScreenState extends State<NameNewAccountScreen> {
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
         child: WelcomeScaffold(
-          allowIosBackSwipe: false,
           onScaffoldTap: FocusScope.of(context).unfocus,
           headline: 'Name new account',
           body: Padding(

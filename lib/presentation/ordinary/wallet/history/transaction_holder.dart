@@ -108,13 +108,15 @@ class WalletTransactionHolder extends StatelessWidget {
                           SizedBox(
                             height: 20,
                             child: Text(
-                              transaction.isOutgoing ? '- ${transaction.value}' : '+ ${transaction.value}',
+                              transaction.isOutgoing
+                                  ? '- ${transaction.value.floorValue().elipseValue()}'
+                                  : '+ ${transaction.value.floorValue().elipseValue()}',
                               style: TextStyle(
                                 fontSize: 16.0,
                                 color: transaction.isOutgoing ? CrystalColor.error : CrystalColor.success,
                                 fontWeight: FontWeight.w700,
                               ),
-                              overflow: TextOverflow.fade,
+                              overflow: TextOverflow.ellipsis,
                               softWrap: false,
                             ),
                           ),

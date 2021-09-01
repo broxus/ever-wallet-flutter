@@ -26,7 +26,7 @@ class _ApplicationState extends State<Application> {
 
   MaterialApp buildMaterialApp(BuildContext context) => MaterialApp.router(
         title: LocaleKeys.application_title.tr(),
-        theme: CrystalTheme.original,
+        theme: applicationTheme,
         debugShowCheckedModeBanner: false,
         supportedLocales: context.supportedLocales,
         locale: context.locale,

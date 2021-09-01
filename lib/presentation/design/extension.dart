@@ -88,3 +88,34 @@ extension FormatTransactionTime on DateTime {
     return formatted;
   }
 }
+
+extension FloorValue on String {
+  String floorValue() {
+    final dot = indexOf(".");
+    if (dot != -1) {
+      if (length - dot > 2) {
+        final firstPart = substring(0, dot);
+        final secondPart = substring(dot, dot + 3);
+
+        return firstPart + secondPart;
+      } else {
+        final firstPart = substring(0, dot);
+        final secondPart = substring(dot, length).padRight(3, "0");
+
+        return firstPart + secondPart;
+      }
+    } else {
+      return this;
+    }
+  }
+}
+
+extension ElipseValue on String {
+  String elipseValue() {
+    if (length > 12) {
+      return "${substring(0, 12)}...";
+    } else {
+      return this;
+    }
+  }
+}

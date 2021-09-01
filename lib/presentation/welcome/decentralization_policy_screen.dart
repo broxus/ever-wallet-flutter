@@ -1,29 +1,31 @@
+import 'package:crystal/domain/utils/decentralization_policy.dart';
 import 'package:expand_tap_area/expand_tap_area.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../design/design.dart';
 import 'widget/welcome_scaffold.dart';
 
-class WelcomePolicyScreen extends StatefulWidget {
+class DecentralizationPolicyScreen extends StatefulWidget {
   final CreationActions action;
 
-  const WelcomePolicyScreen({
+  const DecentralizationPolicyScreen({
     Key? key,
     required this.action,
   }) : super(key: key);
 
   @override
-  _WelcomePolicyScreenState createState() => _WelcomePolicyScreenState();
+  _DecentralizationPolicyScreenState createState() => _DecentralizationPolicyScreenState();
 }
 
-class _WelcomePolicyScreenState extends State<WelcomePolicyScreen> {
+class _DecentralizationPolicyScreenState extends State<DecentralizationPolicyScreen> {
   final _image = ExactAssetPicture(
     SvgPicture.svgStringDecoder,
     Assets.images.signImage.path,
   );
-  late final _policyCheckNotifier = ValueNotifier<bool>(false);
+  final _policyCheckNotifier = ValueNotifier<bool>(false);
 
   @override
   void dispose() {
@@ -33,7 +35,6 @@ class _WelcomePolicyScreenState extends State<WelcomePolicyScreen> {
 
   @override
   Widget build(BuildContext context) => WelcomeScaffold(
-        allowIosBackSwipe: false,
         headline: LocaleKeys.welcome_policy_screen_title.tr(),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -158,5 +159,5 @@ class _WelcomePolicyScreenState extends State<WelcomePolicyScreen> {
         ),
       );
 
-  void onLinkTap() => debugPrint('Decentralization Policy');
+  void onLinkTap() => launch(getDecentralizationPolicyLink());
 }

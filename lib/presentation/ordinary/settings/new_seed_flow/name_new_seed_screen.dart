@@ -26,7 +26,6 @@ class _NameNewSeedScreenState extends State<NameNewSeedScreen> {
 
   @override
   Widget build(BuildContext context) => WelcomeScaffold(
-        allowIosBackSwipe: false,
         onScaffoldTap: FocusScope.of(context).unfocus,
         headline: LocaleKeys.new_seed_name_headline.tr(),
         body: Padding(
@@ -105,7 +104,16 @@ class _NameNewSeedScreenState extends State<NameNewSeedScreen> {
         context.router.push(SeedPhraseSaveScreenRoute(seedName: nameController.text));
         break;
       case CreationActions.import:
-        context.router.push(SeedPhraseImportScreenRoute(seedName: nameController.text));
+        context.router.push(SeedPhraseImportScreenRoute(
+          seedName: nameController.text,
+          isLegacy: false,
+        ));
+        break;
+      case CreationActions.importLegacy:
+        context.router.push(SeedPhraseImportScreenRoute(
+          seedName: nameController.text,
+          isLegacy: true,
+        ));
         break;
     }
   }

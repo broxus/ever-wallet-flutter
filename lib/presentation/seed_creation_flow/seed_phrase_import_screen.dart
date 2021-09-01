@@ -16,8 +16,12 @@ import '../welcome/widget/welcome_scaffold.dart';
 
 class SeedPhraseImportScreen extends StatefulWidget {
   final String seedName;
+  final bool isLegacy;
 
-  const SeedPhraseImportScreen({required this.seedName});
+  const SeedPhraseImportScreen({
+    required this.seedName,
+    required this.isLegacy,
+  });
 
   @override
   _SeedPhraseImportScreenState createState() => _SeedPhraseImportScreenState();
@@ -27,7 +31,7 @@ class _SeedPhraseImportScreenState extends State<SeedPhraseImportScreen> {
   final ValueNotifier<bool> _isPasteButton = ValueNotifier<bool>(true);
 
   final fieldLayoutScrollController = ScrollController();
-  final wordsCount = 24;
+  late final int wordsCount;
   final bloc = getIt.get<PhraseImportBloc>();
   late final List<String> words;
   late final List<FocusNode> focuses;
@@ -37,6 +41,7 @@ class _SeedPhraseImportScreenState extends State<SeedPhraseImportScreen> {
   @override
   void initState() {
     super.initState();
+    wordsCount = widget.isLegacy ? 24 : 12;
     words = List<String>.generate(wordsCount, (_) => '');
     focuses = List.generate(wordsCount, (_) => FocusNode());
     controllers = List.generate(wordsCount, (_) => TextEditingController());
@@ -224,6 +229,7 @@ class _SeedPhraseImportScreenState extends State<SeedPhraseImportScreen> {
           bottom: bottomKeyboardPadding + CrystalButton.kHeight + 24.0,
         ),
         child: buildInputGrid(
+          columns: 1,
           fieldBuilder: (index) => CrystalTextField(
             maxLength: 24,
             enableInteractiveSelection: false,
@@ -251,17 +257,6 @@ class _SeedPhraseImportScreenState extends State<SeedPhraseImportScreen> {
                   color: CrystalColor.fontDark,
                 ),
               ),
-            ),
-            suffix: IconButton(
-              icon: const Icon(
-                Icons.clear,
-                size: 16,
-              ),
-              color: CrystalColor.fontDark,
-              onPressed: () {
-                controllers[index].text = '';
-                words[index] = '';
-              },
             ),
             hintText: LocaleKeys.seed_phrase_import_screen_hint.tr(),
             prefixConstraints: const BoxConstraints(

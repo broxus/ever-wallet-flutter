@@ -160,7 +160,33 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                                               }
                                             : null,
                                       ),
-                                      _deriveSectionAction(keys, currentKey),
+                                      if (currentKey != null &&
+                                          currentKey.value.isNotLegacy &&
+                                          currentKey.value.publicKey == currentKey.value.masterKey)
+                                        _sectionAction(
+                                          title: LocaleKeys.settings_screen_sections_current_seed_preferences_derive_key
+                                              .tr(),
+                                          onTap: keys.isNotEmpty && currentKey != null
+                                              ? () async {
+                                                  final name = await CrystalBottomSheet.show<String>(
+                                                    context,
+                                                    title: NameNewKeyModalBody.title,
+                                                    body: const NameNewKeyModalBody(),
+                                                  );
+
+                                                  if (name != null) {
+                                                    CrystalBottomSheet.show(
+                                                      context,
+                                                      title: DeriveKeyModalBody.title,
+                                                      body: DeriveKeyModalBody(
+                                                        keySubject: currentKey,
+                                                        name: name,
+                                                      ),
+                                                    );
+                                                  }
+                                                }
+                                              : null,
+                                        ),
                                       _sectionAction(
                                         title: LocaleKeys.settings_screen_sections_current_seed_preferences_rename_key
                                             .tr(),
@@ -193,10 +219,6 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                                                 },
                                               )
                                             : const SizedBox(),
-                                      ),
-                                      _sectionAction(
-                                        title: LocaleKeys.settings_screen_sections_wallet_preferences_information.tr(),
-                                        onTap: () {},
                                       ),
                                     ],
                                   ),
@@ -259,38 +281,6 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
           ),
         ),
       );
-
-  Widget _deriveSectionAction(Map<KeySubject, List<KeySubject>?> keys, KeySubject? currentKey) {
-    final selectedSeed = currentKey;
-    if (selectedSeed != null &&
-        selectedSeed.value.isNotLegacy &&
-        selectedSeed.value.publicKey == selectedSeed.value.masterKey) {
-      return _sectionAction(
-        title: LocaleKeys.settings_screen_sections_current_seed_preferences_derive_key.tr(),
-        onTap: keys.isNotEmpty && currentKey != null
-            ? () async {
-                final name = await CrystalBottomSheet.show<String>(
-                  context,
-                  title: NameNewKeyModalBody.title,
-                  body: const NameNewKeyModalBody(),
-                );
-
-                if (name != null) {
-                  CrystalBottomSheet.show(
-                    context,
-                    title: DeriveKeyModalBody.title,
-                    body: DeriveKeyModalBody(
-                      keySubject: currentKey,
-                      name: name,
-                    ),
-                  );
-                }
-              }
-            : null,
-      );
-    }
-    return const SizedBox();
-  }
 
   Widget _seedsList({
     required KeySubject? selectedSeed,

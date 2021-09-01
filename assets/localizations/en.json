@@ -50,7 +50,7 @@
     "subtitle": "Create a new wallet or sign in",
     "action": {
       "create": "Create a new wallet",
-      "sign_in": "Sign in with seed phrase or private key"
+      "sign_in": "Sign in with seed phrase"
     }
   },
   "welcome_policy_screen": {
@@ -169,8 +169,7 @@
   "preferences_modal": {
     "title": "Preferences",
     "actions": {
-      "look_in_the_explorer": "Look in the explorer",
-      "export_private_key": "Export private key"
+      "look_in_the_explorer": "Look in the explorer"
     },
     "message": {
       "renamed": "Wallet renamed",
@@ -251,7 +250,6 @@
       "current_seed_preferences": {
         "title": "Current seed preferences ({})",
         "export_seed": "Export seed phrase",
-        "export_key": "Export private key",
         "remove_seed": "Remove seed phrase",
         "change_seed_password": "Change seed phrase password",
         "derive_key": "Derive key",

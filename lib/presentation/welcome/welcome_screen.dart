@@ -121,21 +121,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             children: [
               CrystalButton(
                 text: LocaleKeys.welcome_screen_action_create.tr(),
-                onTap: () => navigateTo(CreationActions.create),
+                onTap: () => pushDecentralizationPolicyScreen(CreationActions.create),
               ),
               const SizedBox(height: 12.0),
               CrystalButton(
                 type: CrystalButtonType.text,
                 text: LocaleKeys.welcome_screen_action_sign_in.tr(),
-                onTap: () => navigateTo(CreationActions.import),
+                onTap: () => pushDecentralizationPolicyScreen(CreationActions.import),
               ),
             ],
           ),
         ),
       );
 
-  void navigateTo(CreationActions action) => context.router.navigate(
-        WelcomePolicyScreenRoute(
+  void pushDecentralizationPolicyScreen(CreationActions action) => context.router.push(
+        DecentralizationPolicyScreenRoute(
           action: action,
         ),
       );

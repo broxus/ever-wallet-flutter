@@ -2,33 +2,31 @@ import 'package:flutter/material.dart';
 
 import '../../generated/fonts.gen.dart';
 
-abstract class CrystalTheme {
-  static final original = ThemeData(
-    appBarTheme: const AppBarTheme(
-      brightness: Brightness.dark,
-      color: CrystalColor.background,
-      elevation: 0,
-    ),
-    fontFamily: FontFamily.pt,
+final applicationTheme = ThemeData(
+  appBarTheme: const AppBarTheme(
     brightness: Brightness.dark,
-    primaryColorBrightness: Brightness.dark,
-    primaryColor: CrystalColor.primary,
-    accentColor: CrystalColor.accent,
-    errorColor: CrystalColor.error,
-    dividerColor: CrystalColor.divider,
-    shadowColor: CrystalColor.shadow,
-    scaffoldBackgroundColor: CrystalColor.primary,
-    hintColor: CrystalColor.fontSecondaryDark,
-    buttonColor: CrystalColor.accent,
-    iconTheme: const IconThemeData(
-      color: CrystalColor.icon,
-    ),
-    textSelectionTheme: const TextSelectionThemeData(
-      cursorColor: CrystalColor.cursorColor,
-      selectionColor: CrystalColor.hintColor,
-    ),
-  );
-}
+    color: CrystalColor.background,
+    elevation: 0,
+  ),
+  fontFamily: FontFamily.pt,
+  brightness: Brightness.dark,
+  primaryColorBrightness: Brightness.dark,
+  primaryColor: CrystalColor.primary,
+  accentColor: CrystalColor.accent,
+  errorColor: CrystalColor.error,
+  dividerColor: CrystalColor.divider,
+  shadowColor: CrystalColor.shadow,
+  scaffoldBackgroundColor: CrystalColor.primary,
+  hintColor: CrystalColor.fontSecondaryDark,
+  buttonColor: CrystalColor.accent,
+  iconTheme: const IconThemeData(
+    color: CrystalColor.icon,
+  ),
+  textSelectionTheme: const TextSelectionThemeData(
+    cursorColor: CrystalColor.cursorColor,
+    selectionColor: CrystalColor.hintColor,
+  ),
+);
 
 abstract class CrystalColor {
   static const primary = Color(0xFFFFFFFF);

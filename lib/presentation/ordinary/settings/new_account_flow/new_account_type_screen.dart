@@ -45,7 +45,6 @@ class _NewAccountTypeScreenState extends State<NewAccountTypeScreen> {
 
   @override
   Widget build(BuildContext context) => WelcomeScaffold(
-        allowIosBackSwipe: false,
         onScaffoldTap: FocusScope.of(context).unfocus,
         headline: 'Select wallet type',
         body: Padding(

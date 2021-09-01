@@ -29,7 +29,6 @@ class _SeedPhraseExportScreenState extends State<SeedPhraseExportScreen> {
 
   @override
   Widget build(BuildContext context) => WelcomeScaffold(
-        allowIosBackSwipe: false,
         headline: LocaleKeys.seed_phrase_save_screen_title.tr(),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),

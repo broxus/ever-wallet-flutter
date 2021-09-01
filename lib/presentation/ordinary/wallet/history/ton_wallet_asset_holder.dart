@@ -4,6 +4,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../injection.dart';
+import '../../../design/design.dart';
 import '../../../design/utils.dart';
 import '../modals/asset_observer/ton_asset_observer.dart';
 import 'wallet_asset_holder.dart';
@@ -41,7 +42,7 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
         builder: (context, state) => state.maybeWhen(
           ready: (address, contractState, walletType, details, publicKey) => WalletAssetHolder(
             name: 'TON',
-            balance: contractState.balance,
+            balance: contractState.balance.floorValue(),
             icon: getTonAssetIcon(),
             onTap: () => TonAssetObserver.open(
               context: context,

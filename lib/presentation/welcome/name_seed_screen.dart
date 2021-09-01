@@ -14,16 +14,17 @@ class NameSeedScreen extends StatefulWidget {
 
 class _NameSeedScreenState extends State<NameSeedScreen> {
   final nameController = TextEditingController();
+  final selectedSeedType = ValueNotifier<SeedType>(SeedType.labs);
 
   @override
   void dispose() {
+    selectedSeedType.dispose();
     nameController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => WelcomeScaffold(
-        allowIosBackSwipe: false,
         onScaffoldTap: FocusScope.of(context).unfocus,
         headline: LocaleKeys.new_seed_name_headline.tr(),
         body: Padding(
@@ -38,11 +39,27 @@ class _NameSeedScreenState extends State<NameSeedScreen> {
         ),
         child: Stack(
           children: [
-            CrystalTextField(
-              controller: nameController,
-              hintText: LocaleKeys.new_seed_name_hint.tr(),
-              keyboardType: TextInputType.text,
-              autofocus: true,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CrystalTextField(
+                  controller: nameController,
+                  hintText: LocaleKeys.new_seed_name_hint.tr(),
+                  keyboardType: TextInputType.text,
+                ),
+                const CrystalDivider(height: 24.0),
+                if (widget.action != CreationActions.create)
+                  ValueListenableBuilder<SeedType>(
+                    valueListenable: selectedSeedType,
+                    builder: (context, value, child) => CrystalValueSelector<SeedType>(
+                      selectedValue: value,
+                      options: SeedType.values,
+                      nameOfOption: (o) => o.describe(),
+                      onSelect: (contract) => selectedSeedType.value = contract,
+                    ),
+                  ),
+                const CrystalDivider(height: 16),
+              ],
             ),
             Align(
               alignment: Alignment.bottomCenter,
@@ -65,23 +82,64 @@ class _NameSeedScreenState extends State<NameSeedScreen> {
             child: AnimatedAppearance(
               showing: value.text.isNotEmpty,
               duration: const Duration(milliseconds: 350),
-              child: CrystalButton(
-                text: widget.action.describe(),
-                onTap: () => onConfirm(widget.action),
-              ),
+              child: widget.action != CreationActions.create
+                  ? ValueListenableBuilder<SeedType>(
+                      valueListenable: selectedSeedType,
+                      builder: (context, value, child) => CrystalButton(
+                        text: value.describe(),
+                        onTap: () => onImportConfirm(value),
+                      ),
+                    )
+                  : CrystalButton(
+                      text: widget.action.describe(),
+                      onTap: () => onCreateConfirm(widget.action),
+                    ),
             ),
           );
+          ;
         },
       );
 
-  void onConfirm(CreationActions value) {
+  void onCreateConfirm(CreationActions value) {
     switch (value) {
       case CreationActions.create:
         context.router.push(SeedPhraseSaveScreenRoute(seedName: nameController.text));
         break;
-      case CreationActions.import:
-        context.router.push(SeedPhraseImportScreenRoute(seedName: nameController.text));
+      default:
         break;
+    }
+  }
+
+  void onImportConfirm(SeedType value) {
+    switch (value) {
+      case SeedType.labs:
+        context.router.push(SeedPhraseImportScreenRoute(
+          seedName: nameController.text,
+          isLegacy: false,
+        ));
+        break;
+      case SeedType.legacy:
+        context.router.push(SeedPhraseImportScreenRoute(
+          seedName: nameController.text,
+          isLegacy: true,
+        ));
+        break;
+    }
+  }
+}
+
+enum SeedType {
+  labs,
+  legacy,
+}
+
+extension on SeedType {
+  String describe() {
+    switch (this) {
+      case SeedType.labs:
+        return 'Import seed';
+      case SeedType.legacy:
+        return 'Import legacy seed';
     }
   }
 }

@@ -17,7 +17,6 @@ import '../../../design/design.dart';
 import '../../../design/extension.dart';
 import '../../../design/widget/crystal_bottom_sheet.dart';
 import '../modals/account_removement_body.dart';
-import '../modals/connected_sites_body.dart';
 import '../modals/preferences_body.dart';
 
 class WalletCard extends StatefulWidget {
@@ -330,7 +329,8 @@ class _WalletCardState extends State<WalletCard> {
       );
 
   Widget buildBalance(String balance) {
-    final balancePart = balance.split(".");
+    final flooredBalance = balance.floorValue();
+    final balancePart = flooredBalance.split(".");
 
     return AutoSizeText.rich(
       TextSpan(
@@ -412,24 +412,24 @@ class _WalletCardState extends State<WalletCard> {
                           thickness: 1.0,
                           color: Platform.isIOS ? const Color.fromRGBO(60, 60, 67, 0.36) : CrystalColor.divider,
                         ),
-                        buildDropDownAction(
-                          onTap: () {
-                            menuController.dismiss();
+                        // buildDropDownAction(
+                        //   onTap: () {
+                        //     menuController.dismiss();
 
-                            CrystalBottomSheet.show(
-                              context,
-                              title: ConnectedSitesBody.title,
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                              body: ConnectedSitesBody(
-                                subscriptionSubject: widget.subscriptionSubject,
-                              ),
-                              expand: false,
-                              avoidBottomInsets: false,
-                              hasTitleDivider: true,
-                            );
-                          },
-                          title: ConnectedSitesBody.title,
-                        ),
+                        //     CrystalBottomSheet.show(
+                        //       context,
+                        //       title: ConnectedSitesBody.title,
+                        //       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        //       body: ConnectedSitesBody(
+                        //         subscriptionSubject: widget.subscriptionSubject,
+                        //       ),
+                        //       expand: false,
+                        //       avoidBottomInsets: false,
+                        //       hasTitleDivider: true,
+                        //     );
+                        //   },
+                        //   title: ConnectedSitesBody.title,
+                        // ),
                         Divider(
                           height: 1.0,
                           thickness: 1.0,

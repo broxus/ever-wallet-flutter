@@ -14,8 +14,6 @@ class BiometryRepositoryImpl implements BiometryRepository {
   final LocalAuthSource _localAuthSource;
   final _biometryAvailabilitySubject = BehaviorSubject<bool>();
   final _biometryStatusSubject = BehaviorSubject<bool>();
-  late final StreamSubscription _biometryAvailabilitySubscription;
-  late final StreamSubscription _biometryStatusSubscription;
 
   BiometryRepositoryImpl._(
     this._hiveSource,
@@ -82,12 +80,12 @@ class BiometryRepositoryImpl implements BiometryRepository {
   Future<bool> authenticate(String localizedReason) async => _localAuthSource.authenticate(localizedReason);
 
   Future<void> _initialize() async {
-    _biometryAvailabilitySubscription = _biometryAvailabilitySubject.listen((value) async {
+    _biometryAvailabilitySubject.listen((value) async {
       if (!value) {
         _biometryStatusSubject.add(false);
       }
     });
-    _biometryStatusSubscription = _biometryStatusSubject.listen((value) async {
+    _biometryStatusSubject.listen((value) async {
       if (!value) {
         await _hiveSource.clearPasswords();
       }

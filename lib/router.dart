@@ -16,36 +16,33 @@ import 'presentation/seed_creation_flow/password_creation_screen.dart';
 import 'presentation/seed_creation_flow/seed_phrase_check_screen.dart';
 import 'presentation/seed_creation_flow/seed_phrase_import_screen.dart';
 import 'presentation/seed_creation_flow/seed_phrase_save_screen.dart';
+import 'presentation/welcome/decentralization_policy_screen.dart';
 import 'presentation/welcome/name_seed_screen.dart';
 import 'presentation/welcome/welcome_flow.dart';
-import 'presentation/welcome/welcome_policy_screen.dart';
 import 'presentation/welcome/welcome_screen.dart';
 
 @AdaptiveAutoRouter(
   routes: [
-    CustomRoute(
+    AdaptiveRoute(
       page: LoadingScreen,
       initial: true,
-      transitionsBuilder: TransitionsBuilders.fadeIn,
     ),
-    CustomRoute(
+    AdaptiveRoute(
       page: WelcomeFlow,
       children: [
         AdaptiveRoute(page: WelcomeScreen, initial: true),
-        AdaptiveRoute(page: WelcomePolicyScreen),
+        AdaptiveRoute(page: DecentralizationPolicyScreen),
         AdaptiveRoute(page: NameSeedScreen),
         AdaptiveRoute(page: SeedPhraseSaveScreen),
         AdaptiveRoute(page: SeedPhraseCheckScreen),
         AdaptiveRoute(page: SeedPhraseImportScreen),
         AdaptiveRoute(page: PasswordCreationScreen),
       ],
-      transitionsBuilder: TransitionsBuilders.fadeIn,
     ),
-    CustomRoute(
+    AdaptiveRoute(
       page: MainFlow,
-      transitionsBuilder: TransitionsBuilders.fadeIn,
       children: [
-        CustomRoute(
+        AdaptiveRoute(
           initial: true,
           page: WalletFlow,
           children: [
@@ -58,9 +55,8 @@ import 'presentation/welcome/welcome_screen.dart';
               ],
             ),
           ],
-          transitionsBuilder: TransitionsBuilders.fadeIn,
         ),
-        CustomRoute(
+        AdaptiveRoute(
           page: SettingsFlow,
           children: [
             AdaptiveRoute(page: SettingsScreen, initial: true),
@@ -83,7 +79,6 @@ import 'presentation/welcome/welcome_screen.dart';
             ),
             AdaptiveRoute(page: SeedPhraseExportScreen),
           ],
-          transitionsBuilder: TransitionsBuilders.fadeIn,
         ),
       ],
     ),
