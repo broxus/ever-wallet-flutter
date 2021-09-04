@@ -71,7 +71,7 @@ class _WalletScaffoldState extends State<WalletScaffold> {
             ),
             parallaxEnabled: true,
             isDraggable: widget.isModalDragEnabled && size.expandable,
-            parallaxOffset: 5,
+            parallaxOffset: 0.05,
             backdropEnabled: true,
             renderPanelSheet: size.isValid,
             borderRadius: BorderRadius.vertical(top: Radius.circular(Platform.isIOS ? 12 : 0)),
