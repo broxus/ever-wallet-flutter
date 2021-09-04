@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:crystal/logger.dart';
+import '../../logger.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

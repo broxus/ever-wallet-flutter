@@ -1,4 +1,4 @@
-import 'package:crystal/presentation/design/design.dart';
+import '../design/design.dart';
 import 'package:flutter/material.dart';
 
 class LoadingPage extends StatelessWidget {

@@ -6,7 +6,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../domain/blocs/account/account_creation_bloc.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
-import '../../../design/extension.dart';
 import '../../../design/widget/crystal_bottom_sheet.dart';
 import 'add_account_flow/add_account_name.dart';
 

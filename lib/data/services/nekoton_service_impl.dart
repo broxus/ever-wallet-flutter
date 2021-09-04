@@ -140,4 +140,8 @@ class NekotonServiceImpl implements NekotonService {
       currentPublicKey: currentPublicKey,
     );
   }
+
+  @override
+  Future<void> findAndSubscribeToExistingWallets(String publicKey) =>
+      _nekoton.findAndSubscribeToExistingWallets(publicKey);
 }

@@ -61,4 +61,6 @@ abstract class NekotonService {
   });
 
   Future<void> clearAccountsStorage();
+
+  Future<void> findAndSubscribeToExistingWallets(String publicKey);
 }

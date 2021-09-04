@@ -57,10 +57,8 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
             );
           }
 
-          final key = await _nekotonService.addKey(createKeyInput);
-
-          await _biometryRepository.setKeyPassword(
-            publicKey: key.value.publicKey,
+          await _addKey(
+            createKeyInput: createKeyInput,
             password: password,
           );
 
@@ -92,10 +90,8 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
               ),
             );
 
-            final key = await _nekotonService.addKey(createKeyInput);
-
-            await _biometryRepository.setKeyPassword(
-              publicKey: key.value.publicKey,
+            await _addKey(
+              createKeyInput: createKeyInput,
               password: password,
             );
 
@@ -109,6 +105,20 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
         }
       },
     );
+  }
+
+  Future<void> _addKey({
+    required CreateKeyInput createKeyInput,
+    required String password,
+  }) async {
+    final key = await _nekotonService.addKey(createKeyInput);
+
+    await _biometryRepository.setKeyPassword(
+      publicKey: key.value.publicKey,
+      password: password,
+    );
+
+    await _nekotonService.findAndSubscribeToExistingWallets(key.value.publicKey);
   }
 }
 
