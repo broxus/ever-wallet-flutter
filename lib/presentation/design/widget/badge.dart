@@ -5,7 +5,7 @@ import '../theme.dart';
 class CircleIcon extends StatelessWidget {
   const CircleIcon({
     Key? key,
-    this.size = 40.0,
+    this.size = 40,
     required this.color,
     this.icon,
   }) : super(key: key);
@@ -37,8 +37,8 @@ class Badge extends StatelessWidget {
   const Badge({
     Key? key,
     this.counter = 0,
-    this.counterSize = 14.0,
-    this.size = 20.0,
+    this.counterSize = 14,
+    this.size = 20,
     this.color = CrystalColor.badge,
   }) : super(key: key);
 
@@ -52,7 +52,7 @@ class Badge extends StatelessWidget {
         child: AnimatedOpacity(
           duration: kThemeAnimationDuration,
           curve: Curves.decelerate,
-          opacity: counter > 0 ? 1.0 : 0.0,
+          opacity: counter > 0 ? 1 : 0,
           child: Container(
             clipBehavior: Clip.antiAlias,
             width: size,

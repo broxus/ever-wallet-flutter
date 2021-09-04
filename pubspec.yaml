@@ -20,7 +20,6 @@ dependencies:
   expand_tap_area: ^1.1.0
   extended_text: ^7.0.0
   fading_edge_scrollview: ^2.0.0
-  faker: ^2.0.0
   firebase_analytics: ^8.0.2
   firebase_core: ^1.1.0
   firebase_crashlytics: ^2.0.2
@@ -32,7 +31,6 @@ dependencies:
   flutter_launcher_icons: ^0.9.0
   flutter_native_splash: ^1.1.8+4
   flutter_platform_widgets: ^1.9.0
-  flutter_secure_storage: ^4.2.0
   flutter_svg: ^0.22.0
   freezed_annotation: ^0.14.2
   get_it: ^7.1.3
@@ -47,15 +45,14 @@ dependencies:
   nekoton_flutter:
     path: ../nekoton-flutter
   qr_flutter: ^4.0.0
-  rect_getter: ^1.0.0
   rxdart: ^0.27.0
   share_plus: ^2.1.4
-  shared_preferences: ^2.0.5
   shimmer: ^2.0.0
   sortedmap: ^0.5.1
   timeago: ^3.0.2
   tuple: ^2.0.0
   url_launcher: ^6.0.3
+  validators: ^3.0.0
 
 dev_dependencies:
   auto_route_generator: ^2.1.0
@@ -65,7 +62,6 @@ dev_dependencies:
     sdk: flutter
   freezed: ^0.14.2
   hive_generator: ^1.1.0
-  import_sorter: ^4.5.0
   injectable_generator: ^1.3.0
   json_serializable: ^4.1.3
   lint: ^1.5.3
@@ -85,16 +81,13 @@ flutter_native_splash:
 
 flutter_gen:
   output: lib/generated/
-  line_length: 80
-  integrations:
-    flutter_svg: true
 
 flutter:
   uses-material-design: true
 
   assets:
     - .env
-    - assets/font/
+    - assets/fonts/
     - assets/images/
     - assets/animations/
     - assets/localizations/
@@ -102,11 +95,11 @@ flutter:
   fonts:
     - family: PT
       fonts:
-        - asset: assets/font/PT-Root-UI/PT-Root-UI_Light.ttf
+        - asset: assets/fonts/PT-Root-UI/PT-Root-UI_Light.ttf
           weight: 300
-        - asset: assets/font/PT-Root-UI/PT-Root-UI_Regular.ttf
+        - asset: assets/fonts/PT-Root-UI/PT-Root-UI_Regular.ttf
           weight: 400
-        - asset: assets/font/PT-Root-UI/PT-Root-UI_Medium.ttf
+        - asset: assets/fonts/PT-Root-UI/PT-Root-UI_Medium.ttf
           weight: 500
-        - asset: assets/font/PT-Root-UI/PT-Root-UI_Bold.ttf
+        - asset: assets/fonts/PT-Root-UI/PT-Root-UI_Bold.ttf
           weight: 700

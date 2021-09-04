@@ -74,7 +74,7 @@
   },
   "seed_phrase_check_screen": {
     "title": "Let’s check the seed phrase",
-    "hint": "Enter the word",
+    "hint": "Word...",
     "validation_errors": {
       "incorrect_word": "Incorrect word"
     }
@@ -97,7 +97,7 @@
   },
   "seed_phrase_import_screen": {
     "title": "Enter your seed phrase",
-    "hint": "Enter the word",
+    "hint": "Word...",
     "validation_errors": {
       "incorrect_word": "Incorrect word"
     }

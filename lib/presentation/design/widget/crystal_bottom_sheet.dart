@@ -10,7 +10,7 @@ class CrystalBottomSheet {
     String? title,
     required Widget body,
     Widget? closeButton,
-    EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 16.0),
+    EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 16),
     bool expand = false,
     bool hasTitleDivider = false,
     bool draggable = true,
@@ -44,8 +44,8 @@ class CrystalBottomSheet {
                 children: <Widget>[
                   if (title != null)
                     Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16.0) + const EdgeInsets.only(top: 16),
-                      height: 32.0,
+                      margin: const EdgeInsets.symmetric(horizontal: 16) + const EdgeInsets.only(top: 16),
+                      height: 32,
                       child: Text(
                         title,
                         style: const TextStyle(
@@ -72,7 +72,7 @@ class CrystalBottomSheet {
                   top: 0,
                   right: 0,
                   child: ExpandTapWidget(
-                    tapPadding: const EdgeInsets.all(12.0),
+                    tapPadding: const EdgeInsets.all(12),
                     onTap: Navigator.of(context).maybePop,
                     child: closeButton ?? _getCloseButton(),
                   ),
@@ -112,9 +112,9 @@ class CrystalBottomSheet {
   }
 
   static Widget _getCloseButton() => Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10),
         child: CircleIcon(
-          size: 24.0,
+          size: 24,
           color: Platform.isIOS ? CrystalColor.iconBackground : Colors.transparent,
           icon: Image.asset(
             Assets.images.iconClose.path,
@@ -144,13 +144,13 @@ class __ContainerWidgetState extends State<_ContainerWidget> with SingleTickerPr
   @override
   Widget build(BuildContext context) => Container(
         margin: EdgeInsets.only(
-          top: context.safeArea.top + 24.0,
+          top: context.safeArea.top + 24,
         ),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: CrystalColor.primary,
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Platform.isIOS ? 12.0 : 0.0),
+            top: Radius.circular(Platform.isIOS ? 12 : 0),
           ),
         ),
         width: double.infinity,

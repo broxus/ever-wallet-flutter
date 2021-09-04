@@ -3,17 +3,17 @@ import 'package:shimmer/shimmer.dart';
 
 import '../theme.dart';
 import 'animated_appearance.dart';
-import 'dynamic_divider.dart';
+import 'crystal_divider.dart';
 
 class InformationField extends StatelessWidget {
   const InformationField({
     Key? key,
     required this.title,
-    this.step = 4.0,
+    this.step = 4,
     required this.value,
     this.error = '',
     this.isLoading = false,
-    this.fontSize = 14.0,
+    this.fontSize = 14,
     this.letterSpacing = 0.75,
     this.titleColor = CrystalColor.fontTitleSecondaryDark,
     this.valueColor = CrystalColor.fontDark,
@@ -66,7 +66,7 @@ class InformationField extends StatelessWidget {
                 child: Text(
                   error,
                   style: const TextStyle(
-                    fontSize: 12.0,
+                    fontSize: 12,
                     letterSpacing: 0.4,
                     color: CrystalColor.error,
                   ),
@@ -85,7 +85,7 @@ class InformationField extends StatelessWidget {
       child: Container(
         decoration: const BoxDecoration(
           color: CrystalColor.whitelight,
-          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+          borderRadius: BorderRadius.all(Radius.circular(5)),
         ),
         height: fontSize + 3,
         width: 120,

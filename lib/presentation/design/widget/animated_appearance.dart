@@ -69,7 +69,7 @@ class _AnimatedAppearanceState extends State<AnimatedAppearance> {
         builder: (context, appear, child) => IgnorePointer(
           ignoring: !appear,
           child: AnimatedOpacity(
-            opacity: appear ? 1.0 : 0.0,
+            opacity: appear ? 1 : 0,
             duration: widget.duration,
             curve: widget.curve,
             child: TweenAnimationBuilder<Offset>(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../router.gr.dart';
 import '../design/design.dart';
+import '../router.gr.dart';
 import 'application_listener.dart';
 import 'application_localization.dart';
 import 'application_provider.dart';
@@ -19,12 +19,12 @@ class _ApplicationState extends State<Application> {
         child: ApplicationProvider(
           child: ApplicationListener(
             appRouter: _appRouter,
-            builder: (BuildContext context) => buildMaterialApp(context),
+            builder: (BuildContext context) => buildApp(context),
           ),
         ),
       );
 
-  MaterialApp buildMaterialApp(BuildContext context) => MaterialApp.router(
+  Widget buildApp(BuildContext context) => MaterialApp.router(
         title: LocaleKeys.application_title.tr(),
         theme: applicationTheme,
         debugShowCheckedModeBanner: false,
@@ -33,15 +33,5 @@ class _ApplicationState extends State<Application> {
         localizationsDelegates: context.localizationDelegates,
         routerDelegate: _appRouter.delegate(),
         routeInformationParser: _appRouter.defaultRouteParser(),
-        builder: (context, child) => MediaQuery(
-          data: context.media.copyWith(textScaleFactor: 1.0),
-          child: NotificationListener<OverscrollIndicatorNotification>(
-            onNotification: (overscroll) {
-              overscroll.disallowGlow();
-              return true;
-            },
-            child: child ?? const SizedBox(),
-          ),
-        ),
       );
 }

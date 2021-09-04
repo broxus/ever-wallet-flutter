@@ -3,42 +3,56 @@ import 'package:flutter/material.dart';
 
 import '../design.dart';
 
-class CrystalFlushbar {
-  static Future<void> show(
-    BuildContext context, {
-    required String message,
-  }) async {
-    await Flushbar(
-      messageText: Text(
-        message,
-        style: const TextStyle(
-          color: CrystalColor.chipText,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      flushbarPosition: FlushbarPosition.TOP,
-      backgroundColor: CrystalColor.grayBackground,
-      duration: const Duration(seconds: 2),
-    ).show(context);
-  }
+Flushbar? _previousFlushbar;
 
-  static Future<void> showError(
-    BuildContext context, {
-    required String message,
-  }) async {
-    await Flushbar(
-      messageText: Text(
-        message,
-        style: const TextStyle(
-          color: CrystalColor.error,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
+Future<void> showCrystalFlushbar(
+  BuildContext context, {
+  required String message,
+  FlushbarPosition flushbarPosition = FlushbarPosition.TOP,
+  EdgeInsets? margin,
+}) async {
+  _previousFlushbar?.dismiss();
+
+  _previousFlushbar = Flushbar(
+    messageText: Text(
+      message,
+      style: const TextStyle(
+        color: CrystalColor.chipText,
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
       ),
-      flushbarPosition: FlushbarPosition.TOP,
-      backgroundColor: CrystalColor.grayBackground,
-      duration: const Duration(seconds: 2),
-    ).show(context);
-  }
+    ),
+    flushbarPosition: flushbarPosition,
+    backgroundColor: CrystalColor.primary,
+    borderColor: CrystalColor.border,
+    borderWidth: 1,
+    margin: const EdgeInsets.symmetric(horizontal: 16) + (margin ?? EdgeInsets.zero),
+    duration: const Duration(seconds: 2),
+  )..show(context);
+}
+
+Future<void> showErrorCrystalFlushbar(
+  BuildContext context, {
+  required String message,
+  FlushbarPosition flushbarPosition = FlushbarPosition.TOP,
+  EdgeInsets? margin,
+}) async {
+  _previousFlushbar?.dismiss();
+
+  _previousFlushbar = Flushbar(
+    messageText: Text(
+      message,
+      style: const TextStyle(
+        color: CrystalColor.error,
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    flushbarPosition: flushbarPosition,
+    backgroundColor: CrystalColor.primary,
+    borderColor: CrystalColor.border,
+    borderWidth: 1,
+    margin: const EdgeInsets.symmetric(horizontal: 16) + (margin ?? EdgeInsets.zero),
+    duration: const Duration(seconds: 2),
+  )..show(context);
 }

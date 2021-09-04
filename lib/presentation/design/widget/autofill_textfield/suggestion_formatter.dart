@@ -1,21 +1,23 @@
 part of 'autofill_textfield.dart';
 
 class SuggestionFormatter extends TextInputFormatter {
+  final int minimalLength;
+  final Iterable<String> Function(String) suggestions;
+  final String Function(String)? afterClearSuggestionText;
+  String? _oldText;
+  bool _repeated = false;
+
   SuggestionFormatter({
     this.minimalLength = 1,
     required this.suggestions,
     this.afterClearSuggestionText,
   }) : assert(minimalLength > 0);
 
-  final int minimalLength;
-  final Iterable<String> Function(String) suggestions;
-  final String Function(String)? afterClearSuggestionText;
-
-  String? _oldText;
-  bool _repeated = false;
-
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue _oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+    TextEditingValue _oldValue,
+    TextEditingValue newValue,
+  ) {
     TextEditingValue restrictedValue = newValue.copyWith(
       text: newValue.text.replaceAll('\u200B', '').trim(),
     );

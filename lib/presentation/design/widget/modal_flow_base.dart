@@ -27,7 +27,7 @@ class ModalFlowBase extends StatefulWidget {
   final WillPopCallback? onWillPop;
 
   static Widget _kDefaultLayoutBuilder(BuildContext context, Widget child) => SafeArea(
-        minimum: const EdgeInsets.symmetric(vertical: 16.0),
+        minimum: const EdgeInsets.symmetric(vertical: 16),
         child: child,
       );
 
@@ -46,13 +46,13 @@ class _ModalFlowBaseState extends State<ModalFlowBase> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 16.0, right: 32.0, bottom: 24),
+                padding: const EdgeInsets.only(left: 16, right: 32, bottom: 24),
                 child: AnimatedSwitcher(
                   duration: _titleTransitionDuration,
                   transitionBuilder: (child, animation) => FadeTransition(
-                    opacity: TweenSequence([
-                      TweenSequenceItem(tween: ConstantTween(0.0), weight: 3),
-                      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 1),
+                    opacity: TweenSequence<double>([
+                      TweenSequenceItem(tween: ConstantTween(0), weight: 3),
+                      TweenSequenceItem(tween: Tween(begin: 0, end: 1), weight: 1),
                     ]).animate(animation),
                     child: child,
                   ),
