@@ -34,7 +34,7 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Stack(
             children: [
-              getBody(),
+              buildBody(),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: buildActions(),
@@ -44,7 +44,7 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
         ),
       );
 
-  Widget getBody() => FadingEdgeScrollView.fromSingleChildScrollView(
+  Widget buildBody() => FadingEdgeScrollView.fromSingleChildScrollView(
         child: SingleChildScrollView(
           controller: _scrollController,
           padding: const EdgeInsets.only(
@@ -58,13 +58,15 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
   Widget buildActions() => Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: CrystalButton(
-            type: CrystalButtonType.outline,
-            text: LocaleKeys.seed_phrase_save_screen_action_copy.tr(),
-            onTap: () => _onCopyPhrase()),
+          type: CrystalButtonType.outline,
+          text: LocaleKeys.seed_phrase_save_screen_action_copy.tr(),
+          onTap: () => onCopyPhrase(),
+        ),
       );
 
-  Future<void> _onCopyPhrase() async {
+  Future<void> onCopyPhrase() async {
     await Clipboard.setData(ClipboardData(text: widget.phrase.join(' ')));
+
     showCrystalFlushbar(
       context,
       message: LocaleKeys.seed_phrase_save_screen_message_copied.tr(),

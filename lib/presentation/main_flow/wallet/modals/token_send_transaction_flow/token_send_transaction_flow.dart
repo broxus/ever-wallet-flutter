@@ -1,3 +1,4 @@
+import 'package:crystal/presentation/main_flow/widgets/input_password_modal_body.dart';
 import 'package:expand_tap_area/expand_tap_area.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,6 @@ import '../../../../../domain/blocs/token_wallet/token_wallet_transfer_bloc.dart
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widget/crystal_bottom_sheet.dart';
-import '../../../widget/input_password_modal_body.dart';
 
 part 'confirm_body.dart';
 part 'loader_body.dart';

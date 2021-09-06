@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import '../../../design/design.dart';
 
 class WalletButton extends StatelessWidget {
+  final String title;
+  final VoidCallback? onTap;
+  final String iconAsset;
+
   const WalletButton({
     Key? key,
     this.onTap,
     required this.title,
     required this.iconAsset,
   }) : super(key: key);
-
-  final String title;
-  final VoidCallback? onTap;
-  final String iconAsset;
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(

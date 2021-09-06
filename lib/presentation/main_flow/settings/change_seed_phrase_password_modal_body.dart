@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:validators/validators.dart';
 
 import '../../../domain/blocs/biometry/biometry_password_data_bloc.dart';
 import '../../../domain/blocs/key/key_password_check_bloc.dart';
@@ -24,8 +25,11 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
   final keyUpdateBloc = getIt.get<KeyUpdateBloc>();
   final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
   final checkPasswordBloc = getIt.get<KeyPasswordCheckBloc>();
+  final formKey = GlobalKey<FormState>();
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
+  final validationNotifier = ValueNotifier<String?>('');
+  final incorrectPasswordNotifier = ValueNotifier<bool>(false);
 
   @override
   void dispose() {
@@ -34,6 +38,8 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
     checkPasswordBloc.close();
     oldPasswordController.dispose();
     newPasswordController.dispose();
+    validationNotifier.dispose();
+    incorrectPasswordNotifier.dispose();
     super.dispose();
   }
 
@@ -52,74 +58,140 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
             },
             orElse: () => null,
           ),
-          child: BlocConsumer<KeyPasswordCheckBloc, KeyPasswordCheckState>(
-              bloc: checkPasswordBloc,
-              listener: (context, state) {
-                state.maybeMap(
-                    orElse: () => null,
-                    ready: (ready) {
-                      if (ready.isCorrect) {
-                        final newPassword = newPasswordController.text.trim();
-                        keyUpdateBloc.add(
-                          KeyUpdateEvent.changePassword(
-                            keySubject: widget.keySubject,
-                            oldPassword: ready.password,
-                            newPassword: newPassword,
-                          ),
-                        );
-                        biometryPasswordDataBloc.add(
-                          BiometryPasswordDataEvent.setKeyPassword(
-                            publicKey: widget.keySubject.value.publicKey,
-                            password: newPassword,
-                          ),
-                        );
-                      }
-                    });
-              },
-              builder: (context, state) {
-                final bool isCorrect = state.map(
-                  initial: (_) => true,
-                  ready: (ready) => ready.isCorrect,
-                );
-                return getPasswordsBody(isCorrect: isCorrect);
-              }),
+          child: BlocListener<KeyPasswordCheckBloc, KeyPasswordCheckState>(
+            bloc: checkPasswordBloc,
+            listener: (context, state) {
+              state.maybeMap(
+                orElse: () => null,
+                ready: (ready) {
+                  if (ready.isCorrect) {
+                    incorrectPasswordNotifier.value = false;
+                    final newPassword = newPasswordController.text.trim();
+
+                    if (formKey.currentState?.validate() ?? false) {
+                      keyUpdateBloc.add(KeyUpdateEvent.changePassword(
+                        keySubject: widget.keySubject,
+                        oldPassword: ready.password,
+                        newPassword: newPassword,
+                      ));
+                    }
+                  } else {
+                    incorrectPasswordNotifier.value = true;
+                    formKey.currentState?.validate();
+                  }
+                },
+              );
+            },
+            child: buildPasswordsBody(),
+          ),
         ),
       );
 
-  Widget getPasswordsBody({required bool isCorrect}) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const CrystalDivider(height: 24),
-          CrystalTextFormField(
-            controller: oldPasswordController,
-            autofocus: true,
-            obscureText: true,
-            border: isCorrect
-                ? CrystalTextFormField.kInputBorder
-                : CrystalTextFormField.kInputBorder.copyWith(borderSide: const BorderSide(color: CrystalColor.error)),
-            hintText: LocaleKeys.change_seed_password_modal_hints_old.tr(),
-          ),
-          const CrystalDivider(
-            height: 24,
-          ),
-          CrystalTextFormField(
-            controller: newPasswordController,
-            autofocus: true,
-            obscureText: true,
-            hintText: LocaleKeys.change_seed_password_modal_hints_new.tr(),
-          ),
-          const CrystalDivider(height: 24),
-          CrystalButton(
-            text: LocaleKeys.change_seed_password_modal_actions_submit.tr(),
-            onTap: () {
-              final oldPassword = oldPasswordController.text.trim();
-              checkPasswordBloc.add(KeyPasswordCheckEvent.checkPassword(
-                publicKey: widget.keySubject.value.publicKey,
-                password: oldPassword,
-              ));
-            },
-          ),
-        ],
+  Widget buildPasswordsBody() => Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const CrystalDivider(height: 24),
+            buildTextField(
+              controller: oldPasswordController,
+              autofocus: true,
+              hint: LocaleKeys.change_seed_password_modal_hints_old.tr(),
+              inputAction: TextInputAction.next,
+              validator: (value) {
+                if (value == null) {
+                  return null;
+                }
+
+                String? text;
+
+                if (incorrectPasswordNotifier.value) {
+                  text = "Incorrect password";
+                }
+
+                validationNotifier.value = text;
+
+                return text;
+              },
+            ),
+            const CrystalDivider(height: 24),
+            buildTextField(
+              controller: newPasswordController,
+              autofocus: false,
+              hint: LocaleKeys.change_seed_password_modal_hints_new.tr(),
+              inputAction: TextInputAction.done,
+              validator: (value) {
+                if (value == null) {
+                  return null;
+                }
+
+                String? text;
+
+                if (!isLength(value, 8)) {
+                  text = "Password must be at least 8 symbols";
+                }
+
+                if (!incorrectPasswordNotifier.value) {
+                  validationNotifier.value = text;
+                }
+
+                return text;
+              },
+            ),
+            buildValidationText(),
+            const CrystalDivider(height: 24),
+            CrystalButton(
+              text: LocaleKeys.change_seed_password_modal_actions_submit.tr(),
+              onTap: () {
+                final oldPassword = oldPasswordController.text.trim();
+                checkPasswordBloc.add(KeyPasswordCheckEvent.checkPassword(
+                  publicKey: widget.keySubject.value.publicKey,
+                  password: oldPassword,
+                ));
+              },
+            ),
+          ],
+        ),
+      );
+
+  Widget buildTextField({
+    required TextEditingController controller,
+    required bool autofocus,
+    required String hint,
+    required TextInputAction inputAction,
+    required String? Function(String?)? validator,
+  }) =>
+      CrystalTextFormField(
+        controller: controller,
+        autofocus: autofocus,
+        hintText: hint,
+        keyboardType: TextInputType.text,
+        obscureText: true,
+        validator: validator,
+        inputAction: inputAction,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+      );
+
+  Widget buildValidationText() => ValueListenableBuilder<String?>(
+        valueListenable: validationNotifier,
+        builder: (context, value, child) => AnimatedSwitcher(
+          duration: const Duration(milliseconds: 150),
+          child: value != null
+              ? Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: CrystalColor.error,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.25,
+                    ),
+                  ),
+                )
+              : const SizedBox(),
+        ),
       );
 }

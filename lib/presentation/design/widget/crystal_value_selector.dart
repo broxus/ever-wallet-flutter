@@ -9,7 +9,7 @@ import '../../../generated/assets.gen.dart';
 import '../design.dart';
 import '../theme.dart';
 import 'crystal_bottom_sheet.dart';
-import 'ink_well.dart';
+import 'crystal_ink_well.dart';
 
 enum CrystalSelectorBehaviour {
   platform,

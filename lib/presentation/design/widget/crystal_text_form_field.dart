@@ -71,10 +71,10 @@ class CrystalTextFormField extends StatelessWidget {
   final EdgeInsets? contentPadding;
   final Brightness? keyboardAppearance;
   final VoidCallback? onTap;
-  final Function(String)? onChanged;
+  final void Function(String)? onChanged;
   final VoidCallback? onEditingComplete;
-  final Function(String)? onFieldSubmitted;
-  final Function(String?)? onSaved;
+  final void Function(String)? onFieldSubmitted;
+  final void Function(String?)? onSaved;
   final Widget? suffix;
   final BoxConstraints? suffixConstraints;
   final Widget? prefix;

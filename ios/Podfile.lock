@@ -113,6 +113,8 @@ PODS:
   - nanopb/encode (2.30908.0)
   - nekoton_flutter (0.1.0):
     - Flutter
+  - package_info_plus (0.4.5):
+    - Flutter
   - path_provider (0.0.1):
     - Flutter
   - PromisesObjC (1.2.12)
@@ -130,6 +132,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - local_auth (from `.symlinks/plugins/local_auth/ios`)
   - nekoton_flutter (from `.symlinks/plugins/nekoton_flutter/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
@@ -162,6 +165,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/local_auth/ios"
   nekoton_flutter:
     :path: ".symlinks/plugins/nekoton_flutter/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   share_plus:
@@ -188,6 +193,7 @@ SPEC CHECKSUMS:
   local_auth: 25938960984c3a7f6e3253e3f8d962fdd16852bd
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   nekoton_flutter: 69cd4fc540513c9cee5d91a150a33680aac8f56b
+  package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68

@@ -163,22 +163,18 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         builder: (context, value, child) => AnimatedSwitcher(
           duration: const Duration(milliseconds: 150),
           child: value != null
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        value,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: CrystalColor.error,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0.25,
-                        ),
-                      ),
-                    )
-                  ],
+              ? Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: CrystalColor.error,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.25,
+                    ),
+                  ),
                 )
               : const SizedBox(),
         ),

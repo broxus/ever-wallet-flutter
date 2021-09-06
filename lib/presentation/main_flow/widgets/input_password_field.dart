@@ -41,17 +41,18 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
         bloc: checkPasswordBloc,
         listener: (context, state) {
           state.maybeMap(
-              orElse: () => null,
-              ready: (ready) {
-                if (ready.isCorrect) {
-                  widget.onSubmit(ready.password);
-                }
-              });
+            orElse: () => null,
+            ready: (ready) {
+              if (ready.isCorrect) {
+                widget.onSubmit(ready.password);
+              }
+            },
+          );
         },
         builder: (context, state) {
-          final isCorrect = state.map(
-            initial: (_) => true,
+          final isCorrect = state.maybeMap(
             ready: (ready) => ready.isCorrect,
+            orElse: () => true,
           );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,7 +82,7 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
                     password: password,
                   ));
                 },
-              )
+              ),
             ],
           );
         },

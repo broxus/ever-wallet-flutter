@@ -24,7 +24,7 @@ export 'widget/crystal_value_selector.dart';
 export 'widget/expandable_page_view/expandable_page_view.dart';
 export 'widget/focused_menu/focused_menu.dart';
 export 'widget/information_field.dart';
-export 'widget/ink_well.dart';
+export 'widget/crystal_ink_well.dart';
 export 'widget/keep_alive.dart';
 export 'widget/modal_flow_base.dart';
 export 'widget/selection_widget.dart';

@@ -1,5 +1,6 @@
-import '../design/design.dart';
 import 'package:flutter/material.dart';
+
+import '../design/design.dart';
 
 class LoadingPage extends StatelessWidget {
   @override

@@ -11,7 +11,7 @@ import '../../../../../domain/blocs/ton_wallet/ton_wallet_transfer_bloc.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widget/crystal_bottom_sheet.dart';
-import '../../../widget/input_password_modal_body.dart';
+import '../../../widgets/input_password_modal_body.dart';
 
 part 'confirm_body.dart';
 part 'loader_body.dart';

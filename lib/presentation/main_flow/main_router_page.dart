@@ -1,9 +1,9 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
-import '../../logger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
+import '../../logger.dart';
 import '../design/design.dart';
 import '../router.gr.dart';
 

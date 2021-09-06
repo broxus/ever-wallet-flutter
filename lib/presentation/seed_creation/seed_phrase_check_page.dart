@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import '../../logger.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../domain/constants/phrase_generation.dart';
 import '../../domain/utils/phrase_check.dart';
+import '../../logger.dart';
 import '../design/design.dart';
 import '../design/utils.dart';
 import '../design/widget/crystal_scaffold.dart';

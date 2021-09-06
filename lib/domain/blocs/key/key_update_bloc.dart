@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:crystal/domain/repositories/biometry_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -13,8 +14,12 @@ part 'key_update_bloc.freezed.dart';
 @injectable
 class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
   final NekotonService _nekotonService;
+  final BiometryRepository _biometryRepository;
 
-  KeyUpdateBloc(this._nekotonService) : super(const KeyUpdateState.initial());
+  KeyUpdateBloc(
+    this._nekotonService,
+    this._biometryRepository,
+  ) : super(const KeyUpdateState.initial());
 
   @override
   Stream<KeyUpdateState> mapEventToState(KeyUpdateEvent event) async* {
@@ -53,7 +58,12 @@ class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
             );
           }
 
-          await _nekotonService.updateKey(updateKeyInput);
+          final key = await _nekotonService.updateKey(updateKeyInput);
+
+          await _biometryRepository.setKeyPassword(
+            publicKey: key.value.publicKey,
+            password: newPassword,
+          );
 
           yield const KeyUpdateState.success();
         } on Exception catch (err, st) {

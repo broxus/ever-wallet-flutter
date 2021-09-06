@@ -6,7 +6,7 @@ import '../../../domain/blocs/key/key_export_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
 import '../../router.gr.dart';
-import '../widget/input_password_modal_body.dart';
+import '../widgets/input_password_modal_body.dart';
 
 class ExportSeedPhraseModalBody extends StatefulWidget {
   final KeySubject keySubject;

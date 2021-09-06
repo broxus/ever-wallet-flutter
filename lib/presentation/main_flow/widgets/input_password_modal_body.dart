@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:local_auth/local_auth.dart';
 
 import '../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../domain/blocs/biometry/biometry_password_data_bloc.dart';
@@ -33,7 +32,6 @@ class InputPasswordModalBody extends StatefulWidget {
 class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
   final controller = TextEditingController();
   final bloc = getIt.get<BiometryPasswordDataBloc>();
-  final localAuth = LocalAuthentication();
 
   @override
   void dispose() {

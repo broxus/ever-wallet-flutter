@@ -5,11 +5,11 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../domain/blocs/key/key_creation_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
-import '../widget/input_password_modal_body.dart';
+import '../widgets/input_password_modal_body.dart';
 
 class DeriveKeyModalBody extends StatefulWidget {
   final KeySubject keySubject;
-  final String name;
+  final String? name;
 
   const DeriveKeyModalBody({
     Key? key,

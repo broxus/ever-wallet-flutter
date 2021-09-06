@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../domain/blocs/application_flow_bloc.dart';
@@ -53,237 +54,237 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
         value: SystemUiOverlayStyle.dark,
         child: Padding(
           padding: EdgeInsets.only(bottom: context.safeArea.bottom),
-          child: buildChild(),
-        ),
-      );
-
-  Widget buildChild() => CupertinoPageScaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: CrystalColor.iosBackground,
-        child: SafeArea(
-          bottom: false,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeBottom: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                  child: Text(
-                    LocaleKeys.settings_screen_title.tr(),
-                    style: const TextStyle(
-                      fontSize: 30,
-                      color: CrystalColor.fontDark,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+          child: CupertinoPageScaffold(
+            resizeToAvoidBottomInset: false,
+            backgroundColor: CrystalColor.iosBackground,
+            child: SafeArea(
+              bottom: false,
+              child: MediaQuery.removePadding(
+                context: context,
+                removeBottom: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    buildTitle(),
+                    buildBody(),
+                  ],
                 ),
-                Expanded(
-                  child: CupertinoTheme(
-                    data: const CupertinoThemeData(brightness: Brightness.light),
-                    child: CupertinoScrollbar(
-                      controller: scrollController,
-                      child: FadingEdgeScrollView.fromSingleChildScrollView(
-                        gradientFractionOnEnd: 0.5,
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          controller: scrollController,
-                          child: BlocBuilder<KeysBloc, KeysState>(
-                            bloc: bloc,
-                            builder: (context, state) => state.maybeWhen(
-                              ready: (keys, currentKey) => Column(
-                                children: [
-                                  _section(
-                                    title: LocaleKeys.settings_screen_sections_seeds_title.tr(),
-                                    children: [
-                                      if (keys.isNotEmpty)
-                                        _seedsList(
-                                          selectedSeed: currentKey,
-                                          seeds: keys,
-                                          onAdd: () {
-                                            context.router.push(const NewSeedRouterRoute());
-                                          },
-                                          onSelect: (seed) {
-                                            bloc.add(KeysEvent.setCurrentKey(seed));
-                                          },
-                                          showAddAction: true,
-                                        ),
-                                    ],
-                                  ),
-                                  _section(
-                                    title: LocaleKeys.settings_screen_sections_current_seed_preferences_title.tr(
-                                      args: [if (currentKey != null) currentKey.value.publicKey else 'Seed'],
-                                    ),
-                                    children: [
-                                      _sectionAction(
-                                        title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed
-                                            .tr(),
-                                        onTap: keys.isNotEmpty && currentKey != null
-                                            ? () {
-                                                CrystalBottomSheet.show(
-                                                  context,
-                                                  title: ExportSeedPhraseModalBody.title,
-                                                  body: ExportSeedPhraseModalBody(keySubject: currentKey),
-                                                );
-                                              }
-                                            : null,
-                                      ),
-                                      _sectionAction(
-                                        title: LocaleKeys.settings_screen_sections_current_seed_preferences_remove_seed
-                                            .tr(),
-                                        onTap: keys.isNotEmpty && currentKey != null
-                                            ? () {
-                                                CrystalBottomSheet.show(
-                                                  context,
-                                                  title: RemoveSeedPhraseModalBody.title,
-                                                  body: RemoveSeedPhraseModalBody(keySubject: currentKey),
-                                                  expand: false,
-                                                  avoidBottomInsets: false,
-                                                  hasTitleDivider: true,
-                                                );
-                                              }
-                                            : null,
-                                      ),
-                                      _sectionAction(
-                                        title: LocaleKeys
-                                            .settings_screen_sections_current_seed_preferences_change_seed_password
-                                            .tr(),
-                                        onTap: keys.isNotEmpty && currentKey != null
-                                            ? () {
-                                                CrystalBottomSheet.show(
-                                                  context,
-                                                  title: LocaleKeys
-                                                      .settings_screen_sections_current_seed_preferences_change_seed_password
-                                                      .tr(),
-                                                  body: ChangeSeedPhrasePasswordModalBody(keySubject: currentKey),
-                                                );
-                                              }
-                                            : null,
-                                      ),
-                                      if (currentKey != null &&
-                                          currentKey.value.isNotLegacy &&
-                                          currentKey.value.publicKey == currentKey.value.masterKey)
-                                        _sectionAction(
-                                          title: LocaleKeys.settings_screen_sections_current_seed_preferences_derive_key
-                                              .tr(),
-                                          onTap: keys.isNotEmpty
-                                              ? () async {
-                                                  final name = await CrystalBottomSheet.show<String>(
-                                                    context,
-                                                    title: NameNewKeyModalBody.title,
-                                                    body: const NameNewKeyModalBody(),
-                                                  );
-
-                                                  if (name != null) {
-                                                    CrystalBottomSheet.show(
-                                                      context,
-                                                      title: DeriveKeyModalBody.title,
-                                                      body: DeriveKeyModalBody(
-                                                        keySubject: currentKey,
-                                                        name: name,
-                                                      ),
-                                                    );
-                                                  }
-                                                }
-                                              : null,
-                                        ),
-                                      _sectionAction(
-                                        title: LocaleKeys.settings_screen_sections_current_seed_preferences_rename_key
-                                            .tr(),
-                                        onTap: keys.isNotEmpty && currentKey != null
-                                            ? () {
-                                                CrystalBottomSheet.show(
-                                                  context,
-                                                  title: LocaleKeys.rename_key_modal_title.tr(),
-                                                  body: RenameKeyModalBody(keySubject: currentKey),
-                                                );
-                                              }
-                                            : null,
-                                      ),
-                                    ],
-                                  ),
-                                  _section(
-                                    title: LocaleKeys.settings_screen_sections_wallet_preferences_title.tr(),
-                                    children: [
-                                      BlocBuilder<BiometryInfoBloc, BiometryInfoState>(
-                                        bloc: context.watch<BiometryInfoBloc>(),
-                                        builder: (context, biometryInfoState) => biometryInfoState.isAvailable
-                                            ? _sectionAction(
-                                                title: LocaleKeys.biometry_title.tr(),
-                                                onTap: () {
-                                                  CrystalBottomSheet.show(
-                                                    context,
-                                                    title: LocaleKeys.biometry_title.tr(),
-                                                    body: const BiometryModalBody(),
-                                                  );
-                                                },
-                                              )
-                                            : const SizedBox(),
-                                      ),
-                                    ],
-                                  ),
-                                  _section(
-                                    children: [
-                                      _sectionAction(
-                                        isDestructive: true,
-                                        title: LocaleKeys.settings_screen_sections_logout_action.tr(),
-                                        onTap: () {
-                                          showPlatformDialog(
-                                            context: context,
-                                            barrierDismissible: true,
-                                            builder: (context) => Theme(
-                                              data: ThemeData(),
-                                              child: PlatformAlertDialog(
-                                                title:
-                                                    Text(LocaleKeys.settings_screen_sections_logout_confirmation.tr()),
-                                                actions: [
-                                                  PlatformDialogAction(
-                                                    onPressed: Navigator.of(context).pop,
-                                                    child: Text(LocaleKeys.actions_cancel.tr()),
-                                                  ),
-                                                  PlatformDialogAction(
-                                                    onPressed: () {
-                                                      context
-                                                          .read<ApplicationFlowBloc>()
-                                                          .add(const ApplicationFlowEvent.logOut());
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                    cupertino: (_, __) => CupertinoDialogActionData(
-                                                      isDestructiveAction: true,
-                                                    ),
-                                                    material: (_, __) => MaterialDialogActionData(
-                                                      style: TextButton.styleFrom(
-                                                        primary: CrystalColor.error,
-                                                      ),
-                                                    ),
-                                                    child: Text(LocaleKeys.settings_screen_sections_logout_action.tr()),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              orElse: () => const SizedBox(),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              ],
+              ),
             ),
           ),
         ),
       );
 
-  Widget _seedsList({
+  Widget buildTitle() => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+        child: Text(
+          LocaleKeys.settings_screen_title.tr(),
+          style: const TextStyle(
+            fontSize: 30,
+            color: CrystalColor.fontDark,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+
+  Widget buildBody() => Expanded(
+        child: CupertinoTheme(
+          data: const CupertinoThemeData(brightness: Brightness.light),
+          child: CupertinoScrollbar(
+            controller: scrollController,
+            child: FadingEdgeScrollView.fromSingleChildScrollView(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 16),
+                controller: scrollController,
+                child: BlocBuilder<KeysBloc, KeysState>(
+                  bloc: bloc,
+                  builder: (context, state) => state.maybeWhen(
+                    ready: (keys, currentKey) => buildSettingsItemsList(
+                      keys: keys,
+                      currentKey: currentKey,
+                    ),
+                    orElse: () => const SizedBox(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+  Widget buildSettingsItemsList({
+    required Map<KeySubject, List<KeySubject>?> keys,
+    KeySubject? currentKey,
+  }) =>
+      Column(
+        children: [
+          buildSection(
+            title: LocaleKeys.settings_screen_sections_seeds_title.tr(),
+            children: [
+              if (keys.isNotEmpty)
+                buildSeedsList(
+                  selectedSeed: currentKey,
+                  seeds: keys,
+                  onAdd: () {
+                    context.router.push(const NewSeedRouterRoute());
+                  },
+                  onSelect: (seed) {
+                    bloc.add(KeysEvent.setCurrentKey(seed));
+                  },
+                  showAddAction: true,
+                ),
+            ],
+          ),
+          buildSection(
+            title: LocaleKeys.settings_screen_sections_current_seed_preferences_title.tr(
+              args: [if (currentKey != null) currentKey.value.publicKey else 'Seed'],
+            ),
+            children: [
+              buildSectionAction(
+                title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed.tr(),
+                onTap: keys.isNotEmpty && currentKey != null
+                    ? () {
+                        CrystalBottomSheet.show(
+                          context,
+                          title: ExportSeedPhraseModalBody.title,
+                          body: ExportSeedPhraseModalBody(keySubject: currentKey),
+                        );
+                      }
+                    : null,
+              ),
+              buildSectionAction(
+                title: LocaleKeys.settings_screen_sections_current_seed_preferences_remove_seed.tr(),
+                onTap: keys.isNotEmpty && currentKey != null
+                    ? () {
+                        CrystalBottomSheet.show(
+                          context,
+                          title: RemoveSeedPhraseModalBody.title,
+                          body: RemoveSeedPhraseModalBody(keySubject: currentKey),
+                          expand: false,
+                          avoidBottomInsets: false,
+                          hasTitleDivider: true,
+                        );
+                      }
+                    : null,
+              ),
+              buildSectionAction(
+                title: LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
+                onTap: keys.isNotEmpty && currentKey != null
+                    ? () {
+                        CrystalBottomSheet.show(
+                          context,
+                          title: LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
+                          body: ChangeSeedPhrasePasswordModalBody(keySubject: currentKey),
+                        );
+                      }
+                    : null,
+              ),
+              if (currentKey != null &&
+                  currentKey.value.isNotLegacy &&
+                  currentKey.value.publicKey == currentKey.value.masterKey)
+                buildSectionAction(
+                  title: LocaleKeys.settings_screen_sections_current_seed_preferences_derive_key.tr(),
+                  onTap: keys.isNotEmpty
+                      ? () async {
+                          final name = await CrystalBottomSheet.show<String?>(
+                            context,
+                            title: NameNewKeyModalBody.title,
+                            body: const NameNewKeyModalBody(),
+                          );
+
+                          if (name != null) {
+                            CrystalBottomSheet.show(
+                              context,
+                              title: DeriveKeyModalBody.title,
+                              body: DeriveKeyModalBody(
+                                keySubject: currentKey,
+                                name: name.isNotEmpty ? name : null,
+                              ),
+                            );
+                          }
+                        }
+                      : null,
+                ),
+              buildSectionAction(
+                title: LocaleKeys.settings_screen_sections_current_seed_preferences_rename_key.tr(),
+                onTap: keys.isNotEmpty && currentKey != null
+                    ? () {
+                        CrystalBottomSheet.show(
+                          context,
+                          title: LocaleKeys.rename_key_modal_title.tr(),
+                          body: RenameKeyModalBody(keySubject: currentKey),
+                        );
+                      }
+                    : null,
+              ),
+            ],
+          ),
+          buildSection(
+            title: LocaleKeys.settings_screen_sections_wallet_preferences_title.tr(),
+            children: [
+              BlocBuilder<BiometryInfoBloc, BiometryInfoState>(
+                bloc: context.watch<BiometryInfoBloc>(),
+                builder: (context, biometryInfoState) => biometryInfoState.isAvailable
+                    ? buildSectionAction(
+                        title: LocaleKeys.biometry_title.tr(),
+                        onTap: () {
+                          CrystalBottomSheet.show(
+                            context,
+                            title: LocaleKeys.biometry_title.tr(),
+                            body: const BiometryModalBody(),
+                          );
+                        },
+                      )
+                    : const SizedBox(),
+              ),
+            ],
+          ),
+          buildSection(
+            children: [
+              buildSectionAction(
+                isDestructive: true,
+                title: LocaleKeys.settings_screen_sections_logout_action.tr(),
+                onTap: () {
+                  showPlatformDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (context) => Theme(
+                      data: ThemeData(),
+                      child: PlatformAlertDialog(
+                        title: Text(LocaleKeys.settings_screen_sections_logout_confirmation.tr()),
+                        actions: [
+                          PlatformDialogAction(
+                            onPressed: Navigator.of(context).pop,
+                            child: Text(LocaleKeys.actions_cancel.tr()),
+                          ),
+                          PlatformDialogAction(
+                            onPressed: () {
+                              context.read<ApplicationFlowBloc>().add(const ApplicationFlowEvent.logOut());
+                              Navigator.of(context).pop();
+                            },
+                            cupertino: (_, __) => CupertinoDialogActionData(
+                              isDestructiveAction: true,
+                            ),
+                            material: (_, __) => MaterialDialogActionData(
+                              style: TextButton.styleFrom(
+                                primary: CrystalColor.error,
+                              ),
+                            ),
+                            child: Text(LocaleKeys.settings_screen_sections_logout_action.tr()),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          buildAppVersion(),
+        ],
+      );
+
+  Widget buildSeedsList({
     required KeySubject? selectedSeed,
     required Map<KeySubject, List<KeySubject>?> seeds,
     required Function(KeySubject) onSelect,
@@ -297,7 +298,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
     );
     Widget? child;
     for (final seed in seeds.keys) {
-      child = _seedItem(
+      child = buildSeedItem(
         seed: seed,
         selectedSeed: selectedSeed,
         onSelect: onSelect,
@@ -307,7 +308,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
       child = null;
       if (seeds[seed] != null && seeds[seed]!.isNotEmpty) {
         for (final key in seeds[seed]!) {
-          child = _seedItem(
+          child = buildSeedItem(
             seed: key,
             selectedSeed: selectedSeed,
             onSelect: onSelect,
@@ -323,7 +324,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
     }
 
     if (showAddAction) {
-      child = _sectionActionWithIcon(
+      child = buildSectionActionWithIcon(
         onTap: onAdd,
         color: CrystalColor.accent,
         title: LocaleKeys.settings_screen_sections_seeds_add_seed.tr(),
@@ -346,7 +347,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
     );
   }
 
-  Widget _seedItem({
+  Widget buildSeedItem({
     required KeySubject? selectedSeed,
     required KeySubject seed,
     required Function(KeySubject) onSelect,
@@ -362,7 +363,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
       );
     }
 
-    return _sectionActionWithIcon(
+    return buildSectionActionWithIcon(
       onTap: () {
         if (!selected) {
           HapticFeedback.selectionClick();
@@ -375,7 +376,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
     );
   }
 
-  Widget _section({
+  Widget buildSection({
     String? title,
     required List<Widget> children,
   }) {
@@ -445,7 +446,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
     );
   }
 
-  Widget _sectionAction({
+  Widget buildSectionAction({
     required String title,
     VoidCallback? onTap,
     bool isDestructive = false,
@@ -481,7 +482,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
     );
   }
 
-  Widget _sectionActionWithIcon({
+  Widget buildSectionActionWithIcon({
     required String title,
     Color? color,
     Widget? icon,
@@ -508,18 +509,47 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
                   ),
                 ),
                 Expanded(
-                  child: Text(
-                    title.length > 8 ? '${title.substring(0, 4)}...${title.substring(title.length - 4)}' : title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: color ?? CrystalColor.fontDark,
-                      letterSpacing: 0.25,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: color ?? CrystalColor.fontDark,
+                        letterSpacing: 0.25,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
+        ),
+      );
+
+  Widget buildAppVersion() => Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: FutureBuilder<PackageInfo>(
+          future: PackageInfo.fromPlatform(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final version = snapshot.data?.version;
+              final buildNumber = snapshot.data?.buildNumber;
+
+              return Text(
+                'Version $version.$buildNumber',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: CrystalColor.fontSecondaryDark,
+                  letterSpacing: 0.25,
+                ),
+              );
+            } else {
+              return const SizedBox();
+            }
+          },
         ),
       );
 }

@@ -24,6 +24,8 @@ class KeyPasswordCheckBloc extends Bloc<KeyPasswordCheckEvent, KeyPasswordCheckS
         String password,
       ) async* {
         try {
+          yield const KeyPasswordCheckState.loading();
+
           final keySubject = _nekotonService.keys.firstWhere((e) => e.value.publicKey == publicKey);
 
           late final SignInput signInput;
@@ -72,6 +74,8 @@ class KeyPasswordCheckEvent with _$KeyPasswordCheckEvent {
 @freezed
 class KeyPasswordCheckState with _$KeyPasswordCheckState {
   const factory KeyPasswordCheckState.initial() = _Initial;
+
+  const factory KeyPasswordCheckState.loading() = _Loading;
 
   const factory KeyPasswordCheckState.ready({
     required bool isCorrect,
