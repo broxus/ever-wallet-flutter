@@ -1,12 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 
 import 'loading_page/loading_page.dart';
-import 'main_flow/main_router_page.dart';
-import 'main_flow/settings/seed_phrase_export_page.dart';
-import 'main_flow/settings/settings_page.dart';
-import 'main_flow/wallet/new_account_flow/new_account_name_page.dart';
-import 'main_flow/wallet/new_account_flow/new_account_type_page.dart';
-import 'main_flow/wallet/wallet_page.dart';
+import 'main_router/main_router_page.dart';
+import 'main_router/settings/seed_phrase_export_page.dart';
+import 'main_router/settings/settings_page.dart';
+import 'main_router/wallet/new_account_flow/new_account_name_page.dart';
+import 'main_router/wallet/new_account_flow/new_account_type_page.dart';
+import 'main_router/wallet/wallet_page.dart';
 import 'seed_creation/new_seed_name_page.dart';
 import 'seed_creation/password_creation_page.dart';
 import 'seed_creation/seed_name_page.dart';

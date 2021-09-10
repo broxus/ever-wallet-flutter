@@ -1,13 +1,13 @@
 name: crystal
 description: TON Crystal Wallet
 
-publish_to: "none"
+publish_to: 'none'
 
 version: 1.0.1+19
 
 environment:
-  sdk: ">=2.13.0 <3.0.0"
-  flutter: ">=2.2.0"
+  sdk: '>=2.14.0 <3.0.0'
+  flutter: '>=2.5.0'
 
 dependencies:
   another_flushbar: ^1.10.23
@@ -70,15 +70,15 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/logo/logo.png"
-  adaptive_icon_background: "assets/logo/logo_background.png"
-  adaptive_icon_foreground: "assets/logo/logo_foreground.png"
+  image_path: 'assets/logo/logo.png'
+  adaptive_icon_background: 'assets/logo/logo_background.png'
+  adaptive_icon_foreground: 'assets/logo/logo_foreground.png'
 
 flutter_native_splash:
-  image: "assets/logo/logo_splash.png"
-  color: "1a1b39"
-  android_gravity: "center"
-  ios_content_mode: "scaleAspectFit"
+  image: 'assets/logo/logo_splash.png'
+  color: '1a1b39'
+  android_gravity: 'center'
+  ios_content_mode: 'scaleAspectFit'
 
 flutter_gen:
   output: lib/generated/

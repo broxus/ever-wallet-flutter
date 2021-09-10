@@ -1,4 +1,4 @@
-import 'package:crystal/presentation/main_flow/widgets/input_password_modal_body.dart';
+import '../../../widgets/input_password_modal_body.dart';
 import 'package:expand_tap_area/expand_tap_area.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';

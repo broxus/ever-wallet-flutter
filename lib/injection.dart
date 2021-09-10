@@ -47,7 +47,9 @@ abstract class HiveModule {
   Future<HiveModule> initHive() async {
     await Hive.initFlutter();
 
-    Hive..registerAdapter(ConnectedSiteDtoAdapter())..registerAdapter(TokenContractAssetDtoAdapter());
+    Hive
+      ..registerAdapter(ConnectedSiteDtoAdapter())
+      ..registerAdapter(TokenContractAssetDtoAdapter());
 
     return this;
   }
