@@ -13,9 +13,9 @@ extension on _SeedType {
   String describe() {
     switch (this) {
       case _SeedType.labs:
-        return 'Import seed';
+        return 'Import seed (12 phrases)';
       case _SeedType.legacy:
-        return 'Import legacy seed';
+        return 'Import legacy seed (24 phrases)';
     }
   }
 }
