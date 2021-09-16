@@ -44,7 +44,7 @@ class MainRouterPageState extends State<MainRouterPage> {
 
   bool handleAndroidBackButton([bool? stopDefaultButtonEvent, RouteInfo? routeInfo]) {
     try {
-      final router = context.innerRouterOf(MainRouterRoute.name)! as TabsRouter;
+      final router = context.innerRouterOf(WalletRouterRoute.name)! as TabsRouter;
       final currentIndex = router.activeIndex;
       if (currentIndex == 0) return false;
       router.setActiveIndex(0);

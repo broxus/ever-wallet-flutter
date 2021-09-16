@@ -16,7 +16,7 @@ Widget getTokenAssetIcon(String logoURI) => SvgPicture.network(logoURI);
 double getKeyboardInsetsBottom(BuildContext context) {
   final double _keyboardInsetsBottom = context.keyboardInsets.bottom;
 
-  if (context.router.root.current.name == MainRouterRoute.name) {
+  if (context.router.root.current.name == SettingsRouterRoute.name) {
     return _keyboardInsetsBottom - kBottomBarHeight;
   }
 

@@ -45,7 +45,7 @@ class WalletBody extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        onPressed: () => context.router.navigate(const SettingsRouterRoute()),
+                        onPressed: () => context.router.push(const SettingsRouterRoute()),
                         icon: const Icon(
                           Icons.person,
                           size: 30,

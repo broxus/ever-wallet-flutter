@@ -55,10 +55,10 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
         value: SystemUiOverlayStyle.dark,
         child: Padding(
           padding: EdgeInsets.only(bottom: context.safeArea.bottom),
-          child: CupertinoPageScaffold(
+          child: Scaffold(
             resizeToAvoidBottomInset: false,
             backgroundColor: CrystalColor.iosBackground,
-            child: SafeArea(
+            body: SafeArea(
               bottom: false,
               child: MediaQuery.removePadding(
                 context: context,
