@@ -282,7 +282,6 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
           backgroundColor: CrystalColor.secondary,
           textColor: CrystalColor.fontHeaderDark,
           splashColor: CrystalColor.accent,
-          // highlightColor: CrystalColor.accent,
           padding: EdgeInsets.symmetric(vertical: 12),
         ),
         child: Row(

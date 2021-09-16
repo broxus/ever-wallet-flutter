@@ -267,7 +267,6 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
           backgroundColor: CrystalColor.secondary,
           textColor: CrystalColor.fontHeaderDark,
           splashColor: CrystalColor.accent,
-          // highlightColor: CrystalColor.accent,
           padding: EdgeInsets.symmetric(vertical: 12),
         ),
         child: Row(
