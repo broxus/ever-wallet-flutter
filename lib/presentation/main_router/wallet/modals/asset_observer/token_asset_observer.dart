@@ -134,7 +134,7 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
                       SizedBox(
                         height: 24,
                         child: Text(
-                          balance,
+                          formatValue(balance),
                           style: const TextStyle(
                             fontSize: 20,
                             letterSpacing: 0.5,
@@ -257,7 +257,6 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
                         controller: _historyScrollController,
                         itemBuilder: (context, index) => WalletTransactionHolder(
                           transaction: transactions[index],
-                          icon: icon,
                         ),
                         separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
                         itemCount: transactions.length,
@@ -283,7 +282,7 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
           backgroundColor: CrystalColor.secondary,
           textColor: CrystalColor.fontHeaderDark,
           splashColor: CrystalColor.accent,
-          highlightColor: CrystalColor.accent,
+          // highlightColor: CrystalColor.accent,
           padding: EdgeInsets.symmetric(vertical: 12),
         ),
         child: Row(

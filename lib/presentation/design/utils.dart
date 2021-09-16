@@ -22,3 +22,8 @@ double getKeyboardInsetsBottom(BuildContext context) {
 
   return _keyboardInsetsBottom;
 }
+
+String formatValue(String value) {
+    final regex = RegExp(r"([.]*0+)(?!.*\d)");
+    return value.replaceAll(regex, '');
+}

@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:crystal/presentation/design/utils.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -115,7 +116,7 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
                       SizedBox(
                         height: 24,
                         child: Text(
-                          contractState.balance,
+                          formatValue(contractState.balance),
                           style: const TextStyle(
                             fontSize: 20,
                             letterSpacing: 0.5,
@@ -241,7 +242,6 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
                         controller: _historyScrollController,
                         itemBuilder: (context, index) => WalletTransactionHolder(
                           transaction: transactions[index],
-                          icon: Image.asset(Assets.images.ton.path),
                         ),
                         separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
                         itemCount: transactions.length,
@@ -267,7 +267,7 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
           backgroundColor: CrystalColor.secondary,
           textColor: CrystalColor.fontHeaderDark,
           splashColor: CrystalColor.accent,
-          highlightColor: CrystalColor.accent,
+          // highlightColor: CrystalColor.accent,
           padding: EdgeInsets.symmetric(vertical: 12),
         ),
         child: Row(

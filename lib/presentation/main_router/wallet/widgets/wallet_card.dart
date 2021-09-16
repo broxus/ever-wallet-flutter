@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:crystal/presentation/design/utils.dart';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -330,11 +331,14 @@ class _WalletCardState extends State<WalletCard> {
 
   Widget buildBalance(String balance) {
     final flooredBalance = balance.floorValue();
-    final balancePart = flooredBalance.split(".");
+
+    final formattedString = formatValue(flooredBalance);
 
     return AutoSizeText.rich(
       TextSpan(
-        text: balancePart[0],
+        text: formattedString.contains('.')
+            ? formattedString.substring(0, formattedString.indexOf('.'))
+            : formattedString,
         style: const TextStyle(
           fontSize: 24,
           letterSpacing: 0.75,
@@ -342,7 +346,9 @@ class _WalletCardState extends State<WalletCard> {
         ),
         children: [
           TextSpan(
-            text: ".${balancePart.last} TON",
+            text: formattedString.contains('.')
+                ? "${formattedString.substring(formattedString.indexOf('.'), formattedString.length)} TON"
+                : " TON",
             style: const TextStyle(
               fontSize: 18,
               letterSpacing: 0.75,
