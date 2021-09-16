@@ -1,4 +1,4 @@
-import 'package:crystal/presentation/design/value_formatter.dart';
+import 'package:crystal/presentation/design/utils.dart';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -74,8 +74,8 @@ class WalletTransactionHolder extends StatelessWidget {
   Widget _getValueTitle() {
     return Text(
       transaction.isOutgoing
-          ? "${ValueFormatter().formatValue(transaction.value)} ${transaction.currency}"
-          : "- ${ValueFormatter().formatValue(transaction.value)} ${transaction.currency}",
+          ? "${formatValue(transaction.value)} ${transaction.currency}"
+          : "- ${formatValue(transaction.value)} ${transaction.currency}",
       softWrap: false,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
@@ -105,7 +105,7 @@ class WalletTransactionHolder extends StatelessWidget {
 
   Widget _getFees() {
     return Text(
-      "Fees: ${ValueFormatter().formatValue(transaction.totalFees)} ${transaction.feesCurrency}",
+      "Fees: ${formatValue(transaction.totalFees)} ${transaction.feesCurrency}",
       style: const TextStyle(
         color: CrystalColor.fontSecondaryDark,
       ),
