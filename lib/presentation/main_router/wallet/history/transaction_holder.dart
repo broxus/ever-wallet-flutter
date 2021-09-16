@@ -1,3 +1,4 @@
+import 'package:crystal/presentation/design/utils.dart';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,19 +9,18 @@ import '../modals/transaction_observer/transaction_observer.dart';
 
 class WalletTransactionHolder extends StatelessWidget {
   final WalletTransaction transaction;
-  final Widget icon;
+  Widget? icon;
   final String? data;
 
   WalletTransactionHolder({
     Key? key,
     required this.transaction,
-    required this.icon,
+    this.icon,
   })  : data = transaction.maybeMap(ordinary: (v) => v.data, orElse: () => null),
         super(key: key);
 
   @override
   Widget build(BuildContext context) => Material(
-        type: MaterialType.card,
         color: CrystalColor.primary,
         child: CrystalInkWell(
           onTap: () => TransactionObserver.open(
@@ -28,139 +28,141 @@ class WalletTransactionHolder extends StatelessWidget {
             transaction: transaction,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: icon,
-                    ),
-                    const CrystalDivider(width: 16),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: IntrinsicWidth(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height: 20,
-                                width: MediaQuery.of(context).size.width * 0.35,
-                                child: ExtendedText(
-                                  transaction.address,
-                                  key: UniqueKey(),
-                                  maxLines: 1,
-                                  textAlign: TextAlign.start,
-                                  softWrap: false,
-                                  overflowWidget: TextOverflowWidget(
-                                    align: TextOverflowAlign.center,
-                                    position: TextOverflowPosition.middle,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: List.filled(
-                                        3,
-                                        const Padding(
-                                          padding: EdgeInsets.all(2),
-                                          child: CircleIcon(
-                                            color: CrystalColor.fontDark,
-                                            size: 2,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    letterSpacing: 0.25,
-                                    color: CrystalColor.fontDark,
-                                  ),
-                                ),
-                              ),
-                              const CrystalDivider(height: 4),
-                              SizedBox(
-                                height: 20,
-                                child: Text(
-                                  transaction.createdAt.format(),
-                                  textAlign: TextAlign.start,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    letterSpacing: 0.75,
-                                    color: CrystalColor.fontSecondaryDark,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Flexible(
+                if (icon != null)
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: icon,
+                  )
+                else
+                  const SizedBox(),
+                const CrystalDivider(
+                  width: 16,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: IntrinsicWidth(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            height: 20,
-                            child: Text(
-                              transaction.isOutgoing
-                                  ? '- ${transaction.value.floorValue().elipseValue()}'
-                                  : '+ ${transaction.value.floorValue().elipseValue()}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: transaction.isOutgoing ? CrystalColor.error : CrystalColor.success,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              softWrap: false,
-                            ),
+                          _getValueTitle(),
+                          const CrystalDivider(
+                            height: 2,
                           ),
-                          const CrystalDivider(height: 4),
-                          SizedBox(
-                            height: 20,
-                            child: Text(
-                              LocaleKeys.wallet_history_modal_holder_fee.tr(
-                                args: [
-                                  transaction.totalFees,
-                                  transaction.feesCurrency,
-                                ],
-                              ),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                letterSpacing: 0.75,
-                                color: CrystalColor.fontSecondaryDark,
-                              ),
-                            ),
+                          _getLayout(),
+                          const CrystalDivider(
+                            height: 4,
                           ),
+                          getStatusInfo(),
                         ],
                       ),
                     ),
-                  ],
-                ),
-                if (data != null && data!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 10,
-                    ),
-                    child: Text(
-                      data!,
-                      style: const TextStyle(
-                        color: CrystalColor.fontDark,
-                        letterSpacing: 0.75,
-                      ),
-                    ),
                   ),
-                getStatusInfo(),
+                ),
               ],
             ),
           ),
         ),
       );
+
+  Widget _getValueTitle() {
+    return Text(
+      transaction.isOutgoing
+          ? "${formatValue(transaction.value)} ${transaction.currency}"
+          : "- ${formatValue(transaction.value)} ${transaction.currency}",
+      softWrap: false,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: transaction.isOutgoing ? CrystalColor.success : CrystalColor.fontDark,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  Widget _getLayout() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _getFees(),
+            _getAddress(),
+          ],
+        ),
+        _getDate(),
+      ],
+    );
+  }
+
+  Widget _getFees() {
+    return Text(
+      "Fees: ${formatValue(transaction.totalFees)} ${transaction.feesCurrency}",
+      style: const TextStyle(
+        color: CrystalColor.fontSecondaryDark,
+      ),
+    );
+  }
+
+  Widget _getAddress() {
+    return transaction.address != ""
+        ? Column(
+            children: [
+              const CrystalDivider(
+                height: 6,
+              ),
+              SizedBox(
+                width: 100,
+                child: ExtendedText(
+                  transaction.address,
+                  key: UniqueKey(),
+                  maxLines: 1,
+                  textAlign: TextAlign.start,
+                  softWrap: false,
+                  overflowWidget: TextOverflowWidget(
+                    align: TextOverflowAlign.center,
+                    position: TextOverflowPosition.middle,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.filled(
+                        3,
+                        const Padding(
+                          padding: EdgeInsets.all(2),
+                          child: CircleIcon(
+                            color: CrystalColor.fontDark,
+                            size: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  style: const TextStyle(
+                    letterSpacing: 0.25,
+                    color: CrystalColor.fontDark,
+                  ),
+                ),
+              ),
+            ],
+          )
+        : const SizedBox();
+  }
+
+  Widget _getDate() {
+    return Text(
+      DateFormat('MMM d, H:mm').format(transaction.createdAt).toString(),
+      style: const TextStyle(
+        color: CrystalColor.fontDark,
+      ),
+    );
+  }
 
   Widget getStatusInfo() => transaction.map(
         ordinary: (_) => const SizedBox(),

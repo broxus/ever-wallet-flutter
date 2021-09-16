@@ -57,14 +57,14 @@ class _WelcomePageState extends State<WelcomePage> {
                   Text(
                     LocaleKeys.welcome_screen_title.tr(),
                     style: const TextStyle(
-                      fontSize: 40,
+                      fontSize: 36,
                       color: CrystalColor.fontHeaderDark,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.start,
                   ),
                   const Flexible(
-                    child: CrystalDivider(height: 16),
+                    child: CrystalDivider(height: 10),
                   ),
                   Text(
                     LocaleKeys.welcome_screen_subtitle.tr(),

@@ -53,7 +53,7 @@ class _ApplicationListenerState extends State<ApplicationListener> with WidgetsB
           state.when(
             loading: () => pushAsRoot(const LoadingRoute()),
             welcome: () => pushAsRoot(const WelcomeRouterRoute()),
-            home: () => pushAsRoot(const MainRouterRoute()),
+            home: () => pushAsRoot(const WalletRouterRoute()),
           );
         },
       );

@@ -41,7 +41,7 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
         builder: (context, state) => state.maybeWhen(
           ready: (address, contractState, walletType, details, publicKey) => WalletAssetHolder(
             name: 'TON',
-            balance: contractState.balance.floorValue(),
+            balance: contractState.balance,
             icon: Image.asset(Assets.images.ton.path),
             onTap: () => TonAssetObserver.open(
               context: context,

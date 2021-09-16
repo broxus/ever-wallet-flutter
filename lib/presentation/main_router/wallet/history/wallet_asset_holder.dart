@@ -1,3 +1,4 @@
+import 'package:crystal/presentation/design/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../design/design.dart';
@@ -58,7 +59,7 @@ class WalletAssetHolder extends StatelessWidget {
                       SizedBox(
                         height: 20,
                         child: Text(
-                          balance,
+                          formatValue(balance),
                           style: const TextStyle(
                             fontSize: 14,
                             letterSpacing: 0.75,

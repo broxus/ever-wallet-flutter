@@ -4,7 +4,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
 import '../../../../injection.dart';
-import '../../../design/design.dart';
 import '../../../design/utils.dart';
 import '../modals/asset_observer/token_asset_observer.dart';
 import 'wallet_asset_holder.dart';
@@ -50,7 +49,7 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
 
             return WalletAssetHolder(
               name: symbol.name,
-              balance: balance.floorValue(),
+              balance: balance,
               icon: icon,
               onTap: () => TokenAssetObserver.open(
                 context: context,

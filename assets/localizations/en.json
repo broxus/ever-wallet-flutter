@@ -272,7 +272,8 @@
     "hint": "Name",
     "actions": {
       "create": "Create new seed",
-      "import": "Import seed"
+      "import": "Import seed (12 words)",
+      "import_legacy": "Import legacy seed (24 words)"
     }
   },
   "change_seed_password_modal": {

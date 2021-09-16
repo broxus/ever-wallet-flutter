@@ -14,7 +14,7 @@ extension CreationActionsDescribe on CreationActions {
       case CreationActions.import:
         return LocaleKeys.new_seed_name_actions_import.tr();
       case CreationActions.importLegacy:
-        return 'Import legacy seed';
+        return LocaleKeys.new_seed_name_actions_import_legacy.tr();
     }
   }
 }

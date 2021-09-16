@@ -1,3 +1,4 @@
+import 'package:crystal/presentation/design/utils.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -89,7 +90,7 @@ class _TransactionObserverState extends State<TransactionObserver> {
                         title: LocaleKeys.fields_amount.tr(),
                         value: LocaleKeys.wallet_history_modal_holder_value.tr(
                           args: [
-                            widget.transaction.value,
+                            formatValue(widget.transaction.value),
                             widget.transaction.currency,
                           ],
                         ),
@@ -99,7 +100,7 @@ class _TransactionObserverState extends State<TransactionObserver> {
                         title: LocaleKeys.fields_blockchain_fee.tr(),
                         value: LocaleKeys.wallet_history_modal_holder_fee.tr(
                           args: [
-                            widget.transaction.totalFees,
+                            formatValue(widget.transaction.totalFees),
                             widget.transaction.feesCurrency,
                           ],
                         ),
