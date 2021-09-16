@@ -77,7 +77,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
       );
 
   Widget buildTitle() => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
+        padding: const EdgeInsets.fromLTRB(26, 14, 26, 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -89,9 +89,10 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
                 fontWeight: FontWeight.w700,
               ),
             ),
-            IconButton(
-              onPressed: () => context.router.navigate(const WalletRouterRoute()),
-              icon: const Icon(
+            CrystalInkWell(
+              onTap: () => context.router.navigate(const WalletRouterRoute()),
+              highlightColor: Colors.transparent,
+              child: const Icon(
                 Icons.close,
                 color: CrystalColor.fontTitleSecondaryDark,
               ),
