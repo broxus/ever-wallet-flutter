@@ -3,6 +3,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/subscription/subscriptions_bloc.dart';
 import '../../../design/design.dart';
+import '../../../router.gr.dart';
 import 'profile_actions.dart';
 import 'profile_carousel.dart';
 
@@ -33,6 +34,7 @@ class WalletBody extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         LocaleKeys.wallet_screen_title.tr(),
@@ -40,6 +42,13 @@ class WalletBody extends StatelessWidget {
                           fontSize: 30,
                           letterSpacing: 0.25,
                           fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => context.router.navigate(const SettingsRouterRoute()),
+                        icon: const Icon(
+                          Icons.person,
+                          size: 30,
                         ),
                       ),
                     ],

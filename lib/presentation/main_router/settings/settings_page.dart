@@ -8,6 +8,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
+import './../../router.gr.dart';
 import '../../../domain/blocs/application_flow_bloc.dart';
 import '../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../domain/blocs/key/keys_bloc.dart';
@@ -76,14 +77,26 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
       );
 
   Widget buildTitle() => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-        child: Text(
-          LocaleKeys.settings_screen_title.tr(),
-          style: const TextStyle(
-            fontSize: 30,
-            color: CrystalColor.fontDark,
-            fontWeight: FontWeight.w700,
-          ),
+        padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              LocaleKeys.settings_screen_title.tr(),
+              style: const TextStyle(
+                fontSize: 30,
+                color: CrystalColor.fontDark,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            IconButton(
+              onPressed: () => context.router.navigate(const WalletRouterRoute()),
+              icon: const Icon(
+                Icons.close,
+                color: CrystalColor.fontTitleSecondaryDark,
+              ),
+            ),
+          ],
         ),
       );
 
