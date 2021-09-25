@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
 import '../../models/connected_site.dart';
@@ -14,11 +13,11 @@ part 'connected_sites_bloc.freezed.dart';
 @injectable
 class ConnectedSitesBloc extends Bloc<_Event, ConnectedSitesState> {
   final ConnectedSitesRepository _connectedSitesRepository;
-  final AccountSubject? account;
+  final String? address;
 
   ConnectedSitesBloc(
     this._connectedSitesRepository,
-    @factoryParam this.account,
+    @factoryParam this.address,
   ) : super(const ConnectedSitesState.initial()) {
     add(const _LocalEvent.updateConnectedSites());
   }
@@ -29,7 +28,7 @@ class ConnectedSitesBloc extends Bloc<_Event, ConnectedSitesState> {
       yield* event.when(
         updateConnectedSites: () async* {
           try {
-            final connectedSites = await _connectedSitesRepository.getConnectedSites(account!.value.address);
+            final connectedSites = await _connectedSitesRepository.getConnectedSites(address!);
 
             yield ConnectedSitesState.ready(connectedSites);
           } on Exception catch (err, st) {
@@ -46,7 +45,7 @@ class ConnectedSitesBloc extends Bloc<_Event, ConnectedSitesState> {
           try {
             final site = ConnectedSite(url: url, time: DateTime.now());
             await _connectedSitesRepository.addConnectedSite(
-              address: account!.value.address,
+              address: address!,
               site: site,
             );
 
@@ -59,7 +58,7 @@ class ConnectedSitesBloc extends Bloc<_Event, ConnectedSitesState> {
         removeConnectedSite: (String url) async* {
           try {
             await _connectedSitesRepository.removeConnectedSite(
-              address: account!.value.address,
+              address: address!,
               url: url,
             );
 

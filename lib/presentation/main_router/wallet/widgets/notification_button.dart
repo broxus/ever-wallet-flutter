@@ -48,7 +48,7 @@ class _NotificationButtonState extends State<NotificationButton> {
                   type: MaterialType.transparency,
                   child: CrystalInkWell(
                     onTap: () {
-                      CrystalBottomSheet.show(
+                      showCrystalBottomSheet(
                         context,
                         expand: true,
                         padding: EdgeInsets.zero,

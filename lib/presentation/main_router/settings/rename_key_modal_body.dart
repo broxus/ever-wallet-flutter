@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../domain/blocs/key/key_update_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
 
 class RenameKeyModalBody extends StatefulWidget {
-  final KeySubject keySubject;
+  final String publicKey;
 
   const RenameKeyModalBody({
     Key? key,
-    required this.keySubject,
+    required this.publicKey,
   }) : super(key: key);
 
   @override
@@ -71,7 +70,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                     ? null
                     : () {
                         bloc.add(KeyUpdateEvent.rename(
-                          keySubject: widget.keySubject,
+                          publicKey: widget.publicKey,
                           name: value.text,
                         ));
                       },

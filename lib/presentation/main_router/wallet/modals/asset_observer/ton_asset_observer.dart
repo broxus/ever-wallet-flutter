@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:crystal/presentation/design/utils.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +8,7 @@ import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_bloc.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
+import '../../../../design/utils.dart';
 import '../../../../design/widget/crystal_bottom_sheet.dart';
 import '../../../../design/widget/preload_transactions_listener.dart';
 import '../../history/transaction_holder.dart';
@@ -17,25 +17,25 @@ import '../receive_modal.dart';
 import '../send_transaction_flow/send_transaction_flow.dart';
 
 class TonAssetObserver extends StatefulWidget {
-  final TonWallet tonWallet;
+  final String address;
 
   const TonAssetObserver._({
     Key? key,
-    required this.tonWallet,
+    required this.address,
   }) : super(key: key);
 
   static Future<void> open({
     required BuildContext context,
-    required TonWallet tonWallet,
+    required String address,
   }) =>
-      CrystalBottomSheet.show(
+      showCrystalBottomSheet(
         context,
         expand: false,
         padding: EdgeInsets.zero,
         avoidBottomInsets: false,
         barrierColor: CrystalColor.modalBackground.withOpacity(0.7),
         body: TonAssetObserver._(
-          tonWallet: tonWallet,
+          address: address,
         ),
       );
 
@@ -51,8 +51,8 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
   @override
   void initState() {
     super.initState();
-    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.tonWallet);
-    tonWalletTransactionsBloc = getIt.get<TonWalletTransactionsBloc>(param1: widget.tonWallet);
+    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
+    tonWalletTransactionsBloc = getIt.get<TonWalletTransactionsBloc>(param1: widget.address);
   }
 
   @override
@@ -73,6 +73,7 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
             children: [
               _header(
                 address: address,
+                publicKey: publicKey,
                 contractState: contractState,
               ),
               Flexible(
@@ -86,6 +87,7 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
 
   Widget _header({
     required String address,
+    required String publicKey,
     required ContractState contractState,
   }) =>
       Container(
@@ -145,6 +147,7 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
             const CrystalDivider(height: 24),
             _headerActions(
               address: address,
+              publicKey: publicKey,
               isDeployed: contractState.isDeployed,
             ),
           ],
@@ -153,6 +156,7 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
 
   Widget _headerActions({
     required String address,
+    required String publicKey,
     required bool isDeployed,
   }) =>
       AnimatedSwitcher(
@@ -163,7 +167,7 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
               child: _assetButton(
                 asset: Assets.images.iconReceive.path,
                 title: LocaleKeys.actions_receive.tr(),
-                onTap: () => CrystalBottomSheet.show(
+                onTap: () => showCrystalBottomSheet(
                   context,
                   body: ReceiveModalBody(
                     textAsTitle: true,
@@ -178,11 +182,13 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
                 onTap: () => isDeployed
                     ? SendTransactionFlow.start(
                         context: context,
-                        tonWallet: widget.tonWallet,
+                        address: address,
+                        publicKey: publicKey,
                       )
                     : DeployWalletFlow.start(
                         context: context,
-                        tonWallet: widget.tonWallet,
+                        address: address,
+                        publicKey: publicKey,
                       ),
                 asset: isDeployed ? Assets.images.iconSend.path : Assets.images.iconDeploy.path,
                 title: isDeployed ? LocaleKeys.actions_send.tr() : LocaleKeys.actions_deploy.tr(),

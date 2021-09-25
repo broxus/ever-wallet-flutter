@@ -8,6 +8,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../constants/message_expiration.dart';
+import '../../services/nekoton_service.dart';
 import '../../utils/error_message.dart';
 import 'ton_wallet_fees_bloc.dart';
 
@@ -15,12 +16,16 @@ part 'ton_wallet_transfer_bloc.freezed.dart';
 
 @injectable
 class TonWalletTransferBloc extends Bloc<_Event, TonWalletTransferState> {
-  final TonWallet? _tonWallet;
+  final NekotonService _nekotonService;
+  final String? _address;
   UnsignedMessage? _message;
   late TonWalletFeesBloc feesBloc;
 
-  TonWalletTransferBloc(@factoryParam this._tonWallet) : super(const TonWalletTransferState.initial()) {
-    feesBloc = getIt.get<TonWalletFeesBloc>(param1: _tonWallet);
+  TonWalletTransferBloc(
+    this._nekotonService,
+    @factoryParam this._address,
+  ) : super(const TonWalletTransferState.initial()) {
+    feesBloc = getIt.get<TonWalletFeesBloc>(param1: _address);
     add(const _LocalEvent.getBalance());
   }
 
@@ -34,9 +39,11 @@ class TonWalletTransferBloc extends Bloc<_Event, TonWalletTransferState> {
           String? comment,
         ) async* {
           try {
+            final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
             final int? _nanoAmount = int.tryParse(amount.fromTokens());
             if (_nanoAmount != null) {
-              _message = await _tonWallet!.prepareTransfer(
+              _message = await tonWallet.prepareTransfer(
                 expiration: defaultMessageExpiration,
                 destination: destination,
                 amount: _nanoAmount,
@@ -44,7 +51,7 @@ class TonWalletTransferBloc extends Bloc<_Event, TonWalletTransferState> {
               );
               feesBloc.add(TonWalletFeesEvent.estimateFees(nanoAmount: _nanoAmount, message: _message!));
 
-              final contractState = await _tonWallet!.contractState;
+              final contractState = await tonWallet.contractState;
 
               yield TonWalletTransferState.messagePrepared(
                 balance: contractState.balance.toTokens(),
@@ -62,29 +69,35 @@ class TonWalletTransferBloc extends Bloc<_Event, TonWalletTransferState> {
           yield const TonWalletTransferState.password();
         },
         backToInitial: () async* {
-          final contractState = await _tonWallet!.contractState;
+          final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
+          final contractState = await tonWallet.contractState;
           final balance = contractState.balance;
           yield TonWalletTransferState.initial(balance.toTokens());
         },
         send: (String password) async* {
-          if (_message != null) {
-            yield const TonWalletTransferState.sending();
-            try {
-              await _tonWallet!.send(
+          try {
+            final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
+            if (_message != null) {
+              yield const TonWalletTransferState.sending();
+              await tonWallet.send(
                 message: _message!,
                 password: password,
               );
 
               yield const TonWalletTransferState.success();
-            } on Exception catch (err, st) {
-              logger.e(err, err, st);
-              yield TonWalletTransferState.error(err.getMessage());
             }
+          } on Exception catch (err, st) {
+            logger.e(err, err, st);
+            yield TonWalletTransferState.error(err.getMessage());
           }
         },
       );
     } else if (event is _GetBalance) {
-      final contractState = await _tonWallet!.contractState;
+      final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
+      final contractState = await tonWallet.contractState;
       final balance = contractState.balance;
       yield TonWalletTransferState.initial(balance.toTokens());
     }

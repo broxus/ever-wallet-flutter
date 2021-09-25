@@ -4,127 +4,125 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../design.dart';
 
-class CrystalBottomSheet {
-  static Future<T?> show<T>(
-    BuildContext context, {
-    String? title,
-    required Widget body,
-    Widget? closeButton,
-    EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 16),
-    bool expand = false,
-    bool hasTitleDivider = false,
-    bool draggable = true,
-    bool dismissible = true,
-    bool wrapIntoAnimatedSize = true,
-    bool avoidBottomInsets = true,
-    Color barrierColor = CrystalColor.modalBackground,
-  }) {
-    final _hasTitleDivider = title != null && hasTitleDivider;
-    return showCustomModalBottomSheet<T>(
-      expand: expand,
-      context: context,
-      isDismissible: dismissible,
-      useRootNavigator: true,
-      bounce: false,
-      enableDrag: draggable,
-      barrierColor: barrierColor,
-      containerWidget: (context, animation, child) => _ContainerWidget(
-        animated: wrapIntoAnimatedSize,
-        child: child,
-      ),
-      builder: (context) => Material(
-        color: CrystalColor.primary,
-        child: Padding(
-          padding: avoidBottomInsets ? context.keyboardInsets : EdgeInsets.zero,
-          child: Stack(
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  if (title != null)
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16) + const EdgeInsets.only(top: 16),
-                      height: 32,
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 24,
-                          color: CrystalColor.fontDark,
-                        ),
+Future<T?> showCrystalBottomSheet<T>(
+  BuildContext context, {
+  String? title,
+  required Widget body,
+  Widget? closeButton,
+  EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 16),
+  bool expand = false,
+  bool hasTitleDivider = false,
+  bool draggable = true,
+  bool dismissible = true,
+  bool wrapIntoAnimatedSize = true,
+  bool avoidBottomInsets = true,
+  Color barrierColor = CrystalColor.modalBackground,
+}) {
+  final _hasTitleDivider = title != null && hasTitleDivider;
+  return showCustomModalBottomSheet<T>(
+    expand: expand,
+    context: context,
+    isDismissible: dismissible,
+    useRootNavigator: true,
+    bounce: false,
+    enableDrag: draggable,
+    barrierColor: barrierColor,
+    containerWidget: (context, animation, child) => _ContainerWidget(
+      animated: wrapIntoAnimatedSize,
+      child: child,
+    ),
+    builder: (context) => Material(
+      color: CrystalColor.primary,
+      child: Padding(
+        padding: avoidBottomInsets ? context.keyboardInsets : EdgeInsets.zero,
+        child: Stack(
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                if (title != null)
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16) + const EdgeInsets.only(top: 16),
+                    height: 32,
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 24,
+                        color: CrystalColor.fontDark,
                       ),
                     ),
-                  if (_hasTitleDivider)
-                    const SizedBox(
-                      height: 12,
-                    ),
-                  Flexible(
-                    child: Padding(
-                      padding: padding,
-                      child: body,
-                    ),
                   ),
-                ],
+                if (_hasTitleDivider)
+                  const SizedBox(
+                    height: 12,
+                  ),
+                Flexible(
+                  child: Padding(
+                    padding: padding,
+                    child: body,
+                  ),
+                ),
+              ],
+            ),
+            if (!Platform.isIOS || !draggable)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: ExpandTapWidget(
+                  tapPadding: const EdgeInsets.all(12),
+                  onTap: Navigator.of(context).maybePop,
+                  child: closeButton ?? _getCloseButton(),
+                ),
               ),
-              if (!Platform.isIOS || !draggable)
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: ExpandTapWidget(
-                    tapPadding: const EdgeInsets.all(12),
-                    onTap: Navigator.of(context).maybePop,
-                    child: closeButton ?? _getCloseButton(),
-                  ),
+            if (_hasTitleDivider)
+              const Padding(
+                padding: EdgeInsets.only(top: 60),
+                child: Divider(
+                  thickness: 1,
+                  height: 1,
                 ),
-              if (_hasTitleDivider)
-                const Padding(
-                  padding: EdgeInsets.only(top: 60),
-                  child: Divider(
-                    thickness: 1,
-                    height: 1,
-                  ),
-                ),
-              if (Platform.isIOS && draggable)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      height: 3,
-                      width: 48,
-                      margin: const EdgeInsets.only(top: 6, bottom: 6),
-                      decoration: const ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                        ),
-                        color: CrystalColor.cursorColor,
+              ),
+            if (Platform.isIOS && draggable)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    height: 3,
+                    width: 48,
+                    margin: const EdgeInsets.only(top: 6, bottom: 6),
+                    decoration: const ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                       ),
+                      color: CrystalColor.cursorColor,
                     ),
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _getCloseButton() => Padding(
+      padding: const EdgeInsets.all(10),
+      child: CircleIcon(
+        size: 24,
+        color: Platform.isIOS ? CrystalColor.iconBackground : Colors.transparent,
+        icon: Image.asset(
+          Assets.images.iconClose.path,
+          color: Platform.isIOS ? CrystalColor.fontDark : CrystalColor.fontTitleSecondaryDark,
+          width: 10,
+          filterQuality: FilterQuality.high,
         ),
       ),
     );
-  }
-
-  static Widget _getCloseButton() => Padding(
-        padding: const EdgeInsets.all(10),
-        child: CircleIcon(
-          size: 24,
-          color: Platform.isIOS ? CrystalColor.iconBackground : Colors.transparent,
-          icon: Image.asset(
-            Assets.images.iconClose.path,
-            color: Platform.isIOS ? CrystalColor.fontDark : CrystalColor.fontTitleSecondaryDark,
-            width: 10,
-            filterQuality: FilterQuality.high,
-          ),
-        ),
-      );
-}
 
 class _ContainerWidget extends StatefulWidget {
   const _ContainerWidget({
@@ -140,7 +138,7 @@ class _ContainerWidget extends StatefulWidget {
   __ContainerWidgetState createState() => __ContainerWidgetState();
 }
 
-class __ContainerWidgetState extends State<_ContainerWidget> with SingleTickerProviderStateMixin {
+class __ContainerWidgetState extends State<_ContainerWidget> {
   @override
   Widget build(BuildContext context) => Container(
         margin: EdgeInsets.only(
@@ -159,7 +157,6 @@ class __ContainerWidgetState extends State<_ContainerWidget> with SingleTickerPr
           removeTop: true,
           child: widget.animated
               ? AnimatedSize(
-                  vsync: this,
                   duration: kThemeAnimationDuration,
                   reverseDuration: kThemeAnimationDuration,
                   curve: Curves.decelerate,

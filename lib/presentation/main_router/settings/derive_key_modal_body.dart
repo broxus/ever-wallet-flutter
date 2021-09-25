@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../domain/blocs/key/key_creation_bloc.dart';
 import '../../../injection.dart';
@@ -8,12 +7,12 @@ import '../../design/design.dart';
 import '../widgets/input_password_modal_body.dart';
 
 class DeriveKeyModalBody extends StatefulWidget {
-  final KeySubject keySubject;
+  final String publicKey;
   final String? name;
 
   const DeriveKeyModalBody({
     Key? key,
-    required this.keySubject,
+    required this.publicKey,
     required this.name,
   }) : super(key: key);
 
@@ -51,11 +50,11 @@ class _DeriveKeyModalBodyState extends State<DeriveKeyModalBody> {
           onSubmit: (password) => bloc.add(
             KeyCreationEvent.deriveKey(
               name: widget.name,
+              publicKey: widget.publicKey,
               password: password,
-              keySubject: widget.keySubject,
             ),
           ),
-          publicKey: widget.keySubject.value.publicKey,
+          publicKey: widget.publicKey,
         ),
       );
 }

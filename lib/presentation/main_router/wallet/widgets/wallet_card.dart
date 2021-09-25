@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:crystal/presentation/design/utils.dart';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,16 +15,17 @@ import '../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/extension.dart';
+import '../../../design/utils.dart';
 import '../../../design/widget/crystal_bottom_sheet.dart';
 import '../modals/account_removement_body.dart';
 import '../modals/preferences_body.dart';
 
 class WalletCard extends StatefulWidget {
-  final SubscriptionSubject subscriptionSubject;
+  final String address;
 
   const WalletCard({
     Key? key,
-    required this.subscriptionSubject,
+    required this.address,
   }) : super(key: key);
 
   @override
@@ -42,8 +42,8 @@ class _WalletCardState extends State<WalletCard> {
   @override
   void initState() {
     super.initState();
-    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.subscriptionSubject.value.tonWallet);
-    accountInfoBloc = getIt.get<AccountInfoBloc>(param1: widget.subscriptionSubject.value.accountSubject);
+    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
+    accountInfoBloc = getIt.get<AccountInfoBloc>(param1: widget.address);
   }
 
   @override
@@ -180,7 +180,6 @@ class _WalletCardState extends State<WalletCard> {
                 orElse: () => buildNamedField(
                   controller: publicKeyController,
                   name: LocaleKeys.fields_public_key.tr(),
-                  value: null,
                 ),
               ),
             ),
@@ -195,7 +194,6 @@ class _WalletCardState extends State<WalletCard> {
                 orElse: () => buildNamedField(
                   controller: addressController,
                   name: LocaleKeys.fields_address.tr(),
-                  value: null,
                 ),
               ),
             ),
@@ -209,7 +207,6 @@ class _WalletCardState extends State<WalletCard> {
                 ),
                 orElse: () => buildNamedField(
                   name: LocaleKeys.fields_type.tr(),
-                  value: null,
                   isSelectable: false,
                 ),
               ),
@@ -232,7 +229,7 @@ class _WalletCardState extends State<WalletCard> {
   Widget buildNamedField({
     SelectionController? controller,
     required String name,
-    required String? value,
+    String? value,
     bool isSelectable = true,
     bool disabled = false,
   }) =>
@@ -403,11 +400,11 @@ class _WalletCardState extends State<WalletCard> {
                           onTap: () {
                             menuController.dismiss();
 
-                            CrystalBottomSheet.show(
+                            showCrystalBottomSheet(
                               context,
                               title: PreferencesBody.title,
                               body: PreferencesBody(
-                                subscriptionSubject: widget.subscriptionSubject,
+                                address: widget.address,
                               ),
                             );
                           },
@@ -422,7 +419,7 @@ class _WalletCardState extends State<WalletCard> {
                         //   onTap: () {
                         //     menuController.dismiss();
 
-                        //     CrystalBottomSheet.show(
+                        //     showCrystalBottomSheet(
                         //       context,
                         //       title: ConnectedSitesBody.title,
                         //       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -445,12 +442,12 @@ class _WalletCardState extends State<WalletCard> {
                           onTap: () {
                             menuController.dismiss();
 
-                            CrystalBottomSheet.show(
+                            showCrystalBottomSheet(
                               context,
                               title: AccountRemovementBody.title,
                               padding: const EdgeInsets.symmetric(horizontal: 8),
                               body: AccountRemovementBody(
-                                subscriptionSubject: widget.subscriptionSubject,
+                                address: widget.address,
                               ),
                               expand: false,
                               avoidBottomInsets: false,

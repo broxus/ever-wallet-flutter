@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../domain/blocs/subscription/subscriptions_bloc.dart';
+import '../../../../domain/blocs/account/current_accounts_bloc.dart';
 import '../../../design/design.dart';
 import '../../../router.gr.dart';
 import 'profile_actions.dart';
 import 'profile_carousel.dart';
 
 class WalletBody extends StatelessWidget {
-  final List<SubscriptionSubject> subscriptions;
-  final SubscriptionSubject? subscriptionSubject;
+  final List<AssetsList> accounts;
+  final AssetsList? currentAccount;
   final PanelController modalController;
-  final SubscriptionsBloc bloc;
+  final CurrentAccountsBloc bloc;
 
   const WalletBody({
     Key? key,
-    required this.subscriptions,
-    required this.subscriptionSubject,
+    required this.accounts,
+    required this.currentAccount,
     required this.modalController,
     required this.bloc,
   }) : super(key: key);
@@ -59,17 +59,17 @@ class WalletBody extends StatelessWidget {
                   duration: const Duration(milliseconds: 250),
                   offset: const Offset(1, 0),
                   child: ProfileCarousel(
-                    subscriptions: subscriptions,
+                    accounts: accounts,
                     onPageChanged: (i) {
-                      if (i < subscriptions.length) {
-                        bloc.add(SubscriptionsEvent.setCurrentSubscription(subscriptions[i]));
+                      if (i < accounts.length) {
+                        bloc.add(CurrentAccountsEvent.setCurrentAccount(accounts[i].address));
                       } else {
                         modalController.hide();
-                        bloc.add(const SubscriptionsEvent.setCurrentSubscription(null));
+                        bloc.add(const CurrentAccountsEvent.setCurrentAccount(null));
                       }
                     },
                     onPageSelected: (i) {
-                      if (i == subscriptions.length) {
+                      if (i == accounts.length) {
                         modalController.hide();
                       } else {
                         modalController.show();
@@ -78,10 +78,10 @@ class WalletBody extends StatelessWidget {
                   ),
                 ),
                 const CrystalDivider(height: 16),
-                if (subscriptionSubject != null)
+                if (currentAccount != null)
                   ProfileActions(
-                    key: ValueKey(subscriptionSubject),
-                    subscriptionSubject: subscriptionSubject!,
+                    key: ValueKey(currentAccount!.address),
+                    address: currentAccount!.address,
                   ),
                 const CrystalDivider(height: 20),
               ],

@@ -4,10 +4,12 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../logger.dart';
 import '../../repositories/ton_assets_repository.dart';
+import '../../services/nekoton_service.dart';
 
 part 'assets_bloc.freezed.dart';
 
@@ -15,15 +17,32 @@ typedef TokenWalletWithIcon = Tuple2<TokenWallet, String?>;
 
 @injectable
 class AssetsBloc extends Bloc<AssetsEvent, AssetsState> {
+  final NekotonService _nekotonService;
   final TonAssetsRepository _tonAssetsRepository;
-  final SubscriptionSubject? _subscriptionSubject;
+  final String? _address;
   late final StreamSubscription _streamSubscription;
 
   AssetsBloc(
+    this._nekotonService,
     this._tonAssetsRepository,
-    @factoryParam this._subscriptionSubject,
+    @factoryParam this._address,
   ) : super(const AssetsState.initial()) {
-    _streamSubscription = _subscriptionSubject!.listen((value) => add(AssetsEvent.loadAssets(value.tokenWallets)));
+    _streamSubscription = Rx.combineLatest2<TonWallet, List<TokenWallet>, AssetsEvent>(
+      _nekotonService.tonWalletsStream.transform(StreamTransformer.fromHandlers(
+        handleData: (data, sink) {
+          final tonWallet = data.firstWhereOrNull((e) => e.address == _address!);
+
+          if (tonWallet != null) {
+            sink.add(tonWallet);
+          }
+        },
+      )),
+      _nekotonService.tokenWalletsStream.map((e) => e.where((e) => e.owner == _address!).toList()),
+      (a, b) => AssetsEvent.loadAssets(
+        tonWallet: a,
+        tokenWallets: b,
+      ),
+    ).listen((event) => add(event));
   }
 
   @override
@@ -35,7 +54,10 @@ class AssetsBloc extends Bloc<AssetsEvent, AssetsState> {
   @override
   Stream<AssetsState> mapEventToState(AssetsEvent event) async* {
     yield* event.when(
-      loadAssets: (List<TokenWallet> tokenWallets) async* {
+      loadAssets: (
+        TonWallet tonWallet,
+        List<TokenWallet> tokenWallets,
+      ) async* {
         try {
           final stream = _tonAssetsRepository.getTokenContractAssetsStream();
 
@@ -51,8 +73,8 @@ class AssetsBloc extends Bloc<AssetsEvent, AssetsState> {
             }
 
             yield AssetsState.ready(
-              _subscriptionSubject!.value.tonWallet,
-              tokenWalletsWithIcon,
+              tonWallet: tonWallet,
+              tokenWallets: tokenWalletsWithIcon,
             );
           }
         } on Exception catch (err, st) {
@@ -66,17 +88,20 @@ class AssetsBloc extends Bloc<AssetsEvent, AssetsState> {
 
 @freezed
 class AssetsEvent with _$AssetsEvent {
-  const factory AssetsEvent.loadAssets(List<TokenWallet> tokenWallets) = _LoadAssets;
+  const factory AssetsEvent.loadAssets({
+    required TonWallet tonWallet,
+    required List<TokenWallet> tokenWallets,
+  }) = _LoadAssets;
 }
 
 @freezed
 class AssetsState with _$AssetsState {
   const factory AssetsState.initial() = _Initial;
 
-  const factory AssetsState.ready(
-    TonWallet tonWallet,
-    List<TokenWalletWithIcon> tokenWallets,
-  ) = _Ready;
+  const factory AssetsState.ready({
+    required TonWallet tonWallet,
+    required List<TokenWalletWithIcon> tokenWallets,
+  }) = _Ready;
 
   const factory AssetsState.error(String info) = _Error;
 }

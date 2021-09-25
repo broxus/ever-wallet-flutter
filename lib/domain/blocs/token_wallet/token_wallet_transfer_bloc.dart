@@ -8,6 +8,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../constants/message_expiration.dart';
+import '../../services/nekoton_service.dart';
 import '../../utils/error_message.dart';
 import 'token_wallet_fees_bloc.dart';
 
@@ -15,23 +16,32 @@ part 'token_wallet_transfer_bloc.freezed.dart';
 
 @injectable
 class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
-  final TokenWallet? _tokenWallet;
+  final NekotonService _nekotonService;
+  final String? _owner;
+  final String? _rootTokenContract;
   late TokenWalletFeesBloc feesBloc;
   UnsignedMessage? _message;
 
-  TokenWalletTransferBloc(@factoryParam this._tokenWallet) : super(const TokenWalletTransferState.initial()) {
-    feesBloc = getIt.get<TokenWalletFeesBloc>(param1: _tokenWallet);
+  TokenWalletTransferBloc(
+    this._nekotonService,
+    @factoryParam this._owner,
+    @factoryParam this._rootTokenContract,
+  ) : super(const TokenWalletTransferState.initial()) {
+    feesBloc = getIt.get<TokenWalletFeesBloc>(param1: _owner, param2: _rootTokenContract);
     add(const _LocalEvent.getBalance());
   }
 
   @override
   Stream<TokenWalletTransferState> mapEventToState(_Event event) async* {
     if (event is _LocalEvent) {
-      final balance = await _tokenWallet!.balance;
+      final tokenWallet = _nekotonService.tokenWallets
+          .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
+
+      final balance = await tokenWallet.balance;
 
       yield TokenWalletTransferState.initial(
-        balance: balance.toTokens(_tokenWallet!.symbol.decimals),
-        currency: _tokenWallet!.symbol.symbol,
+        balance: balance.toTokens(tokenWallet.symbol.decimals),
+        currency: tokenWallet.symbol.symbol,
       );
     }
 
@@ -43,11 +53,14 @@ class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
           bool notifyReceiver,
         ) async* {
           try {
-            final decimals = _tokenWallet!.symbol.decimals;
+            final tokenWallet = _nekotonService.tokenWallets
+                .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
+
+            final decimals = tokenWallet.symbol.decimals;
 
             final nanoTokens = tokens.fromTokens(decimals);
 
-            _message = await _tokenWallet!.prepareTransfer(
+            _message = await tokenWallet.prepareTransfer(
               expiration: defaultMessageExpiration,
               destination: destination,
               tokens: nanoTokens,
@@ -55,12 +68,12 @@ class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
             );
             feesBloc.add(TokenWalletFeesEvent.estimateFees(nanoTokens: nanoTokens, message: _message!));
 
-            final ownerContractState = await _tokenWallet!.ownerContractState;
+            final ownerContractState = await tokenWallet.ownerContractState;
             final ownerBalance = ownerContractState.balance;
 
-            final currency = _tokenWallet!.symbol.symbol;
+            final currency = tokenWallet.symbol.symbol;
 
-            final balance = await _tokenWallet!.balance;
+            final balance = await tokenWallet.balance;
 
             yield TokenWalletTransferState.messagePrepared(
               ownerBalance: ownerBalance.toTokens(),
@@ -77,8 +90,11 @@ class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
         send: (String password) async* {
           if (_message != null) {
             try {
+              final tokenWallet = _nekotonService.tokenWallets
+                  .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
+
               yield const TokenWalletTransferState.sending();
-              await _tokenWallet!.send(
+              await tokenWallet.send(
                 message: _message!,
                 password: password,
               );
@@ -94,7 +110,10 @@ class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
           yield const TokenWalletTransferState.password();
         },
         backToInitial: () async* {
-          final contractState = await _tokenWallet!.contractState;
+          final tokenWallet = _nekotonService.tokenWallets
+              .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
+
+          final contractState = await tokenWallet.contractState;
           final balance = contractState.balance;
           yield TokenWalletTransferState.initial(balance: balance.toTokens());
         },

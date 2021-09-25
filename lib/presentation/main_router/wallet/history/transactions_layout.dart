@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/ton_wallet/ton_wallet_transactions_bloc.dart';
 import '../../../../injection.dart';
@@ -10,13 +9,13 @@ import '../../../design/widget/preload_transactions_listener.dart';
 import 'transaction_holder.dart';
 
 class TransactionsLayout extends StatefulWidget {
-  final SubscriptionSubject subscriptionSubject;
+  final String address;
   final ScrollController controller;
   final Widget Function(String) placeholderBuilder;
 
   const TransactionsLayout({
     Key? key,
-    required this.subscriptionSubject,
+    required this.address,
     required this.controller,
     required this.placeholderBuilder,
   }) : super(key: key);
@@ -31,7 +30,7 @@ class _TransactionsLayoutState extends State<TransactionsLayout> {
   @override
   void initState() {
     super.initState();
-    bloc = getIt.get<TonWalletTransactionsBloc>(param1: widget.subscriptionSubject.value.tonWallet);
+    bloc = getIt.get<TonWalletTransactionsBloc>(param1: widget.address);
   }
 
   @override

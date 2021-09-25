@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/blocs/subscription/subscriptions_bloc.dart';
+import '../../../domain/blocs/account/current_accounts_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
 import 'history/wallet_modal_body.dart';
@@ -16,12 +16,12 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> {
   final modalController = PanelController(initialState: PanelState.hidden);
-  final subscriptionsBloc = getIt.get<SubscriptionsBloc>();
+  final currentAccountsBloc = getIt.get<CurrentAccountsBloc>();
 
   @override
   void dispose() {
     modalController.close();
-    subscriptionsBloc.close();
+    currentAccountsBloc.close();
     super.dispose();
   }
 
@@ -31,21 +31,21 @@ class _WalletPageState extends State<WalletPage> {
         child: ColoredBox(
           color: CrystalColor.background,
           child: AnimatedAppearance(
-            child: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
-              bloc: subscriptionsBloc,
+            child: BlocBuilder<CurrentAccountsBloc, CurrentAccountsState>(
+              bloc: currentAccountsBloc,
               builder: (context, state) => state.maybeWhen(
-                ready: (subscriptions, currentSubscription) => WalletScaffold(
+                ready: (accounts, currentAccount) => WalletScaffold(
                   modalController: modalController,
                   body: WalletBody(
-                    subscriptions: subscriptions,
-                    subscriptionSubject: currentSubscription,
+                    accounts: accounts,
+                    currentAccount: currentAccount,
                     modalController: modalController,
-                    bloc: subscriptionsBloc,
+                    bloc: currentAccountsBloc,
                   ),
-                  modalBody: (controller) => currentSubscription != null
+                  modalBody: (controller) => currentAccount != null
                       ? WalletModalBody(
-                          key: ValueKey(currentSubscription),
-                          subscriptionSubject: currentSubscription,
+                          key: ValueKey(currentAccount.address),
+                          address: currentAccount.address,
                           scrollController: controller,
                           onTabSelected: (_) => modalController.resetScroll(),
                         )

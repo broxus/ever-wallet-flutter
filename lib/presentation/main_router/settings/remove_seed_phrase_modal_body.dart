@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../domain/blocs/key/key_removement_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
 
 class RemoveSeedPhraseModalBody extends StatefulWidget {
-  final KeySubject keySubject;
+  final String publicKey;
 
   const RemoveSeedPhraseModalBody({
     Key? key,
-    required this.keySubject,
+    required this.publicKey,
   }) : super(key: key);
 
   static String get title => LocaleKeys.remove_seed_modal_title.tr();
@@ -56,7 +55,7 @@ class _RemoveSeedPhraseModalBodyState extends State<RemoveSeedPhraseModalBody> {
               const CrystalDivider(height: 24),
               CrystalButton(
                 text: LocaleKeys.remove_seed_modal_actions_remove.tr(),
-                onTap: () => bloc.add(KeyRemovementEvent.removeKey(widget.keySubject)),
+                onTap: () => bloc.add(KeyRemovementEvent.removeKey(widget.publicKey)),
               ),
             ],
           ),

@@ -16,7 +16,7 @@ part 'assets_addition_bloc.freezed.dart';
 class AssetsAdditionBloc extends Bloc<_Event, AssetsAdditionState> {
   final NekotonService _nekotonService;
   final TonAssetsRepository _tonAssetsRepository;
-  final SubscriptionSubject? _subscriptionSubject;
+  final String? _address;
   final _enabled = <TokenContractAsset>[];
   final _available = <TokenContractAsset>[];
   late final StreamSubscription _streamSubscription;
@@ -24,9 +24,11 @@ class AssetsAdditionBloc extends Bloc<_Event, AssetsAdditionState> {
   AssetsAdditionBloc(
     this._nekotonService,
     this._tonAssetsRepository,
-    @factoryParam this._subscriptionSubject,
+    @factoryParam this._address,
   ) : super(const AssetsAdditionState.initial()) {
-    _streamSubscription = _subscriptionSubject!.listen((_) => add(const _LocalEvent.loadAssets()));
+    _streamSubscription = _nekotonService.tokenWalletsStream
+        .map((e) => e.where((e) => e.owner == _address!).toList())
+        .listen((event) => add(_LocalEvent.loadAssets(event)));
   }
 
   @override
@@ -39,7 +41,7 @@ class AssetsAdditionBloc extends Bloc<_Event, AssetsAdditionState> {
   Stream<AssetsAdditionState> mapEventToState(_Event event) async* {
     if (event is _LocalEvent) {
       yield* event.when(
-        loadAssets: () async* {
+        loadAssets: (List<TokenWallet> tokenWallets) async* {
           try {
             final stream = _tonAssetsRepository.getTokenContractAssetsStream();
 
@@ -49,8 +51,6 @@ class AssetsAdditionBloc extends Bloc<_Event, AssetsAdditionState> {
                 ..addAll(item);
 
               _enabled.clear();
-
-              final tokenWallets = _subscriptionSubject!.value.tokenWallets;
 
               for (final tokenWallet in tokenWallets) {
                 final asset = _findOrCreateAsset(tokenWallet);
@@ -82,7 +82,7 @@ class AssetsAdditionBloc extends Bloc<_Event, AssetsAdditionState> {
           try {
             final enabled = [..._enabled];
 
-            final tokenWallets = _subscriptionSubject!.value.tokenWallets;
+            final tokenWallets = _nekotonService.tokenWallets.where((e) => e.owner == _address!);
 
             final tokenWalletsAddresses = tokenWallets.map((e) => e.symbol.rootTokenContract).toList();
 
@@ -97,11 +97,13 @@ class AssetsAdditionBloc extends Bloc<_Event, AssetsAdditionState> {
 
             for (final address in addressesForAddition) {
               await _nekotonService.addTokenWallet(
-                address: _subscriptionSubject!.value.address,
+                address: _address!,
                 rootTokenContract: address,
               );
-              final tokenWallet =
-                  _subscriptionSubject!.value.tokenWallets.firstWhere((e) => e.symbol.rootTokenContract == address);
+              final tokenWallet = await _nekotonService.tokenWalletsStream
+                  .map((e) => e.where((e) => e.owner == _address!).toList())
+                  .expand((e) => e)
+                  .firstWhere((e) => e.symbol.rootTokenContract == address);
 
               final asset = _findOrCreateAsset(tokenWallet);
               enabled.add(asset);
@@ -111,7 +113,7 @@ class AssetsAdditionBloc extends Bloc<_Event, AssetsAdditionState> {
               enabled.removeWhere((element) => element.address == address);
 
               await _nekotonService.removeTokenWallet(
-                address: _subscriptionSubject!.value.address,
+                address: _address!,
                 rootTokenContract: address,
               );
             }
@@ -134,18 +136,20 @@ class AssetsAdditionBloc extends Bloc<_Event, AssetsAdditionState> {
           try {
             final enabled = [..._enabled];
 
-            final tokenWallets = _subscriptionSubject!.value.tokenWallets;
+            final tokenWallets = _nekotonService.tokenWallets.where((e) => e.owner == _address!);
 
             final tokenWalletsAddresses = tokenWallets.map((e) => e.symbol.rootTokenContract);
 
             if (!enabled.map((e) => e.address).contains(address) && !tokenWalletsAddresses.contains(address)) {
               await _nekotonService.addTokenWallet(
-                address: _subscriptionSubject!.value.address,
+                address: _address!,
                 rootTokenContract: address,
               );
 
-              final tokenWallet =
-                  _subscriptionSubject!.value.tokenWallets.firstWhere((e) => e.symbol.rootTokenContract == address);
+              final tokenWallet = await _nekotonService.tokenWalletsStream
+                  .map((e) => e.where((e) => e.owner == _address!).toList())
+                  .expand((e) => e)
+                  .firstWhere((e) => e.symbol.rootTokenContract == address);
 
               final asset = _findOrCreateAsset(tokenWallet);
               enabled.add(asset);
@@ -197,7 +201,7 @@ abstract class _Event {}
 
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
-  const factory _LocalEvent.loadAssets() = _LoadAssets;
+  const factory _LocalEvent.loadAssets(List<TokenWallet> tokenWallets) = _LoadAssets;
 }
 
 @freezed

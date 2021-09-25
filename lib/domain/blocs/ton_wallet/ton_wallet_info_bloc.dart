@@ -6,28 +6,35 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
+import '../../services/nekoton_service.dart';
 
 part 'ton_wallet_info_bloc.freezed.dart';
 
 @injectable
 class TonWalletInfoBloc extends Bloc<TonWalletInfoEvent, TonWalletInfoState> {
-  final TonWallet? _tonWallet;
-  late final StreamSubscription _onStateChangedSubscription;
+  final NekotonService _nekotonService;
+  final String? _address;
+  StreamSubscription? _onStateChangedSubscription;
   ContractState? _contractState;
 
-  TonWalletInfoBloc(@factoryParam this._tonWallet) : super(const TonWalletInfoState.initial()) {
-    add(const TonWalletInfoEvent.updateInfo());
+  TonWalletInfoBloc(
+    this._nekotonService,
+    @factoryParam this._address,
+  ) : super(const TonWalletInfoState.initial()) {
+    _nekotonService.tonWalletsStream.expand((e) => e).firstWhere((e) => e.address == _address!).then((value) {
+      add(const TonWalletInfoEvent.updateInfo());
 
-    _onStateChangedSubscription = _tonWallet!.onStateChangedStream.listen(
-      (ContractState contractState) => add(
-        TonWalletInfoEvent.updateState(contractState),
-      ),
-    );
+      _onStateChangedSubscription = value.onStateChangedStream.listen(
+        (ContractState contractState) => add(
+          TonWalletInfoEvent.updateState(contractState),
+        ),
+      );
+    });
   }
 
   @override
   Future<void> close() {
-    _onStateChangedSubscription.cancel();
+    _onStateChangedSubscription?.cancel();
     return super.close();
   }
 
@@ -37,16 +44,18 @@ class TonWalletInfoBloc extends Bloc<TonWalletInfoEvent, TonWalletInfoState> {
       yield* event.when(
         updateInfo: () async* {
           try {
-            final contractState = await _tonWallet!.contractState;
+            final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
+            final contractState = await tonWallet.contractState;
             final balance = contractState.balance.toTokens();
             _contractState = contractState.copyWith(balance: balance);
 
             yield TonWalletInfoState.ready(
-              address: _tonWallet!.address,
+              address: tonWallet.address,
               contractState: _contractState!,
-              walletType: _tonWallet!.walletType,
-              details: _tonWallet!.details,
-              publicKey: _tonWallet!.publicKey,
+              walletType: tonWallet.walletType,
+              details: tonWallet.details,
+              publicKey: tonWallet.publicKey,
             );
           } on Exception catch (err, st) {
             logger.e(err, err, st);
@@ -55,15 +64,17 @@ class TonWalletInfoBloc extends Bloc<TonWalletInfoEvent, TonWalletInfoState> {
         },
         updateState: (ContractState contractState) async* {
           try {
+            final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
             final balance = contractState.balance.toTokens();
             _contractState = contractState.copyWith(balance: balance);
 
             yield TonWalletInfoState.ready(
-              address: _tonWallet!.address,
+              address: tonWallet.address,
               contractState: _contractState!,
-              walletType: _tonWallet!.walletType,
-              details: _tonWallet!.details,
-              publicKey: _tonWallet!.publicKey,
+              walletType: tonWallet.walletType,
+              details: tonWallet.details,
+              publicKey: tonWallet.publicKey,
             );
           } on Exception catch (err, st) {
             logger.e(err, err, st);

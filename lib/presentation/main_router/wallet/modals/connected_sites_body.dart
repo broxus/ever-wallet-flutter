@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/misc/connected_sites_bloc.dart';
 import '../../../../domain/models/connected_site.dart';
@@ -13,11 +12,11 @@ import '../../../../injection.dart';
 import '../../../design/design.dart';
 
 class ConnectedSitesBody extends StatefulWidget {
-  final SubscriptionSubject subscriptionSubject;
+  final String address;
 
   const ConnectedSitesBody({
     Key? key,
-    required this.subscriptionSubject,
+    required this.address,
   }) : super(key: key);
 
   static String get title => LocaleKeys.connected_sites_modal_title.tr();
@@ -32,7 +31,7 @@ class _ConnectedSitesBodyState extends State<ConnectedSitesBody> {
   @override
   void initState() {
     super.initState();
-    bloc = getIt.get<ConnectedSitesBloc>(param1: widget.subscriptionSubject.value.accountSubject);
+    bloc = getIt.get<ConnectedSitesBloc>(param1: widget.address);
   }
 
   @override

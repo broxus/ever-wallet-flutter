@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_deployment_bloc.dart';
@@ -18,20 +17,29 @@ part 'password_body.dart';
 part 'result_body.dart';
 
 class DeployWalletFlow extends StatefulWidget {
-  final TonWallet tonWallet;
-  const DeployWalletFlow._({required this.tonWallet});
+  final String address;
+  final String publicKey;
+
+  const DeployWalletFlow._({
+    required this.address,
+    required this.publicKey,
+  });
 
   static Future<void> start({
     required BuildContext context,
-    required TonWallet tonWallet,
+    required String address,
+    required String publicKey,
   }) =>
-      CrystalBottomSheet.show(
+      showCrystalBottomSheet(
         context,
         draggable: false,
         padding: EdgeInsets.zero,
         wrapIntoAnimatedSize: false,
         avoidBottomInsets: false,
-        body: DeployWalletFlow._(tonWallet: tonWallet),
+        body: DeployWalletFlow._(
+          address: address,
+          publicKey: publicKey,
+        ),
       );
 
   @override
@@ -45,7 +53,7 @@ class _DeployWalletFlowState extends State<DeployWalletFlow> {
   @override
   void initState() {
     super.initState();
-    bloc = getIt.get<TonWalletDeploymentBloc>(param1: widget.tonWallet);
+    bloc = getIt.get<TonWalletDeploymentBloc>(param1: widget.address);
   }
 
   @override
@@ -87,7 +95,7 @@ class _DeployWalletFlowState extends State<DeployWalletFlow> {
                   const DeployBody(),
                   Padding(
                     padding: context.keyboardInsets,
-                    child: PasswordBody(publicKey: widget.tonWallet.publicKey),
+                    child: PasswordBody(publicKey: widget.publicKey),
                   ),
                   const ResultBody(),
                 ],

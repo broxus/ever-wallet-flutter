@@ -8,7 +8,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
-import './../../router.gr.dart';
 import '../../../domain/blocs/application_flow_bloc.dart';
 import '../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../domain/blocs/key/keys_bloc.dart';
@@ -39,7 +38,7 @@ class SettingsPage extends StatefulWidget {
   _SettingsPageState createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMixin {
+class _SettingsPageState extends State<SettingsPage> {
   final bloc = getIt.get<KeysBloc>();
   final scrollController = ScrollController();
 
@@ -53,23 +52,20 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: context.safeArea.bottom),
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            backgroundColor: CrystalColor.iosBackground,
-            body: SafeArea(
-              bottom: false,
-              child: MediaQuery.removePadding(
-                context: context,
-                removeBottom: true,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    buildTitle(),
-                    buildBody(),
-                  ],
-                ),
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          backgroundColor: CrystalColor.iosBackground,
+          body: SafeArea(
+            bottom: false,
+            child: MediaQuery.removePadding(
+              context: context,
+              removeBottom: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  buildTitle(),
+                  buildBody(),
+                ],
               ),
             ),
           ),
@@ -127,8 +123,8 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
       );
 
   Widget buildSettingsItemsList({
-    required Map<KeySubject, List<KeySubject>?> keys,
-    KeySubject? currentKey,
+    required Map<KeyStoreEntry, List<KeyStoreEntry>?> keys,
+    KeyStoreEntry? currentKey,
   }) =>
       Column(
         children: [
@@ -143,7 +139,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
                     context.router.push(const NewSeedRouterRoute());
                   },
                   onSelect: (seed) {
-                    bloc.add(KeysEvent.setCurrentKey(seed));
+                    bloc.add(KeysEvent.setCurrentKey(seed.publicKey));
                   },
                   showAddAction: true,
                 ),
@@ -151,17 +147,17 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
           ),
           buildSection(
             title: LocaleKeys.settings_screen_sections_current_seed_preferences_title.tr(
-              args: [if (currentKey != null) currentKey.value.publicKey else 'Seed'],
+              args: [if (currentKey != null) currentKey.publicKey else 'Seed'],
             ),
             children: [
               buildSectionAction(
                 title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed.tr(),
                 onTap: keys.isNotEmpty && currentKey != null
                     ? () {
-                        CrystalBottomSheet.show(
+                        showCrystalBottomSheet(
                           context,
                           title: ExportSeedPhraseModalBody.title,
-                          body: ExportSeedPhraseModalBody(keySubject: currentKey),
+                          body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
                         );
                       }
                     : null,
@@ -170,10 +166,10 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
                 title: LocaleKeys.settings_screen_sections_current_seed_preferences_remove_seed.tr(),
                 onTap: keys.isNotEmpty && currentKey != null
                     ? () {
-                        CrystalBottomSheet.show(
+                        showCrystalBottomSheet(
                           context,
                           title: RemoveSeedPhraseModalBody.title,
-                          body: RemoveSeedPhraseModalBody(keySubject: currentKey),
+                          body: RemoveSeedPhraseModalBody(publicKey: currentKey.publicKey),
                           expand: false,
                           avoidBottomInsets: false,
                           hasTitleDivider: true,
@@ -185,33 +181,31 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
                 title: LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
                 onTap: keys.isNotEmpty && currentKey != null
                     ? () {
-                        CrystalBottomSheet.show(
+                        showCrystalBottomSheet(
                           context,
                           title: LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
-                          body: ChangeSeedPhrasePasswordModalBody(keySubject: currentKey),
+                          body: ChangeSeedPhrasePasswordModalBody(publicKey: currentKey.publicKey),
                         );
                       }
                     : null,
               ),
-              if (currentKey != null &&
-                  currentKey.value.isNotLegacy &&
-                  currentKey.value.publicKey == currentKey.value.masterKey)
+              if (currentKey != null && currentKey.isNotLegacy && currentKey.publicKey == currentKey.masterKey)
                 buildSectionAction(
                   title: LocaleKeys.settings_screen_sections_current_seed_preferences_derive_key.tr(),
                   onTap: keys.isNotEmpty
                       ? () async {
-                          final name = await CrystalBottomSheet.show<String?>(
+                          final name = await showCrystalBottomSheet<String?>(
                             context,
                             title: NameNewKeyModalBody.title,
                             body: const NameNewKeyModalBody(),
                           );
 
                           if (name != null) {
-                            CrystalBottomSheet.show(
+                            showCrystalBottomSheet(
                               context,
                               title: DeriveKeyModalBody.title,
                               body: DeriveKeyModalBody(
-                                keySubject: currentKey,
+                                publicKey: currentKey.publicKey,
                                 name: name.isNotEmpty ? name : null,
                               ),
                             );
@@ -223,10 +217,10 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
                 title: LocaleKeys.settings_screen_sections_current_seed_preferences_rename_key.tr(),
                 onTap: keys.isNotEmpty && currentKey != null
                     ? () {
-                        CrystalBottomSheet.show(
+                        showCrystalBottomSheet(
                           context,
                           title: LocaleKeys.rename_key_modal_title.tr(),
-                          body: RenameKeyModalBody(keySubject: currentKey),
+                          body: RenameKeyModalBody(publicKey: currentKey.publicKey),
                         );
                       }
                     : null,
@@ -242,7 +236,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
                     ? buildSectionAction(
                         title: LocaleKeys.biometry_title.tr(),
                         onTap: () {
-                          CrystalBottomSheet.show(
+                          showCrystalBottomSheet(
                             context,
                             title: LocaleKeys.biometry_title.tr(),
                             body: const BiometryModalBody(),
@@ -299,9 +293,9 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
       );
 
   Widget buildSeedsList({
-    required KeySubject? selectedSeed,
-    required Map<KeySubject, List<KeySubject>?> seeds,
-    required Function(KeySubject) onSelect,
+    KeyStoreEntry? selectedSeed,
+    required Map<KeyStoreEntry, List<KeyStoreEntry>?> seeds,
+    required Function(KeyStoreEntry) onSelect,
     required Function() onAdd,
     required bool showAddAction,
   }) {
@@ -362,9 +356,9 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
   }
 
   Widget buildSeedItem({
-    required KeySubject? selectedSeed,
-    required KeySubject seed,
-    required Function(KeySubject) onSelect,
+    KeyStoreEntry? selectedSeed,
+    required KeyStoreEntry seed,
+    required Function(KeyStoreEntry) onSelect,
     bool isChild = false,
   }) {
     Widget? child;
@@ -384,7 +378,7 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
           onSelect(seed);
         }
       },
-      title: seed.value.name,
+      title: seed.name,
       icon: child,
       isChild: isChild,
     );
@@ -439,7 +433,6 @@ class _SettingsPageState extends State<SettingsPage> with TickerProviderStateMix
     childrenWithDividers.add(SettingsPage._longDivider);
 
     return AnimatedSize(
-      vsync: this,
       duration: kThemeAnimationDuration,
       alignment: Alignment.topCenter,
       child: Column(

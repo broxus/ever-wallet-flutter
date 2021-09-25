@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import '../../repositories/biometry_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
+import '../../repositories/biometry_repository.dart';
 import '../../services/nekoton_service.dart';
 
 part 'key_update_bloc.freezed.dart';
@@ -25,16 +25,18 @@ class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
   Stream<KeyUpdateState> mapEventToState(KeyUpdateEvent event) async* {
     yield* event.when(
       changePassword: (
-        KeySubject keySubject,
+        String publicKey,
         String oldPassword,
         String newPassword,
       ) async* {
         try {
+          final key = _nekotonService.keys.firstWhere((e) => e.publicKey == publicKey);
+
           late final UpdateKeyInput updateKeyInput;
 
-          if (keySubject.value.isLegacy) {
+          if (key.isLegacy) {
             updateKeyInput = EncryptedKeyUpdateParams.changePassword(
-              publicKey: keySubject.value.publicKey,
+              publicKey: key.publicKey,
               oldPassword: Password.explicit(
                 password: oldPassword,
                 cacheBehavior: const PasswordCacheBehavior.remove(),
@@ -46,7 +48,7 @@ class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
             );
           } else {
             updateKeyInput = DerivedKeyUpdateParams.changePassword(
-              masterKey: keySubject.value.masterKey,
+              masterKey: key.masterKey,
               oldPassword: Password.explicit(
                 password: oldPassword,
                 cacheBehavior: const PasswordCacheBehavior.remove(),
@@ -58,10 +60,10 @@ class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
             );
           }
 
-          final key = await _nekotonService.updateKey(updateKeyInput);
+          final updatedKey = await _nekotonService.updateKey(updateKeyInput);
 
           await _biometryRepository.setKeyPassword(
-            publicKey: key.value.publicKey,
+            publicKey: updatedKey.publicKey,
             password: newPassword,
           );
 
@@ -72,21 +74,23 @@ class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
         }
       },
       rename: (
-        KeySubject keySubject,
+        String publicKey,
         String name,
       ) async* {
         try {
+          final key = _nekotonService.keys.firstWhere((e) => e.publicKey == publicKey);
+
           late final UpdateKeyInput updateKeyInput;
 
-          if (keySubject.value.isLegacy) {
+          if (key.isLegacy) {
             updateKeyInput = EncryptedKeyUpdateParams.rename(
-              publicKey: keySubject.value.publicKey,
+              publicKey: key.publicKey,
               name: name,
             );
           } else {
             updateKeyInput = DerivedKeyUpdateParams.renameKey(
-              masterKey: keySubject.value.masterKey,
-              publicKey: keySubject.value.publicKey,
+              masterKey: key.masterKey,
+              publicKey: key.publicKey,
               name: name,
             );
           }
@@ -106,13 +110,13 @@ class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
 @freezed
 class KeyUpdateEvent with _$KeyUpdateEvent {
   const factory KeyUpdateEvent.changePassword({
-    required KeySubject keySubject,
+    required String publicKey,
     required String oldPassword,
     required String newPassword,
   }) = _ChangePassword;
 
   const factory KeyUpdateEvent.rename({
-    required KeySubject keySubject,
+    required String publicKey,
     required String name,
   }) = _Rename;
 }

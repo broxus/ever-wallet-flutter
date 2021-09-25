@@ -275,7 +275,7 @@ class _CrystalValueSelectorState<T> extends State<CrystalValueSelector<T>> {
     final selectedIndex = math.max(widget.options.indexOf(widget.selectedValue), 0);
     final scrollController = FixedExtentScrollController(initialItem: selectedIndex);
 
-    await CrystalBottomSheet.show(
+    await showCrystalBottomSheet(
       context,
       expand: false,
       body: SafeArea(

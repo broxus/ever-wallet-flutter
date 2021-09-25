@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../domain/blocs/subscription/assets_addition_bloc.dart';
+import '../../../../../domain/blocs/account/assets_addition_bloc.dart';
 import '../../../../../domain/models/token_contract_asset.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
@@ -10,11 +9,11 @@ import 'assets_layout.dart';
 import 'new_asset_layout.dart';
 
 class AddAssetModal extends StatefulWidget {
-  final SubscriptionSubject subscriptionSubject;
+  final String address;
 
   const AddAssetModal({
     Key? key,
-    required this.subscriptionSubject,
+    required this.address,
   }) : super(key: key);
 
   @override
@@ -30,7 +29,7 @@ class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateM
   @override
   void initState() {
     super.initState();
-    bloc = getIt.get<AssetsAdditionBloc>(param1: widget.subscriptionSubject);
+    bloc = getIt.get<AssetsAdditionBloc>(param1: widget.address);
   }
 
   @override

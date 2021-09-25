@@ -11,12 +11,12 @@ import 'add_account_flow/add_account_name.dart';
 
 class CreatingWalletBody extends StatefulWidget {
   final PanelController modalController;
-  final KeySubject keySubject;
+  final String publicKey;
 
   const CreatingWalletBody({
     Key? key,
     required this.modalController,
-    required this.keySubject,
+    required this.publicKey,
   }) : super(key: key);
 
   @override
@@ -30,7 +30,7 @@ class _CreatingWalletBodyState extends State<CreatingWalletBody> {
   @override
   void initState() {
     super.initState();
-    accountCreationBloc = getIt.get<AccountCreationBloc>(param1: widget.keySubject);
+    accountCreationBloc = getIt.get<AccountCreationBloc>(param1: widget.key);
   }
 
   @override
@@ -82,7 +82,7 @@ class _CreatingWalletBodyState extends State<CreatingWalletBody> {
             const CrystalDivider(height: 16),
             CrystalButton(
               onTap: () async {
-                final name = await CrystalBottomSheet.show<String>(
+                final name = await showCrystalBottomSheet<String>(
                   context,
                   title: AddAccountName.title,
                   body: AddAccountName(
@@ -93,6 +93,7 @@ class _CreatingWalletBodyState extends State<CreatingWalletBody> {
                 if (name != null) {
                   accountCreationBloc.add(AccountCreationEvent.createAccount(
                     name: name,
+                    publicKey: widget.publicKey,
                     walletType: value ?? options.first,
                   ));
                 }

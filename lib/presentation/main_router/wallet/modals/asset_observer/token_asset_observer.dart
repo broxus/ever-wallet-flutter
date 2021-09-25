@@ -16,29 +16,30 @@ import '../receive_modal.dart';
 import '../token_send_transaction_flow/token_send_transaction_flow.dart';
 
 class TokenAssetObserver extends StatefulWidget {
-  final TokenWallet tokenWallet;
-  final String? logoURI;
+  final String owner;
+  final String rootTokenContract;
 
   const TokenAssetObserver._({
     Key? key,
-    required this.tokenWallet,
-    required this.logoURI,
+    required this.owner,
+    required this.rootTokenContract,
   }) : super(key: key);
 
   static Future<void> open({
     required BuildContext context,
-    required TokenWallet tokenWallet,
-    required String? logoURI,
+    required String owner,
+    required String rootTokenContract,
+    String? logoURI,
   }) =>
-      CrystalBottomSheet.show(
+      showCrystalBottomSheet(
         context,
         expand: false,
         padding: EdgeInsets.zero,
         avoidBottomInsets: false,
         barrierColor: CrystalColor.modalBackground.withOpacity(0.7),
         body: TokenAssetObserver._(
-          tokenWallet: tokenWallet,
-          logoURI: logoURI,
+          owner: owner,
+          rootTokenContract: rootTokenContract,
         ),
       );
 
@@ -50,21 +51,18 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
   final _historyScrollController = ScrollController();
   late final TokenWalletInfoBloc tokenWalletInfoBloc;
   late final TokenWalletTransactionsBloc tokenWalletTransactionsBloc;
-  late final Widget icon;
 
   @override
   void initState() {
     super.initState();
     tokenWalletInfoBloc = getIt.get<TokenWalletInfoBloc>(
-      param1: widget.tokenWallet,
-      param2: widget.logoURI,
+      param1: widget.owner,
+      param2: widget.rootTokenContract,
     );
     tokenWalletTransactionsBloc = getIt.get<TokenWalletTransactionsBloc>(
-      param1: widget.tokenWallet,
+      param1: widget.owner,
+      param2: widget.rootTokenContract,
     );
-    icon = widget.logoURI != null
-        ? getTokenAssetIcon(widget.logoURI!)
-        : getRandomTokenAssetIcon(widget.tokenWallet.symbol.name.hashCode);
   }
 
   @override
@@ -79,15 +77,17 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
   Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfoState>(
         bloc: tokenWalletInfoBloc,
         builder: (context, state) => state.maybeWhen(
-          ready: (logoURI, address, balance, contractState, owner, symbol, version) => Column(
+          ready: (logoURI, address, balance, contractState, owner, symbol, version, ownerPublicKey) => Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _header(
+                logoURI: logoURI,
                 owner: owner,
                 balance: balance,
                 contractState: contractState,
                 symbol: symbol,
+                ownerPublicKey: ownerPublicKey,
               ),
               Flexible(
                 child: _history(
@@ -101,10 +101,12 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
       );
 
   Widget _header({
+    required String? logoURI,
     required String owner,
     required String balance,
     required ContractState contractState,
     required Symbol symbol,
+    required String ownerPublicKey,
   }) =>
       Container(
         padding: const EdgeInsets.symmetric(
@@ -122,7 +124,7 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
                   color: Colors.transparent,
                   icon: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: icon,
+                    child: logoURI != null ? getTokenAssetIcon(logoURI) : getRandomTokenAssetIcon(symbol.name.hashCode),
                   ),
                 ),
                 const CrystalDivider(width: 16),
@@ -163,7 +165,9 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
             const CrystalDivider(height: 24),
             _headerActions(
               owner: owner,
+              symbol: symbol,
               isDeployed: contractState.isDeployed,
+              ownerPublicKey: ownerPublicKey,
             ),
           ],
         ),
@@ -171,7 +175,9 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
 
   Widget _headerActions({
     required String owner,
+    required Symbol symbol,
     required bool isDeployed,
+    required String ownerPublicKey,
   }) =>
       AnimatedSwitcher(
         duration: kThemeAnimationDuration,
@@ -181,7 +187,7 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
               child: _assetButton(
                 asset: Assets.images.iconReceive.path,
                 title: LocaleKeys.actions_receive.tr(),
-                onTap: () => CrystalBottomSheet.show(
+                onTap: () => showCrystalBottomSheet(
                   context,
                   body: ReceiveModalBody(
                     textAsTitle: true,
@@ -195,7 +201,9 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
               child: _assetButton(
                 onTap: () => TokenSendTransactionFlow.start(
                   context: context,
-                  tokenWallet: widget.tokenWallet,
+                  owner: owner,
+                  rootTokenContract: symbol.rootTokenContract,
+                  ownerPublicKey: ownerPublicKey,
                 ),
                 asset: Assets.images.iconSend.path,
                 title: LocaleKeys.actions_send.tr(),

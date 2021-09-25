@@ -14,12 +14,12 @@ import '../../../design/widget/crystal_scaffold.dart';
 import '../../../router.gr.dart';
 
 class NewAccountTypePage extends StatefulWidget {
-  final KeySubject keySubject;
+  final String publicKey;
   final String accountName;
 
   const NewAccountTypePage({
     Key? key,
-    required this.keySubject,
+    required this.publicKey,
     required this.accountName,
   }) : super(key: key);
 
@@ -29,12 +29,12 @@ class NewAccountTypePage extends StatefulWidget {
 
 class _NewAccountTypePageState extends State<NewAccountTypePage> {
   final selectedWalletType = ValueNotifier<WalletType?>(null);
-  late final AccountCreationBloc accountCreationBloc;
+  final AccountCreationBloc accountCreationBloc = getIt.get<AccountCreationBloc>();
 
   @override
   void initState() {
     super.initState();
-    accountCreationBloc = getIt.get<AccountCreationBloc>(param1: widget.keySubject);
+    accountCreationBloc.add(AccountCreationEvent.showOptions(widget.publicKey));
   }
 
   @override
@@ -122,6 +122,7 @@ class _NewAccountTypePageState extends State<NewAccountTypePage> {
   void onConfirm(WalletType walletType) {
     accountCreationBloc.add(AccountCreationEvent.createAccount(
       name: widget.accountName,
+      publicKey: widget.publicKey,
       walletType: walletType,
     ));
 

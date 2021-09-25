@@ -1,23 +1,21 @@
-import 'package:crystal/presentation/design/utils.dart';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../domain/models/wallet_transaction.dart';
 import '../../../design/design.dart';
+import '../../../design/utils.dart';
 import '../modals/transaction_observer/transaction_observer.dart';
 
 class WalletTransactionHolder extends StatelessWidget {
   final WalletTransaction transaction;
-  Widget? icon;
-  final String? data;
+  final Widget? icon;
 
-  WalletTransactionHolder({
+  const WalletTransactionHolder({
     Key? key,
     required this.transaction,
     this.icon,
-  })  : data = transaction.maybeMap(ordinary: (v) => v.data, orElse: () => null),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Material(
@@ -74,13 +72,13 @@ class WalletTransactionHolder extends StatelessWidget {
   Widget _getValueTitle() {
     return Text(
       transaction.isOutgoing
-          ? "${formatValue(transaction.value)} ${transaction.currency}"
-          : "- ${formatValue(transaction.value)} ${transaction.currency}",
+          ? "- ${formatValue(transaction.value)} ${transaction.currency}"
+          : "${formatValue(transaction.value)} ${transaction.currency}",
       softWrap: false,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
-        color: transaction.isOutgoing ? CrystalColor.success : CrystalColor.fontDark,
+        color: transaction.isOutgoing ? CrystalColor.fontDark : CrystalColor.success,
         fontWeight: FontWeight.w600,
       ),
     );

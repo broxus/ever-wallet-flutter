@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
@@ -20,12 +19,12 @@ class AccountRenamingBloc extends Bloc<AccountRenamingEvent, AccountRenamingStat
   Stream<AccountRenamingState> mapEventToState(AccountRenamingEvent event) async* {
     yield* event.when(
       rename: (
-        AccountSubject accountSubject,
+        String address,
         String name,
       ) async* {
         try {
           await _nekotonService.renameAccount(
-            address: accountSubject.value.address,
+            address: address,
             name: name,
           );
 
@@ -42,7 +41,7 @@ class AccountRenamingBloc extends Bloc<AccountRenamingEvent, AccountRenamingStat
 @freezed
 class AccountRenamingEvent with _$AccountRenamingEvent {
   const factory AccountRenamingEvent.rename({
-    required AccountSubject accountSubject,
+    required String address,
     required String name,
   }) = _Rename;
 }

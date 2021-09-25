@@ -1,18 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/account/account_removement_bloc.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 
 class AccountRemovementBody extends StatefulWidget {
-  final SubscriptionSubject subscriptionSubject;
+  final String address;
 
   const AccountRemovementBody({
     Key? key,
-    required this.subscriptionSubject,
+    required this.address,
   }) : super(key: key);
 
   static String get title => LocaleKeys.actions_remove_account.tr();
@@ -56,8 +55,7 @@ class _AccountRemovementBodyState extends State<AccountRemovementBody> {
                 const CrystalDivider(height: 24),
                 CrystalButton(
                   text: LocaleKeys.actions_remove_account.tr(),
-                  onTap: () =>
-                      bloc.add(AccountRemovementEvent.removeAccount(widget.subscriptionSubject.value.accountSubject)),
+                  onTap: () => bloc.add(AccountRemovementEvent.removeAccount(widget.address)),
                 ),
                 const CrystalDivider(height: 24),
               ],

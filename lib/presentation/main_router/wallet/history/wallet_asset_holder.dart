@@ -1,7 +1,7 @@
-import 'package:crystal/presentation/design/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../design/design.dart';
+import '../../../design/utils.dart';
 
 class WalletAssetHolder extends StatelessWidget {
   final String name;

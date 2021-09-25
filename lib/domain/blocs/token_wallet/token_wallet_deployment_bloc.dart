@@ -7,15 +7,22 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
 import '../../constants/message_expiration.dart';
+import '../../services/nekoton_service.dart';
 
 part 'token_wallet_deployment_bloc.freezed.dart';
 
 @injectable
 class TokenWalletDeploymentBloc extends Bloc<TokenWalletDeploymentEvent, TokenWalletDeploymentState> {
-  final TokenWallet? _tokenWallet;
+  final NekotonService _nekotonService;
+  final String? _owner;
+  final String? _rootTokenContract;
   UnsignedMessage? _message;
 
-  TokenWalletDeploymentBloc(@factoryParam this._tokenWallet) : super(const TokenWalletDeploymentState.initial()) {
+  TokenWalletDeploymentBloc(
+    this._nekotonService,
+    @factoryParam this._owner,
+    @factoryParam this._rootTokenContract,
+  ) : super(const TokenWalletDeploymentState.initial()) {
     add(const TokenWalletDeploymentEvent.prepareDeploy());
   }
 
@@ -24,12 +31,15 @@ class TokenWalletDeploymentBloc extends Bloc<TokenWalletDeploymentEvent, TokenWa
     yield* event.when(
       prepareDeploy: () async* {
         try {
-          _message = await _tokenWallet!.prepareDeploy(defaultMessageExpiration);
+          final tokenWallet = _nekotonService.tokenWallets
+              .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
 
-          final feesValue = await _tokenWallet!.estimateFees(_message!);
+          _message = await tokenWallet.prepareDeploy(defaultMessageExpiration);
+
+          final feesValue = await tokenWallet.estimateFees(_message!);
           final fees = feesValue.toString();
 
-          final contractState = await _tokenWallet!.ownerContractState;
+          final contractState = await tokenWallet.ownerContractState;
           final balance = contractState.balance;
           final balanceValue = int.parse(balance);
 
@@ -50,19 +60,22 @@ class TokenWalletDeploymentBloc extends Bloc<TokenWalletDeploymentEvent, TokenWa
         }
       },
       deploy: (String password) async* {
-        if (_message != null) {
-          yield const TokenWalletDeploymentState.sending();
-          try {
-            await _tokenWallet!.send(
+        try {
+          final tokenWallet = _nekotonService.tokenWallets
+              .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
+
+          if (_message != null) {
+            yield const TokenWalletDeploymentState.sending();
+            await tokenWallet.send(
               message: _message!,
               password: password,
             );
 
             yield const TokenWalletDeploymentState.success();
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield TokenWalletDeploymentState.error(err.toString());
           }
+        } on Exception catch (err, st) {
+          logger.e(err, err, st);
+          yield TokenWalletDeploymentState.error(err.toString());
         }
       },
       goToPassword: () async* {

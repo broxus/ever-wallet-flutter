@@ -1,4 +1,3 @@
-import 'package:crystal/presentation/design/utils.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -6,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../../domain/models/wallet_transaction.dart';
 import '../../../../../domain/utils/explorer.dart';
 import '../../../../design/design.dart';
+import '../../../../design/utils.dart';
 import '../../../../design/widget/crystal_bottom_sheet.dart';
 
 class TransactionObserver extends StatefulWidget {
@@ -20,7 +20,7 @@ class TransactionObserver extends StatefulWidget {
     required BuildContext context,
     required WalletTransaction transaction,
   }) =>
-      CrystalBottomSheet.show(
+      showCrystalBottomSheet(
         context,
         expand: false,
         barrierColor: CrystalColor.modalBackground.withOpacity(0.7),

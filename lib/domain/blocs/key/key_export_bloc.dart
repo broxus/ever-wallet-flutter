@@ -18,15 +18,17 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
   Stream<KeyExportState> mapEventToState(KeyExportEvent event) async* {
     yield* event.when(
       exportKey: (
-        KeySubject keySubject,
+        String publicKey,
         String password,
       ) async* {
         try {
+          final key = _nekotonService.keys.firstWhere((e) => e.publicKey == publicKey);
+
           late final ExportKeyInput exportKeyInput;
 
-          if (keySubject.value.isLegacy) {
+          if (key.isLegacy) {
             exportKeyInput = EncryptedKeyPassword(
-              publicKey: keySubject.value.publicKey,
+              publicKey: key.publicKey,
               password: Password.explicit(
                 password: password,
                 cacheBehavior: const PasswordCacheBehavior.remove(),
@@ -34,7 +36,7 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
             );
           } else {
             exportKeyInput = DerivedKeyExportParams(
-              masterKey: keySubject.value.masterKey,
+              masterKey: key.masterKey,
               password: Password.explicit(
                 password: password,
                 cacheBehavior: const PasswordCacheBehavior.remove(),
@@ -63,7 +65,7 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
 @freezed
 class KeyExportEvent with _$KeyExportEvent {
   const factory KeyExportEvent.exportKey({
-    required KeySubject keySubject,
+    required String publicKey,
     required String password,
   }) = _ExportKey;
 }

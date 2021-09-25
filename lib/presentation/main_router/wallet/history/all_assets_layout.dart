@@ -1,22 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../domain/blocs/subscription/assets_bloc.dart';
+import '../../../../domain/blocs/subscriptions/assets_bloc.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import 'token_wallet_asset_holder.dart';
 import 'ton_wallet_asset_holder.dart';
 
 class AllAssetsLayout extends StatefulWidget {
-  final SubscriptionSubject subscriptionSubject;
+  final String address;
   final ScrollController controller;
   final Widget Function(String) placeholderBuilder;
 
   const AllAssetsLayout({
     Key? key,
-    required this.subscriptionSubject,
+    required this.address,
     required this.controller,
     required this.placeholderBuilder,
   }) : super(key: key);
@@ -31,7 +30,7 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
   @override
   void initState() {
     super.initState();
-    bloc = getIt.get<AssetsBloc>(param1: widget.subscriptionSubject);
+    bloc = getIt.get<AssetsBloc>(param1: widget.address);
   }
 
   @override
@@ -54,8 +53,8 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
               controller: widget.controller,
               children: [
                 TonWalletAssetHolder(
-                  key: ValueKey(tonWallet),
-                  tonWallet: tonWallet,
+                  key: ValueKey(tonWallet.address),
+                  address: tonWallet.address,
                 ),
                 ...tokenWallets
                     .map((tokenWallet) => Column(
@@ -67,9 +66,9 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
                               color: CrystalColor.divider,
                             ),
                             TokenWalletAssetHolder(
-                              key: ValueKey(tokenWallet.item1),
-                              tokenWallet: tokenWallet.item1,
-                              logoURI: tokenWallet.item2,
+                              key: ValueKey('${tokenWallet.item1.owner}_${tokenWallet.item1.symbol.rootTokenContract}'),
+                              owner: tokenWallet.item1.owner,
+                              rootTokenContract: tokenWallet.item1.symbol.rootTokenContract,
                             ),
                           ],
                         ))

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../domain/blocs/key/key_export_bloc.dart';
 import '../../../injection.dart';
@@ -9,11 +8,11 @@ import '../../router.gr.dart';
 import '../widgets/input_password_modal_body.dart';
 
 class ExportSeedPhraseModalBody extends StatefulWidget {
-  final KeySubject keySubject;
+  final String publicKey;
 
   const ExportSeedPhraseModalBody({
     Key? key,
-    required this.keySubject,
+    required this.publicKey,
   }) : super(key: key);
 
   static String get title => LocaleKeys.export_seed_modal_title.tr();
@@ -45,10 +44,10 @@ class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
         ),
         child: InputPasswordModalBody(
           onSubmit: (password) => bloc.add(KeyExportEvent.exportKey(
-            keySubject: widget.keySubject,
+            publicKey: widget.publicKey,
             password: password,
           )),
-          publicKey: widget.keySubject.value.publicKey,
+          publicKey: widget.publicKey,
         ),
       );
 }

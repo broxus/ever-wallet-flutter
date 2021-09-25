@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../domain/repositories/user_preferences_repository.dart';
 import '../../domain/services/nekoton_service.dart';
 import '../../logger.dart';
 
@@ -9,139 +10,132 @@ import '../../logger.dart';
 @LazySingleton(as: NekotonService)
 class NekotonServiceImpl implements NekotonService {
   late final Nekoton _nekoton;
-  late final UserPreferencesRepository _userPreferencesRepository;
 
-  NekotonServiceImpl._(
-    this._userPreferencesRepository,
-  );
+  NekotonServiceImpl._();
 
   @factoryMethod
-  static Future<NekotonServiceImpl> create(
-    UserPreferencesRepository userPreferencesRepository,
-  ) async {
-    final nekotonService = NekotonServiceImpl._(userPreferencesRepository);
+  static Future<NekotonServiceImpl> create() async {
+    final nekotonService = NekotonServiceImpl._();
     await nekotonService._initialize();
     return nekotonService;
   }
 
   @override
-  Stream<List<KeySubject>> get keysStream => _nekoton.keysStream;
+  Stream<List<KeyStoreEntry>> get keysStream => _nekoton.keystoreController.keysStream;
 
   @override
-  Stream<List<AccountSubject>> get accountsStream => _nekoton.accountsStream;
+  Stream<List<AssetsList>> get accountsStream => _nekoton.accountsStorageController.accountsStream;
 
   @override
-  Stream<List<SubscriptionSubject>> get subscriptionsStream => _nekoton.subscriptionsStream;
+  Stream<List<TonWallet>> get tonWalletsStream => _nekoton.subscriptionsController.tonWalletsStream;
 
   @override
-  Stream<KeySubject?> get currentKeyStream => _nekoton.currentKeyStream;
+  Stream<List<TokenWallet>> get tokenWalletsStream => _nekoton.subscriptionsController.tokenWalletsStream;
 
   @override
-  Stream<bool> get keysPresenceStream => _nekoton.keysPresenceStream;
+  Stream<KeyStoreEntry?> get currentKeyStream => _nekoton.keystoreController.currentKeyStream;
 
   @override
-  Stream<bool> get accountsPresenceStream => _nekoton.accountsPresenceStream;
+  Stream<bool> get keysPresenceStream => _nekoton.keystoreController.keysStream.transform<bool>(
+        StreamTransformer.fromHandlers(
+          handleData: (data, sink) => sink.add(data.isNotEmpty),
+        ),
+      );
 
   @override
-  Stream<bool> get subscriptionsPresenceStream => _nekoton.subscriptionsPresenceStream;
+  List<KeyStoreEntry> get keys => _nekoton.keystoreController.keys;
 
   @override
-  List<KeySubject> get keys => _nekoton.keys;
+  List<AssetsList> get accounts => _nekoton.accountsStorageController.accounts;
 
   @override
-  List<AccountSubject> get accounts => _nekoton.accounts;
+  List<TonWallet> get tonWallets => _nekoton.subscriptionsController.tonWallets;
 
   @override
-  List<SubscriptionSubject> get subscriptions => _nekoton.subscriptions;
+  List<TokenWallet> get tokenWallets => _nekoton.subscriptionsController.tokenWallets;
 
   @override
-  KeySubject? get currentKey => _nekoton.currentKey;
+  KeyStoreEntry? get currentKey => _nekoton.keystoreController.currentKey;
 
   @override
-  Future<void> setCurrentKey(KeySubject? currentKey) async {
-    final currentPublicKey = currentKey?.value.publicKey;
-
-    await _userPreferencesRepository.setCurrentPublicKey(currentPublicKey);
-
-    return _nekoton.setCurrentKey(currentKey);
-  }
+  set currentKey(KeyStoreEntry? currentKey) => _nekoton.keystoreController.currentKey = currentKey;
 
   @override
-  Future<KeySubject> addKey(CreateKeyInput createKeyInput) => _nekoton.addKey(createKeyInput);
+  String get networkGroup => _nekoton.connectionController.transport.connectionData.group;
 
   @override
-  Future<KeySubject> updateKey(UpdateKeyInput updateKeyInput) => _nekoton.updateKey(updateKeyInput);
+  Future<KeyStoreEntry> addKey(CreateKeyInput createKeyInput) => _nekoton.keystoreController.addKey(createKeyInput);
 
   @override
-  Future<ExportKeyOutput> exportKey(ExportKeyInput exportKeyInput) => _nekoton.exportKey(exportKeyInput);
+  Future<KeyStoreEntry> updateKey(UpdateKeyInput updateKeyInput) =>
+      _nekoton.keystoreController.updateKey(updateKeyInput);
 
   @override
-  Future<bool> checkKeyPassword(SignInput signInput) => _nekoton.checkKeyPassword(signInput);
+  Future<ExportKeyOutput> exportKey(ExportKeyInput exportKeyInput) =>
+      _nekoton.keystoreController.exportKey(exportKeyInput);
 
   @override
-  Future<KeySubject?> removeKey(String publicKey) => _nekoton.removeKey(publicKey);
+  Future<bool> checkKeyPassword(SignInput signInput) => _nekoton.keystoreController.checkKeyPassword(signInput);
 
   @override
-  Future<void> clearKeystore() => _nekoton.clearKeystore();
+  Future<KeyStoreEntry?> removeKey(String publicKey) => _nekoton.keystoreController.removeKey(publicKey);
 
   @override
-  Future<AccountSubject> addAccount({
+  Future<void> clearKeystore() => _nekoton.keystoreController.clearKeystore();
+
+  @override
+  Future<AssetsList> addAccount({
     required String name,
     required String publicKey,
     required WalletType walletType,
+    required int workchain,
   }) =>
-      _nekoton.addAccount(
+      _nekoton.accountsStorageController.addAccount(
         name: name,
         publicKey: publicKey,
         walletType: walletType,
+        workchain: workchain,
       );
 
   @override
-  Future<AccountSubject> renameAccount({
+  Future<AssetsList> renameAccount({
     required String address,
     required String name,
   }) =>
-      _nekoton.renameAccount(
+      _nekoton.accountsStorageController.renameAccount(
         address: address,
         name: name,
       );
 
   @override
-  Future<AccountSubject?> removeAccount(String address) => _nekoton.removeAccount(address);
+  Future<AssetsList?> removeAccount(String address) => _nekoton.accountsStorageController.removeAccount(address);
 
   @override
-  Future<AccountSubject> addTokenWallet({
+  Future<AssetsList> addTokenWallet({
     required String address,
     required String rootTokenContract,
   }) =>
-      _nekoton.addTokenWallet(
+      _nekoton.accountsStorageController.addTokenWallet(
         address: address,
         rootTokenContract: rootTokenContract,
       );
 
   @override
-  Future<AccountSubject> removeTokenWallet({
+  Future<AssetsList> removeTokenWallet({
     required String address,
     required String rootTokenContract,
   }) =>
-      _nekoton.removeTokenWallet(
+      _nekoton.accountsStorageController.removeTokenWallet(
         address: address,
         rootTokenContract: rootTokenContract,
       );
 
   @override
-  Future<void> clearAccountsStorage() => _nekoton.clearAccountsStorage();
+  Future<void> clearAccountsStorage() => _nekoton.accountsStorageController.clearAccountsStorage();
 
   Future<void> _initialize() async {
-    final currentPublicKey = await _userPreferencesRepository.currentPublicKey;
-
     _nekoton = await Nekoton.getInstance(
       logger: logger,
-      currentPublicKey: currentPublicKey,
     );
   }
-
-  @override
-  Future<void> findAndSubscribeToExistingWallets(String publicKey) =>
-      _nekoton.findAndSubscribeToExistingWallets(publicKey);
 }

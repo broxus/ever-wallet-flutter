@@ -8,7 +8,6 @@ import '../../logger.dart';
 import '../repositories/biometry_repository.dart';
 import '../repositories/connected_sites_repository.dart';
 import '../repositories/ton_assets_repository.dart';
-import '../repositories/user_preferences_repository.dart';
 import '../services/nekoton_service.dart';
 import 'common/notification_bloc.dart';
 
@@ -20,7 +19,6 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
   final BiometryRepository _biometryRepository;
   final ConnectedSitesRepository _connectedSitesRepository;
   final TonAssetsRepository _tonAssetsRepository;
-  final UserPreferencesRepository _userPreferencesRepository;
   late final StreamSubscription _keysPresenceSubscription;
   final notificationBloc = NotificationBloc();
 
@@ -29,7 +27,6 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
     this._biometryRepository,
     this._connectedSitesRepository,
     this._tonAssetsRepository,
-    this._userPreferencesRepository,
   ) : super(const ApplicationFlowState.loading()) {
     _keysPresenceSubscription = _nekotonService.keysPresenceStream
         .listen((bool hasKeys) => add(_LocalEvent.updateApplicationState(hasKeys: hasKeys)));
@@ -71,7 +68,6 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
             await _biometryRepository.clear();
             await _connectedSitesRepository.clear();
             await _tonAssetsRepository.clear();
-            await _userPreferencesRepository.clear();
           } on Exception catch (err, st) {
             logger.e(err, err, st);
             notificationBloc.add(NotificationEvent.showError(err.toString()));

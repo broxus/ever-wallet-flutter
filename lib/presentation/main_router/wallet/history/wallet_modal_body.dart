@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../design/design.dart';
 import 'all_assets_layout.dart';
 import 'transactions_layout.dart';
 
 class WalletModalBody extends StatefulWidget {
-  final SubscriptionSubject subscriptionSubject;
+  final String address;
   final ScrollController scrollController;
   final void Function(int)? onTabSelected;
 
   const WalletModalBody({
     Key? key,
-    required this.subscriptionSubject,
+    required this.address,
     required this.scrollController,
     this.onTabSelected,
   }) : super(key: key);
@@ -77,12 +76,12 @@ class _WalletModalBodyState extends State<WalletModalBody> {
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
                       AllAssetsLayout(
-                        subscriptionSubject: widget.subscriptionSubject,
+                        address: widget.address,
                         controller: widget.scrollController,
                         placeholderBuilder: buildPlaceholder,
                       ),
                       TransactionsLayout(
-                        subscriptionSubject: widget.subscriptionSubject,
+                        address: widget.address,
                         controller: widget.scrollController,
                         placeholderBuilder: buildPlaceholder,
                       ),

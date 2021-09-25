@@ -26,13 +26,13 @@ class KeyPasswordCheckBloc extends Bloc<KeyPasswordCheckEvent, KeyPasswordCheckS
         try {
           yield const KeyPasswordCheckState.loading();
 
-          final keySubject = _nekotonService.keys.firstWhere((e) => e.value.publicKey == publicKey);
+          final key = _nekotonService.keys.firstWhere((e) => e.publicKey == publicKey);
 
           late final SignInput signInput;
 
-          if (keySubject.value.isLegacy) {
+          if (key.isLegacy) {
             signInput = EncryptedKeyPassword(
-              publicKey: keySubject.value.publicKey,
+              publicKey: key.publicKey,
               password: Password.explicit(
                 password: password,
                 cacheBehavior: const PasswordCacheBehavior.remove(),
@@ -40,8 +40,8 @@ class KeyPasswordCheckBloc extends Bloc<KeyPasswordCheckEvent, KeyPasswordCheckS
             );
           } else {
             signInput = DerivedKeySignParams.byAccountId(
-              masterKey: keySubject.value.masterKey,
-              accountId: keySubject.value.accountId,
+              masterKey: key.masterKey,
+              accountId: key.accountId,
               password: Password.explicit(
                 password: password,
                 cacheBehavior: const PasswordCacheBehavior.remove(),

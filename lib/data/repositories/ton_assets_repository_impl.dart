@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/models/token_contract_asset.dart';
@@ -29,6 +30,12 @@ class TonAssetsRepositoryImpl implements TonAssetsRepository {
       _hiveSource.cacheTokenContractAssets(assets);
       yield assets.map((e) => e.toDomain()).toList();
     }
+  }
+
+  @override
+  Future<String?> getTokenLogoUri(String address) async {
+    final list = await _hiveSource.getTokenContractAssets();
+    return list.map((e) => e.toDomain()).firstWhereOrNull((e) => e.address == address)?.logoURI;
   }
 
   @override

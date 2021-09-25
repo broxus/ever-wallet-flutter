@@ -6,16 +6,29 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
+import '../../services/nekoton_service.dart';
 
 part 'key_info_bloc.freezed.dart';
 
 @injectable
 class KeyInfoBloc extends Bloc<KeyInfoEvent, KeyInfoState> {
-  final KeySubject? _keySubject;
+  final NekotonService _nekotonService;
+  final String? _publicKey;
   late final StreamSubscription _streamSubscription;
 
-  KeyInfoBloc(@factoryParam this._keySubject) : super(KeyInfoState.ready(_keySubject!.value.name)) {
-    _streamSubscription = _keySubject!.listen((value) => add(KeyInfoEvent.updateName(value.name)));
+  KeyInfoBloc(
+    this._nekotonService,
+    @factoryParam this._publicKey,
+  ) : super(KeyInfoState.ready(_nekotonService.keys.firstWhere((e) => e.publicKey == _publicKey!).name)) {
+    _streamSubscription = _nekotonService.keysStream.transform<KeyStoreEntry>(StreamTransformer.fromHandlers(
+      handleData: (data, sink) {
+        final entry = data.firstWhereOrNull((e) => e.publicKey == _publicKey!);
+
+        if (entry != null) {
+          sink.add(entry);
+        }
+      },
+    )).listen((value) => add(KeyInfoEvent.update(value)));
   }
 
   @override
@@ -27,9 +40,9 @@ class KeyInfoBloc extends Bloc<KeyInfoEvent, KeyInfoState> {
   @override
   Stream<KeyInfoState> mapEventToState(KeyInfoEvent event) async* {
     yield* event.when(
-      updateName: (String name) async* {
+      update: (KeyStoreEntry key) async* {
         try {
-          yield KeyInfoState.ready(name);
+          yield KeyInfoState.ready(key.name);
         } on Exception catch (err, st) {
           logger.e(err, err, st);
           yield KeyInfoState.error(err.toString());
@@ -41,7 +54,7 @@ class KeyInfoBloc extends Bloc<KeyInfoEvent, KeyInfoState> {
 
 @freezed
 class KeyInfoEvent with _$KeyInfoEvent {
-  const factory KeyInfoEvent.updateName(String name) = _UpdateName;
+  const factory KeyInfoEvent.update(KeyStoreEntry key) = _Update;
 }
 
 @freezed

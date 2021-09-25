@@ -134,7 +134,12 @@ class _DeployBodyState extends State<DeployBody> {
         isLoading: isLoading,
       );
 
-  Widget _getInfoRow({required String title, String? value, bool isLoading = false}) => Column(
+  Widget _getInfoRow({
+    required String title,
+    String? value,
+    bool isLoading = false,
+  }) =>
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(

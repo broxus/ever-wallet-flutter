@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
 import '../../../../injection.dart';
@@ -9,13 +8,13 @@ import '../modals/asset_observer/token_asset_observer.dart';
 import 'wallet_asset_holder.dart';
 
 class TokenWalletAssetHolder extends StatefulWidget {
-  final TokenWallet tokenWallet;
-  final String? logoURI;
+  final String owner;
+  final String rootTokenContract;
 
   const TokenWalletAssetHolder({
     Key? key,
-    required this.tokenWallet,
-    required this.logoURI,
+    required this.owner,
+    required this.rootTokenContract,
   }) : super(key: key);
 
   @override
@@ -28,8 +27,8 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
   @override
   void initState() {
     bloc = getIt.get<TokenWalletInfoBloc>(
-      param1: widget.tokenWallet,
-      param2: widget.logoURI,
+      param1: widget.owner,
+      param2: widget.rootTokenContract,
     );
     super.initState();
   }
@@ -44,7 +43,7 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
   Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfoState>(
         bloc: bloc,
         builder: (context, state) => state.maybeWhen(
-          ready: (logoURI, address, balance, contractState, owner, symbol, version) {
+          ready: (logoURI, address, balance, contractState, owner, symbol, version, ownerPublicKey) {
             final icon = logoURI != null ? getTokenAssetIcon(logoURI) : getRandomTokenAssetIcon(symbol.name.hashCode);
 
             return WalletAssetHolder(
@@ -53,8 +52,8 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
               icon: icon,
               onTap: () => TokenAssetObserver.open(
                 context: context,
-                tokenWallet: widget.tokenWallet,
-                logoURI: logoURI,
+                owner: owner,
+                rootTokenContract: symbol.rootTokenContract,
               ),
             );
           },

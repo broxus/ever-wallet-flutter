@@ -19,20 +19,29 @@ part 'password_body.dart';
 part 'receiver_body.dart';
 
 class SendTransactionFlow extends StatefulWidget {
-  final TonWallet tonWallet;
-  const SendTransactionFlow._({required this.tonWallet});
+  final String address;
+  final String publicKey;
+
+  const SendTransactionFlow._({
+    required this.address,
+    required this.publicKey,
+  });
 
   static Future<void> start({
     required BuildContext context,
-    required TonWallet tonWallet,
+    required String address,
+    required String publicKey,
   }) =>
-      CrystalBottomSheet.show(
+      showCrystalBottomSheet(
         context,
         draggable: false,
         padding: EdgeInsets.zero,
         wrapIntoAnimatedSize: false,
         avoidBottomInsets: false,
-        body: SendTransactionFlow._(tonWallet: tonWallet),
+        body: SendTransactionFlow._(
+          address: address,
+          publicKey: publicKey,
+        ),
       );
 
   @override
@@ -41,7 +50,6 @@ class SendTransactionFlow extends StatefulWidget {
 
 class _SendTransactionFlowState extends State<SendTransactionFlow> {
   final _clipboard = ValueNotifier<String?>(null);
-
   final _pageController = PageController();
   late TonWalletTransferBloc _bloc;
 
@@ -59,7 +67,7 @@ class _SendTransactionFlowState extends State<SendTransactionFlow> {
   @override
   void initState() {
     super.initState();
-    _bloc = getIt.get<TonWalletTransferBloc>(param1: widget.tonWallet);
+    _bloc = getIt.get<TonWalletTransferBloc>(param1: widget.address);
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) => _clipboardListener());
   }
 
@@ -124,7 +132,7 @@ class _SendTransactionFlowState extends State<SendTransactionFlow> {
                   ),
                   Padding(
                     padding: context.keyboardInsets,
-                    child: _PasswordBody(publicKey: widget.tonWallet.publicKey),
+                    child: _PasswordBody(publicKey: widget.publicKey),
                   ),
                   const _LoaderBody(),
                 ],

@@ -6,16 +6,29 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
+import '../../services/nekoton_service.dart';
 
 part 'account_info_bloc.freezed.dart';
 
 @injectable
 class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
-  final AccountSubject? _account;
+  final NekotonService _nekotonService;
+  final String? _address;
   late final StreamSubscription _streamSubscription;
 
-  AccountInfoBloc(@factoryParam this._account) : super(AccountInfoState.ready(_account!.value.name)) {
-    _streamSubscription = _account!.listen((value) => add(AccountInfoEvent.updateName(value.name)));
+  AccountInfoBloc(
+    this._nekotonService,
+    @factoryParam this._address,
+  ) : super(AccountInfoState.ready(_nekotonService.accounts.firstWhere((e) => e.address == _address!).name)) {
+    _streamSubscription = _nekotonService.accountsStream.transform<AssetsList>(StreamTransformer.fromHandlers(
+      handleData: (data, sink) {
+        final entry = data.firstWhereOrNull((e) => e.address == _address!);
+
+        if (entry != null) {
+          sink.add(entry);
+        }
+      },
+    )).listen((value) => add(AccountInfoEvent.update(value)));
   }
 
   @override
@@ -27,9 +40,9 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
   @override
   Stream<AccountInfoState> mapEventToState(AccountInfoEvent event) async* {
     yield* event.when(
-      updateName: (String name) async* {
+      update: (AssetsList account) async* {
         try {
-          yield AccountInfoState.ready(name);
+          yield AccountInfoState.ready(account.name);
         } on Exception catch (err, st) {
           logger.e(err, err, st);
           yield AccountInfoState.error(err.toString());
@@ -41,7 +54,7 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
 
 @freezed
 class AccountInfoEvent with _$AccountInfoEvent {
-  const factory AccountInfoEvent.updateName(String name) = _UpdateName;
+  const factory AccountInfoEvent.update(AssetsList account) = _Update;
 }
 
 @freezed

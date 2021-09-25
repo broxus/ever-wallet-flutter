@@ -13,24 +13,18 @@ part 'account_creation_bloc.freezed.dart';
 @injectable
 class AccountCreationBloc extends Bloc<AccountCreationEvent, AccountCreationState> {
   final NekotonService _nekotonService;
-  final KeySubject? _keySubject;
 
   AccountCreationBloc(
     this._nekotonService,
-    @factoryParam this._keySubject,
-  ) : super(const AccountCreationState.initial()) {
-    add(const AccountCreationEvent.showOptions());
-  }
+  ) : super(const AccountCreationState.initial());
 
   @override
   Stream<AccountCreationState> mapEventToState(AccountCreationEvent event) async* {
     yield* event.when(
-      showOptions: () async* {
+      showOptions: (String publicKey) async* {
         try {
-          final added = _nekotonService.accounts
-              .where((e) => e.value.publicKey == _keySubject!.value.publicKey)
-              .map((e) => e.value.tonWallet.contract)
-              .toList();
+          final added =
+              _nekotonService.accounts.where((e) => e.publicKey == publicKey).map((e) => e.tonWallet.contract).toList();
 
           const available = [
             WalletType.multisig(multisigType: MultisigType.safeMultisigWallet),
@@ -51,13 +45,15 @@ class AccountCreationBloc extends Bloc<AccountCreationEvent, AccountCreationStat
       },
       createAccount: (
         String name,
+        String publicKey,
         WalletType walletType,
       ) async* {
         try {
           await _nekotonService.addAccount(
             name: name,
-            publicKey: _keySubject!.value.publicKey,
+            publicKey: publicKey,
             walletType: walletType,
+            workchain: kDefaultWorkchain,
           );
 
           yield const AccountCreationState.success();
@@ -72,10 +68,11 @@ class AccountCreationBloc extends Bloc<AccountCreationEvent, AccountCreationStat
 
 @freezed
 class AccountCreationEvent with _$AccountCreationEvent {
-  const factory AccountCreationEvent.showOptions() = _ShowOptions;
+  const factory AccountCreationEvent.showOptions(String publicKey) = _ShowOptions;
 
   const factory AccountCreationEvent.createAccount({
     required String name,
+    required String publicKey,
     required WalletType walletType,
   }) = _CreateAccount;
 }

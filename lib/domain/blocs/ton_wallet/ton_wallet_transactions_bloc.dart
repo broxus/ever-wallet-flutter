@@ -7,6 +7,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
 import '../../models/wallet_transaction.dart';
+import '../../services/nekoton_service.dart';
 import '../../utils/transaction_data.dart';
 import '../../utils/transaction_time.dart';
 
@@ -14,41 +15,46 @@ part 'ton_wallet_transactions_bloc.freezed.dart';
 
 @injectable
 class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState> {
-  final TonWallet? _tonWallet;
-  late final StreamSubscription _onMessageExpiredSubscription;
-  late final StreamSubscription _onMessageSentSubscription;
-  late final StreamSubscription _onTransactionsFoundSubscription;
+  final NekotonService _nekotonService;
+  final String? _address;
+  StreamSubscription? _onMessageExpiredSubscription;
+  StreamSubscription? _onMessageSentSubscription;
+  StreamSubscription? _onTransactionsFoundSubscription;
   final _expired = <WalletTransaction>[];
   final _sent = <WalletTransaction>[];
   final _ordinary = <WalletTransaction>[];
   final _transactions = <WalletTransaction>[];
 
-  TonWalletTransactionsBloc(@factoryParam this._tonWallet)
-      : super(const TonWalletTransactionsState.ready(
+  TonWalletTransactionsBloc(
+    this._nekotonService,
+    @factoryParam this._address,
+  ) : super(const TonWalletTransactionsState.ready(
           transactions: [],
         )) {
-    _onMessageExpiredSubscription = _tonWallet!.onMessageExpiredStream.listen(
-      (List<Transaction> expired) => add(
-        _LocalEvent.updateExpiredMessages(expired),
-      ),
-    );
-    _onMessageSentSubscription = _tonWallet!.onMessageSentStream.listen(
-      (List<Transaction> sent) => add(
-        _LocalEvent.updateSentMessages(sent),
-      ),
-    );
-    _onTransactionsFoundSubscription = _tonWallet!.onTransactionsFoundStream.listen(
-      (List<TonWalletTransactionWithData> transactions) => add(
-        _LocalEvent.updateTransactions(transactions),
-      ),
-    );
+    _nekotonService.tonWalletsStream.expand((e) => e).firstWhere((e) => e.address == _address!).then((value) {
+      _onMessageExpiredSubscription = value.onMessageExpiredStream.listen(
+        (List<Transaction> expired) => add(
+          _LocalEvent.updateExpiredMessages(expired),
+        ),
+      );
+      _onMessageSentSubscription = value.onMessageSentStream.listen(
+        (List<Transaction> sent) => add(
+          _LocalEvent.updateSentMessages(sent),
+        ),
+      );
+      _onTransactionsFoundSubscription = value.onTransactionsFoundStream.listen(
+        (List<TonWalletTransactionWithData> transactions) => add(
+          _LocalEvent.updateTransactions(transactions),
+        ),
+      );
+    });
   }
 
   @override
   Future<void> close() {
-    _onMessageExpiredSubscription.cancel();
-    _onMessageSentSubscription.cancel();
-    _onTransactionsFoundSubscription.cancel();
+    _onMessageExpiredSubscription?.cancel();
+    _onMessageSentSubscription?.cancel();
+    _onTransactionsFoundSubscription?.cancel();
     return super.close();
   }
 
@@ -162,11 +168,13 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
       yield* event.when(
         preloadTransactions: () async* {
           try {
+            final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
             if (_transactions.isNotEmpty) {
               final prevTransId = _transactions.last.prevTransId;
 
               if (prevTransId != null) {
-                await _tonWallet!.preloadTransactions(prevTransId);
+                await tonWallet.preloadTransactions(prevTransId);
               }
             }
           } on Exception catch (err, st) {

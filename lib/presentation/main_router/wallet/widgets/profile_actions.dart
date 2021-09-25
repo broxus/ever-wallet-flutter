@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
@@ -14,11 +13,11 @@ import '../modals/send_transaction_flow/send_transaction_flow.dart';
 import 'wallet_button.dart';
 
 class ProfileActions extends StatefulWidget {
-  final SubscriptionSubject subscriptionSubject;
+  final String address;
 
   const ProfileActions({
     Key? key,
-    required this.subscriptionSubject,
+    required this.address,
   }) : super(key: key);
 
   @override
@@ -32,8 +31,8 @@ class _ProfileActionsState extends State<ProfileActions> {
   @override
   void initState() {
     super.initState();
-    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.subscriptionSubject.value.tonWallet);
-    accountInfoBloc = getIt.get<AccountInfoBloc>(param1: widget.subscriptionSubject.value.accountSubject);
+    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
+    accountInfoBloc = getIt.get<AccountInfoBloc>(param1: widget.address);
   }
 
   @override
@@ -49,7 +48,7 @@ class _ProfileActionsState extends State<ProfileActions> {
         children: [
           WalletButton(
             onTap: () async {
-              await CrystalBottomSheet.show(
+              await showCrystalBottomSheet(
                 context,
                 padding: EdgeInsets.zero,
                 draggable: false,
@@ -57,7 +56,7 @@ class _ProfileActionsState extends State<ProfileActions> {
                 expand: true,
                 avoidBottomInsets: false,
                 body: AddAssetModal(
-                  subscriptionSubject: widget.subscriptionSubject,
+                  address: widget.address,
                 ),
               );
             },
@@ -72,7 +71,7 @@ class _ProfileActionsState extends State<ProfileActions> {
                 builder: (context, state) => state.maybeWhen(
                   ready: (address, contractState, walletType, details, publicKey) => WalletButton(
                     onTap: () {
-                      CrystalBottomSheet.show(
+                      showCrystalBottomSheet(
                         context,
                         title: name.capitalize,
                         body: ReceiveModalBody(
@@ -103,7 +102,8 @@ class _ProfileActionsState extends State<ProfileActions> {
                       ? WalletButton(
                           onTap: () => SendTransactionFlow.start(
                             context: context,
-                            tonWallet: widget.subscriptionSubject.value.tonWallet,
+                            address: address,
+                            publicKey: publicKey,
                           ),
                           title: LocaleKeys.actions_send.tr(),
                           iconAsset: Assets.images.iconSend.path,
@@ -112,7 +112,8 @@ class _ProfileActionsState extends State<ProfileActions> {
                           onTap: () {
                             DeployWalletFlow.start(
                               context: context,
-                              tonWallet: widget.subscriptionSubject.value.tonWallet,
+                              address: address,
+                              publicKey: publicKey,
                             );
                           },
                           title: LocaleKeys.actions_deploy.tr(),

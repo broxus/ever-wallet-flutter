@@ -6,15 +6,20 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
+import '../../services/nekoton_service.dart';
 import '../../utils/error_message.dart';
 
 part 'ton_wallet_fees_bloc.freezed.dart';
 
 @injectable
 class TonWalletFeesBloc extends Bloc<TonWalletFeesEvent, TonWalletFeesState> {
-  final TonWallet? _tonWallet;
+  final NekotonService _nekotonService;
+  final String? _address;
 
-  TonWalletFeesBloc(@factoryParam this._tonWallet) : super(const TonWalletFeesState.loading());
+  TonWalletFeesBloc(
+    this._nekotonService,
+    @factoryParam this._address,
+  ) : super(const TonWalletFeesState.loading());
 
   @override
   Stream<TonWalletFeesState> mapEventToState(TonWalletFeesEvent event) async* {
@@ -24,11 +29,13 @@ class TonWalletFeesBloc extends Bloc<TonWalletFeesEvent, TonWalletFeesState> {
         UnsignedMessage message,
       ) async* {
         try {
+          final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
           yield const TonWalletFeesState.loading();
-          final feesValue = await _tonWallet!.estimateFees(message);
+          final feesValue = await tonWallet.estimateFees(message);
           final fees = feesValue.toString();
 
-          final contractState = await _tonWallet!.contractState;
+          final contractState = await tonWallet.contractState;
           final balance = contractState.balance;
           final balanceValue = int.parse(balance);
 

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
@@ -19,9 +18,9 @@ class AccountRemovementBloc extends Bloc<AccountRemovementEvent, AccountRemoveme
   @override
   Stream<AccountRemovementState> mapEventToState(AccountRemovementEvent event) async* {
     yield* event.when(
-      removeAccount: (AccountSubject accountSubject) async* {
+      removeAccount: (String address) async* {
         try {
-          await _nekotonService.removeAccount(accountSubject.value.address);
+          await _nekotonService.removeAccount(address);
 
           yield const AccountRemovementState.success();
         } on Exception catch (err, st) {
@@ -35,7 +34,7 @@ class AccountRemovementBloc extends Bloc<AccountRemovementEvent, AccountRemoveme
 
 @freezed
 class AccountRemovementEvent with _$AccountRemovementEvent {
-  const factory AccountRemovementEvent.removeAccount(AccountSubject accountSubject) = _RemoveAccount;
+  const factory AccountRemovementEvent.removeAccount(String address) = _RemoveAccount;
 }
 
 @freezed

@@ -4,7 +4,6 @@ import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../domain/blocs/account/account_info_bloc.dart';
@@ -15,11 +14,11 @@ import '../../../../injection.dart';
 import '../../../design/design.dart';
 
 class PreferencesBody extends StatefulWidget {
-  final SubscriptionSubject subscriptionSubject;
+  final String address;
 
   const PreferencesBody({
     Key? key,
-    required this.subscriptionSubject,
+    required this.address,
   }) : super(key: key);
 
   static String get title => LocaleKeys.preferences_modal_title.tr();
@@ -39,9 +38,9 @@ class _PreferencesBodyState extends State<PreferencesBody> {
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController(text: widget.subscriptionSubject.value.accountSubject.value.name);
-    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.subscriptionSubject.value.tonWallet);
-    accountInfoBloc = getIt.get<AccountInfoBloc>(param1: widget.subscriptionSubject.value.accountSubject);
+    _textController = TextEditingController();
+    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
+    accountInfoBloc = getIt.get<AccountInfoBloc>(param1: widget.address);
   }
 
   @override
@@ -128,7 +127,7 @@ class _PreferencesBodyState extends State<PreferencesBody> {
           child: value.text.trim() != name
               ? GestureDetector(
                   onTap: () => accountRenamingBloc.add(AccountRenamingEvent.rename(
-                    accountSubject: widget.subscriptionSubject.value.accountSubject,
+                    address: widget.address,
                     name: value.text,
                   )),
                   behavior: HitTestBehavior.opaque,

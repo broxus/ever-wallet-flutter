@@ -18,19 +18,20 @@ part 'keys_bloc.freezed.dart';
 class KeysBloc extends Bloc<_Event, KeysState> {
   final NekotonService _nekotonService;
   late final StreamSubscription _streamSubscription;
-  final _keys = SortedMap<KeySubject, List<KeySubject>?>();
-  KeySubject? _currentKey;
+  final _keys = SortedMap<KeyStoreEntry, List<KeyStoreEntry>?>();
+  KeyStoreEntry? _currentKey;
 
   KeysBloc(this._nekotonService) : super(const KeysState.initial()) {
-    _streamSubscription = Rx.combineLatest2<List<KeySubject>, KeySubject?, Tuple2<List<KeySubject>, KeySubject?>>(
-      _nekotonService.keysStream,
+    _streamSubscription =
+        Rx.combineLatest2<KeyStoreEntry?, List<KeyStoreEntry>, Tuple2<KeyStoreEntry?, List<KeyStoreEntry>>>(
       _nekotonService.currentKeyStream,
+      _nekotonService.keysStream,
       (a, b) => Tuple2(a, b),
     ).listen(
-      (Tuple2<List<KeySubject>, KeySubject?> tuple) => add(
+      (Tuple2<KeyStoreEntry?, List<KeyStoreEntry>> tuple) => add(
         _LocalEvent.updateKeys(
-          keys: tuple.item1,
-          currentKey: tuple.item2,
+          currentKey: tuple.item1,
+          keys: tuple.item2,
         ),
       ),
     );
@@ -47,8 +48,8 @@ class KeysBloc extends Bloc<_Event, KeysState> {
     if (event is _LocalEvent) {
       yield* event.when(
         updateKeys: (
-          List<KeySubject> keys,
-          KeySubject? currentKey,
+          KeyStoreEntry? currentKey,
+          List<KeyStoreEntry> keys,
         ) async* {
           try {
             final sortedKeys = _sortKeys(keys);
@@ -72,11 +73,13 @@ class KeysBloc extends Bloc<_Event, KeysState> {
 
     if (event is KeysEvent) {
       yield* event.when(
-        setCurrentKey: (KeySubject keySubject) async* {
+        setCurrentKey: (String publicKey) async* {
           try {
-            _nekotonService.setCurrentKey(keySubject);
+            final key = _nekotonService.keys.firstWhere((e) => e.publicKey == publicKey);
 
-            _currentKey = keySubject;
+            _nekotonService.currentKey = key;
+
+            _currentKey = key;
 
             yield KeysState.ready(
               keys: {..._keys},
@@ -91,14 +94,14 @@ class KeysBloc extends Bloc<_Event, KeysState> {
     }
   }
 
-  Map<KeySubject, List<KeySubject>?> _sortKeys(List<KeySubject> keys) {
-    final map = <KeySubject, List<KeySubject>?>{};
+  Map<KeyStoreEntry, List<KeyStoreEntry>?> _sortKeys(List<KeyStoreEntry> keys) {
+    final map = <KeyStoreEntry, List<KeyStoreEntry>?>{};
 
     for (final key in keys) {
-      if (key.value.publicKey == key.value.masterKey) {
+      if (key.publicKey == key.masterKey) {
         if (!map.containsKey(key)) map[key] = null;
       } else {
-        final parentKey = keys.firstWhereOrNull((e) => e.value.publicKey == key.value.masterKey);
+        final parentKey = keys.firstWhereOrNull((e) => e.publicKey == key.masterKey);
 
         if (parentKey != null) {
           if (map[parentKey] != null) {
@@ -118,14 +121,14 @@ abstract class _Event {}
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
   const factory _LocalEvent.updateKeys({
-    required List<KeySubject> keys,
-    required KeySubject? currentKey,
+    KeyStoreEntry? currentKey,
+    required List<KeyStoreEntry> keys,
   }) = _UpdateKeys;
 }
 
 @freezed
 class KeysEvent extends _Event with _$KeysEvent {
-  const factory KeysEvent.setCurrentKey(KeySubject keySubject) = _SetCurrentKey;
+  const factory KeysEvent.setCurrentKey(String publicKey) = _SetCurrentKey;
 }
 
 @freezed
@@ -133,8 +136,8 @@ class KeysState with _$KeysState {
   const factory KeysState.initial() = _Initial;
 
   const factory KeysState.ready({
-    required Map<KeySubject, List<KeySubject>?> keys,
-    required KeySubject? currentKey,
+    required Map<KeyStoreEntry, List<KeyStoreEntry>?> keys,
+    KeyStoreEntry? currentKey,
   }) = _Ready;
 
   const factory KeysState.error(String info) = _Error;

@@ -70,15 +70,16 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
       },
       deriveKey: (
         String? name,
-        KeySubject keySubject,
+        String publicKey,
         String password,
       ) async* {
         try {
-          if (keySubject.value.isNotLegacy && keySubject.value.accountId == 0) {
-            final derivedKeys =
-                _nekotonService.keys.map((e) => e.value).where((e) => e.masterKey == keySubject.value.publicKey);
+          final key = _nekotonService.keys.firstWhere((e) => e.publicKey == publicKey);
+
+          if (key.isNotLegacy && key.accountId == 0) {
+            final derivedKeys = _nekotonService.keys.where((e) => e.masterKey == key.publicKey);
             final id = derivedKeys.isNotEmpty ? derivedKeys.map((e) => e.nextAccountId).reduce(max) : 1;
-            final masterKey = keySubject.value.publicKey;
+            final masterKey = key.publicKey;
 
             final createKeyInput = DerivedKeyCreateInput.derive(
               keyName: name,
@@ -114,11 +115,9 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
     final key = await _nekotonService.addKey(createKeyInput);
 
     await _biometryRepository.setKeyPassword(
-      publicKey: key.value.publicKey,
+      publicKey: key.publicKey,
       password: password,
     );
-
-    await _nekotonService.findAndSubscribeToExistingWallets(key.value.publicKey);
   }
 }
 
@@ -132,7 +131,7 @@ class KeyCreationEvent with _$KeyCreationEvent {
 
   const factory KeyCreationEvent.deriveKey({
     String? name,
-    required KeySubject keySubject,
+    required String publicKey,
     required String password,
   }) = _DeriveKey;
 }

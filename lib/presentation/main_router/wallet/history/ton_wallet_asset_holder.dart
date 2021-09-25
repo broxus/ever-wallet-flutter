@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../injection.dart';
@@ -9,11 +8,11 @@ import '../modals/asset_observer/ton_asset_observer.dart';
 import 'wallet_asset_holder.dart';
 
 class TonWalletAssetHolder extends StatefulWidget {
-  final TonWallet tonWallet;
+  final String address;
 
   const TonWalletAssetHolder({
     Key? key,
-    required this.tonWallet,
+    required this.address,
   }) : super(key: key);
 
   @override
@@ -25,7 +24,7 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
 
   @override
   void initState() {
-    bloc = getIt.get<TonWalletInfoBloc>(param1: widget.tonWallet);
+    bloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
     super.initState();
   }
 
@@ -45,7 +44,7 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
             icon: Image.asset(Assets.images.ton.path),
             onTap: () => TonAssetObserver.open(
               context: context,
-              tonWallet: widget.tonWallet,
+              address: address,
             ),
           ),
           orElse: () => const SizedBox(),

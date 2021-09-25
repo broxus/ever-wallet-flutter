@@ -1,4 +1,3 @@
-import '../../../widgets/input_password_modal_body.dart';
 import 'package:expand_tap_area/expand_tap_area.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +12,7 @@ import '../../../../../domain/blocs/token_wallet/token_wallet_transfer_bloc.dart
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widget/crystal_bottom_sheet.dart';
+import '../../../widgets/input_password_modal_body.dart';
 
 part 'confirm_body.dart';
 part 'loader_body.dart';
@@ -20,20 +20,33 @@ part 'password_body.dart';
 part 'receiver_body.dart';
 
 class TokenSendTransactionFlow extends StatefulWidget {
-  final TokenWallet tokenWallet;
-  const TokenSendTransactionFlow._({required this.tokenWallet});
+  final String owner;
+  final String rootTokenContract;
+  final String ownerPublicKey;
+
+  const TokenSendTransactionFlow._({
+    required this.owner,
+    required this.rootTokenContract,
+    required this.ownerPublicKey,
+  });
 
   static Future<void> start({
     required BuildContext context,
-    required TokenWallet tokenWallet,
+    required String owner,
+    required String rootTokenContract,
+    required String ownerPublicKey,
   }) =>
-      CrystalBottomSheet.show(
+      showCrystalBottomSheet(
         context,
         draggable: false,
         padding: EdgeInsets.zero,
         wrapIntoAnimatedSize: false,
         avoidBottomInsets: false,
-        body: TokenSendTransactionFlow._(tokenWallet: tokenWallet),
+        body: TokenSendTransactionFlow._(
+          owner: owner,
+          rootTokenContract: rootTokenContract,
+          ownerPublicKey: ownerPublicKey,
+        ),
       );
 
   @override
@@ -60,7 +73,10 @@ class _TokenSendTransactionFlowState extends State<TokenSendTransactionFlow> {
   @override
   void initState() {
     super.initState();
-    _bloc = getIt.get<TokenWalletTransferBloc>(param1: widget.tokenWallet);
+    _bloc = getIt.get<TokenWalletTransferBloc>(
+      param1: widget.owner,
+      param2: widget.rootTokenContract,
+    );
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) => _clipboardListener());
   }
 
@@ -131,7 +147,7 @@ class _TokenSendTransactionFlowState extends State<TokenSendTransactionFlow> {
                   ),
                   Padding(
                     padding: context.keyboardInsets,
-                    child: _PasswordBody(publicKey: widget.tokenWallet.ownerPublicKey),
+                    child: _PasswordBody(publicKey: widget.ownerPublicKey),
                   ),
                   const _LoaderBody(),
                 ],

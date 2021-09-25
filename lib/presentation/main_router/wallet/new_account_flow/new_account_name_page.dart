@@ -4,7 +4,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/key/keys_bloc.dart';
 import '../../../../injection.dart';
@@ -64,7 +63,7 @@ class _NewAccountNamePageState extends State<NewAccountNamePage> {
   Widget buildActions() => BlocBuilder<KeysBloc, KeysState>(
         bloc: keysBloc,
         builder: (context, state) {
-          final keySubject = state.maybeWhen(
+          final key = state.maybeWhen(
             ready: (keys, currentKey) => currentKey,
             orElse: () => null,
           );
@@ -81,12 +80,12 @@ class _NewAccountNamePageState extends State<NewAccountNamePage> {
                   bottom: bottomPadding,
                 ),
                 child: AnimatedAppearance(
-                  showing: value.text.isNotEmpty && keySubject != null,
+                  showing: value.text.isNotEmpty && key != null,
                   duration: const Duration(milliseconds: 350),
                   child: CrystalButton(
                     text: 'Next',
                     onTap: () => onConfirm(
-                      keySubject: keySubject!,
+                      publicKey: key!.publicKey,
                       name: value.text,
                     ),
                   ),
@@ -98,13 +97,13 @@ class _NewAccountNamePageState extends State<NewAccountNamePage> {
       );
 
   void onConfirm({
-    required KeySubject keySubject,
+    required String publicKey,
     required String name,
   }) {
     FocusScope.of(context).unfocus();
 
     context.router.push(NewAccountTypeRoute(
-      keySubject: keySubject,
+      publicKey: publicKey,
       accountName: name,
     ));
   }

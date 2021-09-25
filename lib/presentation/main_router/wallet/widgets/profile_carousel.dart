@@ -9,14 +9,14 @@ import 'wallet_card.dart';
 class ProfileCarousel extends StatefulWidget {
   final bool loading;
   final int initialIndex;
-  final List<SubscriptionSubject> subscriptions;
+  final List<AssetsList> accounts;
   final VoidCallback? onScrollStart;
   final void Function(int)? onPageChanged;
   final void Function(int)? onPageSelected;
 
   const ProfileCarousel({
     Key? key,
-    required this.subscriptions,
+    required this.accounts,
     this.loading = false,
     this.initialIndex = 0,
     this.onScrollStart,
@@ -49,7 +49,7 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
   void didUpdateWidget(covariant ProfileCarousel oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.loading != oldWidget.loading || oldWidget.subscriptions.length != widget.subscriptions.length) {
+    if (widget.loading != oldWidget.loading || oldWidget.accounts.length != widget.accounts.length) {
       SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
         final currentPage = pageController.page?.round() ?? 0;
         widget.onPageChanged?.call(currentPage);
@@ -90,7 +90,7 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
             child: AnimatedSwitcher(
               duration: kThemeAnimationDuration,
               child: PageView.builder(
-                itemCount: widget.subscriptions.length + 1,
+                itemCount: widget.accounts.length + 1,
                 controller: pageController,
                 onPageChanged: widget.onPageChanged,
                 itemBuilder: (context, index) => GestureDetector(
@@ -106,10 +106,10 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 3.5),
-                    child: index < widget.subscriptions.length
+                    child: index < widget.accounts.length
                         ? WalletCard(
-                            key: ValueKey(widget.subscriptions[index]),
-                            subscriptionSubject: widget.subscriptions[index],
+                            key: ValueKey(widget.accounts[index].address),
+                            address: widget.accounts[index].address,
                           )
                         : NewAccountCard(),
                   ),
@@ -129,7 +129,7 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              for (var i = 0; i < widget.subscriptions.length + 1; i++)
+              for (var i = 0; i < widget.accounts.length + 1; i++)
                 AnimatedBuilder(
                   animation: pageController,
                   builder: (context, child) {

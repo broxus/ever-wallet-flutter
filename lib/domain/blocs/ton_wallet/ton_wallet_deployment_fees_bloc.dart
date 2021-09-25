@@ -6,15 +6,20 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
+import '../../services/nekoton_service.dart';
 import '../../utils/error_message.dart';
 
 part 'ton_wallet_deployment_fees_bloc.freezed.dart';
 
 @injectable
 class TonWalletDeploymentFeesBloc extends Bloc<TonWalletDeploymentFeesEvent, TonWalletDeploymentFeesState> {
-  final TonWallet? _tonWallet;
+  final NekotonService _nekotonService;
+  final String? _address;
 
-  TonWalletDeploymentFeesBloc(@factoryParam this._tonWallet) : super(const TonWalletDeploymentFeesState.loading());
+  TonWalletDeploymentFeesBloc(
+    this._nekotonService,
+    @factoryParam this._address,
+  ) : super(const TonWalletDeploymentFeesState.loading());
 
   @override
   Stream<TonWalletDeploymentFeesState> mapEventToState(TonWalletDeploymentFeesEvent event) async* {
@@ -24,13 +29,15 @@ class TonWalletDeploymentFeesBloc extends Bloc<TonWalletDeploymentFeesEvent, Ton
         UnsignedMessage message,
       ) async* {
         try {
+          final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
           yield const TonWalletDeploymentFeesState.loading();
           int feesValue;
           try {
-            feesValue = await _tonWallet!.estimateFees(message);
+            feesValue = await tonWallet.estimateFees(message);
           } catch (err, st) {
             logger.e(err, err, st);
-            yield TonWalletDeploymentFeesState.unknownContract(_tonWallet!.address);
+            yield TonWalletDeploymentFeesState.unknownContract(tonWallet.address);
             return;
           }
           final fees = feesValue.toString();

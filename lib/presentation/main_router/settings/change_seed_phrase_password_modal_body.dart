@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:validators/validators.dart';
 
 import '../../../domain/blocs/biometry/biometry_password_data_bloc.dart';
@@ -10,11 +9,11 @@ import '../../../injection.dart';
 import '../../design/design.dart';
 
 class ChangeSeedPhrasePasswordModalBody extends StatefulWidget {
-  final KeySubject keySubject;
+  final String publicKey;
 
   const ChangeSeedPhrasePasswordModalBody({
     Key? key,
-    required this.keySubject,
+    required this.publicKey,
   }) : super(key: key);
 
   @override
@@ -70,7 +69,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
                     if (formKey.currentState?.validate() ?? false) {
                       keyUpdateBloc.add(KeyUpdateEvent.changePassword(
-                        keySubject: widget.keySubject,
+                        publicKey: widget.publicKey,
                         oldPassword: ready.password,
                         newPassword: newPassword,
                       ));
@@ -146,7 +145,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
               onTap: () {
                 final oldPassword = oldPasswordController.text.trim();
                 checkPasswordBloc.add(KeyPasswordCheckEvent.checkPassword(
-                  publicKey: widget.keySubject.value.publicKey,
+                  publicKey: widget.publicKey,
                   password: oldPassword,
                 ));
               },
@@ -160,7 +159,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
     required bool autofocus,
     required String hint,
     required TextInputAction inputAction,
-    required String? Function(String?)? validator,
+    String? Function(String?)? validator,
   }) =>
       CrystalTextFormField(
         controller: controller,
