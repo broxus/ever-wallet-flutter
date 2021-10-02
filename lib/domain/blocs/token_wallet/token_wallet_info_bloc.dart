@@ -42,7 +42,7 @@ class TokenWalletInfoBloc extends Bloc<TokenWalletInfoEvent, TokenWalletInfoStat
       );
       _onTransactionsFoundSubscription = value.onTransactionsFoundStream.listen(
         (List<TokenWalletTransactionWithData> transactions) {
-          if (transactions.isNotEmpty && transactions.last.transaction.prevTransId == null) {
+          if (transactions.isNotEmpty && transactions.last.transaction.prevTransactionId == null) {
             add(const TokenWalletInfoEvent.updateInfo());
           }
         },

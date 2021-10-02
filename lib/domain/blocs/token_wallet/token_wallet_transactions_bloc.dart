@@ -84,13 +84,13 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, TokenWalletTransactionsSt
 
               return WalletTransaction.ordinary(
                 hash: transaction.id.hash,
-                prevTransId: transaction.prevTransId,
+                prevTransactionId: transaction.prevTransactionId,
                 totalFees: transaction.totalFees.toTokens(),
                 address: address ?? '',
                 value: tokenValue.toTokens(tokenWallet.symbol.decimals),
                 createdAt: transaction.createdAt.toDateTime(),
                 isOutgoing: isOutgoing,
-                currency: tokenWallet.symbol.symbol,
+                currency: tokenWallet.symbol.name,
                 feesCurrency: 'TON',
                 data: data.toComment(),
               );
@@ -117,10 +117,10 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, TokenWalletTransactionsSt
                 .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
 
             if (_transactions.isNotEmpty) {
-              final prevTransId = _transactions.last.prevTransId;
+              final prevTransactionId = _transactions.last.prevTransactionId;
 
-              if (prevTransId != null) {
-                await tokenWallet.preloadTransactions(prevTransId);
+              if (prevTransactionId != null) {
+                await tokenWallet.preloadTransactions(prevTransactionId);
               }
             }
           } on Exception catch (err, st) {

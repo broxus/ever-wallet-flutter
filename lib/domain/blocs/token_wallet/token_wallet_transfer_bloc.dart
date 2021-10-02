@@ -41,7 +41,7 @@ class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
 
       yield TokenWalletTransferState.initial(
         balance: balance.toTokens(tokenWallet.symbol.decimals),
-        currency: tokenWallet.symbol.symbol,
+        currency: tokenWallet.symbol.name,
       );
     }
 
@@ -71,7 +71,7 @@ class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
             final ownerContractState = await tokenWallet.ownerContractState;
             final ownerBalance = ownerContractState.balance;
 
-            final currency = tokenWallet.symbol.symbol;
+            final currency = tokenWallet.symbol.name;
 
             final balance = await tokenWallet.balance;
 

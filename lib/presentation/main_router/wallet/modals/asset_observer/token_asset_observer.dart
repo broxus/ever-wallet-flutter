@@ -149,7 +149,7 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
                       SizedBox(
                         height: 20,
                         child: Text(
-                          symbol.symbol,
+                          symbol.name,
                           style: const TextStyle(
                             fontSize: 16,
                             letterSpacing: 0.75,
@@ -256,7 +256,7 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
                   radius: const Radius.circular(8),
                   controller: _historyScrollController,
                   child: PreloadTransactionsListener(
-                    prevTransId: transactions.lastOrNull?.prevTransId,
+                    prevTransactionId: transactions.lastOrNull?.prevTransactionId,
                     onLoad: () =>
                         tokenWalletTransactionsBloc.add(const TokenWalletTransactionsEvent.preloadTransactions()),
                     child: FadingEdgeScrollView.fromScrollView(

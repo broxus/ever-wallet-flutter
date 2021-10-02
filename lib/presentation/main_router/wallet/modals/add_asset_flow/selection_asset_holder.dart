@@ -62,7 +62,7 @@ class SelectionAssetHolder extends StatelessWidget {
                       SizedBox(
                         height: 20,
                         child: Text(
-                          asset.symbol,
+                          asset.name,
                           style: const TextStyle(
                             fontSize: 14,
                             letterSpacing: 0.75,

@@ -238,7 +238,7 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
                   radius: const Radius.circular(8),
                   controller: _historyScrollController,
                   child: PreloadTransactionsListener(
-                    prevTransId: transactions.lastOrNull?.prevTransId,
+                    prevTransactionId: transactions.lastOrNull?.prevTransactionId,
                     onLoad: () => tonWalletTransactionsBloc.add(
                       const TonWalletTransactionsEvent.preloadTransactions(),
                     ),

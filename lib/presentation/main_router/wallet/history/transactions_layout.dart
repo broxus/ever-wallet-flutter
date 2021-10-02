@@ -47,7 +47,7 @@ class _TransactionsLayoutState extends State<TransactionsLayout> {
             duration: kThemeAnimationDuration,
             child: transactions.isNotEmpty
                 ? PreloadTransactionsListener(
-                    prevTransId: transactions.lastOrNull?.prevTransId,
+                    prevTransactionId: transactions.lastOrNull?.prevTransactionId,
                     onLoad: () => bloc.add(const TonWalletTransactionsEvent.preloadTransactions()),
                     child: ListView.separated(
                       padding: EdgeInsets.zero,

@@ -7,7 +7,7 @@ part 'wallet_transaction.freezed.dart';
 class WalletTransaction with _$WalletTransaction {
   const factory WalletTransaction.ordinary({
     required String hash,
-    TransactionId? prevTransId,
+    TransactionId? prevTransactionId,
     required String totalFees,
     required String address,
     required String value,
@@ -20,7 +20,7 @@ class WalletTransaction with _$WalletTransaction {
 
   const factory WalletTransaction.sent({
     required String hash,
-    TransactionId? prevTransId,
+    TransactionId? prevTransactionId,
     required String totalFees,
     required String address,
     required String value,
@@ -32,7 +32,7 @@ class WalletTransaction with _$WalletTransaction {
 
   const factory WalletTransaction.expired({
     required String hash,
-    TransactionId? prevTransId,
+    TransactionId? prevTransactionId,
     required String totalFees,
     required String address,
     required String value,

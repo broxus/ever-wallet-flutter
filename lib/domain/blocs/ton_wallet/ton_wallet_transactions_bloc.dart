@@ -67,10 +67,10 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
             final walletTransactions = expired
                 .map((e) => WalletTransaction.expired(
                       hash: e.id.hash,
-                      prevTransId: e.prevTransId,
+                      prevTransactionId: e.prevTransactionId,
                       totalFees: e.totalFees.toTokens(),
-                      address: e.outMsgs.first.dst ?? '',
-                      value: e.outMsgs.first.value.toTokens(),
+                      address: e.outMessages.first.dst ?? '',
+                      value: e.outMessages.first.value.toTokens(),
                       createdAt: e.createdAt.toDateTime(),
                       isOutgoing: true,
                       currency: 'TON',
@@ -97,10 +97,10 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
             final walletTransactions = sent
                 .map((e) => WalletTransaction.sent(
                       hash: e.id.hash,
-                      prevTransId: e.prevTransId,
+                      prevTransactionId: e.prevTransactionId,
                       totalFees: e.totalFees.toTokens(),
-                      address: e.outMsgs.first.dst ?? '',
-                      value: e.outMsgs.first.value.toTokens(),
+                      address: e.outMessages.first.dst ?? '',
+                      value: e.outMessages.first.value.toTokens(),
                       createdAt: e.createdAt.toDateTime(),
                       isOutgoing: true,
                       currency: 'TON',
@@ -128,14 +128,14 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
               final transaction = e.transaction;
               final data = e.data;
 
-              final isOutgoing = transaction.outMsgs.isNotEmpty;
+              final isOutgoing = transaction.outMessages.isNotEmpty;
 
-              final address = isOutgoing ? transaction.outMsgs.first.dst : transaction.inMsg.src;
-              final value = isOutgoing ? transaction.outMsgs.first.value : transaction.inMsg.value;
+              final address = isOutgoing ? transaction.outMessages.first.dst : transaction.inMessage.src;
+              final value = isOutgoing ? transaction.outMessages.first.value : transaction.inMessage.value;
 
               return WalletTransaction.ordinary(
                 hash: transaction.id.hash,
-                prevTransId: transaction.prevTransId,
+                prevTransactionId: transaction.prevTransactionId,
                 totalFees: transaction.totalFees.toTokens(),
                 address: address ?? '',
                 value: value.toTokens(),
@@ -171,10 +171,10 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
             final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
 
             if (_transactions.isNotEmpty) {
-              final prevTransId = _transactions.last.prevTransId;
+              final prevTransactionId = _transactions.last.prevTransactionId;
 
-              if (prevTransId != null) {
-                await tonWallet.preloadTransactions(prevTransId);
+              if (prevTransactionId != null) {
+                await tonWallet.preloadTransactions(prevTransactionId);
               }
             }
           } on Exception catch (err, st) {
