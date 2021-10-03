@@ -34,8 +34,7 @@ class HiveSource {
   Future<Box<TokenContractAssetDto>> get _tokenContractAssetsBox async =>
       Hive.openBox<TokenContractAssetDto>("token_contract_assets");
 
-  Future<Box<List<ConnectedSiteDto>>> get _connectedSitesBox async =>
-      Hive.openBox<List<ConnectedSiteDto>>("connected_sites");
+  Future<Box<List>> get _connectedSitesBox async => Hive.openBox<List>("connected_sites");
 
   Future<Box<Object?>> get _biometryPreferencesBox async => Hive.openBox<Object?>("biometry_preferences");
 
@@ -51,7 +50,7 @@ class HiveSource {
     return box.get(
       address,
       defaultValue: [],
-    )!;
+    )!.cast<ConnectedSiteDto>();
   }
 
   Future<void> addConnectedSite({

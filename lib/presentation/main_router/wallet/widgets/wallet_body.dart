@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../domain/blocs/account/current_accounts_bloc.dart';
+import '../../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../design/design.dart';
 import '../../../router.gr.dart';
 import 'profile_actions.dart';
@@ -11,7 +11,7 @@ class WalletBody extends StatelessWidget {
   final List<AssetsList> accounts;
   final AssetsList? currentAccount;
   final PanelController modalController;
-  final CurrentAccountsBloc bloc;
+  final AccountsBloc bloc;
 
   const WalletBody({
     Key? key,
@@ -62,10 +62,10 @@ class WalletBody extends StatelessWidget {
                     accounts: accounts,
                     onPageChanged: (i) {
                       if (i < accounts.length) {
-                        bloc.add(CurrentAccountsEvent.setCurrentAccount(accounts[i].address));
+                        bloc.add(AccountsEvent.setCurrentAccount(accounts[i].address));
                       } else {
                         modalController.hide();
-                        bloc.add(const CurrentAccountsEvent.setCurrentAccount(null));
+                        bloc.add(const AccountsEvent.setCurrentAccount(null));
                       }
                     },
                     onPageSelected: (i) {

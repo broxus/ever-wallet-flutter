@@ -9,21 +9,21 @@ import 'package:rxdart/rxdart.dart';
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
 
-part 'current_accounts_bloc.freezed.dart';
+part 'accounts_bloc.freezed.dart';
 
 @injectable
-class CurrentAccountsBloc extends Bloc<_Event, CurrentAccountsState> {
+class AccountsBloc extends Bloc<_Event, AccountsState> {
   final NekotonService _nekotonService;
   late final StreamSubscription _streamSubscription;
   final _accounts = <AssetsList>[];
   AssetsList? _currentAccount;
 
-  CurrentAccountsBloc(this._nekotonService) : super(const CurrentAccountsState.initial()) {
+  AccountsBloc(this._nekotonService) : super(const AccountsState.initial()) {
     _streamSubscription = Rx.combineLatest2<KeyStoreEntry?, List<AssetsList>, List<AssetsList>>(
       _nekotonService.currentKeyStream,
       _nekotonService.accountsStream,
       (a, b) => b.where((e) => e.publicKey == a?.publicKey).toList(),
-    ).listen((event) => add(_LocalEvent.updateCurrentAccounts(event)));
+    ).listen((event) => add(_LocalEvent.updateAccounts(event)));
   }
 
   @override
@@ -33,10 +33,10 @@ class CurrentAccountsBloc extends Bloc<_Event, CurrentAccountsState> {
   }
 
   @override
-  Stream<CurrentAccountsState> mapEventToState(_Event event) async* {
+  Stream<AccountsState> mapEventToState(_Event event) async* {
     if (event is _LocalEvent) {
       yield* event.when(
-        updateCurrentAccounts: (List<AssetsList> accounts) async* {
+        updateAccounts: (List<AssetsList> accounts) async* {
           try {
             _accounts
               ..clear()
@@ -50,31 +50,31 @@ class CurrentAccountsBloc extends Bloc<_Event, CurrentAccountsState> {
               _currentAccount = currentAccount;
             }
 
-            yield CurrentAccountsState.ready(
+            yield AccountsState.ready(
               accounts: [..._accounts],
               currentAccount: _currentAccount,
             );
           } on Exception catch (err, st) {
             logger.e(err, err, st);
-            yield CurrentAccountsState.error(err.toString());
+            yield AccountsState.error(err.toString());
           }
         },
       );
     }
 
-    if (event is CurrentAccountsEvent) {
+    if (event is AccountsEvent) {
       yield* event.when(
         setCurrentAccount: (String? address) async* {
           try {
             _currentAccount = _nekotonService.accounts.firstWhereOrNull((e) => e.address == address);
 
-            yield CurrentAccountsState.ready(
+            yield AccountsState.ready(
               accounts: [..._accounts],
               currentAccount: _currentAccount,
             );
           } on Exception catch (err, st) {
             logger.e(err, err, st);
-            yield CurrentAccountsState.error(err.toString());
+            yield AccountsState.error(err.toString());
           }
         },
       );
@@ -86,22 +86,22 @@ abstract class _Event {}
 
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
-  const factory _LocalEvent.updateCurrentAccounts(List<AssetsList> accounts) = _UpdateCurrentAccounts;
+  const factory _LocalEvent.updateAccounts(List<AssetsList> accounts) = _UpdateAccounts;
 }
 
 @freezed
-class CurrentAccountsEvent extends _Event with _$CurrentAccountsEvent {
-  const factory CurrentAccountsEvent.setCurrentAccount(String? address) = _SetCurrentAccount;
+class AccountsEvent extends _Event with _$AccountsEvent {
+  const factory AccountsEvent.setCurrentAccount(String? address) = _SetCurrentAccount;
 }
 
 @freezed
-class CurrentAccountsState with _$CurrentAccountsState {
-  const factory CurrentAccountsState.initial() = _Initial;
+class AccountsState with _$AccountsState {
+  const factory AccountsState.initial() = _Initial;
 
-  const factory CurrentAccountsState.ready({
+  const factory AccountsState.ready({
     required List<AssetsList> accounts,
     AssetsList? currentAccount,
   }) = _Ready;
 
-  const factory CurrentAccountsState.error(String info) = _Error;
+  const factory AccountsState.error(String info) = _Error;
 }

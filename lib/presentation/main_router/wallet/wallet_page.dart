@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/blocs/account/current_accounts_bloc.dart';
+import '../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
 import 'history/wallet_modal_body.dart';
@@ -16,12 +16,12 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> {
   final modalController = PanelController(initialState: PanelState.hidden);
-  final currentAccountsBloc = getIt.get<CurrentAccountsBloc>();
+  final accountsBloc = getIt.get<AccountsBloc>();
 
   @override
   void dispose() {
     modalController.close();
-    currentAccountsBloc.close();
+    accountsBloc.close();
     super.dispose();
   }
 
@@ -31,8 +31,8 @@ class _WalletPageState extends State<WalletPage> {
         child: ColoredBox(
           color: CrystalColor.background,
           child: AnimatedAppearance(
-            child: BlocBuilder<CurrentAccountsBloc, CurrentAccountsState>(
-              bloc: currentAccountsBloc,
+            child: BlocBuilder<AccountsBloc, AccountsState>(
+              bloc: accountsBloc,
               builder: (context, state) => state.maybeWhen(
                 ready: (accounts, currentAccount) => WalletScaffold(
                   modalController: modalController,
@@ -40,7 +40,7 @@ class _WalletPageState extends State<WalletPage> {
                     accounts: accounts,
                     currentAccount: currentAccount,
                     modalController: modalController,
-                    bloc: currentAccountsBloc,
+                    bloc: accountsBloc,
                   ),
                   modalBody: (controller) => currentAccount != null
                       ? WalletModalBody(

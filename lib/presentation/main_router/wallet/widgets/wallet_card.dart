@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:crystal/presentation/main_router/wallet/modals/connected_sites_body.dart';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -415,24 +416,24 @@ class _WalletCardState extends State<WalletCard> {
                           thickness: 1,
                           color: Platform.isIOS ? const Color.fromRGBO(60, 60, 67, 0.36) : CrystalColor.divider,
                         ),
-                        // buildDropDownAction(
-                        //   onTap: () {
-                        //     menuController.dismiss();
+                        buildDropDownAction(
+                          onTap: () {
+                            menuController.dismiss();
 
-                        //     showCrystalBottomSheet(
-                        //       context,
-                        //       title: ConnectedSitesBody.title,
-                        //       padding: const EdgeInsets.symmetric(horizontal: 8),
-                        //       body: ConnectedSitesBody(
-                        //         subscriptionSubject: widget.subscriptionSubject,
-                        //       ),
-                        //       expand: false,
-                        //       avoidBottomInsets: false,
-                        //       hasTitleDivider: true,
-                        //     );
-                        //   },
-                        //   title: ConnectedSitesBody.title,
-                        // ),
+                            showCrystalBottomSheet(
+                              context,
+                              title: ConnectedSitesBody.title,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              body: ConnectedSitesBody(
+                                address: address,
+                              ),
+                              expand: false,
+                              avoidBottomInsets: false,
+                              hasTitleDivider: true,
+                            );
+                          },
+                          title: ConnectedSitesBody.title,
+                        ),
                         Divider(
                           height: 1,
                           thickness: 1,
