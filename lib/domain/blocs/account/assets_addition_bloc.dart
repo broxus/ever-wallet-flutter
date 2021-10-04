@@ -185,8 +185,8 @@ class AssetsAdditionBloc extends Bloc<_Event, AssetsAdditionState> {
       return asset;
     } else {
       final asset = TokenContractAsset(
-        name: symbol.name,
-        fullName: symbol.fullName,
+        name: symbol.fullName,
+        symbol: symbol.name,
         decimals: symbol.decimals,
         address: symbol.rootTokenContract,
         version: version.index + 1,
