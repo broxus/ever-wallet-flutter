@@ -40,11 +40,13 @@ class _WebviewPageState extends State<WebviewPage> {
   final providerRequestsBloc = getIt.get<ProviderRequestsBloc>();
   final providerEventsBloc = getIt.get<ProviderEventsBloc>();
   final inAppWebViewControllerCompleter = Completer<InAppWebViewController>();
+  late final String origin;
 
   @override
   void initState() {
     super.initState();
     tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
+    origin = widget.url;
   }
 
   @override
@@ -487,10 +489,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = CodeToTvcInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onCodeToTvc(
+        origin: origin,
+        input: input,
+      ),
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        codeToTvc: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
 
-    const output = CodeToTvcOutput(tvc: "tvc");
+    final output = state.maybeWhen(
+      codeToTvc: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -500,15 +515,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = DecodeEventInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    const output = DecodeEventOutput(
-      event: "event",
-      data: {
-        "data": "data",
-      },
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onDecodeEvent(
+        origin: origin,
+        input: input,
+      ),
     );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        decodeEvent: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
+
+    final output = state.maybeWhen(
+      decodeEvent: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -518,15 +541,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = DecodeInputInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    const output = DecodeInputOutput(
-      method: "method",
-      input: {
-        "input": "input",
-      },
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onDecodeInput(
+        origin: origin,
+        input: input,
+      ),
     );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        decodeInput: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
+
+    final output = state.maybeWhen(
+      decodeInput: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -536,15 +567,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = DecodeOutputInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    const output = DecodeOutputOutput(
-      method: "method",
-      output: {
-        "output": "output",
-      },
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onDecodeOutput(
+        origin: origin,
+        input: input,
+      ),
     );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        decodeOutput: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
+
+    final output = state.maybeWhen(
+      decodeOutput: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -554,10 +593,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = DecodeTransactionEventsInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onDecodeTransactionEvents(
+        origin: origin,
+        input: input,
+      ),
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        decodeTransactionEvents: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
 
-    const output = DecodeTransactionEventsOutput(events: []);
+    final output = state.maybeWhen(
+      decodeTransactionEvents: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -567,36 +619,63 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = DecodeTransactionInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    const output = DecodeTransactionOutput(
-      method: "method",
-      input: {
-        "input": "input",
-      },
-      output: {
-        "output": "output",
-      },
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onDecodeTransaction(
+        origin: origin,
+        input: input,
+      ),
     );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        decodeTransaction: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
+
+    final output = state.maybeWhen(
+      decodeTransaction: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
   }
 
   Future<dynamic> disconnectHandler(List<dynamic> args) async {
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint("disconnected");
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onDisconnect(
+        origin: origin,
+      ),
+    );
+    await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        disconnect: (value) => value.origin == origin,
+        orElse: () => false,
+      ),
+    );
   }
 
   Future<dynamic> encodeInternalInputHandler(List<dynamic> args) async {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = EncodeInternalInputInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onEncodeInternalInput(
+        origin: origin,
+        input: input,
+      ),
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        encodeInternalInput: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
 
-    const output = EncodeInternalInputOutput(boc: "boc");
+    final output = state.maybeWhen(
+      encodeInternalInput: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -606,10 +685,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = EstimateFeesInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onEstimateFees(
+        origin: origin,
+        input: input,
+      ),
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        estimateFees: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
 
-    const output = EstimateFeesOutput(fees: "fees");
+    final output = state.maybeWhen(
+      estimateFees: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -619,10 +711,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = ExtractPublicKeyInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onExtractPublicKey(
+        origin: origin,
+        input: input,
+      ),
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        extractPublicKey: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
 
-    const output = ExtractPublicKeyOutput(publicKey: "publicKey");
+    final output = state.maybeWhen(
+      extractPublicKey: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -632,10 +737,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = GetExpectedAddressInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onGetExpectedAddress(
+        origin: origin,
+        input: input,
+      ),
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        getExpectedAddress: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
 
-    const output = GetExpectedAddressOutput(address: "address");
+    final output = state.maybeWhen(
+      getExpectedAddress: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -645,53 +763,45 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = GetFullContractStateInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    const output = GetFullContractStateOutput(
-      state: FullContractState(
-        balance: "balance",
-        genTimings: GenTimings(
-          genLt: "genLt",
-          genUtime: 0,
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onGetFullContractState(
+        origin: origin,
+        input: input,
         ),
-        lastTransactionId: LastTransactionId(
-          isExact: true,
-          lt: "lt",
-          hash: "hash",
-        ),
-        isDeployed: true,
-        boc: "boc",
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        getFullContractState: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
       ),
     );
+
+    final output = state.maybeWhen(
+      getFullContractState: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
   }
 
   Future<dynamic> getProviderStateHandler(List<dynamic> args) async {
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint("get provider state");
-
-    final output = GetProviderStateOutput(
-      version: "version",
-      numericVersion: 0,
-      selectedConnection: "selectedConnection",
-      permissions: Permissions(
-        tonClient: true,
-        accountInteraction: AccountInteraction(
-          address: "address",
-          publicKey: "publicKey",
-          contractType: WalletContractType.values.first,
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onGetProviderState(
+        origin: origin,
         ),
-      ),
-      subscriptions: {
-        "address": const ContractUpdatesSubscription(
-          state: true,
-          transactions: true,
-        ),
-      },
     );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        getProviderState: (value) => value.origin == origin,
+        orElse: () => false,
+      ),
+    );
+
+    final output = state.maybeWhen(
+      getProviderState: (origin, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -701,52 +811,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = GetTransactionsInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    final output = GetTransactionsOutput(
-      transactions: [
-        Transaction(
-          id: const TransactionId(
-            lt: "lt",
-            hash: "hash",
-          ),
-          prevTransactionId: const TransactionId(
-            lt: "lt",
-            hash: "hash",
-          ),
-          createdAt: 1,
-          aborted: true,
-          origStatus: AccountStatus.values.first,
-          endStatus: AccountStatus.values.first,
-          totalFees: "totalFees",
-          inMessage: const Message(
-            src: "src",
-            dst: "dst",
-            value: "value",
-            bounce: true,
-            bounced: true,
-            body: "body",
-            bodyHash: "bodyHash",
-          ),
-          outMessages: const [
-            Message(
-              src: "src",
-              dst: "dst",
-              value: "value",
-              bounce: true,
-              bounced: true,
-              body: "body",
-              bodyHash: "bodyHash",
-            ),
-          ],
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onGetTransactions(
+        origin: origin,
+        input: input,
         ),
-      ],
-      continuation: const TransactionId(
-        lt: "lt",
-        hash: "hash",
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        getTransactions: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
       ),
     );
+
+    final output = state.maybeWhen(
+      getTransactions: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -756,10 +837,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = PackIntoCellInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onPackIntoCell(
+        origin: origin,
+        input: input,
+      ),
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        packIntoCell: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
 
-    const output = PackIntoCellOutput(boc: "boc");
+    final output = state.maybeWhen(
+      packIntoCell: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -769,17 +863,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = RequestPermissionsInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    final output = RequestPermissionsOutput(
-      tonClient: true,
-      accountInteraction: AccountInteraction(
-        address: "address",
-        publicKey: "publicKey",
-        contractType: WalletContractType.values.first,
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onRequestPermissions(
+        origin: origin,
+        input: input,
       ),
     );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        requestPermissions: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
+
+    final output = state.maybeWhen(
+      requestPermissions: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -789,10 +889,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = RunLocalInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onRunLocal(
+        origin: origin,
+        input: input,
+      ),
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        runLocal: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
 
-    const output = RunLocalOutput(output: {"output": "output"}, code: 0);
+    final output = state.maybeWhen(
+      runLocal: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -802,49 +915,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = SendExternalMessageInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    final output = SendExternalMessageOutput(
-      transaction: Transaction(
-        id: const TransactionId(
-          lt: "lt",
-          hash: "hash",
-        ),
-        prevTransactionId: const TransactionId(
-          lt: "lt",
-          hash: "hash",
-        ),
-        createdAt: 1,
-        aborted: true,
-        origStatus: AccountStatus.values.first,
-        endStatus: AccountStatus.values.first,
-        totalFees: "totalFees",
-        inMessage: const Message(
-          src: "src",
-          dst: "dst",
-          value: "value",
-          bounce: true,
-          bounced: true,
-          body: "body",
-          bodyHash: "bodyHash",
-        ),
-        outMessages: [
-          const Message(
-            src: "src",
-            dst: "dst",
-            value: "value",
-            bounce: true,
-            bounced: true,
-            body: "body",
-            bodyHash: "bodyHash",
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onSendExternalMessage(
+        origin: origin,
+        input: input,
           ),
-        ],
-      ),
-      output: {
-        "output": "output",
-      },
     );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        sendExternalMessage: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
+
+    final output = state.maybeWhen(
+      sendExternalMessage: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -854,46 +941,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = SendMessageInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    final output = SendMessageOutput(
-      transaction: Transaction(
-        id: const TransactionId(
-          lt: "lt",
-          hash: "hash",
-        ),
-        prevTransactionId: const TransactionId(
-          lt: "lt",
-          hash: "hash",
-        ),
-        createdAt: 1,
-        aborted: true,
-        origStatus: AccountStatus.values.first,
-        endStatus: AccountStatus.values.first,
-        totalFees: "totalFees",
-        inMessage: const Message(
-          src: "src",
-          dst: "dst",
-          value: "value",
-          bounce: true,
-          bounced: true,
-          body: "body",
-          bodyHash: "bodyHash",
-        ),
-        outMessages: [
-          const Message(
-            src: "src",
-            dst: "dst",
-            value: "value",
-            bounce: true,
-            bounced: true,
-            body: "body",
-            bodyHash: "bodyHash",
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onSendMessage(
+        origin: origin,
+        input: input,
           ),
-        ],
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        sendMessage: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
       ),
     );
+
+    final output = state.maybeWhen(
+      sendMessage: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -903,13 +967,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = SplitTvcInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    const output = SplitTvcOutput(
-      data: "data",
-      code: "code",
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onSplitTvc(
+        origin: origin,
+        input: input,
+      ),
     );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        splitTvc: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
+
+    final output = state.maybeWhen(
+      splitTvc: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -919,13 +993,23 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = SubscribeInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-
-    const output = SubscribeOutput(
-      state: true,
-      transactions: true,
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onSubscribe(
+        origin: origin,
+        input: input,
+      ),
     );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        subscribe: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
+
+    final output = state.maybeWhen(
+      subscribe: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
@@ -935,26 +1019,57 @@ class _WebviewPageState extends State<WebviewPage> {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = UnpackFromCellInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onUnpackFromCell(
+        origin: origin,
+        input: input,
+      ),
+    );
+    final state = await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        unpackFromCell: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
 
-    const output = UnpackFromCellOutput(data: {"data": "data"});
+    final output = state.maybeWhen(
+      unpackFromCell: (origin, input, output) => output,
+      orElse: () => null,
+    )!;
     final jsonOutput = jsonEncode(output.toJson());
 
     return jsonOutput;
   }
 
   Future<dynamic> unsubscribeAllHandler(List<dynamic> args) async {
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint("unsubscribed all");
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onUnsubscribeAll(
+        origin: origin,
+      ),
+    );
+    await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        unsubscribeAll: (value) => value.origin == origin,
+        orElse: () => false,
+      ),
+    );
   }
 
   Future<dynamic> unsubscribeHandler(List<dynamic> args) async {
     final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
     final input = UnsubscribeInput.fromJson(jsonInput);
 
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(input.toString());
-    debugPrint("unsubscribed");
+    providerRequestsBloc.add(
+      ProviderRequestsEvent.onUnsubscribe(
+        origin: origin,
+        input: input,
+      ),
+    );
+    await providerRequestsBloc.stream.firstWhere(
+      (e) => e.maybeMap(
+        unsubscribe: (value) => value.origin == origin && value.input == input,
+        orElse: () => false,
+      ),
+    );
   }
 }
