@@ -451,625 +451,868 @@ class _WebviewPageState extends State<WebviewPage> {
   }
 
   Future<void> disconnectedCaller(Error event) async {
-    final jsonOutput = jsonEncode(event.toJson());
+    try {
+      final jsonOutput = jsonEncode(event.toJson());
+      logger.d('EVENT disconnected $jsonOutput');
 
-    final controller = await inAppWebViewControllerCompleter.future;
-    controller.evaluateJavascript(source: 'disconnected($jsonOutput)');
+      final controller = await inAppWebViewControllerCompleter.future;
+      final result = await controller.evaluateJavascript(source: "disconnected('$jsonOutput')");
+
+      logger.d('EVENT disconnected $result');
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<void> transactionsFoundCaller(TransactionsFoundEvent event) async {
-    final jsonOutput = jsonEncode(event.toJson());
+    try {
+      final jsonOutput = jsonEncode(event.toJson());
+      logger.d('EVENT transactionsFound $jsonOutput');
 
-    final controller = await inAppWebViewControllerCompleter.future;
-    controller.evaluateJavascript(source: 'transactionsFound($jsonOutput)');
+      final controller = await inAppWebViewControllerCompleter.future;
+      final result = await controller.evaluateJavascript(source: "transactionsFound('$jsonOutput')");
+
+      logger.d('EVENT transactionsFound $result');
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
-  Future<void> contractStateChangedCaller(ContractStateChangedEvent event) async {}
+  Future<void> contractStateChangedCaller(ContractStateChangedEvent event) async {
+    try {
+      final jsonOutput = jsonEncode(event.toJson());
+      logger.d('EVENT contractStateChanged $jsonOutput');
+
+      final controller = await inAppWebViewControllerCompleter.future;
+      final result = await controller.evaluateJavascript(source: "contractStateChanged('$jsonOutput')");
+
+      logger.d('EVENT contractStateChanged $result');
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
+  }
 
   Future<void> networkChangedCaller(NetworkChangedEvent event) async {
-    final jsonOutput = jsonEncode(event.toJson());
+    try {
+      final jsonOutput = jsonEncode(event.toJson());
+      logger.d('EVENT networkChanged $jsonOutput');
 
-    final controller = await inAppWebViewControllerCompleter.future;
-    controller.evaluateJavascript(source: 'networkChanged($jsonOutput)');
+      final controller = await inAppWebViewControllerCompleter.future;
+      final result = await controller.evaluateJavascript(source: "networkChanged('$jsonOutput')");
+
+      logger.d('EVENT networkChanged $result');
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<void> permissionsChangedCaller(PermissionsChangedEvent event) async {
-    final jsonOutput = jsonEncode(event.toJson());
+    try {
+      final jsonOutput = jsonEncode(event.toJson());
+      logger.d('EVENT permissionsChanged $jsonOutput');
 
-    final controller = await inAppWebViewControllerCompleter.future;
-    controller.evaluateJavascript(source: 'permissionsChanged($jsonOutput)');
+      final controller = await inAppWebViewControllerCompleter.future;
+      final result = await controller.evaluateJavascript(source: "permissionsChanged('$jsonOutput')");
+
+      logger.d('EVENT permissionsChanged $result');
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<void> loggedOutCaller(Object event) async {
-    final controller = await inAppWebViewControllerCompleter.future;
-    controller.evaluateJavascript(source: 'loggedOut()');
+    try {
+      logger.d('EVENT loggedOut');
+
+      final controller = await inAppWebViewControllerCompleter.future;
+      final result = await controller.evaluateJavascript(source: 'loggedOut()');
+
+      logger.d('EVENT loggedOut $result');
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> codeToTvcHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = CodeToTvcInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('codeToTvc args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onCodeToTvc(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        codeToTvc: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = CodeToTvcInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      codeToTvc: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onCodeToTvc(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          codeToTvc: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        codeToTvc: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('codeToTvc result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> decodeEventHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = DecodeEventInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('decodeEvent args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onDecodeEvent(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        decodeEvent: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = DecodeEventInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      decodeEvent: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onDecodeEvent(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          decodeEvent: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        decodeEvent: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('decodeEvent result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> decodeInputHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = DecodeInputInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('decodeInput args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onDecodeInput(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        decodeInput: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = DecodeInputInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      decodeInput: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onDecodeInput(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          decodeInput: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        decodeInput: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('decodeInput result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> decodeOutputHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = DecodeOutputInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('decodeOutput args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onDecodeOutput(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        decodeOutput: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = DecodeOutputInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      decodeOutput: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onDecodeOutput(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          decodeOutput: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        decodeOutput: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('decodeOutput result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> decodeTransactionEventsHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = DecodeTransactionEventsInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('decodeTransactionEvents args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onDecodeTransactionEvents(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        decodeTransactionEvents: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = DecodeTransactionEventsInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      decodeTransactionEvents: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onDecodeTransactionEvents(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          decodeTransactionEvents: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        decodeTransactionEvents: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('decodeTransactionEvents result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> decodeTransactionHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = DecodeTransactionInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('decodeTransaction args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onDecodeTransaction(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        decodeTransaction: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = DecodeTransactionInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      decodeTransaction: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onDecodeTransaction(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          decodeTransaction: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        decodeTransaction: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('decodeTransaction result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> disconnectHandler(List<dynamic> args) async {
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onDisconnect(
-        origin: origin,
-      ),
-    );
-    await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        disconnect: (value) => value.origin == origin,
-        orElse: () => false,
-      ),
-    );
+    try {
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onDisconnect(
+          origin: origin,
+        ),
+      );
+      await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          disconnect: (value) => value.origin == origin,
+          orElse: () => false,
+        ),
+      );
+
+      final jsonOutput = {};
+      logger.d('disconnect result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> encodeInternalInputHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = EncodeInternalInputInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('encodeInternalInput args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onEncodeInternalInput(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        encodeInternalInput: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = EncodeInternalInputInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      encodeInternalInput: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onEncodeInternalInput(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          encodeInternalInput: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        encodeInternalInput: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('encodeInternalInput result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> estimateFeesHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = EstimateFeesInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('estimateFees args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onEstimateFees(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        estimateFees: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = EstimateFeesInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      estimateFees: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onEstimateFees(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          estimateFees: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        estimateFees: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('estimateFees result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> extractPublicKeyHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = ExtractPublicKeyInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('extractPublicKey args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onExtractPublicKey(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        extractPublicKey: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = ExtractPublicKeyInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      extractPublicKey: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onExtractPublicKey(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          extractPublicKey: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        extractPublicKey: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('extractPublicKey result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> getExpectedAddressHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = GetExpectedAddressInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('getExpectedAddress args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onGetExpectedAddress(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        getExpectedAddress: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = GetExpectedAddressInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      getExpectedAddress: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onGetExpectedAddress(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          getExpectedAddress: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        getExpectedAddress: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('getExpectedAddress result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> getFullContractStateHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = GetFullContractStateInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('getFullContractState args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onGetFullContractState(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        getFullContractState: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = GetFullContractStateInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      getFullContractState: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onGetFullContractState(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          getFullContractState: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        getFullContractState: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('getFullContractState result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> getProviderStateHandler(List<dynamic> args) async {
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onGetProviderState(
-        origin: origin,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        getProviderState: (value) => value.origin == origin,
-        orElse: () => false,
-      ),
-    );
+    try {
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onGetProviderState(
+          origin: origin,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          getProviderState: (value) => value.origin == origin,
+          orElse: () => false,
+        ),
+      );
 
-    final output = state.maybeWhen(
-      getProviderState: (origin, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      final output = state.maybeWhen(
+        getProviderState: (origin, output) => output,
+        orElse: () => null,
+      )!;
 
-    return jsonOutput;
+      final jsonOutput = output.toJson();
+      logger.d('getProviderState result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> getTransactionsHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = GetTransactionsInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('getTransactions args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onGetTransactions(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        getTransactions: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = GetTransactionsInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      getTransactions: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onGetTransactions(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          getTransactions: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        getTransactions: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('getTransactions result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> packIntoCellHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = PackIntoCellInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('packIntoCell args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onPackIntoCell(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        packIntoCell: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = PackIntoCellInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      packIntoCell: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onPackIntoCell(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          packIntoCell: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        packIntoCell: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('packIntoCell result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> requestPermissionsHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = RequestPermissionsInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('requestPermissions args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onRequestPermissions(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        requestPermissions: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = RequestPermissionsInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      requestPermissions: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onRequestPermissions(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          requestPermissions: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        requestPermissions: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('requestPermissions result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> runLocalHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = RunLocalInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('runLocal args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onRunLocal(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        runLocal: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = RunLocalInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      runLocal: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onRunLocal(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          runLocal: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        runLocal: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('runLocal result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> sendExternalMessageHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = SendExternalMessageInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('sendExternalMessage args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onSendExternalMessage(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        sendExternalMessage: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = SendExternalMessageInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      sendExternalMessage: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onSendExternalMessage(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          sendExternalMessage: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        sendExternalMessage: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('sendExternalMessage result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> sendMessageHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = SendMessageInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('sendMessage args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onSendMessage(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        sendMessage: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = SendMessageInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      sendMessage: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onSendMessage(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          sendMessage: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        sendMessage: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('sendMessage result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> splitTvcHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = SplitTvcInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('splitTvc args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onSplitTvc(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        splitTvc: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = SplitTvcInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      splitTvc: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onSplitTvc(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          splitTvc: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        splitTvc: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('splitTvc result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> subscribeHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = SubscribeInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('subscribe args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onSubscribe(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        subscribe: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = SubscribeInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      subscribe: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onSubscribe(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          subscribe: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        subscribe: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('subscribe result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> unpackFromCellHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = UnpackFromCellInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('unpackFromCell args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onUnpackFromCell(
-        origin: origin,
-        input: input,
-      ),
-    );
-    final state = await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        unpackFromCell: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = UnpackFromCellInput.fromJson(jsonInput);
 
-    final output = state.maybeWhen(
-      unpackFromCell: (origin, input, output) => output,
-      orElse: () => null,
-    )!;
-    final jsonOutput = jsonEncode(output.toJson());
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onUnpackFromCell(
+          origin: origin,
+          input: input,
+        ),
+      );
+      final state = await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          unpackFromCell: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
 
-    return jsonOutput;
+      final output = state.maybeWhen(
+        unpackFromCell: (origin, input, output) => output,
+        orElse: () => null,
+      )!;
+
+      final jsonOutput = output.toJson();
+      logger.d('unpackFromCell result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> unsubscribeAllHandler(List<dynamic> args) async {
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onUnsubscribeAll(
-        origin: origin,
-      ),
-    );
-    await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        unsubscribeAll: (value) => value.origin == origin,
-        orElse: () => false,
-      ),
-    );
+    try {
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onUnsubscribeAll(
+          origin: origin,
+        ),
+      );
+      await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          unsubscribeAll: (value) => value.origin == origin,
+          orElse: () => false,
+        ),
+      );
+
+      final jsonOutput = {};
+      logger.d('unsubscribeAll result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 
   Future<dynamic> unsubscribeHandler(List<dynamic> args) async {
-    final jsonInput = jsonDecode(args.first as String) as Map<String, dynamic>;
-    final input = UnsubscribeInput.fromJson(jsonInput);
+    try {
+      final jsonInput = args.first as Map<String, dynamic>;
+      logger.d('unsubscribe args $jsonInput');
 
-    providerRequestsBloc.add(
-      ProviderRequestsEvent.onUnsubscribe(
-        origin: origin,
-        input: input,
-      ),
-    );
-    await providerRequestsBloc.stream.firstWhere(
-      (e) => e.maybeMap(
-        unsubscribe: (value) => value.origin == origin && value.input == input,
-        orElse: () => false,
-      ),
-    );
+      final input = UnsubscribeInput.fromJson(jsonInput);
+
+      providerRequestsBloc.add(
+        ProviderRequestsEvent.onUnsubscribe(
+          origin: origin,
+          input: input,
+        ),
+      );
+      await providerRequestsBloc.stream.firstWhere(
+        (e) => e.maybeMap(
+          unsubscribe: (value) => value.origin == origin && value.input == input,
+          orElse: () => false,
+        ),
+      );
+
+      final jsonOutput = {};
+      logger.d('unsubscribe result $jsonOutput');
+
+      return jsonOutput;
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 }
