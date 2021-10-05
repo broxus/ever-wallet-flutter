@@ -558,7 +558,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('codeToTvc result $jsonOutput');
 
       return jsonOutput;
@@ -592,7 +592,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('decodeEvent result $jsonOutput');
 
       return jsonOutput;
@@ -626,7 +626,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('decodeInput result $jsonOutput');
 
       return jsonOutput;
@@ -660,7 +660,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('decodeOutput result $jsonOutput');
 
       return jsonOutput;
@@ -694,7 +694,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('decodeTransactionEvents result $jsonOutput');
 
       return jsonOutput;
@@ -728,7 +728,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('decodeTransaction result $jsonOutput');
 
       return jsonOutput;
@@ -785,7 +785,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('encodeInternalInput result $jsonOutput');
 
       return jsonOutput;
@@ -819,7 +819,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('estimateFees result $jsonOutput');
 
       return jsonOutput;
@@ -853,7 +853,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('extractPublicKey result $jsonOutput');
 
       return jsonOutput;
@@ -887,7 +887,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('getExpectedAddress result $jsonOutput');
 
       return jsonOutput;
@@ -921,7 +921,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('getFullContractState result $jsonOutput');
 
       return jsonOutput;
@@ -949,7 +949,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('getProviderState result $jsonOutput');
 
       return jsonOutput;
@@ -983,7 +983,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('getTransactions result $jsonOutput');
 
       return jsonOutput;
@@ -1017,7 +1017,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('packIntoCell result $jsonOutput');
 
       return jsonOutput;
@@ -1051,7 +1051,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('requestPermissions result $jsonOutput');
 
       return jsonOutput;
@@ -1085,7 +1085,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('runLocal result $jsonOutput');
 
       return jsonOutput;
@@ -1119,7 +1119,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('sendExternalMessage result $jsonOutput');
 
       return jsonOutput;
@@ -1153,7 +1153,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('sendMessage result $jsonOutput');
 
       return jsonOutput;
@@ -1187,7 +1187,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('splitTvc result $jsonOutput');
 
       return jsonOutput;
@@ -1221,7 +1221,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('subscribe result $jsonOutput');
 
       return jsonOutput;
@@ -1255,7 +1255,7 @@ class _WebviewPageState extends State<WebviewPage> {
         orElse: () => null,
       )!;
 
-      final jsonOutput = output.toJson();
+      final jsonOutput = jsonEncode(output.toJson());
       logger.d('unpackFromCell result $jsonOutput');
 
       return jsonOutput;
