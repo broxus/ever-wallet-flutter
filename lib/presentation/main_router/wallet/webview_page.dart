@@ -512,7 +512,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT permissionsChanged $jsonOutput');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: "permissionsChanged('$jsonOutput')");
+      final result = await controller.evaluateJavascript(source: "window.__dartNotifications.permissionsChanged('$jsonOutput')");
 
       logger.d('EVENT permissionsChanged $result');
     } catch (err, st) {
