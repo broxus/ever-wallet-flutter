@@ -7,7 +7,7 @@ class TokenContractAsset with _$TokenContractAsset {
   const factory TokenContractAsset({
     required String name,
     int? chainId,
-    required String fullName,
+    required String symbol,
     required int decimals,
     required String address,
     String? logoURI,

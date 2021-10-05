@@ -13,7 +13,7 @@ class TokenContractAssetDto with _$TokenContractAssetDto {
   const factory TokenContractAssetDto({
     @HiveField(0) required String name,
     @HiveField(1) int? chainId,
-    @HiveField(2) required String fullName,
+    @HiveField(2) required String symbol,
     @HiveField(3) required int decimals,
     @HiveField(4) required String address,
     @HiveField(5) String? logoURI,
@@ -25,7 +25,7 @@ class TokenContractAssetDto with _$TokenContractAssetDto {
   factory TokenContractAssetDto.fromDomain(TokenContractAsset tokenContractAsset) => TokenContractAssetDto(
         name: tokenContractAsset.name,
         chainId: tokenContractAsset.chainId,
-        fullName: tokenContractAsset.fullName,
+        symbol: tokenContractAsset.symbol,
         decimals: tokenContractAsset.decimals,
         address: tokenContractAsset.address,
         logoURI: tokenContractAsset.logoURI,
@@ -37,7 +37,7 @@ class TokenContractAssetDto with _$TokenContractAssetDto {
   TokenContractAsset toDomain() => TokenContractAsset(
         name: name,
         chainId: chainId,
-        fullName: fullName,
+        symbol: symbol,
         decimals: decimals,
         address: address,
         logoURI: logoURI,
