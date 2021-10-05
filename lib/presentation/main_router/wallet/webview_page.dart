@@ -590,9 +590,9 @@ class _WebviewPageState extends State<WebviewPage> {
       final output = state.maybeWhen(
         decodeEvent: (origin, input, output) => output,
         orElse: () => null,
-      )!;
+      );
 
-      final jsonOutput = jsonEncode(output.toJson());
+      final jsonOutput = jsonEncode(output?.toJson());
       logger.d('decodeEvent result $jsonOutput');
 
       return jsonOutput;
@@ -624,9 +624,9 @@ class _WebviewPageState extends State<WebviewPage> {
       final output = state.maybeWhen(
         decodeInput: (origin, input, output) => output,
         orElse: () => null,
-      )!;
+      );
 
-      final jsonOutput = jsonEncode(output.toJson());
+      final jsonOutput = jsonEncode(output?.toJson());
       logger.d('decodeInput result $jsonOutput');
 
       return jsonOutput;
@@ -658,9 +658,9 @@ class _WebviewPageState extends State<WebviewPage> {
       final output = state.maybeWhen(
         decodeOutput: (origin, input, output) => output,
         orElse: () => null,
-      )!;
+      );
 
-      final jsonOutput = jsonEncode(output.toJson());
+      final jsonOutput = jsonEncode(output?.toJson());
       logger.d('decodeOutput result $jsonOutput');
 
       return jsonOutput;
@@ -726,9 +726,9 @@ class _WebviewPageState extends State<WebviewPage> {
       final output = state.maybeWhen(
         decodeTransaction: (origin, input, output) => output,
         orElse: () => null,
-      )!;
+      );
 
-      final jsonOutput = jsonEncode(output.toJson());
+      final jsonOutput = jsonEncode(output?.toJson());
       logger.d('decodeTransaction result $jsonOutput');
 
       return jsonOutput;
