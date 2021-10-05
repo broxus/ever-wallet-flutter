@@ -456,7 +456,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT disconnected $jsonOutput');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: "disconnected('$jsonOutput')");
+      final result = await controller.evaluateJavascript(source: "window.__dartNotifications.disconnected('$jsonOutput')");
 
       logger.d('EVENT disconnected $result');
     } catch (err, st) {
@@ -470,7 +470,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT transactionsFound $jsonOutput');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: "transactionsFound('$jsonOutput')");
+      final result = await controller.evaluateJavascript(source: "window.__dartNotifications.transactionsFound('$jsonOutput')");
 
       logger.d('EVENT transactionsFound $result');
     } catch (err, st) {
@@ -484,7 +484,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT contractStateChanged $jsonOutput');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: "contractStateChanged('$jsonOutput')");
+      final result = await controller.evaluateJavascript(source: "window.__dartNotifications.contractStateChanged('$jsonOutput')");
 
       logger.d('EVENT contractStateChanged $result');
     } catch (err, st) {
@@ -498,7 +498,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT networkChanged $jsonOutput');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: "networkChanged('$jsonOutput')");
+      final result = await controller.evaluateJavascript(source: "window.__dartNotifications.networkChanged('$jsonOutput')");
 
       logger.d('EVENT networkChanged $result');
     } catch (err, st) {
@@ -525,7 +525,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT loggedOut');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: 'loggedOut()');
+      final result = await controller.evaluateJavascript(source: 'window.__dartNotifications.loggedOut()');
 
       logger.d('EVENT loggedOut $result');
     } catch (err, st) {
