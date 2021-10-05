@@ -767,7 +767,7 @@ class _WebviewPageState extends State<WebviewPage> {
       ProviderRequestsEvent.onGetFullContractState(
         origin: origin,
         input: input,
-        ),
+      ),
     );
     final state = await providerRequestsBloc.stream.firstWhere(
       (e) => e.maybeMap(
@@ -789,7 +789,7 @@ class _WebviewPageState extends State<WebviewPage> {
     providerRequestsBloc.add(
       ProviderRequestsEvent.onGetProviderState(
         origin: origin,
-        ),
+      ),
     );
     final state = await providerRequestsBloc.stream.firstWhere(
       (e) => e.maybeMap(
@@ -815,7 +815,7 @@ class _WebviewPageState extends State<WebviewPage> {
       ProviderRequestsEvent.onGetTransactions(
         origin: origin,
         input: input,
-        ),
+      ),
     );
     final state = await providerRequestsBloc.stream.firstWhere(
       (e) => e.maybeMap(
@@ -919,7 +919,7 @@ class _WebviewPageState extends State<WebviewPage> {
       ProviderRequestsEvent.onSendExternalMessage(
         origin: origin,
         input: input,
-          ),
+      ),
     );
     final state = await providerRequestsBloc.stream.firstWhere(
       (e) => e.maybeMap(
@@ -945,7 +945,7 @@ class _WebviewPageState extends State<WebviewPage> {
       ProviderRequestsEvent.onSendMessage(
         origin: origin,
         input: input,
-          ),
+      ),
     );
     final state = await providerRequestsBloc.stream.firstWhere(
       (e) => e.maybeMap(
