@@ -767,7 +767,7 @@ class _WebviewPageState extends State<WebviewPage> {
         ),
       );
 
-      final jsonOutput = {};
+      final jsonOutput = jsonEncode({});
       logger.d('REQUEST disconnect result $jsonOutput');
 
       return jsonOutput;
@@ -1294,7 +1294,7 @@ class _WebviewPageState extends State<WebviewPage> {
         ),
       );
 
-      final jsonOutput = {};
+      final jsonOutput = jsonEncode({});
       logger.d('REQUEST unsubscribeAll result $jsonOutput');
 
       return jsonOutput;
@@ -1323,7 +1323,7 @@ class _WebviewPageState extends State<WebviewPage> {
         ),
       );
 
-      final jsonOutput = {};
+      final jsonOutput = jsonEncode({});
       logger.d('REQUEST unsubscribe result $jsonOutput');
 
       return jsonOutput;
