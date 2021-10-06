@@ -10,7 +10,6 @@ import '../../../../domain/blocs/misc/connected_sites_bloc.dart';
 import '../../../../domain/models/connected_site.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
-import '../../../router.gr.dart';
 
 class ConnectedSitesBody extends StatefulWidget {
   final String address;
@@ -132,38 +131,29 @@ class _ConnectedSitesBodyState extends State<ConnectedSitesBody> {
             Expanded(
               child: Material(
                 type: MaterialType.transparency,
-                child: CrystalInkWell(
-                  onTap: () {
-                    context.router.pop();
-                    context.router.innerRouterOf(WalletRouterRoute.name)?.navigate(WebviewRoute(
-                          address: widget.address,
-                          url: site.url,
-                        ));
-                  },
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 20,
-                        child: Text(
-                          site.url,
-                          style: const TextStyle(
-                            color: CrystalColor.fontDark,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 20,
+                      child: Text(
+                        site.url,
+                        style: const TextStyle(
+                          color: CrystalColor.fontDark,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      SizedBox(
-                        height: 20,
-                        child: Text(
-                          DateFormat('dd.MM.yyyy, HH:mm').format(site.time),
-                          style: const TextStyle(color: CrystalColor.hintColor),
-                        ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                      child: Text(
+                        DateFormat('dd.MM.yyyy, HH:mm').format(site.time),
+                        style: const TextStyle(color: CrystalColor.hintColor),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

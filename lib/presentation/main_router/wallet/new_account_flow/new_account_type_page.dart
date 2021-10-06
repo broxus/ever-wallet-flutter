@@ -126,7 +126,7 @@ class _NewAccountTypePageState extends State<NewAccountTypePage> {
       walletType: walletType,
     ));
 
-    if (context.router.root.current.name == WalletRouterRoute.name) {
+    if (context.router.root.current.name == MainRouterRoute.name) {
       context.router.navigate(const WalletRouterRoute());
     }
   }

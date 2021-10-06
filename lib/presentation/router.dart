@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 
 import 'loading_page/loading_page.dart';
+import 'main_router/main_router_page.dart';
 import 'main_router/settings/seed_phrase_export_page.dart';
 import 'main_router/settings/settings_page.dart';
 import 'main_router/wallet/new_account_flow/new_account_name_page.dart';
@@ -34,38 +35,44 @@ import 'welcome_router/welcome_page.dart';
       ],
     ),
     AdaptiveRoute(
-      name: 'WalletRouterRoute',
-      page: EmptyRouterPage,
+      page: MainRouterPage,
       children: [
-        AdaptiveRoute(page: WalletPage, initial: true),
         AdaptiveRoute(
-          name: 'NewAccountRouterRoute',
+          name: 'WalletRouterRoute',
           page: EmptyRouterPage,
+          initial: true,
           children: [
-            AdaptiveRoute(page: NewAccountNamePage, initial: true),
-            AdaptiveRoute(page: NewAccountTypePage),
+            AdaptiveRoute(page: WalletPage, initial: true),
+            AdaptiveRoute(
+              name: 'NewAccountRouterRoute',
+              page: EmptyRouterPage,
+              children: [
+                AdaptiveRoute(page: NewAccountNamePage, initial: true),
+                AdaptiveRoute(page: NewAccountTypePage),
+              ],
+            ),
           ],
         ),
         AdaptiveRoute(page: WebviewPage),
-      ],
-    ),
-    AdaptiveRoute(
-      name: 'SettingsRouterRoute',
-      page: EmptyRouterPage,
-      children: [
-        AdaptiveRoute(page: SettingsPage, initial: true),
         AdaptiveRoute(
-          name: 'NewSeedRouterRoute',
+          name: 'SettingsRouterRoute',
           page: EmptyRouterPage,
           children: [
-            AdaptiveRoute(page: NewSeedNamePage, initial: true),
-            AdaptiveRoute(page: SeedPhraseSavePage),
-            AdaptiveRoute(page: SeedPhraseCheckPage),
-            AdaptiveRoute(page: SeedPhraseImportPage),
-            AdaptiveRoute(page: PasswordCreationPage),
+            AdaptiveRoute(page: SettingsPage, initial: true),
+            AdaptiveRoute(
+              name: 'NewSeedRouterRoute',
+              page: EmptyRouterPage,
+              children: [
+                AdaptiveRoute(page: NewSeedNamePage, initial: true),
+                AdaptiveRoute(page: SeedPhraseSavePage),
+                AdaptiveRoute(page: SeedPhraseCheckPage),
+                AdaptiveRoute(page: SeedPhraseImportPage),
+                AdaptiveRoute(page: PasswordCreationPage),
+              ],
+            ),
+            AdaptiveRoute(page: SeedPhraseExportPage),
           ],
         ),
-        AdaptiveRoute(page: SeedPhraseExportPage),
       ],
     ),
   ],

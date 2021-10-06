@@ -4,13 +4,15 @@ import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:expand_tap_area/expand_tap_area.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../../domain/blocs/provider/approvals_bloc.dart';
 import '../../../../domain/blocs/provider/provider_events_bloc.dart';
 import '../../../../domain/blocs/provider/provider_requests_bloc.dart';
@@ -21,59 +23,70 @@ import '../../../design/design.dart';
 import 'approval_dialogs.dart';
 
 class WebviewPage extends StatefulWidget {
-  final String address;
-  final String url;
-
-  const WebviewPage({
-    Key? key,
-    required this.address,
-    required this.url,
-  }) : super(key: key);
-
   @override
   _WebviewPageState createState() => _WebviewPageState();
 }
 
 class _WebviewPageState extends State<WebviewPage> {
+  final accountsBloc = getIt.get<AccountsBloc>();
   final approvalsBloc = getIt.get<ApprovalsBloc>();
-  late final TonWalletInfoBloc tonWalletInfoBloc;
+  TonWalletInfoBloc? tonWalletInfoBloc;
   final providerRequestsBloc = getIt.get<ProviderRequestsBloc>();
   final providerEventsBloc = getIt.get<ProviderEventsBloc>();
   final inAppWebViewControllerCompleter = Completer<InAppWebViewController>();
-  late final String origin;
+  String origin = 'https://tonswap.io/';
 
   @override
   void initState() {
     super.initState();
-    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
-    origin = widget.url;
   }
 
   @override
   void dispose() {
     approvalsBloc.close();
-    tonWalletInfoBloc.close();
+    tonWalletInfoBloc?.close();
     providerRequestsBloc.close();
     providerEventsBloc.close();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => buildTonWalletInfoBuilder();
-
-  Widget buildTonWalletInfoBuilder() => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
-        bloc: tonWalletInfoBloc,
-        builder: (context, tonWalletInfoState) => tonWalletInfoState.maybeWhen(
-          ready: (address, contractState, walletType, details, publicKey) => buildApprovalsListener(
-            address: address,
-            publicKey: publicKey,
-            walletType: walletType,
-          ),
-          orElse: () => Center(
-            child: PlatformCircularProgressIndicator(),
-          ),
+  Widget build(BuildContext context) => BlocListener<AccountsBloc, AccountsState>(
+        bloc: accountsBloc,
+        listener: (context, state) => state.maybeWhen(
+          ready: (accounts, currentAccount) {
+            print('AZAZAZAZAZAZA $currentAccount');
+            if (currentAccount != null) {
+              setState(() {
+                final prevTonWalletInfoBloc = tonWalletInfoBloc;
+                tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: currentAccount.address);
+                prevTonWalletInfoBloc?.close();
+              });
+            }
+          },
+          orElse: () => null,
         ),
+        child: buildTonWalletInfoBuilder(),
       );
+
+  Widget buildTonWalletInfoBuilder() => tonWalletInfoBloc != null
+      ? BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
+          key: ValueKey(tonWalletInfoBloc.hashCode),
+          bloc: tonWalletInfoBloc,
+          builder: (context, tonWalletInfoState) => tonWalletInfoState.maybeWhen(
+            ready: (address, contractState, walletType, details, publicKey) => buildApprovalsListener(
+              address: address,
+              publicKey: publicKey,
+              walletType: walletType,
+            ),
+            orElse: () => Center(
+              child: PlatformCircularProgressIndicator(),
+            ),
+          ),
+        )
+      : Center(
+          child: PlatformCircularProgressIndicator(),
+        );
 
   Widget buildApprovalsListener({
     required String address,
@@ -130,26 +143,35 @@ class _WebviewPageState extends State<WebviewPage> {
           loggedOut: loggedOutCaller,
           orElse: () => null,
         ),
-        child: buildScaffold(context),
+        child: buildScaffold(),
       );
 
-  Widget buildScaffold(BuildContext context) => Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildAppBar(context),
-              Expanded(
-                child: buildWebview(),
+  Widget buildScaffold() => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: context.safeArea.bottom),
+          child: CupertinoPageScaffold(
+            resizeToAvoidBottomInset: false,
+            backgroundColor: CrystalColor.iosBackground,
+            child: SafeArea(
+              bottom: false,
+              child: MediaQuery.removePadding(
+                context: context,
+                removeBottom: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    buildTitle(),
+                    Expanded(child: buildBody()),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
       );
 
-  Widget buildAppBar(BuildContext context) => Padding(
+  Widget buildTitle() => Padding(
         padding: const EdgeInsets.only(top: 26),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -197,12 +219,12 @@ class _WebviewPageState extends State<WebviewPage> {
         ),
       );
 
-  Widget buildWebview() => FutureBuilder<String>(
+  Widget buildBody() => FutureBuilder<String>(
         future: loadMainScript(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return InAppWebView(
-              initialUrlRequest: URLRequest(url: Uri.parse(widget.url)),
+              initialUrlRequest: URLRequest(url: Uri.parse(origin)),
               initialUserScripts: UnmodifiableListView<UserScript>([
                 UserScript(
                   source: snapshot.data!,

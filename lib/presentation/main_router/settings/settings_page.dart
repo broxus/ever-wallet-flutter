@@ -52,20 +52,23 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          backgroundColor: CrystalColor.iosBackground,
-          body: SafeArea(
-            bottom: false,
-            child: MediaQuery.removePadding(
-              context: context,
-              removeBottom: true,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  buildTitle(),
-                  buildBody(),
-                ],
+        child: Padding(
+          padding: EdgeInsets.only(bottom: context.safeArea.bottom),
+          child: CupertinoPageScaffold(
+            resizeToAvoidBottomInset: false,
+            backgroundColor: CrystalColor.iosBackground,
+            child: SafeArea(
+              bottom: false,
+              child: MediaQuery.removePadding(
+                context: context,
+                removeBottom: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    buildTitle(),
+                    buildBody(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -73,27 +76,14 @@ class _SettingsPageState extends State<SettingsPage> {
       );
 
   Widget buildTitle() => Padding(
-        padding: const EdgeInsets.fromLTRB(26, 14, 26, 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              LocaleKeys.settings_screen_title.tr(),
-              style: const TextStyle(
-                fontSize: 30,
-                color: CrystalColor.fontDark,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            CrystalInkWell(
-              onTap: () => context.router.navigate(const WalletRouterRoute()),
-              highlightColor: Colors.transparent,
-              child: const Icon(
-                Icons.close,
-                color: CrystalColor.fontTitleSecondaryDark,
-              ),
-            ),
-          ],
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+        child: Text(
+          LocaleKeys.settings_screen_title.tr(),
+          style: const TextStyle(
+            fontSize: 30,
+            color: CrystalColor.fontDark,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       );
 
