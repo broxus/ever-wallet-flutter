@@ -3,13 +3,6 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:crystal/domain/blocs/provider/approvals_bloc.dart';
-import 'package:crystal/domain/blocs/provider/provider_events_bloc.dart';
-import 'package:crystal/domain/blocs/provider/provider_requests_bloc.dart';
-import 'package:crystal/domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import 'package:crystal/injection.dart';
-import 'package:crystal/logger.dart';
-import 'package:crystal/presentation/design/design.dart';
 import 'package:expand_tap_area/expand_tap_area.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +11,13 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../domain/blocs/provider/approvals_bloc.dart';
+import '../../../../domain/blocs/provider/provider_events_bloc.dart';
+import '../../../../domain/blocs/provider/provider_requests_bloc.dart';
+import '../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
+import '../../../../injection.dart';
+import '../../../../logger.dart';
+import '../../../design/design.dart';
 import 'approval_dialogs.dart';
 
 class WebviewPage extends StatefulWidget {
@@ -59,119 +59,15 @@ class _WebviewPageState extends State<WebviewPage> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
+  Widget build(BuildContext context) => buildTonWalletInfoBuilder();
+
+  Widget buildTonWalletInfoBuilder() => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
         bloc: tonWalletInfoBloc,
         builder: (context, tonWalletInfoState) => tonWalletInfoState.maybeWhen(
-          ready: (address, contractState, walletType, details, publicKey) =>
-              BlocListener<ApprovalsBloc, ApprovalsState>(
-            bloc: approvalsBloc,
-            listener: (context, state) async {
-              state.maybeWhen(
-                requested: (request) => request.when(
-                  requestPermissions: (origin, permissions, completer) => onRequestPermissions(
-                    origin: origin,
-                    permissions: permissions,
-                    completer: completer,
-                    address: address,
-                    publicKey: publicKey,
-                    walletType: walletType,
-                  ),
-                  sendMessage: (origin, sender, recipient, amount, bounce, payload, knownPayload, completer) =>
-                      onSendMessage(
-                    origin: origin,
-                    sender: sender,
-                    recipient: recipient,
-                    amount: amount,
-                    bounce: bounce,
-                    payload: payload,
-                    knownPayload: knownPayload,
-                    completer: completer,
-                  ),
-                  callContractMethod: (origin, selectedPublicKey, repackedRecipient, payload, completer) =>
-                      onCallContractMethod(
-                    origin: origin,
-                    selectedPublicKey: selectedPublicKey,
-                    repackedRecipient: repackedRecipient,
-                    payload: payload,
-                    completer: completer,
-                  ),
-                ),
-                orElse: () => null,
-              );
-            },
-            child: BlocListener<ProviderEventsBloc, ProviderEventsState>(
-              bloc: providerEventsBloc,
-              listener: (context, state) => state.maybeWhen(
-                disconnected: disconnectedCaller,
-                transactionsFound: transactionsFoundCaller,
-                contractStateChanged: contractStateChangedCaller,
-                networkChanged: networkChangedCaller,
-                permissionsChanged: permissionsChangedCaller,
-                loggedOut: loggedOutCaller,
-                orElse: () => null,
-              ),
-              child: Scaffold(
-                resizeToAvoidBottomInset: false,
-                body: SafeArea(
-                  bottom: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ExpandTapWidget(
-                            onTap: context.router.pop,
-                            tapPadding: const EdgeInsets.all(16),
-                            child: Material(
-                              type: MaterialType.transparency,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 16, top: 12),
-                                child: SizedBox(
-                                  height: 24,
-                                  child: PlatformWidget(
-                                    material: (context, _) => Assets.images.iconBackAndroid.image(
-                                      color: CrystalColor.accent,
-                                      width: 24,
-                                    ),
-                                    cupertino: (context, _) => Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.arrow_back_ios_sharp,
-                                          color: CrystalColor.accent,
-                                          size: 14,
-                                        ),
-                                        const CrystalDivider(width: 3),
-                                        Text(
-                                          LocaleKeys.actions_back.tr(),
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            color: CrystalColor.accent,
-                                            letterSpacing: 0.75,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 26),
-                          child: buildBody(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          ready: (address, contractState, walletType, details, publicKey) => buildApprovalsListener(
+            address: address,
+            publicKey: publicKey,
+            walletType: walletType,
           ),
           orElse: () => Center(
             child: PlatformCircularProgressIndicator(),
@@ -179,7 +75,129 @@ class _WebviewPageState extends State<WebviewPage> {
         ),
       );
 
-  Widget buildBody() => FutureBuilder<String>(
+  Widget buildApprovalsListener({
+    required String address,
+    required String publicKey,
+    required WalletType walletType,
+  }) =>
+      BlocListener<ApprovalsBloc, ApprovalsState>(
+        bloc: approvalsBloc,
+        listener: (context, state) async {
+          state.maybeWhen(
+            requested: (request) => request.when(
+              requestPermissions: (origin, permissions, completer) => onRequestPermissions(
+                origin: origin,
+                permissions: permissions,
+                completer: completer,
+                address: address,
+                publicKey: publicKey,
+                walletType: walletType,
+              ),
+              sendMessage: (origin, sender, recipient, amount, bounce, payload, knownPayload, completer) =>
+                  onSendMessage(
+                origin: origin,
+                sender: sender,
+                recipient: recipient,
+                amount: amount,
+                bounce: bounce,
+                payload: payload,
+                knownPayload: knownPayload,
+                completer: completer,
+              ),
+              callContractMethod: (origin, selectedPublicKey, repackedRecipient, payload, completer) =>
+                  onCallContractMethod(
+                origin: origin,
+                selectedPublicKey: selectedPublicKey,
+                repackedRecipient: repackedRecipient,
+                payload: payload,
+                completer: completer,
+              ),
+            ),
+            orElse: () => null,
+          );
+        },
+        child: buildProviderEventsListener(),
+      );
+
+  Widget buildProviderEventsListener() => BlocListener<ProviderEventsBloc, ProviderEventsState>(
+        bloc: providerEventsBloc,
+        listener: (context, state) => state.maybeWhen(
+          disconnected: disconnectedCaller,
+          transactionsFound: transactionsFoundCaller,
+          contractStateChanged: contractStateChangedCaller,
+          networkChanged: networkChangedCaller,
+          permissionsChanged: permissionsChangedCaller,
+          loggedOut: loggedOutCaller,
+          orElse: () => null,
+        ),
+        child: buildScaffold(context),
+      );
+
+  Widget buildScaffold(BuildContext context) => Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              buildAppBar(context),
+              Expanded(
+                child: buildWebview(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Widget buildAppBar(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 26),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ExpandTapWidget(
+              onTap: context.router.pop,
+              tapPadding: const EdgeInsets.all(16),
+              child: Material(
+                type: MaterialType.transparency,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16, top: 12),
+                  child: SizedBox(
+                    height: 24,
+                    child: PlatformWidget(
+                      material: (context, _) => Assets.images.iconBackAndroid.image(
+                        color: CrystalColor.accent,
+                        width: 24,
+                      ),
+                      cupertino: (context, _) => Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.arrow_back_ios_sharp,
+                            color: CrystalColor.accent,
+                            size: 14,
+                          ),
+                          const CrystalDivider(width: 3),
+                          Text(
+                            LocaleKeys.actions_back.tr(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: CrystalColor.accent,
+                              letterSpacing: 0.75,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  Widget buildWebview() => FutureBuilder<String>(
         future: loadMainScript(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
@@ -196,149 +214,159 @@ class _WebviewPageState extends State<WebviewPage> {
                   useHybridComposition: true,
                 ),
               ),
-              onWebViewCreated: (controller) {
-                controller.addJavaScriptHandler(
-                  handlerName: 'requestPermissions',
-                  callback: requestPermissionsHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'disconnect',
-                  callback: disconnectHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'subscribe',
-                  callback: subscribeHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'unsubscribe',
-                  callback: unsubscribeHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'unsubscribeAll',
-                  callback: unsubscribeAllHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'getProviderState',
-                  callback: getProviderStateHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'getFullContractState',
-                  callback: getFullContractStateHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'getTransactions',
-                  callback: getTransactionsHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'runLocal',
-                  callback: runLocalHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'getExpectedAddress',
-                  callback: getExpectedAddressHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'packIntoCell',
-                  callback: packIntoCellHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'unpackFromCell',
-                  callback: unpackFromCellHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'extractPublicKey',
-                  callback: extractPublicKeyHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'codeToTvc',
-                  callback: codeToTvcHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'splitTvc',
-                  callback: splitTvcHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'encodeInternalInput',
-                  callback: encodeInternalInputHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'decodeInput',
-                  callback: decodeInputHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'decodeEvent',
-                  callback: decodeEventHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'decodeOutput',
-                  callback: decodeOutputHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'decodeTransaction',
-                  callback: decodeTransactionHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'decodeTransactionEvents',
-                  callback: decodeTransactionEventsHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'estimateFees',
-                  callback: estimateFeesHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'sendMessage',
-                  callback: sendMessageHandler,
-                );
-
-                controller.addJavaScriptHandler(
-                  handlerName: 'sendExternalMessage',
-                  callback: sendExternalMessageHandler,
-                );
-              },
-              onLoadStop: (controller, url) {
-                inAppWebViewControllerCompleter.complete(controller);
-              },
-              onConsoleMessage: (controller, consoleMessage) {
-                if (consoleMessage.messageLevel == ConsoleMessageLevel.DEBUG) {
-                  logger.d(consoleMessage.message);
-                } else if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
-                  logger.e(consoleMessage.message, consoleMessage.message);
-                } else if (consoleMessage.messageLevel == ConsoleMessageLevel.LOG) {
-                  logger.d(consoleMessage.message);
-                } else if (consoleMessage.messageLevel == ConsoleMessageLevel.TIP) {
-                  logger.d(consoleMessage.message);
-                } else if (consoleMessage.messageLevel == ConsoleMessageLevel.WARNING) {
-                  logger.w(consoleMessage.message);
-                }
-              },
+              onWebViewCreated: onWebViewCreated,
+              onLoadStop: onLoadStop,
+              onConsoleMessage: onConsoleMessage,
             );
           } else {
             return Center(child: PlatformCircularProgressIndicator());
           }
         },
       );
+
+  void onWebViewCreated(InAppWebViewController controller) {
+    controller.addJavaScriptHandler(
+      handlerName: 'requestPermissions',
+      callback: requestPermissionsHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'disconnect',
+      callback: disconnectHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'subscribe',
+      callback: subscribeHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'unsubscribe',
+      callback: unsubscribeHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'unsubscribeAll',
+      callback: unsubscribeAllHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'getProviderState',
+      callback: getProviderStateHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'getFullContractState',
+      callback: getFullContractStateHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'getTransactions',
+      callback: getTransactionsHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'runLocal',
+      callback: runLocalHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'getExpectedAddress',
+      callback: getExpectedAddressHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'packIntoCell',
+      callback: packIntoCellHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'unpackFromCell',
+      callback: unpackFromCellHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'extractPublicKey',
+      callback: extractPublicKeyHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'codeToTvc',
+      callback: codeToTvcHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'splitTvc',
+      callback: splitTvcHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'encodeInternalInput',
+      callback: encodeInternalInputHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'decodeInput',
+      callback: decodeInputHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'decodeEvent',
+      callback: decodeEventHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'decodeOutput',
+      callback: decodeOutputHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'decodeTransaction',
+      callback: decodeTransactionHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'decodeTransactionEvents',
+      callback: decodeTransactionEventsHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'estimateFees',
+      callback: estimateFeesHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'sendMessage',
+      callback: sendMessageHandler,
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'sendExternalMessage',
+      callback: sendExternalMessageHandler,
+    );
+  }
+
+  void onLoadStop(InAppWebViewController controller, Uri? url) {
+    inAppWebViewControllerCompleter.complete(controller);
+  }
+
+  void onConsoleMessage(InAppWebViewController controller, ConsoleMessage consoleMessage) {
+    if (consoleMessage.message == 'JavaScript execution returned a result of an unsupported type') {
+      return;
+    }
+
+    if (consoleMessage.messageLevel == ConsoleMessageLevel.DEBUG) {
+      logger.d(consoleMessage.message);
+    } else if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
+      logger.e(consoleMessage.message, consoleMessage.message);
+    } else if (consoleMessage.messageLevel == ConsoleMessageLevel.LOG) {
+      logger.d(consoleMessage.message);
+    } else if (consoleMessage.messageLevel == ConsoleMessageLevel.TIP) {
+      logger.d(consoleMessage.message);
+    } else if (consoleMessage.messageLevel == ConsoleMessageLevel.WARNING) {
+      logger.w(consoleMessage.message);
+    }
+  }
 
   Future<void> onRequestPermissions({
     required String origin,
@@ -456,9 +484,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT disconnected $jsonOutput');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: "window.__dartNotifications.disconnected('$jsonOutput')");
-
-      logger.d('EVENT disconnected $result');
+      await controller.evaluateJavascript(source: "window.__dartNotifications.disconnected('$jsonOutput')");
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -470,9 +496,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT transactionsFound $jsonOutput');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: "window.__dartNotifications.transactionsFound('$jsonOutput')");
-
-      logger.d('EVENT transactionsFound $result');
+      await controller.evaluateJavascript(source: "window.__dartNotifications.transactionsFound('$jsonOutput')");
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -484,9 +508,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT contractStateChanged $jsonOutput');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: "window.__dartNotifications.contractStateChanged('$jsonOutput')");
-
-      logger.d('EVENT contractStateChanged $result');
+      await controller.evaluateJavascript(source: "window.__dartNotifications.contractStateChanged('$jsonOutput')");
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -498,9 +520,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT networkChanged $jsonOutput');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: "window.__dartNotifications.networkChanged('$jsonOutput')");
-
-      logger.d('EVENT networkChanged $result');
+      await controller.evaluateJavascript(source: "window.__dartNotifications.networkChanged('$jsonOutput')");
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -512,9 +532,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT permissionsChanged $jsonOutput');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: "window.__dartNotifications.permissionsChanged('$jsonOutput')");
-
-      logger.d('EVENT permissionsChanged $result');
+      await controller.evaluateJavascript(source: "window.__dartNotifications.permissionsChanged('$jsonOutput')");
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -525,9 +543,7 @@ class _WebviewPageState extends State<WebviewPage> {
       logger.d('EVENT loggedOut');
 
       final controller = await inAppWebViewControllerCompleter.future;
-      final result = await controller.evaluateJavascript(source: 'window.__dartNotifications.loggedOut()');
-
-      logger.d('EVENT loggedOut $result');
+      await controller.evaluateJavascript(source: 'window.__dartNotifications.loggedOut()');
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -536,7 +552,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> codeToTvcHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('codeToTvc args $jsonInput');
+      logger.d('REQUEST codeToTvc args $jsonInput');
 
       final input = CodeToTvcInput.fromJson(jsonInput);
 
@@ -559,7 +575,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('codeToTvc result $jsonOutput');
+      logger.d('REQUEST codeToTvc result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -570,7 +586,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> decodeEventHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('decodeEvent args $jsonInput');
+      logger.d('REQUEST decodeEvent args $jsonInput');
 
       final input = DecodeEventInput.fromJson(jsonInput);
 
@@ -593,7 +609,7 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
       final jsonOutput = jsonEncode(output?.toJson());
-      logger.d('decodeEvent result $jsonOutput');
+      logger.d('REQUEST decodeEvent result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -604,7 +620,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> decodeInputHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('decodeInput args $jsonInput');
+      logger.d('REQUEST decodeInput args $jsonInput');
 
       final input = DecodeInputInput.fromJson(jsonInput);
 
@@ -627,7 +643,7 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
       final jsonOutput = jsonEncode(output?.toJson());
-      logger.d('decodeInput result $jsonOutput');
+      logger.d('REQUEST decodeInput result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -638,7 +654,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> decodeOutputHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('decodeOutput args $jsonInput');
+      logger.d('REQUEST decodeOutput args $jsonInput');
 
       final input = DecodeOutputInput.fromJson(jsonInput);
 
@@ -661,7 +677,7 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
       final jsonOutput = jsonEncode(output?.toJson());
-      logger.d('decodeOutput result $jsonOutput');
+      logger.d('REQUEST decodeOutput result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -672,7 +688,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> decodeTransactionEventsHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('decodeTransactionEvents args $jsonInput');
+      logger.d('REQUEST decodeTransactionEvents args $jsonInput');
 
       final input = DecodeTransactionEventsInput.fromJson(jsonInput);
 
@@ -695,7 +711,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('decodeTransactionEvents result $jsonOutput');
+      logger.d('REQUEST decodeTransactionEvents result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -706,7 +722,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> decodeTransactionHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('decodeTransaction args $jsonInput');
+      logger.d('REQUEST decodeTransaction args $jsonInput');
 
       final input = DecodeTransactionInput.fromJson(jsonInput);
 
@@ -729,7 +745,7 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
       final jsonOutput = jsonEncode(output?.toJson());
-      logger.d('decodeTransaction result $jsonOutput');
+      logger.d('REQUEST decodeTransaction result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -752,7 +768,7 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
       final jsonOutput = {};
-      logger.d('disconnect result $jsonOutput');
+      logger.d('REQUEST disconnect result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -763,7 +779,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> encodeInternalInputHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('encodeInternalInput args $jsonInput');
+      logger.d('REQUEST encodeInternalInput args $jsonInput');
 
       final input = EncodeInternalInputInput.fromJson(jsonInput);
 
@@ -786,7 +802,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('encodeInternalInput result $jsonOutput');
+      logger.d('REQUEST encodeInternalInput result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -797,7 +813,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> estimateFeesHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('estimateFees args $jsonInput');
+      logger.d('REQUEST estimateFees args $jsonInput');
 
       final input = EstimateFeesInput.fromJson(jsonInput);
 
@@ -820,7 +836,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('estimateFees result $jsonOutput');
+      logger.d('REQUEST estimateFees result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -831,7 +847,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> extractPublicKeyHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('extractPublicKey args $jsonInput');
+      logger.d('REQUEST extractPublicKey args $jsonInput');
 
       final input = ExtractPublicKeyInput.fromJson(jsonInput);
 
@@ -854,7 +870,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('extractPublicKey result $jsonOutput');
+      logger.d('REQUEST extractPublicKey result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -865,7 +881,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> getExpectedAddressHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('getExpectedAddress args $jsonInput');
+      logger.d('REQUEST getExpectedAddress args $jsonInput');
 
       final input = GetExpectedAddressInput.fromJson(jsonInput);
 
@@ -888,7 +904,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('getExpectedAddress result $jsonOutput');
+      logger.d('REQUEST getExpectedAddress result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -899,7 +915,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> getFullContractStateHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('getFullContractState args $jsonInput');
+      logger.d('REQUEST getFullContractState args $jsonInput');
 
       final input = GetFullContractStateInput.fromJson(jsonInput);
 
@@ -922,7 +938,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('getFullContractState result $jsonOutput');
+      logger.d('REQUEST getFullContractState result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -950,7 +966,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('getProviderState result $jsonOutput');
+      logger.d('REQUEST getProviderState result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -961,7 +977,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> getTransactionsHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('getTransactions args $jsonInput');
+      logger.d('REQUEST getTransactions args $jsonInput');
 
       final input = GetTransactionsInput.fromJson(jsonInput);
 
@@ -984,7 +1000,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('getTransactions result $jsonOutput');
+      logger.d('REQUEST getTransactions result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -995,7 +1011,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> packIntoCellHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('packIntoCell args $jsonInput');
+      logger.d('REQUEST packIntoCell args $jsonInput');
 
       final input = PackIntoCellInput.fromJson(jsonInput);
 
@@ -1018,7 +1034,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('packIntoCell result $jsonOutput');
+      logger.d('REQUEST packIntoCell result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -1029,7 +1045,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> requestPermissionsHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('requestPermissions args $jsonInput');
+      logger.d('REQUEST requestPermissions args $jsonInput');
 
       final input = RequestPermissionsInput.fromJson(jsonInput);
 
@@ -1052,7 +1068,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('requestPermissions result $jsonOutput');
+      logger.d('REQUEST requestPermissions result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -1063,7 +1079,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> runLocalHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('runLocal args $jsonInput');
+      logger.d('REQUEST runLocal args $jsonInput');
 
       final input = RunLocalInput.fromJson(jsonInput);
 
@@ -1086,7 +1102,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('runLocal result $jsonOutput');
+      logger.d('REQUEST runLocal result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -1097,7 +1113,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> sendExternalMessageHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('sendExternalMessage args $jsonInput');
+      logger.d('REQUEST sendExternalMessage args $jsonInput');
 
       final input = SendExternalMessageInput.fromJson(jsonInput);
 
@@ -1120,7 +1136,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('sendExternalMessage result $jsonOutput');
+      logger.d('REQUEST sendExternalMessage result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -1131,7 +1147,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> sendMessageHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('sendMessage args $jsonInput');
+      logger.d('REQUEST sendMessage args $jsonInput');
 
       final input = SendMessageInput.fromJson(jsonInput);
 
@@ -1154,7 +1170,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('sendMessage result $jsonOutput');
+      logger.d('REQUEST sendMessage result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -1165,7 +1181,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> splitTvcHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('splitTvc args $jsonInput');
+      logger.d('REQUEST splitTvc args $jsonInput');
 
       final input = SplitTvcInput.fromJson(jsonInput);
 
@@ -1188,7 +1204,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('splitTvc result $jsonOutput');
+      logger.d('REQUEST splitTvc result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -1199,7 +1215,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> subscribeHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('subscribe args $jsonInput');
+      logger.d('REQUEST subscribe args $jsonInput');
 
       final input = SubscribeInput.fromJson(jsonInput);
 
@@ -1222,7 +1238,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('subscribe result $jsonOutput');
+      logger.d('REQUEST subscribe result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -1233,7 +1249,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> unpackFromCellHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('unpackFromCell args $jsonInput');
+      logger.d('REQUEST unpackFromCell args $jsonInput');
 
       final input = UnpackFromCellInput.fromJson(jsonInput);
 
@@ -1256,7 +1272,7 @@ class _WebviewPageState extends State<WebviewPage> {
       )!;
 
       final jsonOutput = jsonEncode(output.toJson());
-      logger.d('unpackFromCell result $jsonOutput');
+      logger.d('REQUEST unpackFromCell result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -1279,7 +1295,7 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
       final jsonOutput = {};
-      logger.d('unsubscribeAll result $jsonOutput');
+      logger.d('REQUEST unsubscribeAll result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {
@@ -1290,7 +1306,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> unsubscribeHandler(List<dynamic> args) async {
     try {
       final jsonInput = args.first as Map<String, dynamic>;
-      logger.d('unsubscribe args $jsonInput');
+      logger.d('REQUEST unsubscribe args $jsonInput');
 
       final input = UnsubscribeInput.fromJson(jsonInput);
 
@@ -1308,7 +1324,7 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
       final jsonOutput = {};
-      logger.d('unsubscribe result $jsonOutput');
+      logger.d('REQUEST unsubscribe result $jsonOutput');
 
       return jsonOutput;
     } catch (err, st) {

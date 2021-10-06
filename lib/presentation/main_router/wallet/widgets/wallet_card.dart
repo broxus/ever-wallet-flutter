@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:crystal/presentation/main_router/wallet/modals/connected_sites_body.dart';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +18,7 @@ import '../../../design/extension.dart';
 import '../../../design/utils.dart';
 import '../../../design/widget/crystal_bottom_sheet.dart';
 import '../modals/account_removement_body.dart';
+import '../modals/connected_sites_body.dart';
 import '../modals/preferences_body.dart';
 
 class WalletCard extends StatefulWidget {

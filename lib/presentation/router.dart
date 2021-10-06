@@ -6,7 +6,7 @@ import 'main_router/settings/settings_page.dart';
 import 'main_router/wallet/new_account_flow/new_account_name_page.dart';
 import 'main_router/wallet/new_account_flow/new_account_type_page.dart';
 import 'main_router/wallet/wallet_page.dart';
-import 'main_router/wallet/webview_page.dart';
+import 'main_router/wallet/webview/webview_page.dart';
 import 'seed_creation/new_seed_name_page.dart';
 import 'seed_creation/password_creation_page.dart';
 import 'seed_creation/seed_name_page.dart';

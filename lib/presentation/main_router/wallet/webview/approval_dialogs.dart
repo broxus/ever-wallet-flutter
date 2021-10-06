@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../design/design.dart';
+import '../../../design/design.dart';
 
 Future<bool> showRequestPermissionsDialog(
   BuildContext context, {

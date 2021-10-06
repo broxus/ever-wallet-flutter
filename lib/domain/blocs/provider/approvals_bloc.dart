@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:crystal/domain/services/nekoton_service.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+
+import '../../services/nekoton_service.dart';
 
 part 'approvals_bloc.freezed.dart';
 
@@ -16,83 +17,6 @@ class ApprovalsBloc extends Bloc<ApprovalsEvent, ApprovalsState> {
     _nekotonService.approvalStream.listen((event) {
       add(ApprovalsEvent.showApproval(event));
     });
-
-    // Future.delayed(const Duration(seconds: 3)).then((_) async {
-    //   final completer = Completer<Permissions>();
-
-    //   add(
-    //     ApprovalsEvent.showApproval(
-    //       ApprovalRequest.requestPermissions(
-    //         origin: "https://tonswap.io",
-    //         permissions: [
-    //           Permission.tonClient,
-    //           Permission.accountInteraction,
-    //         ],
-    //         completer: completer,
-    //       ),
-    //     ),
-    //   );
-
-    //   try {
-    //     final perm = await completer.future;
-    //     logger.i(perm);
-    //   } catch (err, st) {
-    //     logger.e(err, err, st);
-    //   }
-    // });
-
-    // Future.delayed(const Duration(seconds: 3)).then((_) async {
-    //   final completer = Completer<String>();
-
-    //   add(
-    //     ApprovalsEvent.showApproval(
-    //       ApprovalRequest.sendMessage(
-    //         origin: "https://tonswap.io",
-    //         amount: '1000000000',
-    //         bounce: false,
-    //         knownPayload: null,
-    //         payload: null,
-    //         recipient: '0:aaaabbbbccccddddeeeeffffgggg',
-    //         sender: '0:hhhhiiiijjjjkkkkllllmmmm',
-    //         completer: completer,
-    //       ),
-    //     ),
-    //   );
-
-    //   try {
-    //     final perm = await completer.future;
-    //     logger.i(perm);
-    //   } catch (err, st) {
-    //     logger.e(err, err, st);
-    //   }
-    // });
-
-    // Future.delayed(const Duration(seconds: 3)).then((_) async {
-    //   final completer = Completer<String>();
-
-    //   add(
-    //     ApprovalsEvent.showApproval(
-    //       ApprovalRequest.callContractMethod(
-    //         origin: "https://tonswap.io",
-    //         payload: const FunctionCall(
-    //           abi: 'abi',
-    //           method: 'method',
-    //           params: null,
-    //         ),
-    //         repackedRecipient: '0:aaaabbbbccccddddeeeeffffgggg',
-    //         selectedPublicKey: 'hhhhiiiijjjjkkkkllllmmmm',
-    //         completer: completer,
-    //       ),
-    //     ),
-    //   );
-
-    //   try {
-    //     final perm = await completer.future;
-    //     logger.i(perm);
-    //   } catch (err, st) {
-    //     logger.e(err, err, st);
-    //   }
-    // });
   }
 
   @override
