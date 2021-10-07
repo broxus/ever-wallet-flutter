@@ -342,5 +342,8 @@
     "message": {
       "success": "Seed phrase renamed successfully"
     }
+  },
+  "browser": {
+    "title": "Browser"
   }
 }
