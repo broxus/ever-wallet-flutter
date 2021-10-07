@@ -95,16 +95,16 @@ class MainRouterPageState extends State<MainRouterPage> {
                     label: LocaleKeys.wallet_screen_title.tr(),
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(
-                      Icons.web,
-                      size: 24,
+                    icon: Image.asset(
+                      Assets.images.browser.path,
+                      width: 24,
                     ),
-                    activeIcon: Icon(
-                      Icons.web,
-                      size: 24,
+                    activeIcon: Image.asset(
+                      Assets.images.browser.path,
+                      width: 24,
                       color: CrystalColor.fontHeaderDark,
                     ),
-                    label: LocaleKeys.settings_screen_title.tr(),
+                    label: LocaleKeys.browser_title.tr(),
                   ),
                   BottomNavigationBarItem(
                     icon: Image.asset(
