@@ -30,6 +30,7 @@ class MainRouterPageState extends State<MainRouterPage> {
         onWillPop: () async => handleAndroidBackButton(),
         child: AutoTabsScaffold(
           resizeToAvoidBottomInset: false,
+          lazyLoad: false,
           routes: const [
             WalletRouterRoute(),
             WebviewRoute(),

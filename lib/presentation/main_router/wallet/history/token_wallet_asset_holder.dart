@@ -44,7 +44,7 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
         bloc: bloc,
         builder: (context, state) => state.maybeWhen(
           ready: (logoURI, address, balance, contractState, owner, symbol, version, ownerPublicKey) {
-            final icon = logoURI != null ? getTokenAssetIcon(logoURI) : getRandomTokenAssetIcon(symbol.name.hashCode);
+            final icon = logoURI != null ? getTokenAssetIcon(logoURI) : getGravatarIcon(symbol.name.hashCode);
 
             return WalletAssetHolder(
               name: symbol.name,

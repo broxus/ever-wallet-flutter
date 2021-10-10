@@ -100,3 +100,9 @@ extension ElipseValue on String {
     }
   }
 }
+
+extension Elipse on String {
+  String elipseAddress() => '${substring(0, 6)}...${substring(length - 4, length)}';
+
+  String elipsePublicKey() => '${substring(0, 4)}...${substring(length - 4, length)}';
+}

@@ -37,7 +37,7 @@ class SelectionAssetHolder extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     child: asset.logoURI != null
                         ? getTokenAssetIcon(asset.logoURI!)
-                        : getRandomTokenAssetIcon(asset.name.hashCode),
+                        : getGravatarIcon(asset.name.hashCode),
                   ),
                 ),
                 const CrystalDivider(width: 16),

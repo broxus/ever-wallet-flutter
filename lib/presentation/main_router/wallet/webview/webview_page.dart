@@ -2,25 +2,29 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:auto_route/auto_route.dart';
-import 'package:expand_tap_area/expand_tap_area.dart';
+import 'package:crystal/domain/blocs/misc/bookmarks_bloc.dart';
+import 'package:crystal/domain/models/web_metadata.dart';
+import 'package:crystal/presentation/design/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../../domain/blocs/provider/approvals_bloc.dart';
-import '../../../../domain/blocs/provider/provider_events_bloc.dart';
-import '../../../../domain/blocs/provider/provider_requests_bloc.dart';
-import '../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../injection.dart';
 import '../../../../logger.dart';
 import '../../../design/design.dart';
+import '../../../design/utils.dart';
+import 'account_selection.dart';
 import 'approval_dialogs.dart';
+import 'delegate.dart';
 
 class WebviewPage extends StatefulWidget {
   @override
@@ -30,68 +34,69 @@ class WebviewPage extends StatefulWidget {
 class _WebviewPageState extends State<WebviewPage> {
   final accountsBloc = getIt.get<AccountsBloc>();
   final approvalsBloc = getIt.get<ApprovalsBloc>();
-  TonWalletInfoBloc? tonWalletInfoBloc;
-  final providerRequestsBloc = getIt.get<ProviderRequestsBloc>();
-  final providerEventsBloc = getIt.get<ProviderEventsBloc>();
-  final inAppWebViewControllerCompleter = Completer<InAppWebViewController>();
-  String origin = 'https://tonswap.io/';
+  final bookmarksBloc = getIt.get<BookmarksBloc>();
+  InAppWebViewController? controller;
+  late final StreamSubscription disconnectedStreamSubscription;
+  late final StreamSubscription transactionsFoundStreamSubscription;
+  late final StreamSubscription contractStateChangedStreamSubscription;
+  late final StreamSubscription networkChangedStreamSubscription;
+  late final StreamSubscription permissionsChangedStreamSubscription;
+  late final StreamSubscription loggedOutStreamSubscription;
+  final backButtonEnabled = ValueNotifier<bool>(false);
+  final forwardButtonEnabled = ValueNotifier<bool>(false);
+  final homePageShown = ValueNotifier<bool>(true);
+  final urlController = TextEditingController();
+  final onFocusChange = ValueNotifier<bool>(false);
+  final isManaging = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     super.initState();
+    disconnectedStreamSubscription = disconnectedStream.listen((event) => disconnectedCaller(event));
+    transactionsFoundStreamSubscription = transactionsFoundStream.listen((event) => transactionsFoundCaller(event));
+    contractStateChangedStreamSubscription =
+        contractStateChangedStream.listen((event) => contractStateChangedCaller(event));
+    networkChangedStreamSubscription = networkChangedStream.listen((event) => networkChangedCaller(event));
+    permissionsChangedStreamSubscription = permissionsChangedStream.listen((event) => permissionsChangedCaller(event));
+    loggedOutStreamSubscription = loggedOutStream.listen((event) => loggedOutCaller(event));
   }
 
   @override
   void dispose() {
+    accountsBloc.close();
     approvalsBloc.close();
-    tonWalletInfoBloc?.close();
-    providerRequestsBloc.close();
-    providerEventsBloc.close();
+    backButtonEnabled.dispose();
+    forwardButtonEnabled.dispose();
+    disconnectedStreamSubscription.cancel();
+    transactionsFoundStreamSubscription.cancel();
+    contractStateChangedStreamSubscription.cancel();
+    networkChangedStreamSubscription.cancel();
+    permissionsChangedStreamSubscription.cancel();
+    loggedOutStreamSubscription.cancel();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocListener<AccountsBloc, AccountsState>(
+  Widget build(BuildContext context) => BlocBuilder<AccountsBloc, AccountsState>(
         bloc: accountsBloc,
-        listener: (context, state) => state.maybeWhen(
-          ready: (accounts, currentAccount) {
-            print('AZAZAZAZAZAZA $currentAccount');
-            if (currentAccount != null) {
-              setState(() {
-                final prevTonWalletInfoBloc = tonWalletInfoBloc;
-                tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: currentAccount.address);
-                prevTonWalletInfoBloc?.close();
-              });
-            }
-          },
-          orElse: () => null,
+        builder: (context, state) => state.maybeWhen(
+          ready: (accounts, currentAccount) => currentAccount != null
+              ? buildApprovalsListener(
+                  accounts: accounts,
+                  currentAccount: currentAccount,
+                )
+              : Center(
+                  child: PlatformCircularProgressIndicator(),
+                ),
+          orElse: () => Center(
+            child: PlatformCircularProgressIndicator(),
+          ),
         ),
-        child: buildTonWalletInfoBuilder(),
       );
 
-  Widget buildTonWalletInfoBuilder() => tonWalletInfoBloc != null
-      ? BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
-          key: ValueKey(tonWalletInfoBloc.hashCode),
-          bloc: tonWalletInfoBloc,
-          builder: (context, tonWalletInfoState) => tonWalletInfoState.maybeWhen(
-            ready: (address, contractState, walletType, details, publicKey) => buildApprovalsListener(
-              address: address,
-              publicKey: publicKey,
-              walletType: walletType,
-            ),
-            orElse: () => Center(
-              child: PlatformCircularProgressIndicator(),
-            ),
-          ),
-        )
-      : Center(
-          child: PlatformCircularProgressIndicator(),
-        );
-
   Widget buildApprovalsListener({
-    required String address,
-    required String publicKey,
-    required WalletType walletType,
+    required List<AssetsList> accounts,
+    required AssetsList currentAccount,
   }) =>
       BlocListener<ApprovalsBloc, ApprovalsState>(
         bloc: approvalsBloc,
@@ -102,9 +107,9 @@ class _WebviewPageState extends State<WebviewPage> {
                 origin: origin,
                 permissions: permissions,
                 completer: completer,
-                address: address,
-                publicKey: publicKey,
-                walletType: walletType,
+                address: currentAccount.address,
+                publicKey: currentAccount.publicKey,
+                walletType: currentAccount.tonWallet.contract,
               ),
               sendMessage: (origin, sender, recipient, amount, bounce, payload, knownPayload, completer) =>
                   onSendMessage(
@@ -129,24 +134,17 @@ class _WebviewPageState extends State<WebviewPage> {
             orElse: () => null,
           );
         },
-        child: buildProviderEventsListener(),
-      );
-
-  Widget buildProviderEventsListener() => BlocListener<ProviderEventsBloc, ProviderEventsState>(
-        bloc: providerEventsBloc,
-        listener: (context, state) => state.maybeWhen(
-          disconnected: disconnectedCaller,
-          transactionsFound: transactionsFoundCaller,
-          contractStateChanged: contractStateChangedCaller,
-          networkChanged: networkChangedCaller,
-          permissionsChanged: permissionsChangedCaller,
-          loggedOut: loggedOutCaller,
-          orElse: () => null,
+        child: buildScaffold(
+          accounts: accounts,
+          currentAccount: currentAccount,
         ),
-        child: buildScaffold(),
       );
 
-  Widget buildScaffold() => AnnotatedRegion<SystemUiOverlayStyle>(
+  Widget buildScaffold({
+    required List<AssetsList> accounts,
+    required AssetsList currentAccount,
+  }) =>
+      AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
         child: Padding(
           padding: EdgeInsets.only(bottom: context.safeArea.bottom),
@@ -161,7 +159,10 @@ class _WebviewPageState extends State<WebviewPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    buildTitle(),
+                    buildTitle(
+                      accounts: accounts,
+                      currentAccount: currentAccount,
+                    ),
                     Expanded(child: buildBody()),
                   ],
                 ),
@@ -171,79 +172,446 @@ class _WebviewPageState extends State<WebviewPage> {
         ),
       );
 
-  Widget buildTitle() => Padding(
-        padding: const EdgeInsets.only(top: 26),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            ExpandTapWidget(
-              onTap: context.router.pop,
-              tapPadding: const EdgeInsets.all(16),
-              child: Material(
-                type: MaterialType.transparency,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 12),
-                  child: SizedBox(
-                    height: 24,
-                    child: PlatformWidget(
-                      material: (context, _) => Assets.images.iconBackAndroid.image(
-                        color: CrystalColor.accent,
-                        width: 24,
+  Widget buildTitle({
+    required List<AssetsList> accounts,
+    required AssetsList currentAccount,
+  }) =>
+      Row(
+        children: [
+          ValueListenableBuilder<bool>(
+            valueListenable: onFocusChange,
+            builder: (context, onFocusChangeValue, child) => onFocusChangeValue
+                ? const SizedBox(
+                    height: 48,
+                    width: 24,
+                  )
+                : Wrap(
+                    children: [
+                      ValueListenableBuilder<bool>(
+                        valueListenable: backButtonEnabled,
+                        builder: (context, value, child) => CupertinoButton(
+                          onPressed: value ? () => controller?.goBack() : null,
+                          padding: EdgeInsets.zero,
+                          child: Icon(
+                            CupertinoIcons.back,
+                            color: value ? CrystalColor.accent : CrystalColor.hintColor,
+                          ),
+                        ),
                       ),
-                      cupertino: (context, _) => Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.arrow_back_ios_sharp,
-                            color: CrystalColor.accent,
-                            size: 14,
+                      ValueListenableBuilder<bool>(
+                        valueListenable: forwardButtonEnabled,
+                        builder: (context, value, child) => CupertinoButton(
+                          onPressed: value ? () => controller?.goForward() : null,
+                          padding: EdgeInsets.zero,
+                          child: Icon(
+                            CupertinoIcons.forward,
+                            color: value ? CrystalColor.accent : CrystalColor.hintColor,
                           ),
-                          const CrystalDivider(width: 3),
-                          Text(
-                            LocaleKeys.actions_back.tr(),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: CrystalColor.accent,
-                              letterSpacing: 0.75,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          Expanded(
+            child: Theme(
+              data: ThemeData(),
+              child: Focus(
+                onFocusChange: (value) {
+                  onFocusChange.value = value;
+                  homePageShown.value = value;
+                },
+                child: CupertinoTextField(
+                  controller: urlController,
+                  onEditingComplete: () {
+                    FocusScope.of(context).unfocus();
+
+                    var url = urlController.text;
+
+                    if (!url.startsWith("https://")) {
+                      url = "https://$url";
+                    }
+
+                    try {
+                      controller?.loadUrl(
+                        urlRequest: URLRequest(
+                          url: Uri.parse(url),
+                        ),
+                      );
+                    } catch (_) {}
+                  },
+                  clearButtonMode: OverlayVisibilityMode.editing,
+                ),
+              ),
+            ),
+          ),
+          ValueListenableBuilder<bool>(
+            valueListenable: onFocusChange,
+            builder: (context, onFocusChangeValue, child) => onFocusChangeValue
+                ? const SizedBox.shrink()
+                : ValueListenableBuilder<bool>(
+                    valueListenable: homePageShown,
+                    builder: (context, value, child) => CupertinoButton(
+                      onPressed: !value
+                          ? () => controller?.loadUrl(
+                                urlRequest: URLRequest(url: Uri.parse("about:blank")),
+                              )
+                          : null,
+                      padding: EdgeInsets.zero,
+                      child: Icon(
+                        CupertinoIcons.home,
+                        color: !value ? CrystalColor.accent : CrystalColor.hintColor,
                       ),
                     ),
                   ),
-                ),
+          ),
+          Theme(
+            data: Theme.of(context).copyWith(
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              dividerTheme: const DividerThemeData(color: Colors.grey),
+            ),
+            child: PopupMenuButton<int>(
+              color: CrystalColor.grayBackground,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
+              icon: const Icon(
+                CupertinoIcons.ellipsis,
+                color: CrystalColor.accent,
+              ),
+              itemBuilder: (context) => [
+                buildPopupAccountMenuItem(
+                  value: 0,
+                  address: currentAccount.address,
+                ),
+                const PopupMenuDivider(),
+                buildPopupMenuItem(
+                  value: 1,
+                  text: "Reload",
+                ),
+                const PopupMenuDivider(),
+                buildPopupBookmarkMenuItem(
+                  value: 2,
+                ),
+                const PopupMenuDivider(),
+                buildPopupMenuItem(
+                  value: 3,
+                  text: "Share",
+                ),
+              ],
+              onSelected: (item) => onItemSelected(
+                item: item,
+                accounts: accounts,
+              ),
+            ),
+          ),
+        ],
+      );
+
+  PopupMenuEntry<int> buildPopupAccountMenuItem({
+    required int value,
+    required String address,
+  }) =>
+      PopupMenuItem<int>(
+        value: 0,
+        child: Row(
+          children: [
+            SizedBox.square(
+              dimension: 24,
+              child: getGravatarIcon(address.hashCode),
+            ),
+            const SizedBox(
+              width: 8,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Account",
+                  style: TextStyle(color: Colors.black),
+                ),
+                Text(
+                  address.elipseAddress(),
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ],
             ),
           ],
         ),
       );
 
-  Widget buildBody() => FutureBuilder<String>(
-        future: loadMainScript(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return InAppWebView(
-              initialUrlRequest: URLRequest(url: Uri.parse(origin)),
-              initialUserScripts: UnmodifiableListView<UserScript>([
-                UserScript(
-                  source: snapshot.data!,
-                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+  PopupMenuEntry<int> buildPopupBookmarkMenuItem({
+    required int value,
+  }) =>
+      PopupMenuItem<int>(
+        value: value,
+        child: BlocBuilder<BookmarksBloc, BookmarksState>(
+          bloc: bookmarksBloc,
+          builder: (context, state) => state.maybeWhen(
+            ready: (bookmarks) => Text(
+              !bookmarks.map((e) => e.url).contains(urlController.text) ? "Add bookmark" : "Remove bookmark",
+              style: const TextStyle(
+                color: Colors.black,
+              ),
+            ),
+            orElse: () => const Text(
+              "Add bookmark",
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          ),
+        ),
+      );
+
+  PopupMenuEntry<int> buildPopupMenuItem({
+    required int value,
+    required String text,
+  }) =>
+      PopupMenuItem<int>(
+        value: value,
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.black,
+          ),
+        ),
+      );
+
+  void onItemSelected({
+    required int item,
+    required List<AssetsList> accounts,
+  }) {
+    switch (item) {
+      case 0:
+        AccountSelection.open(
+          context: context,
+          accounts: accounts,
+          onTap: (String address) async {
+            accountsBloc.add(AccountsEvent.setCurrentAccount(address));
+            await disconnect(origin: urlController.text);
+          },
+        );
+        break;
+      case 1:
+        controller?.reload();
+        break;
+      case 2:
+        bookmarksBloc.state.maybeWhen(
+          ready: (bookmarks) {
+            if (!bookmarks.map((e) => e.url).contains(urlController.text)) {
+              bookmarksBloc.add(BookmarksEvent.addBookmark(urlController.text));
+            } else {
+              bookmarksBloc.add(BookmarksEvent.removeBookmark(urlController.text));
+            }
+          },
+          orElse: () => null,
+        );
+        break;
+      case 3:
+        Share.share(urlController.text);
+        break;
+    }
+  }
+
+  Widget buildBody() => GestureDetector(
+        onTap: FocusScope.of(context).unfocus,
+        behavior: HitTestBehavior.translucent,
+        child: FutureBuilder<String>(
+          future: loadMainScript(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ValueListenableBuilder<bool>(
+                valueListenable: homePageShown,
+                builder: (context, value, child) => Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Offstage(
+                      offstage: value,
+                      child: buildWebView(snapshot.data!),
+                    ),
+                    Offstage(
+                      offstage: !value,
+                      child: buildHomePage(),
+                    ),
+                  ],
                 ),
-              ]),
-              initialOptions: InAppWebViewGroupOptions(
-                android: AndroidInAppWebViewOptions(
-                  useHybridComposition: true,
+              );
+            } else {
+              return Center(child: PlatformCircularProgressIndicator());
+            }
+          },
+        ),
+      );
+
+  Widget buildWebView(String script) => InAppWebView(
+        initialUserScripts: UnmodifiableListView<UserScript>([
+          UserScript(
+            source: script,
+            injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+          ),
+        ]),
+        initialOptions: InAppWebViewGroupOptions(
+          android: AndroidInAppWebViewOptions(
+            useHybridComposition: true,
+          ),
+        ),
+        onWebViewCreated: onWebViewCreated,
+        onLoadStop: onLoadStop,
+        onConsoleMessage: onConsoleMessage,
+      );
+
+  Widget buildHomePage() => Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 12,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "BOOKMARKS",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: isManaging,
+                  builder: (context, value, child) => CupertinoButton(
+                    onPressed: () => isManaging.value = !isManaging.value,
+                    child: Text(!value ? "Manage" : "Done"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: BlocBuilder<BookmarksBloc, BookmarksState>(
+              bloc: bookmarksBloc,
+              builder: (context, state) => state.maybeWhen(
+                ready: (bookmarks) => bookmarks.isNotEmpty ? buildBookmarks(bookmarks) : buildBookmarksPlaceholder(),
+                orElse: () => const SizedBox(),
+              ),
+            ),
+          ),
+        ],
+      );
+
+  Widget buildBookmarksPlaceholder() => Column(
+        children: const [
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Icon(
+              CupertinoIcons.bookmark,
+              size: 64,
+            ),
+          ),
+          Text(
+            "Your bookmarks will show up here",
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      );
+
+  Widget buildBookmarks(List<WebMetadata> bookmarks) => GridView.builder(
+        padding: const EdgeInsets.all(12),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+          crossAxisCount: 2,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          height: 44,
+        ),
+        itemCount: bookmarks.length,
+        itemBuilder: (context, index) => GridTile(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => controller?.loadUrl(
+                    urlRequest: URLRequest(url: Uri.parse(bookmarks[index].url)),
+                  ),
+                  child: Row(
+                    children: [
+                      buildBookmarkIcon(
+                        bookmarks: bookmarks,
+                        index: index,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: buildBookmarkTitle(
+                            bookmarks: bookmarks,
+                            index: index,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              onWebViewCreated: onWebViewCreated,
-              onLoadStop: onLoadStop,
-              onConsoleMessage: onConsoleMessage,
+              buildRemoveBookmarkButton(
+                bookmarks: bookmarks,
+                index: index,
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Widget buildBookmarkIcon({
+    required List<WebMetadata> bookmarks,
+    required int index,
+  }) =>
+      bookmarks[index].icon != null && !bookmarks[index].icon!.contains("svg")
+          ? SizedBox.square(
+              dimension: 22,
+              child: Image.network(bookmarks[index].icon!),
+            )
+          : const Icon(
+              CupertinoIcons.globe,
+              size: 22,
             );
-          } else {
-            return Center(child: PlatformCircularProgressIndicator());
-          }
-        },
+
+  Widget buildBookmarkTitle({
+    required List<WebMetadata> bookmarks,
+    required int index,
+  }) =>
+      Text(
+        bookmarks[index].title ?? bookmarks[index].url,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: Colors.black,
+        ),
+      );
+
+  Widget buildRemoveBookmarkButton({
+    required List<WebMetadata> bookmarks,
+    required int index,
+  }) =>
+      ValueListenableBuilder<bool>(
+        valueListenable: isManaging,
+        builder: (context, value, child) => CupertinoButton(
+          onPressed: () => bookmarksBloc.add(BookmarksEvent.removeBookmark(bookmarks[index].url)),
+          padding: EdgeInsets.zero,
+          child: value
+              ? const Icon(
+                  CupertinoIcons.delete,
+                  color: Colors.red,
+                )
+              : const SizedBox.shrink(),
+        ),
       );
 
   void onWebViewCreated(InAppWebViewController controller) {
@@ -368,8 +736,20 @@ class _WebviewPageState extends State<WebviewPage> {
     );
   }
 
-  void onLoadStop(InAppWebViewController controller, Uri? url) {
-    inAppWebViewControllerCompleter.complete(controller);
+  Future<void> onLoadStop(InAppWebViewController controller, Uri? url) async {
+    this.controller = controller;
+
+    backButtonEnabled.value = await this.controller?.canGoBack() ?? false;
+    forwardButtonEnabled.value = await this.controller?.canGoForward() ?? false;
+
+    final url = await this.controller?.getUrl();
+    if (url != null) {
+      homePageShown.value = url == Uri.parse("about:blank");
+      urlController.value = TextEditingValue(
+        text: url.toString(),
+        selection: TextSelection.collapsed(offset: url.toString().length),
+      );
+    }
   }
 
   void onConsoleMessage(InAppWebViewController controller, ConsoleMessage consoleMessage) {
@@ -505,8 +885,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final jsonOutput = jsonEncode(event.toJson());
       logger.d('EVENT disconnected $jsonOutput');
 
-      final controller = await inAppWebViewControllerCompleter.future;
-      await controller.evaluateJavascript(source: "window.__dartNotifications.disconnected('$jsonOutput')");
+      await controller?.evaluateJavascript(source: "window.__dartNotifications.disconnected('$jsonOutput')");
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -517,8 +896,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final jsonOutput = jsonEncode(event.toJson());
       logger.d('EVENT transactionsFound $jsonOutput');
 
-      final controller = await inAppWebViewControllerCompleter.future;
-      await controller.evaluateJavascript(source: "window.__dartNotifications.transactionsFound('$jsonOutput')");
+      await controller?.evaluateJavascript(source: "window.__dartNotifications.transactionsFound('$jsonOutput')");
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -529,8 +907,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final jsonOutput = jsonEncode(event.toJson());
       logger.d('EVENT contractStateChanged $jsonOutput');
 
-      final controller = await inAppWebViewControllerCompleter.future;
-      await controller.evaluateJavascript(source: "window.__dartNotifications.contractStateChanged('$jsonOutput')");
+      await controller?.evaluateJavascript(source: "window.__dartNotifications.contractStateChanged('$jsonOutput')");
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -541,8 +918,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final jsonOutput = jsonEncode(event.toJson());
       logger.d('EVENT networkChanged $jsonOutput');
 
-      final controller = await inAppWebViewControllerCompleter.future;
-      await controller.evaluateJavascript(source: "window.__dartNotifications.networkChanged('$jsonOutput')");
+      await controller?.evaluateJavascript(source: "window.__dartNotifications.networkChanged('$jsonOutput')");
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -553,8 +929,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final jsonOutput = jsonEncode(event.toJson());
       logger.d('EVENT permissionsChanged $jsonOutput');
 
-      final controller = await inAppWebViewControllerCompleter.future;
-      await controller.evaluateJavascript(source: "window.__dartNotifications.permissionsChanged('$jsonOutput')");
+      await controller?.evaluateJavascript(source: "window.__dartNotifications.permissionsChanged('$jsonOutput')");
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -564,8 +939,7 @@ class _WebviewPageState extends State<WebviewPage> {
     try {
       logger.d('EVENT loggedOut');
 
-      final controller = await inAppWebViewControllerCompleter.future;
-      await controller.evaluateJavascript(source: 'window.__dartNotifications.loggedOut()');
+      await controller?.evaluateJavascript(source: 'window.__dartNotifications.loggedOut()');
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -578,23 +952,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = CodeToTvcInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onCodeToTvc(
-          origin: origin,
-          input: input,
-        ),
+      final output = await codeToTvc(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          codeToTvc: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        codeToTvc: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST codeToTvc result $jsonOutput');
@@ -612,22 +973,9 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = DecodeEventInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onDecodeEvent(
-          origin: origin,
-          input: input,
-        ),
-      );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          decodeEvent: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        decodeEvent: (origin, input, output) => output,
-        orElse: () => null,
+      final output = await decodeEvent(
+        origin: urlController.text,
+        input: input,
       );
 
       final jsonOutput = jsonEncode(output?.toJson());
@@ -646,22 +994,9 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = DecodeInputInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onDecodeInput(
-          origin: origin,
-          input: input,
-        ),
-      );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          decodeInput: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        decodeInput: (origin, input, output) => output,
-        orElse: () => null,
+      final output = await decodeInput(
+        origin: urlController.text,
+        input: input,
       );
 
       final jsonOutput = jsonEncode(output?.toJson());
@@ -680,22 +1015,9 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = DecodeOutputInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onDecodeOutput(
-          origin: origin,
-          input: input,
-        ),
-      );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          decodeOutput: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        decodeOutput: (origin, input, output) => output,
-        orElse: () => null,
+      final output = await decodeOutput(
+        origin: urlController.text,
+        input: input,
       );
 
       final jsonOutput = jsonEncode(output?.toJson());
@@ -714,23 +1036,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = DecodeTransactionEventsInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onDecodeTransactionEvents(
-          origin: origin,
-          input: input,
-        ),
+      final output = await decodeTransactionEvents(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          decodeTransactionEvents: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        decodeTransactionEvents: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST decodeTransactionEvents result $jsonOutput');
@@ -748,22 +1057,9 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = DecodeTransactionInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onDecodeTransaction(
-          origin: origin,
-          input: input,
-        ),
-      );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          decodeTransaction: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        decodeTransaction: (origin, input, output) => output,
-        orElse: () => null,
+      final output = await decodeTransaction(
+        origin: urlController.text,
+        input: input,
       );
 
       final jsonOutput = jsonEncode(output?.toJson());
@@ -777,16 +1073,8 @@ class _WebviewPageState extends State<WebviewPage> {
 
   Future<dynamic> disconnectHandler(List<dynamic> args) async {
     try {
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onDisconnect(
-          origin: origin,
-        ),
-      );
-      await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          disconnect: (value) => value.origin == origin,
-          orElse: () => false,
-        ),
+      await disconnect(
+        origin: urlController.text,
       );
 
       final jsonOutput = jsonEncode({});
@@ -805,23 +1093,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = EncodeInternalInputInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onEncodeInternalInput(
-          origin: origin,
-          input: input,
-        ),
+      final output = await encodeInternalInput(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          encodeInternalInput: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        encodeInternalInput: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST encodeInternalInput result $jsonOutput');
@@ -839,23 +1114,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = EstimateFeesInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onEstimateFees(
-          origin: origin,
-          input: input,
-        ),
+      final output = await estimateFees(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          estimateFees: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        estimateFees: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST estimateFees result $jsonOutput');
@@ -873,23 +1135,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = ExtractPublicKeyInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onExtractPublicKey(
-          origin: origin,
-          input: input,
-        ),
+      final output = await extractPublicKey(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          extractPublicKey: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        extractPublicKey: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST extractPublicKey result $jsonOutput');
@@ -907,23 +1156,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = GetExpectedAddressInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onGetExpectedAddress(
-          origin: origin,
-          input: input,
-        ),
+      final output = await getExpectedAddress(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          getExpectedAddress: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        getExpectedAddress: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST getExpectedAddress result $jsonOutput');
@@ -941,23 +1177,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = GetFullContractStateInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onGetFullContractState(
-          origin: origin,
-          input: input,
-        ),
+      final output = await getFullContractState(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          getFullContractState: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        getFullContractState: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST getFullContractState result $jsonOutput');
@@ -970,22 +1193,9 @@ class _WebviewPageState extends State<WebviewPage> {
 
   Future<dynamic> getProviderStateHandler(List<dynamic> args) async {
     try {
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onGetProviderState(
-          origin: origin,
-        ),
+      final output = await getProviderState(
+        origin: urlController.text,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          getProviderState: (value) => value.origin == origin,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        getProviderState: (origin, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST getProviderState result $jsonOutput');
@@ -1003,23 +1213,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = GetTransactionsInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onGetTransactions(
-          origin: origin,
-          input: input,
-        ),
+      final output = await getTransactions(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          getTransactions: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        getTransactions: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST getTransactions result $jsonOutput');
@@ -1037,23 +1234,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = PackIntoCellInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onPackIntoCell(
-          origin: origin,
-          input: input,
-        ),
+      final output = await packIntoCell(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          packIntoCell: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        packIntoCell: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST packIntoCell result $jsonOutput');
@@ -1071,23 +1255,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = RequestPermissionsInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onRequestPermissions(
-          origin: origin,
-          input: input,
-        ),
+      final output = await requestPermissions(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          requestPermissions: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        requestPermissions: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST requestPermissions result $jsonOutput');
@@ -1105,23 +1276,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = RunLocalInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onRunLocal(
-          origin: origin,
-          input: input,
-        ),
+      final output = await runLocal(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          runLocal: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        runLocal: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST runLocal result $jsonOutput');
@@ -1139,23 +1297,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = SendExternalMessageInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onSendExternalMessage(
-          origin: origin,
-          input: input,
-        ),
+      final output = await sendExternalMessage(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          sendExternalMessage: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        sendExternalMessage: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST sendExternalMessage result $jsonOutput');
@@ -1173,23 +1318,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = SendMessageInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onSendMessage(
-          origin: origin,
-          input: input,
-        ),
+      final output = await sendMessage(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          sendMessage: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        sendMessage: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST sendMessage result $jsonOutput');
@@ -1207,23 +1339,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = SplitTvcInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onSplitTvc(
-          origin: origin,
-          input: input,
-        ),
+      final output = await splitTvc(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          splitTvc: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        splitTvc: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST splitTvc result $jsonOutput');
@@ -1241,23 +1360,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = SubscribeInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onSubscribe(
-          origin: origin,
-          input: input,
-        ),
+      final output = await subscribe(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          subscribe: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        subscribe: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST subscribe result $jsonOutput');
@@ -1275,23 +1381,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = UnpackFromCellInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onUnpackFromCell(
-          origin: origin,
-          input: input,
-        ),
+      final output = await unpackFromCell(
+        origin: urlController.text,
+        input: input,
       );
-      final state = await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          unpackFromCell: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
-      );
-
-      final output = state.maybeWhen(
-        unpackFromCell: (origin, input, output) => output,
-        orElse: () => null,
-      )!;
 
       final jsonOutput = jsonEncode(output.toJson());
       logger.d('REQUEST unpackFromCell result $jsonOutput');
@@ -1304,16 +1397,8 @@ class _WebviewPageState extends State<WebviewPage> {
 
   Future<dynamic> unsubscribeAllHandler(List<dynamic> args) async {
     try {
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onUnsubscribeAll(
-          origin: origin,
-        ),
-      );
-      await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          unsubscribeAll: (value) => value.origin == origin,
-          orElse: () => false,
-        ),
+      await unsubscribeAll(
+        origin: urlController.text,
       );
 
       final jsonOutput = jsonEncode({});
@@ -1332,17 +1417,9 @@ class _WebviewPageState extends State<WebviewPage> {
 
       final input = UnsubscribeInput.fromJson(jsonInput);
 
-      providerRequestsBloc.add(
-        ProviderRequestsEvent.onUnsubscribe(
-          origin: origin,
-          input: input,
-        ),
-      );
-      await providerRequestsBloc.stream.firstWhere(
-        (e) => e.maybeMap(
-          unsubscribe: (value) => value.origin == origin && value.input == input,
-          orElse: () => false,
-        ),
+      await unsubscribe(
+        origin: urlController.text,
+        input: input,
       );
 
       final jsonOutput = jsonEncode({});

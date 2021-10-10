@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../router.gr.dart';
 import 'design.dart';
 
-Widget getRandomTokenAssetIcon(int hashCode) => ClipOval(
+Widget getGravatarIcon(int hashCode) => ClipOval(
       child: Image.network(
         Gravatar('$hashCode@example.com').imageUrl(),
       ),

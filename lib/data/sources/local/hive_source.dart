@@ -34,6 +34,8 @@ class HiveSource {
   Future<Box<TokenContractAssetDto>> get _tokenContractAssetsBox async =>
       Hive.openBox<TokenContractAssetDto>("token_contract_assets");
 
+  Future<Box<String>> get _bookmarksBox async => Hive.openBox<String>("bookmarks");
+
   Future<Box<List>> get _connectedSitesBox async => Hive.openBox<List>("connected_sites");
 
   Future<Box<Object?>> get _biometryPreferencesBox async => Hive.openBox<Object?>("biometry_preferences");
@@ -145,5 +147,20 @@ class HiveSource {
   Future<void> clearPasswords() async {
     final box = await _walletsPasswordsBox;
     await box.clear();
+  }
+
+  Future<List<String>> getBookmarks() async {
+    final box = await _bookmarksBox;
+    return box.values.toList();
+  }
+
+  Future<void> addBookmark(String url) async {
+    final box = await _bookmarksBox;
+    await box.put(url.hashCode, url);
+  }
+
+  Future<void> removeBookmark(String url) async {
+    final box = await _bookmarksBox;
+    await box.delete(url.hashCode);
   }
 }

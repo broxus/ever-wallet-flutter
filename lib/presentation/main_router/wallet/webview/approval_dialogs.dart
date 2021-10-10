@@ -21,7 +21,7 @@ Future<bool> showRequestPermissionsDialog(
         child: PlatformAlertDialog(
           title: const Text('Grant permissions'),
           content: Text(
-              '$origin requested permissions ${permissions.map((e) => describeEnum(e).capitalize).join(', ')} to use your account with address ${'${address.substring(0, 6)}...${address.substring(address.length - 4, address.length)}'} and public key ${'${publicKey.substring(0, 4)}...${publicKey.substring(publicKey.length - 4, publicKey.length)}'}'),
+              '$origin requested permissions ${permissions.map((e) => describeEnum(e).capitalize).join(', ')} to use your account with address ${address.elipseAddress()} and public key ${publicKey.elipsePublicKey()}'),
           actions: [
             PlatformDialogAction(
               onPressed: () => Navigator.of(context).pop(false),
@@ -62,7 +62,7 @@ Future<String?> showSendMessageDialog(
         content: Column(
           children: [
             Text(
-                '$origin wants to send message from ${'${sender.substring(0, 6)}...${sender.substring(sender.length - 4, sender.length)}'} to ${'${recipient.substring(0, 6)}...${recipient.substring(recipient.length - 4, recipient.length)}'} with amount of $amount and bounce $bounce'),
+                '$origin wants to send message from ${sender.elipseAddress()} to ${recipient.elipseAddress()} with amount of $amount and bounce $bounce'),
             const Text('Enter your password to allow'),
             PlatformWidget(
               cupertino: (_, __) => Padding(
@@ -121,7 +121,7 @@ Future<String?> showCallContractMethodDialog(
         content: Column(
           children: [
             Text(
-                '$origin wants to call contract method with public key ${'${selectedPublicKey.substring(0, 4)}...${selectedPublicKey.substring(selectedPublicKey.length - 4, selectedPublicKey.length)}'} to recipient ${'${repackedRecipient.substring(0, 4)}...${repackedRecipient.substring(repackedRecipient.length - 4, repackedRecipient.length)}'}'),
+                '$origin wants to call contract method with public key ${selectedPublicKey.elipsePublicKey()} to recipient ${repackedRecipient.elipseAddress()}}'),
             const Text('Enter your password to allow'),
             PlatformWidget(
               cupertino: (_, __) => Padding(

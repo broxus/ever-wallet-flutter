@@ -124,7 +124,7 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
                   color: Colors.transparent,
                   icon: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: logoURI != null ? getTokenAssetIcon(logoURI) : getRandomTokenAssetIcon(symbol.name.hashCode),
+                    child: logoURI != null ? getTokenAssetIcon(logoURI) : getGravatarIcon(symbol.name.hashCode),
                   ),
                 ),
                 const CrystalDivider(width: 16),

@@ -20,6 +20,7 @@ dependencies:
   expand_tap_area: ^1.1.0
   extended_text: ^7.0.0
   fading_edge_scrollview: ^2.0.0
+  favicon: ^1.0.15
   firebase_analytics: ^8.0.2
   firebase_core: ^1.1.0
   firebase_crashlytics: ^2.0.2
@@ -42,6 +43,7 @@ dependencies:
   local_auth: ^1.1.6
   logger: ^1.0.0
   lottie: ^1.0.1
+  metadata_fetch: ^0.4.1
   modal_bottom_sheet: ^2.0.0
   nekoton_flutter:
     path: ../nekoton-flutter
