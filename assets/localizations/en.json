@@ -344,6 +344,19 @@
     }
   },
   "browser": {
-    "title": "Browser"
+    "title": "Browser",
+    "reload": "Reload",
+    "share": "Share",
+    "account": "Account",
+    "add_bookmark": "Add bookmark",
+    "remove_bookmark": "Remove bookmark",
+    "bookmarks": "BOOKMARKS",
+    "manage": "Manage",
+    "done": "Done",
+    "show_bookmarks": "Your bookmarks will show up here",
+    "remove_from_bookmarks": "Remove from Bookmarks?",
+    "remove_from_bookmarks_confirm": "Are you sure you want to remove {} from Bookmarks?",
+    "cancel": "Cancel",
+    "remove": "Remove"
   }
 }
