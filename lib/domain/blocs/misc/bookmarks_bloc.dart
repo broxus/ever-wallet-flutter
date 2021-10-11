@@ -56,9 +56,11 @@ class BookmarksBloc extends Bloc<_Event, BookmarksState> {
       yield* event.when(
         addBookmark: (String url) async* {
           try {
-            await _bookmarksRepository.addBookmark(url);
+            if (url != 'about:blank') {
+              await _bookmarksRepository.addBookmark(url);
 
-            add(const _LocalEvent.updateBookmarks());
+              add(const _LocalEvent.updateBookmarks());
+            }
           } on Exception catch (err, st) {
             logger.e(err, err, st);
             yield BookmarksState.error(err.toString());
