@@ -33,6 +33,10 @@ class BookmarksBloc extends Bloc<_Event, BookmarksState> {
 
             final list = <WebMetadata>[];
 
+            if (bookmarks.isEmpty) {
+              yield const BookmarksState.ready([]);
+            }
+
             for (final bookmark in bookmarks) {
               try {
                 final metadata = await _webMetadataRepository.getMetadata(bookmark);
