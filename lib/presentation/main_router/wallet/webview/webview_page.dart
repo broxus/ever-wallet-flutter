@@ -287,7 +287,7 @@ class _WebviewPageState extends State<WebviewPage> {
                 const PopupMenuDivider(),
                 buildPopupMenuItem(
                   value: 1,
-                  text: "Reload",
+                  text: LocaleKeys.browser_reload.tr(),
                 ),
                 const PopupMenuDivider(),
                 buildPopupBookmarkMenuItem(
@@ -296,7 +296,7 @@ class _WebviewPageState extends State<WebviewPage> {
                 const PopupMenuDivider(),
                 buildPopupMenuItem(
                   value: 3,
-                  text: "Share",
+                  text: LocaleKeys.browser_share.tr(),
                 ),
               ],
               onSelected: (item) => onItemSelected(
@@ -326,9 +326,9 @@ class _WebviewPageState extends State<WebviewPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Account",
-                  style: TextStyle(color: Colors.black),
+                Text(
+                  LocaleKeys.browser_account.tr(),
+                  style: const TextStyle(color: Colors.black),
                 ),
                 Text(
                   address.elipseAddress(),
@@ -349,14 +349,16 @@ class _WebviewPageState extends State<WebviewPage> {
           bloc: bookmarksBloc,
           builder: (context, state) => state.maybeWhen(
             ready: (bookmarks) => Text(
-              !bookmarks.map((e) => e.url).contains(urlController.text) ? "Add bookmark" : "Remove bookmark",
+              !bookmarks.map((e) => e.url).contains(urlController.text)
+                  ? LocaleKeys.browser_add_bookmark.tr()
+                  : LocaleKeys.browser_remove_bookmark.tr(),
               style: const TextStyle(
                 color: Colors.black,
               ),
             ),
-            orElse: () => const Text(
-              "Add bookmark",
-              style: TextStyle(
+            orElse: () => Text(
+              LocaleKeys.browser_add_bookmark.tr(),
+              style: const TextStyle(
                 color: Colors.grey,
               ),
             ),
@@ -471,9 +473,9 @@ class _WebviewPageState extends State<WebviewPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  "BOOKMARKS",
-                  style: TextStyle(
+                Text(
+                  LocaleKeys.browser_bookmarks.tr(),
+                  style: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -483,7 +485,7 @@ class _WebviewPageState extends State<WebviewPage> {
                   valueListenable: isManaging,
                   builder: (context, value, child) => CupertinoButton(
                     onPressed: () => isManaging.value = !isManaging.value,
-                    child: Text(!value ? "Manage" : "Done"),
+                    child: Text(!value ? LocaleKeys.browser_manage.tr() : LocaleKeys.browser_done.tr()),
                   ),
                 ),
               ],
@@ -502,7 +504,7 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
   Widget buildBookmarksPlaceholder() => Column(
-        children: const [
+        children: [
           Padding(
             padding: EdgeInsets.all(16),
             child: Icon(
@@ -511,7 +513,7 @@ class _WebviewPageState extends State<WebviewPage> {
             ),
           ),
           Text(
-            "Your bookmarks will show up here",
+            LocaleKeys.browser_show_bookmarks.tr(),
             style: TextStyle(
               color: Colors.grey,
               fontSize: 16,
@@ -608,12 +610,12 @@ class _WebviewPageState extends State<WebviewPage> {
             builder: (context) => Theme(
               data: ThemeData.light(),
               child: CupertinoAlertDialog(
-                title: Text('Remove from Bookmarks?'),
-                content: Text('Are you sure you want to remove ${bookmarks[index].title} from Bookmarks?'),
+                title: Text(LocaleKeys.browser_remove_from_bookmarks.tr()),
+                content: Text(LocaleKeys.browser_remove_from_bookmarks_confirm.tr(args: [bookmarks[index].title!])),
                 actions: <Widget>[
                   CupertinoDialogAction(
                     onPressed: Navigator.of(context).pop,
-                    child: Text('Cancel'),
+                    child: Text(LocaleKeys.browser_cancel.tr()),
                   ),
                   CupertinoDialogAction(
                     onPressed: () {
@@ -624,7 +626,7 @@ class _WebviewPageState extends State<WebviewPage> {
                       color: Colors.red,
                     ),
                     child: Text(
-                      'Remove',
+                      LocaleKeys.browser_remove.tr(),
                     ),
                   ),
                 ],
