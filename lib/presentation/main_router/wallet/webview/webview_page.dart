@@ -603,7 +603,34 @@ class _WebviewPageState extends State<WebviewPage> {
       ValueListenableBuilder<bool>(
         valueListenable: isManaging,
         builder: (context, value, child) => CupertinoButton(
-          onPressed: () => bookmarksBloc.add(BookmarksEvent.removeBookmark(bookmarks[index].url)),
+          onPressed: () => showCupertinoDialog(
+            context: context,
+            builder: (context) => Theme(
+              data: ThemeData.light(),
+              child: CupertinoAlertDialog(
+                title: Text('Remove from Bookmarks?'),
+                content: Text('Are you sure you want to remove ${bookmarks[index].title} from Bookmarks?'),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    onPressed: Navigator.of(context).pop,
+                    child: Text('Cancel'),
+                  ),
+                  CupertinoDialogAction(
+                    onPressed: () {
+                      bookmarksBloc.add(BookmarksEvent.removeBookmark(bookmarks[index].url));
+                      Navigator.of(context).pop();
+                    },
+                    textStyle: TextStyle(
+                      color: Colors.red,
+                    ),
+                    child: Text(
+                      'Remove',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           padding: EdgeInsets.zero,
           child: value
               ? const Icon(
