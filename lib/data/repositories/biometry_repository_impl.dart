@@ -92,7 +92,7 @@ class BiometryRepositoryImpl implements BiometryRepository {
     });
 
     final isBiometryAvailable = await _localAuthSource.isBiometryAvailable;
-    final isBiometryEnabled = await _hiveSource.biometryStatus;
+    final isBiometryEnabled = await _hiveSource.getBiometryStatus();
 
     _biometryAvailabilitySubject.add(isBiometryAvailable);
     _biometryStatusSubject.add(isBiometryEnabled);

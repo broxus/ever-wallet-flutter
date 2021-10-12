@@ -9,10 +9,10 @@ import '../../dtos/token_contract_asset_dto.dart';
 class RestSource {
   final Dio _dio = Dio();
 
-  String get tonAssetsRoute => 'https://raw.githubusercontent.com/broxus/ton-assets/master/manifest.json';
+  String _getTonAssetsRoute() => 'https://raw.githubusercontent.com/broxus/ton-assets/master/manifest.json';
 
   Future<List<TokenContractAssetDto>> getTokenContractAssets() async {
-    final response = await _dio.get(tonAssetsRoute);
+    final response = await _dio.get(_getTonAssetsRoute());
 
     final data = jsonDecode(response.data as String);
     final json = data as Map<String, dynamic>;

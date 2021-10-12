@@ -7,7 +7,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
-import 'data/dtos/connected_site_dto.dart';
+import 'data/dtos/bookmark_dto.dart';
 import 'data/dtos/token_contract_asset_dto.dart';
 import 'injection.config.dart';
 
@@ -48,7 +48,7 @@ abstract class HiveModule {
     await Hive.initFlutter();
 
     Hive
-      ..registerAdapter(ConnectedSiteDtoAdapter())
+      ..registerAdapter(BookmarkDtoAdapter())
       ..registerAdapter(TokenContractAssetDtoAdapter());
 
     return this;

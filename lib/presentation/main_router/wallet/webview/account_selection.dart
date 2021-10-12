@@ -1,8 +1,8 @@
-import 'package:crystal/presentation/design/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../design/design.dart';
+import '../../../design/utils.dart';
 import '../../../design/widget/crystal_bottom_sheet.dart';
 
 class AccountSelection extends StatefulWidget {

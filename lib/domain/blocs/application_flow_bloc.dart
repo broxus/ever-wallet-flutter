@@ -6,7 +6,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../logger.dart';
 import '../repositories/biometry_repository.dart';
-import '../repositories/connected_sites_repository.dart';
+import '../repositories/bookmarks_repository.dart';
 import '../repositories/ton_assets_repository.dart';
 import '../services/nekoton_service.dart';
 import 'common/notification_bloc.dart';
@@ -17,7 +17,7 @@ part 'application_flow_bloc.freezed.dart';
 class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
   final NekotonService _nekotonService;
   final BiometryRepository _biometryRepository;
-  final ConnectedSitesRepository _connectedSitesRepository;
+  final BookmarksRepository _bookmarksRepository;
   final TonAssetsRepository _tonAssetsRepository;
   late final StreamSubscription _keysPresenceSubscription;
   final notificationBloc = NotificationBloc();
@@ -25,7 +25,7 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
   ApplicationFlowBloc(
     this._nekotonService,
     this._biometryRepository,
-    this._connectedSitesRepository,
+    this._bookmarksRepository,
     this._tonAssetsRepository,
   ) : super(const ApplicationFlowState.loading()) {
     _keysPresenceSubscription = _nekotonService.keysPresenceStream
@@ -66,7 +66,7 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
             await _nekotonService.clearAccountsStorage();
             await _nekotonService.clearKeystore();
             await _biometryRepository.clear();
-            await _connectedSitesRepository.clear();
+            await _bookmarksRepository.clear();
             await _tonAssetsRepository.clear();
           } on Exception catch (err, st) {
             logger.e(err, err, st);

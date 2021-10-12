@@ -1,7 +1,13 @@
+import '../models/bookmark.dart';
+
 abstract class BookmarksRepository {
-  Future<List<String>> getBookmarks();
+  Future<List<Bookmark>> getBookmarks();
 
   Future<void> addBookmark(String url);
 
-  Future<void> removeBookmark(String url);
+  Future<void> updateBookmark(Bookmark bookmark);
+
+  Future<void> removeBookmark(Bookmark bookmark);
+
+  Future<void> clear();
 }

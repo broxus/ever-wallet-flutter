@@ -1,25 +1,22 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:crystal/domain/models/web_metadata.dart';
-import 'package:crystal/domain/repositories/bookmarks_repository.dart';
-import 'package:crystal/domain/repositories/web_metadata_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../logger.dart';
+import '../../models/bookmark.dart';
+import '../../repositories/bookmarks_repository.dart';
 
 part 'bookmarks_bloc.freezed.dart';
 
 @injectable
 class BookmarksBloc extends Bloc<_Event, BookmarksState> {
   final BookmarksRepository _bookmarksRepository;
-  final WebMetadataRepository _webMetadataRepository;
 
   BookmarksBloc(
     this._bookmarksRepository,
-    this._webMetadataRepository,
-  ) : super(const BookmarksState.initial()) {
+  ) : super(const BookmarksState.ready([])) {
     add(const _LocalEvent.updateBookmarks());
   }
 
@@ -31,22 +28,9 @@ class BookmarksBloc extends Bloc<_Event, BookmarksState> {
           try {
             final bookmarks = await _bookmarksRepository.getBookmarks();
 
-            final list = <WebMetadata>[];
-
-            if (bookmarks.isEmpty) {
-              yield const BookmarksState.ready([]);
-            }
-
-            for (final bookmark in bookmarks) {
-              try {
-                final metadata = await _webMetadataRepository.getMetadata(bookmark);
-                list.add(metadata);
-                yield BookmarksState.ready([...list]);
-              } catch (_) {}
-            }
+            yield BookmarksState.ready(bookmarks);
           } on Exception catch (err, st) {
             logger.e(err, err, st);
-            yield BookmarksState.error(err.toString());
           }
         },
       );
@@ -56,24 +40,20 @@ class BookmarksBloc extends Bloc<_Event, BookmarksState> {
       yield* event.when(
         addBookmark: (String url) async* {
           try {
-            if (url != 'about:blank') {
-              await _bookmarksRepository.addBookmark(url);
-
-              add(const _LocalEvent.updateBookmarks());
-            }
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield BookmarksState.error(err.toString());
-          }
-        },
-        removeBookmark: (String url) async* {
-          try {
-            await _bookmarksRepository.removeBookmark(url);
+            await _bookmarksRepository.addBookmark(url);
 
             add(const _LocalEvent.updateBookmarks());
           } on Exception catch (err, st) {
             logger.e(err, err, st);
-            yield BookmarksState.error(err.toString());
+          }
+        },
+        removeBookmark: (Bookmark bookmark) async* {
+          try {
+            await _bookmarksRepository.removeBookmark(bookmark);
+
+            add(const _LocalEvent.updateBookmarks());
+          } on Exception catch (err, st) {
+            logger.e(err, err, st);
           }
         },
       );
@@ -92,14 +72,10 @@ class _LocalEvent extends _Event with _$_LocalEvent {
 class BookmarksEvent extends _Event with _$BookmarksEvent {
   const factory BookmarksEvent.addBookmark(String url) = _AddBookmark;
 
-  const factory BookmarksEvent.removeBookmark(String url) = _RemoveBookmark;
+  const factory BookmarksEvent.removeBookmark(Bookmark bookmark) = _RemoveBookmark;
 }
 
 @freezed
 class BookmarksState with _$BookmarksState {
-  const factory BookmarksState.initial() = _Initial;
-
-  const factory BookmarksState.ready(List<WebMetadata> bookmarks) = _Ready;
-
-  const factory BookmarksState.error(String info) = _Error;
+  const factory BookmarksState.ready(List<Bookmark> bookmarks) = _Ready;
 }

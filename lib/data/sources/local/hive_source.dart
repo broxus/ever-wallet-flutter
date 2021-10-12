@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../dtos/connected_site_dto.dart';
+import '../../dtos/bookmark_dto.dart';
 import '../../dtos/token_contract_asset_dto.dart';
 
 @preResolve
@@ -12,7 +13,10 @@ import '../../dtos/token_contract_asset_dto.dart';
 class HiveSource {
   late final Uint8List _key;
   final _biometryStatus = "biometry_status";
-  final _currentPublicKey = "current_public_key";
+  late final Box<TokenContractAssetDto> _tokenContractAssetsBox;
+  late final Box<BookmarkDto> _bookmarksBox;
+  late final Box<Object?> _biometryPreferencesBox;
+  late final Box<String> _walletsPasswordsBox;
 
   @factoryMethod
   static Future<HiveSource> create() async {
@@ -28,139 +32,82 @@ class HiveSource {
 
     hiveSource._key = hiveAesCipherKey;
 
+    hiveSource._tokenContractAssetsBox = await Hive.openBox<TokenContractAssetDto>("token_contract_assets");
+    hiveSource._bookmarksBox = await Hive.openBox<BookmarkDto>("bookmarks");
+    hiveSource._biometryPreferencesBox = await Hive.openBox<Object?>("biometry_preferences");
+    hiveSource._walletsPasswordsBox = await Hive.openBox<String>(
+      "wallets_passwords",
+      encryptionCipher: HiveAesCipher(hiveSource._key),
+    );
+
     return hiveSource;
   }
 
-  Future<Box<TokenContractAssetDto>> get _tokenContractAssetsBox async =>
-      Hive.openBox<TokenContractAssetDto>("token_contract_assets");
+  List<BookmarkDto> getBookmarks() => _bookmarksBox.values.toList();
 
-  Future<Box<String>> get _bookmarksBox async => Hive.openBox<String>("bookmarks");
-
-  Future<Box<List>> get _connectedSitesBox async => Hive.openBox<List>("connected_sites");
-
-  Future<Box<Object?>> get _biometryPreferencesBox async => Hive.openBox<Object?>("biometry_preferences");
-
-  Future<Box<Object?>> get _userPreferencesBox async => Hive.openBox<Object?>("user_preferences");
-
-  Future<Box<String>> get _walletsPasswordsBox async => Hive.openBox<String>(
-        "wallets_passwords",
-        encryptionCipher: HiveAesCipher(_key),
-      );
-
-  Future<List<ConnectedSiteDto>> getConnectedSites(String address) async {
-    final box = await _connectedSitesBox;
-    return box.get(
-      address,
-      defaultValue: [],
-    )!.cast<ConnectedSiteDto>();
+  Future<void> addBookmark(BookmarkDto bookmark) async {
+    await _bookmarksBox.add(bookmark);
   }
 
-  Future<void> addConnectedSite({
-    required String address,
-    required ConnectedSiteDto site,
-  }) async {
-    final box = await _connectedSitesBox;
+  Future<void> updateBookmark(BookmarkDto bookmark) async {
+    final old = _bookmarksBox.toMap().entries.firstWhereOrNull((e) => e.value.url == bookmark.url);
 
-    final list = await getConnectedSites(address);
-    list.add(site);
+    if (old == null) {
+      throw Exception();
+    }
 
-    await box.put(address, list);
+    await _bookmarksBox.put(old.key, bookmark);
   }
 
-  Future<void> removeConnectedSite({
-    required String address,
-    required String url,
-  }) async {
-    final box = await _connectedSitesBox;
+  Future<void> removeBookmark(BookmarkDto bookmark) async {
+    final old = _bookmarksBox.toMap().entries.firstWhereOrNull((e) => e.value.url == bookmark.url);
 
-    final list = await getConnectedSites(address);
-    final filtered = list.where((element) => element.url != url).toList();
+    if (old == null) {
+      throw Exception();
+    }
 
-    await box.clear();
-    await box.put(address, filtered);
+    await _bookmarksBox.delete(old.key);
   }
 
-  Future<void> clearConnectedSites() async {
-    final box = await _connectedSitesBox;
-    await box.clear();
-  }
+  Future<void> clearBookmarks() async => _bookmarksBox.clear();
 
   Future<List<TokenContractAssetDto>> getTokenContractAssets() async {
-    final box = await _tokenContractAssetsBox;
-    return box.values.toList();
+    return _tokenContractAssetsBox.values.toList();
   }
 
   Future<void> cacheTokenContractAssets(List<TokenContractAssetDto> assets) async {
-    final box = await _tokenContractAssetsBox;
-    await box.clear();
-    await box.addAll(assets);
+    await _tokenContractAssetsBox.clear();
+    await _tokenContractAssetsBox.addAll(assets);
   }
 
   Future<void> clearTokenContractAssets() async {
-    final box = await _tokenContractAssetsBox;
-    await box.clear();
-  }
-
-  Future<bool> get biometryStatus async {
-    final box = await _biometryPreferencesBox;
-    return box.get(_biometryStatus) as bool? ?? false;
+    await _tokenContractAssetsBox.clear();
   }
 
   Future<void> setBiometryStatus({required bool isEnabled}) async {
-    final box = await _biometryPreferencesBox;
-    return box.put(_biometryStatus, isEnabled);
+    return _biometryPreferencesBox.put(_biometryStatus, isEnabled);
+  }
+
+  Future<bool> getBiometryStatus() async {
+    return _biometryPreferencesBox.get(_biometryStatus) as bool? ?? false;
   }
 
   Future<void> clearBiometryPreferences() async {
-    final box = await _biometryPreferencesBox;
-    await box.clear();
-  }
-
-  Future<String?> get currentPublicKey async {
-    final box = await _userPreferencesBox;
-    return box.get(_currentPublicKey) as String?;
-  }
-
-  Future<void> setCurrentPublicKey(String? currentPublicKey) async {
-    final box = await _userPreferencesBox;
-    await box.put(_currentPublicKey, currentPublicKey);
-  }
-
-  Future<void> clearUserPreferences() async {
-    final box = await _userPreferencesBox;
-    await box.clear();
+    await _biometryPreferencesBox.clear();
   }
 
   Future<void> setKeyPassword({
     required String publicKey,
     required String password,
   }) async {
-    final box = await _walletsPasswordsBox;
-    await box.put(publicKey, password);
+    await _walletsPasswordsBox.put(publicKey, password);
   }
 
   Future<String?> getKeyPassword(String publicKey) async {
-    final box = await _walletsPasswordsBox;
-    return box.get(publicKey);
+    return _walletsPasswordsBox.get(publicKey);
   }
 
   Future<void> clearPasswords() async {
-    final box = await _walletsPasswordsBox;
-    await box.clear();
-  }
-
-  Future<List<String>> getBookmarks() async {
-    final box = await _bookmarksBox;
-    return box.values.toList();
-  }
-
-  Future<void> addBookmark(String url) async {
-    final box = await _bookmarksBox;
-    await box.put(url.hashCode, url);
-  }
-
-  Future<void> removeBookmark(String url) async {
-    final box = await _bookmarksBox;
-    await box.delete(url.hashCode);
+    await _walletsPasswordsBox.clear();
   }
 }

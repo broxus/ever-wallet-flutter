@@ -18,7 +18,6 @@ import '../../../design/extension.dart';
 import '../../../design/utils.dart';
 import '../../../design/widget/crystal_bottom_sheet.dart';
 import '../modals/account_removement_body.dart';
-import '../modals/connected_sites_body.dart';
 import '../modals/preferences_body.dart';
 
 class WalletCard extends StatefulWidget {
@@ -416,24 +415,24 @@ class _WalletCardState extends State<WalletCard> {
                           thickness: 1,
                           color: Platform.isIOS ? const Color.fromRGBO(60, 60, 67, 0.36) : CrystalColor.divider,
                         ),
-                        buildDropDownAction(
-                          onTap: () {
-                            menuController.dismiss();
+                        // buildDropDownAction(
+                        //   onTap: () {
+                        //     menuController.dismiss();
 
-                            showCrystalBottomSheet(
-                              context,
-                              title: ConnectedSitesBody.title,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              body: ConnectedSitesBody(
-                                address: address,
-                              ),
-                              expand: false,
-                              avoidBottomInsets: false,
-                              hasTitleDivider: true,
-                            );
-                          },
-                          title: ConnectedSitesBody.title,
-                        ),
+                        //     showCrystalBottomSheet(
+                        //       context,
+                        //       title: ConnectedSitesBody.title,
+                        //       padding: const EdgeInsets.symmetric(horizontal: 8),
+                        //       body: ConnectedSitesBody(
+                        //         address: address,
+                        //       ),
+                        //       expand: false,
+                        //       avoidBottomInsets: false,
+                        //       hasTitleDivider: true,
+                        //     );
+                        //   },
+                        //   title: ConnectedSitesBody.title,
+                        // ),
                         Divider(
                           height: 1,
                           thickness: 1,

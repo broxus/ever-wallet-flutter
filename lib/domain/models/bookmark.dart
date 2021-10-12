@@ -1,12 +1,12 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'web_metadata.freezed.dart';
+part 'bookmark.freezed.dart';
 
 @freezed
-class WebMetadata with _$WebMetadata {
-  const factory WebMetadata({
+class Bookmark with _$Bookmark {
+  const factory Bookmark({
     required String url,
     String? title,
     String? icon,
-  }) = _WebMetadata;
+  }) = _Bookmark;
 }

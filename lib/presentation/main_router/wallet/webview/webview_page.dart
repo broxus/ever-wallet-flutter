@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:crystal/domain/blocs/misc/bookmarks_bloc.dart';
-import 'package:crystal/domain/models/web_metadata.dart';
-import 'package:crystal/presentation/design/theme.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -17,10 +15,13 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../domain/blocs/account/accounts_bloc.dart';
+import '../../../../domain/blocs/misc/bookmarks_bloc.dart';
 import '../../../../domain/blocs/provider/approvals_bloc.dart';
+import '../../../../domain/models/bookmark.dart';
 import '../../../../injection.dart';
 import '../../../../logger.dart';
 import '../../../design/design.dart';
+import '../../../design/theme.dart';
 import '../../../design/utils.dart';
 import 'account_selection.dart';
 import 'approval_dialogs.dart';
@@ -401,10 +402,12 @@ class _WebviewPageState extends State<WebviewPage> {
       case 2:
         bookmarksBloc.state.maybeWhen(
           ready: (bookmarks) {
-            if (!bookmarks.map((e) => e.url).contains(urlController.text)) {
+            final old = bookmarks.firstWhereOrNull((e) => e.url == urlController.text);
+
+            if (old == null) {
               bookmarksBloc.add(BookmarksEvent.addBookmark(urlController.text));
             } else {
-              bookmarksBloc.add(BookmarksEvent.removeBookmark(urlController.text));
+              bookmarksBloc.add(BookmarksEvent.removeBookmark(old));
             }
           },
           orElse: () => null,
@@ -505,7 +508,7 @@ class _WebviewPageState extends State<WebviewPage> {
 
   Widget buildBookmarksPlaceholder() => Column(
         children: [
-          Padding(
+          const Padding(
             padding: EdgeInsets.all(16),
             child: Icon(
               CupertinoIcons.bookmark,
@@ -514,7 +517,7 @@ class _WebviewPageState extends State<WebviewPage> {
           ),
           Text(
             LocaleKeys.browser_show_bookmarks.tr(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.grey,
               fontSize: 16,
             ),
@@ -522,7 +525,7 @@ class _WebviewPageState extends State<WebviewPage> {
         ],
       );
 
-  Widget buildBookmarks(List<WebMetadata> bookmarks) => GridView.builder(
+  Widget buildBookmarks(List<Bookmark> bookmarks) => GridView.builder(
         padding: const EdgeInsets.all(12),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
           crossAxisCount: 2,
@@ -573,7 +576,7 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
   Widget buildBookmarkIcon({
-    required List<WebMetadata> bookmarks,
+    required List<Bookmark> bookmarks,
     required int index,
   }) =>
       bookmarks[index].icon != null && !bookmarks[index].icon!.contains("svg")
@@ -587,7 +590,7 @@ class _WebviewPageState extends State<WebviewPage> {
             );
 
   Widget buildBookmarkTitle({
-    required List<WebMetadata> bookmarks,
+    required List<Bookmark> bookmarks,
     required int index,
   }) =>
       Text(
@@ -599,7 +602,7 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
   Widget buildRemoveBookmarkButton({
-    required List<WebMetadata> bookmarks,
+    required List<Bookmark> bookmarks,
     required int index,
   }) =>
       ValueListenableBuilder<bool>(
@@ -619,10 +622,10 @@ class _WebviewPageState extends State<WebviewPage> {
                   ),
                   CupertinoDialogAction(
                     onPressed: () {
-                      bookmarksBloc.add(BookmarksEvent.removeBookmark(bookmarks[index].url));
+                      bookmarksBloc.add(BookmarksEvent.removeBookmark(bookmarks[index]));
                       Navigator.of(context).pop();
                     },
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       color: Colors.red,
                     ),
                     child: Text(
@@ -982,7 +985,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = CodeToTvcInput.fromJson(jsonInput);
 
       final output = await codeToTvc(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1003,7 +1006,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = DecodeEventInput.fromJson(jsonInput);
 
       final output = await decodeEvent(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1024,7 +1027,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = DecodeInputInput.fromJson(jsonInput);
 
       final output = await decodeInput(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1045,7 +1048,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = DecodeOutputInput.fromJson(jsonInput);
 
       final output = await decodeOutput(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1066,7 +1069,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = DecodeTransactionEventsInput.fromJson(jsonInput);
 
       final output = await decodeTransactionEvents(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1087,7 +1090,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = DecodeTransactionInput.fromJson(jsonInput);
 
       final output = await decodeTransaction(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1103,7 +1106,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> disconnectHandler(List<dynamic> args) async {
     try {
       await disconnect(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
       );
 
       final jsonOutput = jsonEncode({});
@@ -1123,7 +1126,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = EncodeInternalInputInput.fromJson(jsonInput);
 
       final output = await encodeInternalInput(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1144,7 +1147,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = EstimateFeesInput.fromJson(jsonInput);
 
       final output = await estimateFees(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1165,7 +1168,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = ExtractPublicKeyInput.fromJson(jsonInput);
 
       final output = await extractPublicKey(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1186,7 +1189,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = GetExpectedAddressInput.fromJson(jsonInput);
 
       final output = await getExpectedAddress(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1207,7 +1210,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = GetFullContractStateInput.fromJson(jsonInput);
 
       final output = await getFullContractState(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1223,7 +1226,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> getProviderStateHandler(List<dynamic> args) async {
     try {
       final output = await getProviderState(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
       );
 
       final jsonOutput = jsonEncode(output.toJson());
@@ -1243,7 +1246,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = GetTransactionsInput.fromJson(jsonInput);
 
       final output = await getTransactions(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1264,7 +1267,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = PackIntoCellInput.fromJson(jsonInput);
 
       final output = await packIntoCell(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1285,7 +1288,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = RequestPermissionsInput.fromJson(jsonInput);
 
       final output = await requestPermissions(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1306,7 +1309,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = RunLocalInput.fromJson(jsonInput);
 
       final output = await runLocal(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1327,7 +1330,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = SendExternalMessageInput.fromJson(jsonInput);
 
       final output = await sendExternalMessage(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1348,7 +1351,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = SendMessageInput.fromJson(jsonInput);
 
       final output = await sendMessage(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1369,7 +1372,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = SplitTvcInput.fromJson(jsonInput);
 
       final output = await splitTvc(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1390,7 +1393,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = SubscribeInput.fromJson(jsonInput);
 
       final output = await subscribe(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1411,7 +1414,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = UnpackFromCellInput.fromJson(jsonInput);
 
       final output = await unpackFromCell(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1427,7 +1430,7 @@ class _WebviewPageState extends State<WebviewPage> {
   Future<dynamic> unsubscribeAllHandler(List<dynamic> args) async {
     try {
       await unsubscribeAll(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
       );
 
       final jsonOutput = jsonEncode({});
@@ -1447,7 +1450,7 @@ class _WebviewPageState extends State<WebviewPage> {
       final input = UnsubscribeInput.fromJson(jsonInput);
 
       await unsubscribe(
-        origin: urlController.text,
+        origin: await getCurrentOrigin(controller!),
         input: input,
       );
 
@@ -1458,5 +1461,10 @@ class _WebviewPageState extends State<WebviewPage> {
     } catch (err, st) {
       logger.e(err, err, st);
     }
+  }
+
+  Future<String> getCurrentOrigin(InAppWebViewController controller) async {
+    final url = await controller.getUrl();
+    return url!.authority;
   }
 }
