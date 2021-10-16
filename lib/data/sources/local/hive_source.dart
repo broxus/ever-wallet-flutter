@@ -46,7 +46,13 @@ class HiveSource {
   List<BookmarkDto> getBookmarks() => _bookmarksBox.values.toList();
 
   Future<void> addBookmark(BookmarkDto bookmark) async {
-    await _bookmarksBox.add(bookmark);
+    final old = _bookmarksBox.toMap().entries.firstWhereOrNull((e) => e.value.url == bookmark.url);
+
+    if (old != null) {
+      await _bookmarksBox.put(old.key, bookmark);
+    } else {
+      await _bookmarksBox.add(bookmark);
+    }
   }
 
   Future<void> updateBookmark(BookmarkDto bookmark) async {

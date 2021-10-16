@@ -11,24 +11,24 @@ import '../../repositories/bookmarks_repository.dart';
 part 'bookmarks_bloc.freezed.dart';
 
 @injectable
-class BookmarksBloc extends Bloc<_Event, BookmarksState> {
+class BookmarksBloc extends Bloc<_Event, List<Bookmark>> {
   final BookmarksRepository _bookmarksRepository;
 
   BookmarksBloc(
     this._bookmarksRepository,
-  ) : super(const BookmarksState.ready([])) {
+  ) : super(const []) {
     add(const _LocalEvent.updateBookmarks());
   }
 
   @override
-  Stream<BookmarksState> mapEventToState(_Event event) async* {
+  Stream<List<Bookmark>> mapEventToState(_Event event) async* {
     if (event is _LocalEvent) {
       yield* event.when(
         updateBookmarks: () async* {
           try {
             final bookmarks = await _bookmarksRepository.getBookmarks();
 
-            yield BookmarksState.ready(bookmarks);
+            yield [...bookmarks];
           } on Exception catch (err, st) {
             logger.e(err, err, st);
           }
@@ -73,9 +73,4 @@ class BookmarksEvent extends _Event with _$BookmarksEvent {
   const factory BookmarksEvent.addBookmark(String url) = _AddBookmark;
 
   const factory BookmarksEvent.removeBookmark(Bookmark bookmark) = _RemoveBookmark;
-}
-
-@freezed
-class BookmarksState with _$BookmarksState {
-  const factory BookmarksState.ready(List<Bookmark> bookmarks) = _Ready;
 }
