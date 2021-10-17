@@ -43,33 +43,9 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
         listener: (context, state) async {
           state.maybeWhen(
             requested: (request) => request.when(
-              requestPermissions: (origin, permissions, completer) => onRequestPermissions(
-                origin: origin,
-                permissions: permissions,
-                completer: completer,
-                address: widget.address,
-                publicKey: widget.publicKey,
-                walletType: widget.walletType,
-              ),
-              sendMessage: (origin, sender, recipient, amount, bounce, payload, knownPayload, completer) =>
-                  onSendMessage(
-                origin: origin,
-                sender: sender,
-                recipient: recipient,
-                amount: amount,
-                bounce: bounce,
-                payload: payload,
-                knownPayload: knownPayload,
-                completer: completer,
-              ),
-              callContractMethod: (origin, selectedPublicKey, repackedRecipient, payload, completer) =>
-                  onCallContractMethod(
-                origin: origin,
-                selectedPublicKey: selectedPublicKey,
-                repackedRecipient: repackedRecipient,
-                payload: payload,
-                completer: completer,
-              ),
+              requestPermissions: requestPermissions,
+              sendMessage: sendMessage,
+              callContractMethod: callContractMethod,
             ),
             orElse: () => null,
           );
@@ -77,20 +53,17 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
         child: widget.child,
       );
 
-  Future<void> onRequestPermissions({
-    required String origin,
-    required List<Permission> permissions,
-    required Completer<Permissions> completer,
-    required String address,
-    required String publicKey,
-    required WalletType walletType,
-  }) async {
+  Future<void> requestPermissions(
+    String origin,
+    List<Permission> permissions,
+    Completer<Permissions> completer,
+  ) async {
     final result = await showRequestPermissionsDialog(
       context,
       origin: origin,
       permissions: permissions,
-      address: address,
-      publicKey: publicKey,
+      address: widget.address,
+      publicKey: widget.publicKey,
     );
 
     if (result) {
@@ -102,29 +75,11 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
             grantedPermissions = grantedPermissions.copyWith(tonClient: true);
             break;
           case Permission.accountInteraction:
-            final contractType = walletType.when(
-              multisig: (multisigType) {
-                switch (multisigType) {
-                  case MultisigType.safeMultisigWallet:
-                    return WalletContractType.safeMultisigWallet;
-                  case MultisigType.safeMultisigWallet24h:
-                    return WalletContractType.safeMultisigWallet24h;
-                  case MultisigType.setcodeMultisigWallet:
-                    return WalletContractType.setcodeMultisigWallet;
-                  case MultisigType.bridgeMultisigWallet:
-                    return WalletContractType.bridgeMultisigWallet;
-                  case MultisigType.surfWallet:
-                    return WalletContractType.surfWallet;
-                }
-              },
-              walletV3: () => WalletContractType.walletV3,
-            );
-
             grantedPermissions = grantedPermissions.copyWith(
               accountInteraction: AccountInteraction(
-                address: address,
-                publicKey: publicKey,
-                contractType: contractType,
+                address: widget.address,
+                publicKey: widget.publicKey,
+                contractType: widget.walletType.toWalletType(),
               ),
             );
             break;
@@ -137,20 +92,21 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
     }
   }
 
-  Future<void> onSendMessage({
-    required String origin,
-    required String sender,
-    required String recipient,
-    required String amount,
-    required bool bounce,
-    required FunctionCall? payload,
-    required KnownPayload? knownPayload,
-    required Completer<String> completer,
-  }) async {
+  Future<void> sendMessage(
+    String origin,
+    String sender,
+    String recipient,
+    String amount,
+    bool bounce,
+    FunctionCall? payload,
+    KnownPayload? knownPayload,
+    Completer<String> completer,
+  ) async {
     final result = await showSendMessageDialog(
       context,
       origin: origin,
       sender: sender,
+      publicKey: widget.publicKey,
       recipient: recipient,
       amount: amount,
       bounce: bounce,
@@ -165,13 +121,13 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
     }
   }
 
-  Future<void> onCallContractMethod({
-    required String origin,
-    required String selectedPublicKey,
-    required String repackedRecipient,
-    required FunctionCall payload,
-    required Completer<String> completer,
-  }) async {
+  Future<void> callContractMethod(
+    String origin,
+    String selectedPublicKey,
+    String repackedRecipient,
+    FunctionCall payload,
+    Completer<String> completer,
+  ) async {
     final result = await showCallContractMethodDialog(
       context,
       origin: origin,

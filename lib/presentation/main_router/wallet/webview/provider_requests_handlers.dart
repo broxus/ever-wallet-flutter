@@ -5,6 +5,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../logger.dart';
+import 'controller_extensions.dart';
 
 Future<dynamic> codeToTvcHandler({
   required InAppWebViewController controller,
@@ -17,7 +18,7 @@ Future<dynamic> codeToTvcHandler({
     final input = CodeToTvcInput.fromJson(jsonInput);
 
     final output = await codeToTvc(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -41,7 +42,7 @@ Future<dynamic> decodeEventHandler({
     final input = DecodeEventInput.fromJson(jsonInput);
 
     final output = await decodeEvent(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -65,7 +66,7 @@ Future<dynamic> decodeInputHandler({
     final input = DecodeInputInput.fromJson(jsonInput);
 
     final output = await decodeInput(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -89,7 +90,7 @@ Future<dynamic> decodeOutputHandler({
     final input = DecodeOutputInput.fromJson(jsonInput);
 
     final output = await decodeOutput(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -113,7 +114,7 @@ Future<dynamic> decodeTransactionEventsHandler({
     final input = DecodeTransactionEventsInput.fromJson(jsonInput);
 
     final output = await decodeTransactionEvents(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -137,7 +138,7 @@ Future<dynamic> decodeTransactionHandler({
     final input = DecodeTransactionInput.fromJson(jsonInput);
 
     final output = await decodeTransaction(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -156,7 +157,7 @@ Future<dynamic> disconnectHandler({
 }) async {
   try {
     await disconnect(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
     );
 
     final jsonOutput = jsonEncode({});
@@ -179,7 +180,7 @@ Future<dynamic> encodeInternalInputHandler({
     final input = EncodeInternalInputInput.fromJson(jsonInput);
 
     final output = await encodeInternalInput(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -203,7 +204,7 @@ Future<dynamic> estimateFeesHandler({
     final input = EstimateFeesInput.fromJson(jsonInput);
 
     final output = await estimateFees(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -227,7 +228,7 @@ Future<dynamic> extractPublicKeyHandler({
     final input = ExtractPublicKeyInput.fromJson(jsonInput);
 
     final output = await extractPublicKey(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -251,7 +252,7 @@ Future<dynamic> getExpectedAddressHandler({
     final input = GetExpectedAddressInput.fromJson(jsonInput);
 
     final output = await getExpectedAddress(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -275,7 +276,7 @@ Future<dynamic> getFullContractStateHandler({
     final input = GetFullContractStateInput.fromJson(jsonInput);
 
     final output = await getFullContractState(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -294,7 +295,7 @@ Future<dynamic> getProviderStateHandler({
 }) async {
   try {
     final output = await getProviderState(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
     );
 
     final jsonOutput = jsonEncode(output.toJson());
@@ -317,7 +318,7 @@ Future<dynamic> getTransactionsHandler({
     final input = GetTransactionsInput.fromJson(jsonInput);
 
     final output = await getTransactions(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -341,7 +342,7 @@ Future<dynamic> packIntoCellHandler({
     final input = PackIntoCellInput.fromJson(jsonInput);
 
     final output = await packIntoCell(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -365,7 +366,7 @@ Future<dynamic> requestPermissionsHandler({
     final input = RequestPermissionsInput.fromJson(jsonInput);
 
     final output = await requestPermissions(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -389,7 +390,7 @@ Future<dynamic> runLocalHandler({
     final input = RunLocalInput.fromJson(jsonInput);
 
     final output = await runLocal(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -413,7 +414,7 @@ Future<dynamic> sendExternalMessageHandler({
     final input = SendExternalMessageInput.fromJson(jsonInput);
 
     final output = await sendExternalMessage(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -437,7 +438,7 @@ Future<dynamic> sendMessageHandler({
     final input = SendMessageInput.fromJson(jsonInput);
 
     final output = await sendMessage(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -461,7 +462,7 @@ Future<dynamic> splitTvcHandler({
     final input = SplitTvcInput.fromJson(jsonInput);
 
     final output = await splitTvc(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -485,7 +486,7 @@ Future<dynamic> subscribeHandler({
     final input = SubscribeInput.fromJson(jsonInput);
 
     final output = await subscribe(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -509,7 +510,7 @@ Future<dynamic> unpackFromCellHandler({
     final input = UnpackFromCellInput.fromJson(jsonInput);
 
     final output = await unpackFromCell(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -528,7 +529,7 @@ Future<dynamic> unsubscribeAllHandler({
 }) async {
   try {
     await unsubscribeAll(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
     );
 
     final jsonOutput = jsonEncode({});
@@ -551,7 +552,7 @@ Future<dynamic> unsubscribeHandler({
     final input = UnsubscribeInput.fromJson(jsonInput);
 
     await unsubscribe(
-      origin: await _getCurrentOrigin(controller),
+      origin: (await controller.getCurrentOrigin())!,
       input: input,
     );
 
@@ -562,9 +563,4 @@ Future<dynamic> unsubscribeHandler({
   } catch (err, st) {
     logger.e(err, err, st);
   }
-}
-
-Future<String> _getCurrentOrigin(InAppWebViewController controller) async {
-  final url = await controller.getUrl();
-  return url!.authority;
 }

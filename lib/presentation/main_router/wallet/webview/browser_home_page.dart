@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../../../../domain/blocs/misc/bookmarks_bloc.dart';
 import '../../../../domain/models/bookmark.dart';
@@ -181,32 +182,36 @@ class _BrowserHomePageState extends State<BrowserHomePage> {
         ),
       );
 
-  void showBookmarkRemoveDialog(Bookmark bookmark) => showCupertinoDialog(
-        context: context,
-        builder: (context) => Theme(
-          data: ThemeData(),
-          child: CupertinoAlertDialog(
-            title: Text(LocaleKeys.browser_remove_from_bookmarks.tr()),
-            content: Text(LocaleKeys.browser_remove_from_bookmarks_confirm.tr(args: [bookmark.title ?? bookmark.url])),
-            actions: <Widget>[
-              CupertinoDialogAction(
-                onPressed: Navigator.of(context).pop,
-                child: Text(LocaleKeys.browser_cancel.tr()),
+  Future<void> showBookmarkRemoveDialog(Bookmark bookmark) async {
+    await showPlatformDialog(
+      context: context,
+      builder: (context) => Theme(
+        data: ThemeData(),
+        child: PlatformAlertDialog(
+          title: Text(LocaleKeys.browser_remove_from_bookmarks.tr()),
+          content: Text(LocaleKeys.browser_remove_from_bookmarks_confirm.tr(args: [bookmark.title ?? bookmark.url])),
+          actions: <Widget>[
+            PlatformDialogAction(
+              onPressed: Navigator.of(context).pop,
+              child: Text(LocaleKeys.browser_cancel.tr()),
+            ),
+            PlatformDialogAction(
+              onPressed: () {
+                widget.bookmarksBloc.add(BookmarksEvent.removeBookmark(bookmark));
+                Navigator.of(context).pop();
+              },
+              cupertino: (context, platform) => CupertinoDialogActionData(
+                isDestructiveAction: true,
               ),
-              CupertinoDialogAction(
-                onPressed: () {
-                  widget.bookmarksBloc.add(BookmarksEvent.removeBookmark(bookmark));
-                  Navigator.of(context).pop();
-                },
-                textStyle: const TextStyle(
-                  color: Colors.red,
-                ),
-                child: Text(
-                  LocaleKeys.browser_remove.tr(),
-                ),
+              child: Text(
+                LocaleKeys.browser_remove.tr(),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+
+    isManagingNotifier.value = false;
+  }
 }

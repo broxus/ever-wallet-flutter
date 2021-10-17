@@ -1,9 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:crystal/presentation/main_router/wallet/webview/account_selection.dart';
-import 'package:crystal/presentation/main_router/wallet/webview/browser_home_page.dart';
-import 'package:crystal/presentation/main_router/wallet/webview/browser_web_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -21,8 +18,12 @@ import '../../../../domain/blocs/provider/approvals_bloc.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/theme.dart';
+import 'account_selection.dart';
 import 'approvals_listener.dart';
 import 'browser_app_bar.dart';
+import 'browser_home_page.dart';
+import 'browser_web_view.dart';
+import 'controller_extensions.dart';
 import 'provider_events_callers.dart';
 
 class WebviewPage extends StatefulWidget {
@@ -211,7 +212,7 @@ class _WebviewPageState extends State<WebviewPage> {
         accounts: accounts,
         onTap: (String address) async {
           accountsBloc.add(AccountsEvent.setCurrentAccount(address));
-          await disconnect(origin: urlController.text);
+          await disconnect(origin: (await controller!.getCurrentOrigin())!);
         },
       );
 
@@ -303,26 +304,4 @@ class _WebviewPageState extends State<WebviewPage> {
   ) async {
     progressNotifier.value = progress;
   }
-}
-
-extension on InAppWebViewController {
-  Future<void> openEmptyPage() async => loadUrl(urlRequest: URLRequest(url: Uri.parse("about:blank")));
-
-  Future<void> parseAndLoadUrl(String url) async {
-    try {
-      final parsedUrl = Uri.parse(url);
-
-      if (parsedUrl.toString().isEmpty) {
-        return openEmptyPage();
-      }
-
-      return loadUrl(
-        urlRequest: URLRequest(url: parsedUrl),
-      );
-    } catch (_) {
-      return;
-    }
-  }
-
-  Future<String?> getStringifiedUrl() async => getUrl().then((value) => value?.toString());
 }
