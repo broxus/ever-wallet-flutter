@@ -65,7 +65,7 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, TokenWalletTransactionsSt
               );
               final tokenReceiverAddress = data.maybeWhen(
                 outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.address,
-                swapBack: (tokenSwapBack) => tokenSwapBack.to,
+                swapBack: (tokenSwapBack) => tokenSwapBack.callbackAddress,
                 orElse: () => null,
               );
 
