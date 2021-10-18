@@ -36,6 +36,7 @@ class _WebviewPageState extends State<WebviewPage> {
   final approvalsBloc = getIt.get<ApprovalsBloc>();
   final bookmarksBloc = getIt.get<BookmarksBloc>();
   InAppWebViewController? controller;
+  late final PullToRefreshController pullToRefreshController;
   late final StreamSubscription disconnectedStreamSubscription;
   late final StreamSubscription transactionsFoundStreamSubscription;
   late final StreamSubscription contractStateChangedStreamSubscription;
@@ -49,11 +50,16 @@ class _WebviewPageState extends State<WebviewPage> {
   final progressNotifier = ValueNotifier<int>(100);
   final homePageShownNotifier = ValueNotifier<bool>(true);
   final urlController = TextEditingController();
-  final isManaging = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     super.initState();
+    pullToRefreshController = PullToRefreshController(
+      options: PullToRefreshOptions(
+        color: Colors.blue,
+      ),
+      onRefresh: () => controller?.refresh(),
+    );
     disconnectedStreamSubscription = disconnectedStream.listen((event) {
       if (controller != null) {
         disconnectedCaller(controller: controller!, event: event);
@@ -105,14 +111,20 @@ class _WebviewPageState extends State<WebviewPage> {
   void dispose() {
     accountsBloc.close();
     approvalsBloc.close();
-    backButtonEnabledNotifier.dispose();
-    forwardButtonEnabledNotifier.dispose();
+    bookmarksBloc.close();
     disconnectedStreamSubscription.cancel();
     transactionsFoundStreamSubscription.cancel();
     contractStateChangedStreamSubscription.cancel();
     networkChangedStreamSubscription.cancel();
     permissionsChangedStreamSubscription.cancel();
     loggedOutStreamSubscription.cancel();
+    backButtonEnabledNotifier.dispose();
+    forwardButtonEnabledNotifier.dispose();
+    addressFieldFocusedNotifier.dispose();
+    currentPageBookmarkedNotifier.dispose();
+    progressNotifier.dispose();
+    homePageShownNotifier.dispose();
+    urlController.dispose();
     super.dispose();
   }
 
@@ -120,14 +132,10 @@ class _WebviewPageState extends State<WebviewPage> {
   Widget build(BuildContext context) => BlocBuilder<AccountsBloc, AccountsState>(
         bloc: accountsBloc,
         builder: (context, state) => state.maybeWhen(
-          ready: (accounts, currentAccount) => currentAccount != null
-              ? buildApprovalsListener(
-                  accounts: accounts,
-                  currentAccount: currentAccount,
-                )
-              : Center(
-                  child: PlatformCircularProgressIndicator(),
-                ),
+          ready: (accounts, currentAccount) => buildApprovalsListener(
+            accounts: accounts,
+            currentAccount: currentAccount,
+          ),
           orElse: () => Center(
             child: PlatformCircularProgressIndicator(),
           ),
@@ -136,21 +144,26 @@ class _WebviewPageState extends State<WebviewPage> {
 
   Widget buildApprovalsListener({
     required List<AssetsList> accounts,
-    required AssetsList currentAccount,
+    required AssetsList? currentAccount,
   }) =>
-      ApprovalsListener(
-        address: currentAccount.address,
-        publicKey: currentAccount.publicKey,
-        walletType: currentAccount.tonWallet.contract,
-        child: buildScaffold(
-          accounts: accounts,
-          currentAccount: currentAccount,
-        ),
-      );
+      currentAccount != null
+          ? ApprovalsListener(
+              address: currentAccount.address,
+              publicKey: currentAccount.publicKey,
+              walletType: currentAccount.tonWallet.contract,
+              child: buildScaffold(
+                accounts: accounts,
+                currentAccount: currentAccount,
+              ),
+            )
+          : buildScaffold(
+              accounts: accounts,
+              currentAccount: currentAccount,
+            );
 
   Widget buildScaffold({
     required List<AssetsList> accounts,
-    required AssetsList currentAccount,
+    AssetsList? currentAccount,
   }) =>
       AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
@@ -186,8 +199,8 @@ class _WebviewPageState extends State<WebviewPage> {
       );
 
   Widget buildAppBar({
-    required AssetsList currentAccount,
     required List<AssetsList> accounts,
+    AssetsList? currentAccount,
   }) =>
       BrowserAppBar(
         currentAccount: currentAccount,
@@ -256,8 +269,12 @@ class _WebviewPageState extends State<WebviewPage> {
               Offstage(
                 offstage: homePageShownValue,
                 child: BrowserWebView(
+                  pullToRefreshController: pullToRefreshController,
+                  onWebViewCreated: onWebViewCreated,
+                  onLoadStart: onLoadStart,
                   onLoadStop: onLoadStop,
                   onProgressChanged: onProgressChanged,
+                  onUpdateVisitedHistory: onUpdateVisitedHistory,
                 ),
               ),
               Offstage(
@@ -277,12 +294,21 @@ class _WebviewPageState extends State<WebviewPage> {
         ),
       );
 
+  Future<void> onWebViewCreated(InAppWebViewController controller) async {
+    this.controller = controller;
+  }
+
+  Future<void> onLoadStart(
+    InAppWebViewController controller,
+    Uri? url,
+  ) async {
+    urlController.value = TextEditingValue(text: url.toString());
+  }
+
   Future<void> onLoadStop(
     InAppWebViewController controller,
     Uri? url,
   ) async {
-    this.controller = controller;
-
     backButtonEnabledNotifier.value = await this.controller?.canGoBack() ?? false;
     forwardButtonEnabledNotifier.value = await this.controller?.canGoForward() ?? false;
 
@@ -303,5 +329,13 @@ class _WebviewPageState extends State<WebviewPage> {
     int progress,
   ) async {
     progressNotifier.value = progress;
+  }
+
+  Future<void> onUpdateVisitedHistory(
+    InAppWebViewController controller,
+    Uri? url,
+    bool? androidIsReload,
+  ) async {
+    urlController.value = TextEditingValue(text: url.toString());
   }
 }

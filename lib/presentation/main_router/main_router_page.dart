@@ -1,4 +1,6 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
+import 'package:crystal/domain/blocs/account/accounts_bloc.dart';
+import 'package:crystal/injection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -56,7 +58,14 @@ class MainRouterPageState extends State<MainRouterPage> {
               height: context.safeArea.bottom + kBottomBarHeight,
               child: PlatformNavBar(
                 currentIndex: router.activeIndex,
-                itemChanged: (index) {
+                itemChanged: (index) async {
+                  final exist = await checkForExistingAccount(index);
+
+                  if (!exist) {
+                    await showAddAccountDialog();
+                    return;
+                  }
+
                   if (index == router.activeIndex) {
                     switch (index) {
                       case 0:
@@ -122,6 +131,53 @@ class MainRouterPageState extends State<MainRouterPage> {
                 ],
               ),
             ),
+          ),
+        ),
+      );
+
+  Future<bool> checkForExistingAccount(int index) async {
+    if (index == 1) {
+      final state = await getIt.get<AccountsBloc>().stream.firstWhere((e) => e.maybeWhen(
+            ready: (accounts, currentAccount) => true,
+            orElse: () => false,
+          ));
+
+      final exist = state.maybeWhen(
+        ready: (accounts, currentAccount) => currentAccount != null,
+        orElse: () => false,
+      );
+
+      return exist;
+    }
+
+    return true;
+  }
+
+  Future<void> showAddAccountDialog() async => showPlatformDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => Theme(
+          data: ThemeData(),
+          child: PlatformAlertDialog(
+            title: const Text('Add account'),
+            content: const Text('To use the browser you need to add an account first'),
+            actions: [
+              PlatformDialogAction(
+                onPressed: () async {
+                  await context.router.pop();
+
+                  final mainRouterRouter = context.router.root.innerRouterOf(MainRouterRoute.name);
+                  final walletRouterRouter = mainRouterRouter?.innerRouterOf(WalletRouterRoute.name);
+
+                  mainRouterRouter?.navigate(const WalletRouterRoute());
+                  walletRouterRouter?.navigate(const NewAccountRouterRoute());
+                },
+                cupertino: (_, __) => CupertinoDialogActionData(
+                  isDefaultAction: true,
+                ),
+                child: const Text('Add account'),
+              ),
+            ],
           ),
         ),
       );

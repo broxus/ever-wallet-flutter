@@ -10,7 +10,7 @@ import '../../../design/theme.dart';
 import '../../../design/utils.dart';
 
 class BrowserAppBar extends StatefulWidget {
-  final AssetsList currentAccount;
+  final AssetsList? currentAccount;
   final TextEditingController urlController;
   final ValueNotifier<bool> backButtonEnabledNotifier;
   final ValueNotifier<bool> forwardButtonEnabledNotifier;
@@ -28,7 +28,7 @@ class BrowserAppBar extends StatefulWidget {
 
   const BrowserAppBar({
     Key? key,
-    required this.currentAccount,
+    this.currentAccount,
     required this.urlController,
     required this.backButtonEnabledNotifier,
     required this.forwardButtonEnabledNotifier,
@@ -118,9 +118,13 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
                         ),
                       )
                     : progressValue != 100
-                        ? Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: PlatformCircularProgressIndicator(),
+                        ? Container(
+                            width: 20,
+                            height: 20,
+                            margin: const EdgeInsets.only(right: 8),
+                            child: PlatformCircularProgressIndicator(
+                              material: (context, platform) => MaterialProgressIndicatorData(strokeWidth: 2),
+                            ),
                           )
                         : const SizedBox(),
               ),
@@ -159,8 +163,10 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
             color: CrystalColor.accent,
           ),
           itemBuilder: (context) => [
-            buildPopupAccountMenuItem(0),
-            const PopupMenuDivider(),
+            if (widget.currentAccount != null) ...[
+              buildPopupAccountMenuItem(0),
+              const PopupMenuDivider(),
+            ],
             buildPopupMenuItem(
               value: 1,
               text: LocaleKeys.browser_reload.tr(),
@@ -183,7 +189,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
           children: [
             SizedBox.square(
               dimension: 24,
-              child: getGravatarIcon(widget.currentAccount.address.hashCode),
+              child: getGravatarIcon(widget.currentAccount!.address.hashCode),
             ),
             const SizedBox(
               width: 8,
@@ -196,7 +202,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
                   style: const TextStyle(color: Colors.black),
                 ),
                 Text(
-                  widget.currentAccount.address.elipseAddress(),
+                  widget.currentAccount!.address.elipseAddress(),
                   style: const TextStyle(color: Colors.grey),
                 ),
               ],

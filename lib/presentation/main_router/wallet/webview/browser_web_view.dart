@@ -8,11 +8,20 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../logger.dart';
 import 'provider_requests_handlers.dart';
 
 class BrowserWebView extends StatefulWidget {
+  final PullToRefreshController pullToRefreshController;
+  final Future<void> Function(
+    InAppWebViewController controller,
+  ) onWebViewCreated;
+  final Future<void> Function(
+    InAppWebViewController controller,
+    Uri? url,
+  ) onLoadStart;
   final Future<void> Function(
     InAppWebViewController controller,
     Uri? url,
@@ -21,11 +30,20 @@ class BrowserWebView extends StatefulWidget {
     InAppWebViewController controller,
     int progress,
   ) onProgressChanged;
+  final void Function(
+    InAppWebViewController controller,
+    Uri? url,
+    bool? androidIsReload,
+  ) onUpdateVisitedHistory;
 
   const BrowserWebView({
     Key? key,
+    required this.pullToRefreshController,
+    required this.onWebViewCreated,
+    required this.onLoadStart,
     required this.onLoadStop,
     required this.onProgressChanged,
+    required this.onUpdateVisitedHistory,
   }) : super(key: key);
 
   @override
@@ -33,6 +51,20 @@ class BrowserWebView extends StatefulWidget {
 }
 
 class _BrowserWebViewState extends State<BrowserWebView> {
+  final initialUrlRequest = URLRequest(url: Uri.parse("about:blank"));
+  final initialOptions = InAppWebViewGroupOptions(
+    crossPlatform: InAppWebViewOptions(
+      useShouldOverrideUrlLoading: true,
+      mediaPlaybackRequiresUserGesture: false,
+    ),
+    android: AndroidInAppWebViewOptions(
+      useHybridComposition: true,
+    ),
+    ios: IOSInAppWebViewOptions(
+      allowsInlineMediaPlayback: true,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) => FutureBuilder<String>(
         future: loadMainScript(),
@@ -45,11 +77,18 @@ class _BrowserWebViewState extends State<BrowserWebView> {
                   injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
                 ),
               ]),
-              initialOptions: InAppWebViewGroupOptions(),
+              initialUrlRequest: initialUrlRequest,
+              initialOptions: initialOptions,
+              pullToRefreshController: widget.pullToRefreshController,
               onWebViewCreated: onProviderWebViewCreated,
-              onLoadStop: widget.onLoadStop,
+              onLoadStart: widget.onLoadStart,
+              onLoadStop: onLoadStop,
+              onLoadError: onLoadError,
+              onProgressChanged: onProgressChanged,
+              onUpdateVisitedHistory: widget.onUpdateVisitedHistory,
+              androidOnPermissionRequest: androidOnPermissionRequest,
+              shouldOverrideUrlLoading: shouldOverrideUrlLoading,
               onConsoleMessage: onConsoleMessage,
-              onProgressChanged: widget.onProgressChanged,
             );
           } else {
             return Center(
@@ -251,6 +290,54 @@ class _BrowserWebViewState extends State<BrowserWebView> {
         args: args,
       ),
     );
+
+    widget.onWebViewCreated(controller);
+  }
+
+  void onLoadStop(InAppWebViewController controller, Uri? url) {
+    widget.pullToRefreshController.endRefreshing();
+    widget.onLoadStop(controller, url);
+  }
+
+  void onLoadError(InAppWebViewController controller, Uri? url, int code, String message) {
+    widget.pullToRefreshController.endRefreshing();
+  }
+
+  void onProgressChanged(InAppWebViewController controller, int progress) {
+    if (progress == 100) {
+      widget.pullToRefreshController.endRefreshing();
+    }
+
+    widget.onProgressChanged(controller, progress);
+  }
+
+  Future<PermissionRequestResponse?> androidOnPermissionRequest(
+    InAppWebViewController controller,
+    String origin,
+    List<String> resources,
+  ) async =>
+      PermissionRequestResponse(
+        resources: resources,
+        action: PermissionRequestResponseAction.GRANT,
+      );
+
+  Future<NavigationActionPolicy?> shouldOverrideUrlLoading(
+    InAppWebViewController controller,
+    NavigationAction navigationAction,
+  ) async {
+    final uri = navigationAction.request.url!;
+
+    if (!["http", "https", "file", "chrome", "data", "javascript", "about"].contains(uri.scheme)) {
+      final url = uri.toString();
+
+      if (await canLaunch(url)) {
+        await launch(url);
+
+        return NavigationActionPolicy.CANCEL;
+      }
+    }
+
+    return NavigationActionPolicy.ALLOW;
   }
 
   void onConsoleMessage(

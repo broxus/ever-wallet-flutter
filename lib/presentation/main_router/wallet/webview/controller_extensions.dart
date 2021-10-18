@@ -1,6 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 extension InAppWebViewControllerX on InAppWebViewController {
+  Future<void> refresh() async {
+    if (Platform.isAndroid) {
+      return reload();
+    } else if (Platform.isIOS) {
+      return loadUrl(urlRequest: URLRequest(url: await getUrl()));
+    }
+  }
+
   Future<void> openEmptyPage() async => loadUrl(urlRequest: URLRequest(url: Uri.parse("about:blank")));
 
   Future<void> parseAndLoadUrl(String url) async {
@@ -11,8 +21,8 @@ extension InAppWebViewControllerX on InAppWebViewController {
         return openEmptyPage();
       }
 
-      if (!parsedUrl.hasScheme) {
-        parsedUrl = Uri.https(parsedUrl.authority, parsedUrl.path);
+      if (parsedUrl.scheme.isEmpty) {
+        parsedUrl = Uri.parse("https://www.google.com/search?q=$url");
       }
 
       return loadUrl(

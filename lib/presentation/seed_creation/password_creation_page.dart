@@ -112,7 +112,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
                   inputAction: TextInputAction.done,
                 ),
                 buildValidationText(),
-                if (context.router.root.current.name != SettingsRouterRoute.name) ...[
+                if (context.router.current.parent?.name != NewSeedRouterRoute.name) ...[
                   const CrystalDivider(height: 10),
                   buildBiometryCheck(),
                   const CrystalDivider(height: 20),
@@ -245,7 +245,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
       phrase: widget.phrase,
       password: password,
     ));
-    if (context.router.root.current.name == SettingsRouterRoute.name) {
+    if (context.router.current.parent?.name == NewSeedRouterRoute.name) {
       context.router.navigate(const SettingsRouterRoute());
     }
   }
