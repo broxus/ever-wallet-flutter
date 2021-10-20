@@ -136,9 +136,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
           buildSection(
-            title: LocaleKeys.settings_screen_sections_current_seed_preferences_title.tr(
-              args: [if (currentKey != null) currentKey.publicKey else 'Seed'],
-            ),
+            title: LocaleKeys.settings_screen_sections_current_seed_preferences_title.tr(),
             children: [
               buildSectionAction(
                 title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed.tr(),

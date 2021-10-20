@@ -248,7 +248,7 @@
         "add_seed": "Add seed"
       },
       "current_seed_preferences": {
-        "title": "Current seed preferences ({})",
+        "title": "Current seed preferences",
         "export_seed": "Export seed phrase",
         "remove_seed": "Remove seed phrase",
         "change_seed_password": "Change seed phrase password",

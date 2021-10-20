@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:crystal/logger.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 extension InAppWebViewControllerX on InAppWebViewController {
@@ -17,7 +18,7 @@ extension InAppWebViewControllerX on InAppWebViewController {
     try {
       var parsedUrl = Uri.parse(url);
 
-      if (parsedUrl.hasEmptyPath) {
+      if (parsedUrl.toString().isEmpty) {
         return openEmptyPage();
       }
 
@@ -28,7 +29,8 @@ extension InAppWebViewControllerX on InAppWebViewController {
       return loadUrl(
         urlRequest: URLRequest(url: parsedUrl),
       );
-    } catch (_) {
+    } catch (err, st) {
+      logger.e(err, err, st);
       return;
     }
   }

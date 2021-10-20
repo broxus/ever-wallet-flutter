@@ -39,13 +39,15 @@ class TonWalletTransferBloc extends Bloc<_Event, TonWalletTransferState> {
           String? comment,
         ) async* {
           try {
+            final repackedDestination = repackAddress(destination);
+
             final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
 
             final int? _nanoAmount = int.tryParse(amount.fromTokens());
             if (_nanoAmount != null) {
               _message = await tonWallet.prepareTransfer(
                 expiration: defaultMessageExpiration,
-                destination: destination,
+                destination: repackedDestination,
                 amount: _nanoAmount,
                 body: comment,
               );

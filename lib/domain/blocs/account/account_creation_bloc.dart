@@ -26,13 +26,7 @@ class AccountCreationBloc extends Bloc<AccountCreationEvent, AccountCreationStat
           final added =
               _nekotonService.accounts.where((e) => e.publicKey == publicKey).map((e) => e.tonWallet.contract).toList();
 
-          const available = [
-            WalletType.multisig(multisigType: MultisigType.safeMultisigWallet),
-            WalletType.multisig(multisigType: MultisigType.safeMultisigWallet24h),
-            WalletType.multisig(multisigType: MultisigType.setcodeMultisigWallet),
-            WalletType.multisig(multisigType: MultisigType.surfWallet),
-            WalletType.walletV3(),
-          ];
+          const available = kAvailableWallets;
 
           yield AccountCreationState.options(
             added: added,

@@ -53,6 +53,8 @@ class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
           bool notifyReceiver,
         ) async* {
           try {
+            final repackedDestination = repackAddress(destination);
+
             final tokenWallet = _nekotonService.tokenWallets
                 .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
 
@@ -62,7 +64,7 @@ class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
 
             _message = await tokenWallet.prepareTransfer(
               expiration: defaultMessageExpiration,
-              destination: destination,
+              destination: repackedDestination,
               tokens: nanoTokens,
               notifyReceiver: notifyReceiver,
             );

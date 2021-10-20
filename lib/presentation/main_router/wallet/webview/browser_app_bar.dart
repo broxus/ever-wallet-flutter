@@ -106,13 +106,17 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
               builder: (context, value, child) => ValueListenableBuilder<int>(
                 valueListenable: widget.progressNotifier,
                 builder: (context, progressValue, child) => value && textEditingValue.text.isNotEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: widget.urlController.clear,
+                    ? GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: widget.urlController.clear,
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          alignment: Alignment.center,
+                          margin: const EdgeInsets.only(right: 8),
                           child: const Icon(
                             CupertinoIcons.clear_thick_circled,
-                            size: 18.0,
+                            size: 18,
                             color: CrystalColor.hintColor,
                           ),
                         ),
@@ -121,6 +125,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
                         ? Container(
                             width: 20,
                             height: 20,
+                            alignment: Alignment.center,
                             margin: const EdgeInsets.only(right: 8),
                             child: PlatformCircularProgressIndicator(
                               material: (context, platform) => MaterialProgressIndicatorData(strokeWidth: 2),
