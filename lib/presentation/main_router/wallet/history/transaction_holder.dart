@@ -78,7 +78,7 @@ class WalletTransactionHolder extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
-        color: transaction.isOutgoing ? CrystalColor.fontDark : CrystalColor.success,
+        color: transaction.isOutgoing ? CrystalColor.error : CrystalColor.success,
         fontWeight: FontWeight.w600,
       ),
     );
