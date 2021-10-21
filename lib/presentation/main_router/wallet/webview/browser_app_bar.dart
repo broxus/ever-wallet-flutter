@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -99,6 +100,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
         child: CupertinoTextField(
           controller: widget.urlController,
           onSubmitted: (value) => widget.onUrlEntered(value),
+          keyboardType: TextInputType.url,
           suffix: ValueListenableBuilder<TextEditingValue>(
             valueListenable: widget.urlController,
             builder: (context, textEditingValue, child) => ValueListenableBuilder<bool>(

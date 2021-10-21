@@ -163,7 +163,7 @@ class _SendMessageBodyState extends State<SendMessageBody> {
           Expanded(
             child: CrystalButton(
               type: CrystalButtonType.outline,
-              text: "Deny",
+              text: "Reject",
               onTap: onDenyTapped,
             ),
           ),
@@ -171,7 +171,7 @@ class _SendMessageBodyState extends State<SendMessageBody> {
           Expanded(
             flex: 2,
             child: CrystalButton(
-              text: "Allow",
+              text: "Send",
               onTap: onAllowTapped,
             ),
           ),

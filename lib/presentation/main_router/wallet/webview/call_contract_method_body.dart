@@ -126,7 +126,7 @@ class _CallContractMethodBodyState extends State<CallContractMethodBody> {
           Expanded(
             child: CrystalButton(
               type: CrystalButtonType.outline,
-              text: "Deny",
+              text: "Reject",
               onTap: onDenyTapped,
             ),
           ),
@@ -134,7 +134,7 @@ class _CallContractMethodBodyState extends State<CallContractMethodBody> {
           Expanded(
             flex: 2,
             child: CrystalButton(
-              text: "Allow",
+              text: "Call",
               onTap: onAllowTapped,
             ),
           ),

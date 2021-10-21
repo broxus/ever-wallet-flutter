@@ -90,7 +90,7 @@ class _TransactionObserverState extends State<TransactionObserver> {
                         title: LocaleKeys.fields_amount.tr(),
                         value: LocaleKeys.wallet_history_modal_holder_value.tr(
                           args: [
-                            formatValue(widget.transaction.value),
+                            '${widget.transaction.isOutgoing ? '- ' : ''}${formatValue(widget.transaction.value)}',
                             widget.transaction.currency,
                           ],
                         ),
@@ -106,14 +106,15 @@ class _TransactionObserverState extends State<TransactionObserver> {
                         ),
                       ),
                       const CrystalDivider(height: 16),
-                      const Divider(height: 1, thickness: 1),
-                      const CrystalDivider(height: 16),
-                      if (data?.isNotEmpty ?? false)
+                      if (data?.isNotEmpty ?? false) ...[
+                        const Divider(height: 1, thickness: 1),
+                        const CrystalDivider(height: 16),
                         InformationField(
                           title: LocaleKeys.fields_comment.tr(),
                           step: 8,
                           value: data!,
                         ),
+                      ]
                     ],
                   ),
                 ),

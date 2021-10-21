@@ -130,7 +130,7 @@
     },
     "holder": {
       "value": "{} {}",
-      "fee": "Fees: {} {}"
+      "fee": "{} {}"
     },
     "status": {
       "failed": "Failed transaction",

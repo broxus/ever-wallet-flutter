@@ -11,6 +11,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../logger.dart';
+import 'controller_extensions.dart';
 import 'provider_requests_handlers.dart';
 
 class BrowserWebView extends StatefulWidget {
@@ -84,6 +85,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
               onLoadStart: widget.onLoadStart,
               onLoadStop: onLoadStop,
               onLoadError: onLoadError,
+              onLoadHttpError: onLoadHttpError,
               onProgressChanged: onProgressChanged,
               onUpdateVisitedHistory: widget.onUpdateVisitedHistory,
               androidOnPermissionRequest: androidOnPermissionRequest,
@@ -295,11 +297,20 @@ class _BrowserWebViewState extends State<BrowserWebView> {
   }
 
   void onLoadStop(InAppWebViewController controller, Uri? url) {
+    controller.onLoaded(url);
     widget.pullToRefreshController.endRefreshing();
     widget.onLoadStop(controller, url);
   }
 
+  void onLoadHttpError(InAppWebViewController controller, Uri? url, int statusCode, String description) {
+    controller.onError(url, statusCode, description);
+    controller.openEmptyPage();
+    widget.pullToRefreshController.endRefreshing();
+  }
+
   void onLoadError(InAppWebViewController controller, Uri? url, int code, String message) {
+    controller.onError(url, code, message);
+    controller.openEmptyPage();
     widget.pullToRefreshController.endRefreshing();
   }
 

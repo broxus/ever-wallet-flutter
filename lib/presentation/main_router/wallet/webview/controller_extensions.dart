@@ -1,9 +1,17 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:crystal/logger.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:rxdart/subjects.dart';
 
 extension InAppWebViewControllerX on InAppWebViewController {
+  static final _errorsSubject = PublishSubject<_LoadingError>();
+  static final _loadedUrlsSubject = PublishSubject<Uri?>();
+
+  void onError(Uri? url, int code, String message) => _errorsSubject.add(_LoadingError(url, code, message));
+
+  void onLoaded(Uri? url) => _loadedUrlsSubject.add(url);
+
   Future<void> refresh() async {
     if (Platform.isAndroid) {
       return reload();
@@ -19,18 +27,37 @@ extension InAppWebViewControllerX on InAppWebViewController {
       var parsedUrl = Uri.parse(url);
 
       if (parsedUrl.toString().isEmpty) {
-        return openEmptyPage();
+        await openEmptyPage();
+        return;
       }
 
       if (parsedUrl.scheme.isEmpty) {
-        parsedUrl = Uri.parse("https://www.google.com/search?q=$url");
+        parsedUrl = Uri.https(url, '');
       }
 
-      return loadUrl(
-        urlRequest: URLRequest(url: parsedUrl),
-      );
-    } catch (err, st) {
-      logger.e(err, err, st);
+      try {
+        await loadUrlWithResult(
+          urlRequest: URLRequest(url: parsedUrl),
+        );
+        return;
+      } catch (_) {
+        parsedUrl = Uri.http(url, '');
+
+        try {
+          await loadUrlWithResult(
+            urlRequest: URLRequest(url: parsedUrl),
+          );
+          return;
+        } catch (_) {
+          parsedUrl = Uri.parse("https://www.google.com/search?q=$url");
+
+          await loadUrl(
+            urlRequest: URLRequest(url: parsedUrl),
+          );
+          return;
+        }
+      }
+    } catch (_) {
       return;
     }
   }
@@ -38,4 +65,52 @@ extension InAppWebViewControllerX on InAppWebViewController {
   Future<String?> getStringifiedUrl() async => getUrl().then((value) => value?.toString());
 
   Future<String?> getCurrentOrigin() async => getUrl().then((value) => value?.authority);
+
+  Future<void> loadUrlWithResult({
+    required URLRequest urlRequest,
+    Uri? iosAllowingReadAccessTo,
+  }) async {
+    final completer = Completer();
+
+    late final StreamSubscription _errorsStreamSubscription;
+
+    _errorsStreamSubscription = _errorsSubject.listen((value) {
+      if (value.url?.scheme == urlRequest.url?.scheme && value.url?.authority == urlRequest.url?.authority) {
+        if (!completer.isCompleted) {
+          completer.completeError(Exception(value.message));
+        }
+        _errorsStreamSubscription.cancel();
+      }
+    });
+
+    late final StreamSubscription _loadedUrlsStreamSubscription;
+
+    _loadedUrlsStreamSubscription = _loadedUrlsSubject.listen((value) {
+      if (value?.scheme == urlRequest.url?.scheme && value?.authority == urlRequest.url?.authority) {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+        _loadedUrlsStreamSubscription.cancel();
+      }
+    });
+
+    loadUrl(
+      urlRequest: urlRequest,
+      iosAllowingReadAccessTo: iosAllowingReadAccessTo,
+    );
+
+    return completer.future;
+  }
+}
+
+class _LoadingError {
+  Uri? url;
+  int code;
+  String message;
+
+  _LoadingError(
+    this.url,
+    this.code,
+    this.message,
+  );
 }
