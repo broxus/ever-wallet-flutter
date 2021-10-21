@@ -111,8 +111,9 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
         data: ThemeData(),
         child: CupertinoTextField(
           controller: widget.urlController,
-          onSubmitted: (value) => widget.onUrlEntered(value),
+          onSubmitted: (value) => widget.onUrlEntered(value.trim()),
           keyboardType: TextInputType.url,
+          autocorrect: false,
           suffix: ValueListenableBuilder<TextEditingValue>(
             valueListenable: widget.urlController,
             builder: (context, textEditingValue, child) => ValueListenableBuilder<bool>(
