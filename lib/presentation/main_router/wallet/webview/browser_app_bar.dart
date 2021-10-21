@@ -52,6 +52,18 @@ class BrowserAppBar extends StatefulWidget {
 
 class _BrowserAppBarState extends State<BrowserAppBar> {
   @override
+  void initState() {
+    super.initState();
+    widget.addressFieldFocusedNotifier.addListener(selectTextOnFocus);
+  }
+
+  @override
+  void dispose() {
+    widget.addressFieldFocusedNotifier.removeListener(selectTextOnFocus);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => Row(
         children: [
           buildNavigationButtons(),
@@ -259,6 +271,19 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
       case 3:
         widget.onShareButtonTapped();
         break;
+    }
+  }
+
+  void selectTextOnFocus() {
+    if (widget.addressFieldFocusedNotifier.value == true) {
+      widget.urlController.value = widget.urlController.value.copyWith(
+        selection: TextSelection(
+          baseOffset: 0,
+          extentOffset: widget.urlController.text.length,
+          isDirectional: true,
+          affinity: TextAffinity.upstream,
+        ),
+      );
     }
   }
 }

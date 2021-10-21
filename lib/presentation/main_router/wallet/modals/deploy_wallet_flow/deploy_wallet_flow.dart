@@ -1,4 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:crystal/domain/blocs/biometry/biometry_info_bloc.dart';
+import 'package:crystal/domain/blocs/biometry/biometry_password_data_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,33 +50,61 @@ class DeployWalletFlow extends StatefulWidget {
 
 class _DeployWalletFlowState extends State<DeployWalletFlow> {
   final _pageController = PageController();
-  late TonWalletDeploymentBloc bloc;
+  late TonWalletDeploymentBloc _bloc;
 
   @override
   void initState() {
     super.initState();
-    bloc = getIt.get<TonWalletDeploymentBloc>(param1: widget.address);
+    _bloc = getIt.get<TonWalletDeploymentBloc>(param1: widget.address);
   }
 
   @override
   void dispose() {
-    bloc.close();
+    _bloc.close();
     _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => BlocProvider.value(
-        value: bloc,
+        value: _bloc,
         child: Builder(
           builder: (context) => BlocConsumer<TonWalletDeploymentBloc, TonWalletDeploymentState>(
             listener: (context, state) {
               FocusScope.of(context).unfocus();
               state.maybeMap(
-                initial: (_) => _pageController.openAt(0),
-                password: (_) => _pageController.openAt(1),
-                sending: (_) => _pageController.openAt(2),
-                orElse: () => null,
+                initial: (_) async => _pageController.openAt(0),
+                password: (_) async {
+                  String? password;
+
+                  final biometryInfoBloc = context.read<BiometryInfoBloc>();
+                  final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
+
+                  if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
+                    biometryPasswordDataBloc.add(BiometryPasswordDataEvent.getKeyPassword(widget.publicKey));
+
+                    final state = await biometryPasswordDataBloc.stream.first;
+
+                    password = state.maybeWhen(
+                      ready: (password) => password,
+                      orElse: () => null,
+                    );
+
+                    if (password != null) {
+                      _bloc.add(TonWalletDeploymentEvent.deploy(password));
+                    } else {
+                      _pageController.openAt(1);
+                    }
+
+                    Future.delayed(const Duration(seconds: 1), () async {
+                      biometryPasswordDataBloc.close();
+                    });
+                  } else {
+                    _pageController.openAt(1);
+                  }
+                },
+                sending: (_) async => _pageController.openAt(2),
+                orElse: () async => null,
               );
             },
             builder: (context, state) {

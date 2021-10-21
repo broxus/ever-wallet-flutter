@@ -70,6 +70,11 @@ Future<String?> showSendMessageDialog(
         orElse: () => null,
       );
 
+      password ??= await SubmitSendBody.open(
+        context: context,
+        publicKey: publicKey,
+      );
+
       Future.delayed(const Duration(seconds: 1), () async {
         biometryPasswordDataBloc.close();
       });
@@ -119,6 +124,11 @@ Future<String?> showCallContractMethodDialog(
       password = readyState.maybeWhen(
         ready: (password) => password,
         orElse: () => null,
+      );
+
+      password ??= await SubmitSendBody.open(
+        context: context,
+        publicKey: selectedPublicKey,
       );
 
       Future.delayed(const Duration(seconds: 1), () async {

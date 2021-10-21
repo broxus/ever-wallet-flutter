@@ -1,3 +1,5 @@
+import 'package:crystal/domain/blocs/biometry/biometry_password_data_bloc.dart';
+import 'package:crystal/domain/blocs/key/key_export_bloc.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -141,12 +143,54 @@ class _SettingsPageState extends State<SettingsPage> {
               buildSectionAction(
                 title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed.tr(),
                 onTap: keys.isNotEmpty && currentKey != null
-                    ? () {
-                        showCrystalBottomSheet(
-                          context,
-                          title: ExportSeedPhraseModalBody.title,
-                          body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
-                        );
+                    ? () async {
+                        String? password;
+
+                        final biometryInfoBloc = context.read<BiometryInfoBloc>();
+                        final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
+                        final keyExportBloc = getIt.get<KeyExportBloc>();
+
+                        if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
+                          biometryPasswordDataBloc.add(BiometryPasswordDataEvent.getKeyPassword(currentKey.publicKey));
+
+                          final state = await biometryPasswordDataBloc.stream.first;
+
+                          password = state.maybeWhen(
+                            ready: (password) => password,
+                            orElse: () => null,
+                          );
+
+                          if (password != null) {
+                            keyExportBloc.add(KeyExportEvent.exportKey(
+                              publicKey: currentKey.publicKey,
+                              password: password,
+                            ));
+
+                            final state = await keyExportBloc.stream.first;
+
+                            state.maybeWhen(
+                              success: (phrase) => context.router.navigate(SeedPhraseExportRoute(phrase: phrase)),
+                              orElse: () => null,
+                            );
+                          } else {
+                            showCrystalBottomSheet(
+                              context,
+                              title: ExportSeedPhraseModalBody.title,
+                              body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
+                            );
+                          }
+
+                          Future.delayed(const Duration(seconds: 1), () async {
+                            biometryPasswordDataBloc.close();
+                            keyExportBloc.close();
+                          });
+                        } else {
+                          showCrystalBottomSheet(
+                            context,
+                            title: ExportSeedPhraseModalBody.title,
+                            body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
+                          );
+                        }
                       }
                     : null,
               ),

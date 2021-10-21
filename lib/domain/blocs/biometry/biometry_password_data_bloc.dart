@@ -36,6 +36,8 @@ class BiometryPasswordDataBloc extends Bloc<BiometryPasswordDataEvent, BiometryP
 
               if (isAuthenticated) {
                 yield BiometryPasswordDataState.ready(password);
+              } else {
+                yield const BiometryPasswordDataState.ready();
               }
             } else {
               yield const BiometryPasswordDataState.ready();

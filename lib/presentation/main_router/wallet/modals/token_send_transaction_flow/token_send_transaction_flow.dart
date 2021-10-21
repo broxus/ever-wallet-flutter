@@ -1,3 +1,5 @@
+import 'package:crystal/domain/blocs/biometry/biometry_info_bloc.dart';
+import 'package:crystal/domain/blocs/biometry/biometry_password_data_bloc.dart';
 import 'package:expand_tap_area/expand_tap_area.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
@@ -95,11 +97,39 @@ class _TokenSendTransactionFlowState extends State<TokenSendTransactionFlow> {
             listener: (context, state) {
               FocusScope.of(context).unfocus();
               state.maybeMap(
-                initial: (_) => _pageController.openAt(0),
-                messagePrepared: (_) => _pageController.openAt(1),
-                password: (_) => _pageController.openAt(2),
-                sending: (_) => _pageController.openAt(3),
-                orElse: () => null,
+                initial: (_) async => _pageController.openAt(0),
+                messagePrepared: (_) async => _pageController.openAt(1),
+                password: (_) async {
+                  String? password;
+
+                  final biometryInfoBloc = context.read<BiometryInfoBloc>();
+                  final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
+
+                  if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
+                    biometryPasswordDataBloc.add(BiometryPasswordDataEvent.getKeyPassword(widget.ownerPublicKey));
+
+                    final state = await biometryPasswordDataBloc.stream.first;
+
+                    password = state.maybeWhen(
+                      ready: (password) => password,
+                      orElse: () => null,
+                    );
+
+                    if (password != null) {
+                      _bloc.add(TokenWalletTransferEvent.send(password));
+                    } else {
+                      _pageController.openAt(2);
+                    }
+
+                    Future.delayed(const Duration(seconds: 1), () async {
+                      biometryPasswordDataBloc.close();
+                    });
+                  } else {
+                    _pageController.openAt(2);
+                  }
+                },
+                sending: (_) async => _pageController.openAt(3),
+                orElse: () async => null,
               );
             },
             builder: (context, state) {
