@@ -1,5 +1,5 @@
 {
-  "application_title": "TON Crystal Wallet",
+  "application_title": "Crystal Wallet",
   "actions": {
     "submit": "Submit",
     "confirm": "Confirm",
@@ -46,7 +46,7 @@
     }
   },
   "welcome_screen": {
-    "title": "Welcome to\nTON Crystal Wallet",
+    "title": "Welcome to\nCrystal Wallet",
     "subtitle": "Create a new wallet or sign in",
     "action": {
       "create": "Create a new wallet",
@@ -58,7 +58,7 @@
     "description": {
       "common": "I accept the",
       "link": "the decentralization policy",
-      "application": "of TON Crystal Wallet",
+      "application": "of Crystal Wallet",
       "text": "@:welcome_policy_screen_description.common @:welcome_policy_screen_description.link @:welcome_policy_screen_description.application"
     }
   },

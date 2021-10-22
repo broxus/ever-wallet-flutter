@@ -2,7 +2,7 @@
     package="com.broxus.crystal.app">
    <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
    <application
-        android:label="TON Crystal"
+        android:label="Crystal Wallet"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
         <activity
