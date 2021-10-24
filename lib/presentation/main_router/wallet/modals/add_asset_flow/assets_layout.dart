@@ -9,14 +9,14 @@ import 'selection_asset_holder.dart';
 class AssetsLayout extends StatefulWidget {
   final ScrollController controller;
   final List<TokenContractAsset> available;
-  final List<TokenContractAsset> enabled;
+  final List<TokenContractAsset> added;
   final void Function(List<TokenContractAsset>) onSave;
 
   const AssetsLayout({
     Key? key,
     required this.controller,
     required this.available,
-    required this.enabled,
+    required this.added,
     required this.onSave,
   }) : super(key: key);
 
@@ -31,7 +31,7 @@ class _AssetsLayoutState extends State<AssetsLayout> {
   @override
   void initState() {
     super.initState();
-    assets.value = widget.enabled;
+    assets.value = widget.added;
     filtered = ValueNotifier<List<TokenContractAsset>>(widget.available);
   }
 
@@ -106,7 +106,7 @@ class _AssetsLayoutState extends State<AssetsLayout> {
               valueListenable: assets,
               builder: (context, value, child) => CrystalButton(
                 text: LocaleKeys.actions_save.tr(),
-                enabled: !listEquals(value, widget.enabled),
+                enabled: !listEquals(value, widget.added),
                 onTap: () {
                   context.router.pop();
                   widget.onSave(value);

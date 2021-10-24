@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../repositories/biometry_repository.dart';
@@ -16,6 +17,7 @@ part 'key_creation_bloc.freezed.dart';
 class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
   final NekotonService _nekotonService;
   final BiometryRepository _biometryRepository;
+  final _errorsSubject = PublishSubject<String>();
 
   KeyCreationBloc(
     this._nekotonService,
@@ -23,89 +25,79 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
   ) : super(const KeyCreationState.initial());
 
   @override
+  Future<void> close() {
+    _errorsSubject.close();
+    return super.close();
+  }
+
+  @override
   Stream<KeyCreationState> mapEventToState(KeyCreationEvent event) async* {
-    yield* event.when(
-      createKey: (
-        String? name,
-        List<String> phrase,
-        String password,
-      ) async* {
-        try {
-          final isLegacy = phrase.length == 24;
-          final mnemonicType = isLegacy ? const MnemonicType.legacy() : const MnemonicType.labs(id: 0);
+    try {
+      if (event is _Create) {
+        final isLegacy = event.phrase.length == 24;
+        final mnemonicType = isLegacy ? const MnemonicType.legacy() : const MnemonicType.labs(id: 0);
 
-          late final CreateKeyInput createKeyInput;
+        late final CreateKeyInput createKeyInput;
 
-          if (isLegacy) {
-            createKeyInput = EncryptedKeyCreateInput(
-              name: name,
-              phrase: phrase.join(" "),
-              mnemonicType: mnemonicType,
-              password: Password.explicit(
-                password: password,
-                cacheBehavior: const PasswordCacheBehavior.remove(),
-              ),
-            );
-          } else {
-            createKeyInput = DerivedKeyCreateInput.import(
-              keyName: name,
-              phrase: phrase.join(" "),
-              password: Password.explicit(
-                password: password,
-                cacheBehavior: const PasswordCacheBehavior.remove(),
-              ),
-            );
-          }
+        if (isLegacy) {
+          createKeyInput = EncryptedKeyCreateInput(
+            name: event.name,
+            phrase: event.phrase.join(" "),
+            mnemonicType: mnemonicType,
+            password: Password.explicit(
+              password: event.password,
+              cacheBehavior: const PasswordCacheBehavior.remove(),
+            ),
+          );
+        } else {
+          createKeyInput = DerivedKeyCreateInput.import(
+            keyName: event.name,
+            phrase: event.phrase.join(" "),
+            password: Password.explicit(
+              password: event.password,
+              cacheBehavior: const PasswordCacheBehavior.remove(),
+            ),
+          );
+        }
+
+        await _addKey(
+          createKeyInput: createKeyInput,
+          password: event.password,
+        );
+
+        yield const KeyCreationState.success();
+      } else if (event is _Derive) {
+        final key = _nekotonService.keys.firstWhere((e) => e.publicKey == event.publicKey);
+
+        if (key.isNotLegacy && key.accountId == 0) {
+          final derivedKeys = _nekotonService.keys.where((e) => e.masterKey == key.publicKey);
+          final id = derivedKeys.isNotEmpty ? derivedKeys.map((e) => e.nextAccountId).reduce(max) : 1;
+          final masterKey = key.publicKey;
+
+          final createKeyInput = DerivedKeyCreateInput.derive(
+            keyName: event.name,
+            masterKey: masterKey,
+            accountId: id,
+            password: Password.explicit(
+              password: event.password,
+              cacheBehavior: const PasswordCacheBehavior.remove(),
+            ),
+          );
 
           await _addKey(
             createKeyInput: createKeyInput,
-            password: password,
+            password: event.password,
           );
 
           yield const KeyCreationState.success();
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield KeyCreationState.error(err.toString());
+        } else {
+          throw UnsupportedError("Operation is unsupported");
         }
-      },
-      deriveKey: (
-        String? name,
-        String publicKey,
-        String password,
-      ) async* {
-        try {
-          final key = _nekotonService.keys.firstWhere((e) => e.publicKey == publicKey);
-
-          if (key.isNotLegacy && key.accountId == 0) {
-            final derivedKeys = _nekotonService.keys.where((e) => e.masterKey == key.publicKey);
-            final id = derivedKeys.isNotEmpty ? derivedKeys.map((e) => e.nextAccountId).reduce(max) : 1;
-            final masterKey = key.publicKey;
-
-            final createKeyInput = DerivedKeyCreateInput.derive(
-              keyName: name,
-              masterKey: masterKey,
-              accountId: id,
-              password: Password.explicit(
-                password: password,
-                cacheBehavior: const PasswordCacheBehavior.remove(),
-              ),
-            );
-
-            await _addKey(
-              createKeyInput: createKeyInput,
-              password: password,
-            );
-
-            yield const KeyCreationState.success();
-          } else {
-            throw UnimplementedError();
-          }
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield KeyCreationState.error(err.toString());
-        }
-      },
-    );
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
+    }
   }
 
   Future<void> _addKey({
@@ -114,26 +106,30 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
   }) async {
     final key = await _nekotonService.addKey(createKeyInput);
 
-    await _biometryRepository.setKeyPassword(
-      publicKey: key.publicKey,
-      password: password,
-    );
+    if (_biometryRepository.biometryAvailability && _biometryRepository.biometryStatus) {
+      await _biometryRepository.setKeyPassword(
+        publicKey: key.publicKey,
+        password: password,
+      );
+    }
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed
 class KeyCreationEvent with _$KeyCreationEvent {
-  const factory KeyCreationEvent.createKey({
+  const factory KeyCreationEvent.create({
     String? name,
     required List<String> phrase,
     required String password,
-  }) = _CreateKey;
+  }) = _Create;
 
-  const factory KeyCreationEvent.deriveKey({
+  const factory KeyCreationEvent.derive({
     String? name,
     required String publicKey,
     required String password,
-  }) = _DeriveKey;
+  }) = _Derive;
 }
 
 @freezed
@@ -141,6 +137,4 @@ class KeyCreationState with _$KeyCreationState {
   const factory KeyCreationState.initial() = _Initial;
 
   const factory KeyCreationState.success() = _Success;
-
-  const factory KeyCreationState.error(String info) = _Error;
 }

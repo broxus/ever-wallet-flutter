@@ -1,8 +1,8 @@
+import 'package:crystal/domain/blocs/key/key_password_checking_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/blocs/key/key_password_check_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
 
@@ -27,31 +27,31 @@ class InputPasswordField extends StatefulWidget {
 
 class _InputPasswordFieldState extends State<InputPasswordField> {
   final controller = TextEditingController();
-  final checkPasswordBloc = getIt.get<KeyPasswordCheckBloc>();
+  final bloc = getIt.get<KeyPasswordCheckingBloc>();
 
   @override
   void dispose() {
     controller.dispose();
-    checkPasswordBloc.close();
+    bloc.close();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocConsumer<KeyPasswordCheckBloc, KeyPasswordCheckState>(
-        bloc: checkPasswordBloc,
+  Widget build(BuildContext context) => BlocConsumer<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
+        bloc: bloc,
         listener: (context, state) {
-          state.maybeMap(
-            orElse: () => null,
-            ready: (ready) {
-              if (ready.isCorrect) {
-                widget.onSubmit(ready.password);
+          state.maybeWhen(
+            success: (isCorrect) {
+              if (isCorrect) {
+                widget.onSubmit(controller.text.trim());
               }
             },
+            orElse: () => null,
           );
         },
         builder: (context, state) {
-          final isCorrect = state.maybeMap(
-            ready: (ready) => ready.isCorrect,
+          final isCorrect = state.maybeWhen(
+            success: (isCorrect) => isCorrect,
             orElse: () => true,
           );
           return Column(
@@ -77,7 +77,8 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
                 text: widget.buttonText ?? LocaleKeys.actions_submit.tr(),
                 onTap: () {
                   final password = controller.text.trim();
-                  checkPasswordBloc.add(KeyPasswordCheckEvent.checkPassword(
+
+                  bloc.add(KeyPasswordCheckingEvent.check(
                     publicKey: widget.publicKey,
                     password: password,
                   ));

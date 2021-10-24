@@ -42,7 +42,7 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
         bloc: approvalsBloc,
         listener: (context, state) async {
           state.maybeWhen(
-            requested: (request) => request.when(
+            shown: (request) => request.when(
               requestPermissions: requestPermissions,
               sendMessage: sendMessage,
               callContractMethod: callContractMethod,

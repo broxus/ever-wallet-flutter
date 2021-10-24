@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../models/wallet_transaction.dart';
@@ -16,142 +17,118 @@ part 'token_wallet_transactions_bloc.freezed.dart';
 @injectable
 class TokenWalletTransactionsBloc extends Bloc<_Event, TokenWalletTransactionsState> {
   final NekotonService _nekotonService;
-  final String? _owner;
-  final String? _rootTokenContract;
+  final _errorsSubject = PublishSubject<String>();
+  StreamSubscription? _streamSubscription;
   StreamSubscription? _onTransactionsFoundSubscription;
-  final _transactions = <WalletTransaction>[];
+  Future<void> Function(TransactionId from)? _preloadTransactions;
 
-  TokenWalletTransactionsBloc(
-    this._nekotonService,
-    @factoryParam this._owner,
-    @factoryParam this._rootTokenContract,
-  ) : super(const TokenWalletTransactionsState.ready([])) {
-    _nekotonService.tokenWalletsStream
-        .expand((e) => e)
-        .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!)
-        .then((value) {
-      _onTransactionsFoundSubscription = value.onTransactionsFoundStream.listen(
-        (List<TokenWalletTransactionWithData> transactions) => add(
-          _LocalEvent.updateTransactions(transactions),
-        ),
-      );
-    });
-  }
+  TokenWalletTransactionsBloc(this._nekotonService) : super(const TokenWalletTransactionsState([]));
 
   @override
   Future<void> close() {
+    _errorsSubject.close();
     _onTransactionsFoundSubscription?.cancel();
     return super.close();
   }
 
   @override
   Stream<TokenWalletTransactionsState> mapEventToState(_Event event) async* {
-    if (event is _LocalEvent) {
-      yield* event.when(
-        updateTransactions: (
-          List<TokenWalletTransactionWithData> transactions,
-        ) async* {
-          try {
-            final tokenWallet = _nekotonService.tokenWallets
-                .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
+    try {
+      if (event is _Load) {
+        _streamSubscription?.cancel();
+        _onTransactionsFoundSubscription?.cancel();
+        _streamSubscription = _nekotonService.tokenWalletsStream
+            .expand((e) => e)
+            .where((e) => e.owner == event.owner && e.symbol.rootTokenContract == event.rootTokenContract)
+            .listen((tokenWalletEvent) {
+          _onTransactionsFoundSubscription?.cancel();
+          _preloadTransactions = tokenWalletEvent.preloadTransactions;
+          _onTransactionsFoundSubscription =
+              tokenWalletEvent.onTransactionsFoundStream.listen((event) async => add(_LocalEvent.update(
+                    tokenWallet: tokenWalletEvent,
+                    transactions: event,
+                  )));
+        });
+      } else if (event is _Preload) {
+        final prevTransactionId = state.transactions.lastOrNull?.prevTransactionId;
 
-            final walletTransactions = transactions.where((e) => e.data != null).map((e) {
-              final transaction = e.transaction;
-              final data = e.data!;
+        if (prevTransactionId != null) {
+          await _preloadTransactions?.call(prevTransactionId);
+        }
+      } else if (event is _Update) {
+        final transactions = event.transactions.where((e) => e.data != null).map((e) {
+          final transaction = e.transaction;
+          final data = e.data!;
 
-              final tokenSenderAddress = data.maybeWhen(
-                incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.senderAddress,
-                orElse: () => null,
-              );
-              final tokenReceiverAddress = data.maybeWhen(
-                outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.address,
-                swapBack: (tokenSwapBack) => tokenSwapBack.callbackAddress,
-                orElse: () => null,
-              );
+          final tokenSenderAddress = data.maybeWhen(
+            incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.senderAddress,
+            orElse: () => null,
+          );
+          final tokenReceiverAddress = data.maybeWhen(
+            outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.address,
+            swapBack: (tokenSwapBack) => tokenSwapBack.callbackAddress,
+            orElse: () => null,
+          );
 
-              final tokenValue = data.when(
-                incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
-                outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.tokens,
-                swapBack: (tokenSwapBack) => tokenSwapBack.tokens,
-                accept: (value) => value,
-                transferBounced: (value) => value,
-                swapBackBounced: (value) => value,
-              );
+          final tokenValue = data.when(
+            incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
+            outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.tokens,
+            swapBack: (tokenSwapBack) => tokenSwapBack.tokens,
+            accept: (value) => value,
+            transferBounced: (value) => value,
+            swapBackBounced: (value) => value,
+          );
 
-              final isOutgoing = tokenReceiverAddress != null;
+          final isOutgoing = tokenReceiverAddress != null;
 
-              final address = isOutgoing ? tokenReceiverAddress : tokenSenderAddress;
+          final address = isOutgoing ? tokenReceiverAddress : tokenSenderAddress;
 
-              return WalletTransaction.ordinary(
-                hash: transaction.id.hash,
-                prevTransactionId: transaction.prevTransactionId,
-                totalFees: transaction.totalFees.toTokens(),
-                address: address ?? '',
-                value: tokenValue.toTokens(tokenWallet.symbol.decimals),
-                createdAt: transaction.createdAt.toDateTime(),
-                isOutgoing: isOutgoing,
-                currency: tokenWallet.symbol.name,
-                feesCurrency: 'TON',
-                data: data.toComment(),
-              );
-            }).toList();
+          return WalletTransaction.ordinary(
+            hash: transaction.id.hash,
+            prevTransactionId: transaction.prevTransactionId,
+            totalFees: transaction.totalFees.toTokens(),
+            address: address ?? '',
+            value: tokenValue.toTokens(event.tokenWallet.symbol.decimals),
+            createdAt: transaction.createdAt.toDateTime(),
+            isOutgoing: isOutgoing,
+            currency: event.tokenWallet.symbol.name,
+            feesCurrency: 'TON',
+            data: data.toComment(),
+          );
+        }).toList();
 
-            _transactions
-              ..clear()
-              ..addAll(walletTransactions);
-
-            yield TokenWalletTransactionsState.ready([..._transactions]);
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield TokenWalletTransactionsState.error(err.toString());
-          }
-        },
-      );
-    }
-
-    if (event is TokenWalletTransactionsEvent) {
-      yield* event.when(
-        preloadTransactions: () async* {
-          try {
-            final tokenWallet = _nekotonService.tokenWallets
-                .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
-
-            if (_transactions.isNotEmpty) {
-              final prevTransactionId = _transactions.last.prevTransactionId;
-
-              if (prevTransactionId != null) {
-                await tokenWallet.preloadTransactions(prevTransactionId);
-              }
-            }
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield TokenWalletTransactionsState.error(err.toString());
-          }
-        },
-      );
+        yield TokenWalletTransactionsState(transactions);
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
     }
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}
 
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
-  const factory _LocalEvent.updateTransactions(
-    List<TokenWalletTransactionWithData> transactions,
-  ) = _UpdateTransactions;
+  const factory _LocalEvent.update({
+    required TokenWallet tokenWallet,
+    required List<TokenWalletTransactionWithData> transactions,
+  }) = _Update;
 }
 
 @freezed
 class TokenWalletTransactionsEvent extends _Event with _$TokenWalletTransactionsEvent {
-  const factory TokenWalletTransactionsEvent.preloadTransactions() = _PreloadTransactions;
+  const factory TokenWalletTransactionsEvent.load({
+    required String owner,
+    required String rootTokenContract,
+  }) = _Load;
+
+  const factory TokenWalletTransactionsEvent.preload() = _Preload;
 }
 
 @freezed
 class TokenWalletTransactionsState with _$TokenWalletTransactionsState {
-  const factory TokenWalletTransactionsState.ready(
-    List<WalletTransaction> transactions,
-  ) = _Ready;
-
-  const factory TokenWalletTransactionsState.error(String info) = _Error;
+  const factory TokenWalletTransactionsState(List<WalletTransaction> transactions) = _TokenWalletTransactionsState;
 }

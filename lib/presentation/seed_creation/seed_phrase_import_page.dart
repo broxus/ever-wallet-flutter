@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:another_flushbar/flushbar.dart';
@@ -5,7 +6,6 @@ import 'package:expand_tap_area/expand_tap_area.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
@@ -37,13 +37,14 @@ class SeedPhraseImportPage extends StatefulWidget {
 class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
   final scrollController = ScrollController();
   final formKey = GlobalKey<FormState>();
-  final bloc = getIt.get<PhraseImportBloc>();
   late final List<String> words;
   late final List<FocusNode> focuses;
   late final List<TextEditingController> controllers;
   late final int wordsCount;
   final buttonState = ValueNotifier<_ButtonState>(_ButtonState.paste);
   final isFormValid = ValueNotifier<bool>(false);
+  final bloc = getIt.get<PhraseImportBloc>();
+  late final StreamSubscription streamSubscription;
 
   @override
   void initState() {
@@ -52,6 +53,22 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
     words = List<String>.generate(wordsCount, (_) => '');
     focuses = List.generate(wordsCount, (_) => FocusNode());
     controllers = List.generate(wordsCount, (_) => TextEditingController());
+    streamSubscription = bloc.errorsStream.listen((event) => showPlatformDialog(
+          context: context,
+          builder: (context) => Theme(
+            data: ThemeData(),
+            child: PlatformAlertDialog(
+              title: const Text('Error'),
+              content: Text(event),
+              actions: <Widget>[
+                PlatformDialogAction(
+                  onPressed: () => context.router.navigatorKey.currentState?.pop(),
+                  child: const Text('Ok'),
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 
   @override
@@ -62,73 +79,49 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
     }
     scrollController.dispose();
     buttonState.dispose();
-    bloc.close();
     isFormValid.dispose();
+    bloc.close();
+    streamSubscription.cancel();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocListener<PhraseImportBloc, PhraseImportState>(
-        bloc: bloc,
-        listener: (context, state) => state.when(
-          initial: () => null,
-          success: (phrase) => context.router.push(
-            PasswordCreationRoute(
-              phrase: words,
-              seedName: widget.seedName,
-            ),
-          ),
-          error: (info) => showPlatformDialog(
-            context: context,
-            builder: (context) => PlatformAlertDialog(
-              title: const Text('Error'),
-              content: Text(info),
-              actions: <Widget>[
-                PlatformDialogAction(
-                  onPressed: () => context.router.navigatorKey.currentState?.pop(),
-                  child: const Text('Ok'),
-                ),
-              ],
-            ),
-          ),
+  Widget build(BuildContext context) => CrystalScaffold(
+        actions: ValueListenableBuilder<_ButtonState>(
+          valueListenable: buttonState,
+          builder: (context, value, child) {
+            late final Widget child;
+
+            switch (value) {
+              case _ButtonState.clear:
+                child = buildClearButton();
+                break;
+              case _ButtonState.paste:
+                child = buildPasteButton();
+                break;
+            }
+
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 150),
+              child: child,
+            );
+          },
         ),
-        child: CrystalScaffold(
-          actions: ValueListenableBuilder<_ButtonState>(
-            valueListenable: buttonState,
-            builder: (context, value, child) {
-              late final Widget child;
-
-              switch (value) {
-                case _ButtonState.clear:
-                  child = buildClearButton();
-                  break;
-                case _ButtonState.paste:
-                  child = buildPasteButton();
-                  break;
-              }
-
-              return AnimatedSwitcher(
-                duration: const Duration(milliseconds: 150),
-                child: child,
-              );
-            },
-          ),
-          onScaffoldTap: FocusScope.of(context).unfocus,
-          headlineSize: 28,
-          headline: LocaleKeys.seed_phrase_import_screen_title.tr(),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Stack(
-              children: [
-                SizedBox.expand(child: buildFieldLayout()),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: buildActions(),
-                ),
-              ],
-            ),
+        onScaffoldTap: FocusScope.of(context).unfocus,
+        headlineSize: 28,
+        headline: LocaleKeys.seed_phrase_import_screen_title.tr(),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Stack(
+            children: [
+              SizedBox.expand(child: buildFieldLayout()),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: buildActions(),
+              ),
+            ],
           ),
         ),
       );
@@ -420,8 +413,26 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
     }
   }
 
-  void onConfirm(List<String> words) {
+  Future<void> onConfirm(List<String> words) async {
     FocusScope.of(context).unfocus();
+
     bloc.add(PhraseImportEvent.submit(words));
+
+    final result = await Future.any([
+      bloc.stream.first,
+      bloc.errorsStream.first,
+    ]);
+
+    if (result is PhraseImportState) {
+      result.maybeWhen(
+        success: () => context.router.push(
+          PasswordCreationRoute(
+            phrase: words,
+            seedName: widget.seedName,
+          ),
+        ),
+        orElse: () => null,
+      );
+    }
   }
 }

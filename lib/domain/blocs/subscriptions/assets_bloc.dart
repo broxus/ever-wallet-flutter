@@ -16,92 +16,84 @@ part 'assets_bloc.freezed.dart';
 typedef TokenWalletWithIcon = Tuple2<TokenWallet, String?>;
 
 @injectable
-class AssetsBloc extends Bloc<AssetsEvent, AssetsState> {
+class AssetsBloc extends Bloc<_Event, AssetsState> {
   final NekotonService _nekotonService;
   final TonAssetsRepository _tonAssetsRepository;
-  final String? _address;
-  late final StreamSubscription _streamSubscription;
+  final _errorsSubject = PublishSubject<String>();
+  StreamSubscription? _streamSubscription;
 
   AssetsBloc(
     this._nekotonService,
     this._tonAssetsRepository,
-    @factoryParam this._address,
-  ) : super(const AssetsState.initial()) {
-    _streamSubscription = Rx.combineLatest2<TonWallet, List<TokenWallet>, AssetsEvent>(
-      _nekotonService.tonWalletsStream.transform(StreamTransformer.fromHandlers(
-        handleData: (data, sink) {
-          final tonWallet = data.firstWhereOrNull((e) => e.address == _address!);
-
-          if (tonWallet != null) {
-            sink.add(tonWallet);
-          }
-        },
-      )),
-      _nekotonService.tokenWalletsStream.map((e) => e.where((e) => e.owner == _address!).toList()),
-      (a, b) => AssetsEvent.loadAssets(
-        tonWallet: a,
-        tokenWallets: b,
-      ),
-    ).listen((event) => add(event));
-  }
+  ) : super(const AssetsState());
 
   @override
   Future<void> close() {
-    _streamSubscription.cancel();
+    _errorsSubject.close();
+    _streamSubscription?.cancel();
     return super.close();
   }
 
   @override
-  Stream<AssetsState> mapEventToState(AssetsEvent event) async* {
-    yield* event.when(
-      loadAssets: (
-        TonWallet tonWallet,
-        List<TokenWallet> tokenWallets,
-      ) async* {
-        try {
-          final stream = _tonAssetsRepository.getTokenContractAssetsStream();
+  Stream<AssetsState> mapEventToState(_Event event) async* {
+    try {
+      if (event is _Load) {
+        _streamSubscription?.cancel();
+        _streamSubscription = Rx.combineLatest2<TonWallet, List<TokenWallet>, _LocalEvent>(
+          _nekotonService.tonWalletsStream.expand((e) => e).where((e) => e.address == event.address),
+          _nekotonService.tokenWalletsStream.map((e) => e.where((e) => e.owner == event.address).toList()),
+          (a, b) => _LocalEvent.update(
+            tonWallet: a,
+            tokenWallets: b,
+          ),
+        ).listen((event) => add(event));
+      } else if (event is _Update) {
+        final stream = _tonAssetsRepository.getTokenContractAssetsStream();
 
-          await for (final item in stream) {
-            final tokenWalletsWithIcon = <TokenWalletWithIcon>[];
+        await for (final item in stream) {
+          final tokenWalletsWithIcon = <TokenWalletWithIcon>[];
 
-            for (final tokenWallet in tokenWallets) {
-              final address = tokenWallet.symbol.rootTokenContract;
-              final tokenContractAsset = item.firstWhereOrNull((element) => element.address == address);
-              final logoURI = tokenContractAsset?.logoURI;
+          for (final tokenWallet in event.tokenWallets) {
+            final tokenContractAsset =
+                item.firstWhereOrNull((element) => element.address == tokenWallet.symbol.rootTokenContract);
 
-              tokenWalletsWithIcon.add(Tuple2(tokenWallet, logoURI));
-            }
-
-            yield AssetsState.ready(
-              tonWallet: tonWallet,
-              tokenWallets: tokenWalletsWithIcon,
-            );
+            tokenWalletsWithIcon.add(Tuple2(tokenWallet, tokenContractAsset?.logoURI));
           }
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield AssetsState.error(err.toString());
+
+          yield AssetsState(
+            tonWallet: event.tonWallet,
+            tokenWallets: tokenWalletsWithIcon,
+          );
         }
-      },
-    );
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
+    }
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
+}
+
+abstract class _Event {}
+
+@freezed
+class _LocalEvent extends _Event with _$_LocalEvent {
+  const factory _LocalEvent.update({
+    required TonWallet tonWallet,
+    required List<TokenWallet> tokenWallets,
+  }) = _Update;
 }
 
 @freezed
-class AssetsEvent with _$AssetsEvent {
-  const factory AssetsEvent.loadAssets({
-    required TonWallet tonWallet,
-    required List<TokenWallet> tokenWallets,
-  }) = _LoadAssets;
+class AssetsEvent extends _Event with _$AssetsEvent {
+  const factory AssetsEvent.load(String address) = _Load;
 }
 
 @freezed
 class AssetsState with _$AssetsState {
-  const factory AssetsState.initial() = _Initial;
-
-  const factory AssetsState.ready({
-    required TonWallet tonWallet,
-    required List<TokenWalletWithIcon> tokenWallets,
-  }) = _Ready;
-
-  const factory AssetsState.error(String info) = _Error;
+  const factory AssetsState({
+    TonWallet? tonWallet,
+    @Default([]) List<TokenWalletWithIcon> tokenWallets,
+  }) = _AssetsState;
 }

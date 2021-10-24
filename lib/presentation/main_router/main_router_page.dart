@@ -1,8 +1,8 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:crystal/domain/blocs/account/accounts_bloc.dart';
-import 'package:crystal/injection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../../logger.dart';
@@ -137,17 +137,9 @@ class MainRouterPageState extends State<MainRouterPage> {
 
   Future<bool> checkForExistingAccount(int index) async {
     if (index == 1) {
-      final state = await getIt.get<AccountsBloc>().stream.firstWhere((e) => e.maybeWhen(
-            ready: (accounts, currentAccount) => true,
-            orElse: () => false,
-          ));
+      final state = context.read<AccountsBloc>().state;
 
-      final exist = state.maybeWhen(
-        ready: (accounts, currentAccount) => currentAccount != null,
-        orElse: () => false,
-      );
-
-      return exist;
+      return state.currentAccount != null;
     }
 
     return true;

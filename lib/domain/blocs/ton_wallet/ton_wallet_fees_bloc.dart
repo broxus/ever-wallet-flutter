@@ -4,16 +4,17 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
-import '../../utils/error_message.dart';
 
 part 'ton_wallet_fees_bloc.freezed.dart';
 
 @injectable
 class TonWalletFeesBloc extends Bloc<TonWalletFeesEvent, TonWalletFeesState> {
   final NekotonService _nekotonService;
+  final _errorsSubject = PublishSubject<String>();
   final String? _address;
 
   TonWalletFeesBloc(
@@ -22,39 +23,42 @@ class TonWalletFeesBloc extends Bloc<TonWalletFeesEvent, TonWalletFeesState> {
   ) : super(const TonWalletFeesState.loading());
 
   @override
-  Stream<TonWalletFeesState> mapEventToState(TonWalletFeesEvent event) async* {
-    yield* event.when(
-      estimateFees: (
-        int nanoAmount,
-        UnsignedMessage message,
-      ) async* {
-        try {
-          final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
-
-          yield const TonWalletFeesState.loading();
-          final feesValue = await tonWallet.estimateFees(message);
-          final fees = feesValue.toString();
-
-          final contractState = await tonWallet.contractState;
-          final balance = contractState.balance;
-          final balanceValue = int.parse(balance);
-
-          if (balanceValue > (feesValue + nanoAmount)) {
-            yield TonWalletFeesState.ready(
-              fees: fees.toTokens(),
-            );
-          } else {
-            yield TonWalletFeesState.insufficientFunds(
-              fees: fees.toTokens(),
-            );
-          }
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield TonWalletFeesState.error(err.getMessage());
-        }
-      },
-    );
+  Future<void> close() {
+    _errorsSubject.close();
+    return super.close();
   }
+
+  @override
+  Stream<TonWalletFeesState> mapEventToState(TonWalletFeesEvent event) async* {
+    try {
+      if (event is _EstimateFees) {
+        final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
+        yield const TonWalletFeesState.loading();
+        final feesValue = await tonWallet.estimateFees(event.message);
+        final fees = feesValue.toString();
+
+        final contractState = await tonWallet.contractState;
+        final balance = contractState.balance;
+        final balanceValue = int.parse(balance);
+
+        if (balanceValue > (feesValue + event.nanoAmount)) {
+          yield TonWalletFeesState.ready(
+            fees: fees.toTokens(),
+          );
+        } else {
+          yield TonWalletFeesState.insufficientFunds(
+            fees: fees.toTokens(),
+          );
+        }
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
+    }
+  }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed

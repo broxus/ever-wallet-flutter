@@ -4,12 +4,12 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../constants/message_expiration.dart';
 import '../../services/nekoton_service.dart';
-import '../../utils/error_message.dart';
 import 'token_wallet_fees_bloc.dart';
 
 part 'token_wallet_transfer_bloc.freezed.dart';
@@ -17,6 +17,7 @@ part 'token_wallet_transfer_bloc.freezed.dart';
 @injectable
 class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
   final NekotonService _nekotonService;
+  final _errorsSubject = PublishSubject<String>();
   final String? _owner;
   final String? _rootTokenContract;
   late TokenWalletFeesBloc feesBloc;
@@ -32,96 +33,86 @@ class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
   }
 
   @override
+  Future<void> close() {
+    _errorsSubject.close();
+    return super.close();
+  }
+
+  @override
   Stream<TokenWalletTransferState> mapEventToState(_Event event) async* {
-    if (event is _LocalEvent) {
-      final tokenWallet = _nekotonService.tokenWallets
-          .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
+    try {
+      if (event is _GetBalance) {
+        final tokenWallet = _nekotonService.tokenWallets
+            .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
 
-      final balance = await tokenWallet.balance;
+        final balance = await tokenWallet.balance;
 
-      yield TokenWalletTransferState.initial(
-        balance: balance.toTokens(tokenWallet.symbol.decimals),
-        currency: tokenWallet.symbol.name,
-      );
-    }
+        yield TokenWalletTransferState.initial(
+          balance: balance.toTokens(tokenWallet.symbol.decimals),
+          currency: tokenWallet.symbol.name,
+        );
+      } else if (event is _PrepareTransfer) {
+        final repackedDestination = repackAddress(event.destination);
 
-    if (event is TokenWalletTransferEvent) {
-      yield* event.when(
-        prepareTransfer: (
-          String destination,
-          String tokens,
-          bool notifyReceiver,
-        ) async* {
-          try {
-            final repackedDestination = repackAddress(destination);
+        final tokenWallet = _nekotonService.tokenWallets
+            .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
 
-            final tokenWallet = _nekotonService.tokenWallets
-                .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
+        final decimals = tokenWallet.symbol.decimals;
 
-            final decimals = tokenWallet.symbol.decimals;
+        final nanoTokens = event.tokens.fromTokens(decimals);
 
-            final nanoTokens = tokens.fromTokens(decimals);
+        _message = await tokenWallet.prepareTransfer(
+          expiration: defaultMessageExpiration,
+          destination: repackedDestination,
+          tokens: nanoTokens,
+          notifyReceiver: event.notifyReceiver,
+        );
+        feesBloc.add(TokenWalletFeesEvent.estimateFees(nanoTokens: nanoTokens, message: _message!));
 
-            _message = await tokenWallet.prepareTransfer(
-              expiration: defaultMessageExpiration,
-              destination: repackedDestination,
-              tokens: nanoTokens,
-              notifyReceiver: notifyReceiver,
-            );
-            feesBloc.add(TokenWalletFeesEvent.estimateFees(nanoTokens: nanoTokens, message: _message!));
+        final ownerContractState = await tokenWallet.ownerContractState;
+        final ownerBalance = ownerContractState.balance;
 
-            final ownerContractState = await tokenWallet.ownerContractState;
-            final ownerBalance = ownerContractState.balance;
+        final currency = tokenWallet.symbol.name;
 
-            final currency = tokenWallet.symbol.name;
+        final balance = await tokenWallet.balance;
 
-            final balance = await tokenWallet.balance;
-
-            yield TokenWalletTransferState.messagePrepared(
-              ownerBalance: ownerBalance.toTokens(),
-              balance: balance.toTokens(decimals),
-              currency: currency,
-              tokens: tokens,
-              destination: destination,
-            );
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield TokenWalletTransferState.error(err.getMessage());
-          }
-        },
-        send: (String password) async* {
-          if (_message != null) {
-            try {
-              final tokenWallet = _nekotonService.tokenWallets
-                  .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
-
-              yield const TokenWalletTransferState.sending();
-              await tokenWallet.send(
-                message: _message!,
-                password: password,
-              );
-
-              yield const TokenWalletTransferState.success();
-            } on Exception catch (err, st) {
-              logger.e(err, err, st);
-              yield TokenWalletTransferState.error(err.getMessage());
-            }
-          }
-        },
-        goToPassword: () async* {
-          yield const TokenWalletTransferState.password();
-        },
-        backToInitial: () async* {
+        yield TokenWalletTransferState.messagePrepared(
+          ownerBalance: ownerBalance.toTokens(),
+          balance: balance.toTokens(decimals),
+          currency: currency,
+          tokens: event.tokens,
+          destination: event.destination,
+        );
+      } else if (event is _Send) {
+        if (_message != null) {
           final tokenWallet = _nekotonService.tokenWallets
               .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
 
-          final contractState = await tokenWallet.contractState;
-          final balance = contractState.balance;
-          yield TokenWalletTransferState.initial(balance: balance.toTokens());
-        },
-      );
+          yield const TokenWalletTransferState.sending();
+          await tokenWallet.send(
+            message: _message!,
+            password: event.password,
+          );
+
+          yield const TokenWalletTransferState.success();
+        }
+      } else if (event is _GoToPassword) {
+        yield const TokenWalletTransferState.password();
+      } else if (event is _BackToInitial) {
+        final tokenWallet = _nekotonService.tokenWallets
+            .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
+
+        final contractState = await tokenWallet.contractState;
+        final balance = contractState.balance;
+        yield TokenWalletTransferState.initial(balance: balance.toTokens());
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
     }
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

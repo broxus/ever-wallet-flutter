@@ -6,7 +6,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:sortedmap/sortedmap.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../logger.dart';
@@ -17,11 +16,10 @@ part 'keys_bloc.freezed.dart';
 @injectable
 class KeysBloc extends Bloc<_Event, KeysState> {
   final NekotonService _nekotonService;
+  final _errorsSubject = PublishSubject<String>();
   late final StreamSubscription _streamSubscription;
-  final _keys = SortedMap<KeyStoreEntry, List<KeyStoreEntry>?>();
-  KeyStoreEntry? _currentKey;
 
-  KeysBloc(this._nekotonService) : super(const KeysState.initial()) {
+  KeysBloc(this._nekotonService) : super(const KeysState()) {
     _streamSubscription =
         Rx.combineLatest2<KeyStoreEntry?, List<KeyStoreEntry>, Tuple2<KeyStoreEntry?, List<KeyStoreEntry>>>(
       _nekotonService.currentKeyStream,
@@ -29,9 +27,9 @@ class KeysBloc extends Bloc<_Event, KeysState> {
       (a, b) => Tuple2(a, b),
     ).listen(
       (Tuple2<KeyStoreEntry?, List<KeyStoreEntry>> tuple) => add(
-        _LocalEvent.updateKeys(
-          currentKey: tuple.item1,
+        _LocalEvent.update(
           keys: tuple.item2,
+          currentKey: tuple.item1,
         ),
       ),
     );
@@ -39,58 +37,34 @@ class KeysBloc extends Bloc<_Event, KeysState> {
 
   @override
   Future<void> close() {
+    _errorsSubject.close();
     _streamSubscription.cancel();
     return super.close();
   }
 
   @override
   Stream<KeysState> mapEventToState(_Event event) async* {
-    if (event is _LocalEvent) {
-      yield* event.when(
-        updateKeys: (
-          KeyStoreEntry? currentKey,
-          List<KeyStoreEntry> keys,
-        ) async* {
-          try {
-            final sortedKeys = _sortKeys(keys);
+    try {
+      if (event is _Update) {
+        final sortedKeys = _sortKeys(event.keys);
 
-            _keys
-              ..clear()
-              ..addAll(sortedKeys);
-            _currentKey = currentKey;
+        yield KeysState(
+          keys: sortedKeys,
+          currentKey: event.currentKey,
+        );
+      } else if (event is _SetCurrent) {
+        final key = _nekotonService.keys.firstWhere((e) => e.publicKey == event.publicKey);
 
-            yield KeysState.ready(
-              keys: {..._keys},
-              currentKey: _currentKey,
-            );
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield KeysState.error(err.toString());
-          }
-        },
-      );
-    }
+        _nekotonService.currentKey = key;
 
-    if (event is KeysEvent) {
-      yield* event.when(
-        setCurrentKey: (String publicKey) async* {
-          try {
-            final key = _nekotonService.keys.firstWhere((e) => e.publicKey == publicKey);
-
-            _nekotonService.currentKey = key;
-
-            _currentKey = key;
-
-            yield KeysState.ready(
-              keys: {..._keys},
-              currentKey: _currentKey,
-            );
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield KeysState.error(err.toString());
-          }
-        },
-      );
+        yield KeysState(
+          keys: state.keys,
+          currentKey: key,
+        );
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
     }
   }
 
@@ -112,33 +86,32 @@ class KeysBloc extends Bloc<_Event, KeysState> {
         }
       }
     }
+
     return map;
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}
 
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
-  const factory _LocalEvent.updateKeys({
-    KeyStoreEntry? currentKey,
+  const factory _LocalEvent.update({
     required List<KeyStoreEntry> keys,
-  }) = _UpdateKeys;
+    KeyStoreEntry? currentKey,
+  }) = _Update;
 }
 
 @freezed
 class KeysEvent extends _Event with _$KeysEvent {
-  const factory KeysEvent.setCurrentKey(String publicKey) = _SetCurrentKey;
+  const factory KeysEvent.setCurrent(String? publicKey) = _SetCurrent;
 }
 
 @freezed
 class KeysState with _$KeysState {
-  const factory KeysState.initial() = _Initial;
-
-  const factory KeysState.ready({
-    required Map<KeyStoreEntry, List<KeyStoreEntry>?> keys,
+  const factory KeysState({
+    @Default({}) Map<KeyStoreEntry, List<KeyStoreEntry>?> keys,
     KeyStoreEntry? currentKey,
-  }) = _Ready;
-
-  const factory KeysState.error(String info) = _Error;
+  }) = _KeysState;
 }

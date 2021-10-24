@@ -16,7 +16,7 @@ abstract class BiometryRepository {
     required String password,
   });
 
-  Future<String?> getKeyPassword(String publicKey);
+  Future<String?> get(String publicKey);
 
   Future<void> clear();
 

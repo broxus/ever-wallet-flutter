@@ -35,7 +35,7 @@ class _ApplicationListenerState extends State<ApplicationListener> with WidgetsB
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      context.read<BiometryInfoBloc>().add(const BiometryInfoEvent.checkBiometryAvailability());
+      context.read<BiometryInfoBloc>().add(const BiometryInfoEvent.checkAvailability());
     }
   }
 

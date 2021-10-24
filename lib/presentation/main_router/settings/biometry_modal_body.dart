@@ -41,9 +41,7 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
             bloc: context.watch<BiometryInfoBloc>(),
             builder: (context, state) => CrystalSwitch(
               isActive: state.isEnabled,
-              onTap: () => context
-                  .read<BiometryInfoBloc>()
-                  .add(BiometryInfoEvent.setBiometryStatus(isEnabled: !state.isEnabled)),
+              onTap: () => context.read<BiometryInfoBloc>().add(BiometryInfoEvent.setStatus(!state.isEnabled)),
             ),
           ),
         ],

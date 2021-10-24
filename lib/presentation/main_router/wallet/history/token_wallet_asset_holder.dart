@@ -22,15 +22,24 @@ class TokenWalletAssetHolder extends StatefulWidget {
 }
 
 class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
-  late final TokenWalletInfoBloc bloc;
+  final bloc = getIt.get<TokenWalletInfoBloc>();
 
   @override
   void initState() {
-    bloc = getIt.get<TokenWalletInfoBloc>(
-      param1: widget.owner,
-      param2: widget.rootTokenContract,
-    );
+    bloc.add(TokenWalletInfoEvent.load(
+      owner: widget.owner,
+      rootTokenContract: widget.rootTokenContract,
+    ));
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant TokenWalletAssetHolder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    bloc.add(TokenWalletInfoEvent.load(
+      owner: widget.owner,
+      rootTokenContract: widget.rootTokenContract,
+    ));
   }
 
   @override
@@ -40,24 +49,21 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfoState>(
+  Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfoState?>(
         bloc: bloc,
-        builder: (context, state) => state.maybeWhen(
-          ready: (logoURI, address, balance, contractState, owner, symbol, version, ownerPublicKey) {
-            final icon = logoURI != null ? getTokenAssetIcon(logoURI) : getGravatarIcon(symbol.name.hashCode);
-
-            return WalletAssetHolder(
-              name: symbol.name,
-              balance: balance,
-              icon: icon,
-              onTap: () => TokenAssetObserver.open(
-                context: context,
-                owner: owner,
-                rootTokenContract: symbol.rootTokenContract,
-              ),
-            );
-          },
-          orElse: () => const SizedBox(),
-        ),
+        builder: (context, state) => state != null
+            ? WalletAssetHolder(
+                name: state.symbol.name,
+                balance: state.balance,
+                icon: state.logoURI != null
+                    ? getTokenAssetIcon(state.logoURI!)
+                    : getGravatarIcon(state.symbol.name.hashCode),
+                onTap: () => TokenAssetObserver.open(
+                  context: context,
+                  owner: state.owner,
+                  rootTokenContract: state.symbol.rootTokenContract,
+                ),
+              )
+            : const SizedBox(),
       );
 }

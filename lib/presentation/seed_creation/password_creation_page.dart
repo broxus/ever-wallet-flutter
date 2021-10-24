@@ -32,7 +32,6 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
   final scrollController = ScrollController();
   final passwordController = TextEditingController();
   final repeatController = TextEditingController();
-  final bloc = getIt.get<KeyCreationBloc>();
   final validationNotifier = ValueNotifier<String?>('');
 
   @override
@@ -40,7 +39,6 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
     scrollController.dispose();
     passwordController.dispose();
     repeatController.dispose();
-    bloc.close();
     validationNotifier.dispose();
     super.dispose();
   }
@@ -189,8 +187,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
 
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () =>
-                context.read<BiometryInfoBloc>().add(BiometryInfoEvent.setBiometryStatus(isEnabled: !state.isEnabled)),
+            onTap: () => context.read<BiometryInfoBloc>().add(BiometryInfoEvent.setStatus(!state.isEnabled)),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Row(
@@ -238,9 +235,12 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         ),
       );
 
-  void onConfirm(String password) {
+  Future<void> onConfirm(String password) async {
     FocusScope.of(context).unfocus();
-    bloc.add(KeyCreationEvent.createKey(
+
+    final bloc = getIt.get<KeyCreationBloc>();
+
+    bloc.add(KeyCreationEvent.create(
       name: widget.seedName,
       phrase: widget.phrase,
       password: password,
@@ -248,5 +248,9 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
     if (context.router.current.parent?.name == NewSeedRouterRoute.name) {
       context.router.navigate(const SettingsRouterRoute());
     }
+
+    await bloc.stream.first;
+
+    bloc.close();
   }
 }

@@ -55,7 +55,7 @@ class _RemoveSeedPhraseModalBodyState extends State<RemoveSeedPhraseModalBody> {
               const CrystalDivider(height: 24),
               CrystalButton(
                 text: LocaleKeys.remove_seed_modal_actions_remove.tr(),
-                onTap: () => bloc.add(KeyRemovementEvent.removeKey(widget.publicKey)),
+                onTap: () => bloc.add(KeyRemovementEvent.remove(widget.publicKey)),
               ),
             ],
           ),

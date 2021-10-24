@@ -14,94 +14,73 @@ part 'accounts_bloc.freezed.dart';
 @injectable
 class AccountsBloc extends Bloc<_Event, AccountsState> {
   final NekotonService _nekotonService;
+  final _errorsSubject = PublishSubject<String>();
   late final StreamSubscription _streamSubscription;
-  final _accounts = <AssetsList>[];
-  AssetsList? _currentAccount;
 
-  AccountsBloc(this._nekotonService) : super(const AccountsState.initial()) {
+  AccountsBloc(this._nekotonService) : super(const AccountsState()) {
     _streamSubscription = Rx.combineLatest2<KeyStoreEntry?, List<AssetsList>, List<AssetsList>>(
       _nekotonService.currentKeyStream,
       _nekotonService.accountsStream,
       (a, b) => b.where((e) => e.publicKey == a?.publicKey).toList(),
-    ).listen((event) => add(_LocalEvent.updateAccounts(event)));
+    ).listen((event) => add(_LocalEvent.update(event)));
   }
 
   @override
   Future<void> close() {
+    _errorsSubject.close();
     _streamSubscription.cancel();
     return super.close();
   }
 
   @override
   Stream<AccountsState> mapEventToState(_Event event) async* {
-    if (event is _LocalEvent) {
-      yield* event.when(
-        updateAccounts: (List<AssetsList> accounts) async* {
-          try {
-            _accounts
-              ..clear()
-              ..addAll(accounts);
+    try {
+      if (event is _SetCurrent) {
+        final currentAccount = _nekotonService.accounts.firstWhereOrNull((e) => e.address == event.address);
 
-            final currentAccount = _accounts.firstWhereOrNull((e) => e.address == _currentAccount?.address);
+        yield AccountsState(
+          accounts: state.accounts,
+          currentAccount: currentAccount,
+        );
+      } else if (event is _Update) {
+        var currentAccount = event.accounts.firstWhereOrNull((e) => e.address == state.currentAccount?.address);
 
-            if (currentAccount == null) {
-              _currentAccount = _accounts.firstOrNull;
-            } else {
-              _currentAccount = currentAccount;
-            }
+        if (currentAccount == null) {
+          currentAccount = event.accounts.firstOrNull;
+        } else {
+          currentAccount = currentAccount;
+        }
 
-            yield AccountsState.ready(
-              accounts: [..._accounts],
-              currentAccount: _currentAccount,
-            );
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield AccountsState.error(err.toString());
-          }
-        },
-      );
-    }
-
-    if (event is AccountsEvent) {
-      yield* event.when(
-        setCurrentAccount: (String? address) async* {
-          try {
-            _currentAccount = _nekotonService.accounts.firstWhereOrNull((e) => e.address == address);
-
-            yield AccountsState.ready(
-              accounts: [..._accounts],
-              currentAccount: _currentAccount,
-            );
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield AccountsState.error(err.toString());
-          }
-        },
-      );
+        yield AccountsState(
+          accounts: event.accounts,
+          currentAccount: currentAccount,
+        );
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
     }
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}
 
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
-  const factory _LocalEvent.updateAccounts(List<AssetsList> accounts) = _UpdateAccounts;
+  const factory _LocalEvent.update(List<AssetsList> accounts) = _Update;
 }
 
 @freezed
 class AccountsEvent extends _Event with _$AccountsEvent {
-  const factory AccountsEvent.setCurrentAccount(String? address) = _SetCurrentAccount;
+  const factory AccountsEvent.setCurrent(String? address) = _SetCurrent;
 }
 
 @freezed
 class AccountsState with _$AccountsState {
-  const factory AccountsState.initial() = _Initial;
-
-  const factory AccountsState.ready({
-    required List<AssetsList> accounts,
+  const factory AccountsState({
+    @Default([]) List<AssetsList> accounts,
     AssetsList? currentAccount,
-  }) = _Ready;
-
-  const factory AccountsState.error(String info) = _Error;
+  }) = _AccountsState;
 }

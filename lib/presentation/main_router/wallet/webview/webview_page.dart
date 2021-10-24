@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -32,7 +31,6 @@ class WebviewPage extends StatefulWidget {
 }
 
 class _WebviewPageState extends State<WebviewPage> {
-  final accountsBloc = getIt.get<AccountsBloc>();
   final approvalsBloc = getIt.get<ApprovalsBloc>();
   final bookmarksBloc = getIt.get<BookmarksBloc>();
   InAppWebViewController? controller;
@@ -109,7 +107,6 @@ class _WebviewPageState extends State<WebviewPage> {
 
   @override
   void dispose() {
-    accountsBloc.close();
     approvalsBloc.close();
     bookmarksBloc.close();
     disconnectedStreamSubscription.cancel();
@@ -130,15 +127,10 @@ class _WebviewPageState extends State<WebviewPage> {
 
   @override
   Widget build(BuildContext context) => BlocBuilder<AccountsBloc, AccountsState>(
-        bloc: accountsBloc,
-        builder: (context, state) => state.maybeWhen(
-          ready: (accounts, currentAccount) => buildApprovalsListener(
-            accounts: accounts,
-            currentAccount: currentAccount,
-          ),
-          orElse: () => Center(
-            child: PlatformCircularProgressIndicator(),
-          ),
+        bloc: context.watch<AccountsBloc>(),
+        builder: (context, state) => buildApprovalsListener(
+          accounts: state.accounts,
+          currentAccount: state.currentAccount,
         ),
       );
 
@@ -224,7 +216,7 @@ class _WebviewPageState extends State<WebviewPage> {
         context: context,
         accounts: accounts,
         onTap: (String address) async {
-          accountsBloc.add(AccountsEvent.setCurrentAccount(address));
+          context.read<AccountsBloc>().add(AccountsEvent.setCurrent(address));
           await disconnect(origin: (await controller!.getCurrentOrigin())!);
         },
       );
@@ -239,9 +231,9 @@ class _WebviewPageState extends State<WebviewPage> {
     final bookmark = bookmarksBloc.state.firstWhereOrNull((e) => e.url == url);
 
     if (bookmark == null) {
-      bookmarksBloc.add(BookmarksEvent.addBookmark(url));
+      bookmarksBloc.add(BookmarksEvent.add(url));
     } else {
-      bookmarksBloc.add(BookmarksEvent.removeBookmark(bookmark));
+      bookmarksBloc.add(BookmarksEvent.remove(bookmark));
     }
 
     final state = await bookmarksBloc.stream.first;

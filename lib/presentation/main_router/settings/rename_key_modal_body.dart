@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/blocs/key/key_update_bloc.dart';
 import '../../../injection.dart';
@@ -20,35 +21,25 @@ class RenameKeyModalBody extends StatefulWidget {
 
 class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
   final controller = TextEditingController();
-  late KeyUpdateBloc bloc = getIt.get<KeyUpdateBloc>();
+  final bloc = getIt.get<KeyUpdateBloc>();
+  late final StreamSubscription streamSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    streamSubscription = bloc.errorsStream.listen((event) => showErrorCrystalFlushbar(context, message: event));
+  }
 
   @override
   void dispose() {
     controller.dispose();
     bloc.close();
+    streamSubscription.cancel();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocListener<KeyUpdateBloc, KeyUpdateState>(
-        bloc: bloc,
-        listener: (context, state) {
-          state.map(
-            success: (success) {
-              context.router.navigatorKey.currentState?.pop();
-              return showCrystalFlushbar(
-                context,
-                message: LocaleKeys.rename_key_modal_message_success.tr(),
-              );
-            },
-            error: (error) => showErrorCrystalFlushbar(context, message: error.info),
-            initial: (_) => null,
-          );
-        },
-        child: getBody(),
-      );
-
-  Widget getBody() => SafeArea(
+  Widget build(BuildContext context) => SafeArea(
         minimum: const EdgeInsets.only(bottom: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -68,11 +59,29 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                 text: LocaleKeys.rename_key_modal_actions_rename.tr(),
                 onTap: value.text.isEmpty
                     ? null
-                    : () {
+                    : () async {
                         bloc.add(KeyUpdateEvent.rename(
                           publicKey: widget.publicKey,
                           name: value.text,
                         ));
+
+                        final result = await Future.any([
+                          bloc.stream.first,
+                          bloc.errorsStream.first,
+                        ]);
+
+                        if (result is KeyUpdateState) {
+                          result.maybeWhen(
+                            success: () {
+                              context.router.navigatorKey.currentState?.pop();
+                              showCrystalFlushbar(
+                                context,
+                                message: LocaleKeys.rename_key_modal_message_success.tr(),
+                              );
+                            },
+                            orElse: () => null,
+                          );
+                        }
                       },
               ),
             )

@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
@@ -11,55 +12,54 @@ import '../../services/nekoton_service.dart';
 part 'account_info_bloc.freezed.dart';
 
 @injectable
-class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
+class AccountInfoBloc extends Bloc<_Event, AccountInfoState?> {
   final NekotonService _nekotonService;
-  final String? _address;
-  late final StreamSubscription _streamSubscription;
+  final _errorsSubject = PublishSubject<String>();
+  StreamSubscription? _streamSubscription;
 
-  AccountInfoBloc(
-    this._nekotonService,
-    @factoryParam this._address,
-  ) : super(AccountInfoState.ready(_nekotonService.accounts.firstWhere((e) => e.address == _address!).name)) {
-    _streamSubscription = _nekotonService.accountsStream.transform<AssetsList>(StreamTransformer.fromHandlers(
-      handleData: (data, sink) {
-        final entry = data.firstWhereOrNull((e) => e.address == _address!);
-
-        if (entry != null) {
-          sink.add(entry);
-        }
-      },
-    )).listen((value) => add(AccountInfoEvent.update(value)));
-  }
+  AccountInfoBloc(this._nekotonService) : super(null);
 
   @override
   Future<void> close() {
-    _streamSubscription.cancel();
+    _errorsSubject.close();
+    _streamSubscription?.cancel();
     return super.close();
   }
 
   @override
-  Stream<AccountInfoState> mapEventToState(AccountInfoEvent event) async* {
-    yield* event.when(
-      update: (AssetsList account) async* {
-        try {
-          yield AccountInfoState.ready(account.name);
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield AccountInfoState.error(err.toString());
-        }
-      },
-    );
+  Stream<AccountInfoState?> mapEventToState(_Event event) async* {
+    try {
+      if (event is _Load) {
+        _streamSubscription?.cancel();
+        _streamSubscription = _nekotonService.accountsStream
+            .expand((e) => e)
+            .where((e) => e.address == event.address)
+            .listen((value) => add(_LocalEvent.update(value)));
+      } else if (event is _Update) {
+        yield AccountInfoState(event.account);
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
+    }
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
+}
+
+abstract class _Event {}
+
+@freezed
+class _LocalEvent extends _Event with _$_LocalEvent {
+  const factory _LocalEvent.update(AssetsList account) = _Update;
 }
 
 @freezed
-class AccountInfoEvent with _$AccountInfoEvent {
-  const factory AccountInfoEvent.update(AssetsList account) = _Update;
+class AccountInfoEvent extends _Event with _$AccountInfoEvent {
+  const factory AccountInfoEvent.load(String address) = _Load;
 }
 
 @freezed
 class AccountInfoState with _$AccountInfoState {
-  const factory AccountInfoState.ready(String name) = _Ready;
-
-  const factory AccountInfoState.error(String info) = _Error;
+  const factory AccountInfoState(AssetsList account) = _AccountInfoState;
 }

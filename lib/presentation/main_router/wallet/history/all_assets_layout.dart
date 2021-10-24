@@ -25,12 +25,18 @@ class AllAssetsLayout extends StatefulWidget {
 }
 
 class _AllAssetsLayoutState extends State<AllAssetsLayout> {
-  late final AssetsBloc bloc;
+  final bloc = getIt.get<AssetsBloc>();
 
   @override
   void initState() {
     super.initState();
-    bloc = getIt.get<AssetsBloc>(param1: widget.address);
+    bloc.add(AssetsEvent.load(widget.address));
+  }
+
+  @override
+  void didUpdateWidget(covariant AllAssetsLayout oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    bloc.add(AssetsEvent.load(widget.address));
   }
 
   @override
@@ -42,41 +48,39 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
   @override
   Widget build(BuildContext context) => BlocBuilder<AssetsBloc, AssetsState>(
         bloc: bloc,
-        builder: (context, state) => state.maybeWhen(
-          ready: (tonWallet, tokenWallets) => AnimatedSwitcher(
-            duration: kThemeAnimationDuration,
-            child: ListView(
-              physics: const ClampingScrollPhysics(),
-              padding: EdgeInsets.only(
-                bottom: context.safeArea.bottom + 12,
-              ),
-              controller: widget.controller,
-              children: [
-                TonWalletAssetHolder(
-                  key: ValueKey(tonWallet.address),
-                  address: tonWallet.address,
-                ),
-                ...tokenWallets
-                    .map((tokenWallet) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Container(
-                              height: 1,
-                              margin: const EdgeInsets.symmetric(horizontal: 16),
-                              color: CrystalColor.divider,
-                            ),
-                            TokenWalletAssetHolder(
-                              key: ValueKey('${tokenWallet.item1.owner}_${tokenWallet.item1.symbol.rootTokenContract}'),
-                              owner: tokenWallet.item1.owner,
-                              rootTokenContract: tokenWallet.item1.symbol.rootTokenContract,
-                            ),
-                          ],
-                        ))
-                    .toList(),
-              ],
+        builder: (context, state) => AnimatedSwitcher(
+          duration: kThemeAnimationDuration,
+          child: ListView(
+            physics: const ClampingScrollPhysics(),
+            padding: EdgeInsets.only(
+              bottom: context.safeArea.bottom + 12,
             ),
+            controller: widget.controller,
+            children: [
+              if (state.tonWallet != null)
+                TonWalletAssetHolder(
+                  address: state.tonWallet!.address,
+                ),
+              ...state.tokenWallets
+                  .map(
+                    (tokenWallet) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          height: 1,
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          color: CrystalColor.divider,
+                        ),
+                        TokenWalletAssetHolder(
+                          owner: tokenWallet.item1.owner,
+                          rootTokenContract: tokenWallet.item1.symbol.rootTokenContract,
+                        ),
+                      ],
+                    ),
+                  )
+                  .toList(),
+            ],
           ),
-          orElse: () => const SizedBox(),
         ),
       );
 }

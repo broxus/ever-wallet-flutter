@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../logger.dart';
 import '../repositories/biometry_repository.dart';
 import '../repositories/bookmarks_repository.dart';
 import '../repositories/ton_assets_repository.dart';
 import '../services/nekoton_service.dart';
-import 'common/notification_bloc.dart';
 
 part 'application_flow_bloc.freezed.dart';
 
@@ -19,8 +19,8 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
   final BiometryRepository _biometryRepository;
   final BookmarksRepository _bookmarksRepository;
   final TonAssetsRepository _tonAssetsRepository;
-  late final StreamSubscription _keysPresenceSubscription;
-  final notificationBloc = NotificationBloc();
+  final _errorsSubject = PublishSubject<String>();
+  late final StreamSubscription _streamSubscription;
 
   ApplicationFlowBloc(
     this._nekotonService,
@@ -28,61 +28,48 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
     this._bookmarksRepository,
     this._tonAssetsRepository,
   ) : super(const ApplicationFlowState.loading()) {
-    _keysPresenceSubscription = _nekotonService.keysPresenceStream
-        .listen((bool hasKeys) => add(_LocalEvent.updateApplicationState(hasKeys: hasKeys)));
+    _streamSubscription = _nekotonService.keysPresenceStream.listen((bool hasKeys) => add(_LocalEvent.update(hasKeys)));
   }
 
   @override
   Future<void> close() {
-    _keysPresenceSubscription.cancel();
+    _errorsSubject.close();
+    _streamSubscription.cancel();
     return super.close();
   }
 
   @override
   Stream<ApplicationFlowState> mapEventToState(_Event event) async* {
-    if (event is _LocalEvent) {
-      yield* event.when(
-        updateApplicationState: (bool hasKeys) async* {
-          try {
-            if (hasKeys) {
-              yield const ApplicationFlowState.home();
-            } else {
-              yield const ApplicationFlowState.welcome();
-            }
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            notificationBloc.add(NotificationEvent.showError(err.toString()));
-          }
-        },
-      );
-    }
+    try {
+      if (event is _Update) {
+        if (event.hasKeys) {
+          yield const ApplicationFlowState.home();
+        } else {
+          yield const ApplicationFlowState.welcome();
+        }
+      } else if (event is _LogOut) {
+        yield const ApplicationFlowState.loading();
 
-    if (event is ApplicationFlowEvent) {
-      yield* event.when(
-        logOut: () async* {
-          try {
-            yield const ApplicationFlowState.loading();
-
-            await _nekotonService.clearAccountsStorage();
-            await _nekotonService.clearKeystore();
-            await _biometryRepository.clear();
-            await _bookmarksRepository.clear();
-            await _tonAssetsRepository.clear();
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            notificationBloc.add(NotificationEvent.showError(err.toString()));
-          }
-        },
-      );
+        await _nekotonService.clearAccountsStorage();
+        await _nekotonService.clearKeystore();
+        await _biometryRepository.clear();
+        await _bookmarksRepository.clear();
+        await _tonAssetsRepository.clear();
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
     }
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}
 
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
-  const factory _LocalEvent.updateApplicationState({required bool hasKeys}) = _UpdateApplicationState;
+  const factory _LocalEvent.update(bool hasKeys) = _Update;
 }
 
 @freezed

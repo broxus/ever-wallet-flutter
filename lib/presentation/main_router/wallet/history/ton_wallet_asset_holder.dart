@@ -20,12 +20,18 @@ class TonWalletAssetHolder extends StatefulWidget {
 }
 
 class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
-  late final TonWalletInfoBloc bloc;
+  final bloc = getIt.get<TonWalletInfoBloc>();
 
   @override
   void initState() {
-    bloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
+    bloc.add(TonWalletInfoEvent.load(widget.address));
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant TonWalletAssetHolder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    bloc.add(TonWalletInfoEvent.load(widget.address));
   }
 
   @override
@@ -35,19 +41,18 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
+  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
         bloc: bloc,
-        builder: (context, state) => state.maybeWhen(
-          ready: (address, contractState, walletType, details, publicKey) => WalletAssetHolder(
-            name: 'TON',
-            balance: contractState.balance,
-            icon: Image.asset(Assets.images.ton.path),
-            onTap: () => TonAssetObserver.open(
-              context: context,
-              address: address,
-            ),
-          ),
-          orElse: () => const SizedBox(),
-        ),
+        builder: (context, state) => state != null
+            ? WalletAssetHolder(
+                name: 'TON',
+                balance: state.contractState.balance,
+                icon: Image.asset(Assets.images.ton.path),
+                onTap: () => TonAssetObserver.open(
+                  context: context,
+                  address: state.address,
+                ),
+              )
+            : const SizedBox(),
       );
 }

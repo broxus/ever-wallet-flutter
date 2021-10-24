@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/account/accounts_bloc.dart';
@@ -10,14 +11,12 @@ class WalletBody extends StatelessWidget {
   final List<AssetsList> accounts;
   final AssetsList? currentAccount;
   final PanelController modalController;
-  final AccountsBloc bloc;
 
   const WalletBody({
     Key? key,
     required this.accounts,
     required this.currentAccount,
     required this.modalController,
-    required this.bloc,
   }) : super(key: key);
 
   @override
@@ -53,10 +52,10 @@ class WalletBody extends StatelessWidget {
                     accounts: accounts,
                     onPageChanged: (i) {
                       if (i < accounts.length) {
-                        bloc.add(AccountsEvent.setCurrentAccount(accounts[i].address));
+                        context.read<AccountsBloc>().add(AccountsEvent.setCurrent(accounts[i].address));
                       } else {
                         modalController.hide();
-                        bloc.add(const AccountsEvent.setCurrentAccount(null));
+                        context.read<AccountsBloc>().add(const AccountsEvent.setCurrent(null));
                       }
                     },
                     onPageSelected: (i) {
@@ -69,11 +68,7 @@ class WalletBody extends StatelessWidget {
                   ),
                 ),
                 const CrystalDivider(height: 16),
-                if (currentAccount != null)
-                  ProfileActions(
-                    key: ValueKey(currentAccount!.address),
-                    address: currentAccount!.address,
-                  ),
+                if (currentAccount != null) ProfileActions(address: currentAccount!.address),
                 const CrystalDivider(height: 20),
               ],
             ),

@@ -1,12 +1,15 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:crystal/domain/blocs/account/account_creation_options_bloc.dart';
+import 'package:crystal/domain/blocs/key/keys_bloc.dart';
+import 'package:crystal/domain/constants/default_wallet_type.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../domain/blocs/account/account_creation_bloc.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/utils.dart';
@@ -14,43 +17,42 @@ import '../../../design/widget/crystal_scaffold.dart';
 import '../../../router.gr.dart';
 
 class NewAccountTypePage extends StatefulWidget {
-  final String publicKey;
-  final String accountName;
-
-  const NewAccountTypePage({
-    Key? key,
-    required this.publicKey,
-    required this.accountName,
-  }) : super(key: key);
-
   @override
   _NewAccountTypePageState createState() => _NewAccountTypePageState();
 }
 
 class _NewAccountTypePageState extends State<NewAccountTypePage> {
   final selectedWalletType = ValueNotifier<WalletType?>(null);
-  final AccountCreationBloc accountCreationBloc = getIt.get<AccountCreationBloc>();
+  final accountCreationOptionsBloc = getIt.get<AccountCreationOptionsBloc>();
 
   @override
   void initState() {
     super.initState();
-    accountCreationBloc.add(AccountCreationEvent.showOptions(widget.publicKey));
+
+    final publicKey = context.read<KeysBloc>().state.currentKey?.publicKey;
+
+    if (publicKey != null) {
+      accountCreationOptionsBloc.add(AccountCreationOptionsEvent.show(publicKey));
+    }
   }
 
   @override
   void dispose() {
     selectedWalletType.dispose();
-    accountCreationBloc.close();
+    accountCreationOptionsBloc.close();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => CrystalScaffold(
-        onScaffoldTap: FocusScope.of(context).unfocus,
-        headline: 'Select wallet type',
-        body: Padding(
-          padding: const EdgeInsets.only(top: 20),
-          child: buildBody(),
+  Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: CrystalScaffold(
+          onScaffoldTap: FocusScope.of(context).unfocus,
+          headline: 'Select wallet type',
+          body: Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: buildBody(),
+          ),
         ),
       );
 
@@ -60,32 +62,32 @@ class _NewAccountTypePageState extends State<NewAccountTypePage> {
         ),
         child: Stack(
           children: [
-            BlocConsumer<AccountCreationBloc, AccountCreationState>(
-              bloc: accountCreationBloc,
-              listener: (context, state) => state.maybeWhen(
-                options: (added, available) =>
-                    selectedWalletType.value = available.firstWhereOrNull((e) => !added.contains(e)),
-                orElse: () => null,
-              ),
-              builder: (context, state) => state.maybeWhen(
-                options: (added, available) => ListView.builder(
-                  itemCount: available.length,
-                  itemBuilder: (BuildContext context, int index) => ValueListenableBuilder<WalletType?>(
+            BlocConsumer<AccountCreationOptionsBloc, AccountCreationOptionsState>(
+              bloc: accountCreationOptionsBloc,
+              listener: (context, state) {
+                selectedWalletType.value = state.available.firstOrNull;
+              },
+              builder: (context, state) => ListView.builder(
+                itemCount: state.added.length + state.available.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final list = [...state.added, ...state.available]..sort((a, b) => a.toInt().compareTo(b.toInt()));
+
+                  return ValueListenableBuilder<WalletType?>(
                     valueListenable: selectedWalletType,
                     builder: (context, value, child) => Theme(
                       data: ThemeData(),
                       child: RadioListTile<WalletType>(
-                        value: available[index],
+                        value: list[index],
                         groupValue: value,
                         onChanged:
-                            !added.contains(available[index]) ? (value) => selectedWalletType.value = value : null,
+                            !state.added.contains(list[index]) ? (value) => selectedWalletType.value = value : null,
                         activeColor: CrystalColor.accent,
-                        title: Text('${available[index].describe()}${index == 0 ? ' (default)' : ""}'),
+                        title:
+                            Text('${list[index].describe()}${list[index] == kDefaultWalletType ? ' (default)' : ""}'),
                       ),
                     ),
-                  ),
-                ),
-                orElse: () => const SizedBox(),
+                  );
+                },
               ),
             ),
             Align(
@@ -120,12 +122,13 @@ class _NewAccountTypePageState extends State<NewAccountTypePage> {
       );
 
   void onConfirm(WalletType walletType) {
-    accountCreationBloc.add(AccountCreationEvent.createAccount(
-      name: widget.accountName,
-      publicKey: widget.publicKey,
-      walletType: walletType,
-    ));
+    final publicKey = context.read<KeysBloc>().state.currentKey?.publicKey;
 
-    context.router.navigate(const WalletRouterRoute());
+    if (publicKey != null) {
+      context.router.push(NewAccountNameRoute(
+        publicKey: publicKey,
+        walletType: walletType,
+      ));
+    }
   }
 }

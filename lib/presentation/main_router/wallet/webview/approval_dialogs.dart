@@ -58,7 +58,7 @@ Future<String?> showSendMessageDialog(
     final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
 
     if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-      biometryPasswordDataBloc.add(BiometryPasswordDataEvent.getKeyPassword(publicKey));
+      biometryPasswordDataBloc.add(BiometryPasswordDataEvent.get(publicKey));
 
       final readyState = await biometryPasswordDataBloc.stream.firstWhere((e) => e.maybeWhen(
             ready: (password) => true,
@@ -114,7 +114,7 @@ Future<String?> showCallContractMethodDialog(
     final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
 
     if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-      biometryPasswordDataBloc.add(BiometryPasswordDataEvent.getKeyPassword(selectedPublicKey));
+      biometryPasswordDataBloc.add(BiometryPasswordDataEvent.get(selectedPublicKey));
 
       final readyState = await biometryPasswordDataBloc.stream.firstWhere((e) => e.maybeWhen(
             ready: (password) => true,

@@ -36,14 +36,21 @@ class _WalletCardState extends State<WalletCard> {
   final menuController = SelectionController();
   final addressController = SelectionController();
   final publicKeyController = SelectionController();
-  late final TonWalletInfoBloc tonWalletInfoBloc;
-  late final AccountInfoBloc accountInfoBloc;
+  final tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>();
+  final accountInfoBloc = getIt.get<AccountInfoBloc>();
 
   @override
   void initState() {
     super.initState();
-    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
-    accountInfoBloc = getIt.get<AccountInfoBloc>(param1: widget.address);
+    tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
+    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
+  }
+
+  @override
+  void didUpdateWidget(covariant WalletCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
+    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
   }
 
   @override
@@ -107,23 +114,15 @@ class _WalletCardState extends State<WalletCard> {
                   ),
                 ),
               ),
-              BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
+              BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
                 bloc: tonWalletInfoBloc,
-                builder: (context, state) => state.maybeWhen(
-                  ready: (
-                    address,
-                    contractState,
-                    walletType,
-                    details,
-                    publicKey,
-                  ) =>
-                      Positioned(
-                    top: 8,
-                    right: 8,
-                    child: buildMoreButton(address: address),
-                  ),
-                  orElse: () => const SizedBox(),
-                ),
+                builder: (context, state) => state != null
+                    ? Positioned(
+                        top: 8,
+                        right: 8,
+                        child: buildMoreButton(address: state.address),
+                      )
+                    : const SizedBox(),
               ),
             ],
           ),
@@ -152,75 +151,70 @@ class _WalletCardState extends State<WalletCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BlocBuilder<AccountInfoBloc, AccountInfoState>(
+            BlocBuilder<AccountInfoBloc, AccountInfoState?>(
               bloc: accountInfoBloc,
-              builder: (context, state) => state.maybeWhen(
-                ready: (name) => AutoSizeText(
-                  name,
-                  maxLines: 1,
-                  maxFontSize: 16,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    letterSpacing: 0.75,
-                    color: CrystalColor.fontLight,
-                  ),
-                ),
-                orElse: () => const SizedBox(),
-              ),
+              builder: (context, state) => state != null
+                  ? AutoSizeText(
+                      state.account.name,
+                      maxLines: 1,
+                      maxFontSize: 16,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        letterSpacing: 0.75,
+                        color: CrystalColor.fontLight,
+                      ),
+                    )
+                  : const SizedBox(),
             ),
             const CrystalDivider(height: 8),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
+            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
               bloc: tonWalletInfoBloc,
-              builder: (context, state) => state.maybeWhen(
-                ready: (_, __, ___, ____, publicKey) => buildNamedField(
-                  controller: publicKeyController,
-                  name: LocaleKeys.fields_public_key.tr(),
-                  value: publicKey,
-                ),
-                orElse: () => buildNamedField(
-                  controller: publicKeyController,
-                  name: LocaleKeys.fields_public_key.tr(),
-                ),
-              ),
+              builder: (context, state) => state != null
+                  ? buildNamedField(
+                      controller: publicKeyController,
+                      name: LocaleKeys.fields_public_key.tr(),
+                      value: state.publicKey,
+                    )
+                  : buildNamedField(
+                      controller: publicKeyController,
+                      name: LocaleKeys.fields_public_key.tr(),
+                    ),
             ),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
+            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
               bloc: tonWalletInfoBloc,
-              builder: (context, state) => state.maybeWhen(
-                ready: (address, _, __, ___, ____) => buildNamedField(
-                  controller: addressController,
-                  name: LocaleKeys.fields_address.tr(),
-                  value: address,
-                ),
-                orElse: () => buildNamedField(
-                  controller: addressController,
-                  name: LocaleKeys.fields_address.tr(),
-                ),
-              ),
+              builder: (context, state) => state != null
+                  ? buildNamedField(
+                      controller: addressController,
+                      name: LocaleKeys.fields_address.tr(),
+                      value: state.address,
+                    )
+                  : buildNamedField(
+                      controller: addressController,
+                      name: LocaleKeys.fields_address.tr(),
+                    ),
             ),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
+            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
               bloc: tonWalletInfoBloc,
-              builder: (context, state) => state.maybeWhen(
-                ready: (_, __, walletType, ___, ____) => buildNamedField(
-                  name: LocaleKeys.fields_type.tr(),
-                  value: walletType.describe(),
-                  isSelectable: false,
-                ),
-                orElse: () => buildNamedField(
-                  name: LocaleKeys.fields_type.tr(),
-                  isSelectable: false,
-                ),
-              ),
+              builder: (context, state) => state != null
+                  ? buildNamedField(
+                      name: LocaleKeys.fields_type.tr(),
+                      value: state.walletType.describe(),
+                      isSelectable: false,
+                    )
+                  : buildNamedField(
+                      name: LocaleKeys.fields_type.tr(),
+                      isSelectable: false,
+                    ),
             ),
             const Spacer(),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
+            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
               bloc: tonWalletInfoBloc,
-              builder: (context, state) => state.maybeWhen(
-                ready: (_, contractState, __, ___, ____) => Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: buildBalance(contractState.balance),
-                ),
-                orElse: () => const SizedBox(),
-              ),
+              builder: (context, state) => state != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: buildBalance(state.contractState.balance),
+                    )
+                  : const SizedBox(),
             ),
           ],
         ),

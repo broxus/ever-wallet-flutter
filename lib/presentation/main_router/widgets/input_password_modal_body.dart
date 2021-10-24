@@ -1,5 +1,7 @@
+import 'package:crystal/domain/blocs/biometry/biometry_info_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/blocs/biometry/biometry_password_data_bloc.dart';
 import '../../../injection.dart';
@@ -33,8 +35,8 @@ class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
 
   @override
   void dispose() {
-    controller.dispose();
     bloc.close();
+    controller.dispose();
     super.dispose();
   }
 
@@ -60,11 +62,16 @@ class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
                 const CrystalDivider(height: 24),
               ],
               InputPasswordField(
-                onSubmit: (password) {
-                  bloc.add(BiometryPasswordDataEvent.setKeyPassword(
-                    publicKey: widget.publicKey,
-                    password: password,
-                  ));
+                onSubmit: (password) async {
+                  final biometryInfoBloc = context.read<BiometryInfoBloc>();
+
+                  if (biometryInfoBloc.state.isEnabled && biometryInfoBloc.state.isEnabled) {
+                    bloc.add(BiometryPasswordDataEvent.set(
+                      publicKey: widget.publicKey,
+                      password: password,
+                    ));
+                  }
+
                   widget.onSubmit(password);
                 },
                 publicKey: widget.publicKey,

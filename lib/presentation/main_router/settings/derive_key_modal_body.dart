@@ -48,7 +48,7 @@ class _DeriveKeyModalBodyState extends State<DeriveKeyModalBody> {
         ),
         child: InputPasswordModalBody(
           onSubmit: (password) => bloc.add(
-            KeyCreationEvent.deriveKey(
+            KeyCreationEvent.derive(
               name: widget.name,
               publicKey: widget.publicKey,
               password: password,

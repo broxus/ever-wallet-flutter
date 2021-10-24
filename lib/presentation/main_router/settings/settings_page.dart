@@ -41,12 +41,10 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final bloc = getIt.get<KeysBloc>();
   final scrollController = ScrollController();
 
   @override
   void dispose() {
-    bloc.close();
     scrollController.dispose();
     super.dispose();
   }
@@ -99,13 +97,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 padding: const EdgeInsets.only(bottom: 16),
                 controller: scrollController,
                 child: BlocBuilder<KeysBloc, KeysState>(
-                  bloc: bloc,
-                  builder: (context, state) => state.maybeWhen(
-                    ready: (keys, currentKey) => buildSettingsItemsList(
-                      keys: keys,
-                      currentKey: currentKey,
-                    ),
-                    orElse: () => const SizedBox(),
+                  bloc: context.watch<KeysBloc>(),
+                  builder: (context, state) => buildSettingsItemsList(
+                    keys: state.keys,
+                    currentKey: state.currentKey,
                   ),
                 ),
               ),
@@ -131,7 +126,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     context.router.push(const NewSeedRouterRoute());
                   },
                   onSelect: (seed) {
-                    bloc.add(KeysEvent.setCurrentKey(seed.publicKey));
+                    context.read<KeysBloc>().add(KeysEvent.setCurrent(seed.publicKey));
                   },
                   showAddAction: true,
                 ),
@@ -151,7 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         final keyExportBloc = getIt.get<KeyExportBloc>();
 
                         if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-                          biometryPasswordDataBloc.add(BiometryPasswordDataEvent.getKeyPassword(currentKey.publicKey));
+                          biometryPasswordDataBloc.add(BiometryPasswordDataEvent.get(currentKey.publicKey));
 
                           final state = await biometryPasswordDataBloc.stream.first;
 
@@ -161,7 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           );
 
                           if (password != null) {
-                            keyExportBloc.add(KeyExportEvent.exportKey(
+                            keyExportBloc.add(KeyExportEvent.export(
                               publicKey: currentKey.publicKey,
                               password: password,
                             ));
@@ -394,7 +389,7 @@ class _SettingsPageState extends State<SettingsPage> {
     bool isChild = false,
   }) {
     Widget? child;
-    final selected = seed == selectedSeed;
+    final selected = seed.publicKey == selectedSeed?.publicKey;
     if (selected) {
       child = const Icon(
         CupertinoIcons.checkmark_alt,

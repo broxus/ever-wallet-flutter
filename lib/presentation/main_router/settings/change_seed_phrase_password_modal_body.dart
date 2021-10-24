@@ -1,9 +1,9 @@
+import 'package:crystal/domain/blocs/key/key_password_checking_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:validators/validators.dart';
 
 import '../../../domain/blocs/biometry/biometry_password_data_bloc.dart';
-import '../../../domain/blocs/key/key_password_check_bloc.dart';
 import '../../../domain/blocs/key/key_update_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
@@ -23,7 +23,7 @@ class ChangeSeedPhrasePasswordModalBody extends StatefulWidget {
 class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePasswordModalBody> {
   final keyUpdateBloc = getIt.get<KeyUpdateBloc>();
   final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
-  final checkPasswordBloc = getIt.get<KeyPasswordCheckBloc>();
+  final checkPasswordBloc = getIt.get<KeyPasswordCheckingBloc>();
   final formKey = GlobalKey<FormState>();
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
@@ -57,20 +57,20 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
             },
             orElse: () => null,
           ),
-          child: BlocListener<KeyPasswordCheckBloc, KeyPasswordCheckState>(
+          child: BlocListener<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
             bloc: checkPasswordBloc,
             listener: (context, state) {
               state.maybeMap(
                 orElse: () => null,
-                ready: (ready) {
-                  if (ready.isCorrect) {
+                success: (success) {
+                  if (success.isCorrect) {
                     incorrectPasswordNotifier.value = false;
                     final newPassword = newPasswordController.text.trim();
 
                     if (formKey.currentState?.validate() ?? false) {
                       keyUpdateBloc.add(KeyUpdateEvent.changePassword(
                         publicKey: widget.publicKey,
-                        oldPassword: ready.password,
+                        oldPassword: oldPasswordController.text.trim(),
                         newPassword: newPassword,
                       ));
                     }
@@ -144,7 +144,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
               text: LocaleKeys.change_seed_password_modal_actions_submit.tr(),
               onTap: () {
                 final oldPassword = oldPasswordController.text.trim();
-                checkPasswordBloc.add(KeyPasswordCheckEvent.checkPassword(
+                checkPasswordBloc.add(KeyPasswordCheckingEvent.check(
                   publicKey: widget.publicKey,
                   password: oldPassword,
                 ));

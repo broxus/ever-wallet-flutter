@@ -106,7 +106,7 @@ class _TokenSendTransactionFlowState extends State<TokenSendTransactionFlow> {
                   final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
 
                   if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-                    biometryPasswordDataBloc.add(BiometryPasswordDataEvent.getKeyPassword(widget.ownerPublicKey));
+                    biometryPasswordDataBloc.add(BiometryPasswordDataEvent.get(widget.ownerPublicKey));
 
                     final state = await biometryPasswordDataBloc.stream.first;
 

@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
@@ -11,55 +12,54 @@ import '../../services/nekoton_service.dart';
 part 'key_info_bloc.freezed.dart';
 
 @injectable
-class KeyInfoBloc extends Bloc<KeyInfoEvent, KeyInfoState> {
+class KeyInfoBloc extends Bloc<_Event, KeyInfoState?> {
   final NekotonService _nekotonService;
-  final String? _publicKey;
-  late final StreamSubscription _streamSubscription;
+  final _errorsSubject = PublishSubject<String>();
+  StreamSubscription? _streamSubscription;
 
-  KeyInfoBloc(
-    this._nekotonService,
-    @factoryParam this._publicKey,
-  ) : super(KeyInfoState.ready(_nekotonService.keys.firstWhere((e) => e.publicKey == _publicKey!).name)) {
-    _streamSubscription = _nekotonService.keysStream.transform<KeyStoreEntry>(StreamTransformer.fromHandlers(
-      handleData: (data, sink) {
-        final entry = data.firstWhereOrNull((e) => e.publicKey == _publicKey!);
-
-        if (entry != null) {
-          sink.add(entry);
-        }
-      },
-    )).listen((value) => add(KeyInfoEvent.update(value)));
-  }
+  KeyInfoBloc(this._nekotonService) : super(null);
 
   @override
   Future<void> close() {
-    _streamSubscription.cancel();
+    _errorsSubject.close();
+    _streamSubscription?.cancel();
     return super.close();
   }
 
   @override
-  Stream<KeyInfoState> mapEventToState(KeyInfoEvent event) async* {
-    yield* event.when(
-      update: (KeyStoreEntry key) async* {
-        try {
-          yield KeyInfoState.ready(key.name);
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield KeyInfoState.error(err.toString());
-        }
-      },
-    );
+  Stream<KeyInfoState?> mapEventToState(_Event event) async* {
+    try {
+      if (event is _Load) {
+        _streamSubscription?.cancel();
+        _streamSubscription = _nekotonService.keysStream
+            .expand((e) => e)
+            .where((e) => e.publicKey == event.publicKey)
+            .listen((value) => add(_LocalEvent.update(value)));
+      } else if (event is _Update) {
+        yield KeyInfoState(event.key);
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
+    }
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
+}
+
+abstract class _Event {}
+
+@freezed
+class _LocalEvent extends _Event with _$_LocalEvent {
+  const factory _LocalEvent.update(KeyStoreEntry key) = _Update;
 }
 
 @freezed
-class KeyInfoEvent with _$KeyInfoEvent {
-  const factory KeyInfoEvent.update(KeyStoreEntry key) = _Update;
+class KeyInfoEvent extends _Event with _$KeyInfoEvent {
+  const factory KeyInfoEvent.load(String publicKey) = _Load;
 }
 
 @freezed
 class KeyInfoState with _$KeyInfoState {
-  const factory KeyInfoState.ready(String name) = _Ready;
-
-  const factory KeyInfoState.error(String info) = _Error;
+  const factory KeyInfoState(KeyStoreEntry key) = _KeyInfoState;
 }

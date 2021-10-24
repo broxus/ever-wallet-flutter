@@ -4,12 +4,12 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../constants/message_expiration.dart';
 import '../../services/nekoton_service.dart';
-import '../../utils/error_message.dart';
 import 'ton_wallet_deployment_fees_bloc.dart';
 
 part 'ton_wallet_deployment_bloc.freezed.dart';
@@ -17,6 +17,7 @@ part 'ton_wallet_deployment_bloc.freezed.dart';
 @injectable
 class TonWalletDeploymentBloc extends Bloc<TonWalletDeploymentEvent, TonWalletDeploymentState> {
   final NekotonService _nekotonService;
+  final _errorsSubject = PublishSubject<String>();
   final String? _address;
   UnsignedMessage? _message;
   late TonWalletDeploymentFeesBloc feesBloc;
@@ -30,45 +31,44 @@ class TonWalletDeploymentBloc extends Bloc<TonWalletDeploymentEvent, TonWalletDe
   }
 
   @override
+  Future<void> close() {
+    _errorsSubject.close();
+    return super.close();
+  }
+
+  @override
   Stream<TonWalletDeploymentState> mapEventToState(TonWalletDeploymentEvent event) async* {
-    yield* event.when(
-      prepareDeploy: () async* {
+    try {
+      if (event is _PrepareDeploy) {
         final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
 
-        try {
-          final contractState = await tonWallet.contractState;
-          final balance = contractState.balance;
-          yield TonWalletDeploymentState.initial(balance.toTokens());
-          _message = await tonWallet.prepareDeploy(defaultMessageExpiration);
-          feesBloc.add(TonWalletDeploymentFeesEvent.estimateFees(balance: balance, message: _message!));
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield TonWalletDeploymentState.error(err.getMessage());
-        }
-      },
-      deploy: (String password) async* {
-        try {
-          final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+        final contractState = await tonWallet.contractState;
+        final balance = contractState.balance;
+        yield TonWalletDeploymentState.initial(balance.toTokens());
+        _message = await tonWallet.prepareDeploy(defaultMessageExpiration);
+        feesBloc.add(TonWalletDeploymentFeesEvent.estimateFees(balance: balance, message: _message!));
+      } else if (event is _Deploy) {
+        final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
 
-          if (_message != null) {
-            yield const TonWalletDeploymentState.sending();
-            await tonWallet.send(
-              message: _message!,
-              password: password,
-            );
+        if (_message != null) {
+          yield const TonWalletDeploymentState.sending();
+          await tonWallet.send(
+            message: _message!,
+            password: event.password,
+          );
 
-            yield const TonWalletDeploymentState.success();
-          }
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield TonWalletDeploymentState.error(err.getMessage());
+          yield const TonWalletDeploymentState.success();
         }
-      },
-      goToPassword: () async* {
+      } else if (event is _GoToPassword) {
         yield const TonWalletDeploymentState.password();
-      },
-    );
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
+    }
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed

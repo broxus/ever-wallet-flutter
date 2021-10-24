@@ -28,27 +28,33 @@ class PreferencesBody extends StatefulWidget {
 }
 
 class _PreferencesBodyState extends State<PreferencesBody> {
-  final _textFocus = FocusNode();
-  final _scrollController = ScrollController();
+  final textFocus = FocusNode();
+  final scrollController = ScrollController();
   final accountRenamingBloc = getIt.get<AccountRenamingBloc>();
-  late final TextEditingController _textController;
-  late final TonWalletInfoBloc tonWalletInfoBloc;
-  late final AccountInfoBloc accountInfoBloc;
+  final textController = TextEditingController();
+  final tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>();
+  final accountInfoBloc = getIt.get<AccountInfoBloc>();
 
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController();
-    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
-    accountInfoBloc = getIt.get<AccountInfoBloc>(param1: widget.address);
+    tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
+    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
+  }
+
+  @override
+  void didUpdateWidget(covariant PreferencesBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
+    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
   }
 
   @override
   void dispose() {
-    _textFocus.unfocus();
-    _textFocus.dispose();
-    _textController.dispose();
-    _scrollController.dispose();
+    textFocus.unfocus();
+    textFocus.dispose();
+    textController.dispose();
+    scrollController.dispose();
     accountRenamingBloc.close();
     tonWalletInfoBloc.close();
     accountInfoBloc.close();
@@ -56,72 +62,70 @@ class _PreferencesBodyState extends State<PreferencesBody> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
+  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
         bloc: tonWalletInfoBloc,
-        builder: (context, state) => state.maybeWhen(
-          ready: (address, _, __, ___, ____) => GestureDetector(
-            onTap: _textFocus.unfocus,
-            child: FadingEdgeScrollView.fromScrollView(
-              child: ListView(
-                shrinkWrap: true,
-                controller: _scrollController,
-                padding: EdgeInsets.only(
-                  top: 24,
-                  bottom: math.max(16, context.safeArea.bottom),
-                ),
-                children: [
-                  getNameTextField(),
-                  const CrystalDivider(height: 24),
-                  AddressCard(address: address),
-                  const CrystalDivider(height: 24),
-                  CrystalButton(
-                    type: CrystalButtonType.outline,
-                    text: LocaleKeys.preferences_modal_actions_look_in_the_explorer.tr(),
-                    onTap: () => launch(getAccountExplorerLink(address)),
+        builder: (context, state) => state != null
+            ? GestureDetector(
+                onTap: textFocus.unfocus,
+                child: FadingEdgeScrollView.fromScrollView(
+                  child: ListView(
+                    shrinkWrap: true,
+                    controller: scrollController,
+                    padding: EdgeInsets.only(
+                      top: 24,
+                      bottom: math.max(16, context.safeArea.bottom),
+                    ),
+                    children: [
+                      getNameTextField(),
+                      const CrystalDivider(height: 24),
+                      AddressCard(address: state.address),
+                      const CrystalDivider(height: 24),
+                      CrystalButton(
+                        type: CrystalButtonType.outline,
+                        text: LocaleKeys.preferences_modal_actions_look_in_the_explorer.tr(),
+                        onTap: () => launch(getAccountExplorerLink(state.address)),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ),
-          orElse: () => const SizedBox(),
-        ),
+                ),
+              )
+            : const SizedBox(),
       );
 
-  Widget getNameTextField() => BlocConsumer<AccountInfoBloc, AccountInfoState>(
+  Widget getNameTextField() => BlocConsumer<AccountInfoBloc, AccountInfoState?>(
         bloc: accountInfoBloc,
         listener: (context, state) {
-          state.map(
-            ready: (_) => showCrystalFlushbar(
+          if (state != null && textController.text != state.account.name) {
+            showCrystalFlushbar(
               context,
               message: LocaleKeys.preferences_modal_message_renamed.tr(),
-            ),
-            error: (_) => showErrorCrystalFlushbar(
-              context,
-              message: LocaleKeys.preferences_modal_message_renaming_error.tr(),
-            ),
-          );
+            );
+          }
         },
-        builder: (context, state) => state.maybeWhen(
-          ready: (name) {
-            _textController.text = name;
-            _textController.selection = TextSelection.collapsed(offset: name.length);
+        builder: (context, state) {
+          if (state != null) {
+            textController.text = state.account.name;
+            textController.selection = TextSelection.collapsed(offset: state.account.name.length);
+
             return CrystalTextFormField(
-                controller: _textController,
-                focusNode: _textFocus,
-                hintText: '${LocaleKeys.wallet_screen_add_account_hint.tr()}…',
-                maxLength: 24,
-                formatters: [
-                  FilteringTextInputFormatter.allow(RegExp('[a-zA-Z -_]')),
-                  FilteringTextInputFormatter.deny('  ', replacementString: ' '),
-                ],
-                suffix: getSaveButton(name));
-          },
-          orElse: () => const SizedBox(),
-        ),
+              controller: textController,
+              focusNode: textFocus,
+              hintText: '${LocaleKeys.wallet_screen_add_account_hint.tr()}…',
+              maxLength: 24,
+              formatters: [
+                FilteringTextInputFormatter.allow(RegExp('[a-zA-Z -_]')),
+                FilteringTextInputFormatter.deny('  ', replacementString: ' '),
+              ],
+              suffix: getSaveButton(state.account.name),
+            );
+          } else {
+            return const SizedBox();
+          }
+        },
       );
 
   Widget getSaveButton(String name) => ValueListenableBuilder<TextEditingValue>(
-        valueListenable: _textController,
+        valueListenable: textController,
         builder: (context, value, child) => AnimatedSwitcher(
           duration: kThemeAnimationDuration,
           child: value.text.trim() != name

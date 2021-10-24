@@ -55,7 +55,7 @@ class _AccountRemovementBodyState extends State<AccountRemovementBody> {
                 const CrystalDivider(height: 24),
                 CrystalButton(
                   text: LocaleKeys.actions_remove_account.tr(),
-                  onTap: () => bloc.add(AccountRemovementEvent.removeAccount(widget.address)),
+                  onTap: () => bloc.add(AccountRemovementEvent.remove(widget.address)),
                 ),
                 const CrystalDivider(height: 24),
               ],

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -7,14 +9,14 @@ import 'package:rxdart/rxdart.dart';
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
 
-part 'key_export_bloc.freezed.dart';
+part 'key_password_checking_bloc.freezed.dart';
 
 @injectable
-class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
+class KeyPasswordCheckingBloc extends Bloc<KeyPasswordCheckingEvent, KeyPasswordCheckingState> {
   final NekotonService _nekotonService;
   final _errorsSubject = PublishSubject<String>();
 
-  KeyExportBloc(this._nekotonService) : super(const KeyExportState.initial());
+  KeyPasswordCheckingBloc(this._nekotonService) : super(const KeyPasswordCheckingState.initial());
 
   @override
   Future<void> close() {
@@ -23,15 +25,15 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
   }
 
   @override
-  Stream<KeyExportState> mapEventToState(KeyExportEvent event) async* {
+  Stream<KeyPasswordCheckingState> mapEventToState(KeyPasswordCheckingEvent event) async* {
     try {
-      if (event is _Export) {
+      if (event is _Check) {
         final key = _nekotonService.keys.firstWhere((e) => e.publicKey == event.publicKey);
 
-        late final ExportKeyInput exportKeyInput;
+        late final SignInput signInput;
 
         if (key.isLegacy) {
-          exportKeyInput = EncryptedKeyPassword(
+          signInput = EncryptedKeyPassword(
             publicKey: key.publicKey,
             password: Password.explicit(
               password: event.password,
@@ -39,8 +41,9 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
             ),
           );
         } else {
-          exportKeyInput = DerivedKeyExportParams(
+          signInput = DerivedKeySignParams.byAccountId(
             masterKey: key.masterKey,
+            accountId: key.accountId,
             password: Password.explicit(
               password: event.password,
               cacheBehavior: const PasswordCacheBehavior.remove(),
@@ -48,15 +51,9 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
           );
         }
 
-        final output = await _nekotonService.exportKey(exportKeyInput);
+        final isCorrect = await _nekotonService.checkKeyPassword(signInput);
 
-        if (output is EncryptedKeyExportOutput) {
-          yield KeyExportState.success(output.phrase.split(" "));
-        } else if (output is DerivedKeyExportOutput) {
-          yield KeyExportState.success(output.phrase.split(" "));
-        } else {
-          throw UnsupportedError("Operation is unsupported");
-        }
+        yield KeyPasswordCheckingState.success(isCorrect);
       }
     } catch (err, st) {
       logger.e(err, err, st);
@@ -68,16 +65,16 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
 }
 
 @freezed
-class KeyExportEvent with _$KeyExportEvent {
-  const factory KeyExportEvent.export({
+class KeyPasswordCheckingEvent with _$KeyPasswordCheckingEvent {
+  const factory KeyPasswordCheckingEvent.check({
     required String publicKey,
     required String password,
-  }) = _Export;
+  }) = _Check;
 }
 
 @freezed
-class KeyExportState with _$KeyExportState {
-  const factory KeyExportState.initial() = _Initial;
+class KeyPasswordCheckingState with _$KeyPasswordCheckingState {
+  const factory KeyPasswordCheckingState.initial() = _Initial;
 
-  const factory KeyExportState.success(List<String> phrase) = _Success;
+  const factory KeyPasswordCheckingState.success(bool isCorrect) = _Success;
 }

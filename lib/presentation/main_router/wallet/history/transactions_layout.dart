@@ -25,12 +25,18 @@ class TransactionsLayout extends StatefulWidget {
 }
 
 class _TransactionsLayoutState extends State<TransactionsLayout> {
-  late final TonWalletTransactionsBloc bloc;
+  final bloc = getIt.get<TonWalletTransactionsBloc>();
 
   @override
   void initState() {
     super.initState();
-    bloc = getIt.get<TonWalletTransactionsBloc>(param1: widget.address);
+    bloc.add(TonWalletTransactionsEvent.load(widget.address));
+  }
+
+  @override
+  void didUpdateWidget(covariant TransactionsLayout oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    bloc.add(TonWalletTransactionsEvent.load(widget.address));
   }
 
   @override
@@ -42,31 +48,28 @@ class _TransactionsLayoutState extends State<TransactionsLayout> {
   @override
   Widget build(BuildContext context) => BlocBuilder<TonWalletTransactionsBloc, TonWalletTransactionsState>(
         bloc: bloc,
-        builder: (context, state) => state.maybeWhen(
-          ready: (transactions) => AnimatedSwitcher(
-            duration: kThemeAnimationDuration,
-            child: transactions.isNotEmpty
-                ? PreloadTransactionsListener(
-                    prevTransactionId: transactions.lastOrNull?.prevTransactionId,
-                    onLoad: () => bloc.add(const TonWalletTransactionsEvent.preloadTransactions()),
-                    child: ListView.separated(
-                      padding: EdgeInsets.zero,
-                      controller: widget.controller,
-                      itemCount: transactions.length,
-                      separatorBuilder: (_, __) => Container(
-                        height: 1,
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        color: CrystalColor.divider,
-                      ),
-                      itemBuilder: (context, index) => WalletTransactionHolder(
-                        transaction: transactions[index],
-                        icon: Image.asset(Assets.images.ton.path),
-                      ),
+        builder: (context, state) => AnimatedSwitcher(
+          duration: kThemeAnimationDuration,
+          child: state.transactions.isNotEmpty
+              ? PreloadTransactionsListener(
+                  prevTransactionId: state.transactions.lastOrNull?.prevTransactionId,
+                  onLoad: () => bloc.add(const TonWalletTransactionsEvent.preload()),
+                  child: ListView.separated(
+                    padding: EdgeInsets.zero,
+                    controller: widget.controller,
+                    itemCount: state.transactions.length,
+                    separatorBuilder: (_, __) => Container(
+                      height: 1,
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      color: CrystalColor.divider,
                     ),
-                  )
-                : widget.placeholderBuilder(LocaleKeys.wallet_history_modal_placeholder_transactions_empty.tr()),
-          ),
-          orElse: () => const SizedBox(),
+                    itemBuilder: (context, index) => WalletTransactionHolder(
+                      transaction: state.transactions[index],
+                      icon: Image.asset(Assets.images.ton.path),
+                    ),
+                  ),
+                )
+              : widget.placeholderBuilder(LocaleKeys.wallet_history_modal_placeholder_transactions_empty.tr()),
         ),
       );
 }

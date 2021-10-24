@@ -47,8 +47,8 @@ import 'welcome_router/welcome_page.dart';
               name: 'NewAccountRouterRoute',
               page: EmptyRouterPage,
               children: [
-                AdaptiveRoute(page: NewAccountNamePage, initial: true),
-                AdaptiveRoute(page: NewAccountTypePage),
+                AdaptiveRoute(page: NewAccountTypePage, initial: true),
+                AdaptiveRoute(page: NewAccountNamePage),
               ],
             ),
           ],

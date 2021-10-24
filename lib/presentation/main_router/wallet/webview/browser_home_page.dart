@@ -197,7 +197,7 @@ class _BrowserHomePageState extends State<BrowserHomePage> {
             ),
             PlatformDialogAction(
               onPressed: () {
-                widget.bookmarksBloc.add(BookmarksEvent.removeBookmark(bookmark));
+                widget.bookmarksBloc.add(BookmarksEvent.remove(bookmark));
                 Navigator.of(context).pop();
               },
               cupertino: (context, platform) => CupertinoDialogActionData(

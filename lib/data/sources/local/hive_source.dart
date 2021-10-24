@@ -109,7 +109,7 @@ class HiveSource {
     await _walletsPasswordsBox.put(publicKey, password);
   }
 
-  Future<String?> getKeyPassword(String publicKey) async {
+  Future<String?> get(String publicKey) async {
     return _walletsPasswordsBox.get(publicKey);
   }
 

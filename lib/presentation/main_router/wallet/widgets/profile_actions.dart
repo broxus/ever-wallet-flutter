@@ -25,14 +25,21 @@ class ProfileActions extends StatefulWidget {
 }
 
 class _ProfileActionsState extends State<ProfileActions> {
-  late final TonWalletInfoBloc tonWalletInfoBloc;
-  late final AccountInfoBloc accountInfoBloc;
+  final tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>();
+  final accountInfoBloc = getIt.get<AccountInfoBloc>();
 
   @override
   void initState() {
     super.initState();
-    tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>(param1: widget.address);
-    accountInfoBloc = getIt.get<AccountInfoBloc>(param1: widget.address);
+    tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
+    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
+  }
+
+  @override
+  void didUpdateWidget(covariant ProfileActions oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
+    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
   }
 
   @override
@@ -63,67 +70,47 @@ class _ProfileActionsState extends State<ProfileActions> {
             title: LocaleKeys.wallet_screen_actions_add_asset.tr(),
             iconAsset: Assets.images.iconAdd.path,
           ),
-          BlocBuilder<AccountInfoBloc, AccountInfoState>(
+          BlocBuilder<AccountInfoBloc, AccountInfoState?>(
             bloc: accountInfoBloc,
-            builder: (context, state) => state.maybeWhen(
-              ready: (name) => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
-                bloc: tonWalletInfoBloc,
-                builder: (context, state) => state.maybeWhen(
-                  ready: (address, contractState, walletType, details, publicKey) => WalletButton(
-                    onTap: () {
-                      showCrystalBottomSheet(
+            builder: (context, state) => WalletButton(
+              onTap: state != null
+                  ? () => showCrystalBottomSheet(
                         context,
-                        title: name.capitalize,
+                        title: state.account.name.capitalize,
                         body: ReceiveModalBody(
-                          address: address,
+                          address: state.account.address,
                         ),
-                      );
-                    },
-                    title: LocaleKeys.actions_receive.tr(),
-                    iconAsset: Assets.images.iconReceive.path,
-                  ),
-                  orElse: () => WalletButton(
-                    title: LocaleKeys.actions_receive.tr(),
-                    iconAsset: Assets.images.iconReceive.path,
-                  ),
-                ),
-              ),
-              orElse: () => WalletButton(
-                title: LocaleKeys.actions_receive.tr(),
-                iconAsset: Assets.images.iconReceive.path,
-              ),
+                      )
+                  : null,
+              title: LocaleKeys.actions_receive.tr(),
+              iconAsset: Assets.images.iconReceive.path,
             ),
           ),
-          BlocBuilder<TonWalletInfoBloc, TonWalletInfoState>(
+          BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
             bloc: tonWalletInfoBloc,
-            builder: (context, state) => state.maybeWhen(
-              ready: (address, contractState, walletType, details, publicKey) =>
-                  !details.requiresSeparateDeploy || contractState.isDeployed
-                      ? WalletButton(
-                          onTap: () => SendTransactionFlow.start(
-                            context: context,
-                            address: address,
-                            publicKey: publicKey,
-                          ),
-                          title: LocaleKeys.actions_send.tr(),
-                          iconAsset: Assets.images.iconSend.path,
-                        )
-                      : WalletButton(
-                          onTap: () {
-                            DeployWalletFlow.start(
-                              context: context,
-                              address: address,
-                              publicKey: publicKey,
-                            );
-                          },
-                          title: LocaleKeys.actions_deploy.tr(),
-                          iconAsset: Assets.images.iconDeploy.path,
+            builder: (context, state) => state != null
+                ? !state.details.requiresSeparateDeploy || state.contractState.isDeployed
+                    ? WalletButton(
+                        onTap: () => SendTransactionFlow.start(
+                          context: context,
+                          address: state.address,
+                          publicKey: state.publicKey,
                         ),
-              orElse: () => WalletButton(
-                title: LocaleKeys.actions_deploy.tr(),
-                iconAsset: Assets.images.iconDeploy.path,
-              ),
-            ),
+                        title: LocaleKeys.actions_send.tr(),
+                        iconAsset: Assets.images.iconSend.path,
+                      )
+                    : WalletButton(
+                        onTap: () {
+                          DeployWalletFlow.start(
+                            context: context,
+                            address: state.address,
+                            publicKey: state.publicKey,
+                          );
+                        },
+                        title: LocaleKeys.actions_deploy.tr(),
+                        iconAsset: Assets.images.iconDeploy.path,
+                      )
+                : const SizedBox.square(dimension: 56),
           ),
         ],
       );

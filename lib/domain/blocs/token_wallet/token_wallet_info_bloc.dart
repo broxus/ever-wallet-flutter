@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../repositories/ton_assets_repository.dart';
@@ -12,119 +13,103 @@ import '../../services/nekoton_service.dart';
 part 'token_wallet_info_bloc.freezed.dart';
 
 @injectable
-class TokenWalletInfoBloc extends Bloc<TokenWalletInfoEvent, TokenWalletInfoState> {
+class TokenWalletInfoBloc extends Bloc<_Event, TokenWalletInfoState?> {
   final NekotonService _nekotonService;
   final TonAssetsRepository _tonAssetsRepository;
-  final String? _owner;
-  final String? _rootTokenContract;
+  final _errorsSubject = PublishSubject<String>();
+  StreamSubscription? _streamSubscription;
   StreamSubscription? _onBalanceChangedSubscription;
   StreamSubscription? _onTransactionsFoundSubscription;
-  String? _logoURI;
-  String? _balance;
-  ContractState? _contractState;
 
   TokenWalletInfoBloc(
     this._nekotonService,
     this._tonAssetsRepository,
-    @factoryParam this._owner,
-    @factoryParam this._rootTokenContract,
-  ) : super(const TokenWalletInfoState.initial()) {
-    _nekotonService.tokenWalletsStream
-        .expand((e) => e)
-        .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!)
-        .then((value) {
-      add(const TokenWalletInfoEvent.updateInfo());
-
-      _onBalanceChangedSubscription = value.onBalanceChangedStream.listen(
-        (String balance) => add(
-          TokenWalletInfoEvent.updateBalance(balance),
-        ),
-      );
-      _onTransactionsFoundSubscription = value.onTransactionsFoundStream.listen(
-        (List<TokenWalletTransactionWithData> transactions) {
-          if (transactions.isNotEmpty && transactions.last.transaction.prevTransactionId == null) {
-            add(const TokenWalletInfoEvent.updateInfo());
-          }
-        },
-      );
-    });
-  }
+  ) : super(null);
 
   @override
   Future<void> close() {
+    _errorsSubject.close();
+    _streamSubscription?.cancel();
     _onBalanceChangedSubscription?.cancel();
     _onTransactionsFoundSubscription?.cancel();
     return super.close();
   }
 
   @override
-  Stream<TokenWalletInfoState> mapEventToState(TokenWalletInfoEvent event) async* {
-    yield* event.when(
-      updateInfo: () async* {
-        try {
-          final tokenWallet = _nekotonService.tokenWallets
-              .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
+  Stream<TokenWalletInfoState?> mapEventToState(_Event event) async* {
+    try {
+      if (event is _Load) {
+        _streamSubscription?.cancel();
+        _onBalanceChangedSubscription?.cancel();
+        _onTransactionsFoundSubscription?.cancel();
+        _streamSubscription = _nekotonService.tokenWalletsStream
+            .expand((e) => e)
+            .where((e) => e.owner == event.owner && e.symbol.rootTokenContract == event.rootTokenContract)
+            .listen((tokenWalletEvent) {
+          _onBalanceChangedSubscription?.cancel();
+          _onBalanceChangedSubscription =
+              tokenWalletEvent.onBalanceChangedStream.listen((event) => add(_LocalEvent.update(
+                    tokenWallet: tokenWalletEvent,
+                    balance: event,
+                  )));
 
-          final balance = await tokenWallet.balance;
-          _balance = balance.toTokens(tokenWallet.symbol.decimals);
-          _contractState = await tokenWallet.contractState;
-          _logoURI ??= await _tonAssetsRepository.getTokenLogoUri(tokenWallet.symbol.rootTokenContract);
+          _onTransactionsFoundSubscription?.cancel();
+          _onTransactionsFoundSubscription = tokenWalletEvent.onTransactionsFoundStream
+              .expand((e) => e)
+              .map((e) => e.transaction)
+              .where((e) => e.prevTransactionId == null)
+              .listen((event) async => add(_LocalEvent.update(
+                    tokenWallet: tokenWalletEvent,
+                    balance: await tokenWalletEvent.balance,
+                  )));
+        });
+      } else if (event is _Update) {
+        final balance = event.balance.toTokens(event.tokenWallet.symbol.decimals);
+        final contractState = await event.tokenWallet.contractState;
+        final logoURI =
+            state?.logoURI ?? await _tonAssetsRepository.getTokenLogoUri(event.tokenWallet.symbol.rootTokenContract);
 
-          yield TokenWalletInfoState.ready(
-            logoURI: _logoURI,
-            address: tokenWallet.address,
-            balance: _balance!,
-            contractState: _contractState!,
-            owner: tokenWallet.owner,
-            symbol: tokenWallet.symbol,
-            version: tokenWallet.version,
-            ownerPublicKey: tokenWallet.ownerPublicKey,
-          );
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield TokenWalletInfoState.error(err.toString());
-        }
-      },
-      updateBalance: (String balance) async* {
-        try {
-          final tokenWallet = _nekotonService.tokenWallets
-              .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
-
-          _balance = balance.toTokens(tokenWallet.symbol.decimals);
-          _contractState ??= await tokenWallet.contractState;
-          _logoURI ??= await _tonAssetsRepository.getTokenLogoUri(tokenWallet.symbol.rootTokenContract);
-
-          yield TokenWalletInfoState.ready(
-            logoURI: _logoURI,
-            address: tokenWallet.address,
-            balance: _balance!,
-            contractState: _contractState!,
-            owner: tokenWallet.owner,
-            symbol: tokenWallet.symbol,
-            version: tokenWallet.version,
-            ownerPublicKey: tokenWallet.ownerPublicKey,
-          );
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield TokenWalletInfoState.error(err.toString());
-        }
-      },
-    );
+        yield TokenWalletInfoState(
+          logoURI: logoURI,
+          address: event.tokenWallet.address,
+          balance: balance,
+          contractState: contractState,
+          owner: event.tokenWallet.owner,
+          symbol: event.tokenWallet.symbol,
+          version: event.tokenWallet.version,
+          ownerPublicKey: event.tokenWallet.ownerPublicKey,
+        );
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err.toString());
+    }
   }
+
+  Stream<String> get errorsStream => _errorsSubject.stream;
+}
+
+abstract class _Event {}
+
+@freezed
+class _LocalEvent extends _Event with _$_LocalEvent {
+  const factory _LocalEvent.update({
+    required TokenWallet tokenWallet,
+    required String balance,
+  }) = _Update;
 }
 
 @freezed
-class TokenWalletInfoEvent with _$TokenWalletInfoEvent {
-  const factory TokenWalletInfoEvent.updateInfo() = _UpdateInfo;
-
-  const factory TokenWalletInfoEvent.updateBalance(String balance) = _UpdateBalance;
+class TokenWalletInfoEvent extends _Event with _$TokenWalletInfoEvent {
+  const factory TokenWalletInfoEvent.load({
+    required String owner,
+    required String rootTokenContract,
+  }) = _Load;
 }
 
 @freezed
 class TokenWalletInfoState with _$TokenWalletInfoState {
-  const factory TokenWalletInfoState.initial() = _Initial;
-
-  const factory TokenWalletInfoState.ready({
+  const factory TokenWalletInfoState({
     String? logoURI,
     required String address,
     required String balance,
@@ -133,7 +118,5 @@ class TokenWalletInfoState with _$TokenWalletInfoState {
     required Symbol symbol,
     required TokenWalletVersion version,
     required String ownerPublicKey,
-  }) = _Ready;
-
-  const factory TokenWalletInfoState.error(String info) = _Error;
+  }) = _TokenWalletInfoState;
 }

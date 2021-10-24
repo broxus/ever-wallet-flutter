@@ -6,19 +6,23 @@ class LocalAuthSource {
   final _localAuth = LocalAuthentication();
 
   Future<bool> get isBiometryAvailable async {
-    final isSupported = await _localAuth.isDeviceSupported();
-
-    if (!isSupported) {
+    if (!await _localAuth.canCheckBiometrics || !await _localAuth.isDeviceSupported()) {
       return false;
     }
 
     final available = await _localAuth.getAvailableBiometrics();
 
-    return available.isNotEmpty;
+    return available.contains(BiometricType.fingerprint) || available.contains(BiometricType.face);
   }
 
-  Future<bool> authenticate(String localizedReason) => _localAuth.authenticate(
+  Future<bool> authenticate(String localizedReason) async {
+    if (await isBiometryAvailable) {
+      return _localAuth.authenticate(
         localizedReason: localizedReason,
         biometricOnly: true,
       );
+    } else {
+      throw Exception();
+    }
+  }
 }

@@ -49,20 +49,33 @@ class TokenAssetObserver extends StatefulWidget {
 
 class _TokenAssetObserverState extends State<TokenAssetObserver> {
   final _historyScrollController = ScrollController();
-  late final TokenWalletInfoBloc tokenWalletInfoBloc;
-  late final TokenWalletTransactionsBloc tokenWalletTransactionsBloc;
+  final tokenWalletInfoBloc = getIt.get<TokenWalletInfoBloc>();
+  final tokenWalletTransactionsBloc = getIt.get<TokenWalletTransactionsBloc>();
 
   @override
   void initState() {
     super.initState();
-    tokenWalletInfoBloc = getIt.get<TokenWalletInfoBloc>(
-      param1: widget.owner,
-      param2: widget.rootTokenContract,
-    );
-    tokenWalletTransactionsBloc = getIt.get<TokenWalletTransactionsBloc>(
-      param1: widget.owner,
-      param2: widget.rootTokenContract,
-    );
+    tokenWalletInfoBloc.add(TokenWalletInfoEvent.load(
+      owner: widget.owner,
+      rootTokenContract: widget.rootTokenContract,
+    ));
+    tokenWalletTransactionsBloc.add(TokenWalletTransactionsEvent.load(
+      owner: widget.owner,
+      rootTokenContract: widget.rootTokenContract,
+    ));
+  }
+
+  @override
+  void didUpdateWidget(covariant TokenAssetObserver oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    tokenWalletInfoBloc.add(TokenWalletInfoEvent.load(
+      owner: widget.owner,
+      rootTokenContract: widget.rootTokenContract,
+    ));
+    tokenWalletTransactionsBloc.add(TokenWalletTransactionsEvent.load(
+      owner: widget.owner,
+      rootTokenContract: widget.rootTokenContract,
+    ));
   }
 
   @override
@@ -74,30 +87,29 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfoState>(
+  Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfoState?>(
         bloc: tokenWalletInfoBloc,
-        builder: (context, state) => state.maybeWhen(
-          ready: (logoURI, address, balance, contractState, owner, symbol, version, ownerPublicKey) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _header(
-                logoURI: logoURI,
-                owner: owner,
-                balance: balance,
-                contractState: contractState,
-                symbol: symbol,
-                ownerPublicKey: ownerPublicKey,
-              ),
-              Flexible(
-                child: _history(
-                  symbol: symbol,
-                ),
-              ),
-            ],
-          ),
-          orElse: () => const SizedBox(),
-        ),
+        builder: (context, state) => state != null
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _header(
+                    logoURI: state.logoURI,
+                    owner: state.owner,
+                    balance: state.balance,
+                    contractState: state.contractState,
+                    symbol: state.symbol,
+                    ownerPublicKey: state.ownerPublicKey,
+                  ),
+                  Flexible(
+                    child: _history(
+                      symbol: state.symbol,
+                    ),
+                  ),
+                ],
+              )
+            : const SizedBox(),
       );
 
   Widget _header({
@@ -218,64 +230,60 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
   }) =>
       BlocBuilder<TokenWalletTransactionsBloc, TokenWalletTransactionsState>(
         bloc: tokenWalletTransactionsBloc,
-        builder: (context, state) => state.maybeWhen(
-          ready: (transactions) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
+        builder: (context, state) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Text(
+                    LocaleKeys.fields_history.tr(),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                      color: CrystalColor.fontDark,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (state.transactions.isEmpty)
                     Text(
-                      LocaleKeys.fields_history.tr(),
+                      LocaleKeys.wallet_history_modal_placeholder_transactions_empty.tr(),
                       style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                        color: CrystalColor.fontDark,
+                        fontSize: 16,
+                        color: CrystalColor.fontSecondaryDark,
                       ),
                     ),
-                    const Spacer(),
-                    if (transactions.isEmpty)
-                      Text(
-                        LocaleKeys.wallet_history_modal_placeholder_transactions_empty.tr(),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: CrystalColor.fontSecondaryDark,
-                        ),
-                      ),
-                  ],
-                ),
+                ],
               ),
-              const Divider(height: 1, thickness: 1),
-              Flexible(
-                child: RawScrollbar(
-                  thickness: 4,
-                  thumbColor: CrystalColor.secondary,
-                  radius: const Radius.circular(8),
-                  controller: _historyScrollController,
-                  child: PreloadTransactionsListener(
-                    prevTransactionId: transactions.lastOrNull?.prevTransactionId,
-                    onLoad: () =>
-                        tokenWalletTransactionsBloc.add(const TokenWalletTransactionsEvent.preloadTransactions()),
-                    child: FadingEdgeScrollView.fromScrollView(
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        controller: _historyScrollController,
-                        itemBuilder: (context, index) => WalletTransactionHolder(
-                          transaction: transactions[index],
-                        ),
-                        separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
-                        itemCount: transactions.length,
+            ),
+            const Divider(height: 1, thickness: 1),
+            Flexible(
+              child: RawScrollbar(
+                thickness: 4,
+                thumbColor: CrystalColor.secondary,
+                radius: const Radius.circular(8),
+                controller: _historyScrollController,
+                child: PreloadTransactionsListener(
+                  prevTransactionId: state.transactions.lastOrNull?.prevTransactionId,
+                  onLoad: () => tokenWalletTransactionsBloc.add(const TokenWalletTransactionsEvent.preload()),
+                  child: FadingEdgeScrollView.fromScrollView(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      controller: _historyScrollController,
+                      itemBuilder: (context, index) => WalletTransactionHolder(
+                        transaction: state.transactions[index],
                       ),
+                      separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
+                      itemCount: state.transactions.length,
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
-          orElse: () => const SizedBox(),
+            ),
+          ],
         ),
       );
 
