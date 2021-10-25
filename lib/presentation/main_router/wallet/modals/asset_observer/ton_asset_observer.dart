@@ -58,8 +58,10 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
   @override
   void didUpdateWidget(covariant TonAssetObserver oldWidget) {
     super.didUpdateWidget(oldWidget);
-    tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
-    tonWalletTransactionsBloc.add(TonWalletTransactionsEvent.load(widget.address));
+    if (oldWidget.address != widget.address) {
+      tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
+      tonWalletTransactionsBloc.add(TonWalletTransactionsEvent.load(widget.address));
+    }
   }
 
   @override

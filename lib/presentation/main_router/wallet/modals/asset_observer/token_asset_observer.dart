@@ -68,14 +68,16 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
   @override
   void didUpdateWidget(covariant TokenAssetObserver oldWidget) {
     super.didUpdateWidget(oldWidget);
-    tokenWalletInfoBloc.add(TokenWalletInfoEvent.load(
-      owner: widget.owner,
-      rootTokenContract: widget.rootTokenContract,
-    ));
-    tokenWalletTransactionsBloc.add(TokenWalletTransactionsEvent.load(
-      owner: widget.owner,
-      rootTokenContract: widget.rootTokenContract,
-    ));
+    if (oldWidget.owner != widget.owner || oldWidget.rootTokenContract != widget.rootTokenContract) {
+      tokenWalletInfoBloc.add(TokenWalletInfoEvent.load(
+        owner: widget.owner,
+        rootTokenContract: widget.rootTokenContract,
+      ));
+      tokenWalletTransactionsBloc.add(TokenWalletTransactionsEvent.load(
+        owner: widget.owner,
+        rootTokenContract: widget.rootTokenContract,
+      ));
+    }
   }
 
   @override

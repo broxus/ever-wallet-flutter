@@ -87,7 +87,7 @@ class _WalletModalBodyState extends State<WalletModalBody> {
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),

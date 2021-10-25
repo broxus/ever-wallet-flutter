@@ -36,10 +36,12 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
   @override
   void didUpdateWidget(covariant TokenWalletAssetHolder oldWidget) {
     super.didUpdateWidget(oldWidget);
-    bloc.add(TokenWalletInfoEvent.load(
-      owner: widget.owner,
-      rootTokenContract: widget.rootTokenContract,
-    ));
+    if (oldWidget.owner != widget.owner || oldWidget.rootTokenContract != widget.rootTokenContract) {
+      bloc.add(TokenWalletInfoEvent.load(
+        owner: widget.owner,
+        rootTokenContract: widget.rootTokenContract,
+      ));
+    }
   }
 
   @override

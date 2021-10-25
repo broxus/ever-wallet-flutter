@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:crystal/domain/blocs/account/account_assets_addition_bloc.dart';
-import 'package:crystal/domain/blocs/account/account_assets_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../domain/models/token_contract_asset.dart';
 import '../../../../../injection.dart';
@@ -24,39 +22,24 @@ class AddAssetModal extends StatefulWidget {
 }
 
 class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateMixin {
-  final accountAssetsBloc = getIt.get<AccountAssetsBloc>();
   final accountAssetsAdditionBloc = getIt.get<AccountAssetsAdditionBloc>();
-  final assets = ValueNotifier<Set<String>>({});
   final newAssetLayoutScrollController = ScrollController();
   final selectAssetsLayoutScrollController = ScrollController();
   late final tabController = TabController(length: 2, vsync: this);
-  late final StreamSubscription accountAssetsErrorsSubscription;
   late final StreamSubscription accountAssetsAdditionErrorsSubscription;
 
   @override
   void initState() {
     super.initState();
-    accountAssetsErrorsSubscription =
-        accountAssetsBloc.errorsStream.listen((event) => showErrorCrystalFlushbar(context, message: event));
-    accountAssetsAdditionErrorsSubscription =
-        accountAssetsAdditionBloc.errorsStream.listen((event) => showErrorCrystalFlushbar(context, message: event));
-    accountAssetsBloc.add(AccountAssetsEvent.load(widget.address));
-  }
-
-  @override
-  void didUpdateWidget(covariant AddAssetModal oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    accountAssetsBloc.add(AccountAssetsEvent.load(widget.address));
+    accountAssetsAdditionErrorsSubscription = accountAssetsAdditionBloc.errorsStream
+        .listen((event) => showErrorCrystalFlushbar(context, message: "Invalid root token contract"));
   }
 
   @override
   void dispose() {
-    accountAssetsBloc.close();
     accountAssetsAdditionBloc.close();
     selectAssetsLayoutScrollController.dispose();
     newAssetLayoutScrollController.dispose();
-    assets.dispose();
-    accountAssetsErrorsSubscription.cancel();
     accountAssetsAdditionErrorsSubscription.cancel();
     super.dispose();
   }
@@ -129,40 +112,43 @@ class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateM
       );
 
   Widget _layout() => LayoutBuilder(
-        builder: (context, constraints) => BlocBuilder<AccountAssetsBloc, AccountAssetsState>(
-          bloc: accountAssetsBloc,
-          builder: (context, state) => TabBarView(
-            controller: tabController,
-            children: [
-              AssetsLayout(
-                controller: selectAssetsLayoutScrollController,
-                added: state.added,
-                available: state.available,
-                onSave: (List<TokenContractAsset> assets) {
-                  for (final asset in assets) {
-                    accountAssetsAdditionBloc.add(AccountAssetsAdditionEvent.add(
-                      address: widget.address,
-                      rootTokenContract: asset.address,
-                    ));
-                  }
-                },
-              ),
-              NewAssetLayout(
-                controller: newAssetLayoutScrollController,
-                onSave: (String address) => accountAssetsAdditionBloc.add(AccountAssetsAdditionEvent.add(
-                  address: widget.address,
-                  rootTokenContract: address,
-                )),
-              ),
-            ]
-                .map(
-                  (e) => Padding(
-                    padding: context.keyboardInsets,
-                    child: KeepAliveWidget(child: e),
-                  ),
-                )
-                .toList(),
-          ),
+        builder: (context, constraints) => TabBarView(
+          controller: tabController,
+          children: [
+            AssetsLayout(
+              controller: selectAssetsLayoutScrollController,
+              address: widget.address,
+              onSave: (List<TokenContractAsset> added, List<TokenContractAsset> removed) {
+                for (final asset in added) {
+                  accountAssetsAdditionBloc.add(AccountAssetsAdditionEvent.add(
+                    address: widget.address,
+                    rootTokenContract: asset.address,
+                  ));
+                }
+
+                for (final asset in removed) {
+                  accountAssetsAdditionBloc.add(AccountAssetsAdditionEvent.remove(
+                    address: widget.address,
+                    rootTokenContract: asset.address,
+                  ));
+                }
+              },
+            ),
+            NewAssetLayout(
+              controller: newAssetLayoutScrollController,
+              onSave: (String address) => accountAssetsAdditionBloc.add(AccountAssetsAdditionEvent.add(
+                address: widget.address,
+                rootTokenContract: address,
+              )),
+            ),
+          ]
+              .map(
+                (e) => Padding(
+                  padding: context.keyboardInsets,
+                  child: KeepAliveWidget(child: e),
+                ),
+              )
+              .toList(),
         ),
       );
 }

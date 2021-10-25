@@ -36,7 +36,9 @@ class _TransactionsLayoutState extends State<TransactionsLayout> {
   @override
   void didUpdateWidget(covariant TransactionsLayout oldWidget) {
     super.didUpdateWidget(oldWidget);
-    bloc.add(TonWalletTransactionsEvent.load(widget.address));
+    if (oldWidget.address != widget.address) {
+      bloc.add(TonWalletTransactionsEvent.load(widget.address));
+    }
   }
 
   @override

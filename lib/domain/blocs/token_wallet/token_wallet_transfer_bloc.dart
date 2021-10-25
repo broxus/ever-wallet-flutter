@@ -8,7 +8,6 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../injection.dart';
 import '../../../logger.dart';
-import '../../constants/message_expiration.dart';
 import '../../services/nekoton_service.dart';
 import 'token_wallet_fees_bloc.dart';
 
@@ -62,7 +61,7 @@ class TokenWalletTransferBloc extends Bloc<_Event, TokenWalletTransferState> {
         final nanoTokens = event.tokens.fromTokens(decimals);
 
         _message = await tokenWallet.prepareTransfer(
-          expiration: defaultMessageExpiration,
+          expiration: kDefaultMessageExpiration,
           destination: repackedDestination,
           tokens: nanoTokens,
           notifyReceiver: event.notifyReceiver,

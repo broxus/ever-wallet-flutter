@@ -184,7 +184,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
           ),
           itemBuilder: (context) => [
             if (widget.currentAccount != null) ...[
-              buildPopupAccountMenuItem(0),
+              buildPopupAccountMenuItem(value: 0, currentAccount: widget.currentAccount!),
               const PopupMenuDivider(),
             ],
             buildPopupMenuItem(
@@ -203,13 +203,17 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
         ),
       );
 
-  PopupMenuEntry<int> buildPopupAccountMenuItem(int value) => PopupMenuItem<int>(
+  PopupMenuEntry<int> buildPopupAccountMenuItem({
+    required int value,
+    required AssetsList currentAccount,
+  }) =>
+      PopupMenuItem<int>(
         value: 0,
         child: Row(
           children: [
             SizedBox.square(
               dimension: 24,
-              child: getGravatarIcon(widget.currentAccount!.address.hashCode),
+              child: getGravatarIcon(currentAccount.address.hashCode),
             ),
             const SizedBox(
               width: 8,
@@ -218,7 +222,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  LocaleKeys.browser_account.tr(),
+                  currentAccount.name,
                   style: const TextStyle(color: Colors.black),
                 ),
                 Text(
@@ -226,6 +230,18 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
                   style: const TextStyle(color: Colors.grey),
                 ),
               ],
+            ),
+            const Spacer(),
+            const SizedBox(
+              height: 20,
+              width: 20,
+              child: Center(
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  color: CrystalColor.icon,
+                  size: 14,
+                ),
+              ),
             ),
           ],
         ),

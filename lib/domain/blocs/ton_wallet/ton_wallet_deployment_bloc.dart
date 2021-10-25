@@ -8,7 +8,6 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../injection.dart';
 import '../../../logger.dart';
-import '../../constants/message_expiration.dart';
 import '../../services/nekoton_service.dart';
 import 'ton_wallet_deployment_fees_bloc.dart';
 
@@ -45,7 +44,7 @@ class TonWalletDeploymentBloc extends Bloc<TonWalletDeploymentEvent, TonWalletDe
         final contractState = await tonWallet.contractState;
         final balance = contractState.balance;
         yield TonWalletDeploymentState.initial(balance.toTokens());
-        _message = await tonWallet.prepareDeploy(defaultMessageExpiration);
+        _message = await tonWallet.prepareDeploy(kDefaultMessageExpiration);
         feesBloc.add(TonWalletDeploymentFeesEvent.estimateFees(balance: balance, message: _message!));
       } else if (event is _Deploy) {
         final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);

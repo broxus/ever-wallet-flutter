@@ -45,8 +45,10 @@ class _PreferencesBodyState extends State<PreferencesBody> {
   @override
   void didUpdateWidget(covariant PreferencesBody oldWidget) {
     super.didUpdateWidget(oldWidget);
-    tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
-    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
+    if (oldWidget.address != widget.address) {
+      tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
+      accountInfoBloc.add(AccountInfoEvent.load(widget.address));
+    }
   }
 
   @override

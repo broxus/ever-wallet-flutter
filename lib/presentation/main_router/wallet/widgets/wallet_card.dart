@@ -49,8 +49,10 @@ class _WalletCardState extends State<WalletCard> {
   @override
   void didUpdateWidget(covariant WalletCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
-    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
+    if (oldWidget.address != widget.address) {
+      tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
+      accountInfoBloc.add(AccountInfoEvent.load(widget.address));
+    }
   }
 
   @override

@@ -36,7 +36,9 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
   @override
   void didUpdateWidget(covariant AllAssetsLayout oldWidget) {
     super.didUpdateWidget(oldWidget);
-    bloc.add(AssetsEvent.load(widget.address));
+    if (oldWidget.address != widget.address) {
+      bloc.add(AssetsEvent.load(widget.address));
+    }
   }
 
   @override
@@ -48,39 +50,37 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
   @override
   Widget build(BuildContext context) => BlocBuilder<AssetsBloc, AssetsState>(
         bloc: bloc,
-        builder: (context, state) => AnimatedSwitcher(
-          duration: kThemeAnimationDuration,
-          child: ListView(
-            physics: const ClampingScrollPhysics(),
-            padding: EdgeInsets.only(
-              bottom: context.safeArea.bottom + 12,
+        builder: (context, state) {
+          final list = [
+            if (state.tonWallet != null)
+              TonWalletAssetHolder(
+                key: ValueKey(state.tonWallet),
+                address: state.tonWallet!.address,
+              ),
+            ...state.tokenWallets
+                .map((tokenWallet) => TokenWalletAssetHolder(
+                      key: ValueKey(tokenWallet),
+                      owner: tokenWallet.item1.owner,
+                      rootTokenContract: tokenWallet.item1.symbol.rootTokenContract,
+                    ))
+                .toList(),
+          ];
+
+          return AnimatedSwitcher(
+            duration: kThemeAnimationDuration,
+            child: ListView.separated(
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              controller: widget.controller,
+              itemCount: list.length,
+              separatorBuilder: (_, __) => Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                color: CrystalColor.divider,
+              ),
+              itemBuilder: (context, index) => list[index],
             ),
-            controller: widget.controller,
-            children: [
-              if (state.tonWallet != null)
-                TonWalletAssetHolder(
-                  address: state.tonWallet!.address,
-                ),
-              ...state.tokenWallets
-                  .map(
-                    (tokenWallet) => Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Container(
-                          height: 1,
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
-                          color: CrystalColor.divider,
-                        ),
-                        TokenWalletAssetHolder(
-                          owner: tokenWallet.item1.owner,
-                          rootTokenContract: tokenWallet.item1.symbol.rootTokenContract,
-                        ),
-                      ],
-                    ),
-                  )
-                  .toList(),
-            ],
-          ),
-        ),
+          );
+        },
       );
 }

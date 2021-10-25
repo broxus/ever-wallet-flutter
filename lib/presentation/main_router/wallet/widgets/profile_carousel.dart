@@ -107,7 +107,10 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 3.5),
                     child: index < widget.accounts.length
-                        ? WalletCard(address: widget.accounts[index].address)
+                        ? WalletCard(
+                            key: ValueKey(widget.accounts[index].address),
+                            address: widget.accounts[index].address,
+                          )
                         : NewAccountCard(),
                   ),
                 ),

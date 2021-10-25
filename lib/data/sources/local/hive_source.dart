@@ -17,6 +17,23 @@ class HiveSource {
   late final Box<BookmarkDto> _bookmarksBox;
   late final Box<Object?> _biometryPreferencesBox;
   late final Box<String> _walletsPasswordsBox;
+  static const _bookmarksPreset = [
+    BookmarkDto(
+      url: "https://wton.io/",
+      title: "WTON",
+      icon: "https://wton.io/favicon.ico",
+    ),
+    BookmarkDto(
+      url: "https://tonswap.io/swap",
+      title: "TON Swap",
+      icon: "https://tonswap.io/favicon.svg",
+    ),
+    BookmarkDto(
+      url: "https://tonscan.io/",
+      title: "Free TON Blockchain Explorer",
+      icon: "https://tonscan.io/assets/favicon/favicon-32x32.png",
+    ),
+  ];
 
   @factoryMethod
   static Future<HiveSource> create() async {
@@ -32,13 +49,21 @@ class HiveSource {
 
     hiveSource._key = hiveAesCipherKey;
 
+    final bookmarksBoxExists = await Hive.boxExists("bookmarks");
+
     hiveSource._tokenContractAssetsBox = await Hive.openBox<TokenContractAssetDto>("token_contract_assets");
     hiveSource._bookmarksBox = await Hive.openBox<BookmarkDto>("bookmarks");
     hiveSource._biometryPreferencesBox = await Hive.openBox<Object?>("biometry_preferences");
     hiveSource._walletsPasswordsBox = await Hive.openBox<String>(
-      "wallets_passwords",
+      "wallets_passwords_v2",
       encryptionCipher: HiveAesCipher(hiveSource._key),
     );
+
+    if (!bookmarksBoxExists) {
+      for (final item in _bookmarksPreset) {
+        await hiveSource.addBookmark(item);
+      }
+    }
 
     return hiveSource;
   }

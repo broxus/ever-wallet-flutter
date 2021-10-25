@@ -7,7 +7,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
-import '../../constants/message_expiration.dart';
 import '../../services/nekoton_service.dart';
 
 part 'token_wallet_deployment_bloc.freezed.dart';
@@ -41,7 +40,7 @@ class TokenWalletDeploymentBloc extends Bloc<TokenWalletDeploymentEvent, TokenWa
         final tokenWallet = _nekotonService.tokenWallets
             .firstWhere((e) => e.owner == _owner! && e.symbol.rootTokenContract == _rootTokenContract!);
 
-        _message = await tokenWallet.prepareDeploy(defaultMessageExpiration);
+        _message = await tokenWallet.prepareDeploy(kDefaultMessageExpiration);
 
         final feesValue = await tokenWallet.estimateFees(_message!);
         final fees = feesValue.toString();

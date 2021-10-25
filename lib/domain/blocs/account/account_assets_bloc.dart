@@ -40,15 +40,25 @@ class AccountAssetsBloc extends Bloc<_Event, AccountAssetsState> {
             .map((e) => e.where((e) => e.owner == event.address).toList())
             .listen(
                 (value) => add(_LocalEvent.update(value.map((e) => TokenContractAsset.fromTokenWallet(e)).toList())));
+
+        if (_nekotonService.tokenWallets.where((e) => e.owner == event.address).isEmpty) {
+          add(const _LocalEvent.update([]));
+        }
       } else if (event is _Update) {
+        final added = <TokenContractAsset>[];
+
+        for (final asset in event.assets) {
+          added.add(asset.copyWith(logoURI: await _tonAssetsRepository.getTokenLogoUri(asset.address)));
+        }
+
         final stream = _tonAssetsRepository.getTokenContractAssetsStream();
 
         await for (final item in stream) {
-          final available = item.where((e) => !event.assets.contains(e)).toList()
+          final available = item.where((e) => added.firstWhereOrNull((el) => el.address == e.address) == null).toList()
             ..sort((a, b) => b.address.compareTo(a.address));
 
           yield AccountAssetsState(
-            added: event.assets,
+            added: added,
             available: available,
           );
         }

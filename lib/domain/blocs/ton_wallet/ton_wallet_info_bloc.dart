@@ -36,12 +36,17 @@ class TonWalletInfoBloc extends Bloc<_Event, TonWalletInfoState?> {
         _streamSubscription = _nekotonService.tonWalletsStream
             .expand((e) => e)
             .where((e) => e.address == event.address)
-            .listen((tonWalletEvent) {
+            .listen((tonWalletEvent) async {
           _onStateChangedSubscription?.cancel();
           _onStateChangedSubscription = tonWalletEvent.onStateChangedStream.listen((event) => add(_LocalEvent.update(
                 tonWallet: tonWalletEvent,
                 contractState: event,
               )));
+
+          add(_LocalEvent.update(
+            tonWallet: tonWalletEvent,
+            contractState: await tonWalletEvent.contractState,
+          ));
         });
       } else if (event is _Update) {
         final contractState = event.contractState.copyWith(balance: event.contractState.balance.toTokens());

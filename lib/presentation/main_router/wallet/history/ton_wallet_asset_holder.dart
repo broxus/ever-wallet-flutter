@@ -31,7 +31,9 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
   @override
   void didUpdateWidget(covariant TonWalletAssetHolder oldWidget) {
     super.didUpdateWidget(oldWidget);
-    bloc.add(TonWalletInfoEvent.load(widget.address));
+    if (oldWidget.address != widget.address) {
+      bloc.add(TonWalletInfoEvent.load(widget.address));
+    }
   }
 
   @override
