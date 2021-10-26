@@ -8,7 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-
+import '../../../../design/design.dart';
+import '../../../../design/utils.dart';
 import '../../../../../domain/blocs/token_wallet/token_wallet_fees_bloc.dart';
 import '../../../../../domain/blocs/token_wallet/token_wallet_transfer_bloc.dart';
 import '../../../../../injection.dart';

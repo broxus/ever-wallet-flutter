@@ -45,16 +45,16 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
   @override
   Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
         bloc: bloc,
-        builder: (context, state) => state != null
-            ? WalletAssetHolder(
-                name: 'TON',
-                balance: state.contractState.balance,
-                icon: Image.asset(Assets.images.ton.path),
-                onTap: () => TonAssetObserver.open(
-                  context: context,
-                  address: state.address,
-                ),
-              )
-            : const SizedBox(),
+        builder: (context, state) => WalletAssetHolder(
+          name: 'TON',
+          balance: state != null ? state.contractState.balance : '0',
+          icon: Image.asset(Assets.images.ton.path),
+          onTap: state != null
+              ? () => TonAssetObserver.open(
+                    context: context,
+                    address: state.address,
+                  )
+              : () {},
+        ),
       );
 }

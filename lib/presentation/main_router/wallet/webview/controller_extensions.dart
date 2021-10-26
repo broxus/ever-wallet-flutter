@@ -20,14 +20,15 @@ extension InAppWebViewControllerX on InAppWebViewController {
     }
   }
 
-  Future<void> openEmptyPage() async => loadUrl(urlRequest: URLRequest(url: Uri.parse("about:blank")));
+  Future<void> openInitialPage() async =>
+      loadUrl(urlRequest: URLRequest(url: Uri.parse("https://l1.broxus.com/dapps")));
 
   Future<void> parseAndLoadUrl(String url) async {
     try {
       var parsedUrl = Uri.parse(url);
 
       if (parsedUrl.toString().isEmpty) {
-        await openEmptyPage();
+        await openInitialPage();
         return;
       }
 

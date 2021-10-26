@@ -16,14 +16,12 @@ class BrowserAppBar extends StatefulWidget {
   final ValueNotifier<bool> backButtonEnabledNotifier;
   final ValueNotifier<bool> forwardButtonEnabledNotifier;
   final ValueNotifier<bool> addressFieldFocusedNotifier;
-  final ValueNotifier<bool> currentPageBookmarkedNotifier;
   final ValueNotifier<int> progressNotifier;
   final VoidCallback onGoBack;
   final VoidCallback onGoForward;
   final VoidCallback onGoHome;
   final VoidCallback onAccountButtonTapped;
   final VoidCallback onRefreshButtonTapped;
-  final VoidCallback onBookmarkButtonTapped;
   final VoidCallback onShareButtonTapped;
   final void Function(String url) onUrlEntered;
 
@@ -34,14 +32,12 @@ class BrowserAppBar extends StatefulWidget {
     required this.backButtonEnabledNotifier,
     required this.forwardButtonEnabledNotifier,
     required this.addressFieldFocusedNotifier,
-    required this.currentPageBookmarkedNotifier,
     required this.progressNotifier,
     required this.onGoBack,
     required this.onGoForward,
     required this.onGoHome,
     required this.onAccountButtonTapped,
     required this.onRefreshButtonTapped,
-    required this.onBookmarkButtonTapped,
     required this.onShareButtonTapped,
     required this.onUrlEntered,
   }) : super(key: key);
@@ -192,10 +188,8 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
               text: LocaleKeys.browser_reload.tr(),
             ),
             const PopupMenuDivider(),
-            buildPopupBookmarkMenuItem(2),
-            const PopupMenuDivider(),
             buildPopupMenuItem(
-              value: 3,
+              value: 2,
               text: LocaleKeys.browser_share.tr(),
             ),
           ],
@@ -247,19 +241,6 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
         ),
       );
 
-  PopupMenuEntry<int> buildPopupBookmarkMenuItem(int value) => PopupMenuItem<int>(
-        value: value,
-        child: ValueListenableBuilder<bool>(
-          valueListenable: widget.currentPageBookmarkedNotifier,
-          builder: (context, value, child) => Text(
-            !value ? LocaleKeys.browser_add_bookmark.tr() : LocaleKeys.browser_remove_bookmark.tr(),
-            style: const TextStyle(
-              color: Colors.black,
-            ),
-          ),
-        ),
-      );
-
   PopupMenuEntry<int> buildPopupMenuItem({
     required int value,
     required String text,
@@ -283,9 +264,6 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
         widget.onRefreshButtonTapped();
         break;
       case 2:
-        widget.onBookmarkButtonTapped();
-        break;
-      case 3:
         widget.onShareButtonTapped();
         break;
     }
@@ -297,8 +275,6 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
         selection: TextSelection(
           baseOffset: 0,
           extentOffset: widget.urlController.text.length,
-          isDirectional: true,
-          affinity: TextAffinity.upstream,
         ),
       );
     }

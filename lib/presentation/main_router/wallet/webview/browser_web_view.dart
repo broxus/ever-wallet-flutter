@@ -52,7 +52,7 @@ class BrowserWebView extends StatefulWidget {
 }
 
 class _BrowserWebViewState extends State<BrowserWebView> {
-  final initialUrlRequest = URLRequest(url: Uri.parse("about:blank"));
+  final initialUrlRequest = URLRequest(url: Uri.parse("https://l1.broxus.com/dapps"));
   final initialOptions = InAppWebViewGroupOptions(
     crossPlatform: InAppWebViewOptions(
       useShouldOverrideUrlLoading: true,
@@ -304,13 +304,13 @@ class _BrowserWebViewState extends State<BrowserWebView> {
 
   void onLoadHttpError(InAppWebViewController controller, Uri? url, int statusCode, String description) {
     controller.onError(url, statusCode, description);
-    controller.openEmptyPage();
+    controller.openInitialPage();
     widget.pullToRefreshController.endRefreshing();
   }
 
   void onLoadError(InAppWebViewController controller, Uri? url, int code, String message) {
     controller.onError(url, code, message);
-    controller.openEmptyPage();
+    controller.openInitialPage();
     widget.pullToRefreshController.endRefreshing();
   }
 

@@ -31,8 +31,8 @@ class SeedPhraseCheckPage extends StatefulWidget {
 class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
   late final Map<int, String> words;
   final formKey = GlobalKey<FormState>();
-  final wordsFocuses = List.generate(defaultCheckingWordsAmount, (_) => FocusNode());
-  final wordsControllers = List.generate(defaultCheckingWordsAmount, (_) => TextEditingController());
+  final wordsFocuses = List.generate(kDefaultCheckingWordsAmount, (_) => FocusNode());
+  final wordsControllers = List.generate(kDefaultCheckingWordsAmount, (_) => TextEditingController());
   final scrollController = ScrollController();
   final isFormValid = ValueNotifier<bool>(false);
 
@@ -45,7 +45,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
 
   @override
   void dispose() {
-    for (var i = 0; i < defaultCheckingWordsAmount; i++) {
+    for (var i = 0; i < kDefaultCheckingWordsAmount; i++) {
       wordsFocuses[i].dispose();
       wordsControllers[i].dispose();
     }

@@ -68,7 +68,7 @@ class BiometryRepositoryImpl implements BiometryRepository {
       );
 
   @override
-  Future<String?> get(String publicKey) async => _hiveSource.get(publicKey);
+  Future<String?> get(String publicKey) async => _hiveSource.getKeyPassword(publicKey);
 
   @override
   Future<void> clear() async {

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -12,7 +11,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../domain/blocs/account/accounts_bloc.dart';
-import '../../../../domain/blocs/misc/bookmarks_bloc.dart';
 import '../../../../domain/blocs/provider/approvals_bloc.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
@@ -20,7 +18,6 @@ import '../../../design/theme.dart';
 import 'account_selection.dart';
 import 'approvals_listener.dart';
 import 'browser_app_bar.dart';
-import 'browser_home_page.dart';
 import 'browser_web_view.dart';
 import 'controller_extensions.dart';
 import 'provider_events_callers.dart';
@@ -32,7 +29,6 @@ class WebviewPage extends StatefulWidget {
 
 class _WebviewPageState extends State<WebviewPage> {
   final approvalsBloc = getIt.get<ApprovalsBloc>();
-  final bookmarksBloc = getIt.get<BookmarksBloc>();
   InAppWebViewController? controller;
   late final PullToRefreshController pullToRefreshController;
   late final StreamSubscription disconnectedStreamSubscription;
@@ -44,9 +40,7 @@ class _WebviewPageState extends State<WebviewPage> {
   final backButtonEnabledNotifier = ValueNotifier<bool>(false);
   final forwardButtonEnabledNotifier = ValueNotifier<bool>(false);
   final addressFieldFocusedNotifier = ValueNotifier<bool>(false);
-  final currentPageBookmarkedNotifier = ValueNotifier<bool>(false);
   final progressNotifier = ValueNotifier<int>(100);
-  final homePageShownNotifier = ValueNotifier<bool>(true);
   final urlController = TextEditingController();
 
   @override
@@ -108,7 +102,6 @@ class _WebviewPageState extends State<WebviewPage> {
   @override
   void dispose() {
     approvalsBloc.close();
-    bookmarksBloc.close();
     disconnectedStreamSubscription.cancel();
     transactionsFoundStreamSubscription.cancel();
     contractStateChangedStreamSubscription.cancel();
@@ -118,9 +111,7 @@ class _WebviewPageState extends State<WebviewPage> {
     backButtonEnabledNotifier.dispose();
     forwardButtonEnabledNotifier.dispose();
     addressFieldFocusedNotifier.dispose();
-    currentPageBookmarkedNotifier.dispose();
     progressNotifier.dispose();
-    homePageShownNotifier.dispose();
     urlController.dispose();
     super.dispose();
   }
@@ -200,14 +191,12 @@ class _WebviewPageState extends State<WebviewPage> {
         backButtonEnabledNotifier: backButtonEnabledNotifier,
         forwardButtonEnabledNotifier: forwardButtonEnabledNotifier,
         addressFieldFocusedNotifier: addressFieldFocusedNotifier,
-        currentPageBookmarkedNotifier: currentPageBookmarkedNotifier,
         progressNotifier: progressNotifier,
         onGoBack: () => controller?.goBack(),
         onGoForward: () => controller?.goForward(),
-        onGoHome: () => controller?.openEmptyPage(),
+        onGoHome: () => controller?.openInitialPage(),
         onAccountButtonTapped: () => onAccountButtonTapped(accounts),
         onRefreshButtonTapped: () => controller?.reload(),
-        onBookmarkButtonTapped: onBookmarkButtonTapped,
         onShareButtonTapped: onShareButtonTapped,
         onUrlEntered: (String url) => controller?.parseAndLoadUrl(url),
       );
@@ -221,26 +210,6 @@ class _WebviewPageState extends State<WebviewPage> {
         },
       );
 
-  Future<void> onBookmarkButtonTapped() async {
-    final url = await controller?.getStringifiedUrl();
-
-    if (url == null) {
-      return;
-    }
-
-    final bookmark = bookmarksBloc.state.firstWhereOrNull((e) => e.url == url);
-
-    if (bookmark == null) {
-      bookmarksBloc.add(BookmarksEvent.add(url));
-    } else {
-      bookmarksBloc.add(BookmarksEvent.remove(bookmark));
-    }
-
-    final state = await bookmarksBloc.stream.first;
-
-    currentPageBookmarkedNotifier.value = state.firstWhereOrNull((e) => e.url == url.toString()) != null;
-  }
-
   Future<void> onShareButtonTapped() async {
     final url = await controller?.getStringifiedUrl();
 
@@ -253,36 +222,23 @@ class _WebviewPageState extends State<WebviewPage> {
 
   Widget buildBody() => ValueListenableBuilder<bool>(
         valueListenable: addressFieldFocusedNotifier,
-        builder: (context, addressFieldFocusedValue, child) => ValueListenableBuilder<bool>(
-          valueListenable: homePageShownNotifier,
-          builder: (context, homePageShownValue, child) => Stack(
-            fit: StackFit.expand,
-            children: [
-              Offstage(
-                offstage: homePageShownValue,
-                child: BrowserWebView(
-                  pullToRefreshController: pullToRefreshController,
-                  onWebViewCreated: onWebViewCreated,
-                  onLoadStart: onLoadStart,
-                  onLoadStop: onLoadStop,
-                  onProgressChanged: onProgressChanged,
-                  onUpdateVisitedHistory: onUpdateVisitedHistory,
-                ),
-              ),
-              Offstage(
-                offstage: !homePageShownValue,
-                child: BrowserHomePage(
-                  bookmarksBloc: bookmarksBloc,
-                  onBookmarkTapped: (String url) => controller?.parseAndLoadUrl(url),
-                ),
-              ),
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: addressFieldFocusedValue ? FocusScope.of(context).unfocus : null,
-                child: const SizedBox.expand(),
-              ),
-            ],
-          ),
+        builder: (context, addressFieldFocusedValue, child) => Stack(
+          fit: StackFit.expand,
+          children: [
+            BrowserWebView(
+              pullToRefreshController: pullToRefreshController,
+              onWebViewCreated: onWebViewCreated,
+              onLoadStart: onLoadStart,
+              onLoadStop: onLoadStop,
+              onProgressChanged: onProgressChanged,
+              onUpdateVisitedHistory: onUpdateVisitedHistory,
+            ),
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: addressFieldFocusedValue ? FocusScope.of(context).unfocus : null,
+              child: const SizedBox.expand(),
+            ),
+          ],
         ),
       );
 
@@ -305,14 +261,10 @@ class _WebviewPageState extends State<WebviewPage> {
     forwardButtonEnabledNotifier.value = await this.controller?.canGoForward() ?? false;
 
     if (url != null) {
-      homePageShownNotifier.value = url == Uri.parse("about:blank");
       urlController.value = TextEditingValue(
         text: url.toString(),
         selection: TextSelection.collapsed(offset: url.toString().length),
       );
-
-      currentPageBookmarkedNotifier.value =
-          bookmarksBloc.state.firstWhereOrNull((e) => e.url == url.toString()) != null;
     }
   }
 

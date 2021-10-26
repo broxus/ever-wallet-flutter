@@ -1,11 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:collection/collection.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../dtos/bookmark_dto.dart';
 import '../../dtos/token_contract_asset_dto.dart';
 
 @preResolve
@@ -14,26 +12,8 @@ class HiveSource {
   late final Uint8List _key;
   final _biometryStatus = "biometry_status";
   late final Box<TokenContractAssetDto> _tokenContractAssetsBox;
-  late final Box<BookmarkDto> _bookmarksBox;
   late final Box<Object?> _biometryPreferencesBox;
   late final Box<String> _walletsPasswordsBox;
-  static const _bookmarksPreset = [
-    BookmarkDto(
-      url: "https://wton.io/",
-      title: "WTON",
-      icon: "https://wton.io/favicon.ico",
-    ),
-    BookmarkDto(
-      url: "https://tonswap.io/swap",
-      title: "TON Swap",
-      icon: "https://tonswap.io/favicon.svg",
-    ),
-    BookmarkDto(
-      url: "https://tonscan.io/",
-      title: "Free TON Blockchain Explorer",
-      icon: "https://tonscan.io/assets/favicon/favicon-32x32.png",
-    ),
-  ];
 
   @factoryMethod
   static Future<HiveSource> create() async {
@@ -49,58 +29,15 @@ class HiveSource {
 
     hiveSource._key = hiveAesCipherKey;
 
-    final bookmarksBoxExists = await Hive.boxExists("bookmarks");
-
     hiveSource._tokenContractAssetsBox = await Hive.openBox<TokenContractAssetDto>("token_contract_assets");
-    hiveSource._bookmarksBox = await Hive.openBox<BookmarkDto>("bookmarks");
     hiveSource._biometryPreferencesBox = await Hive.openBox<Object?>("biometry_preferences");
     hiveSource._walletsPasswordsBox = await Hive.openBox<String>(
       "wallets_passwords_v2",
       encryptionCipher: HiveAesCipher(hiveSource._key),
     );
 
-    if (!bookmarksBoxExists) {
-      for (final item in _bookmarksPreset) {
-        await hiveSource.addBookmark(item);
-      }
-    }
-
     return hiveSource;
   }
-
-  List<BookmarkDto> getBookmarks() => _bookmarksBox.values.toList();
-
-  Future<void> addBookmark(BookmarkDto bookmark) async {
-    final old = _bookmarksBox.toMap().entries.firstWhereOrNull((e) => e.value.url == bookmark.url);
-
-    if (old != null) {
-      await _bookmarksBox.put(old.key, bookmark);
-    } else {
-      await _bookmarksBox.add(bookmark);
-    }
-  }
-
-  Future<void> updateBookmark(BookmarkDto bookmark) async {
-    final old = _bookmarksBox.toMap().entries.firstWhereOrNull((e) => e.value.url == bookmark.url);
-
-    if (old == null) {
-      throw Exception();
-    }
-
-    await _bookmarksBox.put(old.key, bookmark);
-  }
-
-  Future<void> removeBookmark(BookmarkDto bookmark) async {
-    final old = _bookmarksBox.toMap().entries.firstWhereOrNull((e) => e.value.url == bookmark.url);
-
-    if (old == null) {
-      throw Exception();
-    }
-
-    await _bookmarksBox.delete(old.key);
-  }
-
-  Future<void> clearBookmarks() async => _bookmarksBox.clear();
 
   Future<List<TokenContractAssetDto>> getTokenContractAssets() async {
     return _tokenContractAssetsBox.values.toList();
@@ -134,7 +71,7 @@ class HiveSource {
     await _walletsPasswordsBox.put(publicKey, password);
   }
 
-  Future<String?> get(String publicKey) async {
+  Future<String?> getKeyPassword(String publicKey) async {
     return _walletsPasswordsBox.get(publicKey);
   }
 

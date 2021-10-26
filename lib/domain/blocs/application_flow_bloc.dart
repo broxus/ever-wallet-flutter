@@ -7,7 +7,6 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../logger.dart';
 import '../repositories/biometry_repository.dart';
-import '../repositories/bookmarks_repository.dart';
 import '../repositories/ton_assets_repository.dart';
 import '../services/nekoton_service.dart';
 
@@ -17,7 +16,6 @@ part 'application_flow_bloc.freezed.dart';
 class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
   final NekotonService _nekotonService;
   final BiometryRepository _biometryRepository;
-  final BookmarksRepository _bookmarksRepository;
   final TonAssetsRepository _tonAssetsRepository;
   final _errorsSubject = PublishSubject<String>();
   late final StreamSubscription _streamSubscription;
@@ -25,7 +23,6 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
   ApplicationFlowBloc(
     this._nekotonService,
     this._biometryRepository,
-    this._bookmarksRepository,
     this._tonAssetsRepository,
   ) : super(const ApplicationFlowState.loading()) {
     _streamSubscription = _nekotonService.keysPresenceStream.listen((bool hasKeys) => add(_LocalEvent.update(hasKeys)));
@@ -53,7 +50,6 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
         await _nekotonService.clearAccountsStorage();
         await _nekotonService.clearKeystore();
         await _biometryRepository.clear();
-        await _bookmarksRepository.clear();
         await _tonAssetsRepository.clear();
       }
     } catch (err, st) {

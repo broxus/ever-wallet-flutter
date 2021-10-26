@@ -23,7 +23,7 @@ class SeedPhraseSavePage extends StatefulWidget {
 
 class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
   final scrollController = ScrollController();
-  final key = generateKey(defaultMnemonicType);
+  final key = generateKey(kDefaultMnemonicType);
 
   @override
   void dispose() {

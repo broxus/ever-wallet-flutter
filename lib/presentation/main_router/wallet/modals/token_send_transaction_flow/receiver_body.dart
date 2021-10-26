@@ -79,7 +79,7 @@ class __EnterAddressBodyState extends State<_EnterAddressBody> {
                       suffix: _suffixText(
                         text: LocaleKeys.send_transaction_modal_input_actions_max.tr(),
                         onTap: () {
-                          _amountController.text = widget.balance ?? '';
+                          _amountController.text = widget.balance?.floorValue() ?? '';
                         },
                       ),
                       scrollPadding: const EdgeInsets.only(bottom: 24),

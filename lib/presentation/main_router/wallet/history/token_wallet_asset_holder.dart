@@ -53,19 +53,21 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
   @override
   Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfoState?>(
         bloc: bloc,
-        builder: (context, state) => state != null
-            ? WalletAssetHolder(
-                name: state.symbol.name,
-                balance: state.balance,
-                icon: state.logoURI != null
-                    ? getTokenAssetIcon(state.logoURI!)
-                    : getGravatarIcon(state.symbol.name.hashCode),
-                onTap: () => TokenAssetObserver.open(
-                  context: context,
-                  owner: state.owner,
-                  rootTokenContract: state.symbol.rootTokenContract,
-                ),
-              )
-            : const SizedBox(),
+        builder: (context, state) => WalletAssetHolder(
+          name: state != null ? state.symbol.name : '',
+          balance: state != null ? state.balance : '0',
+          icon: state != null
+              ? state.logoURI != null
+                  ? getTokenAssetIcon(state.logoURI!)
+                  : getGravatarIcon(state.symbol.name.hashCode)
+              : const SizedBox(),
+          onTap: state != null
+              ? () => TokenAssetObserver.open(
+                    context: context,
+                    owner: state.owner,
+                    rootTokenContract: state.symbol.rootTokenContract,
+                  )
+              : () {},
+        ),
       );
 }
