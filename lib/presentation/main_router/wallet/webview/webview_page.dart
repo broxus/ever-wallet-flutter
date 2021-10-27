@@ -47,9 +47,6 @@ class _WebviewPageState extends State<WebviewPage> {
   void initState() {
     super.initState();
     pullToRefreshController = PullToRefreshController(
-      options: PullToRefreshOptions(
-        color: Colors.blue,
-      ),
       onRefresh: () => controller?.refresh(),
     );
     disconnectedStreamSubscription = disconnectedStream.listen((event) {
@@ -117,8 +114,15 @@ class _WebviewPageState extends State<WebviewPage> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<AccountsBloc, AccountsState>(
+  Widget build(BuildContext context) => BlocConsumer<AccountsBloc, AccountsState>(
         bloc: context.watch<AccountsBloc>(),
+        listener: (context, state) async {
+          final currentOrigin = await controller?.getCurrentOrigin();
+
+          if (currentOrigin != null) {
+            await disconnect(origin: currentOrigin);
+          }
+        },
         builder: (context, state) => buildApprovalsListener(
           accounts: state.accounts,
           currentAccount: state.currentAccount,
@@ -204,10 +208,7 @@ class _WebviewPageState extends State<WebviewPage> {
   void onAccountButtonTapped(List<AssetsList> accounts) => AccountSelection.open(
         context: context,
         accounts: accounts,
-        onTap: (String address) async {
-          context.read<AccountsBloc>().add(AccountsEvent.setCurrent(address));
-          await disconnect(origin: (await controller!.getCurrentOrigin())!);
-        },
+        onTap: (String address) async => context.read<AccountsBloc>().add(AccountsEvent.setCurrent(address)),
       );
 
   Future<void> onShareButtonTapped() async {

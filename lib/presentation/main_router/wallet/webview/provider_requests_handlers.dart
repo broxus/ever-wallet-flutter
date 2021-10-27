@@ -13,7 +13,6 @@ Future<dynamic> codeToTvcHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST codeToTvc args $jsonInput');
 
     final input = CodeToTvcInput.fromJson(jsonInput);
 
@@ -23,7 +22,6 @@ Future<dynamic> codeToTvcHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST codeToTvc result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -37,7 +35,6 @@ Future<dynamic> decodeEventHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST decodeEvent args $jsonInput');
 
     final input = DecodeEventInput.fromJson(jsonInput);
 
@@ -47,7 +44,6 @@ Future<dynamic> decodeEventHandler({
     );
 
     final jsonOutput = jsonEncode(output?.toJson());
-    logger.d('REQUEST decodeEvent result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -61,7 +57,6 @@ Future<dynamic> decodeInputHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST decodeInput args $jsonInput');
 
     final input = DecodeInputInput.fromJson(jsonInput);
 
@@ -71,7 +66,6 @@ Future<dynamic> decodeInputHandler({
     );
 
     final jsonOutput = jsonEncode(output?.toJson());
-    logger.d('REQUEST decodeInput result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -85,7 +79,6 @@ Future<dynamic> decodeOutputHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST decodeOutput args $jsonInput');
 
     final input = DecodeOutputInput.fromJson(jsonInput);
 
@@ -95,7 +88,6 @@ Future<dynamic> decodeOutputHandler({
     );
 
     final jsonOutput = jsonEncode(output?.toJson());
-    logger.d('REQUEST decodeOutput result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -109,7 +101,6 @@ Future<dynamic> decodeTransactionEventsHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST decodeTransactionEvents args $jsonInput');
 
     final input = DecodeTransactionEventsInput.fromJson(jsonInput);
 
@@ -119,7 +110,6 @@ Future<dynamic> decodeTransactionEventsHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST decodeTransactionEvents result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -133,7 +123,6 @@ Future<dynamic> decodeTransactionHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST decodeTransaction args $jsonInput');
 
     final input = DecodeTransactionInput.fromJson(jsonInput);
 
@@ -143,7 +132,6 @@ Future<dynamic> decodeTransactionHandler({
     );
 
     final jsonOutput = jsonEncode(output?.toJson());
-    logger.d('REQUEST decodeTransaction result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -161,7 +149,6 @@ Future<dynamic> disconnectHandler({
     );
 
     final jsonOutput = jsonEncode({});
-    logger.d('REQUEST disconnect result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -175,7 +162,6 @@ Future<dynamic> encodeInternalInputHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST encodeInternalInput args $jsonInput');
 
     final input = EncodeInternalInputInput.fromJson(jsonInput);
 
@@ -185,7 +171,6 @@ Future<dynamic> encodeInternalInputHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST encodeInternalInput result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -199,7 +184,6 @@ Future<dynamic> estimateFeesHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST estimateFees args $jsonInput');
 
     final input = EstimateFeesInput.fromJson(jsonInput);
 
@@ -209,7 +193,6 @@ Future<dynamic> estimateFeesHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST estimateFees result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -223,7 +206,6 @@ Future<dynamic> extractPublicKeyHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST extractPublicKey args $jsonInput');
 
     final input = ExtractPublicKeyInput.fromJson(jsonInput);
 
@@ -233,7 +215,6 @@ Future<dynamic> extractPublicKeyHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST extractPublicKey result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -247,7 +228,6 @@ Future<dynamic> getExpectedAddressHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST getExpectedAddress args $jsonInput');
 
     final input = GetExpectedAddressInput.fromJson(jsonInput);
 
@@ -257,7 +237,6 @@ Future<dynamic> getExpectedAddressHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST getExpectedAddress result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -271,7 +250,6 @@ Future<dynamic> getFullContractStateHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST getFullContractState args $jsonInput');
 
     final input = GetFullContractStateInput.fromJson(jsonInput);
 
@@ -281,7 +259,6 @@ Future<dynamic> getFullContractStateHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST getFullContractState result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -299,7 +276,6 @@ Future<dynamic> getProviderStateHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST getProviderState result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -313,7 +289,6 @@ Future<dynamic> getTransactionsHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST getTransactions args $jsonInput');
 
     final input = GetTransactionsInput.fromJson(jsonInput);
 
@@ -323,7 +298,6 @@ Future<dynamic> getTransactionsHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST getTransactions result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -337,7 +311,6 @@ Future<dynamic> packIntoCellHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST packIntoCell args $jsonInput');
 
     final input = PackIntoCellInput.fromJson(jsonInput);
 
@@ -347,7 +320,6 @@ Future<dynamic> packIntoCellHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST packIntoCell result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -361,7 +333,6 @@ Future<dynamic> requestPermissionsHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST requestPermissions args $jsonInput');
 
     final input = RequestPermissionsInput.fromJson(jsonInput);
 
@@ -371,7 +342,6 @@ Future<dynamic> requestPermissionsHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST requestPermissions result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -385,7 +355,6 @@ Future<dynamic> runLocalHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST runLocal args $jsonInput');
 
     final input = RunLocalInput.fromJson(jsonInput);
 
@@ -395,7 +364,6 @@ Future<dynamic> runLocalHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST runLocal result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -409,7 +377,6 @@ Future<dynamic> sendExternalMessageHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST sendExternalMessage args $jsonInput');
 
     final input = SendExternalMessageInput.fromJson(jsonInput);
 
@@ -419,7 +386,6 @@ Future<dynamic> sendExternalMessageHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST sendExternalMessage result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -433,7 +399,6 @@ Future<dynamic> sendMessageHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST sendMessage args $jsonInput');
 
     final input = SendMessageInput.fromJson(jsonInput);
 
@@ -443,7 +408,6 @@ Future<dynamic> sendMessageHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST sendMessage result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -457,7 +421,6 @@ Future<dynamic> splitTvcHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST splitTvc args $jsonInput');
 
     final input = SplitTvcInput.fromJson(jsonInput);
 
@@ -467,7 +430,6 @@ Future<dynamic> splitTvcHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST splitTvc result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -481,7 +443,6 @@ Future<dynamic> subscribeHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST subscribe args $jsonInput');
 
     final input = SubscribeInput.fromJson(jsonInput);
 
@@ -491,7 +452,6 @@ Future<dynamic> subscribeHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST subscribe result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -505,7 +465,6 @@ Future<dynamic> unpackFromCellHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST unpackFromCell args $jsonInput');
 
     final input = UnpackFromCellInput.fromJson(jsonInput);
 
@@ -515,7 +474,6 @@ Future<dynamic> unpackFromCellHandler({
     );
 
     final jsonOutput = jsonEncode(output.toJson());
-    logger.d('REQUEST unpackFromCell result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -533,7 +491,6 @@ Future<dynamic> unsubscribeAllHandler({
     );
 
     final jsonOutput = jsonEncode({});
-    logger.d('REQUEST unsubscribeAll result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {
@@ -547,7 +504,6 @@ Future<dynamic> unsubscribeHandler({
 }) async {
   try {
     final jsonInput = args.first as Map<String, dynamic>;
-    logger.d('REQUEST unsubscribe args $jsonInput');
 
     final input = UnsubscribeInput.fromJson(jsonInput);
 
@@ -557,7 +513,6 @@ Future<dynamic> unsubscribeHandler({
     );
 
     final jsonOutput = jsonEncode({});
-    logger.d('REQUEST unsubscribe result $jsonOutput');
 
     return jsonOutput;
   } catch (err, st) {

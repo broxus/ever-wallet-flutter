@@ -91,6 +91,17 @@ extension FloorValue on String {
   }
 }
 
+extension RemoveZeroes on String {
+  String removeZeroes() {
+    final dot = indexOf(".");
+    if (dot != -1) {
+      return replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+    } else {
+      return this;
+    }
+  }
+}
+
 extension ElipseValue on String {
   String elipseValue() {
     if (length > 12) {

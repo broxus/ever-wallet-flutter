@@ -1,4 +1,5 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
+import 'package:collection/collection.dart';
 import 'package:crystal/domain/blocs/account/accounts_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -39,11 +40,8 @@ class MainRouterPageState extends State<MainRouterPage> {
             SettingsRouterRoute(),
           ],
           extendBody: true,
-          animationDuration: const Duration(milliseconds: 150),
-          builder: (context, page, animation) => FadeTransition(
-            opacity: Tween<double>(begin: 0.5, end: 1).animate(animation),
-            child: page,
-          ),
+          animationDuration: Duration.zero,
+          builder: (context, page, animation) => page,
           bottomNavigationBuilder: (context, router) => CupertinoTheme(
             data: const CupertinoThemeData(
               textTheme: CupertinoTextThemeData(
@@ -137,9 +135,17 @@ class MainRouterPageState extends State<MainRouterPage> {
 
   Future<bool> checkForExistingAccount(int index) async {
     if (index == 1) {
-      final state = context.read<AccountsBloc>().state;
+      final bloc = context.read<AccountsBloc>();
 
-      return state.currentAccount != null;
+      final state = bloc.state;
+
+      if (state.currentAccount == null) {
+        bloc.add(AccountsEvent.setCurrent(state.accounts.firstOrNull?.address));
+
+        await bloc.stream.first;
+      }
+
+      return bloc.state.currentAccount != null;
     }
 
     return true;

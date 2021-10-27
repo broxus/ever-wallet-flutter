@@ -12,7 +12,6 @@ Future<void> disconnectedCaller({
 }) async {
   try {
     final jsonOutput = jsonEncode(event.toJson());
-    logger.d('EVENT disconnected $jsonOutput');
 
     await controller.evaluateJavascript(source: "window.__dartNotifications.disconnected('$jsonOutput')");
   } catch (err, st) {
@@ -26,7 +25,6 @@ Future<void> transactionsFoundCaller({
 }) async {
   try {
     final jsonOutput = jsonEncode(event.toJson());
-    logger.d('EVENT transactionsFound $jsonOutput');
 
     await controller.evaluateJavascript(source: "window.__dartNotifications.transactionsFound('$jsonOutput')");
   } catch (err, st) {
@@ -40,7 +38,6 @@ Future<void> contractStateChangedCaller({
 }) async {
   try {
     final jsonOutput = jsonEncode(event.toJson());
-    logger.d('EVENT contractStateChanged $jsonOutput');
 
     await controller.evaluateJavascript(source: "window.__dartNotifications.contractStateChanged('$jsonOutput')");
   } catch (err, st) {
@@ -54,7 +51,6 @@ Future<void> networkChangedCaller({
 }) async {
   try {
     final jsonOutput = jsonEncode(event.toJson());
-    logger.d('EVENT networkChanged $jsonOutput');
 
     await controller.evaluateJavascript(source: "window.__dartNotifications.networkChanged('$jsonOutput')");
   } catch (err, st) {
@@ -68,7 +64,6 @@ Future<void> permissionsChangedCaller({
 }) async {
   try {
     final jsonOutput = jsonEncode(event.toJson());
-    logger.d('EVENT permissionsChanged $jsonOutput');
 
     await controller.evaluateJavascript(source: "window.__dartNotifications.permissionsChanged('$jsonOutput')");
   } catch (err, st) {
@@ -81,8 +76,6 @@ Future<void> loggedOutCaller({
   required Object event,
 }) async {
   try {
-    logger.d('EVENT loggedOut');
-
     await controller.evaluateJavascript(source: 'window.__dartNotifications.loggedOut()');
   } catch (err, st) {
     logger.e(err, err, st);
