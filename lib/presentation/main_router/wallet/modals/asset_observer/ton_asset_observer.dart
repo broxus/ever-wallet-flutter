@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:crystal/domain/models/ton_wallet_info.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -73,7 +74,7 @@ class _TonAssetObserverState extends State<TonAssetObserver> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
+  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
         bloc: tonWalletInfoBloc,
         builder: (context, state) => state != null
             ? Column(

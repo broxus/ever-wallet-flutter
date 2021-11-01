@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../design/design.dart';
@@ -8,25 +7,21 @@ import 'profile_actions.dart';
 import 'profile_carousel.dart';
 
 class WalletBody extends StatelessWidget {
-  final List<AssetsList> accounts;
-  final AssetsList? currentAccount;
   final PanelController modalController;
 
   const WalletBody({
     Key? key,
-    required this.accounts,
-    required this.currentAccount,
     required this.modalController,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => AnimatedAppearance(
-        duration: const Duration(milliseconds: 400),
-        child: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 14),
-            child: Column(
+  Widget build(BuildContext context) => SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 14),
+          child: BlocBuilder<AccountsBloc, AccountsState>(
+            bloc: context.watch<AccountsBloc>(),
+            builder: (context, state) => Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
@@ -49,17 +44,17 @@ class WalletBody extends StatelessWidget {
                   duration: const Duration(milliseconds: 250),
                   offset: const Offset(1, 0),
                   child: ProfileCarousel(
-                    accounts: accounts,
+                    accounts: state.accounts,
                     onPageChanged: (i) {
-                      if (i < accounts.length) {
-                        context.read<AccountsBloc>().add(AccountsEvent.setCurrent(accounts[i].address));
+                      if (i < state.accounts.length) {
+                        context.read<AccountsBloc>().add(AccountsEvent.setCurrent(state.accounts[i].address));
                       } else {
                         modalController.hide();
                         context.read<AccountsBloc>().add(const AccountsEvent.setCurrent(null));
                       }
                     },
                     onPageSelected: (i) {
-                      if (i == accounts.length) {
+                      if (i == state.accounts.length) {
                         modalController.hide();
                       } else {
                         modalController.show();
@@ -68,7 +63,7 @@ class WalletBody extends StatelessWidget {
                   ),
                 ),
                 const CrystalDivider(height: 16),
-                if (currentAccount != null) ProfileActions(address: currentAccount!.address),
+                if (state.currentAccount != null) ProfileActions(address: state.currentAccount!.address),
                 const CrystalDivider(height: 20),
               ],
             ),

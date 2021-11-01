@@ -1,5 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
+import 'package:crystal/data/dtos/token_wallet_info_dto.dart';
+import 'package:crystal/data/dtos/token_wallet_transaction_with_data_dto.dart';
+import 'package:crystal/data/dtos/ton_wallet_info_dto.dart';
+import 'package:crystal/data/dtos/ton_wallet_transaction_with_data_dto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
@@ -9,16 +14,125 @@ import '../../dtos/token_contract_asset_dto.dart';
 @preResolve
 @lazySingleton
 class HiveSource {
+  static const _keysPasswordsBoxName = "keys_passwords_v1";
+  static const _userPreferencesBoxName = "user_preferences_v1";
+  static const _tokenContractAssetsBoxName = "token_contract_assets_v1";
+  static const _tonWalletInfosBoxName = "ton_wallet_infos_v1";
+  static const _tokenWalletInfosBoxName = "token_wallet_infos_v1";
+  static const _tonWalletTransactionsBoxName = "ton_wallet_transactions_v1";
+  static const _tokenWalletTransactionsBoxName = "token_wallet_transactions_v1";
+  static const _biometryStatusKey = "biometry_status";
   late final Uint8List _key;
-  final _biometryStatus = "biometry_status";
+  late final Box<String> _keysPasswordsBox;
+  late final Box<Object?> _userPreferencesBox;
   late final Box<TokenContractAssetDto> _tokenContractAssetsBox;
-  late final Box<Object?> _biometryPreferencesBox;
-  late final Box<String> _walletsPasswordsBox;
+  late final Box<TonWalletInfoDto> _tonWalletInfosBox;
+  late final Box<TokenWalletInfoDto> _tokenWalletInfosBox;
+  late final Box<List> _tonWalletTransactionsBox;
+  late final Box<List> _tokenWalletTransactionsBox;
 
   @factoryMethod
   static Future<HiveSource> create() async {
     final hiveSource = HiveSource();
+    await hiveSource._initialize();
+    return hiveSource;
+  }
 
+  List<TokenContractAssetDto> getTokenContractAssets() => _tokenContractAssetsBox.values.toList();
+
+  Future<void> saveTokenContractAsset(TokenContractAssetDto asset) =>
+      _tokenContractAssetsBox.put(asset.address.hashCode, asset);
+
+  Future<void> removeTokenContractAsset(String address) => _tokenContractAssetsBox.delete(address.hashCode);
+
+  Future<void> clearTokenContractAssets() => _tokenContractAssetsBox.clear();
+
+  TonWalletInfoDto? getTonWalletInfo(String address) =>
+      _tonWalletInfosBox.values.firstWhereOrNull((e) => e.address == address);
+
+  Future<void> saveTonWalletInfo(TonWalletInfoDto tonWalletInfo) =>
+      _tonWalletInfosBox.put(tonWalletInfo.address.hashCode, tonWalletInfo);
+
+  Future<void> removeTonWalletInfo(String address) => _tonWalletInfosBox.delete(address.hashCode);
+
+  Future<void> clearTonWalletInfos() => _tonWalletInfosBox.clear();
+
+  TokenWalletInfoDto? getTokenWalletInfo({
+    required String owner,
+    required String rootTokenContract,
+  }) =>
+      _tokenWalletInfosBox.values
+          .firstWhereOrNull((e) => e.owner == owner && e.symbol.rootTokenContract == rootTokenContract);
+
+  Future<void> saveTokenWalletInfo(TokenWalletInfoDto tokenWalletInfo) => _tokenWalletInfosBox.put(
+      tokenWalletInfo.owner.hashCode ^ tokenWalletInfo.symbol.rootTokenContract.hashCode, tokenWalletInfo);
+
+  Future<void> removeTokenWalletInfo({
+    required String owner,
+    required String rootTokenContract,
+  }) =>
+      _tokenWalletInfosBox.delete(owner.hashCode ^ rootTokenContract.hashCode);
+
+  Future<void> clearTokenWalletInfos() => _tokenWalletInfosBox.clear();
+
+  List<TonWalletTransactionWithDataDto>? getTonWalletTransactions(String address) => _tonWalletTransactionsBox
+      .get(address.hashCode)
+      ?.where((e) => e != null)
+      .toList()
+      .cast<TonWalletTransactionWithDataDto>();
+
+  Future<void> saveTonWalletTransactions({
+    required List<TonWalletTransactionWithDataDto> tonWalletTransactions,
+    required String address,
+  }) =>
+      _tonWalletTransactionsBox.put(address.hashCode, tonWalletTransactions);
+
+  Future<void> removeTonWalletTransactions(String address) => _tonWalletTransactionsBox.delete(address);
+
+  Future<void> clearTonWalletTransactions() => _tonWalletTransactionsBox.clear();
+
+  List<TokenWalletTransactionWithDataDto>? getTokenWalletTransactions({
+    required String owner,
+    required String rootTokenContract,
+  }) =>
+      _tokenWalletTransactionsBox
+          .get(owner.hashCode ^ rootTokenContract.hashCode)
+          ?.where((e) => e != null)
+          .toList()
+          .cast<TokenWalletTransactionWithDataDto>();
+
+  Future<void> saveTokenWalletTransactions({
+    required List<TokenWalletTransactionWithDataDto> tokenWalletTransactions,
+    required String owner,
+    required String rootTokenContract,
+  }) =>
+      _tokenWalletTransactionsBox.put(owner.hashCode ^ rootTokenContract.hashCode, tokenWalletTransactions);
+
+  Future<void> removeTokenWalletTransactions({
+    required String owner,
+    required String rootTokenContract,
+  }) =>
+      _tokenWalletTransactionsBox.delete(owner.hashCode ^ rootTokenContract.hashCode);
+
+  Future<void> clearTokenWalletTransactions() => _tokenWalletTransactionsBox.clear();
+
+  Future<void> setBiometryStatus(bool isEnabled) => _userPreferencesBox.put(_biometryStatusKey, isEnabled);
+
+  bool getBiometryStatus() => _userPreferencesBox.get(_biometryStatusKey) as bool? ?? false;
+
+  Future<void> clearUserPreferences() => _userPreferencesBox.clear();
+
+  Future<void> setKeyPassword({
+    required String publicKey,
+    required String password,
+  }) =>
+      _keysPasswordsBox.put(publicKey, password);
+
+  String? getKeyPassword(String publicKey) => _keysPasswordsBox.get(publicKey);
+
+  Future<void> clearKeysPasswords() => _keysPasswordsBox.clear();
+
+  Future<void> _initialize() async {
     final hiveAesCipherKeyString = dotenv.env['HIVE_AES_CIPHER_KEY'];
     final hiveAesCipherKeyList = hiveAesCipherKeyString?.split(" ").map((e) => int.parse(e)).toList();
     final hiveAesCipherKey = hiveAesCipherKeyList != null ? Uint8List.fromList(hiveAesCipherKeyList) : null;
@@ -27,55 +141,25 @@ class HiveSource {
       throw Exception('Provide HIVE_AES_CIPHER_KEY in .env file in correct format!');
     }
 
-    hiveSource._key = hiveAesCipherKey;
+    _key = hiveAesCipherKey;
 
-    hiveSource._tokenContractAssetsBox = await Hive.openBox<TokenContractAssetDto>("token_contract_assets");
-    hiveSource._biometryPreferencesBox = await Hive.openBox<Object?>("biometry_preferences");
-    hiveSource._walletsPasswordsBox = await Hive.openBox<String>(
-      "wallets_passwords_v2",
-      encryptionCipher: HiveAesCipher(hiveSource._key),
+    // await Hive.deleteBoxFromDisk(_keysPasswordsBoxName);
+    // await Hive.deleteBoxFromDisk(_userPreferencesBoxName);
+    // await Hive.deleteBoxFromDisk(_tokenContractAssetsBoxName);
+    // await Hive.deleteBoxFromDisk(_tonWalletInfosBoxName);
+    // await Hive.deleteBoxFromDisk(_tokenWalletInfosBoxName);
+    // await Hive.deleteBoxFromDisk(_tonWalletTransactionsBoxName);
+    // await Hive.deleteBoxFromDisk(_tokenWalletTransactionsBoxName);
+
+    _keysPasswordsBox = await Hive.openBox<String>(
+      _keysPasswordsBoxName,
+      encryptionCipher: HiveAesCipher(_key),
     );
-
-    return hiveSource;
-  }
-
-  Future<List<TokenContractAssetDto>> getTokenContractAssets() async {
-    return _tokenContractAssetsBox.values.toList();
-  }
-
-  Future<void> cacheTokenContractAssets(List<TokenContractAssetDto> assets) async {
-    await _tokenContractAssetsBox.clear();
-    await _tokenContractAssetsBox.addAll(assets);
-  }
-
-  Future<void> clearTokenContractAssets() async {
-    await _tokenContractAssetsBox.clear();
-  }
-
-  Future<void> setBiometryStatus({required bool isEnabled}) async {
-    return _biometryPreferencesBox.put(_biometryStatus, isEnabled);
-  }
-
-  Future<bool> getBiometryStatus() async {
-    return _biometryPreferencesBox.get(_biometryStatus) as bool? ?? false;
-  }
-
-  Future<void> clearBiometryPreferences() async {
-    await _biometryPreferencesBox.clear();
-  }
-
-  Future<void> setKeyPassword({
-    required String publicKey,
-    required String password,
-  }) async {
-    await _walletsPasswordsBox.put(publicKey, password);
-  }
-
-  Future<String?> getKeyPassword(String publicKey) async {
-    return _walletsPasswordsBox.get(publicKey);
-  }
-
-  Future<void> clearPasswords() async {
-    await _walletsPasswordsBox.clear();
+    _userPreferencesBox = await Hive.openBox<Object?>(_userPreferencesBoxName);
+    _tokenContractAssetsBox = await Hive.openBox<TokenContractAssetDto>(_tokenContractAssetsBoxName);
+    _tonWalletInfosBox = await Hive.openBox<TonWalletInfoDto>(_tonWalletInfosBoxName);
+    _tokenWalletInfosBox = await Hive.openBox<TokenWalletInfoDto>(_tokenWalletInfosBoxName);
+    _tonWalletTransactionsBox = await Hive.openBox<List>(_tonWalletTransactionsBoxName);
+    _tokenWalletTransactionsBox = await Hive.openBox<List>(_tokenWalletTransactionsBoxName);
   }
 }

@@ -12,8 +12,8 @@ import '../sources/local/local_auth_source.dart';
 class BiometryRepositoryImpl implements BiometryRepository {
   final HiveSource _hiveSource;
   final LocalAuthSource _localAuthSource;
-  final _biometryAvailabilitySubject = BehaviorSubject<bool>();
-  final _biometryStatusSubject = BehaviorSubject<bool>();
+  final _availabilitySubject = BehaviorSubject<bool>.seeded(false);
+  final _statusSubject = BehaviorSubject<bool>.seeded(false);
 
   BiometryRepositoryImpl._(
     this._hiveSource,
@@ -34,67 +34,67 @@ class BiometryRepositoryImpl implements BiometryRepository {
   }
 
   @override
-  bool get biometryAvailability => _biometryAvailabilitySubject.value;
+  Stream<bool> get biometryAvailabilityStream => _availabilitySubject.stream.distinct();
 
   @override
-  Stream<bool> get biometryAvailabilityStream => _biometryAvailabilitySubject.stream;
+  bool get biometryAvailability => _availabilitySubject.value;
 
   @override
   Future<void> checkBiometryAvailability() async {
-    final isAvailable = await _localAuthSource.isBiometryAvailable;
-    _biometryAvailabilitySubject.add(isAvailable);
+    final isAvailable = await _localAuthSource.getIsBiometryAvailable();
+    _availabilitySubject.add(isAvailable);
   }
 
   @override
-  bool get biometryStatus => _biometryStatusSubject.value;
+  Stream<bool> get biometryStatusStream => _statusSubject.stream.distinct();
 
   @override
-  Stream<bool> get biometryStatusStream => _biometryStatusSubject.stream;
+  bool get biometryStatus => _statusSubject.value;
 
   @override
-  Future<void> setBiometryStatus({required bool isEnabled}) async {
-    await _hiveSource.setBiometryStatus(isEnabled: isEnabled);
-    _biometryStatusSubject.add(isEnabled);
+  Future<void> setBiometryStatus(bool isEnabled) async {
+    await _hiveSource.setBiometryStatus(isEnabled);
+    _statusSubject.add(isEnabled);
   }
 
   @override
   Future<void> setKeyPassword({
     required String publicKey,
     required String password,
-  }) async =>
+  }) =>
       _hiveSource.setKeyPassword(
         publicKey: publicKey,
         password: password,
       );
 
   @override
-  Future<String?> get(String publicKey) async => _hiveSource.getKeyPassword(publicKey);
+  String? getKeyPassword(String publicKey) => _hiveSource.getKeyPassword(publicKey);
 
   @override
   Future<void> clear() async {
-    await _hiveSource.clearPasswords();
-    await _hiveSource.clearBiometryPreferences();
+    await _hiveSource.clearKeysPasswords();
+    await _hiveSource.clearUserPreferences();
   }
 
   @override
-  Future<bool> authenticate(String localizedReason) async => _localAuthSource.authenticate(localizedReason);
+  Future<bool> authenticate(String localizedReason) => _localAuthSource.authenticate(localizedReason);
 
   Future<void> _initialize() async {
-    _biometryAvailabilitySubject.listen((value) async {
+    _availabilitySubject.listen((value) async {
       if (!value) {
-        _biometryStatusSubject.add(false);
+        _statusSubject.add(false);
       }
     });
-    _biometryStatusSubject.listen((value) async {
+    _statusSubject.listen((value) async {
       if (!value) {
-        await _hiveSource.clearPasswords();
+        await _hiveSource.clearKeysPasswords();
       }
     });
 
-    final isBiometryAvailable = await _localAuthSource.isBiometryAvailable;
-    final isBiometryEnabled = await _hiveSource.getBiometryStatus();
+    final isAvailable = await _localAuthSource.getIsBiometryAvailable();
+    final isEnabled = _hiveSource.getBiometryStatus();
 
-    _biometryAvailabilitySubject.add(isBiometryAvailable);
-    _biometryStatusSubject.add(isBiometryEnabled);
+    _availabilitySubject.add(isAvailable);
+    _statusSubject.add(isEnabled);
   }
 }

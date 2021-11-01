@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/blocs/account/accounts_bloc.dart';
 import '../../design/design.dart';
 import 'history/wallet_modal_body.dart';
 import 'widgets/wallet_body.dart';
@@ -28,22 +26,14 @@ class _WalletPageState extends State<WalletPage> {
         child: ColoredBox(
           color: CrystalColor.background,
           child: AnimatedAppearance(
-            child: BlocBuilder<AccountsBloc, AccountsState>(
-              bloc: context.watch<AccountsBloc>(),
-              builder: (context, state) => WalletScaffold(
+            child: WalletScaffold(
+              modalController: modalController,
+              body: WalletBody(
                 modalController: modalController,
-                body: WalletBody(
-                  accounts: state.accounts,
-                  currentAccount: state.currentAccount,
-                  modalController: modalController,
-                ),
-                modalBody: (controller) => state.currentAccount != null
-                    ? WalletModalBody(
-                        address: state.currentAccount!.address,
-                        scrollController: controller,
-                        onTabSelected: (_) => modalController.resetScroll(),
-                      )
-                    : const SizedBox(),
+              ),
+              modalBody: (controller) => WalletModalBody(
+                scrollController: controller,
+                onTabSelected: (_) => modalController.resetScroll(),
               ),
             ),
           ),

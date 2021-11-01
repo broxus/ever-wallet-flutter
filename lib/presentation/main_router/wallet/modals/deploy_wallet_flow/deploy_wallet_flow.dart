@@ -73,7 +73,7 @@ class _DeployWalletFlowState extends State<DeployWalletFlow> {
             listener: (context, state) {
               FocusScope.of(context).unfocus();
               state.maybeMap(
-                initial: (_) async => _pageController.openAt(0),
+                initial: (_) => _pageController.openAt(0),
                 password: (_) async {
                   String? password;
 
@@ -103,8 +103,8 @@ class _DeployWalletFlowState extends State<DeployWalletFlow> {
                     _pageController.openAt(1);
                   }
                 },
-                sending: (_) async => _pageController.openAt(2),
-                orElse: () async => null,
+                sending: (_) => _pageController.openAt(2),
+                orElse: () => null,
               );
             },
             builder: (context, state) {

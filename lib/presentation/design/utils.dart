@@ -1,17 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gravatar/flutter_gravatar.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../router.gr.dart';
 import 'design.dart';
-
-Widget getGravatarIcon(int hashCode) => ClipOval(
-      child: Image.network(
-        Gravatar('$hashCode@example.com').imageUrl(),
-      ),
-    );
-
-Widget getTokenAssetIcon(String logoURI) => SvgPicture.network(logoURI);
 
 double getKeyboardInsetsBottom(BuildContext context) {
   final double _keyboardInsetsBottom = context.keyboardInsets.bottom;

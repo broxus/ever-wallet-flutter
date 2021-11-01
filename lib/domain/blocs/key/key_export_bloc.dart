@@ -26,7 +26,11 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
   Stream<KeyExportState> mapEventToState(KeyExportEvent event) async* {
     try {
       if (event is _Export) {
-        final key = _nekotonService.keys.firstWhere((e) => e.publicKey == event.publicKey);
+        final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == event.publicKey);
+
+        if (key == null) {
+          throw KeyNotFoundException();
+        }
 
         late final ExportKeyInput exportKeyInput;
 
@@ -55,7 +59,7 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
         } else if (output is DerivedKeyExportOutput) {
           yield KeyExportState.success(output.phrase.split(" "));
         } else {
-          throw UnsupportedError("Operation is unsupported");
+          throw UnknownSignerException();
         }
       }
     } catch (err, st) {

@@ -208,7 +208,7 @@ class _WebviewPageState extends State<WebviewPage> {
   void onAccountButtonTapped(List<AssetsList> accounts) => AccountSelection.open(
         context: context,
         accounts: accounts,
-        onTap: (String address) async => context.read<AccountsBloc>().add(AccountsEvent.setCurrent(address)),
+        onTap: (String address) => context.read<AccountsBloc>().add(AccountsEvent.setCurrent(address)),
       );
 
   Future<void> onShareButtonTapped() async {

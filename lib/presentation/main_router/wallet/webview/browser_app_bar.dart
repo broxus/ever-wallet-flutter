@@ -1,3 +1,4 @@
+import 'package:crystal/presentation/design/widget/account_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -8,7 +9,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../design/design.dart';
 import '../../../design/theme.dart';
-import '../../../design/utils.dart';
 
 class BrowserAppBar extends StatefulWidget {
   final AssetsList? currentAccount;
@@ -207,7 +207,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
           children: [
             SizedBox.square(
               dimension: 24,
-              child: getGravatarIcon(currentAccount.address.hashCode),
+              child: AccountIcon(address: currentAccount.address),
             ),
             const SizedBox(
               width: 8,

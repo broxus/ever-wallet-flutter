@@ -1,5 +1,7 @@
+import 'package:crystal/domain/models/ton_wallet_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
@@ -72,15 +74,15 @@ class _ProfileActionsState extends State<ProfileActions> {
             title: LocaleKeys.wallet_screen_actions_add_asset.tr(),
             iconAsset: Assets.images.iconAdd.path,
           ),
-          BlocBuilder<AccountInfoBloc, AccountInfoState?>(
+          BlocBuilder<AccountInfoBloc, AssetsList?>(
             bloc: accountInfoBloc,
             builder: (context, state) => WalletButton(
               onTap: state != null
                   ? () => showCrystalBottomSheet(
                         context,
-                        title: state.account.name.capitalize,
+                        title: state.name.capitalize,
                         body: ReceiveModalBody(
-                          address: state.account.address,
+                          address: state.address,
                         ),
                       )
                   : null,
@@ -88,7 +90,7 @@ class _ProfileActionsState extends State<ProfileActions> {
               iconAsset: Assets.images.iconReceive.path,
             ),
           ),
-          BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
+          BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
             bloc: tonWalletInfoBloc,
             builder: (context, state) => state != null
                 ? !state.details.requiresSeparateDeploy || state.contractState.isDeployed

@@ -1,6 +1,11 @@
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:tuple/tuple.dart';
 
 abstract class NekotonService {
+  Stream<Transport> get transportStream;
+
+  Transport get transport;
+
   Stream<List<KeyStoreEntry>> get keysStream;
 
   Stream<List<AssetsList>> get accountsStream;
@@ -64,6 +69,11 @@ abstract class NekotonService {
   });
 
   Future<void> clearAccountsStorage();
+
+  Future<Tuple2<Symbol, TokenWalletVersion>> getTokenWalletInfo({
+    required String address,
+    required String rootTokenContract,
+  });
 
   Stream<ApprovalRequest> get approvalStream;
 }

@@ -27,7 +27,7 @@ class BiometryPasswordDataBloc extends Bloc<BiometryPasswordDataEvent, BiometryP
   Stream<BiometryPasswordDataState> mapEventToState(BiometryPasswordDataEvent event) async* {
     try {
       if (event is _Get) {
-        final password = await _biometryRepository.get(event.publicKey);
+        final password = _biometryRepository.getKeyPassword(event.publicKey);
 
         if (password != null) {
           final isAuthenticated = await _biometryRepository.authenticate('Please authenticate to interact with wallet');

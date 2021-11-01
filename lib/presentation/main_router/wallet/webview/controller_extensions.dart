@@ -20,8 +20,7 @@ extension InAppWebViewControllerX on InAppWebViewController {
     }
   }
 
-  Future<void> openInitialPage() async =>
-      loadUrl(urlRequest: URLRequest(url: Uri.parse("https://l1.broxus.com/dapps")));
+  Future<void> openInitialPage() => loadUrl(urlRequest: URLRequest(url: Uri.parse("https://l1.broxus.com/dapps")));
 
   Future<void> parseAndLoadUrl(String url) async {
     try {
@@ -63,9 +62,9 @@ extension InAppWebViewControllerX on InAppWebViewController {
     }
   }
 
-  Future<String?> getStringifiedUrl() async => getUrl().then((value) => value?.toString());
+  Future<String?> getStringifiedUrl() => getUrl().then((value) => value?.toString());
 
-  Future<String?> getCurrentOrigin() async => getUrl().then((value) => value?.authority);
+  Future<String?> getCurrentOrigin() => getUrl().then((value) => value?.authority);
 
   Future<void> loadUrlWithResult({
     required URLRequest urlRequest,

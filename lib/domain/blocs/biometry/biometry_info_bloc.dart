@@ -22,14 +22,14 @@ class BiometryInfoBloc extends Bloc<_Event, BiometryInfoState> {
       _biometryRepository.biometryAvailabilityStream,
       _biometryRepository.biometryStatusStream,
       (a, b) => Tuple2(a, b),
-    ).listen(
-      (Tuple2<bool, bool> tuple) => add(
-        _LocalEvent.update(
-          isAvailable: tuple.item1,
-          isEnabled: tuple.item2,
-        ),
-      ),
-    );
+    ).distinct().listen(
+          (Tuple2<bool, bool> tuple) => add(
+            _LocalEvent.update(
+              isAvailable: tuple.item1,
+              isEnabled: tuple.item2,
+            ),
+          ),
+        );
   }
 
   @override
@@ -46,7 +46,7 @@ class BiometryInfoBloc extends Bloc<_Event, BiometryInfoState> {
         final isAuthenticated = await _biometryRepository.authenticate('Authenticate to change user settings');
 
         if (isAuthenticated) {
-          await _biometryRepository.setBiometryStatus(isEnabled: event.isEnabled);
+          await _biometryRepository.setBiometryStatus(event.isEnabled);
         }
       } else if (event is _CheckAvailability) {
         await _biometryRepository.checkBiometryAvailability();

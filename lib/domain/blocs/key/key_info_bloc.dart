@@ -12,7 +12,7 @@ import '../../services/nekoton_service.dart';
 part 'key_info_bloc.freezed.dart';
 
 @injectable
-class KeyInfoBloc extends Bloc<_Event, KeyInfoState?> {
+class KeyInfoBloc extends Bloc<_Event, KeyStoreEntry?> {
   final NekotonService _nekotonService;
   final _errorsSubject = PublishSubject<String>();
   StreamSubscription? _streamSubscription;
@@ -27,16 +27,23 @@ class KeyInfoBloc extends Bloc<_Event, KeyInfoState?> {
   }
 
   @override
-  Stream<KeyInfoState?> mapEventToState(_Event event) async* {
+  Stream<KeyStoreEntry?> mapEventToState(_Event event) async* {
     try {
       if (event is _Load) {
+        final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == event.publicKey);
+
+        if (key == null) {
+          throw KeyNotFoundException();
+        }
+
         _streamSubscription?.cancel();
         _streamSubscription = _nekotonService.keysStream
             .expand((e) => e)
             .where((e) => e.publicKey == event.publicKey)
+            .distinct()
             .listen((value) => add(_LocalEvent.update(value)));
       } else if (event is _Update) {
-        yield KeyInfoState(event.key);
+        yield event.key;
       }
     } catch (err, st) {
       logger.e(err, err, st);
@@ -57,9 +64,4 @@ class _LocalEvent extends _Event with _$_LocalEvent {
 @freezed
 class KeyInfoEvent extends _Event with _$KeyInfoEvent {
   const factory KeyInfoEvent.load(String publicKey) = _Load;
-}
-
-@freezed
-class KeyInfoState with _$KeyInfoState {
-  const factory KeyInfoState(KeyStoreEntry key) = _KeyInfoState;
 }

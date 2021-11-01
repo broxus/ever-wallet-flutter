@@ -1,8 +1,8 @@
+import 'package:crystal/presentation/design/widget/asset_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../domain/models/token_contract_asset.dart';
 import '../../../../design/design.dart';
-import '../../../../design/utils.dart';
 
 class SelectionAssetHolder extends StatelessWidget {
   final TokenContractAsset asset;
@@ -35,9 +35,10 @@ class SelectionAssetHolder extends StatelessWidget {
                   color: Colors.transparent,
                   icon: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: asset.logoURI != null
-                        ? getTokenAssetIcon(asset.logoURI!)
-                        : getGravatarIcon(asset.name.hashCode),
+                    child: AssetIcon(
+                      svgIcon: asset.svgIcon,
+                      gravatarIcon: asset.gravatarIcon,
+                    ),
                   ),
                 ),
                 const CrystalDivider(width: 16),

@@ -8,13 +8,13 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 
-part 'phrase_import_bloc.freezed.dart';
+part 'key_import_bloc.freezed.dart';
 
 @injectable
-class PhraseImportBloc extends Bloc<PhraseImportEvent, PhraseImportState> {
+class KeyImportBloc extends Bloc<KeyImportEvent, KeyImportState> {
   final _errorsSubject = PublishSubject<String>();
 
-  PhraseImportBloc() : super(const PhraseImportState.initial());
+  KeyImportBloc() : super(const KeyImportState.initial());
 
   @override
   Future<void> close() {
@@ -23,7 +23,7 @@ class PhraseImportBloc extends Bloc<PhraseImportEvent, PhraseImportState> {
   }
 
   @override
-  Stream<PhraseImportState> mapEventToState(PhraseImportEvent event) async* {
+  Stream<KeyImportState> mapEventToState(KeyImportEvent event) async* {
     try {
       if (event is _Submit) {
         final mnemonicType = event.phrase.length == 24 ? const MnemonicType.legacy() : const MnemonicType.labs(id: 0);
@@ -33,7 +33,7 @@ class PhraseImportBloc extends Bloc<PhraseImportEvent, PhraseImportState> {
           mnemonicType: mnemonicType,
         );
 
-        yield const PhraseImportState.success();
+        yield const KeyImportState.success();
       }
     } catch (err, st) {
       logger.e(err, err, st);
@@ -45,13 +45,13 @@ class PhraseImportBloc extends Bloc<PhraseImportEvent, PhraseImportState> {
 }
 
 @freezed
-class PhraseImportEvent with _$PhraseImportEvent {
-  const factory PhraseImportEvent.submit(List<String> phrase) = _Submit;
+class KeyImportEvent with _$KeyImportEvent {
+  const factory KeyImportEvent.submit(List<String> phrase) = _Submit;
 }
 
 @freezed
-class PhraseImportState with _$PhraseImportState {
-  const factory PhraseImportState.initial() = _Initial;
+class KeyImportState with _$KeyImportState {
+  const factory KeyImportState.initial() = _Initial;
 
-  const factory PhraseImportState.success() = _Success;
+  const factory KeyImportState.success() = _Success;
 }

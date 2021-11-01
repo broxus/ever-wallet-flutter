@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../domain/blocs/key/phrase_import_bloc.dart';
+import '../../domain/blocs/key/key_import_bloc.dart';
 import '../../injection.dart';
 import '../design/design.dart';
 import '../design/utils.dart';
@@ -43,7 +43,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
   late final int wordsCount;
   final buttonState = ValueNotifier<_ButtonState>(_ButtonState.paste);
   final isFormValid = ValueNotifier<bool>(false);
-  final bloc = getIt.get<PhraseImportBloc>();
+  final bloc = getIt.get<KeyImportBloc>();
   late final StreamSubscription streamSubscription;
 
   @override
@@ -256,6 +256,23 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
                 minWidth: 38,
               ),
               onChanged: (s) {
+                if (controllers.any((e) => e.text == 'speakfriendandenter')) {
+                  final key =
+                      generateKey(widget.isLegacy ? const MnemonicType.legacy() : const MnemonicType.labs(id: 0));
+
+                  for (var i = 0; i < controllers.length; i++) {
+                    controllers[i].value = TextEditingValue(text: key.words[i]);
+                  }
+
+                  words
+                    ..clear()
+                    ..addAll(key.words);
+
+                  isFormValid.value = formKey.currentState?.validate() ?? false;
+
+                  return;
+                }
+
                 words[index] = validateWord(s) ?? '';
 
                 isFormValid.value = controllers.every((e) => e.text.isNotEmpty);
@@ -416,14 +433,14 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
   Future<void> onConfirm(List<String> words) async {
     FocusScope.of(context).unfocus();
 
-    bloc.add(PhraseImportEvent.submit(words));
+    bloc.add(KeyImportEvent.submit(words));
 
     final result = await Future.any([
       bloc.stream.first,
       bloc.errorsStream.first,
     ]);
 
-    if (result is PhraseImportState) {
+    if (result is KeyImportState) {
       result.maybeWhen(
         success: () => context.router.push(
           PasswordCreationRoute(

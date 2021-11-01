@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:crystal/domain/models/token_contract_asset.dart';
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../../logger.dart';
-import '../../models/token_contract_asset.dart';
 import '../../repositories/ton_assets_repository.dart';
 import '../../services/nekoton_service.dart';
 
@@ -35,33 +38,58 @@ class AccountAssetsBloc extends Bloc<_Event, AccountAssetsState> {
   Stream<AccountAssetsState> mapEventToState(_Event event) async* {
     try {
       if (event is _Load) {
+        final account = _nekotonService.accounts.firstWhereOrNull((e) => e.address == event.address);
+
+        if (account == null) {
+          throw AccountNotFoundException();
+        }
+
         _streamSubscription?.cancel();
-        _streamSubscription = _nekotonService.tokenWalletsStream
-            .map((e) => e.where((e) => e.owner == event.address).toList())
-            .listen(
-                (value) => add(_LocalEvent.update(value.map((e) => TokenContractAsset.fromTokenWallet(e)).toList())));
+        _streamSubscription = Rx.combineLatest2<
+                Tuple2<TonWalletAsset, List<TokenWalletAsset>>,
+                List<TokenContractAsset>,
+                Tuple2<Tuple2<TonWalletAsset, List<TokenWalletAsset>>, List<TokenContractAsset>>>(
+          Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
+            _nekotonService.accountsStream.expand((e) => e).where((e) => e.address == event.address).distinct(),
+            _nekotonService.transportStream,
+            (a, b) => Tuple2(a, b),
+          ).map((event) {
+            final tonWalletAsset = event.item1.tonWallet;
+            final tokenWalletAssets = event.item1.additionalAssets.entries
+                .where((e) => e.key == event.item2.connectionData.group)
+                .map((e) => e.value.tokenWallets)
+                .expand((e) => e)
+                .toList();
 
-        if (_nekotonService.tokenWallets.where((e) => e.owner == event.address).isEmpty) {
-          add(const _LocalEvent.update([]));
-        }
-      } else if (event is _Update) {
-        final added = <TokenContractAsset>[];
-
-        for (final asset in event.assets) {
-          added.add(asset.copyWith(logoURI: await _tonAssetsRepository.getTokenLogoUri(asset.address)));
-        }
-
-        final stream = _tonAssetsRepository.getTokenContractAssetsStream();
-
-        await for (final item in stream) {
-          final available = item.where((e) => added.firstWhereOrNull((el) => el.address == e.address) == null).toList()
+            return Tuple2(
+              tonWalletAsset,
+              tokenWalletAssets,
+            );
+          }).distinct((previous, next) => previous.item1 == next.item1 && listEquals(previous.item2, next.item2)),
+          _tonAssetsRepository.assetsStream,
+          (a, b) => Tuple2(a, b),
+        )
+            .distinct((previous, next) =>
+                previous.item1.item1 == next.item1.item1 &&
+                listEquals(previous.item1.item2, next.item1.item2) &&
+                listEquals(previous.item2, next.item2))
+            .listen((value) {
+          final tonWalletAsset = value.item1.item1;
+          final tokenContractAssets = value.item2
+              .where((e) => value.item1.item2.any((el) => el.rootTokenContract == e.address))
+              .toList()
             ..sort((a, b) => b.address.compareTo(a.address));
 
-          yield AccountAssetsState(
-            added: added,
-            available: available,
-          );
-        }
+          add(_LocalEvent.update(
+            tonWalletAsset: tonWalletAsset,
+            tokenContractAssets: tokenContractAssets,
+          ));
+        });
+      } else if (event is _Update) {
+        yield AccountAssetsState(
+          tonWalletAsset: event.tonWalletAsset,
+          tokenContractAssets: event.tokenContractAssets,
+        );
       }
     } catch (err, st) {
       logger.e(err, err, st);
@@ -76,7 +104,10 @@ abstract class _Event {}
 
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
-  const factory _LocalEvent.update(List<TokenContractAsset> assets) = _Update;
+  const factory _LocalEvent.update({
+    required TonWalletAsset tonWalletAsset,
+    required List<TokenContractAsset> tokenContractAssets,
+  }) = _Update;
 }
 
 @freezed
@@ -87,7 +118,7 @@ class AccountAssetsEvent extends _Event with _$AccountAssetsEvent {
 @freezed
 class AccountAssetsState with _$AccountAssetsState {
   const factory AccountAssetsState({
-    @Default([]) List<TokenContractAsset> added,
-    @Default([]) List<TokenContractAsset> available,
+    TonWalletAsset? tonWalletAsset,
+    @Default([]) List<TokenContractAsset> tokenContractAssets,
   }) = _AccountAssetsState;
 }

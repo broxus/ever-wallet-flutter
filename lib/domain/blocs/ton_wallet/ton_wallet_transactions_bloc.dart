@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:crystal/domain/repositories/ton_wallet_transactions_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -17,6 +18,7 @@ part 'ton_wallet_transactions_bloc.freezed.dart';
 @injectable
 class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState> {
   final NekotonService _nekotonService;
+  final TonWalletTransactionsRepository _tonWalletTransactionsRepository;
   final _errorsSubject = PublishSubject<String>();
   StreamSubscription? _streamSubscription;
   StreamSubscription? _onTransactionsFoundSubscription;
@@ -24,7 +26,10 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
   StreamSubscription? _onMessageExpiredSubscription;
   Future<void> Function(TransactionId from)? _preloadTransactions;
 
-  TonWalletTransactionsBloc(this._nekotonService) : super(const TonWalletTransactionsState([]));
+  TonWalletTransactionsBloc(
+    this._nekotonService,
+    this._tonWalletTransactionsRepository,
+  ) : super(const TonWalletTransactionsState([]));
 
   @override
   Future<void> close() {
@@ -40,6 +45,19 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
   Stream<TonWalletTransactionsState> mapEventToState(_Event event) async* {
     try {
       if (event is _Load) {
+        final tonWalletTransactions = _tonWalletTransactionsRepository.get(event.address);
+
+        if (tonWalletTransactions != null) {
+          _nekotonService.tonWalletsStream
+              .expand((e) => e)
+              .where((e) => e.address == event.address)
+              .first
+              .then((value) => add(_LocalEvent.update(
+                    tonWallet: value,
+                    transactions: tonWalletTransactions,
+                  )));
+        }
+
         _streamSubscription?.cancel();
         _onTransactionsFoundSubscription?.cancel();
         _onMessageSentSubscription?.cancel();
@@ -47,24 +65,24 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
         _streamSubscription = _nekotonService.tonWalletsStream
             .expand((e) => e)
             .where((e) => e.address == event.address)
+            .distinct()
             .listen((tonWalletEvent) {
           _onTransactionsFoundSubscription?.cancel();
           _onMessageSentSubscription?.cancel();
           _onMessageExpiredSubscription?.cancel();
           _preloadTransactions = tonWalletEvent.preloadTransactions;
           _onTransactionsFoundSubscription =
-              tonWalletEvent.onTransactionsFoundStream.listen((event) async => add(_LocalEvent.update(
-                    tokenWallet: tonWalletEvent,
+              tonWalletEvent.onTransactionsFoundStream.listen((event) => add(_LocalEvent.update(
+                    tonWallet: tonWalletEvent,
                     transactions: event,
                   )));
-          _onMessageSentSubscription =
-              tonWalletEvent.onMessageSentStream.listen((event) async => add(_LocalEvent.updateSent(
-                    tokenWallet: tonWalletEvent,
-                    transactions: event,
-                  )));
+          _onMessageSentSubscription = tonWalletEvent.onMessageSentStream.listen((event) => add(_LocalEvent.updateSent(
+                tonWallet: tonWalletEvent,
+                transactions: event,
+              )));
           _onMessageExpiredSubscription =
-              tonWalletEvent.onMessageExpiredStream.listen((event) async => add(_LocalEvent.updateExpired(
-                    tokenWallet: tonWalletEvent,
+              tonWalletEvent.onMessageExpiredStream.listen((event) => add(_LocalEvent.updateExpired(
+                    tonWallet: tonWalletEvent,
                     transactions: event,
                   )));
         });
@@ -99,6 +117,11 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
         }).toList();
 
         yield TonWalletTransactionsState(transactions);
+
+        await _tonWalletTransactionsRepository.save(
+          tonWalletTransactions: event.transactions,
+          address: event.tonWallet.address,
+        );
       } else if (event is _UpdateSent) {
         // TODO: Implement _UpdateSent and check if this is realy working in nekoton
       } else if (event is _UpdateExpired) {
@@ -118,17 +141,17 @@ abstract class _Event {}
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
   const factory _LocalEvent.update({
-    required TonWallet tokenWallet,
+    required TonWallet tonWallet,
     required List<TonWalletTransactionWithData> transactions,
   }) = _Update;
 
   const factory _LocalEvent.updateSent({
-    required TonWallet tokenWallet,
+    required TonWallet tonWallet,
     required List<Transaction> transactions,
   }) = _UpdateSent;
 
   const factory _LocalEvent.updateExpired({
-    required TonWallet tokenWallet,
+    required TonWallet tonWallet,
     required List<Transaction> transactions,
   }) = _UpdateExpired;
 }

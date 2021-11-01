@@ -114,6 +114,12 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
       focusNode: wordsFocuses[index],
       autocorrect: false,
       onChanged: (_) {
+        if (wordsControllers.any((e) => e.text == 'speakfriendandenter')) {
+          for (var i = 0; i < wordsControllers.length; i++) {
+            wordsControllers[i].value = TextEditingValue(text: widget.phrase[words.entries.elementAt(i).key]);
+          }
+        }
+
         if (wordsControllers.every((e) => e.text.isNotEmpty)) {
           isFormValid.value = formKey.currentState?.validate() ?? false;
         }

@@ -1,9 +1,21 @@
 import '../models/token_contract_asset.dart';
 
 abstract class TonAssetsRepository {
-  Stream<List<TokenContractAsset>> getTokenContractAssetsStream({bool refresh = false});
+  Stream<List<TokenContractAsset>> get assetsStream;
 
-  Future<String?> getTokenLogoUri(String address);
+  List<TokenContractAsset> get assets;
+
+  Future<void> save(TokenContractAsset asset);
+
+  Future<void> saveCustom({
+    required String name,
+    required String symbol,
+    required int decimals,
+    required String address,
+    required int version,
+  });
+
+  Future<void> remove(String address);
 
   Future<void> clear();
 }

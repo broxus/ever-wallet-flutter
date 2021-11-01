@@ -1,8 +1,8 @@
+import 'package:crystal/presentation/design/widget/account_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../design/design.dart';
-import '../../../design/utils.dart';
 import '../../../design/widget/crystal_bottom_sheet.dart';
 
 class AccountSelection extends StatefulWidget {
@@ -47,7 +47,7 @@ class _AccountSelectionState extends State<AccountSelection> {
           itemBuilder: (context, index) => ListTile(
             leading: SizedBox.square(
               dimension: 32,
-              child: getGravatarIcon(widget.accounts[index].address.hashCode),
+              child: AccountIcon(address: widget.accounts[index].address),
             ),
             title: Text(
               widget.accounts[index].name,

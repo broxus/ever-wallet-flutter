@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 
+import 'package:crystal/domain/models/ton_wallet_info.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../domain/blocs/account/account_info_bloc.dart';
@@ -64,7 +66,7 @@ class _PreferencesBodyState extends State<PreferencesBody> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
+  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
         bloc: tonWalletInfoBloc,
         builder: (context, state) => state != null
             ? GestureDetector(
@@ -94,10 +96,10 @@ class _PreferencesBodyState extends State<PreferencesBody> {
             : const SizedBox(),
       );
 
-  Widget getNameTextField() => BlocConsumer<AccountInfoBloc, AccountInfoState?>(
+  Widget getNameTextField() => BlocConsumer<AccountInfoBloc, AssetsList?>(
         bloc: accountInfoBloc,
         listener: (context, state) {
-          if (state != null && textController.text != state.account.name) {
+          if (state != null && textController.text != state.name) {
             showCrystalFlushbar(
               context,
               message: LocaleKeys.preferences_modal_message_renamed.tr(),
@@ -106,8 +108,8 @@ class _PreferencesBodyState extends State<PreferencesBody> {
         },
         builder: (context, state) {
           if (state != null) {
-            textController.text = state.account.name;
-            textController.selection = TextSelection.collapsed(offset: state.account.name.length);
+            textController.text = state.name;
+            textController.selection = TextSelection.collapsed(offset: state.name.length);
 
             return CrystalTextFormField(
               controller: textController,
@@ -118,7 +120,7 @@ class _PreferencesBodyState extends State<PreferencesBody> {
                 FilteringTextInputFormatter.allow(RegExp('[a-zA-Z -_]')),
                 FilteringTextInputFormatter.deny('  ', replacementString: ' '),
               ],
-              suffix: getSaveButton(state.account.name),
+              suffix: getSaveButton(state.name),
             );
           } else {
             return const SizedBox();

@@ -91,7 +91,7 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
 
           yield const KeyCreationState.success();
         } else {
-          throw UnsupportedError("Operation is unsupported");
+          throw UnknownSignerException();
         }
       }
     } catch (err, st) {

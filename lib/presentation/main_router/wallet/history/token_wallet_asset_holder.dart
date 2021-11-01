@@ -1,20 +1,25 @@
+import 'package:crystal/domain/models/token_wallet_info.dart';
+import 'package:crystal/presentation/design/widget/asset_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
 import '../../../../injection.dart';
-import '../../../design/utils.dart';
 import '../modals/asset_observer/token_asset_observer.dart';
 import 'wallet_asset_holder.dart';
 
 class TokenWalletAssetHolder extends StatefulWidget {
   final String owner;
   final String rootTokenContract;
+  final String? svgIcon;
+  final List<int>? gravatarIcon;
 
   const TokenWalletAssetHolder({
     Key? key,
     required this.owner,
     required this.rootTokenContract,
+    this.svgIcon,
+    this.gravatarIcon,
   }) : super(key: key);
 
   @override
@@ -51,21 +56,22 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfoState?>(
+  Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
         bloc: bloc,
         builder: (context, state) => WalletAssetHolder(
           name: state != null ? state.symbol.name : '',
-          balance: state != null ? state.balance : '0',
-          icon: state != null
-              ? state.logoURI != null
-                  ? getTokenAssetIcon(state.logoURI!)
-                  : getGravatarIcon(state.symbol.name.hashCode)
-              : const SizedBox(),
+          balance: state != null ? state.balance : '0.0',
+          icon: AssetIcon(
+            svgIcon: widget.svgIcon,
+            gravatarIcon: widget.gravatarIcon,
+          ),
           onTap: state != null
               ? () => TokenAssetObserver.open(
                     context: context,
                     owner: state.owner,
                     rootTokenContract: state.symbol.rootTokenContract,
+                    svgIcon: widget.svgIcon,
+                    gravatarIcon: widget.gravatarIcon,
                   )
               : () {},
         ),

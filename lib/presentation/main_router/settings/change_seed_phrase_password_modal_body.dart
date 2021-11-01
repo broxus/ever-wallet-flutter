@@ -62,8 +62,8 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
             listener: (context, state) {
               state.maybeMap(
                 orElse: () => null,
-                success: (success) {
-                  if (success.isCorrect) {
+                ready: (ready) {
+                  if (ready.isCorrect) {
                     incorrectPasswordNotifier.value = false;
                     final newPassword = newPasswordController.text.trim();
 

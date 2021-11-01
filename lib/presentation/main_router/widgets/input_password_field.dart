@@ -41,7 +41,7 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
         bloc: bloc,
         listener: (context, state) {
           state.maybeWhen(
-            success: (isCorrect) {
+            ready: (isCorrect) {
               if (isCorrect) {
                 widget.onSubmit(controller.text.trim());
               }
@@ -51,7 +51,7 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
         },
         builder: (context, state) {
           final isCorrect = state.maybeWhen(
-            success: (isCorrect) => isCorrect,
+            ready: (isCorrect) => isCorrect,
             orElse: () => true,
           );
           return Column(

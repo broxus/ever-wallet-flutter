@@ -17,9 +17,7 @@ class ApprovalsBloc extends Bloc<ApprovalsEvent, ApprovalsState> {
   final _errorsSubject = PublishSubject<String>();
 
   ApprovalsBloc(this._nekotonService) : super(const ApprovalsState.initial()) {
-    _nekotonService.approvalStream.listen((event) {
-      add(ApprovalsEvent.show(event));
-    });
+    _nekotonService.approvalStream.listen((event) => add(ApprovalsEvent.show(event)));
   }
 
   @override

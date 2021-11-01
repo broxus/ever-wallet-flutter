@@ -17,15 +17,14 @@ Future<bool> showRequestPermissionsDialog(
   required List<Permission> permissions,
   required String address,
   required String publicKey,
-}) async =>
-    await RequestPermissionsBody.open(
+}) =>
+    RequestPermissionsBody.open(
       context: context,
       origin: origin,
       permissions: permissions,
       address: address,
       publicKey: publicKey,
-    ) ??
-    false;
+    ).then((value) => value ?? false);
 
 Future<String?> showSendMessageDialog(
   BuildContext context, {

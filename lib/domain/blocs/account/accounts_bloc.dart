@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -22,7 +23,7 @@ class AccountsBloc extends Bloc<_Event, AccountsState> {
       _nekotonService.currentKeyStream,
       _nekotonService.accountsStream,
       (a, b) => b.where((e) => e.publicKey == a?.publicKey).toList(),
-    ).listen((event) => add(_LocalEvent.update(event)));
+    ).distinct((previous, next) => listEquals(previous, next)).listen((event) => add(_LocalEvent.update(event)));
   }
 
   @override
@@ -43,13 +44,8 @@ class AccountsBloc extends Bloc<_Event, AccountsState> {
           currentAccount: currentAccount,
         );
       } else if (event is _Update) {
-        var currentAccount = event.accounts.firstWhereOrNull((e) => e.address == state.currentAccount?.address);
-
-        if (currentAccount == null) {
-          currentAccount = event.accounts.firstOrNull;
-        } else {
-          currentAccount = currentAccount;
-        }
+        final currentAccount = event.accounts.firstWhereOrNull((e) => e.address == state.currentAccount?.address) ??
+            event.accounts.firstOrNull;
 
         yield AccountsState(
           accounts: event.accounts,

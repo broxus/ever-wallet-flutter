@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 part 'token_contract_asset.freezed.dart';
 
@@ -11,15 +10,8 @@ class TokenContractAsset with _$TokenContractAsset {
     required String symbol,
     required int decimals,
     required String address,
-    String? logoURI,
+    String? svgIcon,
+    List<int>? gravatarIcon,
     required int version,
   }) = _TokenContractAsset;
-
-  factory TokenContractAsset.fromTokenWallet(TokenWallet tokenWallet) => TokenContractAsset(
-        name: tokenWallet.symbol.fullName,
-        symbol: tokenWallet.symbol.name,
-        decimals: tokenWallet.symbol.decimals,
-        address: tokenWallet.symbol.rootTokenContract,
-        version: tokenWallet.version.index + 1,
-      );
 }

@@ -37,7 +37,9 @@ class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateM
 
   @override
   void dispose() {
-    accountAssetsAdditionBloc.close();
+    Future.delayed(const Duration(seconds: 3)).then((_) {
+      accountAssetsAdditionBloc.close();
+    });
     selectAssetsLayoutScrollController.dispose();
     newAssetLayoutScrollController.dispose();
     accountAssetsAdditionErrorsSubscription.cancel();

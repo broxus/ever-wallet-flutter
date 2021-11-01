@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:crystal/domain/repositories/ton_assets_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
@@ -13,9 +14,13 @@ part 'account_assets_addition_bloc.freezed.dart';
 @injectable
 class AccountAssetsAdditionBloc extends Bloc<AccountAssetsAdditionEvent, AccountAssetsAdditionState> {
   final NekotonService _nekotonService;
+  final TonAssetsRepository _tonAssetsRepository;
   final _errorsSubject = PublishSubject<String>();
 
-  AccountAssetsAdditionBloc(this._nekotonService) : super(const AccountAssetsAdditionState.initial());
+  AccountAssetsAdditionBloc(
+    this._nekotonService,
+    this._tonAssetsRepository,
+  ) : super(const AccountAssetsAdditionState.initial());
 
   @override
   Future<void> close() {
@@ -31,6 +36,21 @@ class AccountAssetsAdditionBloc extends Bloc<AccountAssetsAdditionEvent, Account
           address: event.address,
           rootTokenContract: event.rootTokenContract,
         );
+
+        if (_tonAssetsRepository.assets.firstWhereOrNull((e) => e.address == event.rootTokenContract) == null) {
+          final tokenWalletInfo = await _nekotonService.getTokenWalletInfo(
+            address: event.address,
+            rootTokenContract: event.rootTokenContract,
+          );
+
+          await _tonAssetsRepository.saveCustom(
+            name: tokenWalletInfo.item1.fullName,
+            symbol: tokenWalletInfo.item1.name,
+            decimals: tokenWalletInfo.item1.decimals,
+            address: tokenWalletInfo.item1.rootTokenContract,
+            version: tokenWalletInfo.item2.index + 1,
+          );
+        }
 
         yield const AccountAssetsAdditionState.success();
       } else if (event is _Remove) {

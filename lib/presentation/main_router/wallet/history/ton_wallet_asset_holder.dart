@@ -1,3 +1,4 @@
+import 'package:crystal/domain/models/ton_wallet_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -43,11 +44,11 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
+  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
         bloc: bloc,
         builder: (context, state) => WalletAssetHolder(
           name: 'TON',
-          balance: state != null ? state.contractState.balance : '0',
+          balance: state != null ? state.contractState.balance : '0.0',
           icon: Image.asset(Assets.images.ton.path),
           onTap: state != null
               ? () => TonAssetObserver.open(

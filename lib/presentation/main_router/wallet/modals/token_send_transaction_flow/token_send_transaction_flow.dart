@@ -97,8 +97,8 @@ class _TokenSendTransactionFlowState extends State<TokenSendTransactionFlow> {
             listener: (context, state) {
               FocusScope.of(context).unfocus();
               state.maybeMap(
-                initial: (_) async => _pageController.openAt(0),
-                messagePrepared: (_) async => _pageController.openAt(1),
+                initial: (_) => _pageController.openAt(0),
+                messagePrepared: (_) => _pageController.openAt(1),
                 password: (_) async {
                   String? password;
 
@@ -128,8 +128,8 @@ class _TokenSendTransactionFlowState extends State<TokenSendTransactionFlow> {
                     _pageController.openAt(2);
                   }
                 },
-                sending: (_) async => _pageController.openAt(3),
-                orElse: () async => null,
+                sending: (_) => _pageController.openAt(3),
+                orElse: () => null,
               );
             },
             builder: (context, state) {

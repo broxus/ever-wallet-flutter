@@ -33,7 +33,11 @@ class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
   Stream<KeyUpdateState> mapEventToState(KeyUpdateEvent event) async* {
     try {
       if (event is _ChangePassword) {
-        final key = _nekotonService.keys.firstWhere((e) => e.publicKey == event.publicKey);
+        final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == event.publicKey);
+
+        if (key == null) {
+          throw KeyNotFoundException();
+        }
 
         late final UpdateKeyInput updateKeyInput;
 
@@ -72,7 +76,11 @@ class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
 
         yield const KeyUpdateState.success();
       } else if (event is _Rename) {
-        final key = _nekotonService.keys.firstWhere((e) => e.publicKey == event.publicKey);
+        final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == event.publicKey);
+
+        if (key == null) {
+          throw KeyNotFoundException();
+        }
 
         late final UpdateKeyInput updateKeyInput;
 

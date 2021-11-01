@@ -151,7 +151,7 @@ class MainRouterPageState extends State<MainRouterPage> {
     return true;
   }
 
-  Future<void> showAddAccountDialog() async => showPlatformDialog(
+  Future<void> showAddAccountDialog() => showPlatformDialog(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) => Theme(

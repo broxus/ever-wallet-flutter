@@ -1,4 +1,6 @@
 import 'package:collection/collection.dart';
+import 'package:crystal/domain/models/token_wallet_info.dart';
+import 'package:crystal/presentation/design/widget/asset_icon.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,18 +20,23 @@ import '../token_send_transaction_flow/token_send_transaction_flow.dart';
 class TokenAssetObserver extends StatefulWidget {
   final String owner;
   final String rootTokenContract;
+  final String? svgIcon;
+  final List<int>? gravatarIcon;
 
   const TokenAssetObserver._({
     Key? key,
     required this.owner,
     required this.rootTokenContract,
+    this.svgIcon,
+    this.gravatarIcon,
   }) : super(key: key);
 
   static Future<void> open({
     required BuildContext context,
     required String owner,
     required String rootTokenContract,
-    String? logoURI,
+    String? svgIcon,
+    List<int>? gravatarIcon,
   }) =>
       showCrystalBottomSheet(
         context,
@@ -40,6 +47,8 @@ class TokenAssetObserver extends StatefulWidget {
         body: TokenAssetObserver._(
           owner: owner,
           rootTokenContract: rootTokenContract,
+          svgIcon: svgIcon,
+          gravatarIcon: gravatarIcon,
         ),
       );
 
@@ -89,7 +98,7 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfoState?>(
+  Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
         bloc: tokenWalletInfoBloc,
         builder: (context, state) => state != null
             ? Column(
@@ -97,7 +106,6 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _header(
-                    logoURI: state.logoURI,
                     owner: state.owner,
                     balance: state.balance,
                     contractState: state.contractState,
@@ -115,7 +123,6 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
       );
 
   Widget _header({
-    required String? logoURI,
     required String owner,
     required String balance,
     required ContractState contractState,
@@ -138,7 +145,10 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
                   color: Colors.transparent,
                   icon: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: logoURI != null ? getTokenAssetIcon(logoURI) : getGravatarIcon(symbol.name.hashCode),
+                    child: AssetIcon(
+                      svgIcon: widget.svgIcon,
+                      gravatarIcon: widget.gravatarIcon,
+                    ),
                   ),
                 ),
                 const CrystalDivider(width: 16),

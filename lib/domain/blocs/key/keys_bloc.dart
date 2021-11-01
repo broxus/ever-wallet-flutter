@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -25,14 +26,14 @@ class KeysBloc extends Bloc<_Event, KeysState> {
       _nekotonService.currentKeyStream,
       _nekotonService.keysStream,
       (a, b) => Tuple2(a, b),
-    ).listen(
-      (Tuple2<KeyStoreEntry?, List<KeyStoreEntry>> tuple) => add(
-        _LocalEvent.update(
-          keys: tuple.item2,
-          currentKey: tuple.item1,
-        ),
-      ),
-    );
+    ).distinct((previous, next) => previous.item1 == next.item1 && listEquals(previous.item2, next.item2)).listen(
+              (event) => add(
+                _LocalEvent.update(
+                  keys: event.item2,
+                  currentKey: event.item1,
+                ),
+              ),
+            );
   }
 
   @override

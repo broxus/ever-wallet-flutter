@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../domain/services/nekoton_service.dart';
 import '../../logger.dart';
@@ -21,6 +22,12 @@ class NekotonServiceImpl implements NekotonService {
   }
 
   @override
+  Stream<Transport> get transportStream => _nekoton.connectionController.transportStream;
+
+  @override
+  Transport get transport => _nekoton.connectionController.transport;
+
+  @override
   Stream<List<KeyStoreEntry>> get keysStream => _nekoton.keystoreController.keysStream;
 
   @override
@@ -36,11 +43,13 @@ class NekotonServiceImpl implements NekotonService {
   Stream<KeyStoreEntry?> get currentKeyStream => _nekoton.keystoreController.currentKeyStream;
 
   @override
-  Stream<bool> get keysPresenceStream => _nekoton.keystoreController.keysStream.transform<bool>(
+  Stream<bool> get keysPresenceStream => _nekoton.keystoreController.keysStream
+      .transform<bool>(
         StreamTransformer.fromHandlers(
           handleData: (data, sink) => sink.add(data.isNotEmpty),
         ),
-      );
+      )
+      .distinct();
 
   @override
   List<KeyStoreEntry> get keys => _nekoton.keystoreController.keys;
@@ -132,6 +141,16 @@ class NekotonServiceImpl implements NekotonService {
 
   @override
   Future<void> clearAccountsStorage() => _nekoton.accountsStorageController.clearAccountsStorage();
+
+  @override
+  Future<Tuple2<Symbol, TokenWalletVersion>> getTokenWalletInfo({
+    required String address,
+    required String rootTokenContract,
+  }) =>
+      _nekoton.subscriptionsController.getTokenWalletInfo(
+        address: address,
+        rootTokenContract: rootTokenContract,
+      );
 
   @override
   Stream<ApprovalRequest> get approvalStream => _nekoton.approvalController.approvalStream;

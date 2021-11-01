@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:crystal/domain/blocs/account/account_assets_bloc.dart';
+import 'package:crystal/domain/blocs/account/account_assets_options_bloc.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +28,7 @@ class AssetsLayout extends StatefulWidget {
 }
 
 class _AssetsLayoutState extends State<AssetsLayout> {
-  final accountAssetsBloc = getIt.get<AccountAssetsBloc>();
+  final accountAssetsOptionsBloc = getIt.get<AccountAssetsOptionsBloc>();
   final selected = ValueNotifier<List<TokenContractAsset>>([]);
   final filtered = ValueNotifier<List<TokenContractAsset>>([]);
   late final StreamSubscription accountAssetsErrorsSubscription;
@@ -37,29 +37,29 @@ class _AssetsLayoutState extends State<AssetsLayout> {
   void initState() {
     super.initState();
     accountAssetsErrorsSubscription =
-        accountAssetsBloc.errorsStream.listen((event) => showErrorCrystalFlushbar(context, message: event));
-    accountAssetsBloc.add(AccountAssetsEvent.load(widget.address));
+        accountAssetsOptionsBloc.errorsStream.listen((event) => showErrorCrystalFlushbar(context, message: event));
+    accountAssetsOptionsBloc.add(AccountAssetsOptionsEvent.load(widget.address));
   }
 
   @override
   void didUpdateWidget(covariant AssetsLayout oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.address != widget.address) {
-      accountAssetsBloc.add(AccountAssetsEvent.load(widget.address));
+      accountAssetsOptionsBloc.add(AccountAssetsOptionsEvent.load(widget.address));
     }
   }
 
   @override
   void dispose() {
-    accountAssetsBloc.close();
+    accountAssetsOptionsBloc.close();
     selected.dispose();
     accountAssetsErrorsSubscription.cancel();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocConsumer<AccountAssetsBloc, AccountAssetsState>(
-        bloc: accountAssetsBloc,
+  Widget build(BuildContext context) => BlocConsumer<AccountAssetsOptionsBloc, AccountAssetsOptionsState>(
+        bloc: accountAssetsOptionsBloc,
         listener: (context, state) {
           selected.value = [...state.added];
           filtered.value = [...state.added, ...state.available];

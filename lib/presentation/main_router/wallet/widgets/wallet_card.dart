@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:crystal/domain/models/ton_wallet_info.dart';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -116,7 +117,7 @@ class _WalletCardState extends State<WalletCard> {
                   ),
                 ),
               ),
-              BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
+              BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
                 bloc: tonWalletInfoBloc,
                 builder: (context, state) => state != null
                     ? Positioned(
@@ -153,11 +154,11 @@ class _WalletCardState extends State<WalletCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BlocBuilder<AccountInfoBloc, AccountInfoState?>(
+            BlocBuilder<AccountInfoBloc, AssetsList?>(
               bloc: accountInfoBloc,
               builder: (context, state) => state != null
                   ? AutoSizeText(
-                      state.account.name,
+                      state.name,
                       maxLines: 1,
                       maxFontSize: 16,
                       style: const TextStyle(
@@ -169,7 +170,7 @@ class _WalletCardState extends State<WalletCard> {
                   : const SizedBox(),
             ),
             const CrystalDivider(height: 8),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
+            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
                   ? buildNamedField(
@@ -182,7 +183,7 @@ class _WalletCardState extends State<WalletCard> {
                       name: LocaleKeys.fields_public_key.tr(),
                     ),
             ),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
+            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
                   ? buildNamedField(
@@ -195,7 +196,7 @@ class _WalletCardState extends State<WalletCard> {
                       name: LocaleKeys.fields_address.tr(),
                     ),
             ),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
+            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
                   ? buildNamedField(
@@ -209,7 +210,7 @@ class _WalletCardState extends State<WalletCard> {
                     ),
             ),
             const Spacer(),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfoState?>(
+            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
                   ? Padding(

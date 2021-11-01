@@ -28,7 +28,11 @@ class KeyPasswordCheckingBloc extends Bloc<KeyPasswordCheckingEvent, KeyPassword
   Stream<KeyPasswordCheckingState> mapEventToState(KeyPasswordCheckingEvent event) async* {
     try {
       if (event is _Check) {
-        final key = _nekotonService.keys.firstWhere((e) => e.publicKey == event.publicKey);
+        final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == event.publicKey);
+
+        if (key == null) {
+          throw KeyNotFoundException();
+        }
 
         late final SignInput signInput;
 
@@ -53,7 +57,7 @@ class KeyPasswordCheckingBloc extends Bloc<KeyPasswordCheckingEvent, KeyPassword
 
         final isCorrect = await _nekotonService.checkKeyPassword(signInput);
 
-        yield KeyPasswordCheckingState.success(isCorrect);
+        yield KeyPasswordCheckingState.ready(isCorrect);
       }
     } catch (err, st) {
       logger.e(err, err, st);
@@ -76,5 +80,5 @@ class KeyPasswordCheckingEvent with _$KeyPasswordCheckingEvent {
 class KeyPasswordCheckingState with _$KeyPasswordCheckingState {
   const factory KeyPasswordCheckingState.initial() = _Initial;
 
-  const factory KeyPasswordCheckingState.success(bool isCorrect) = _Success;
+  const factory KeyPasswordCheckingState.ready(bool isCorrect) = _Ready;
 }
