@@ -1,4 +1,3 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -119,29 +118,11 @@ class WalletTransactionHolder extends StatelessWidget {
               ),
               SizedBox(
                 width: 100,
-                child: ExtendedText(
-                  transaction.address,
-                  key: UniqueKey(),
+                child: Text(
+                  transaction.address.elipseAddress(),
                   maxLines: 1,
                   textAlign: TextAlign.start,
                   softWrap: false,
-                  overflowWidget: TextOverflowWidget(
-                    align: TextOverflowAlign.center,
-                    position: TextOverflowPosition.middle,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: List.filled(
-                        3,
-                        const Padding(
-                          padding: EdgeInsets.all(2),
-                          child: CircleIcon(
-                            color: CrystalColor.fontDark,
-                            size: 2,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                   style: const TextStyle(
                     letterSpacing: 0.25,
                     color: CrystalColor.fontDark,

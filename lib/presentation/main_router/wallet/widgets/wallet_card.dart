@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:crystal/domain/models/ton_wallet_info.dart';
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback;
@@ -176,7 +175,7 @@ class _WalletCardState extends State<WalletCard> {
                   ? buildNamedField(
                       controller: publicKeyController,
                       name: LocaleKeys.fields_public_key.tr(),
-                      value: state.publicKey,
+                      value: state.publicKey.elipsePublicKey(),
                     )
                   : buildNamedField(
                       controller: publicKeyController,
@@ -189,7 +188,7 @@ class _WalletCardState extends State<WalletCard> {
                   ? buildNamedField(
                       controller: addressController,
                       name: LocaleKeys.fields_address.tr(),
-                      value: state.address,
+                      value: state.address.elipseAddress(),
                     )
                   : buildNamedField(
                       controller: addressController,
@@ -289,20 +288,9 @@ class _WalletCardState extends State<WalletCard> {
                     ),
                     child: (onHold) => SizedBox(
                       height: 20,
-                      child: ExtendedText(
+                      child: Text(
                         value,
-                        key: UniqueKey(),
                         maxLines: 1,
-                        overflowWidget: TextOverflowWidget(
-                          position: TextOverflowPosition.middle,
-                          align: TextOverflowAlign.center,
-                          child: Text(
-                            '…',
-                            style: TextStyle(
-                              color: CrystalColor.secondary.withOpacity(!onHold && isSelectable ? 0.64 : 1),
-                            ),
-                          ),
-                        ),
                         textAlign: TextAlign.start,
                         style: TextStyle(
                           height: 20 / 14,

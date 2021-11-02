@@ -19,7 +19,6 @@ dependencies:
   dio: ^4.0.0
   easy_localization: ^3.0.0
   expand_tap_area: ^1.1.0
-  extended_text: ^7.0.0
   fading_edge_scrollview: ^2.0.0
   firebase_analytics: ^8.0.2
   firebase_core: ^1.1.0
