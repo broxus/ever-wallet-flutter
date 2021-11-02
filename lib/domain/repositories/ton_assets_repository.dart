@@ -18,4 +18,6 @@ abstract class TonAssetsRepository {
   Future<void> remove(String address);
 
   Future<void> clear();
+
+  Future<void> refresh();
 }

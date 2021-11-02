@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:crystal/data/dtos/token_contract_asset_dto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -18,7 +19,7 @@ class TonAssetsRepositoryImpl implements TonAssetsRepository {
     this._hiveSource,
     this._restSource,
   ) {
-    _refresh();
+    _loadFromCache();
   }
 
   @override
@@ -77,13 +78,11 @@ class TonAssetsRepositoryImpl implements TonAssetsRepository {
     await _hiveSource.clearTokenContractAssets();
   }
 
-  Future<void> _refresh() async {
-    final cachedDtos = _hiveSource.getTokenContractAssets();
-    final cached = cachedDtos.map((e) => e.toModel()).toList();
-
-    _assetsSubject.add(cached);
-
+  @override
+  Future<void> refresh() async {
     final manifest = await _restSource.getTonAssetsManifest();
+
+    final assets = <TokenContractAsset>[];
 
     for (final token in manifest.tokens) {
       String? svgIcon;
@@ -109,7 +108,22 @@ class TonAssetsRepositoryImpl implements TonAssetsRepository {
       );
       final asset = assetDto.toModel();
 
-      await save(asset);
+      await _hiveSource.saveTokenContractAsset(assetDto);
+
+      assets.add(asset);
     }
+
+    final list = [
+      ...assets,
+      ..._assetsSubject.value.where((e) => assets.firstWhereOrNull((el) => e.address != el.address) == null)
+    ];
+
+    _assetsSubject.add(list);
+  }
+
+  void _loadFromCache() {
+    final assets = _hiveSource.getTokenContractAssets().map((e) => e.toModel()).toList();
+
+    _assetsSubject.add(assets);
   }
 }

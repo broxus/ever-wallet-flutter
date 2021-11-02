@@ -1,6 +1,10 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:crystal/domain/repositories/token_wallet_info_repository.dart';
+import 'package:crystal/domain/repositories/token_wallet_transactions_repository.dart';
+import 'package:crystal/domain/repositories/ton_wallet_info_repository.dart';
+import 'package:crystal/domain/repositories/ton_wallet_transactions_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
@@ -17,6 +21,10 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
   final NekotonService _nekotonService;
   final BiometryRepository _biometryRepository;
   final TonAssetsRepository _tonAssetsRepository;
+  final TonWalletInfoRepository _tonWalletInfoRepository;
+  final TokenWalletInfoRepository _tokenWalletInfoRepository;
+  final TonWalletTransactionsRepository _tonWalletTransactionsRepository;
+  final TokenWalletTransactionsRepository _tokenWalletTransactionsRepository;
   final _errorsSubject = PublishSubject<String>();
   late final StreamSubscription _streamSubscription;
 
@@ -24,6 +32,10 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
     this._nekotonService,
     this._biometryRepository,
     this._tonAssetsRepository,
+    this._tonWalletInfoRepository,
+    this._tokenWalletInfoRepository,
+    this._tonWalletTransactionsRepository,
+    this._tokenWalletTransactionsRepository,
   ) : super(const ApplicationFlowState.loading()) {
     _streamSubscription = _nekotonService.keysPresenceStream.listen((bool hasKeys) => add(_LocalEvent.update(hasKeys)));
   }
@@ -40,6 +52,8 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
     try {
       if (event is _Update) {
         if (event.hasKeys) {
+          _tonAssetsRepository.refresh();
+
           yield const ApplicationFlowState.home();
         } else {
           yield const ApplicationFlowState.welcome();
@@ -51,6 +65,10 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
         await _nekotonService.clearKeystore();
         await _biometryRepository.clear();
         await _tonAssetsRepository.clear();
+        await _tonWalletInfoRepository.clear();
+        await _tokenWalletInfoRepository.clear();
+        await _tonWalletTransactionsRepository.clear();
+        await _tokenWalletTransactionsRepository.clear();
       }
     } catch (err, st) {
       logger.e(err, err, st);

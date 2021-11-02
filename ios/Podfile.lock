@@ -208,7 +208,7 @@ SPEC CHECKSUMS:
   nekoton_flutter: 08cfb02a40d69a004d60cf73c05b792b3f8bce94
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
-  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
+  path_provider: d1e9807085df1f9cc9318206cd649dc0b76be3de
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
