@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
+
+part 'key_import_bloc.freezed.dart';
 
 @injectable
 class KeyImportBloc extends Bloc<KeyImportEvent, KeyImportState> {
@@ -13,14 +16,16 @@ class KeyImportBloc extends Bloc<KeyImportEvent, KeyImportState> {
   @override
   Stream<KeyImportState> mapEventToState(KeyImportEvent event) async* {
     try {
-      final mnemonicType = event.phrase.length == 24 ? const MnemonicType.legacy() : const MnemonicType.labs(id: 0);
+      if (event is _Import) {
+        final mnemonicType = event.phrase.length == 24 ? const MnemonicType.legacy() : const MnemonicType.labs(id: 0);
 
-      deriveFromPhrase(
-        phrase: event.phrase,
-        mnemonicType: mnemonicType,
-      );
+        deriveFromPhrase(
+          phrase: event.phrase,
+          mnemonicType: mnemonicType,
+        );
 
-      yield KeyImportStateSuccess();
+        yield KeyImportStateSuccess();
+      }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
       yield KeyImportStateError(err);
@@ -28,23 +33,16 @@ class KeyImportBloc extends Bloc<KeyImportEvent, KeyImportState> {
   }
 }
 
-class KeyImportEvent {
-  final List<String> phrase;
-
-  KeyImportEvent(this.phrase);
+@freezed
+class KeyImportEvent with _$KeyImportEvent {
+  const factory KeyImportEvent.import(List<String> phrase) = _Import;
 }
 
-abstract class KeyImportState {
-  KeyImportState();
-}
+abstract class KeyImportState {}
 
-class KeyImportStateInitial extends KeyImportState {
-  KeyImportStateInitial();
-}
+class KeyImportStateInitial extends KeyImportState {}
 
-class KeyImportStateSuccess extends KeyImportState {
-  KeyImportStateSuccess();
-}
+class KeyImportStateSuccess extends KeyImportState {}
 
 class KeyImportStateError extends KeyImportState {
   final Exception exception;

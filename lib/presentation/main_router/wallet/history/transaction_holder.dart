@@ -119,7 +119,7 @@ class WalletTransactionHolder extends StatelessWidget {
               SizedBox(
                 width: 100,
                 child: Text(
-                  transaction.address.elipseAddress(),
+                  transaction.address.ellipseAddress(),
                   maxLines: 1,
                   textAlign: TextAlign.start,
                   softWrap: false,

@@ -17,7 +17,7 @@ part 'keys_bloc.freezed.dart';
 @injectable
 class KeysBloc extends Bloc<_Event, KeysState> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   late final StreamSubscription _streamSubscription;
 
   KeysBloc(this._nekotonService) : super(const KeysState()) {
@@ -63,9 +63,9 @@ class KeysBloc extends Bloc<_Event, KeysState> {
           currentKey: key,
         );
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
@@ -91,7 +91,7 @@ class KeysBloc extends Bloc<_Event, KeysState> {
     return map;
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

@@ -1,8 +1,8 @@
-import 'package:crystal/presentation/design/widget/asset_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../domain/models/token_contract_asset.dart';
 import '../../../../design/design.dart';
+import '../../../../design/widget/asset_icon.dart';
 
 class SelectionAssetHolder extends StatelessWidget {
   final TokenContractAsset asset;

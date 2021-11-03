@@ -1,8 +1,8 @@
-import 'package:crystal/domain/blocs/key/key_password_checking_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../domain/blocs/key/key_password_checking_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
 
@@ -40,20 +40,15 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
   Widget build(BuildContext context) => BlocConsumer<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
         bloc: bloc,
         listener: (context, state) {
-          state.maybeWhen(
-            ready: (isCorrect) {
-              if (isCorrect) {
-                widget.onSubmit(controller.text.trim());
-              }
-            },
-            orElse: () => null,
-          );
+          if (state is KeyPasswordCheckingStateSuccess) {
+            if (state.isCorrect) {
+              widget.onSubmit(controller.text.trim());
+            }
+          }
         },
         builder: (context, state) {
-          final isCorrect = state.maybeWhen(
-            ready: (isCorrect) => isCorrect,
-            orElse: () => true,
-          );
+          final isCorrect = state is KeyPasswordCheckingStateSuccess && state.isCorrect || true;
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

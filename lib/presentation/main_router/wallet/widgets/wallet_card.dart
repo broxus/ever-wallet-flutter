@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:crystal/domain/models/ton_wallet_info.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback;
@@ -12,6 +11,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
+import '../../../../domain/models/ton_wallet_info.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/extension.dart';
@@ -175,7 +175,8 @@ class _WalletCardState extends State<WalletCard> {
                   ? buildNamedField(
                       controller: publicKeyController,
                       name: LocaleKeys.fields_public_key.tr(),
-                      value: state.publicKey.elipsePublicKey(),
+                      value: state.publicKey,
+                      ellipsedValue: state.publicKey.ellipsePublicKey(),
                     )
                   : buildNamedField(
                       controller: publicKeyController,
@@ -188,7 +189,8 @@ class _WalletCardState extends State<WalletCard> {
                   ? buildNamedField(
                       controller: addressController,
                       name: LocaleKeys.fields_address.tr(),
-                      value: state.address.elipseAddress(),
+                      value: state.address,
+                      ellipsedValue: state.address.ellipseAddress(),
                     )
                   : buildNamedField(
                       controller: addressController,
@@ -226,6 +228,7 @@ class _WalletCardState extends State<WalletCard> {
     SelectionController? controller,
     required String name,
     String? value,
+    String? ellipsedValue,
     bool isSelectable = true,
     bool disabled = false,
   }) =>
@@ -241,7 +244,7 @@ class _WalletCardState extends State<WalletCard> {
           ),
           const CrystalDivider(width: 8),
           Flexible(
-            child: value == null
+            child: value == null && ellipsedValue == null
                 ? Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                     child: buildShimmer(),
@@ -289,7 +292,7 @@ class _WalletCardState extends State<WalletCard> {
                     child: (onHold) => SizedBox(
                       height: 20,
                       child: Text(
-                        value,
+                        ellipsedValue ?? value!,
                         maxLines: 1,
                         textAlign: TextAlign.start,
                         style: TextStyle(

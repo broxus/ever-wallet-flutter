@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
@@ -14,15 +13,8 @@ part 'key_password_checking_bloc.freezed.dart';
 @injectable
 class KeyPasswordCheckingBloc extends Bloc<KeyPasswordCheckingEvent, KeyPasswordCheckingState> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
 
-  KeyPasswordCheckingBloc(this._nekotonService) : super(const KeyPasswordCheckingState.initial());
-
-  @override
-  Future<void> close() {
-    _errorsSubject.close();
-    return super.close();
-  }
+  KeyPasswordCheckingBloc(this._nekotonService) : super(KeyPasswordCheckingStateInitial());
 
   @override
   Stream<KeyPasswordCheckingState> mapEventToState(KeyPasswordCheckingEvent event) async* {
@@ -57,15 +49,13 @@ class KeyPasswordCheckingBloc extends Bloc<KeyPasswordCheckingEvent, KeyPassword
 
         final isCorrect = await _nekotonService.checkKeyPassword(signInput);
 
-        yield KeyPasswordCheckingState.ready(isCorrect);
+        yield KeyPasswordCheckingStateSuccess(isCorrect);
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      yield KeyPasswordCheckingStateError(err);
     }
   }
-
-  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed
@@ -76,9 +66,18 @@ class KeyPasswordCheckingEvent with _$KeyPasswordCheckingEvent {
   }) = _Check;
 }
 
-@freezed
-class KeyPasswordCheckingState with _$KeyPasswordCheckingState {
-  const factory KeyPasswordCheckingState.initial() = _Initial;
+abstract class KeyPasswordCheckingState {}
 
-  const factory KeyPasswordCheckingState.ready(bool isCorrect) = _Ready;
+class KeyPasswordCheckingStateInitial extends KeyPasswordCheckingState {}
+
+class KeyPasswordCheckingStateSuccess extends KeyPasswordCheckingState {
+  final bool isCorrect;
+
+  KeyPasswordCheckingStateSuccess(this.isCorrect);
+}
+
+class KeyPasswordCheckingStateError extends KeyPasswordCheckingState {
+  final Exception exception;
+
+  KeyPasswordCheckingStateError(this.exception);
 }

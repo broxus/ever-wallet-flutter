@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
-import 'package:crystal/data/dtos/token_contract_asset_dto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/subjects.dart';
 
 import '../../domain/models/token_contract_asset.dart';
 import '../../domain/repositories/ton_assets_repository.dart';
+import '../dtos/token_contract_asset_dto.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/remote/rest_source.dart';
 

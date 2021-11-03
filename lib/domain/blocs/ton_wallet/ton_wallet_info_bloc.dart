@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:crystal/domain/models/ton_wallet_info.dart';
-import 'package:crystal/domain/repositories/ton_wallet_info_repository.dart';
-import 'package:crystal/logger.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/subjects.dart';
 
+import '../../../logger.dart';
+import '../../models/ton_wallet_info.dart';
+import '../../repositories/ton_wallet_info_repository.dart';
 import '../../services/nekoton_service.dart';
 
 part 'ton_wallet_info_bloc.freezed.dart';
@@ -17,7 +17,7 @@ part 'ton_wallet_info_bloc.freezed.dart';
 class TonWalletInfoBloc extends Bloc<_Event, TonWalletInfo?> {
   final NekotonService _nekotonService;
   final TonWalletInfoRepository _tonWalletInfoRepository;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   StreamSubscription? _streamSubscription;
   StreamSubscription? _onStateChangedSubscription;
 
@@ -76,13 +76,13 @@ class TonWalletInfoBloc extends Bloc<_Event, TonWalletInfo?> {
 
         await _tonWalletInfoRepository.save(event.tonWalletInfo);
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

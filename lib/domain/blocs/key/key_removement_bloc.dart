@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
@@ -13,15 +12,8 @@ part 'key_removement_bloc.freezed.dart';
 @injectable
 class KeyRemovementBloc extends Bloc<KeyRemovementEvent, KeyRemovementState> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
 
-  KeyRemovementBloc(this._nekotonService) : super(const KeyRemovementState.initial());
-
-  @override
-  Future<void> close() {
-    _errorsSubject.close();
-    return super.close();
-  }
+  KeyRemovementBloc(this._nekotonService) : super(KeyRemovementStateInitial());
 
   @override
   Stream<KeyRemovementState> mapEventToState(KeyRemovementEvent event) async* {
@@ -29,15 +21,13 @@ class KeyRemovementBloc extends Bloc<KeyRemovementEvent, KeyRemovementState> {
       if (event is _Remove) {
         await _nekotonService.removeKey(event.publicKey);
 
-        yield const KeyRemovementState.success();
+        yield KeyRemovementStateSuccess();
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      yield KeyRemovementStateError(err);
     }
   }
-
-  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed
@@ -45,9 +35,14 @@ class KeyRemovementEvent with _$KeyRemovementEvent {
   const factory KeyRemovementEvent.remove(String publicKey) = _Remove;
 }
 
-@freezed
-class KeyRemovementState with _$KeyRemovementState {
-  const factory KeyRemovementState.initial() = _Initial;
+abstract class KeyRemovementState {}
 
-  const factory KeyRemovementState.success() = _Success;
+class KeyRemovementStateInitial extends KeyRemovementState {}
+
+class KeyRemovementStateSuccess extends KeyRemovementState {}
+
+class KeyRemovementStateError extends KeyRemovementState {
+  final Exception exception;
+
+  KeyRemovementStateError(this.exception);
 }

@@ -36,10 +36,11 @@ class _AccountRemovementBodyState extends State<AccountRemovementBody> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: BlocListener<AccountRemovementBloc, AccountRemovementState>(
             bloc: bloc,
-            listener: (context, state) => state.maybeWhen(
-              success: () => context.router.navigatorKey.currentState?.pop(),
-              orElse: () => null,
-            ),
+            listener: (context, state) {
+              if (state is AccountRemovementStateSuccess) {
+                context.router.navigatorKey.currentState?.pop();
+              }
+            },
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,

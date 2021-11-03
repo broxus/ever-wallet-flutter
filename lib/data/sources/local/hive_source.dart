@@ -1,15 +1,15 @@
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
-import 'package:crystal/data/dtos/token_wallet_info_dto.dart';
-import 'package:crystal/data/dtos/token_wallet_transaction_with_data_dto.dart';
-import 'package:crystal/data/dtos/ton_wallet_info_dto.dart';
-import 'package:crystal/data/dtos/ton_wallet_transaction_with_data_dto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../dtos/token_contract_asset_dto.dart';
+import '../../dtos/token_wallet_info_dto.dart';
+import '../../dtos/token_wallet_transaction_with_data_dto.dart';
+import '../../dtos/ton_wallet_info_dto.dart';
+import '../../dtos/ton_wallet_transaction_with_data_dto.dart';
 
 @preResolve
 @lazySingleton

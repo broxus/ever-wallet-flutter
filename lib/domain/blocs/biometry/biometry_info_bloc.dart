@@ -14,7 +14,7 @@ part 'biometry_info_bloc.freezed.dart';
 @injectable
 class BiometryInfoBloc extends Bloc<_Event, BiometryInfoState> {
   final BiometryRepository _biometryRepository;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   late final StreamSubscription _streamSubscription;
 
   BiometryInfoBloc(this._biometryRepository) : super(const BiometryInfoState()) {
@@ -43,7 +43,7 @@ class BiometryInfoBloc extends Bloc<_Event, BiometryInfoState> {
   Stream<BiometryInfoState> mapEventToState(_Event event) async* {
     try {
       if (event is _SetStatus) {
-        final isAuthenticated = await _biometryRepository.authenticate('Authenticate to change user settings');
+        final isAuthenticated = await _biometryRepository.authenticate(event.localizedReason);
 
         if (isAuthenticated) {
           await _biometryRepository.setBiometryStatus(event.isEnabled);
@@ -56,13 +56,13 @@ class BiometryInfoBloc extends Bloc<_Event, BiometryInfoState> {
           isEnabled: event.isEnabled ?? state.isEnabled,
         );
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}
@@ -77,7 +77,10 @@ class _LocalEvent extends _Event with _$_LocalEvent {
 
 @freezed
 class BiometryInfoEvent extends _Event with _$BiometryInfoEvent {
-  const factory BiometryInfoEvent.setStatus(bool isEnabled) = _SetStatus;
+  const factory BiometryInfoEvent.setStatus({
+    required String localizedReason,
+    required bool isEnabled,
+  }) = _SetStatus;
 
   const factory BiometryInfoEvent.checkAvailability() = _CheckAvailability;
 }

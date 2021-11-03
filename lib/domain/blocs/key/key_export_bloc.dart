@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
@@ -12,15 +11,8 @@ part 'key_export_bloc.freezed.dart';
 @injectable
 class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
 
-  KeyExportBloc(this._nekotonService) : super(const KeyExportState.initial());
-
-  @override
-  Future<void> close() {
-    _errorsSubject.close();
-    return super.close();
-  }
+  KeyExportBloc(this._nekotonService) : super(KeyExportStateInitial());
 
   @override
   Stream<KeyExportState> mapEventToState(KeyExportEvent event) async* {
@@ -55,20 +47,18 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
         final output = await _nekotonService.exportKey(exportKeyInput);
 
         if (output is EncryptedKeyExportOutput) {
-          yield KeyExportState.success(output.phrase.split(" "));
+          yield KeyExportStateSuccess(output.phrase.split(" "));
         } else if (output is DerivedKeyExportOutput) {
-          yield KeyExportState.success(output.phrase.split(" "));
+          yield KeyExportStateSuccess(output.phrase.split(" "));
         } else {
           throw UnknownSignerException();
         }
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      yield KeyExportStateError(err);
     }
   }
-
-  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed
@@ -79,9 +69,18 @@ class KeyExportEvent with _$KeyExportEvent {
   }) = _Export;
 }
 
-@freezed
-class KeyExportState with _$KeyExportState {
-  const factory KeyExportState.initial() = _Initial;
+abstract class KeyExportState {}
 
-  const factory KeyExportState.success(List<String> phrase) = _Success;
+class KeyExportStateInitial extends KeyExportState {}
+
+class KeyExportStateSuccess extends KeyExportState {
+  final List<String> phrase;
+
+  KeyExportStateSuccess(this.phrase);
+}
+
+class KeyExportStateError extends KeyExportState {
+  final Exception exception;
+
+  KeyExportStateError(this.exception);
 }

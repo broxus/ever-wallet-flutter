@@ -1,6 +1,7 @@
-import 'package:crystal/data/dtos/ton_assets_manifest_token_dto.dart';
-import 'package:crystal/data/dtos/ton_assets_manifest_version_dto.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import 'ton_assets_manifest_token_dto.dart';
+import 'ton_assets_manifest_version_dto.dart';
 
 part 'ton_assets_manifest_dto.freezed.dart';
 part 'ton_assets_manifest_dto.g.dart';

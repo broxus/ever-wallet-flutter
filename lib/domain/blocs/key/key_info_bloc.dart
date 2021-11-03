@@ -14,7 +14,7 @@ part 'key_info_bloc.freezed.dart';
 @injectable
 class KeyInfoBloc extends Bloc<_Event, KeyStoreEntry?> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   StreamSubscription? _streamSubscription;
 
   KeyInfoBloc(this._nekotonService) : super(null);
@@ -45,13 +45,13 @@ class KeyInfoBloc extends Bloc<_Event, KeyStoreEntry?> {
       } else if (event is _Update) {
         yield event.key;
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

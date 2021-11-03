@@ -15,7 +15,7 @@ part 'accounts_bloc.freezed.dart';
 @injectable
 class AccountsBloc extends Bloc<_Event, AccountsState> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   late final StreamSubscription _streamSubscription;
 
   AccountsBloc(this._nekotonService) : super(const AccountsState()) {
@@ -52,13 +52,13 @@ class AccountsBloc extends Bloc<_Event, AccountsState> {
           currentAccount: currentAccount,
         );
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

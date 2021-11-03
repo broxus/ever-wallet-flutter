@@ -1,4 +1,4 @@
-import 'package:crystal/domain/models/token_wallet_info.dart';
+import '../models/token_wallet_info.dart';
 
 abstract class TokenWalletInfoRepository {
   TokenWalletInfo? get({

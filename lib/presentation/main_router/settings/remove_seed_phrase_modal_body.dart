@@ -33,12 +33,11 @@ class _RemoveSeedPhraseModalBodyState extends State<RemoveSeedPhraseModalBody> {
         minimum: const EdgeInsets.only(bottom: 16),
         child: BlocListener<KeyRemovementBloc, KeyRemovementState>(
           bloc: bloc,
-          listener: (context, state) => state.maybeWhen(
-            success: () {
+          listener: (context, state) {
+            if (state is KeyRemovementStateSuccess) {
               context.router.navigatorKey.currentState?.pop();
-            },
-            orElse: () => null,
-          ),
+            }
+          },
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,

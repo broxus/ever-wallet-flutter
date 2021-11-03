@@ -1,7 +1,7 @@
-import 'package:crystal/domain/blocs/account/accounts_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../design/design.dart';
 import 'all_assets_layout.dart';
 import 'transactions_layout.dart';

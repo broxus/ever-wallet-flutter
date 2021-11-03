@@ -103,7 +103,7 @@ extension RemoveZeroes on String {
 }
 
 extension ElipseValue on String {
-  String elipseValue() {
+  String ellipseValue() {
     if (length > 12) {
       return "${substring(0, 12)}...";
     } else {
@@ -113,7 +113,7 @@ extension ElipseValue on String {
 }
 
 extension Elipse on String {
-  String elipseAddress() => '${substring(0, 6)}...${substring(length - 4, length)}';
+  String ellipseAddress() => '${substring(0, 6)}...${substring(length - 4, length)}';
 
-  String elipsePublicKey() => '${substring(0, 4)}...${substring(length - 4, length)}';
+  String ellipsePublicKey() => '${substring(0, 4)}...${substring(length - 4, length)}';
 }

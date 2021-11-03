@@ -1,5 +1,3 @@
-import 'package:crystal/domain/blocs/biometry/biometry_password_data_bloc.dart';
-import 'package:crystal/domain/blocs/key/key_export_bloc.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +9,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../domain/blocs/application_flow_bloc.dart';
+import '../../../domain/blocs/biometry/biometry_get_password_bloc.dart';
 import '../../../domain/blocs/biometry/biometry_info_bloc.dart';
+import '../../../domain/blocs/key/key_export_bloc.dart';
 import '../../../domain/blocs/key/keys_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
@@ -142,18 +142,19 @@ class _SettingsPageState extends State<SettingsPage> {
                         String? password;
 
                         final biometryInfoBloc = context.read<BiometryInfoBloc>();
-                        final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
+                        final biometryPasswordDataBloc = getIt.get<BiometryGetPasswordBloc>();
                         final keyExportBloc = getIt.get<KeyExportBloc>();
 
                         if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-                          biometryPasswordDataBloc.add(BiometryPasswordDataEvent.get(currentKey.publicKey));
+                          biometryPasswordDataBloc.add(BiometryGetPasswordEvent.get(
+                            localizedReason: 'Please authenticate to interact with wallet',
+                            publicKey: currentKey.publicKey,
+                          ));
 
-                          final state = await biometryPasswordDataBloc.stream.first;
-
-                          password = state.maybeWhen(
-                            ready: (password) => password,
-                            orElse: () => null,
-                          );
+                          password = await biometryPasswordDataBloc.stream
+                              .firstWhere((e) => e is BiometryGetPasswordStateSuccess)
+                              .then((value) => value as BiometryGetPasswordStateSuccess)
+                              .then((value) => value.password);
 
                           if (password != null) {
                             keyExportBloc.add(KeyExportEvent.export(
@@ -163,10 +164,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
                             final state = await keyExportBloc.stream.first;
 
-                            state.maybeWhen(
-                              success: (phrase) => context.router.navigate(SeedPhraseExportRoute(phrase: phrase)),
-                              orElse: () => null,
-                            );
+                            if (state is KeyExportStateSuccess) {
+                              context.router.navigate(SeedPhraseExportRoute(phrase: state.phrase));
+                            }
                           } else {
                             showCrystalBottomSheet(
                               context,

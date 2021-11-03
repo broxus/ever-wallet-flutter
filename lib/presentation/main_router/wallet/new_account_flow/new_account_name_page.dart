@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:auto_route/auto_route.dart';
-import 'package:crystal/domain/blocs/account/account_creation_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../domain/blocs/account/account_creation_bloc.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/utils.dart';

@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:crystal/data/dtos/ton_assets_manifest_dto.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+
+import '../../dtos/ton_assets_manifest_dto.dart';
 
 @lazySingleton
 class RestSource {

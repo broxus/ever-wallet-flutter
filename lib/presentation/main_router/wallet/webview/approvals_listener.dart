@@ -41,14 +41,13 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
   Widget build(BuildContext context) => BlocListener<ApprovalsBloc, ApprovalsState>(
         bloc: approvalsBloc,
         listener: (context, state) async {
-          state.maybeWhen(
-            shown: (request) => request.when(
+          if (state is ApprovalsStateShown) {
+            state.request.when(
               requestPermissions: requestPermissions,
               sendMessage: sendMessage,
               callContractMethod: callContractMethod,
-            ),
-            orElse: () => null,
-          );
+            );
+          }
         },
         child: widget.child,
       );

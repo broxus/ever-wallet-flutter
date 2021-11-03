@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:crystal/domain/models/ton_wallet_info.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +6,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_bloc.dart';
+import '../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/utils.dart';

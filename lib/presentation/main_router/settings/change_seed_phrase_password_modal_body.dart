@@ -1,9 +1,8 @@
-import 'package:crystal/domain/blocs/key/key_password_checking_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:validators/validators.dart';
 
-import '../../../domain/blocs/biometry/biometry_password_data_bloc.dart';
+import '../../../domain/blocs/key/key_password_checking_bloc.dart';
 import '../../../domain/blocs/key/key_update_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
@@ -22,7 +21,6 @@ class ChangeSeedPhrasePasswordModalBody extends StatefulWidget {
 
 class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePasswordModalBody> {
   final keyUpdateBloc = getIt.get<KeyUpdateBloc>();
-  final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
   final checkPasswordBloc = getIt.get<KeyPasswordCheckingBloc>();
   final formKey = GlobalKey<FormState>();
   final oldPasswordController = TextEditingController();
@@ -33,7 +31,6 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
   @override
   void dispose() {
     keyUpdateBloc.close();
-    biometryPasswordDataBloc.close();
     checkPasswordBloc.close();
     oldPasswordController.dispose();
     newPasswordController.dispose();
@@ -47,39 +44,35 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
         minimum: const EdgeInsets.only(bottom: 16),
         child: BlocListener<KeyUpdateBloc, KeyUpdateState>(
           bloc: keyUpdateBloc,
-          listener: (context, state) => state.maybeWhen(
-            success: () {
+          listener: (context, state) {
+            if (state is KeyUpdateStateSuccess) {
               context.router.navigatorKey.currentState?.pop();
               showCrystalFlushbar(
                 context,
                 message: LocaleKeys.change_seed_password_modal_messages_success.tr(),
               );
-            },
-            orElse: () => null,
-          ),
+            }
+          },
           child: BlocListener<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
             bloc: checkPasswordBloc,
             listener: (context, state) {
-              state.maybeMap(
-                orElse: () => null,
-                ready: (ready) {
-                  if (ready.isCorrect) {
-                    incorrectPasswordNotifier.value = false;
-                    final newPassword = newPasswordController.text.trim();
+              if (state is KeyPasswordCheckingStateSuccess) {
+                if (state.isCorrect) {
+                  incorrectPasswordNotifier.value = false;
+                  final newPassword = newPasswordController.text.trim();
 
-                    if (formKey.currentState?.validate() ?? false) {
-                      keyUpdateBloc.add(KeyUpdateEvent.changePassword(
-                        publicKey: widget.publicKey,
-                        oldPassword: oldPasswordController.text.trim(),
-                        newPassword: newPassword,
-                      ));
-                    }
-                  } else {
-                    incorrectPasswordNotifier.value = true;
-                    formKey.currentState?.validate();
+                  if (formKey.currentState?.validate() ?? false) {
+                    keyUpdateBloc.add(KeyUpdateEvent.changePassword(
+                      publicKey: widget.publicKey,
+                      oldPassword: oldPasswordController.text.trim(),
+                      newPassword: newPassword,
+                    ));
                   }
-                },
-              );
+                } else {
+                  incorrectPasswordNotifier.value = true;
+                  formKey.currentState?.validate();
+                }
+              }
             },
             child: buildPasswordsBody(),
           ),

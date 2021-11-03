@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -22,19 +20,11 @@ class RenameKeyModalBody extends StatefulWidget {
 class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
   final controller = TextEditingController();
   final bloc = getIt.get<KeyUpdateBloc>();
-  late final StreamSubscription streamSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    streamSubscription = bloc.errorsStream.listen((event) => showErrorCrystalFlushbar(context, message: event));
-  }
 
   @override
   void dispose() {
     controller.dispose();
     bloc.close();
-    streamSubscription.cancel();
     super.dispose();
   }
 
@@ -65,21 +55,18 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                           name: value.text,
                         ));
 
-                        final result = await Future.any([
-                          bloc.stream.first,
-                          bloc.errorsStream.first,
-                        ]);
+                        final result = await bloc.stream.first;
 
-                        if (result is KeyUpdateState) {
-                          result.maybeWhen(
-                            success: () {
-                              context.router.navigatorKey.currentState?.pop();
-                              showCrystalFlushbar(
-                                context,
-                                message: LocaleKeys.rename_key_modal_message_success.tr(),
-                              );
-                            },
-                            orElse: () => null,
+                        if (result is KeyUpdateStateSuccess) {
+                          context.router.navigatorKey.currentState?.pop();
+                          showCrystalFlushbar(
+                            context,
+                            message: LocaleKeys.rename_key_modal_message_success.tr(),
+                          );
+                        } else if (result is KeyUpdateStateError) {
+                          showErrorCrystalFlushbar(
+                            context,
+                            message: result.exception.toString(),
                           );
                         }
                       },

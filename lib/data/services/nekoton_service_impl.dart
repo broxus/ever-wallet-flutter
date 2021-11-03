@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../domain/services/nekoton_service.dart';
 import '../../logger.dart';
@@ -143,7 +142,7 @@ class NekotonServiceImpl implements NekotonService {
   Future<void> clearAccountsStorage() => _nekoton.accountsStorageController.clearAccountsStorage();
 
   @override
-  Future<Tuple2<Symbol, TokenWalletVersion>> getTokenWalletInfo({
+  Future<RootTokenContractInfo> getTokenWalletInfo({
     required String address,
     required String rootTokenContract,
   }) =>

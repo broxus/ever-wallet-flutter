@@ -1,17 +1,17 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:crystal/domain/repositories/token_wallet_info_repository.dart';
-import 'package:crystal/domain/repositories/token_wallet_transactions_repository.dart';
-import 'package:crystal/domain/repositories/ton_wallet_info_repository.dart';
-import 'package:crystal/domain/repositories/ton_wallet_transactions_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../logger.dart';
 import '../repositories/biometry_repository.dart';
+import '../repositories/token_wallet_info_repository.dart';
+import '../repositories/token_wallet_transactions_repository.dart';
 import '../repositories/ton_assets_repository.dart';
+import '../repositories/ton_wallet_info_repository.dart';
+import '../repositories/ton_wallet_transactions_repository.dart';
 import '../services/nekoton_service.dart';
 
 part 'application_flow_bloc.freezed.dart';
@@ -25,7 +25,7 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
   final TokenWalletInfoRepository _tokenWalletInfoRepository;
   final TonWalletTransactionsRepository _tonWalletTransactionsRepository;
   final TokenWalletTransactionsRepository _tokenWalletTransactionsRepository;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   late final StreamSubscription _streamSubscription;
 
   ApplicationFlowBloc(
@@ -70,13 +70,13 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
         await _tonWalletTransactionsRepository.clear();
         await _tokenWalletTransactionsRepository.clear();
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

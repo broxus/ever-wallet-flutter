@@ -40,12 +40,11 @@ class _DeriveKeyModalBodyState extends State<DeriveKeyModalBody> {
   @override
   Widget build(BuildContext context) => BlocListener<KeyCreationBloc, KeyCreationState>(
         bloc: bloc,
-        listener: (context, state) => state.maybeWhen(
-          success: () {
+        listener: (context, state) {
+          if (state is KeyCreationStateSuccess) {
             context.router.navigatorKey.currentState?.pop();
-          },
-          orElse: () => null,
-        ),
+          }
+        },
         child: InputPasswordModalBody(
           onSubmit: (password) => bloc.add(
             KeyCreationEvent.derive(

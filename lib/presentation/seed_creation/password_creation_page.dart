@@ -187,7 +187,10 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
 
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => context.read<BiometryInfoBloc>().add(BiometryInfoEvent.setStatus(!state.isEnabled)),
+            onTap: () => context.read<BiometryInfoBloc>().add(BiometryInfoEvent.setStatus(
+                  localizedReason: 'Please authenticate to interact with wallet',
+                  isEnabled: !state.isEnabled,
+                )),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Row(

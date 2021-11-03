@@ -1,15 +1,15 @@
-import 'package:crystal/presentation/main_router/wallet/webview/call_contract_method_body.dart';
-import 'package:crystal/presentation/main_router/wallet/webview/request_permissions_body.dart';
-import 'package:crystal/presentation/main_router/wallet/webview/send_message_body.dart';
-import 'package:crystal/presentation/main_router/wallet/webview/submit_send_body.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../domain/blocs/biometry/biometry_get_password_bloc.dart';
 import '../../../../domain/blocs/biometry/biometry_info_bloc.dart';
-import '../../../../domain/blocs/biometry/biometry_password_data_bloc.dart';
 import '../../../../injection.dart';
+import 'call_contract_method_body.dart';
+import 'request_permissions_body.dart';
+import 'send_message_body.dart';
+import 'submit_send_body.dart';
 
 Future<bool> showRequestPermissionsDialog(
   BuildContext context, {
@@ -54,20 +54,18 @@ Future<String?> showSendMessageDialog(
     String? password;
 
     final biometryInfoBloc = context.read<BiometryInfoBloc>();
-    final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
+    final biometryPasswordDataBloc = getIt.get<BiometryGetPasswordBloc>();
 
     if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-      biometryPasswordDataBloc.add(BiometryPasswordDataEvent.get(publicKey));
+      biometryPasswordDataBloc.add(BiometryGetPasswordEvent.get(
+        localizedReason: 'Please authenticate to interact with wallet',
+        publicKey: publicKey,
+      ));
 
-      final readyState = await biometryPasswordDataBloc.stream.firstWhere((e) => e.maybeWhen(
-            ready: (password) => true,
-            orElse: () => false,
-          ));
-
-      password = readyState.maybeWhen(
-        ready: (password) => password,
-        orElse: () => null,
-      );
+      password = await biometryPasswordDataBloc.stream
+          .firstWhere((e) => e is BiometryGetPasswordStateSuccess)
+          .then((value) => value as BiometryGetPasswordStateSuccess)
+          .then((value) => value.password);
 
       password ??= await SubmitSendBody.open(
         context: context,
@@ -110,20 +108,18 @@ Future<String?> showCallContractMethodDialog(
     String? password;
 
     final biometryInfoBloc = context.read<BiometryInfoBloc>();
-    final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
+    final biometryPasswordDataBloc = getIt.get<BiometryGetPasswordBloc>();
 
     if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-      biometryPasswordDataBloc.add(BiometryPasswordDataEvent.get(selectedPublicKey));
+      biometryPasswordDataBloc.add(BiometryGetPasswordEvent.get(
+        localizedReason: 'Please authenticate to interact with wallet',
+        publicKey: selectedPublicKey,
+      ));
 
-      final readyState = await biometryPasswordDataBloc.stream.firstWhere((e) => e.maybeWhen(
-            ready: (password) => true,
-            orElse: () => false,
-          ));
-
-      password = readyState.maybeWhen(
-        ready: (password) => password,
-        orElse: () => null,
-      );
+      password = await biometryPasswordDataBloc.stream
+          .firstWhere((e) => e is BiometryGetPasswordStateSuccess)
+          .then((value) => value as BiometryGetPasswordStateSuccess)
+          .then((value) => value.password);
 
       password ??= await SubmitSendBody.open(
         context: context,

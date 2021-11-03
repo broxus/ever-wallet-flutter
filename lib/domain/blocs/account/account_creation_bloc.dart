@@ -14,9 +14,9 @@ part 'account_creation_bloc.freezed.dart';
 @injectable
 class AccountCreationBloc extends Bloc<AccountCreationEvent, AccountCreationState> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
 
-  AccountCreationBloc(this._nekotonService) : super(const AccountCreationState.initial());
+  AccountCreationBloc(this._nekotonService) : super(AccountCreationStateInitial());
 
   @override
   Future<void> close() {
@@ -35,15 +35,15 @@ class AccountCreationBloc extends Bloc<AccountCreationEvent, AccountCreationStat
           workchain: kDefaultWorkchain,
         );
 
-        yield const AccountCreationState.success();
+        yield AccountCreationStateSuccess();
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      yield AccountCreationStateError(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed
@@ -55,9 +55,14 @@ class AccountCreationEvent with _$AccountCreationEvent {
   }) = _Create;
 }
 
-@freezed
-class AccountCreationState with _$AccountCreationState {
-  const factory AccountCreationState.initial() = _Initial;
+abstract class AccountCreationState {}
 
-  const factory AccountCreationState.success() = _Success;
+class AccountCreationStateInitial extends AccountCreationState {}
+
+class AccountCreationStateSuccess extends AccountCreationState {}
+
+class AccountCreationStateError extends AccountCreationState {
+  final Exception exception;
+
+  AccountCreationStateError(this.exception);
 }

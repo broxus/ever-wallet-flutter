@@ -1,9 +1,9 @@
-import 'package:crystal/presentation/main_router/widgets/input_password_field.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../design/design.dart';
 import '../../../design/widget/crystal_bottom_sheet.dart';
+import '../../widgets/input_password_field.dart';
 
 class SubmitSendBody extends StatefulWidget {
   final String publicKey;

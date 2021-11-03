@@ -1,4 +1,3 @@
-import 'package:crystal/presentation/design/widget/account_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -9,6 +8,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../design/design.dart';
 import '../../../design/theme.dart';
+import '../../../design/widget/account_icon.dart';
 
 class BrowserAppBar extends StatefulWidget {
   final AssetsList? currentAccount;
@@ -220,7 +220,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
                   style: const TextStyle(color: Colors.black),
                 ),
                 Text(
-                  widget.currentAccount!.address.elipseAddress(),
+                  widget.currentAccount!.address.ellipseAddress(),
                   style: const TextStyle(color: Colors.grey),
                 ),
               ],

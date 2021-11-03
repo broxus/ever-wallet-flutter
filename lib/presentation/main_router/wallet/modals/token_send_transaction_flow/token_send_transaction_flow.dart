@@ -1,5 +1,3 @@
-import 'package:crystal/domain/blocs/biometry/biometry_info_bloc.dart';
-import 'package:crystal/domain/blocs/biometry/biometry_password_data_bloc.dart';
 import 'package:expand_tap_area/expand_tap_area.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../../domain/blocs/biometry/biometry_get_password_bloc.dart';
+import '../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../domain/blocs/token_wallet/token_wallet_fees_bloc.dart';
 import '../../../../../domain/blocs/token_wallet/token_wallet_transfer_bloc.dart';
 import '../../../../../injection.dart';
@@ -103,17 +103,18 @@ class _TokenSendTransactionFlowState extends State<TokenSendTransactionFlow> {
                   String? password;
 
                   final biometryInfoBloc = context.read<BiometryInfoBloc>();
-                  final biometryPasswordDataBloc = getIt.get<BiometryPasswordDataBloc>();
+                  final biometryPasswordDataBloc = getIt.get<BiometryGetPasswordBloc>();
 
                   if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-                    biometryPasswordDataBloc.add(BiometryPasswordDataEvent.get(widget.ownerPublicKey));
+                    biometryPasswordDataBloc.add(BiometryGetPasswordEvent.get(
+                      localizedReason: 'Please authenticate to interact with wallet',
+                      publicKey: widget.ownerPublicKey,
+                    ));
 
-                    final state = await biometryPasswordDataBloc.stream.first;
-
-                    password = state.maybeWhen(
-                      ready: (password) => password,
-                      orElse: () => null,
-                    );
+                    password = await biometryPasswordDataBloc.stream
+                        .firstWhere((e) => e is BiometryGetPasswordStateSuccess)
+                        .then((value) => value as BiometryGetPasswordStateSuccess)
+                        .then((value) => value.password);
 
                     if (password != null) {
                       _bloc.add(TokenWalletTransferEvent.send(password));

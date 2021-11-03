@@ -1,10 +1,11 @@
-import 'package:crystal/data/dtos/contract_state_dto.dart';
-import 'package:crystal/data/dtos/ton_wallet_details_dto.dart';
-import 'package:crystal/data/dtos/wallet_type_dto.dart';
-import 'package:crystal/domain/models/ton_wallet_info.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import '../../domain/models/ton_wallet_info.dart';
+import 'contract_state_dto.dart';
+import 'ton_wallet_details_dto.dart';
+import 'wallet_type_dto.dart';
 
 part 'ton_wallet_info_dto.freezed.dart';
 part 'ton_wallet_info_dto.g.dart';

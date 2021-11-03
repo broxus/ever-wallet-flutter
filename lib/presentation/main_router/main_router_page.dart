@@ -1,11 +1,11 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:collection/collection.dart';
-import 'package:crystal/domain/blocs/account/accounts_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
+import '../../domain/blocs/account/accounts_bloc.dart';
 import '../../logger.dart';
 import '../design/design.dart';
 import '../router.gr.dart';
@@ -139,7 +139,7 @@ class MainRouterPageState extends State<MainRouterPage> {
 
       final state = bloc.state;
 
-      if (state.currentAccount == null) {
+      if (state.currentAccount == null && state.accounts.isNotEmpty) {
         bloc.add(AccountsEvent.setCurrent(state.accounts.firstOrNull?.address));
 
         await bloc.stream.first;

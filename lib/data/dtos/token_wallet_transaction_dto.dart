@@ -1,9 +1,10 @@
-import 'package:crystal/data/dtos/token_incoming_transfer_dto.dart';
-import 'package:crystal/data/dtos/token_outgoing_transfer_dto.dart';
-import 'package:crystal/data/dtos/token_swap_back_dto.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+
+import 'token_incoming_transfer_dto.dart';
+import 'token_outgoing_transfer_dto.dart';
+import 'token_swap_back_dto.dart';
 
 part 'token_wallet_transaction_dto.freezed.dart';
 part 'token_wallet_transaction_dto.g.dart';

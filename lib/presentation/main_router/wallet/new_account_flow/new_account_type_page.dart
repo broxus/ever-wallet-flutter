@@ -1,15 +1,15 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
-import 'package:crystal/domain/blocs/account/account_creation_options_bloc.dart';
-import 'package:crystal/domain/blocs/key/keys_bloc.dart';
-import 'package:crystal/domain/constants/default_wallet_type.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../domain/blocs/account/account_creation_options_bloc.dart';
+import '../../../../domain/blocs/key/keys_bloc.dart';
+import '../../../../domain/constants/default_wallet_type.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/utils.dart';
@@ -32,7 +32,7 @@ class _NewAccountTypePageState extends State<NewAccountTypePage> {
     final publicKey = context.read<KeysBloc>().state.currentKey?.publicKey;
 
     if (publicKey != null) {
-      accountCreationOptionsBloc.add(AccountCreationOptionsEvent.show(publicKey));
+      accountCreationOptionsBloc.add(AccountCreationOptionsEvent.load(publicKey));
     }
   }
 

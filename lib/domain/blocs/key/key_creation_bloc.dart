@@ -5,7 +5,6 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../repositories/biometry_repository.dart';
@@ -17,18 +16,11 @@ part 'key_creation_bloc.freezed.dart';
 class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
   final NekotonService _nekotonService;
   final BiometryRepository _biometryRepository;
-  final _errorsSubject = PublishSubject<String>();
 
   KeyCreationBloc(
     this._nekotonService,
     this._biometryRepository,
-  ) : super(const KeyCreationState.initial());
-
-  @override
-  Future<void> close() {
-    _errorsSubject.close();
-    return super.close();
-  }
+  ) : super(KeyCreationStateSuccess());
 
   @override
   Stream<KeyCreationState> mapEventToState(KeyCreationEvent event) async* {
@@ -65,7 +57,7 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
           password: event.password,
         );
 
-        yield const KeyCreationState.success();
+        yield KeyCreationStateSuccess();
       } else if (event is _Derive) {
         final key = _nekotonService.keys.firstWhere((e) => e.publicKey == event.publicKey);
 
@@ -89,14 +81,14 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
             password: event.password,
           );
 
-          yield const KeyCreationState.success();
+          yield KeyCreationStateSuccess();
         } else {
           throw UnknownSignerException();
         }
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      yield KeyCreationStateError(err);
     }
   }
 
@@ -113,8 +105,6 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
       );
     }
   }
-
-  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed
@@ -132,9 +122,14 @@ class KeyCreationEvent with _$KeyCreationEvent {
   }) = _Derive;
 }
 
-@freezed
-class KeyCreationState with _$KeyCreationState {
-  const factory KeyCreationState.initial() = _Initial;
+abstract class KeyCreationState {}
 
-  const factory KeyCreationState.success() = _Success;
+class KeyCreationStateInitial extends KeyCreationState {}
+
+class KeyCreationStateSuccess extends KeyCreationState {}
+
+class KeyCreationStateError extends KeyCreationState {
+  final Exception exception;
+
+  KeyCreationStateError(this.exception);
 }

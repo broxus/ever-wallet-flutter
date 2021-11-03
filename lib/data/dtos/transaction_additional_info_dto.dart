@@ -1,12 +1,13 @@
-import 'package:crystal/data/dtos/de_pool_on_round_complete_notification_dto.dart';
-import 'package:crystal/data/dtos/de_pool_receive_answer_notification_dto.dart';
-import 'package:crystal/data/dtos/eth_event_status_dto.dart';
-import 'package:crystal/data/dtos/token_wallet_deployed_notification_dto.dart';
-import 'package:crystal/data/dtos/ton_event_status_dto.dart';
-import 'package:crystal/data/dtos/wallet_interaction_info_dto.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+
+import 'de_pool_on_round_complete_notification_dto.dart';
+import 'de_pool_receive_answer_notification_dto.dart';
+import 'eth_event_status_dto.dart';
+import 'token_wallet_deployed_notification_dto.dart';
+import 'ton_event_status_dto.dart';
+import 'wallet_interaction_info_dto.dart';
 
 part 'transaction_additional_info_dto.freezed.dart';
 part 'transaction_additional_info_dto.g.dart';

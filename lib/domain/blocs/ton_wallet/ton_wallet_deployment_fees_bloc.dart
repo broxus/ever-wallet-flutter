@@ -14,7 +14,7 @@ part 'ton_wallet_deployment_fees_bloc.freezed.dart';
 @injectable
 class TonWalletDeploymentFeesBloc extends Bloc<TonWalletDeploymentFeesEvent, TonWalletDeploymentFeesState> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   final String? _address;
 
   TonWalletDeploymentFeesBloc(
@@ -56,13 +56,13 @@ class TonWalletDeploymentFeesBloc extends Bloc<TonWalletDeploymentFeesEvent, Ton
           );
         }
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed

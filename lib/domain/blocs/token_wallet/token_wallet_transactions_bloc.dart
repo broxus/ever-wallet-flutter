@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:crystal/domain/repositories/token_wallet_transactions_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -9,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../models/wallet_transaction.dart';
+import '../../repositories/token_wallet_transactions_repository.dart';
 import '../../services/nekoton_service.dart';
 import '../../utils/transaction_data.dart';
 import '../../utils/transaction_time.dart';
@@ -19,7 +19,7 @@ part 'token_wallet_transactions_bloc.freezed.dart';
 class TokenWalletTransactionsBloc extends Bloc<_Event, TokenWalletTransactionsState> {
   final NekotonService _nekotonService;
   final TokenWalletTransactionsRepository _tokenWalletTransactionsRepository;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   StreamSubscription? _streamSubscription;
   StreamSubscription? _onTransactionsFoundSubscription;
   Future<void> Function(TransactionId from)? _preloadTransactions;
@@ -127,13 +127,13 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, TokenWalletTransactionsSt
           rootTokenContract: event.tokenWallet.symbol.rootTokenContract,
         );
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

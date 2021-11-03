@@ -1,8 +1,8 @@
-import 'package:crystal/data/dtos/ton_wallet_info_dto.dart';
-import 'package:crystal/domain/models/ton_wallet_info.dart';
-import 'package:crystal/domain/repositories/ton_wallet_info_repository.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../domain/models/ton_wallet_info.dart';
+import '../../domain/repositories/ton_wallet_info_repository.dart';
+import '../dtos/ton_wallet_info_dto.dart';
 import '../sources/local/hive_source.dart';
 
 @LazySingleton(as: TonWalletInfoRepository)

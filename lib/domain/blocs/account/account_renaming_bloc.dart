@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
@@ -13,15 +12,8 @@ part 'account_renaming_bloc.freezed.dart';
 @injectable
 class AccountRenamingBloc extends Bloc<AccountRenamingEvent, AccountRenamingState> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
 
-  AccountRenamingBloc(this._nekotonService) : super(const AccountRenamingState.initial());
-
-  @override
-  Future<void> close() {
-    _errorsSubject.close();
-    return super.close();
-  }
+  AccountRenamingBloc(this._nekotonService) : super(AccountRenamingStateInitial());
 
   @override
   Stream<AccountRenamingState> mapEventToState(AccountRenamingEvent event) async* {
@@ -32,15 +24,13 @@ class AccountRenamingBloc extends Bloc<AccountRenamingEvent, AccountRenamingStat
           name: event.name,
         );
 
-        yield const AccountRenamingState.success();
+        yield AccountRenamingStateSuccess();
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      yield AccountRenamingStateError(err);
     }
   }
-
-  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed
@@ -51,9 +41,14 @@ class AccountRenamingEvent with _$AccountRenamingEvent {
   }) = _Rename;
 }
 
-@freezed
-class AccountRenamingState with _$AccountRenamingState {
-  const factory AccountRenamingState.initial() = _Initial;
+abstract class AccountRenamingState {}
 
-  const factory AccountRenamingState.success() = _Success;
+class AccountRenamingStateInitial extends AccountRenamingState {}
+
+class AccountRenamingStateSuccess extends AccountRenamingState {}
+
+class AccountRenamingStateError extends AccountRenamingState {
+  final Exception exception;
+
+  AccountRenamingStateError(this.exception);
 }

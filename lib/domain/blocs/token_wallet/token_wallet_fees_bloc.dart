@@ -14,7 +14,7 @@ part 'token_wallet_fees_bloc.freezed.dart';
 @injectable
 class TokenWalletFeesBloc extends Bloc<TokenWalletFeesEvent, TokenWalletFeesState> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   final String? _owner;
   final String? _rootTokenContract;
 
@@ -67,13 +67,13 @@ class TokenWalletFeesBloc extends Bloc<TokenWalletFeesEvent, TokenWalletFeesStat
           );
         }
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed

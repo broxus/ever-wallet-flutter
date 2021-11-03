@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:crystal/domain/models/token_contract_asset.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -10,6 +9,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../logger.dart';
+import '../../models/token_contract_asset.dart';
 import '../../repositories/ton_assets_repository.dart';
 import '../../services/nekoton_service.dart';
 
@@ -19,7 +19,7 @@ part 'account_assets_bloc.freezed.dart';
 class AccountAssetsBloc extends Bloc<_Event, AccountAssetsState> {
   final NekotonService _nekotonService;
   final TonAssetsRepository _tonAssetsRepository;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   StreamSubscription? _streamSubscription;
 
   AccountAssetsBloc(
@@ -44,28 +44,30 @@ class AccountAssetsBloc extends Bloc<_Event, AccountAssetsState> {
           throw AccountNotFoundException();
         }
 
+        final accountAssetsStream = Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
+          _nekotonService.accountsStream.expand((e) => e).where((e) => e.address == event.address).distinct(),
+          _nekotonService.transportStream,
+          (a, b) => Tuple2(a, b),
+        ).map((event) {
+          final tonWalletAsset = event.item1.tonWallet;
+          final tokenWalletAssets = event.item1.additionalAssets.entries
+              .where((e) => e.key == event.item2.connectionData.group)
+              .map((e) => e.value.tokenWallets)
+              .expand((e) => e)
+              .toList();
+
+          return Tuple2(
+            tonWalletAsset,
+            tokenWalletAssets,
+          );
+        }).distinct((previous, next) => previous.item1 == next.item1 && listEquals(previous.item2, next.item2));
+
         _streamSubscription?.cancel();
         _streamSubscription = Rx.combineLatest2<
                 Tuple2<TonWalletAsset, List<TokenWalletAsset>>,
                 List<TokenContractAsset>,
                 Tuple2<Tuple2<TonWalletAsset, List<TokenWalletAsset>>, List<TokenContractAsset>>>(
-          Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
-            _nekotonService.accountsStream.expand((e) => e).where((e) => e.address == event.address).distinct(),
-            _nekotonService.transportStream,
-            (a, b) => Tuple2(a, b),
-          ).map((event) {
-            final tonWalletAsset = event.item1.tonWallet;
-            final tokenWalletAssets = event.item1.additionalAssets.entries
-                .where((e) => e.key == event.item2.connectionData.group)
-                .map((e) => e.value.tokenWallets)
-                .expand((e) => e)
-                .toList();
-
-            return Tuple2(
-              tonWalletAsset,
-              tokenWalletAssets,
-            );
-          }).distinct((previous, next) => previous.item1 == next.item1 && listEquals(previous.item2, next.item2)),
+          accountAssetsStream,
           _tonAssetsRepository.assetsStream,
           (a, b) => Tuple2(a, b),
         )
@@ -91,13 +93,13 @@ class AccountAssetsBloc extends Bloc<_Event, AccountAssetsState> {
           tokenContractAssets: event.tokenContractAssets,
         );
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

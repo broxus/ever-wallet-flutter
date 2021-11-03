@@ -1,9 +1,9 @@
-import 'package:crystal/domain/blocs/biometry/biometry_info_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/blocs/biometry/biometry_password_data_bloc.dart';
+import '../../../domain/blocs/biometry/biometry_info_bloc.dart';
+import '../../../domain/blocs/biometry/biometry_set_password_bloc.dart';
 import '../../../injection.dart';
 import '../../design/design.dart';
 import 'input_password_field.dart';
@@ -31,7 +31,7 @@ class InputPasswordModalBody extends StatefulWidget {
 
 class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
   final controller = TextEditingController();
-  final bloc = getIt.get<BiometryPasswordDataBloc>();
+  final bloc = getIt.get<BiometrySetPasswordBloc>();
 
   @override
   void dispose() {
@@ -66,7 +66,7 @@ class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
                   final biometryInfoBloc = context.read<BiometryInfoBloc>();
 
                   if (biometryInfoBloc.state.isEnabled && biometryInfoBloc.state.isEnabled) {
-                    bloc.add(BiometryPasswordDataEvent.set(
+                    bloc.add(BiometrySetPasswordEvent.set(
                       publicKey: widget.publicKey,
                       password: password,
                     ));

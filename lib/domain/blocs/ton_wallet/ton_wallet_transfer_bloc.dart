@@ -16,7 +16,7 @@ part 'ton_wallet_transfer_bloc.freezed.dart';
 @injectable
 class TonWalletTransferBloc extends Bloc<_Event, TonWalletTransferState> {
   final NekotonService _nekotonService;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   final String? _address;
   UnsignedMessage? _message;
   late TonWalletFeesBloc feesBloc;
@@ -89,13 +89,13 @@ class TonWalletTransferBloc extends Bloc<_Event, TonWalletTransferState> {
         final balance = contractState.balance;
         yield TonWalletTransferState.initial(balance.toTokens());
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

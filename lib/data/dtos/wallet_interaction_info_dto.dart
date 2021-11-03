@@ -1,8 +1,9 @@
-import 'package:crystal/data/dtos/known_payload_dto.dart';
-import 'package:crystal/data/dtos/wallet_interaction_method_dto.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+
+import 'known_payload_dto.dart';
+import 'wallet_interaction_method_dto.dart';
 
 part 'wallet_interaction_info_dto.freezed.dart';
 part 'wallet_interaction_info_dto.g.dart';

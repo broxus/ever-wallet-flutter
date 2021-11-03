@@ -1,8 +1,8 @@
-import 'package:crystal/presentation/design/widget/account_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../design/design.dart';
+import '../../../design/widget/account_icon.dart';
 import '../../../design/widget/crystal_bottom_sheet.dart';
 
 class AccountSelection extends StatefulWidget {
@@ -58,7 +58,7 @@ class _AccountSelectionState extends State<AccountSelection> {
               ),
             ),
             subtitle: Text(
-              widget.accounts[index].address.elipseAddress(),
+              widget.accounts[index].address.ellipseAddress(),
               style: const TextStyle(
                 fontSize: 16,
                 color: CrystalColor.fontDark,

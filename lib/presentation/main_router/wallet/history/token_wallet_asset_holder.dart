@@ -1,10 +1,10 @@
-import 'package:crystal/domain/models/token_wallet_info.dart';
-import 'package:crystal/presentation/design/widget/asset_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
+import '../../../../domain/models/token_wallet_info.dart';
 import '../../../../injection.dart';
+import '../../../design/widget/asset_icon.dart';
 import '../modals/asset_observer/token_asset_observer.dart';
 import 'wallet_asset_holder.dart';
 

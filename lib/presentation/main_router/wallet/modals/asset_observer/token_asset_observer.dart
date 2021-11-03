@@ -1,6 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:crystal/domain/models/token_wallet_info.dart';
-import 'package:crystal/presentation/design/widget/asset_icon.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,9 +6,11 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
 import '../../../../../domain/blocs/token_wallet/token_wallet_transactions_bloc.dart';
+import '../../../../../domain/models/token_wallet_info.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/utils.dart';
+import '../../../../design/widget/asset_icon.dart';
 import '../../../../design/widget/crystal_bottom_sheet.dart';
 import '../../../../design/widget/preload_transactions_listener.dart';
 import '../../history/transaction_holder.dart';

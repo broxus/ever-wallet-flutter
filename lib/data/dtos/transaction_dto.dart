@@ -1,9 +1,10 @@
-import 'package:crystal/data/dtos/account_status_dto.dart';
-import 'package:crystal/data/dtos/message_dto.dart';
-import 'package:crystal/data/dtos/transaction_id_dto.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+
+import 'account_status_dto.dart';
+import 'message_dto.dart';
+import 'transaction_id_dto.dart';
 
 part 'transaction_dto.freezed.dart';
 part 'transaction_dto.g.dart';

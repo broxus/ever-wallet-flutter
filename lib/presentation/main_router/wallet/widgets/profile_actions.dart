@@ -1,10 +1,10 @@
-import 'package:crystal/domain/models/ton_wallet_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
+import '../../../../domain/models/ton_wallet_info.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/widget/crystal_bottom_sheet.dart';

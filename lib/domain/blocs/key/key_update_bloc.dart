@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
 import '../../repositories/biometry_repository.dart';
@@ -16,18 +15,11 @@ part 'key_update_bloc.freezed.dart';
 class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
   final NekotonService _nekotonService;
   final BiometryRepository _biometryRepository;
-  final _errorsSubject = PublishSubject<String>();
 
   KeyUpdateBloc(
     this._nekotonService,
     this._biometryRepository,
-  ) : super(const KeyUpdateState.initial());
-
-  @override
-  Future<void> close() {
-    _errorsSubject.close();
-    return super.close();
-  }
+  ) : super(KeyUpdateStateInitial());
 
   @override
   Stream<KeyUpdateState> mapEventToState(KeyUpdateEvent event) async* {
@@ -74,7 +66,7 @@ class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
           password: event.newPassword,
         );
 
-        yield const KeyUpdateState.success();
+        yield KeyUpdateStateSuccess();
       } else if (event is _Rename) {
         final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == event.publicKey);
 
@@ -99,15 +91,13 @@ class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
 
         await _nekotonService.updateKey(updateKeyInput);
 
-        yield const KeyUpdateState.success();
+        yield KeyUpdateStateSuccess();
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      yield KeyUpdateStateError(err);
     }
   }
-
-  Stream<String> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed
@@ -124,9 +114,14 @@ class KeyUpdateEvent with _$KeyUpdateEvent {
   }) = _Rename;
 }
 
-@freezed
-class KeyUpdateState with _$KeyUpdateState {
-  const factory KeyUpdateState.initial() = _Initial;
+abstract class KeyUpdateState {}
 
-  const factory KeyUpdateState.success() = _Success;
+class KeyUpdateStateInitial extends KeyUpdateState {}
+
+class KeyUpdateStateSuccess extends KeyUpdateState {}
+
+class KeyUpdateStateError extends KeyUpdateState {
+  final Exception exception;
+
+  KeyUpdateStateError(this.exception);
 }

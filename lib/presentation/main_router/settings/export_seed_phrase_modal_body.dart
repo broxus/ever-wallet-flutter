@@ -35,13 +35,12 @@ class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
   @override
   Widget build(BuildContext context) => BlocListener<KeyExportBloc, KeyExportState>(
         bloc: bloc,
-        listener: (context, state) => state.maybeWhen(
-          success: (phrase) {
+        listener: (context, state) {
+          if (state is KeyExportStateSuccess) {
             context.router.navigatorKey.currentState?.pop();
-            context.topRoute.router.navigate(SeedPhraseExportRoute(phrase: phrase));
-          },
-          orElse: () => null,
-        ),
+            context.topRoute.router.navigate(SeedPhraseExportRoute(phrase: state.phrase));
+          }
+        },
         child: InputPasswordModalBody(
           onSubmit: (password) => bloc.add(KeyExportEvent.export(
             publicKey: widget.publicKey,

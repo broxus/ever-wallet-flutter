@@ -1,4 +1,4 @@
-import 'package:crystal/domain/models/ton_wallet_info.dart';
+import '../models/ton_wallet_info.dart';
 
 abstract class TonWalletInfoRepository {
   TonWalletInfo? get(String address);

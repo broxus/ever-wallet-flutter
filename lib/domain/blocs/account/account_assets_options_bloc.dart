@@ -19,7 +19,7 @@ part 'account_assets_options_bloc.freezed.dart';
 class AccountAssetsOptionsBloc extends Bloc<_Event, AccountAssetsOptionsState> {
   final NekotonService _nekotonService;
   final TonAssetsRepository _tonAssetsRepository;
-  final _errorsSubject = PublishSubject<String>();
+  final _errorsSubject = PublishSubject<Exception>();
   StreamSubscription? _streamSubscription;
 
   AccountAssetsOptionsBloc(
@@ -44,20 +44,22 @@ class AccountAssetsOptionsBloc extends Bloc<_Event, AccountAssetsOptionsState> {
           throw AccountNotFoundException();
         }
 
+        final accountAssetsStream = Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
+          _nekotonService.accountsStream.expand((e) => e).where((e) => e.address == event.address).distinct(),
+          _nekotonService.transportStream,
+          (a, b) => Tuple2(a, b),
+        )
+            .map((event) => event.item1.additionalAssets.entries
+                .where((e) => e.key == event.item2.connectionData.group)
+                .map((e) => e.value.tokenWallets)
+                .expand((e) => e)
+                .toList())
+            .distinct((previous, next) => listEquals(previous, next));
+
         _streamSubscription?.cancel();
         _streamSubscription = Rx.combineLatest2<List<TokenWalletAsset>, List<TokenContractAsset>,
                 Tuple2<List<TokenWalletAsset>, List<TokenContractAsset>>>(
-          Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
-            _nekotonService.accountsStream.expand((e) => e).where((e) => e.address == event.address).distinct(),
-            _nekotonService.transportStream,
-            (a, b) => Tuple2(a, b),
-          )
-              .map((event) => event.item1.additionalAssets.entries
-                  .where((e) => e.key == event.item2.connectionData.group)
-                  .map((e) => e.value.tokenWallets)
-                  .expand((e) => e)
-                  .toList())
-              .distinct((previous, next) => listEquals(previous, next)),
+          accountAssetsStream,
           _tonAssetsRepository.assetsStream,
           (a, b) => Tuple2(a, b),
         )
@@ -83,13 +85,13 @@ class AccountAssetsOptionsBloc extends Bloc<_Event, AccountAssetsOptionsState> {
           available: event.available,
         );
       }
-    } catch (err, st) {
+    } on Exception catch (err, st) {
       logger.e(err, err, st);
-      _errorsSubject.add(err.toString());
+      _errorsSubject.add(err);
     }
   }
 
-  Stream<String> get errorsStream => _errorsSubject.stream;
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

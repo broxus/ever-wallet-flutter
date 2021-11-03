@@ -437,7 +437,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
   Future<void> onConfirm(List<String> words) async {
     FocusScope.of(context).unfocus();
 
-    bloc.add(KeyImportEvent(words));
+    bloc.add(KeyImportEvent.import(words));
 
     final result = await bloc.stream.first;
 

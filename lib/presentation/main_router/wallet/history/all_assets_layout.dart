@@ -1,8 +1,8 @@
-import 'package:crystal/domain/blocs/account/account_assets_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../domain/blocs/account/account_assets_bloc.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import 'token_wallet_asset_holder.dart';

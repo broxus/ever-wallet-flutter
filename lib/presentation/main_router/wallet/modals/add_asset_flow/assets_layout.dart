@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:crystal/domain/blocs/account/account_assets_options_bloc.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../domain/blocs/account/account_assets_options_bloc.dart';
 import '../../../../../domain/models/token_contract_asset.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
@@ -36,8 +36,8 @@ class _AssetsLayoutState extends State<AssetsLayout> {
   @override
   void initState() {
     super.initState();
-    accountAssetsErrorsSubscription =
-        accountAssetsOptionsBloc.errorsStream.listen((event) => showErrorCrystalFlushbar(context, message: event));
+    accountAssetsErrorsSubscription = accountAssetsOptionsBloc.errorsStream
+        .listen((event) => showErrorCrystalFlushbar(context, message: event.toString()));
     accountAssetsOptionsBloc.add(AccountAssetsOptionsEvent.load(widget.address));
   }
 

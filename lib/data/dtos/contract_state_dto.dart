@@ -1,9 +1,10 @@
-import 'package:crystal/data/dtos/gen_timings_dto.dart';
-import 'package:crystal/data/dtos/last_transaction_id_dto.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+
+import 'gen_timings_dto.dart';
+import 'last_transaction_id_dto.dart';
 
 part 'contract_state_dto.freezed.dart';
 part 'contract_state_dto.g.dart';

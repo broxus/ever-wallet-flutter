@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:crystal/domain/blocs/account/account_assets_addition_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../domain/blocs/account/account_assets_addition_bloc.dart';
 import '../../../../../domain/models/token_contract_asset.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
@@ -29,13 +30,6 @@ class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateM
   late final StreamSubscription accountAssetsAdditionErrorsSubscription;
 
   @override
-  void initState() {
-    super.initState();
-    accountAssetsAdditionErrorsSubscription = accountAssetsAdditionBloc.errorsStream
-        .listen((event) => showErrorCrystalFlushbar(context, message: "Invalid root token contract"));
-  }
-
-  @override
   void dispose() {
     Future.delayed(const Duration(seconds: 3)).then((_) {
       accountAssetsAdditionBloc.close();
@@ -54,17 +48,25 @@ class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateM
           }
           return true;
         },
-        child: SafeArea(
-          minimum: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _modalTitle(),
-              const CrystalDivider(height: 8),
-              _tabRow(),
-              Flexible(child: _layout()),
-            ],
+        child: BlocListener<AccountAssetsAdditionBloc, AccountAssetsAdditionState>(
+          bloc: accountAssetsAdditionBloc,
+          listener: (context, state) {
+            if (state is AccountAssetsAdditionStateError) {
+              showErrorCrystalFlushbar(context, message: "Invalid root token contract");
+            }
+          },
+          child: SafeArea(
+            minimum: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _modalTitle(),
+                const CrystalDivider(height: 8),
+                _tabRow(),
+                Flexible(child: _layout()),
+              ],
+            ),
           ),
         ),
       );
