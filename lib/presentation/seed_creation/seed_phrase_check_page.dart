@@ -8,7 +8,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../domain/constants/phrase_generation.dart';
 import '../../domain/utils/phrase_check.dart';
-import '../../logger.dart';
 import '../design/design.dart';
 import '../design/utils.dart';
 import '../design/widget/crystal_scaffold.dart';
@@ -40,7 +39,6 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
   void initState() {
     super.initState();
     words = generateCheckingMap(widget.phrase);
-    logger.d(words.toString());
   }
 
   @override

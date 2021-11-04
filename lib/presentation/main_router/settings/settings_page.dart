@@ -254,25 +254,27 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ],
           ),
-          buildSection(
-            title: LocaleKeys.settings_screen_sections_wallet_preferences_title.tr(),
-            children: [
-              BlocBuilder<BiometryInfoBloc, BiometryInfoState>(
-                bloc: context.watch<BiometryInfoBloc>(),
-                builder: (context, biometryInfoState) => biometryInfoState.isAvailable
-                    ? buildSectionAction(
-                        title: LocaleKeys.biometry_title.tr(),
-                        onTap: () {
-                          showCrystalBottomSheet(
-                            context,
-                            title: LocaleKeys.biometry_title.tr(),
-                            body: const BiometryModalBody(),
-                          );
-                        },
-                      )
-                    : const SizedBox(),
-              ),
-            ],
+          BlocBuilder<BiometryInfoBloc, BiometryInfoState>(
+            bloc: context.watch<BiometryInfoBloc>(),
+            builder: (context, biometryInfoState) {
+              return biometryInfoState.isAvailable
+                  ? buildSection(
+                      title: LocaleKeys.settings_screen_sections_wallet_preferences_title.tr(),
+                      children: [
+                        buildSectionAction(
+                          title: LocaleKeys.biometry_title.tr(),
+                          onTap: () {
+                            showCrystalBottomSheet(
+                              context,
+                              title: LocaleKeys.biometry_title.tr(),
+                              body: const BiometryModalBody(),
+                            );
+                          },
+                        ),
+                      ],
+                    )
+                  : const SizedBox();
+            },
           ),
           buildSection(
             children: [
