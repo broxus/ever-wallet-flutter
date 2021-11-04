@@ -4,91 +4,98 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../injection.dart';
 import '../../../logger.dart';
-import '../../constants/message_expiration.dart';
-import '../../utils/error_message.dart';
+import '../../services/nekoton_service.dart';
 import 'ton_wallet_fees_bloc.dart';
 
 part 'ton_wallet_transfer_bloc.freezed.dart';
 
 @injectable
 class TonWalletTransferBloc extends Bloc<_Event, TonWalletTransferState> {
-  final TonWallet? _tonWallet;
+  final NekotonService _nekotonService;
+  final _errorsSubject = PublishSubject<Exception>();
+  final String? _address;
   UnsignedMessage? _message;
   late TonWalletFeesBloc feesBloc;
 
-  TonWalletTransferBloc(@factoryParam this._tonWallet) : super(const TonWalletTransferState.initial()) {
-    feesBloc = getIt.get<TonWalletFeesBloc>(param1: _tonWallet);
+  TonWalletTransferBloc(
+    this._nekotonService,
+    @factoryParam this._address,
+  ) : super(const TonWalletTransferState.initial()) {
+    feesBloc = getIt.get<TonWalletFeesBloc>(param1: _address);
     add(const _LocalEvent.getBalance());
   }
 
   @override
+  Future<void> close() {
+    _errorsSubject.close();
+    return super.close();
+  }
+
+  @override
   Stream<TonWalletTransferState> mapEventToState(_Event event) async* {
-    if (event is TonWalletTransferEvent) {
-      yield* event.when(
-        prepareTransfer: (
-          String destination,
-          String amount,
-          String? comment,
-        ) async* {
-          try {
-            final int? _nanoAmount = int.tryParse(amount.fromTokens());
-            if (_nanoAmount != null) {
-              _message = await _tonWallet!.prepareTransfer(
-                expiration: defaultMessageExpiration,
-                destination: destination,
-                amount: _nanoAmount,
-                body: comment,
-              );
-              feesBloc.add(TonWalletFeesEvent.estimateFees(nanoAmount: _nanoAmount, message: _message!));
+    try {
+      if (event is _PrepareTransfer) {
+        final repackedDestination = repackAddress(event.destination);
 
-              final contractState = await _tonWallet!.contractState;
+        final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
 
-              yield TonWalletTransferState.messagePrepared(
-                balance: contractState.balance.toTokens(),
-                amount: amount,
-                destination: destination,
-                comment: comment,
-              );
-            }
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield TonWalletTransferState.error(err.getMessage());
-          }
-        },
-        goToPassword: () async* {
-          yield const TonWalletTransferState.password();
-        },
-        backToInitial: () async* {
-          final contractState = await _tonWallet!.contractState;
-          final balance = contractState.balance;
-          yield TonWalletTransferState.initial(balance.toTokens());
-        },
-        send: (String password) async* {
-          if (_message != null) {
-            yield const TonWalletTransferState.sending();
-            try {
-              await _tonWallet!.send(
-                message: _message!,
-                password: password,
-              );
+        final int? _nanoAmount = int.tryParse(event.amount.fromTokens());
+        if (_nanoAmount != null) {
+          _message = await tonWallet.prepareTransfer(
+            expiration: kDefaultMessageExpiration,
+            destination: repackedDestination,
+            amount: _nanoAmount,
+            body: event.comment,
+          );
+          feesBloc.add(TonWalletFeesEvent.estimateFees(nanoAmount: _nanoAmount, message: _message!));
 
-              yield const TonWalletTransferState.success();
-            } on Exception catch (err, st) {
-              logger.e(err, err, st);
-              yield TonWalletTransferState.error(err.getMessage());
-            }
-          }
-        },
-      );
-    } else if (event is _GetBalance) {
-      final contractState = await _tonWallet!.contractState;
-      final balance = contractState.balance;
-      yield TonWalletTransferState.initial(balance.toTokens());
+          final contractState = await tonWallet.contractState;
+
+          yield TonWalletTransferState.messagePrepared(
+            balance: contractState.balance.toTokens(),
+            amount: event.amount,
+            destination: event.destination,
+            comment: event.comment,
+          );
+        }
+      } else if (event is _GoToPassword) {
+        yield const TonWalletTransferState.password();
+      } else if (event is _BackToInitial) {
+        final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
+        final contractState = await tonWallet.contractState;
+        final balance = contractState.balance;
+        yield TonWalletTransferState.initial(balance.toTokens());
+      } else if (event is _Send) {
+        final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
+        if (_message != null) {
+          yield const TonWalletTransferState.sending();
+          await tonWallet.send(
+            message: _message!,
+            password: event.password,
+          );
+
+          yield const TonWalletTransferState.success();
+        }
+      } else if (event is _GetBalance) {
+        final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
+
+        final contractState = await tonWallet.contractState;
+        final balance = contractState.balance;
+        yield TonWalletTransferState.initial(balance.toTokens());
+      }
+    } on Exception catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err);
     }
   }
+
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}

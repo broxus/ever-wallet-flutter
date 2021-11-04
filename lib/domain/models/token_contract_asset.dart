@@ -10,7 +10,8 @@ class TokenContractAsset with _$TokenContractAsset {
     required String symbol,
     required int decimals,
     required String address,
-    String? logoURI,
+    String? svgIcon,
+    List<int>? gravatarIcon,
     required int version,
   }) = _TokenContractAsset;
 }

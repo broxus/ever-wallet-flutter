@@ -30,11 +30,11 @@ class WordsGridWidget extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _words.length,
-                separatorBuilder: (_, __) => const CrystalDivider(height: 16.0),
+                separatorBuilder: (_, __) => const CrystalDivider(height: 16),
                 itemBuilder: (_, i) => animated
                     ? AnimatedAppearance(
                         delay: const Duration(milliseconds: 50) * (_countInColumn * column + i + 1),
-                        offset: const Offset(1.0, 0.0),
+                        offset: const Offset(1, 0),
                         child: _words[i],
                       )
                     : _words[i],
@@ -51,13 +51,13 @@ class WordsGridWidget extends StatelessWidget {
       (i) => Row(
         children: [
           SizedBox(
-            width: 24.0,
+            width: 24,
             child: Text(
               "${i + 1}.",
               textAlign: TextAlign.left,
               style: const TextStyle(
-                fontSize: 16.0,
-                letterSpacing: 0.0,
+                fontSize: 16,
+                letterSpacing: 0,
                 fontWeight: FontWeight.w700,
                 color: CrystalColor.fontDark,
               ),
@@ -69,7 +69,7 @@ class WordsGridWidget extends StatelessWidget {
               words[i],
               textAlign: TextAlign.left,
               style: const TextStyle(
-                fontSize: 16.0,
+                fontSize: 16,
                 color: CrystalColor.fontDark,
               ),
             ),

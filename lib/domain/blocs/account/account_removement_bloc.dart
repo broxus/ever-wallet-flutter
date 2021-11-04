@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
 import '../../services/nekoton_service.dart';
@@ -14,35 +13,36 @@ part 'account_removement_bloc.freezed.dart';
 class AccountRemovementBloc extends Bloc<AccountRemovementEvent, AccountRemovementState> {
   final NekotonService _nekotonService;
 
-  AccountRemovementBloc(this._nekotonService) : super(const AccountRemovementState.initial());
+  AccountRemovementBloc(this._nekotonService) : super(AccountRemovementStateInitial());
 
   @override
   Stream<AccountRemovementState> mapEventToState(AccountRemovementEvent event) async* {
-    yield* event.when(
-      removeAccount: (AccountSubject accountSubject) async* {
-        try {
-          await _nekotonService.removeAccount(accountSubject.value.address);
+    try {
+      if (event is _Remove) {
+        await _nekotonService.removeAccount(event.address);
 
-          yield const AccountRemovementState.success();
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield AccountRemovementState.error(err.toString());
-        }
-      },
-    );
+        yield AccountRemovementStateSuccess();
+      }
+    } on Exception catch (err, st) {
+      logger.e(err, err, st);
+      yield AccountRemovementStateError(err);
+    }
   }
 }
 
 @freezed
 class AccountRemovementEvent with _$AccountRemovementEvent {
-  const factory AccountRemovementEvent.removeAccount(AccountSubject accountSubject) = _RemoveAccount;
+  const factory AccountRemovementEvent.remove(String address) = _Remove;
 }
 
-@freezed
-class AccountRemovementState with _$AccountRemovementState {
-  const factory AccountRemovementState.initial() = _Initial;
+abstract class AccountRemovementState {}
 
-  const factory AccountRemovementState.success() = _Success;
+class AccountRemovementStateInitial extends AccountRemovementState {}
 
-  const factory AccountRemovementState.error(String info) = _Error;
+class AccountRemovementStateSuccess extends AccountRemovementState {}
+
+class AccountRemovementStateError extends AccountRemovementState {
+  final Exception exception;
+
+  AccountRemovementStateError(this.exception);
 }

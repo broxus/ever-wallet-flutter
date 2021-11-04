@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import 'design.dart';
 
@@ -63,28 +62,58 @@ extension DoubleX on double {
   }
 }
 
-extension Describe on WalletType {
-  String describe() => when(
-        multisig: (multisigType) {
-          switch (multisigType) {
-            case MultisigType.safeMultisigWallet:
-              return 'SafeMultisig';
-            case MultisigType.safeMultisigWallet24h:
-              return 'SafeMultisig24';
-            case MultisigType.setcodeMultisigWallet:
-              return 'SetcodeMultisig';
-            case MultisigType.surfWallet:
-              return 'Surf';
-          }
-        },
-        walletV3: () => 'WalletV3',
-      );
-}
-
 extension FormatTransactionTime on DateTime {
   String format() {
     final DateFormat formatter = DateFormat('MM/dd/yy HH:mm');
     final String formatted = formatter.format(this);
     return formatted;
   }
+}
+
+extension FloorValue on String {
+  String floorValue() {
+    final dot = indexOf(".");
+    if (dot != -1) {
+      if (length - dot > 2) {
+        final firstPart = substring(0, dot);
+        final secondPart = substring(dot, dot + 3);
+
+        return firstPart + secondPart;
+      } else {
+        final firstPart = substring(0, dot);
+        final secondPart = substring(dot, length).padRight(3, "0");
+
+        return firstPart + secondPart;
+      }
+    } else {
+      return this;
+    }
+  }
+}
+
+extension RemoveZeroes on String {
+  String removeZeroes() {
+    final dot = indexOf(".");
+    if (dot != -1) {
+      return replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+    } else {
+      return this;
+    }
+  }
+}
+
+extension ElipseValue on String {
+  String ellipseValue() {
+    if (length > 12) {
+      return "${substring(0, 12)}...";
+    } else {
+      return this;
+    }
+  }
+}
+
+extension Elipse on String {
+  String ellipseAddress() => '${substring(0, 6)}...${substring(length - 4, length)}';
+
+  String ellipsePublicKey() => '${substring(0, 4)}...${substring(length - 4, length)}';
 }

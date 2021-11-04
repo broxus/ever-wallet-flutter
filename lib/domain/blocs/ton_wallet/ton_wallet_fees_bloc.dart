@@ -4,50 +4,61 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
-import '../../utils/error_message.dart';
+import '../../services/nekoton_service.dart';
 
 part 'ton_wallet_fees_bloc.freezed.dart';
 
 @injectable
 class TonWalletFeesBloc extends Bloc<TonWalletFeesEvent, TonWalletFeesState> {
-  final TonWallet? _tonWallet;
+  final NekotonService _nekotonService;
+  final _errorsSubject = PublishSubject<Exception>();
+  final String? _address;
 
-  TonWalletFeesBloc(@factoryParam this._tonWallet) : super(const TonWalletFeesState.loading());
+  TonWalletFeesBloc(
+    this._nekotonService,
+    @factoryParam this._address,
+  ) : super(const TonWalletFeesState.loading());
+
+  @override
+  Future<void> close() {
+    _errorsSubject.close();
+    return super.close();
+  }
 
   @override
   Stream<TonWalletFeesState> mapEventToState(TonWalletFeesEvent event) async* {
-    yield* event.when(
-      estimateFees: (
-        int nanoAmount,
-        UnsignedMessage message,
-      ) async* {
-        try {
-          yield const TonWalletFeesState.loading();
-          final feesValue = await _tonWallet!.estimateFees(message);
-          final fees = feesValue.toString();
+    try {
+      if (event is _EstimateFees) {
+        final tonWallet = _nekotonService.tonWallets.firstWhere((e) => e.address == _address!);
 
-          final contractState = await _tonWallet!.contractState;
-          final balance = contractState.balance;
-          final balanceValue = int.parse(balance);
+        yield const TonWalletFeesState.loading();
+        final feesValue = await tonWallet.estimateFees(event.message);
+        final fees = feesValue.toString();
 
-          if (balanceValue > (feesValue + nanoAmount)) {
-            yield TonWalletFeesState.ready(
-              fees: fees.toTokens(),
-            );
-          } else {
-            yield TonWalletFeesState.insufficientFunds(
-              fees: fees.toTokens(),
-            );
-          }
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield TonWalletFeesState.error(err.getMessage());
+        final contractState = await tonWallet.contractState;
+        final balance = contractState.balance;
+        final balanceValue = int.parse(balance);
+
+        if (balanceValue > (feesValue + event.nanoAmount)) {
+          yield TonWalletFeesState.ready(
+            fees: fees.toTokens(),
+          );
+        } else {
+          yield TonWalletFeesState.insufficientFunds(
+            fees: fees.toTokens(),
+          );
         }
-      },
-    );
+      }
+    } on Exception catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err);
+    }
   }
+
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 @freezed

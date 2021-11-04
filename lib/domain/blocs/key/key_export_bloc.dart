@@ -12,67 +12,75 @@ part 'key_export_bloc.freezed.dart';
 class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
   final NekotonService _nekotonService;
 
-  KeyExportBloc(this._nekotonService) : super(const KeyExportState.initial());
+  KeyExportBloc(this._nekotonService) : super(KeyExportStateInitial());
 
   @override
   Stream<KeyExportState> mapEventToState(KeyExportEvent event) async* {
-    yield* event.when(
-      exportKey: (
-        KeySubject keySubject,
-        String password,
-      ) async* {
-        try {
-          late final ExportKeyInput exportKeyInput;
+    try {
+      if (event is _Export) {
+        final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == event.publicKey);
 
-          if (keySubject.value.isLegacy) {
-            exportKeyInput = EncryptedKeyPassword(
-              publicKey: keySubject.value.publicKey,
-              password: Password.explicit(
-                password: password,
-                cacheBehavior: const PasswordCacheBehavior.remove(),
-              ),
-            );
-          } else {
-            exportKeyInput = DerivedKeyExportParams(
-              masterKey: keySubject.value.masterKey,
-              password: Password.explicit(
-                password: password,
-                cacheBehavior: const PasswordCacheBehavior.remove(),
-              ),
-            );
-          }
-
-          final output = await _nekotonService.exportKey(exportKeyInput);
-
-          if (output is EncryptedKeyExportOutput) {
-            yield KeyExportState.success(output.phrase.split(" "));
-          } else if (output is DerivedKeyExportOutput) {
-            yield KeyExportState.success(output.phrase.split(" "));
-          } else {
-            throw UnimplementedError();
-          }
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield KeyExportState.error(err.toString());
+        if (key == null) {
+          throw KeyNotFoundException();
         }
-      },
-    );
+
+        late final ExportKeyInput exportKeyInput;
+
+        if (key.isLegacy) {
+          exportKeyInput = EncryptedKeyPassword(
+            publicKey: key.publicKey,
+            password: Password.explicit(
+              password: event.password,
+              cacheBehavior: const PasswordCacheBehavior.remove(),
+            ),
+          );
+        } else {
+          exportKeyInput = DerivedKeyExportParams(
+            masterKey: key.masterKey,
+            password: Password.explicit(
+              password: event.password,
+              cacheBehavior: const PasswordCacheBehavior.remove(),
+            ),
+          );
+        }
+
+        final output = await _nekotonService.exportKey(exportKeyInput);
+
+        if (output is EncryptedKeyExportOutput) {
+          yield KeyExportStateSuccess(output.phrase.split(" "));
+        } else if (output is DerivedKeyExportOutput) {
+          yield KeyExportStateSuccess(output.phrase.split(" "));
+        } else {
+          throw UnknownSignerException();
+        }
+      }
+    } on Exception catch (err, st) {
+      logger.e(err, err, st);
+      yield KeyExportStateError(err);
+    }
   }
 }
 
 @freezed
 class KeyExportEvent with _$KeyExportEvent {
-  const factory KeyExportEvent.exportKey({
-    required KeySubject keySubject,
+  const factory KeyExportEvent.export({
+    required String publicKey,
     required String password,
-  }) = _ExportKey;
+  }) = _Export;
 }
 
-@freezed
-class KeyExportState with _$KeyExportState {
-  const factory KeyExportState.initial() = _Initial;
+abstract class KeyExportState {}
 
-  const factory KeyExportState.success(List<String> phrase) = _Success;
+class KeyExportStateInitial extends KeyExportState {}
 
-  const factory KeyExportState.error(String info) = _Error;
+class KeyExportStateSuccess extends KeyExportState {
+  final List<String> phrase;
+
+  KeyExportStateSuccess(this.phrase);
+}
+
+class KeyExportStateError extends KeyExportState {
+  final Exception exception;
+
+  KeyExportStateError(this.exception);
 }

@@ -39,7 +39,7 @@ class ExpandablePageView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.animateFirstPage = false,
-    this.estimatedPageSize = 0.0,
+    this.estimatedPageSize = 0,
     this.maxHeight = double.infinity,
     Key? key,
   })  : assert(
@@ -48,7 +48,7 @@ class ExpandablePageView extends StatefulWidget {
             "Cannot provide both children and itemBuilder\n"
             "If you need a fixed PageView, use children\n"
             "If you need a dynamically built PageView, use itemBuilder and itemCount"),
-        assert(estimatedPageSize >= 0.0),
+        assert(estimatedPageSize >= 0),
         super(key: key);
 
   @override

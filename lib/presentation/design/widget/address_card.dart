@@ -22,7 +22,7 @@ class AddressCard extends StatelessWidget {
             children: [
               QrImage(
                 size: constraints.maxWidth * 0.45,
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(12),
                 foregroundColor: CrystalColor.fontDark,
                 backgroundColor: CrystalColor.primary,
                 data: address,
@@ -36,11 +36,11 @@ class AddressCard extends StatelessWidget {
                     highlightColor: CrystalColor.secondary,
                   ),
                   overlay: (context) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
+                    padding: const EdgeInsets.only(bottom: 4),
                     child: Material(
                       type: MaterialType.card,
                       color: CrystalColor.secondary,
-                      borderRadius: BorderRadius.circular(4.0),
+                      borderRadius: BorderRadius.circular(4),
                       clipBehavior: Clip.antiAlias,
                       child: CrystalInkWell(
                         splashColor: CrystalColor.background,
@@ -51,8 +51,8 @@ class AddressCard extends StatelessWidget {
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 6.0,
+                            horizontal: 16,
+                            vertical: 6,
                           ),
                           color: CrystalColor.secondaryBackground,
                           child: Text(

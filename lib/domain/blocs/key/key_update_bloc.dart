@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../logger.dart';
+import '../../repositories/biometry_repository.dart';
 import '../../services/nekoton_service.dart';
 
 part 'key_update_bloc.freezed.dart';
@@ -13,105 +14,114 @@ part 'key_update_bloc.freezed.dart';
 @injectable
 class KeyUpdateBloc extends Bloc<KeyUpdateEvent, KeyUpdateState> {
   final NekotonService _nekotonService;
+  final BiometryRepository _biometryRepository;
 
-  KeyUpdateBloc(this._nekotonService) : super(const KeyUpdateState.initial());
+  KeyUpdateBloc(
+    this._nekotonService,
+    this._biometryRepository,
+  ) : super(KeyUpdateStateInitial());
 
   @override
   Stream<KeyUpdateState> mapEventToState(KeyUpdateEvent event) async* {
-    yield* event.when(
-      changePassword: (
-        KeySubject keySubject,
-        String oldPassword,
-        String newPassword,
-      ) async* {
-        try {
-          late final UpdateKeyInput updateKeyInput;
+    try {
+      if (event is _ChangePassword) {
+        final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == event.publicKey);
 
-          if (keySubject.value.isLegacy) {
-            updateKeyInput = EncryptedKeyUpdateParams.changePassword(
-              publicKey: keySubject.value.publicKey,
-              oldPassword: Password.explicit(
-                password: oldPassword,
-                cacheBehavior: const PasswordCacheBehavior.remove(),
-              ),
-              newPassword: Password.explicit(
-                password: newPassword,
-                cacheBehavior: const PasswordCacheBehavior.remove(),
-              ),
-            );
-          } else {
-            updateKeyInput = DerivedKeyUpdateParams.changePassword(
-              masterKey: keySubject.value.masterKey,
-              oldPassword: Password.explicit(
-                password: oldPassword,
-                cacheBehavior: const PasswordCacheBehavior.remove(),
-              ),
-              newPassword: Password.explicit(
-                password: newPassword,
-                cacheBehavior: const PasswordCacheBehavior.remove(),
-              ),
-            );
-          }
-
-          await _nekotonService.updateKey(updateKeyInput);
-
-          yield const KeyUpdateState.success();
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield KeyUpdateState.error(err.toString());
+        if (key == null) {
+          throw KeyNotFoundException();
         }
-      },
-      rename: (
-        KeySubject keySubject,
-        String name,
-      ) async* {
-        try {
-          late final UpdateKeyInput updateKeyInput;
 
-          if (keySubject.value.isLegacy) {
-            updateKeyInput = EncryptedKeyUpdateParams.rename(
-              publicKey: keySubject.value.publicKey,
-              name: name,
-            );
-          } else {
-            updateKeyInput = DerivedKeyUpdateParams.renameKey(
-              masterKey: keySubject.value.masterKey,
-              publicKey: keySubject.value.publicKey,
-              name: name,
-            );
-          }
+        late final UpdateKeyInput updateKeyInput;
 
-          await _nekotonService.updateKey(updateKeyInput);
-
-          yield const KeyUpdateState.success();
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield KeyUpdateState.error(err.toString());
+        if (key.isLegacy) {
+          updateKeyInput = EncryptedKeyUpdateParams.changePassword(
+            publicKey: key.publicKey,
+            oldPassword: Password.explicit(
+              password: event.oldPassword,
+              cacheBehavior: const PasswordCacheBehavior.remove(),
+            ),
+            newPassword: Password.explicit(
+              password: event.newPassword,
+              cacheBehavior: const PasswordCacheBehavior.remove(),
+            ),
+          );
+        } else {
+          updateKeyInput = DerivedKeyUpdateParams.changePassword(
+            masterKey: key.masterKey,
+            oldPassword: Password.explicit(
+              password: event.oldPassword,
+              cacheBehavior: const PasswordCacheBehavior.remove(),
+            ),
+            newPassword: Password.explicit(
+              password: event.newPassword,
+              cacheBehavior: const PasswordCacheBehavior.remove(),
+            ),
+          );
         }
-      },
-    );
+
+        final updatedKey = await _nekotonService.updateKey(updateKeyInput);
+
+        await _biometryRepository.setKeyPassword(
+          publicKey: updatedKey.publicKey,
+          password: event.newPassword,
+        );
+
+        yield KeyUpdateStateSuccess();
+      } else if (event is _Rename) {
+        final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == event.publicKey);
+
+        if (key == null) {
+          throw KeyNotFoundException();
+        }
+
+        late final UpdateKeyInput updateKeyInput;
+
+        if (key.isLegacy) {
+          updateKeyInput = EncryptedKeyUpdateParams.rename(
+            publicKey: key.publicKey,
+            name: event.name,
+          );
+        } else {
+          updateKeyInput = DerivedKeyUpdateParams.renameKey(
+            masterKey: key.masterKey,
+            publicKey: key.publicKey,
+            name: event.name,
+          );
+        }
+
+        await _nekotonService.updateKey(updateKeyInput);
+
+        yield KeyUpdateStateSuccess();
+      }
+    } on Exception catch (err, st) {
+      logger.e(err, err, st);
+      yield KeyUpdateStateError(err);
+    }
   }
 }
 
 @freezed
 class KeyUpdateEvent with _$KeyUpdateEvent {
   const factory KeyUpdateEvent.changePassword({
-    required KeySubject keySubject,
+    required String publicKey,
     required String oldPassword,
     required String newPassword,
   }) = _ChangePassword;
 
   const factory KeyUpdateEvent.rename({
-    required KeySubject keySubject,
+    required String publicKey,
     required String name,
   }) = _Rename;
 }
 
-@freezed
-class KeyUpdateState with _$KeyUpdateState {
-  const factory KeyUpdateState.initial() = _Initial;
+abstract class KeyUpdateState {}
 
-  const factory KeyUpdateState.success() = _Success;
+class KeyUpdateStateInitial extends KeyUpdateState {}
 
-  const factory KeyUpdateState.error(String info) = _Error;
+class KeyUpdateStateSuccess extends KeyUpdateState {}
+
+class KeyUpdateStateError extends KeyUpdateState {
+  final Exception exception;
+
+  KeyUpdateStateError(this.exception);
 }

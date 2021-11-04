@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../../theme.dart';
-import '../ink_well.dart';
+import '../crystal_ink_well.dart';
 
 class FocusedMenuController {
   _FocusedMenuHolderState? _state;
@@ -39,9 +39,9 @@ class FocusedMenuHolder extends StatefulWidget {
     required this.menuItems,
     this.duration = const Duration(milliseconds: 100),
     this.menuBoxDecoration,
-    this.menuItemExtent = 50.0,
+    this.menuItemExtent = 50,
     this.animateMenuItems = true,
-    this.blurSize = 4.0,
+    this.blurSize = 4,
     this.blurBackgroundColor,
     this.menuWidth,
     this.bottomOffsetHeight = 0,
@@ -207,10 +207,10 @@ class _FocusedMenuDetails extends StatelessWidget {
                 decoration: menuBoxDecoration ?? const BoxDecoration(),
                 child: IntrinsicWidth(
                   child: Material(
-                    elevation: 1.0,
+                    elevation: 1,
                     type: MaterialType.card,
                     color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(Platform.isIOS ? 13.0 : 4.0),
+                    borderRadius: BorderRadius.circular(Platform.isIOS ? 13 : 4),
                     clipBehavior: Clip.antiAlias,
                     child: Stack(
                       children: [
@@ -237,8 +237,8 @@ class _FocusedMenuDetails extends StatelessWidget {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             separatorBuilder: (_, __) => Divider(
-                              height: 1.0,
-                              thickness: 1.0,
+                              height: 1,
+                              thickness: 1,
                               color: Platform.isIOS ? const Color.fromRGBO(60, 60, 67, 0.36) : CrystalColor.divider,
                             ),
                             itemBuilder: (context, index) {
@@ -255,7 +255,7 @@ class _FocusedMenuDetails extends StatelessWidget {
                               );
                               if (animateMenu) {
                                 return TweenAnimationBuilder<double>(
-                                  tween: Tween(begin: 1.0, end: 0.0),
+                                  tween: Tween(begin: 1, end: 0),
                                   duration: Duration(milliseconds: index * 200),
                                   builder: (context, value, child) => Transform(
                                     transform: Matrix4.rotationX(1.5708 * value),
@@ -315,13 +315,13 @@ class _FocusedMenuDetails extends StatelessWidget {
           highlightColor: color,
           child: Container(
             height: itemExtent,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: PlatformWidgetBuilder(
               material: (context, child, _) => Row(
                 children: [
                   if (icon != null)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8.0, right: 20.0),
+                      padding: const EdgeInsets.only(left: 8, right: 20),
                       child: SizedBox(
                         width: 24,
                         child: Icon(icon, color: color, size: 24),
@@ -342,7 +342,7 @@ class _FocusedMenuDetails extends StatelessWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                  fontSize: Platform.isIOS ? 17.0 : 16.0,
+                  fontSize: Platform.isIOS ? 17 : 16,
                   color: color,
                   fontWeight: FontWeight.w500,
                 ),

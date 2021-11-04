@@ -4,95 +4,95 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/subjects.dart';
 
 import '../../../logger.dart';
+import '../../models/ton_wallet_info.dart';
+import '../../repositories/ton_wallet_info_repository.dart';
+import '../../services/nekoton_service.dart';
 
 part 'ton_wallet_info_bloc.freezed.dart';
 
 @injectable
-class TonWalletInfoBloc extends Bloc<TonWalletInfoEvent, TonWalletInfoState> {
-  final TonWallet? _tonWallet;
-  late final StreamSubscription _onStateChangedSubscription;
-  ContractState? _contractState;
+class TonWalletInfoBloc extends Bloc<_Event, TonWalletInfo?> {
+  final NekotonService _nekotonService;
+  final TonWalletInfoRepository _tonWalletInfoRepository;
+  final _errorsSubject = PublishSubject<Exception>();
+  StreamSubscription? _streamSubscription;
+  StreamSubscription? _onStateChangedSubscription;
 
-  TonWalletInfoBloc(@factoryParam this._tonWallet) : super(const TonWalletInfoState.initial()) {
-    add(const TonWalletInfoEvent.updateInfo());
-
-    _onStateChangedSubscription = _tonWallet!.onStateChangedStream.listen(
-      (ContractState contractState) => add(
-        TonWalletInfoEvent.updateState(contractState),
-      ),
-    );
-  }
+  TonWalletInfoBloc(
+    this._nekotonService,
+    this._tonWalletInfoRepository,
+  ) : super(null);
 
   @override
   Future<void> close() {
-    _onStateChangedSubscription.cancel();
+    _errorsSubject.close();
+    _streamSubscription?.cancel();
+    _onStateChangedSubscription?.cancel();
     return super.close();
   }
 
   @override
-  Stream<TonWalletInfoState> mapEventToState(TonWalletInfoEvent event) async* {
-    if (event is TonWalletInfoEvent) {
-      yield* event.when(
-        updateInfo: () async* {
-          try {
-            final contractState = await _tonWallet!.contractState;
-            final balance = contractState.balance.toTokens();
-            _contractState = contractState.copyWith(balance: balance);
+  Stream<TonWalletInfo?> mapEventToState(_Event event) async* {
+    try {
+      if (event is _Load) {
+        final tonWalletInfo = _tonWalletInfoRepository.get(event.address);
 
-            yield TonWalletInfoState.ready(
-              address: _tonWallet!.address,
-              contractState: _contractState!,
-              walletType: _tonWallet!.walletType,
-              details: _tonWallet!.details,
-              publicKey: _tonWallet!.publicKey,
-            );
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield TonWalletInfoState.error(err.toString());
-          }
-        },
-        updateState: (ContractState contractState) async* {
-          try {
-            final balance = contractState.balance.toTokens();
-            _contractState = contractState.copyWith(balance: balance);
+        if (tonWalletInfo != null) {
+          add(_LocalEvent.update(tonWalletInfo));
+        }
 
-            yield TonWalletInfoState.ready(
-              address: _tonWallet!.address,
-              contractState: _contractState!,
-              walletType: _tonWallet!.walletType,
-              details: _tonWallet!.details,
-              publicKey: _tonWallet!.publicKey,
-            );
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-            yield TonWalletInfoState.error(err.toString());
-          }
-        },
-      );
+        _streamSubscription?.cancel();
+        _onStateChangedSubscription?.cancel();
+        _streamSubscription = _nekotonService.tonWalletsStream
+            .expand((e) => e)
+            .where((e) => e.address == event.address)
+            .distinct()
+            .listen((tonWalletEvent) async {
+          _onStateChangedSubscription?.cancel();
+          _onStateChangedSubscription =
+              tonWalletEvent.onStateChangedStream.listen((event) => add(_LocalEvent.update(TonWalletInfo(
+                    address: tonWalletEvent.address,
+                    contractState: event.copyWith(balance: event.balance.toTokens()),
+                    walletType: tonWalletEvent.walletType,
+                    details: tonWalletEvent.details,
+                    publicKey: tonWalletEvent.publicKey,
+                  ))));
+
+          final contractState = await tonWalletEvent.contractState;
+
+          add(_LocalEvent.update(TonWalletInfo(
+            address: tonWalletEvent.address,
+            contractState: contractState.copyWith(balance: contractState.balance.toTokens()),
+            walletType: tonWalletEvent.walletType,
+            details: tonWalletEvent.details,
+            publicKey: tonWalletEvent.publicKey,
+          )));
+        });
+      } else if (event is _Update) {
+        yield event.tonWalletInfo;
+
+        await _tonWalletInfoRepository.save(event.tonWalletInfo);
+      }
+    } on Exception catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err);
     }
   }
+
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
+}
+
+abstract class _Event {}
+
+@freezed
+class _LocalEvent extends _Event with _$_LocalEvent {
+  const factory _LocalEvent.update(TonWalletInfo tonWalletInfo) = _Update;
 }
 
 @freezed
-class TonWalletInfoEvent with _$TonWalletInfoEvent {
-  const factory TonWalletInfoEvent.updateInfo() = _UpdateInfo;
-
-  const factory TonWalletInfoEvent.updateState(ContractState contractState) = _UpdateState;
-}
-
-@freezed
-class TonWalletInfoState with _$TonWalletInfoState {
-  const factory TonWalletInfoState.initial() = _Initial;
-
-  const factory TonWalletInfoState.ready({
-    required String address,
-    required ContractState contractState,
-    required WalletType walletType,
-    required TonWalletDetails details,
-    required String publicKey,
-  }) = _Ready;
-
-  const factory TonWalletInfoState.error(String info) = _Error;
+class TonWalletInfoEvent extends _Event with _$TonWalletInfoEvent {
+  const factory TonWalletInfoEvent.load(String address) = _Load;
 }

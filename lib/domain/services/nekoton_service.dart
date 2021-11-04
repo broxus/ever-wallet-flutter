@@ -1,64 +1,78 @@
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 abstract class NekotonService {
-  Stream<List<KeySubject>> get keysStream;
+  Stream<Transport> get transportStream;
 
-  Stream<List<AccountSubject>> get accountsStream;
+  Transport get transport;
 
-  Stream<List<SubscriptionSubject>> get subscriptionsStream;
+  Stream<List<KeyStoreEntry>> get keysStream;
 
-  Stream<KeySubject?> get currentKeyStream;
+  Stream<List<AssetsList>> get accountsStream;
+
+  Stream<List<TonWallet>> get tonWalletsStream;
+
+  Stream<List<TokenWallet>> get tokenWalletsStream;
+
+  Stream<KeyStoreEntry?> get currentKeyStream;
 
   Stream<bool> get keysPresenceStream;
 
-  Stream<bool> get accountsPresenceStream;
+  List<KeyStoreEntry> get keys;
 
-  Stream<bool> get subscriptionsPresenceStream;
+  List<AssetsList> get accounts;
 
-  List<KeySubject> get keys;
+  List<TonWallet> get tonWallets;
 
-  List<AccountSubject> get accounts;
+  List<TokenWallet> get tokenWallets;
 
-  List<SubscriptionSubject> get subscriptions;
+  KeyStoreEntry? get currentKey;
 
-  KeySubject? get currentKey;
+  set currentKey(KeyStoreEntry? currentKey);
 
-  Future<void> setCurrentKey(KeySubject? currentKey);
+  String get networkGroup;
 
-  Future<KeySubject> addKey(CreateKeyInput createKeyInput);
+  Future<KeyStoreEntry> addKey(CreateKeyInput createKeyInput);
 
-  Future<KeySubject> updateKey(UpdateKeyInput updateKeyInput);
+  Future<KeyStoreEntry> updateKey(UpdateKeyInput updateKeyInput);
 
   Future<ExportKeyOutput> exportKey(ExportKeyInput exportKeyInput);
 
   Future<bool> checkKeyPassword(SignInput signInput);
 
-  Future<KeySubject?> removeKey(String publicKey);
+  Future<KeyStoreEntry?> removeKey(String publicKey);
 
   Future<void> clearKeystore();
 
-  Future<AccountSubject> addAccount({
+  Future<AssetsList> addAccount({
     required String name,
     required String publicKey,
     required WalletType walletType,
+    required int workchain,
   });
 
-  Future<AccountSubject> renameAccount({
+  Future<AssetsList> renameAccount({
     required String address,
     required String name,
   });
 
-  Future<AccountSubject?> removeAccount(String address);
+  Future<AssetsList?> removeAccount(String address);
 
-  Future<AccountSubject> addTokenWallet({
+  Future<AssetsList> addTokenWallet({
     required String address,
     required String rootTokenContract,
   });
 
-  Future<AccountSubject> removeTokenWallet({
+  Future<AssetsList> removeTokenWallet({
     required String address,
     required String rootTokenContract,
   });
 
   Future<void> clearAccountsStorage();
+
+  Future<RootTokenContractInfo> getTokenWalletInfo({
+    required String address,
+    required String rootTokenContract,
+  });
+
+  Stream<ApprovalRequest> get approvalStream;
 }

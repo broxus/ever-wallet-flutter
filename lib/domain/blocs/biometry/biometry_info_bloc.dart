@@ -14,99 +14,81 @@ part 'biometry_info_bloc.freezed.dart';
 @injectable
 class BiometryInfoBloc extends Bloc<_Event, BiometryInfoState> {
   final BiometryRepository _biometryRepository;
+  final _errorsSubject = PublishSubject<Exception>();
   late final StreamSubscription _streamSubscription;
 
-  BiometryInfoBloc(this._biometryRepository)
-      : super(const BiometryInfoState(
-          isAvailable: true,
-          isEnabled: false,
-        )) {
+  BiometryInfoBloc(this._biometryRepository) : super(const BiometryInfoState()) {
     _streamSubscription = Rx.combineLatest2<bool, bool, Tuple2<bool, bool>>(
       _biometryRepository.biometryAvailabilityStream,
       _biometryRepository.biometryStatusStream,
       (a, b) => Tuple2(a, b),
-    ).listen(
-      (Tuple2<bool, bool> tuple) => add(
-        _LocalEvent.updateBiometryInfo(
-          isAvailable: tuple.item1,
-          isEnabled: tuple.item2,
-        ),
-      ),
-    );
+    ).distinct().listen(
+          (Tuple2<bool, bool> tuple) => add(
+            _LocalEvent.update(
+              isAvailable: tuple.item1,
+              isEnabled: tuple.item2,
+            ),
+          ),
+        );
   }
 
   @override
   Future<void> close() {
+    _errorsSubject.close();
     _streamSubscription.cancel();
     return super.close();
   }
 
   @override
   Stream<BiometryInfoState> mapEventToState(_Event event) async* {
-    if (event is _LocalEvent) {
-      yield* event.when(
-        updateBiometryInfo: (
-          bool isAvailable,
-          bool isEnabled,
-        ) async* {
-          try {
-            yield BiometryInfoState(
-              isAvailable: isAvailable,
-              isEnabled: isEnabled,
-            );
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-          }
-        },
-      );
-    }
+    try {
+      if (event is _SetStatus) {
+        final isAuthenticated = await _biometryRepository.authenticate(event.localizedReason);
 
-    if (event is BiometryInfoEvent) {
-      yield* event.when(
-        setBiometryStatus: (bool isEnabled) async* {
-          try {
-            final isAuthenticated = await _biometryRepository.authenticate('Authenticate to change user settings');
-
-            if (isAuthenticated) {
-              await _biometryRepository.setBiometryStatus(isEnabled: isEnabled);
-            }
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-          }
-        },
-        checkBiometryAvailability: () async* {
-          try {
-            await _biometryRepository.checkBiometryAvailability();
-          } on Exception catch (err, st) {
-            logger.e(err, err, st);
-          }
-        },
-      );
+        if (isAuthenticated) {
+          await _biometryRepository.setBiometryStatus(event.isEnabled);
+        }
+      } else if (event is _CheckAvailability) {
+        await _biometryRepository.checkBiometryAvailability();
+      } else if (event is _Update) {
+        yield BiometryInfoState(
+          isAvailable: event.isAvailable ?? state.isAvailable,
+          isEnabled: event.isEnabled ?? state.isEnabled,
+        );
+      }
+    } on Exception catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err);
     }
   }
+
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
 abstract class _Event {}
 
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
-  const factory _LocalEvent.updateBiometryInfo({
-    required bool isAvailable,
-    required bool isEnabled,
-  }) = _UpdateBiometryInfo;
+  const factory _LocalEvent.update({
+    bool? isAvailable,
+    bool? isEnabled,
+  }) = _Update;
 }
 
 @freezed
 class BiometryInfoEvent extends _Event with _$BiometryInfoEvent {
-  const factory BiometryInfoEvent.setBiometryStatus({required bool isEnabled}) = _SetBiometryStatus;
+  const factory BiometryInfoEvent.setStatus({
+    required String localizedReason,
+    required bool isEnabled,
+  }) = _SetStatus;
 
-  const factory BiometryInfoEvent.checkBiometryAvailability() = _CheckBiometryAvailability;
+  const factory BiometryInfoEvent.checkAvailability() = _CheckAvailability;
 }
 
 @freezed
 class BiometryInfoState with _$BiometryInfoState {
   const factory BiometryInfoState({
-    required bool isAvailable,
-    required bool isEnabled,
+    @Default(false) bool isAvailable,
+    @Default(false) bool isEnabled,
   }) = _BiometryInfoState;
 }

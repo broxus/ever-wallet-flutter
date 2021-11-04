@@ -69,7 +69,7 @@ class _SelectionWidgetState extends State<SelectionWidget> {
       return _dismiss();
     }
 
-    final radius = math.min(pointer.radiusMajor, (objectPosition?.shortestSide ?? 0.0) / 4);
+    final radius = math.min(pointer.radiusMajor, (objectPosition?.shortestSide ?? 0) / 4);
 
     _objectPosition ??= _keyPosition(_objectKey)?.inflate(radius);
     if (_objectPosition != null && _objectPosition!.contains(offset)) return;
@@ -129,7 +129,7 @@ class _SelectionWidgetState extends State<SelectionWidget> {
           valueListenable: _selection,
           builder: (context, selected, _) => TweenAnimationBuilder<double>(
             duration: const Duration(),
-            tween: Tween(end: selected ? 1.0 : 0.0),
+            tween: Tween(end: selected ? 1 : 0),
             builder: (context, opacity, child) {
               final color = widget.configuration.highlightColor;
               return color == null
@@ -137,7 +137,7 @@ class _SelectionWidgetState extends State<SelectionWidget> {
                   : DecoratedBox(
                       decoration: BoxDecoration(
                         color: color.withOpacity(color.opacity * opacity),
-                        borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+                        borderRadius: const BorderRadius.all(Radius.circular(2)),
                       ),
                       child: child,
                     );
@@ -177,7 +177,7 @@ class _SelectionWidgetState extends State<SelectionWidget> {
             valueListenable: _selection,
             builder: (context, value, child) => AnimatedOpacity(
               duration: const Duration(),
-              opacity: value ? 1.0 : 0.0,
+              opacity: value ? 1 : 0,
               child: child,
             ),
             child: KeyedSubtree(
@@ -257,7 +257,7 @@ class SelectionConfiguration {
     this.childAnchor = Alignment.bottomCenter,
     this.hapticOnShown = true,
     this.autoClose = true,
-    this.highlightPadding = const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+    this.highlightPadding = const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     this.highlightColor,
   });
 

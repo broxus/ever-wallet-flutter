@@ -4,49 +4,64 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
+import '../../services/nekoton_service.dart';
 
 part 'key_info_bloc.freezed.dart';
 
 @injectable
-class KeyInfoBloc extends Bloc<KeyInfoEvent, KeyInfoState> {
-  final KeySubject? _keySubject;
-  late final StreamSubscription _streamSubscription;
+class KeyInfoBloc extends Bloc<_Event, KeyStoreEntry?> {
+  final NekotonService _nekotonService;
+  final _errorsSubject = PublishSubject<Exception>();
+  StreamSubscription? _streamSubscription;
 
-  KeyInfoBloc(@factoryParam this._keySubject) : super(KeyInfoState.ready(_keySubject!.value.name)) {
-    _streamSubscription = _keySubject!.listen((value) => add(KeyInfoEvent.updateName(value.name)));
-  }
+  KeyInfoBloc(this._nekotonService) : super(null);
 
   @override
   Future<void> close() {
-    _streamSubscription.cancel();
+    _errorsSubject.close();
+    _streamSubscription?.cancel();
     return super.close();
   }
 
   @override
-  Stream<KeyInfoState> mapEventToState(KeyInfoEvent event) async* {
-    yield* event.when(
-      updateName: (String name) async* {
-        try {
-          yield KeyInfoState.ready(name);
-        } on Exception catch (err, st) {
-          logger.e(err, err, st);
-          yield KeyInfoState.error(err.toString());
+  Stream<KeyStoreEntry?> mapEventToState(_Event event) async* {
+    try {
+      if (event is _Load) {
+        final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == event.publicKey);
+
+        if (key == null) {
+          throw KeyNotFoundException();
         }
-      },
-    );
+
+        _streamSubscription?.cancel();
+        _streamSubscription = _nekotonService.keysStream
+            .expand((e) => e)
+            .where((e) => e.publicKey == event.publicKey)
+            .distinct()
+            .listen((value) => add(_LocalEvent.update(value)));
+      } else if (event is _Update) {
+        yield event.key;
+      }
+    } on Exception catch (err, st) {
+      logger.e(err, err, st);
+      _errorsSubject.add(err);
+    }
   }
+
+  Stream<Exception> get errorsStream => _errorsSubject.stream;
+}
+
+abstract class _Event {}
+
+@freezed
+class _LocalEvent extends _Event with _$_LocalEvent {
+  const factory _LocalEvent.update(KeyStoreEntry key) = _Update;
 }
 
 @freezed
-class KeyInfoEvent with _$KeyInfoEvent {
-  const factory KeyInfoEvent.updateName(String name) = _UpdateName;
-}
-
-@freezed
-class KeyInfoState with _$KeyInfoState {
-  const factory KeyInfoState.ready(String name) = _Ready;
-
-  const factory KeyInfoState.error(String info) = _Error;
+class KeyInfoEvent extends _Event with _$KeyInfoEvent {
+  const factory KeyInfoEvent.load(String publicKey) = _Load;
 }

@@ -50,7 +50,7 @@
     "subtitle": "Create a new wallet or sign in",
     "action": {
       "create": "Create a new wallet",
-      "sign_in": "Sign in with seed phrase or private key"
+      "sign_in": "Sign in with seed phrase"
     }
   },
   "welcome_policy_screen": {
@@ -74,7 +74,7 @@
   },
   "seed_phrase_check_screen": {
     "title": "Let’s check the seed phrase",
-    "hint": "Enter the word",
+    "hint": "Word...",
     "validation_errors": {
       "incorrect_word": "Incorrect word"
     }
@@ -97,7 +97,7 @@
   },
   "seed_phrase_import_screen": {
     "title": "Enter your seed phrase",
-    "hint": "Enter the word",
+    "hint": "Word...",
     "validation_errors": {
       "incorrect_word": "Incorrect word"
     }
@@ -130,7 +130,7 @@
     },
     "holder": {
       "value": "{} {}",
-      "fee": "Fees: {} {}"
+      "fee": "{} {}"
     },
     "status": {
       "failed": "Failed transaction",
@@ -169,8 +169,7 @@
   "preferences_modal": {
     "title": "Preferences",
     "actions": {
-      "look_in_the_explorer": "Look in the explorer",
-      "export_private_key": "Export private key"
+      "look_in_the_explorer": "Look in the explorer"
     },
     "message": {
       "renamed": "Wallet renamed",
@@ -249,9 +248,8 @@
         "add_seed": "Add seed"
       },
       "current_seed_preferences": {
-        "title": "Current seed preferences ({})",
+        "title": "Current seed preferences",
         "export_seed": "Export seed phrase",
-        "export_key": "Export private key",
         "remove_seed": "Remove seed phrase",
         "change_seed_password": "Change seed phrase password",
         "derive_key": "Derive key",
@@ -274,7 +272,8 @@
     "hint": "Name",
     "actions": {
       "create": "Create new seed",
-      "import": "Import seed"
+      "import": "Import seed (12 words)",
+      "import_legacy": "Import legacy seed (24 words)"
     }
   },
   "change_seed_password_modal": {
@@ -343,5 +342,21 @@
     "message": {
       "success": "Seed phrase renamed successfully"
     }
+  },
+  "browser": {
+    "title": "Browser",
+    "reload": "Reload",
+    "share": "Share",
+    "account": "Account",
+    "add_bookmark": "Add bookmark",
+    "remove_bookmark": "Remove bookmark",
+    "bookmarks": "BOOKMARKS",
+    "manage": "Manage",
+    "done": "Done",
+    "show_bookmarks": "Your bookmarks will show up here",
+    "remove_from_bookmarks": "Remove from Bookmarks?",
+    "remove_from_bookmarks_confirm": "Are you sure you want to remove {} from Bookmarks?",
+    "cancel": "Cancel",
+    "remove": "Remove"
   }
 }

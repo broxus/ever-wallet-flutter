@@ -1,22 +1,22 @@
 abstract class BiometryRepository {
-  bool get biometryAvailability;
-
   Stream<bool> get biometryAvailabilityStream;
+
+  bool get biometryAvailability;
 
   Future<void> checkBiometryAvailability();
 
-  bool get biometryStatus;
-
   Stream<bool> get biometryStatusStream;
 
-  Future<void> setBiometryStatus({required bool isEnabled});
+  bool get biometryStatus;
+
+  Future<void> setBiometryStatus(bool isEnabled);
 
   Future<void> setKeyPassword({
     required String publicKey,
     required String password,
   });
 
-  Future<String?> getKeyPassword(String publicKey);
+  String? getKeyPassword(String publicKey);
 
   Future<void> clear();
 

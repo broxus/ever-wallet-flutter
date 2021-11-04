@@ -1,5 +1,5 @@
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-const defaultMnemonicType = MnemonicType.labs(id: 0);
+const kDefaultMnemonicType = MnemonicType.labs(id: 0);
 
-const defaultCheckingWordsAmount = 4;
+const kDefaultCheckingWordsAmount = 4;
