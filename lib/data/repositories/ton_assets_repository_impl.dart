@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/subjects.dart';
@@ -9,17 +8,29 @@ import '../dtos/token_contract_asset_dto.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/remote/rest_source.dart';
 
+@preResolve
 @LazySingleton(as: TonAssetsRepository)
 class TonAssetsRepositoryImpl implements TonAssetsRepository {
   final HiveSource _hiveSource;
   final RestSource _restSource;
   final _assetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
 
-  TonAssetsRepositoryImpl(
+  TonAssetsRepositoryImpl._(
     this._hiveSource,
     this._restSource,
-  ) {
-    _loadFromCache();
+  );
+
+  @factoryMethod
+  static Future<TonAssetsRepositoryImpl> create(
+    HiveSource hiveSource,
+    RestSource restSource,
+  ) async {
+    final tonAssetsRepositoryImpl = TonAssetsRepositoryImpl._(
+      hiveSource,
+      restSource,
+    );
+    await tonAssetsRepositoryImpl._initialize();
+    return tonAssetsRepositoryImpl;
   }
 
   @override
@@ -113,17 +124,25 @@ class TonAssetsRepositoryImpl implements TonAssetsRepository {
       assets.add(asset);
     }
 
+    final old = [..._assetsSubject.value]..removeWhere((e) => assets.any((el) => e.address == el.address));
+
     final list = [
       ...assets,
-      ..._assetsSubject.value.where((e) => assets.firstWhereOrNull((el) => e.address != el.address) == null)
+      ...old,
     ];
 
     _assetsSubject.add(list);
   }
 
-  void _loadFromCache() {
+  Future<void> _initialize() async {
     final assets = _hiveSource.getTokenContractAssets().map((e) => e.toModel()).toList();
 
-    _assetsSubject.add(assets);
+    if (assets.isEmpty) {
+      await refresh();
+    } else {
+      _assetsSubject.add(assets);
+
+      refresh();
+    }
   }
 }
