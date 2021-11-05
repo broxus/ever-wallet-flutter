@@ -115,7 +115,9 @@ class __EnterAddressBodyState extends State<_EnterAddressBody> {
                         },
                         scrollPadding: const EdgeInsets.only(bottom: 24),
                         maxLength: 128,
-                        suffix: Wrap(
+                        suffix: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             if (_addressController.text.isEmpty && _clipboard.value != null)
                               _suffixText(
