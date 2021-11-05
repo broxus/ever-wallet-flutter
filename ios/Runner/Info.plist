@@ -29,6 +29,10 @@
 		<true/>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Use Face ID for biometry authentication?</string>
+		<key>io.flutter.embedded_views_preview</key>
+		<true/>
+		<key>NSCameraUsageDescription</key>
+		<string>This app needs camera access to scan QR codes</string>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>

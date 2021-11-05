@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:permission_handler/permission_handler.dart' as ph;
 
 import '../../../../../domain/blocs/biometry/biometry_get_password_bloc.dart';
 import '../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
@@ -14,6 +15,7 @@ import '../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widget/crystal_bottom_sheet.dart';
 import '../../../widgets/input_password_modal_body.dart';
+import 'scanner_widget.dart';
 
 part 'confirm_body.dart';
 part 'loader_body.dart';

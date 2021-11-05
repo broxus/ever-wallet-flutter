@@ -88,7 +88,7 @@
     "creation": {
       "title": "Create a password",
       "description": "We will ask for it at each transaction. If you forget it, you will need to restore the wallet from the seed phrase",
-      "action": "Create a wallet"
+      "action": "Confirm"
     },
     "password": {
       "hint": "Your password…",

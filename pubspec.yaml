@@ -45,6 +45,8 @@ dependencies:
   nekoton_flutter:
     path: ../nekoton-flutter
   package_info_plus: ^1.0.6
+  permission_handler: ^8.2.6
+  qr_code_scanner: ^0.6.1
   qr_flutter: ^4.0.0
   rxdart: ^0.27.0
   share_plus: ^2.1.4

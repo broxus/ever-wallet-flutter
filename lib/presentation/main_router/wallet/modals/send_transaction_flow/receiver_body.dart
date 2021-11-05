@@ -115,16 +115,81 @@ class __EnterAddressBodyState extends State<_EnterAddressBody> {
                         },
                         scrollPadding: const EdgeInsets.only(bottom: 24),
                         maxLength: 128,
-                        suffix: _addressController.text.isEmpty && _clipboard.value != null
-                            ? _suffixText(
-                                text: LocaleKeys.send_transaction_modal_input_actions_paste.tr(),
+                        suffix: Wrap(
+                          children: [
+                            if (_addressController.text.isEmpty && _clipboard.value != null)
+                              _suffixText(
+                                text: 'Paste',
+                                paddingLeft: 12,
+                                paddingRight: 6,
                                 onTap: () {
                                   _addressController.text = _clipboard.value!;
                                   _addressController.selection =
                                       TextSelection.collapsed(offset: _clipboard.value!.length);
                                 },
-                              )
-                            : null,
+                              ),
+                            _suffixText(
+                              text: 'Scan',
+                              paddingLeft: 6,
+                              paddingRight: 12,
+                              onTap: () async {
+                                var status = await ph.Permission.camera.status;
+
+                                if (!status.isGranted) {
+                                  status = await ph.Permission.camera.request();
+                                }
+
+                                if (!status.isGranted) {
+                                  ph.openAppSettings();
+                                } else {
+                                  final result = await Navigator.of(context).push<String>(
+                                    MaterialPageRoute(
+                                      builder: (context) => const ScannerWidget(),
+                                    ),
+                                  );
+
+                                  if (result != null) {
+                                    final regExp = RegExp(
+                                      r"([\-]?[\d]:[\d\w\+\-\/]{64})|([\d\w\+\-\/]{48})|([13]{1}[a-km-zA-HJ-NP-Z1-9]{26,33}|bc1[a-z0-9]{39,59})|(0x[a-fA-F0-9]{40})",
+                                    );
+
+                                    final address = regExp.stringMatch(result);
+
+                                    if (address != null) {
+                                      _addressController.text = address;
+                                    } else {
+                                      await showErrorCrystalFlushbar(
+                                        context,
+                                        message: 'Incorrect address',
+                                      );
+                                      return;
+                                    }
+
+                                    final amountRegExp = RegExp(
+                                      r"amount=[+-]?((\d+(\.\d*)?)|(\.\d+))",
+                                    );
+
+                                    final amount = amountRegExp.firstMatch(result)?.group(1);
+
+                                    if (amount != null) {
+                                      _amountController.text = amount;
+                                    }
+
+                                    final commentRegExp = RegExp(
+                                      r"comment=(.+?(?=&|$))",
+                                    );
+
+                                    final comment = commentRegExp.firstMatch(result)?.group(1);
+
+                                    if (comment != null) {
+                                      _commentController.text = Uri.decodeFull(comment);
+                                    }
+                                  }
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const CrystalDivider(height: 16),

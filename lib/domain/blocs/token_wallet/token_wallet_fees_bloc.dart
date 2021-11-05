@@ -69,6 +69,7 @@ class TokenWalletFeesBloc extends Bloc<TokenWalletFeesEvent, TokenWalletFeesStat
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
+      yield TokenWalletFeesState.error(err.toString());
       _errorsSubject.add(err);
     }
   }

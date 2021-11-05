@@ -54,6 +54,7 @@ class TonWalletFeesBloc extends Bloc<TonWalletFeesEvent, TonWalletFeesState> {
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
+      yield TonWalletFeesState.error(err.toString());
       _errorsSubject.add(err);
     }
   }

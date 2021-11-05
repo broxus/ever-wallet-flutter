@@ -24,14 +24,17 @@ class _ApplicationState extends State<Application> {
         ),
       );
 
-  Widget buildApp(BuildContext context) => MaterialApp.router(
-        title: LocaleKeys.application_title.tr(),
-        theme: applicationTheme,
-        debugShowCheckedModeBanner: false,
-        supportedLocales: context.supportedLocales,
-        locale: context.locale,
-        localizationsDelegates: context.localizationDelegates,
-        routerDelegate: _appRouter.delegate(),
-        routeInformationParser: _appRouter.defaultRouteParser(),
+  Widget buildApp(BuildContext context) => Container(
+        color: CrystalColor.background,
+        child: MaterialApp.router(
+          title: LocaleKeys.application_title.tr(),
+          theme: applicationTheme,
+          debugShowCheckedModeBanner: false,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
+          localizationsDelegates: context.localizationDelegates,
+          routerDelegate: _appRouter.delegate(),
+          routeInformationParser: _appRouter.defaultRouteParser(),
+        ),
       );
 }
