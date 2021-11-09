@@ -46,7 +46,7 @@ class WalletAssetHolder extends StatelessWidget {
                       SizedBox(
                         height: 24,
                         child: Text(
-                          name,
+                          formatValue(balance),
                           style: const TextStyle(
                             fontSize: 18,
                             letterSpacing: 0.5,
@@ -59,7 +59,7 @@ class WalletAssetHolder extends StatelessWidget {
                       SizedBox(
                         height: 20,
                         child: Text(
-                          formatValue(balance),
+                          name,
                           style: const TextStyle(
                             fontSize: 14,
                             letterSpacing: 0.75,

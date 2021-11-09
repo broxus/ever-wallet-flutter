@@ -27,7 +27,7 @@ class _ApplicationState extends State<Application> {
   Widget buildApp(BuildContext context) => Container(
         color: CrystalColor.background,
         child: MaterialApp.router(
-          title: LocaleKeys.application_title.tr(),
+          title: 'TON Crystal',
           theme: applicationTheme,
           debugShowCheckedModeBanner: false,
           supportedLocales: context.supportedLocales,

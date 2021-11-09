@@ -93,6 +93,10 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
               text = "Passwords must match";
             }
 
+            if (passwordController.text.isEmpty && repeatController.text.isEmpty) {
+              text = '';
+            }
+
             validationNotifier.value = text;
           },
           child: FadingEdgeScrollView.fromScrollView(
@@ -145,7 +149,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
           bottom: context.keyboardInsets.bottom + 24 + CrystalButton.kHeight,
         ),
         validator: (String? value) {
-          if (value == null) {
+          if (value == null || value.isEmpty) {
             return null;
           }
 

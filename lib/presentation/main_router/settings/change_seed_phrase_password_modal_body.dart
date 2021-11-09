@@ -25,7 +25,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
   final formKey = GlobalKey<FormState>();
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
-  final validationNotifier = ValueNotifier<String?>('');
+  final validationNotifier = ValueNotifier<String?>(null);
   final incorrectPasswordNotifier = ValueNotifier<bool>(false);
 
   @override
@@ -61,7 +61,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
                   incorrectPasswordNotifier.value = false;
                   final newPassword = newPasswordController.text.trim();
 
-                  if (formKey.currentState?.validate() ?? false) {
+                  if (newPassword.isNotEmpty && (formKey.currentState?.validate() ?? false)) {
                     keyUpdateBloc.add(KeyUpdateEvent.changePassword(
                       publicKey: widget.publicKey,
                       oldPassword: oldPasswordController.text.trim(),
@@ -71,6 +71,16 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
                 } else {
                   incorrectPasswordNotifier.value = true;
                   formKey.currentState?.validate();
+
+                  String? text;
+
+                  if (incorrectPasswordNotifier.value) {
+                    text = "Incorrect password";
+                  } else if (newPasswordController.text.isNotEmpty && !isLength(newPasswordController.text, 8)) {
+                    text = "Password must be at least 8 symbols";
+                  }
+
+                  validationNotifier.value = text;
                 }
               }
             },
@@ -81,6 +91,17 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
   Widget buildPasswordsBody() => Form(
         key: formKey,
+        onChanged: () {
+          String? text;
+
+          if (incorrectPasswordNotifier.value) {
+            text = "Incorrect password";
+          } else if (newPasswordController.text.isNotEmpty && !isLength(newPasswordController.text, 8)) {
+            text = "Password must be at least 8 symbols";
+          }
+
+          validationNotifier.value = text;
+        },
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,19 +113,13 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
               hint: LocaleKeys.change_seed_password_modal_hints_old.tr(),
               inputAction: TextInputAction.next,
               validator: (value) {
-                if (value == null) {
+                if (value == null || value.isEmpty) {
                   return null;
                 }
 
-                String? text;
-
                 if (incorrectPasswordNotifier.value) {
-                  text = "Incorrect password";
+                  return value;
                 }
-
-                validationNotifier.value = text;
-
-                return text;
               },
             ),
             const CrystalDivider(height: 24),
@@ -114,21 +129,13 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
               hint: LocaleKeys.change_seed_password_modal_hints_new.tr(),
               inputAction: TextInputAction.done,
               validator: (value) {
-                if (value == null) {
+                if (value == null || value.isEmpty) {
                   return null;
                 }
 
-                String? text;
-
                 if (!isLength(value, 8)) {
-                  text = "Password must be at least 8 symbols";
+                  return value;
                 }
-
-                if (!incorrectPasswordNotifier.value) {
-                  validationNotifier.value = text;
-                }
-
-                return text;
               },
             ),
             buildValidationText(),
