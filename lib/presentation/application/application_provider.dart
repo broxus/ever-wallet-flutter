@@ -1,3 +1,4 @@
+import 'package:crystal/domain/blocs/connection_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,6 +19,7 @@ class ApplicationProvider extends StatelessWidget {
   Widget build(BuildContext context) => MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => getIt.get<ApplicationFlowBloc>()),
+          BlocProvider(create: (_) => getIt.get<ConnectionBloc>()),
           BlocProvider(create: (_) => getIt.get<BiometryInfoBloc>()),
           BlocProvider(create: (_) => getIt.get<KeysBloc>()),
           BlocProvider(create: (_) => getIt.get<AccountsBloc>()),

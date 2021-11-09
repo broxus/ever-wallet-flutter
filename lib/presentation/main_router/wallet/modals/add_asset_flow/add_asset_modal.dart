@@ -27,7 +27,6 @@ class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateM
   final newAssetLayoutScrollController = ScrollController();
   final selectAssetsLayoutScrollController = ScrollController();
   late final tabController = TabController(length: 2, vsync: this);
-  late final StreamSubscription accountAssetsAdditionErrorsSubscription;
 
   @override
   void dispose() {
@@ -36,7 +35,6 @@ class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateM
     });
     selectAssetsLayoutScrollController.dispose();
     newAssetLayoutScrollController.dispose();
-    accountAssetsAdditionErrorsSubscription.cancel();
     super.dispose();
   }
 

@@ -96,7 +96,7 @@ class _DeployBodyState extends State<DeployBody> {
               title: LocaleKeys.fields_account_balance.tr(),
               value: balance != null
                   ? LocaleKeys.deploy_asset_modal_value.tr(args: [
-                      balance,
+                      balance.removeZeroes(),
                       'TON',
                     ])
                   : null,

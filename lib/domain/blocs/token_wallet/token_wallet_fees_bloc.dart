@@ -51,7 +51,7 @@ class TokenWalletFeesBloc extends Bloc<TokenWalletFeesEvent, TokenWalletFeesStat
         final tokensValue = BigInt.parse(event.nanoTokens);
 
         final isPossibleToSendMessage = ownerBalanceValue > feesValue;
-        final isPossibleToSendTokens = balanceValue >= tokensValue;
+        final isPossibleToSendTokens = balanceValue >= tokensValue && tokensValue != BigInt.zero;
 
         if (isPossibleToSendMessage && isPossibleToSendTokens) {
           yield TokenWalletFeesState.ready(

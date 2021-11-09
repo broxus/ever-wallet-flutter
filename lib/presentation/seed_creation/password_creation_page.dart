@@ -84,6 +84,16 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
           key: formKey,
           onChanged: () {
             formKey.currentState?.validate();
+
+            String? text;
+
+            if (!isLength(passwordController.text, 8)) {
+              text = "Password must be at least 8 symbols";
+            } else if (passwordController.text != repeatController.text) {
+              text = "Passwords must match";
+            }
+
+            validationNotifier.value = text;
           },
           child: FadingEdgeScrollView.fromScrollView(
             child: ListView(
@@ -134,24 +144,18 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         scrollPadding: EdgeInsets.only(
           bottom: context.keyboardInsets.bottom + 24 + CrystalButton.kHeight,
         ),
-        validator: (value) {
+        validator: (String? value) {
           if (value == null) {
             return null;
           }
 
-          String? text;
+          if (!isLength(value, 8)) {
+            return value;
+          }
 
           if (passwordController.text != repeatController.text) {
-            text = "Passwords must match";
+            return value;
           }
-
-          if (!isLength(value, 8)) {
-            text = "Password must be at least 8 symbols";
-          }
-
-          validationNotifier.value = text;
-
-          return text;
         },
         inputAction: inputAction,
       );
@@ -248,6 +252,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
       phrase: widget.phrase,
       password: password,
     ));
+
     if (context.router.current.parent?.name == NewSeedRouterRoute.name) {
       context.router.navigate(const SettingsRouterRoute());
     }

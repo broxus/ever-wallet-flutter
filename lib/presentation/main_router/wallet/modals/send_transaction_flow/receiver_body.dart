@@ -83,7 +83,7 @@ class __EnterAddressBodyState extends State<_EnterAddressBody> {
                         child: Text(
                           LocaleKeys.send_transaction_modal_input_balance.tr(
                             args: [
-                              widget.balance!,
+                              widget.balance!.removeZeroes(),
                               'TON',
                             ],
                           ),
@@ -144,6 +144,11 @@ class __EnterAddressBodyState extends State<_EnterAddressBody> {
                                 if (!status.isGranted) {
                                   ph.openAppSettings();
                                 } else {
+                                  if (FocusScope.of(context).hasFocus) {
+                                    FocusScope.of(context).unfocus();
+                                    await Future.delayed(const Duration(milliseconds: 500));
+                                  }
+
                                   final result = await Navigator.of(context).push<String>(
                                     MaterialPageRoute(
                                       builder: (context) => const ScannerWidget(),

@@ -27,6 +27,10 @@ class NekotonServiceImpl implements NekotonService {
   Transport get transport => _nekoton.connectionController.transport;
 
   @override
+  Future<void> updateTransport(ConnectionData connectionData) =>
+      _nekoton.connectionController.updateTransport(connectionData);
+
+  @override
   Stream<List<KeyStoreEntry>> get keysStream => _nekoton.keystoreController.keysStream;
 
   @override

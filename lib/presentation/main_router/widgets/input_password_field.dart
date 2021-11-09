@@ -47,7 +47,8 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
           }
         },
         builder: (context, state) {
-          final isCorrect = state is KeyPasswordCheckingStateSuccess && state.isCorrect || true;
+          final isCorrect =
+              state is KeyPasswordCheckingStateInitial || state is KeyPasswordCheckingStateSuccess && state.isCorrect;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

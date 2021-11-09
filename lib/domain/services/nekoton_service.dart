@@ -5,6 +5,8 @@ abstract class NekotonService {
 
   Transport get transport;
 
+  Future<void> updateTransport(ConnectionData connectionData);
+
   Stream<List<KeyStoreEntry>> get keysStream;
 
   Stream<List<AssetsList>> get accountsStream;

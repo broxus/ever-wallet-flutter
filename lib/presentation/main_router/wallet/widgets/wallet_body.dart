@@ -1,3 +1,4 @@
+import 'package:crystal/presentation/main_router/wallet/widgets/connection_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -27,6 +28,7 @@ class WalletBody extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         LocaleKeys.wallet_screen_title.tr(),
@@ -36,6 +38,7 @@ class WalletBody extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
+                      const ConnectionButton(),
                     ],
                   ),
                 ),
