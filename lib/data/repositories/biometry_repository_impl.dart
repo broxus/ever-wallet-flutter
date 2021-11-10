@@ -12,8 +12,8 @@ import '../sources/local/local_auth_source.dart';
 class BiometryRepositoryImpl implements BiometryRepository {
   final HiveSource _hiveSource;
   final LocalAuthSource _localAuthSource;
-  final _availabilitySubject = BehaviorSubject<bool>.seeded(false);
-  final _statusSubject = BehaviorSubject<bool>.seeded(false);
+  final _availabilitySubject = BehaviorSubject<bool>();
+  final _statusSubject = BehaviorSubject<bool>();
 
   BiometryRepositoryImpl._(
     this._hiveSource,
