@@ -3,7 +3,7 @@ description: TON Crystal
 
 publish_to: 'none'
 
-version: 1.0.4+43
+version: 1.0.4+44
 
 environment:
   sdk: '>=2.14.0 <3.0.0'
