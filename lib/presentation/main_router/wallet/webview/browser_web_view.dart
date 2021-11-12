@@ -52,7 +52,7 @@ class BrowserWebView extends StatefulWidget {
 }
 
 class _BrowserWebViewState extends State<BrowserWebView> {
-  final initialUrlRequest = URLRequest(url: Uri.parse("https://l1.broxus.com/main"));
+  final initialUrlRequest = URLRequest(url: Uri.parse("https://www.google.com/"));
   final initialOptions = InAppWebViewGroupOptions(
     crossPlatform: InAppWebViewOptions(
       useShouldOverrideUrlLoading: true,
