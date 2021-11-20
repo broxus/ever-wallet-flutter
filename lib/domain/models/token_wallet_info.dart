@@ -6,12 +6,11 @@ part 'token_wallet_info.freezed.dart';
 @freezed
 class TokenWalletInfo with _$TokenWalletInfo {
   const factory TokenWalletInfo({
-    required String address,
-    required String balance,
-    required ContractState contractState,
     required String owner,
+    required String address,
     required Symbol symbol,
     required TokenWalletVersion version,
-    required String ownerPublicKey,
+    required String balance,
+    required ContractState contractState,
   }) = _TokenWalletInfo;
 }

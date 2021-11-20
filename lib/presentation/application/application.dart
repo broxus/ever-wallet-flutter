@@ -1,40 +1,30 @@
 import 'package:flutter/material.dart';
 
-import '../design/design.dart';
-import '../router.gr.dart';
-import 'application_listener.dart';
+import '../routes/router.gr.dart';
+import 'application_bloc_listener.dart';
+import 'application_bloc_provider.dart';
 import 'application_localization.dart';
-import 'application_provider.dart';
+import 'material_application.dart';
 
 class Application extends StatefulWidget {
+  const Application({Key? key}) : super(key: key);
+
   @override
   _ApplicationState createState() => _ApplicationState();
 }
 
 class _ApplicationState extends State<Application> {
-  final _appRouter = AppRouter();
+  final appRouter = AppRouter();
 
   @override
   Widget build(BuildContext context) => ApplicationLocalization(
-        child: ApplicationProvider(
-          child: ApplicationListener(
-            appRouter: _appRouter,
-            builder: (BuildContext context) => buildApp(context),
+        child: ApplicationBlocProvider(
+          child: ApplicationBlocListener(
+            appRouter: appRouter,
+            child: MaterialApplication(
+              appRouter: appRouter,
+            ),
           ),
-        ),
-      );
-
-  Widget buildApp(BuildContext context) => Container(
-        color: CrystalColor.background,
-        child: MaterialApp.router(
-          title: 'TON Crystal',
-          theme: applicationTheme,
-          debugShowCheckedModeBanner: false,
-          supportedLocales: context.supportedLocales,
-          locale: context.locale,
-          localizationsDelegates: context.localizationDelegates,
-          routerDelegate: _appRouter.delegate(),
-          routeInformationParser: _appRouter.defaultRouteParser(),
         ),
       );
 }

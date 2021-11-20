@@ -6,16 +6,17 @@ class ApplicationLocalization extends StatelessWidget {
   final Widget child;
 
   const ApplicationLocalization({
+    Key? key,
     required this.child,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => EasyLocalization(
-        path: "assets/localizations",
+        path: 'assets/localizations',
         supportedLocales: const [
-          Locale("en"),
+          Locale('en'),
         ],
-        fallbackLocale: const Locale("en"),
+        fallbackLocale: const Locale('en'),
         useOnlyLangCode: true,
         child: child,
       );

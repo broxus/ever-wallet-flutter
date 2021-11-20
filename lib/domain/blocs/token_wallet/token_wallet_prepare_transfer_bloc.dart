@@ -1,0 +1,73 @@
+import 'dart:async';
+
+import 'package:bloc/bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
+
+import '../../../logger.dart';
+import '../../services/nekoton_service.dart';
+
+part 'token_wallet_prepare_transfer_bloc.freezed.dart';
+
+@injectable
+class TokenWalletPrepareTransferBloc extends Bloc<TokenWalletPrepareTransferEvent, TokenWalletPrepareTransferState> {
+  final NekotonService _nekotonService;
+
+  TokenWalletPrepareTransferBloc(this._nekotonService) : super(TokenWalletPrepareTransferStateInitial());
+
+  @override
+  Stream<TokenWalletPrepareTransferState> mapEventToState(TokenWalletPrepareTransferEvent event) async* {
+    try {
+      if (event is _PrepareTransfer) {
+        final tokenWallet = _nekotonService.tokenWallets
+            .firstWhereOrNull((e) => e.owner == event.owner && e.symbol.rootTokenContract == event.rootTokenContract);
+
+        if (tokenWallet == null) {
+          throw TokenWalletNotFoundException();
+        }
+
+        final repackedDestination = repackAddress(event.destination);
+
+        final message = await tokenWallet.prepareTransfer(
+          expiration: kDefaultMessageExpiration,
+          destination: repackedDestination,
+          tokens: event.amount,
+          notifyReceiver: event.notifyReceiver,
+        );
+
+        yield TokenWalletPrepareTransferStateSuccess(message);
+      }
+    } on Exception catch (err, st) {
+      logger.e(err, err, st);
+      yield TokenWalletPrepareTransferStateError(err);
+    }
+  }
+}
+
+@freezed
+class TokenWalletPrepareTransferEvent with _$TokenWalletPrepareTransferEvent {
+  const factory TokenWalletPrepareTransferEvent.prepareTransfer({
+    required String owner,
+    required String rootTokenContract,
+    required String destination,
+    required String amount,
+    required bool notifyReceiver,
+  }) = _PrepareTransfer;
+}
+
+abstract class TokenWalletPrepareTransferState {}
+
+class TokenWalletPrepareTransferStateInitial extends TokenWalletPrepareTransferState {}
+
+class TokenWalletPrepareTransferStateSuccess extends TokenWalletPrepareTransferState {
+  final UnsignedMessage message;
+
+  TokenWalletPrepareTransferStateSuccess(this.message);
+}
+
+class TokenWalletPrepareTransferStateError extends TokenWalletPrepareTransferState {
+  final Exception exception;
+
+  TokenWalletPrepareTransferStateError(this.exception);
+}

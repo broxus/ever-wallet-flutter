@@ -14,30 +14,36 @@ part 'ton_wallet_info_dto.g.dart';
 class TonWalletInfoDto with _$TonWalletInfoDto {
   @HiveType(typeId: 9)
   const factory TonWalletInfoDto({
-    @HiveField(0) required String address,
-    @HiveField(1) required ContractStateDto contractState,
-    @HiveField(2) required WalletTypeDto walletType,
-    @HiveField(3) required TonWalletDetailsDto details,
-    @HiveField(4) required String publicKey,
+    @HiveField(0) required int workchain,
+    @HiveField(1) required String address,
+    @HiveField(2) required String publicKey,
+    @HiveField(3) required WalletTypeDto walletType,
+    @HiveField(4) required ContractStateDto contractState,
+    @HiveField(5) required TonWalletDetailsDto details,
+    @HiveField(6) required List<String>? custodians,
   }) = _TonWalletInfoDto;
 }
 
 extension TonWalletInfoDtoToDomain on TonWalletInfoDto {
   TonWalletInfo toModel() => TonWalletInfo(
+        workchain: workchain,
         address: address,
-        contractState: contractState.toModel(),
-        walletType: walletType.toModel(),
-        details: details.toModel(),
         publicKey: publicKey,
+        walletType: walletType.toModel(),
+        contractState: contractState.toModel(),
+        details: details.toModel(),
+        custodians: custodians,
       );
 }
 
 extension TonWalletInfoFromDomain on TonWalletInfo {
   TonWalletInfoDto toDto() => TonWalletInfoDto(
+        workchain: workchain,
         address: address,
-        contractState: contractState.toDto(),
-        walletType: walletType.toDto(),
-        details: details.toDto(),
         publicKey: publicKey,
+        walletType: walletType.toDto(),
+        contractState: contractState.toDto(),
+        details: details.toDto(),
+        custodians: custodians,
       );
 }

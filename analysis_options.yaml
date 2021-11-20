@@ -3,6 +3,8 @@ include: package:lint/analysis_options.yaml
 linter:
   rules:
     avoid_positional_boolean_parameters: false
+    prefer_single_quotes: true
+    prefer_relative_imports: true
 
 analyzer:
   exclude:

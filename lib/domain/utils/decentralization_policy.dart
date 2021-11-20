@@ -1,1 +1,1 @@
-String getDecentralizationPolicyLink() => 'https://broxus.com/';
+String decentralizationPolicyLink() => 'https://broxus.com/';

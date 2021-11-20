@@ -1,11 +1,11 @@
-import 'package:nekoton_flutter/nekoton_flutter.dart';
+import '../models/ton_wallet_transactions.dart';
 
 abstract class TonWalletTransactionsRepository {
-  List<TonWalletTransactionWithData>? get(String address);
+  TonWalletTransactions? get(String address);
 
   Future<void> save({
-    required List<TonWalletTransactionWithData> tonWalletTransactions,
     required String address,
+    required TonWalletTransactions tonWalletTransactions,
   });
 
   Future<void> remove(String address);

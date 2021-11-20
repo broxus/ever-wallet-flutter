@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/subjects.dart';
 
 import '../../../logger.dart';
@@ -38,7 +37,11 @@ class TonWalletInfoBloc extends Bloc<_Event, TonWalletInfo?> {
   Stream<TonWalletInfo?> mapEventToState(_Event event) async* {
     try {
       if (event is _Load) {
-        final tonWalletInfo = _tonWalletInfoRepository.get(event.address);
+        yield null;
+
+        final address = event.address;
+
+        final tonWalletInfo = _tonWalletInfoRepository.get(address);
 
         if (tonWalletInfo != null) {
           add(_LocalEvent.update(tonWalletInfo));
@@ -46,30 +49,41 @@ class TonWalletInfoBloc extends Bloc<_Event, TonWalletInfo?> {
 
         _streamSubscription?.cancel();
         _onStateChangedSubscription?.cancel();
+
         _streamSubscription = _nekotonService.tonWalletsStream
             .expand((e) => e)
-            .where((e) => e.address == event.address)
+            .where((e) => e.address == address)
             .distinct()
-            .listen((tonWalletEvent) async {
+            .listen((event) async {
+          final tonWallet = event;
+
           _onStateChangedSubscription?.cancel();
-          _onStateChangedSubscription =
-              tonWalletEvent.onStateChangedStream.listen((event) => add(_LocalEvent.update(TonWalletInfo(
-                    address: tonWalletEvent.address,
-                    contractState: event.copyWith(balance: event.balance.toTokens()),
-                    walletType: tonWalletEvent.walletType,
-                    details: tonWalletEvent.details,
-                    publicKey: tonWalletEvent.publicKey,
-                  ))));
 
-          final contractState = await tonWalletEvent.contractState;
+          _onStateChangedSubscription = tonWallet.onStateChangedStream.listen((event) {
+            final tonWalletInfo = TonWalletInfo(
+              workchain: tonWallet.workchain,
+              address: tonWallet.address,
+              publicKey: tonWallet.publicKey,
+              walletType: tonWallet.walletType,
+              contractState: event,
+              details: tonWallet.details,
+              custodians: tonWallet.custodians,
+            );
 
-          add(_LocalEvent.update(TonWalletInfo(
-            address: tonWalletEvent.address,
-            contractState: contractState.copyWith(balance: contractState.balance.toTokens()),
-            walletType: tonWalletEvent.walletType,
-            details: tonWalletEvent.details,
-            publicKey: tonWalletEvent.publicKey,
-          )));
+            add(_LocalEvent.update(tonWalletInfo));
+          });
+
+          final tonWalletInfo = TonWalletInfo(
+            workchain: tonWallet.workchain,
+            address: tonWallet.address,
+            publicKey: tonWallet.publicKey,
+            walletType: tonWallet.walletType,
+            contractState: await tonWallet.contractState,
+            details: tonWallet.details,
+            custodians: tonWallet.custodians,
+          );
+
+          add(_LocalEvent.update(tonWalletInfo));
         });
       } else if (event is _Update) {
         yield event.tonWalletInfo;

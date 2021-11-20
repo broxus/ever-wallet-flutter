@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../router.gr.dart';
+import '../routes/router.gr.dart';
 import 'design.dart';
 
 double getKeyboardInsetsBottom(BuildContext context) {
@@ -14,7 +14,7 @@ double getKeyboardInsetsBottom(BuildContext context) {
 }
 
 String formatValue(String value) {
-  final regex = RegExp(r"([.]*0+)(?!.*\d)");
+  final regex = RegExp(r'([.]*0+)(?!.*\d)');
   final res = value.replaceAll(regex, '');
 
   String addSpaces(String string) => string.replaceAllMapped(
@@ -22,12 +22,12 @@ String formatValue(String value) {
         (match) => '${match[1]} ',
       );
 
-  if (res.contains(".")) {
-    final values = res.split(".");
+  if (res.contains('.')) {
+    final values = res.split('.');
     final firstPart = addSpaces(values.first);
     final lastPart = values.last;
 
-    return [firstPart, lastPart].join(".");
+    return [firstPart, lastPart].join('.');
   } else {
     return addSpaces(res);
   }

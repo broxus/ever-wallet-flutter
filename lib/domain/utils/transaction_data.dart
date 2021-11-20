@@ -11,8 +11,9 @@ extension TonTransactionDataToComment on TransactionAdditionalInfo {
         tonEventStatusChanged: (status) => 'TON status changed: ${describeEnum(status)}',
         walletInteraction: (info) => info.knownPayload?.when(
           comment: (value) => value,
-          tokenOutgoingTransfer: (_) => null,
-          tokenSwapBack: (_) => null,
+          tokenOutgoingTransfer: (tokenOutgoingTransfer) =>
+              'Token outgoing transfer ${tokenOutgoingTransfer.to} ${tokenOutgoingTransfer.tokens}',
+          tokenSwapBack: (tokenSwapBack) => 'Token swap back ${tokenSwapBack.callbackAddress} ${tokenSwapBack.tokens}',
         ),
       );
 }

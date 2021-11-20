@@ -34,6 +34,7 @@ import 'data/dtos/ton_event_status_dto.dart';
 import 'data/dtos/ton_wallet_details_dto.dart';
 import 'data/dtos/ton_wallet_info_dto.dart';
 import 'data/dtos/ton_wallet_transaction_with_data_dto.dart';
+import 'data/dtos/ton_wallet_transactions_dto.dart';
 import 'data/dtos/transaction_additional_info_dto.dart';
 import 'data/dtos/transaction_dto.dart';
 import 'data/dtos/transaction_id_dto.dart';
@@ -130,7 +131,8 @@ abstract class HiveModule {
       ..registerAdapter(WalletInteractionDtoAdapter())
       ..registerAdapter(WalletInteractionInfoDtoAdapter())
       ..registerAdapter(WalletV3TransferAdapter())
-      ..registerAdapter(MultisigAdapter());
+      ..registerAdapter(MultisigAdapter())
+      ..registerAdapter(TonWalletTransactionsDtoAdapter());
 
     return this;
   }

@@ -9,26 +9,26 @@ import '../../dtos/token_contract_asset_dto.dart';
 import '../../dtos/token_wallet_info_dto.dart';
 import '../../dtos/token_wallet_transaction_with_data_dto.dart';
 import '../../dtos/ton_wallet_info_dto.dart';
-import '../../dtos/ton_wallet_transaction_with_data_dto.dart';
+import '../../dtos/ton_wallet_transactions_dto.dart';
 
 @preResolve
 @lazySingleton
 class HiveSource {
-  static const _keysPasswordsBoxName = "keys_passwords_v1";
-  static const _userPreferencesBoxName = "user_preferences_v1";
-  static const _tokenContractAssetsBoxName = "token_contract_assets_v1";
-  static const _tonWalletInfosBoxName = "ton_wallet_infos_v1";
-  static const _tokenWalletInfosBoxName = "token_wallet_infos_v1";
-  static const _tonWalletTransactionsBoxName = "ton_wallet_transactions_v1";
-  static const _tokenWalletTransactionsBoxName = "token_wallet_transactions_v1";
-  static const _biometryStatusKey = "biometry_status";
+  static const _keysPasswordsBoxName = 'keys_passwords_v1';
+  static const _userPreferencesBoxName = 'user_preferences_v1';
+  static const _tokenContractAssetsBoxName = 'token_contract_assets_v1';
+  static const _tonWalletInfosBoxName = 'ton_wallet_infos_v2';
+  static const _tokenWalletInfosBoxName = 'token_wallet_infos_v2';
+  static const _tonWalletTransactionsBoxName = 'ton_wallet_transactions_v4';
+  static const _tokenWalletTransactionsBoxName = 'token_wallet_transactions_v4';
+  static const _biometryStatusKey = 'biometry_status';
   late final Uint8List _key;
   late final Box<String> _keysPasswordsBox;
   late final Box<Object?> _userPreferencesBox;
   late final Box<TokenContractAssetDto> _tokenContractAssetsBox;
   late final Box<TonWalletInfoDto> _tonWalletInfosBox;
   late final Box<TokenWalletInfoDto> _tokenWalletInfosBox;
-  late final Box<List> _tonWalletTransactionsBox;
+  late final Box<TonWalletTransactionsDto> _tonWalletTransactionsBox;
   late final Box<List> _tokenWalletTransactionsBox;
 
   @factoryMethod
@@ -75,15 +75,11 @@ class HiveSource {
 
   Future<void> clearTokenWalletInfos() => _tokenWalletInfosBox.clear();
 
-  List<TonWalletTransactionWithDataDto>? getTonWalletTransactions(String address) => _tonWalletTransactionsBox
-      .get(address.hashCode)
-      ?.where((e) => e != null)
-      .toList()
-      .cast<TonWalletTransactionWithDataDto>();
+  TonWalletTransactionsDto? getTonWalletTransactions(String address) => _tonWalletTransactionsBox.get(address.hashCode);
 
   Future<void> saveTonWalletTransactions({
-    required List<TonWalletTransactionWithDataDto> tonWalletTransactions,
     required String address,
+    required TonWalletTransactionsDto tonWalletTransactions,
   }) =>
       _tonWalletTransactionsBox.put(address.hashCode, tonWalletTransactions);
 
@@ -134,7 +130,7 @@ class HiveSource {
 
   Future<void> _initialize() async {
     final hiveAesCipherKeyString = dotenv.env['HIVE_AES_CIPHER_KEY'];
-    final hiveAesCipherKeyList = hiveAesCipherKeyString?.split(" ").map((e) => int.parse(e)).toList();
+    final hiveAesCipherKeyList = hiveAesCipherKeyString?.split(' ').map((e) => int.parse(e)).toList();
     final hiveAesCipherKey = hiveAesCipherKeyList != null ? Uint8List.fromList(hiveAesCipherKeyList) : null;
 
     if (hiveAesCipherKey == null) {
@@ -142,6 +138,13 @@ class HiveSource {
     }
 
     _key = hiveAesCipherKey;
+
+    await Hive.deleteBoxFromDisk(_userPreferencesBoxName);
+    await Hive.deleteBoxFromDisk(_tokenContractAssetsBoxName);
+    await Hive.deleteBoxFromDisk(_tonWalletInfosBoxName);
+    await Hive.deleteBoxFromDisk(_tokenWalletInfosBoxName);
+    await Hive.deleteBoxFromDisk(_tonWalletTransactionsBoxName);
+    await Hive.deleteBoxFromDisk(_tokenWalletTransactionsBoxName);
 
     _keysPasswordsBox = await Hive.openBox<String>(
       _keysPasswordsBoxName,
@@ -151,7 +154,7 @@ class HiveSource {
     _tokenContractAssetsBox = await Hive.openBox<TokenContractAssetDto>(_tokenContractAssetsBoxName);
     _tonWalletInfosBox = await Hive.openBox<TonWalletInfoDto>(_tonWalletInfosBoxName);
     _tokenWalletInfosBox = await Hive.openBox<TokenWalletInfoDto>(_tokenWalletInfosBoxName);
-    _tonWalletTransactionsBox = await Hive.openBox<List>(_tonWalletTransactionsBoxName);
+    _tonWalletTransactionsBox = await Hive.openBox<TonWalletTransactionsDto>(_tonWalletTransactionsBoxName);
     _tokenWalletTransactionsBox = await Hive.openBox<List>(_tokenWalletTransactionsBoxName);
   }
 }

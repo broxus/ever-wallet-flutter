@@ -34,7 +34,7 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
         if (isLegacy) {
           createKeyInput = EncryptedKeyCreateInput(
             name: event.name,
-            phrase: event.phrase.join(" "),
+            phrase: event.phrase.join(' '),
             mnemonicType: mnemonicType,
             password: Password.explicit(
               password: event.password,
@@ -44,7 +44,7 @@ class KeyCreationBloc extends Bloc<KeyCreationEvent, KeyCreationState> {
         } else {
           createKeyInput = DerivedKeyCreateInput.import(
             keyName: event.name,
-            phrase: event.phrase.join(" "),
+            phrase: event.phrase.join(' '),
             password: Password.explicit(
               password: event.password,
               cacheBehavior: const PasswordCacheBehavior.remove(),

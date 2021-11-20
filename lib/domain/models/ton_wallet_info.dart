@@ -6,10 +6,12 @@ part 'ton_wallet_info.freezed.dart';
 @freezed
 class TonWalletInfo with _$TonWalletInfo {
   const factory TonWalletInfo({
+    required int workchain,
     required String address,
-    required ContractState contractState,
-    required WalletType walletType,
-    required TonWalletDetails details,
     required String publicKey,
+    required WalletType walletType,
+    required ContractState contractState,
+    required TonWalletDetails details,
+    required List<String>? custodians,
   }) = _TonWalletInfo;
 }

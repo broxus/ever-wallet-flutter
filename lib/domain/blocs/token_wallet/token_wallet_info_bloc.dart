@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
@@ -20,7 +19,6 @@ class TokenWalletInfoBloc extends Bloc<_Event, TokenWalletInfo?> {
   final _errorsSubject = PublishSubject<Exception>();
   StreamSubscription? _streamSubscription;
   StreamSubscription? _onBalanceChangedSubscription;
-  StreamSubscription? _onTransactionsFoundSubscription;
 
   TokenWalletInfoBloc(
     this._nekotonService,
@@ -32,7 +30,6 @@ class TokenWalletInfoBloc extends Bloc<_Event, TokenWalletInfo?> {
     _errorsSubject.close();
     _streamSubscription?.cancel();
     _onBalanceChangedSubscription?.cancel();
-    _onTransactionsFoundSubscription?.cancel();
     return super.close();
   }
 
@@ -40,9 +37,14 @@ class TokenWalletInfoBloc extends Bloc<_Event, TokenWalletInfo?> {
   Stream<TokenWalletInfo?> mapEventToState(_Event event) async* {
     try {
       if (event is _Load) {
+        yield null;
+
+        final owner = event.owner;
+        final rootTokenContract = event.rootTokenContract;
+
         final tokenWalletInfo = _tokenWalletInfoRepository.get(
-          owner: event.owner,
-          rootTokenContract: event.rootTokenContract,
+          owner: owner,
+          rootTokenContract: rootTokenContract,
         );
 
         if (tokenWalletInfo != null) {
@@ -51,47 +53,39 @@ class TokenWalletInfoBloc extends Bloc<_Event, TokenWalletInfo?> {
 
         _streamSubscription?.cancel();
         _onBalanceChangedSubscription?.cancel();
-        _onTransactionsFoundSubscription?.cancel();
+
         _streamSubscription = _nekotonService.tokenWalletsStream
             .expand((e) => e)
-            .where((e) => e.owner == event.owner && e.symbol.rootTokenContract == event.rootTokenContract)
+            .where((e) => e.owner == owner && e.symbol.rootTokenContract == rootTokenContract)
             .distinct()
-            .listen((tokenWalletEvent) {
+            .listen((event) async {
+          final tokenWallet = event;
+
           _onBalanceChangedSubscription?.cancel();
-          _onBalanceChangedSubscription = tokenWalletEvent.onBalanceChangedStream.listen((event) async {
-            final contractState = await tokenWalletEvent.contractState;
 
-            add(_LocalEvent.update(TokenWalletInfo(
-              address: tokenWalletEvent.address,
-              balance: event.toTokens(tokenWalletEvent.symbol.decimals),
-              contractState: contractState.copyWith(balance: contractState.balance.toTokens()),
-              owner: tokenWalletEvent.owner,
-              symbol: tokenWalletEvent.symbol,
-              version: tokenWalletEvent.version,
-              ownerPublicKey: tokenWalletEvent.ownerPublicKey,
-            )));
+          _onBalanceChangedSubscription = tokenWallet.onBalanceChangedStream.listen((event) async {
+            final tokenWalletInfo = TokenWalletInfo(
+              owner: tokenWallet.owner,
+              address: tokenWallet.address,
+              symbol: tokenWallet.symbol,
+              version: tokenWallet.version,
+              balance: event,
+              contractState: await tokenWallet.contractState,
+            );
+
+            add(_LocalEvent.update(tokenWalletInfo));
           });
 
-          _onTransactionsFoundSubscription?.cancel();
-          _onTransactionsFoundSubscription = tokenWalletEvent.onTransactionsFoundStream
-              .expand((e) => e)
-              .map((e) => e.transaction)
-              .where((e) => e.prevTransactionId == null)
-              .distinct()
-              .listen((event) async {
-            final balance = await tokenWalletEvent.balance;
-            final contractState = await tokenWalletEvent.contractState;
+          final tokenWalletInfo = TokenWalletInfo(
+            owner: tokenWallet.owner,
+            address: tokenWallet.address,
+            symbol: tokenWallet.symbol,
+            version: tokenWallet.version,
+            balance: await tokenWallet.balance,
+            contractState: await tokenWallet.contractState,
+          );
 
-            add(_LocalEvent.update(TokenWalletInfo(
-              address: tokenWalletEvent.address,
-              balance: balance.toTokens(tokenWalletEvent.symbol.decimals),
-              contractState: contractState.copyWith(balance: contractState.balance.toTokens()),
-              owner: tokenWalletEvent.owner,
-              symbol: tokenWalletEvent.symbol,
-              version: tokenWalletEvent.version,
-              ownerPublicKey: tokenWalletEvent.ownerPublicKey,
-            )));
-          });
+          add(_LocalEvent.update(tokenWalletInfo));
         });
       } else if (event is _Update) {
         yield event.tokenWalletInfo;

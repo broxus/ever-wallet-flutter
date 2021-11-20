@@ -24,7 +24,7 @@ extension DoubleX on double {
     bool allowPlusSign = false,
     String? currency,
   }) {
-    final buffer = StringBuffer("###,###,##0");
+    final buffer = StringBuffer('###,###,##0');
 
     if (minimumFractionDigits > 0 || maximumFractionDigits > 0) buffer.write('.');
 
@@ -72,7 +72,7 @@ extension FormatTransactionTime on DateTime {
 
 extension FloorValue on String {
   String floorValue() {
-    final dot = indexOf(".");
+    final dot = indexOf('.');
     if (dot != -1) {
       if (length - dot > 2) {
         final firstPart = substring(0, dot);
@@ -81,7 +81,7 @@ extension FloorValue on String {
         return firstPart + secondPart;
       } else {
         final firstPart = substring(0, dot);
-        final secondPart = substring(dot, length).padRight(3, "0");
+        final secondPart = substring(dot, length).padRight(3, '0');
 
         return firstPart + secondPart;
       }
@@ -93,9 +93,9 @@ extension FloorValue on String {
 
 extension RemoveZeroes on String {
   String removeZeroes() {
-    final dot = indexOf(".");
+    final dot = indexOf('.');
     if (dot != -1) {
-      return replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+      return replaceAll(RegExp(r'([.]*0+)(?!.*\d)'), '');
     } else {
       return this;
     }
@@ -105,7 +105,7 @@ extension RemoveZeroes on String {
 extension ElipseValue on String {
   String ellipseValue() {
     if (length > 12) {
-      return "${substring(0, 12)}...";
+      return '${substring(0, 12)}...';
     } else {
       return this;
     }

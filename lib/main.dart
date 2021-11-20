@@ -37,7 +37,7 @@ Future<void> main() async {
     await configureDependencies();
 
     runZonedGuarded(
-      () => runApp(Application()),
+      () => runApp(const Application()),
       FirebaseCrashlytics.instance.recordError,
     );
   } catch (err, st) {

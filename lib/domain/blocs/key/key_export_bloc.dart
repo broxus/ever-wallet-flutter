@@ -47,9 +47,9 @@ class KeyExportBloc extends Bloc<KeyExportEvent, KeyExportState> {
         final output = await _nekotonService.exportKey(exportKeyInput);
 
         if (output is EncryptedKeyExportOutput) {
-          yield KeyExportStateSuccess(output.phrase.split(" "));
+          yield KeyExportStateSuccess(output.phrase.split(' '));
         } else if (output is DerivedKeyExportOutput) {
-          yield KeyExportStateSuccess(output.phrase.split(" "));
+          yield KeyExportStateSuccess(output.phrase.split(' '));
         } else {
           throw UnknownSignerException();
         }
