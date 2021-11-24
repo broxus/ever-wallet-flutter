@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,11 +10,13 @@ import '../../../../../domain/blocs/key/key_creation_bloc.dart';
 import '../../../../../injection.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
+import '../../../design/widgets/crystal_subtitle.dart';
+import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_app_bar.dart';
 import '../../../design/widgets/custom_checkbox.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_text_form_field.dart';
-import '../../../design/widgets/text_clear_button.dart';
+import '../../../design/widgets/text_suffix_icon_button.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';
 import '../../router.gr.dart';
 
@@ -54,7 +57,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         bloc: bloc,
         listener: (context, state) {
           if (state is KeyCreationStateSuccess) {
-            if (context.router.current.parent?.name == NewSeedRouterRoute.name) {
+            if (context.router.current.name == NewSeedRouterRoute.name) {
               context.router.navigate(const SettingsRouterRoute());
             }
           }
@@ -104,23 +107,12 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         ),
       );
 
-  Widget title() => Text(
-        LocaleKeys.password_creation_screen_creation_title.tr(),
-        style: const TextStyle(
-          fontSize: 36,
-          color: CrystalColor.fontHeaderDark,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.start,
+  Widget title() => CrystalTitle(
+        text: LocaleKeys.password_creation_screen_creation_title.tr(),
       );
 
-  Widget subtitle() => Text(
-        LocaleKeys.password_creation_screen_creation_description.tr(),
-        textAlign: TextAlign.start,
-        style: const TextStyle(
-          fontSize: 16,
-          color: CrystalColor.fontHeaderDark,
-        ),
+  Widget subtitle() => CrystalSubtitle(
+        text: LocaleKeys.password_creation_screen_creation_description.tr(),
       );
 
   Widget fields() => Form(
@@ -134,7 +126,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
             const SizedBox(height: 16),
             repeatField(),
             validationText(),
-            if (context.router.current.parent?.name != NewSeedRouterRoute.name) biometryCheckbox(),
+            if (context.router.current.name != NewSeedRouterRoute.name) biometryCheckbox(),
           ],
         ),
       );
@@ -164,7 +156,13 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         obscureText: true,
         textInputAction: TextInputAction.next,
         hintText: LocaleKeys.password_creation_screen_password_hint.tr(),
-        suffixIcon: TextClearButton(controller: passwordController),
+        suffixIcon: SuffixIconButton(
+          onPressed: () {
+            passwordController.clear();
+            Form.of(context)?.validate();
+          },
+          icon: Assets.images.iconCross.svg(),
+        ),
         onFieldSubmitted: (value) => FocusScope.of(context).nextFocus(),
         validator: (String? value) {
           if (value == null || value.isEmpty) {
@@ -184,7 +182,13 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         obscureText: true,
         textInputAction: TextInputAction.done,
         hintText: LocaleKeys.password_creation_screen_password_confirmation.tr(),
-        suffixIcon: TextClearButton(controller: repeatController),
+        suffixIcon: SuffixIconButton(
+          onPressed: () {
+            repeatController.clear();
+            Form.of(context)?.validate();
+          },
+          icon: Assets.images.iconCross.svg(),
+        ),
         validator: (String? value) {
           if (value == null || value.isEmpty) {
             return null;

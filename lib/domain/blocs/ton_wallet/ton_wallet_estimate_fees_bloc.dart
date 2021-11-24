@@ -14,7 +14,7 @@ part 'ton_wallet_estimate_fees_bloc.freezed.dart';
 class TonWalletEstimateFeesBloc extends Bloc<TonWalletEstimateFeesEvent, TonWalletEstimateFeesState> {
   final NekotonService _nekotonService;
 
-  TonWalletEstimateFeesBloc(this._nekotonService) : super(TonWalletEstimateFeesStateInitial());
+  TonWalletEstimateFeesBloc(this._nekotonService) : super(const TonWalletEstimateFeesState.initial());
 
   @override
   Stream<TonWalletEstimateFeesState> mapEventToState(TonWalletEstimateFeesEvent event) async* {
@@ -37,14 +37,14 @@ class TonWalletEstimateFeesBloc extends Bloc<TonWalletEstimateFeesEvent, TonWall
         final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);
 
         if (isPossibleToSendMessage) {
-          yield TonWalletEstimateFeesStateSuccess(fees);
+          yield TonWalletEstimateFeesState.success(fees);
         } else {
-          yield TonWalletEstimateFeesStateSuccess.insufficientFunds(fees);
+          yield TonWalletEstimateFeesState.insufficientFunds(fees);
         }
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield TonWalletEstimateFeesStateError(err);
+      yield TonWalletEstimateFeesState.error(err);
     }
   }
 }
@@ -53,25 +53,26 @@ class TonWalletEstimateFeesBloc extends Bloc<TonWalletEstimateFeesEvent, TonWall
 class TonWalletEstimateFeesEvent with _$TonWalletEstimateFeesEvent {
   const factory TonWalletEstimateFeesEvent.estimateFees({
     required String address,
-    required String amount,
     required UnsignedMessage message,
+    @Default('0') String amount,
   }) = _EstimateFees;
 }
 
-abstract class TonWalletEstimateFeesState {}
-
-class TonWalletEstimateFeesStateInitial extends TonWalletEstimateFeesState {}
-
 @freezed
-class TonWalletEstimateFeesStateSuccess extends TonWalletEstimateFeesState with _$TonWalletEstimateFeesStateSuccess {
-  const factory TonWalletEstimateFeesStateSuccess(String fees) = _TonWalletEstimateFeesStateSuccess;
+class TonWalletEstimateFeesState with _$TonWalletEstimateFeesState {
+  const factory TonWalletEstimateFeesState.initial() = _Initial;
 
-  const factory TonWalletEstimateFeesStateSuccess.insufficientFunds(String fees) =
-      _TonWalletEstimateFeesStateSuccessInsufficientFunds;
-}
+  const factory TonWalletEstimateFeesState.success(String fees) = _Success;
 
-class TonWalletEstimateFeesStateError extends TonWalletEstimateFeesState {
-  final Exception exception;
+  const factory TonWalletEstimateFeesState.insufficientFunds(String fees) = _InsufficientFunds;
 
-  TonWalletEstimateFeesStateError(this.exception);
+  const factory TonWalletEstimateFeesState.error(Exception exception) = _Error;
+
+  const TonWalletEstimateFeesState._();
+
+  @override
+  bool operator ==(Object other) => false;
+
+  @override
+  int get hashCode => 0;
 }

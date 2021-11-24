@@ -14,7 +14,7 @@ part 'key_password_checking_bloc.freezed.dart';
 class KeyPasswordCheckingBloc extends Bloc<KeyPasswordCheckingEvent, KeyPasswordCheckingState> {
   final NekotonService _nekotonService;
 
-  KeyPasswordCheckingBloc(this._nekotonService) : super(KeyPasswordCheckingStateInitial());
+  KeyPasswordCheckingBloc(this._nekotonService) : super(const KeyPasswordCheckingState.initial());
 
   @override
   Stream<KeyPasswordCheckingState> mapEventToState(KeyPasswordCheckingEvent event) async* {
@@ -49,11 +49,11 @@ class KeyPasswordCheckingBloc extends Bloc<KeyPasswordCheckingEvent, KeyPassword
 
         final isCorrect = await _nekotonService.checkKeyPassword(signInput);
 
-        yield KeyPasswordCheckingStateSuccess(isCorrect);
+        yield KeyPasswordCheckingState.success(isCorrect);
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield KeyPasswordCheckingStateError(err);
+      yield KeyPasswordCheckingState.error(err);
     }
   }
 }
@@ -66,18 +66,19 @@ class KeyPasswordCheckingEvent with _$KeyPasswordCheckingEvent {
   }) = _Check;
 }
 
-abstract class KeyPasswordCheckingState {}
+@freezed
+class KeyPasswordCheckingState with _$KeyPasswordCheckingState {
+  const factory KeyPasswordCheckingState.initial() = _Initial;
 
-class KeyPasswordCheckingStateInitial extends KeyPasswordCheckingState {}
+  const factory KeyPasswordCheckingState.success(bool isCorrect) = _Success;
 
-class KeyPasswordCheckingStateSuccess extends KeyPasswordCheckingState {
-  final bool isCorrect;
+  const factory KeyPasswordCheckingState.error(Exception exception) = _Error;
 
-  KeyPasswordCheckingStateSuccess(this.isCorrect);
-}
+  const KeyPasswordCheckingState._();
 
-class KeyPasswordCheckingStateError extends KeyPasswordCheckingState {
-  final Exception exception;
+  @override
+  bool operator ==(Object other) => false;
 
-  KeyPasswordCheckingStateError(this.exception);
+  @override
+  int get hashCode => 0;
 }

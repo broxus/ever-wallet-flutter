@@ -12,11 +12,12 @@ import '../../../../domain/blocs/key/key_import_bloc.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/action_button.dart';
+import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_app_bar.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_type_ahead_field.dart';
-import '../../../design/widgets/text_clear_button.dart';
 import '../../../design/widgets/text_field_index_icon.dart';
+import '../../../design/widgets/text_suffix_icon_button.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';
 import '../../router.gr.dart';
 
@@ -226,14 +227,8 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         ),
       );
 
-  Widget title() => Text(
-        LocaleKeys.seed_phrase_import_screen_title.tr(),
-        style: const TextStyle(
-          fontSize: 36,
-          color: CrystalColor.fontHeaderDark,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.start,
+  Widget title() => CrystalTitle(
+        text: LocaleKeys.seed_phrase_import_screen_title.tr(),
       );
 
   Widget list() {
@@ -288,7 +283,13 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         prefixIcon: TextFieldIndexIcon(
           index: index,
         ),
-        suffixIcon: TextClearButton(controller: controllers[index]),
+        suffixIcon: SuffixIconButton(
+          onPressed: () {
+            controllers[index].clear();
+            Form.of(context)?.validate();
+          },
+          icon: Assets.images.iconCross.svg(),
+        ),
         validator: (value) => validator(
           value: value,
           index: index,

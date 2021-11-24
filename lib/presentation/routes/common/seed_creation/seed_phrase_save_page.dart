@@ -5,6 +5,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../../../../../domain/constants/phrase_generation.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/animated_fade_slide_in.dart';
+import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_app_bar.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_outlined_button.dart';
@@ -69,14 +70,8 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
         ),
       );
 
-  Widget title() => Text(
-        LocaleKeys.seed_phrase_save_screen_title.tr(),
-        style: const TextStyle(
-          fontSize: 36,
-          color: CrystalColor.fontHeaderDark,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.start,
+  Widget title() => CrystalTitle(
+        text: LocaleKeys.seed_phrase_save_screen_title.tr(),
       );
 
   Widget words() => Row(

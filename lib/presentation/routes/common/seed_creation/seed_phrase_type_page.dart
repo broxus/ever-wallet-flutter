@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../design/design.dart';
+import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_app_bar.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 
@@ -62,14 +62,8 @@ class SeedPhraseTypePage extends StatelessWidget {
         ),
       );
 
-  Widget title() => const Text(
-        'Please select the type of seed phrase',
-        style: TextStyle(
-          fontSize: 36,
-          color: CrystalColor.fontHeaderDark,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.start,
+  Widget title() => const CrystalTitle(
+        text: 'Please select the type of seed phrase',
       );
 
   Widget seedButton({

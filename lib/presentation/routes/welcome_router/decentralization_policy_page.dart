@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../domain/utils/decentralization_policy.dart';
 import '../../design/design.dart';
+import '../../design/widgets/crystal_title.dart';
 import '../../design/widgets/custom_app_bar.dart';
 import '../../design/widgets/custom_checkbox.dart';
 import '../../design/widgets/custom_elevated_button.dart';
@@ -91,14 +92,8 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
         ),
       );
 
-  Widget title() => Text(
-        LocaleKeys.welcome_policy_screen_title.tr(),
-        style: const TextStyle(
-          fontSize: 36,
-          color: CrystalColor.fontHeaderDark,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.start,
+  Widget title() => CrystalTitle(
+        text: LocaleKeys.welcome_policy_screen_title.tr(),
       );
 
   Widget image() => Align(

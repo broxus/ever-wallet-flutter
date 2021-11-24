@@ -10,6 +10,8 @@ import '../../../../../../logger.dart';
 import '../../design/design.dart';
 import '../router.gr.dart';
 
+late GlobalKey mainRouterPageKey;
+
 class MainRouterPage extends StatefulWidget {
   const MainRouterPage({Key? key}) : super(key: key);
 
@@ -22,6 +24,7 @@ class _MainRouterPageState extends State<MainRouterPage> {
   void initState() {
     super.initState();
     BackButtonInterceptor.add(handleAndroidBackButton);
+    mainRouterPageKey = GlobalKey();
   }
 
   @override
@@ -34,6 +37,7 @@ class _MainRouterPageState extends State<MainRouterPage> {
   Widget build(BuildContext context) => WillPopScope(
         onWillPop: () async => handleAndroidBackButton(),
         child: AutoTabsScaffold(
+          key: mainRouterPageKey,
           lazyLoad: false,
           routes: const [
             WalletRouterRoute(),

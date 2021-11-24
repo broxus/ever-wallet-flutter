@@ -9,12 +9,12 @@ class CustomCloseButton extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      onPressed: onPressed,
-      icon: const Icon(Icons.close),
-    );
-  }
+  Widget build(BuildContext context) => IconButton(
+        padding: EdgeInsets.zero,
+        visualDensity: VisualDensity.compact,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        onPressed: onPressed,
+        icon: const Icon(Icons.close),
+      );
 }

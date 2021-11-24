@@ -9,11 +9,12 @@ import '../../../../domain/constants/phrase_generation.dart';
 import '../../../../domain/utils/phrase_check.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/animated_offstage.dart';
+import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_app_bar.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_type_ahead_field.dart';
-import '../../../design/widgets/text_clear_button.dart';
 import '../../../design/widgets/text_field_index_icon.dart';
+import '../../../design/widgets/text_suffix_icon_button.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';
 import '../../router.gr.dart';
 
@@ -101,14 +102,8 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
         ),
       );
 
-  Widget title() => Text(
-        LocaleKeys.seed_phrase_check_screen_title.tr(),
-        style: const TextStyle(
-          fontSize: 36,
-          color: CrystalColor.fontHeaderDark,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.start,
+  Widget title() => CrystalTitle(
+        text: LocaleKeys.seed_phrase_check_screen_title.tr(),
       );
 
   Widget list() => Form(
@@ -149,7 +144,13 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
           FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]')),
           SuggestionFormatter(suggestions: getHints),
         ],
-        suffixIcon: TextClearButton(controller: controllers[index]),
+        suffixIcon: SuffixIconButton(
+          onPressed: () {
+            controllers[index].clear();
+            Form.of(context)?.validate();
+          },
+          icon: Assets.images.iconCross.svg(),
+        ),
         suggestionsCallback: (pattern) => suggestionsCallback(
           pattern: pattern,
           index: index,

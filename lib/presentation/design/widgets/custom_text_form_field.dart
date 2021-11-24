@@ -16,6 +16,7 @@ class CustomTextFormField extends StatelessWidget {
   final String? hintText;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
+  final int? maxLength;
 
   const CustomTextFormField({
     Key? key,
@@ -33,6 +34,7 @@ class CustomTextFormField extends StatelessWidget {
     this.hintText,
     this.prefixIcon,
     this.suffixIcon,
+    this.maxLength,
   }) : super(key: key);
 
   @override
@@ -70,6 +72,14 @@ class CustomTextFormField extends StatelessWidget {
         onChanged: onChanged,
         inputFormatters: inputFormatters,
         cursorWidth: 1,
+        maxLength: maxLength,
+        buildCounter: (
+          context, {
+          required int currentLength,
+          required bool isFocused,
+          required int? maxLength,
+        }) =>
+            null,
       );
 
   InputBorder border() => const OutlineInputBorder(

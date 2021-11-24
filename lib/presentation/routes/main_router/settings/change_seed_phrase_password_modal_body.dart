@@ -55,9 +55,9 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
           },
           child: BlocListener<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
             bloc: checkPasswordBloc,
-            listener: (context, state) {
-              if (state is KeyPasswordCheckingStateSuccess) {
-                if (state.isCorrect) {
+            listener: (context, state) => state.maybeWhen(
+              success: (isCorrect) {
+                if (isCorrect) {
                   incorrectPasswordNotifier.value = false;
                   final newPassword = newPasswordController.text.trim();
 
@@ -82,8 +82,9 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
                   validationNotifier.value = text;
                 }
-              }
-            },
+              },
+              orElse: () => false,
+            ),
             child: buildPasswordsBody(),
           ),
         ),

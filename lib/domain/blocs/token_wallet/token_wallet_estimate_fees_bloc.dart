@@ -61,8 +61,8 @@ class TokenWalletEstimateFeesEvent with _$TokenWalletEstimateFeesEvent {
   const factory TokenWalletEstimateFeesEvent.estimateEstimateFees({
     required String owner,
     required String rootTokenContract,
-    required String amount,
     required UnsignedMessage message,
+    @Default('0') String amount,
   }) = _EstimateFees;
 }
 

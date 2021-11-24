@@ -39,16 +39,16 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
   @override
   Widget build(BuildContext context) => BlocConsumer<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
         bloc: bloc,
-        listener: (context, state) {
-          if (state is KeyPasswordCheckingStateSuccess) {
-            if (state.isCorrect) {
-              widget.onSubmit(controller.text.trim());
-            }
-          }
-        },
+        listener: (context, state) => state.maybeWhen(
+          success: (isCorrect) => isCorrect ? widget.onSubmit(controller.text.trim()) : null,
+          orElse: () => null,
+        ),
         builder: (context, state) {
-          final isCorrect =
-              state is KeyPasswordCheckingStateInitial || state is KeyPasswordCheckingStateSuccess && state.isCorrect;
+          final isCorrect = state.maybeWhen(
+            initial: () => true,
+            success: (isCorrect) => isCorrect,
+            orElse: () => false,
+          );
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

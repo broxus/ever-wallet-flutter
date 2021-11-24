@@ -14,7 +14,7 @@ part 'ton_wallet_prepare_deploy_bloc.freezed.dart';
 class TonWalletPrepareDeployBloc extends Bloc<TonWalletPrepareDeployEvent, TonWalletPrepareDeployState> {
   final NekotonService _nekotonService;
 
-  TonWalletPrepareDeployBloc(this._nekotonService) : super(TonWalletPrepareDeployStateInitial());
+  TonWalletPrepareDeployBloc(this._nekotonService) : super(const TonWalletPrepareDeployState.initial());
 
   @override
   Stream<TonWalletPrepareDeployState> mapEventToState(TonWalletPrepareDeployEvent event) async* {
@@ -28,7 +28,7 @@ class TonWalletPrepareDeployBloc extends Bloc<TonWalletPrepareDeployEvent, TonWa
 
         final message = await tonWallet.prepareDeploy(kDefaultMessageExpiration);
 
-        yield TonWalletPrepareDeployStateSuccess(message);
+        yield TonWalletPrepareDeployState.success(message);
       } else if (event is _PrepareDeployWithMultipleOwners) {
         final tonWallet = _nekotonService.tonWallets.firstWhereOrNull((e) => e.address == event.address);
 
@@ -42,11 +42,11 @@ class TonWalletPrepareDeployBloc extends Bloc<TonWalletPrepareDeployEvent, TonWa
           reqConfirms: event.reqConfirms,
         );
 
-        yield TonWalletPrepareDeployStateSuccess(message);
+        yield TonWalletPrepareDeployState.success(message);
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield TonWalletPrepareDeployStateError(err);
+      yield TonWalletPrepareDeployState.error(err);
     }
   }
 }
@@ -62,18 +62,19 @@ class TonWalletPrepareDeployEvent with _$TonWalletPrepareDeployEvent {
   }) = _PrepareDeployWithMultipleOwners;
 }
 
-abstract class TonWalletPrepareDeployState {}
+@freezed
+class TonWalletPrepareDeployState with _$TonWalletPrepareDeployState {
+  const factory TonWalletPrepareDeployState.initial() = _Initial;
 
-class TonWalletPrepareDeployStateInitial extends TonWalletPrepareDeployState {}
+  const factory TonWalletPrepareDeployState.success(UnsignedMessage message) = _Success;
 
-class TonWalletPrepareDeployStateSuccess extends TonWalletPrepareDeployState {
-  final UnsignedMessage message;
+  const factory TonWalletPrepareDeployState.error(Exception exception) = _Error;
 
-  TonWalletPrepareDeployStateSuccess(this.message);
-}
+  const TonWalletPrepareDeployState._();
 
-class TonWalletPrepareDeployStateError extends TonWalletPrepareDeployState {
-  final Exception exception;
+  @override
+  bool operator ==(Object other) => false;
 
-  TonWalletPrepareDeployStateError(this.exception);
+  @override
+  int get hashCode => 0;
 }

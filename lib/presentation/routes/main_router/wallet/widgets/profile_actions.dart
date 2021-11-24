@@ -8,8 +8,9 @@ import '../../../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/crystal_bottom_sheet.dart';
-import '../../../router.gr.dart';
+import '../../main_router_page.dart';
 import '../modals/add_asset_flow/add_asset_modal.dart';
+import '../modals/new_deploy_wallet_flow/new_deploy_wallet_flow.dart';
 import '../modals/receive_modal.dart';
 import 'wallet_button.dart';
 
@@ -106,7 +107,15 @@ class _ProfileActionsState extends State<ProfileActions> {
                       )
                     : WalletButton(
                         onTap: () {
-                          context.router.push(const SelectWalletTypeRoute());
+                          DeployWalletFlow.start(
+                            context: mainRouterPageKey.currentContext ?? context,
+                            address: state.address,
+                            publicKey: state.publicKey,
+                            // isMultisignature: state.walletType.when(
+                            //   multisig: (_) => true,
+                            //   walletV3: () => false,
+                            // ),
+                          );
                           // DeployWalletFlow.start(
                           //   context: context,
                           //   address: state.address,

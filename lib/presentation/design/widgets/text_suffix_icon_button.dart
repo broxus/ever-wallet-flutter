@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
-class TextClearButton extends StatelessWidget {
-  final TextEditingController controller;
+class SuffixIconButton extends StatelessWidget {
+  final void Function() onPressed;
+  final Widget icon;
 
-  const TextClearButton({
+  const SuffixIconButton({
     Key? key,
-    required this.controller,
+    required this.onPressed,
+    required this.icon,
   }) : super(key: key);
 
   @override
@@ -14,10 +16,7 @@ class TextClearButton extends StatelessWidget {
         highlightColor: Colors.transparent,
         padding: EdgeInsets.zero,
         visualDensity: VisualDensity.compact,
-        onPressed: () {
-          controller.clear();
-          Form.of(context)?.validate();
-        },
-        icon: const Icon(Icons.clear),
+        onPressed: onPressed,
+        icon: icon,
       );
 }

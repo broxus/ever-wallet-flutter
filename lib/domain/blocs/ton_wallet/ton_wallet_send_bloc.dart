@@ -14,28 +14,32 @@ part 'ton_wallet_send_bloc.freezed.dart';
 class TonWalletSendBloc extends Bloc<TonWalletSendEvent, TonWalletSendState> {
   final NekotonService _nekotonService;
 
-  TonWalletSendBloc(this._nekotonService) : super(TonWalletSendStateInitial());
+  TonWalletSendBloc(this._nekotonService) : super(const TonWalletSendState.initial());
 
   @override
   Stream<TonWalletSendState> mapEventToState(TonWalletSendEvent event) async* {
     try {
       if (event is _Send) {
+        yield const TonWalletSendState.sending();
+
         final tonWallet = _nekotonService.tonWallets.firstWhereOrNull((e) => e.address == event.address);
 
         if (tonWallet == null) {
           throw TonWalletNotFoundException();
         }
 
-        await tonWallet.send(
-          message: event.message,
-          password: event.password,
-        );
+        // await tonWallet.send(
+        //   message: event.message,
+        //   password: event.password,
+        // );
 
-        yield TonWalletSendStateSuccess();
+        await Future.delayed(const Duration(seconds: 3));
+
+        yield const TonWalletSendState.success();
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield TonWalletSendStateError(err);
+      yield TonWalletSendState.error(err);
     }
   }
 }
@@ -49,14 +53,21 @@ class TonWalletSendEvent with _$TonWalletSendEvent {
   }) = _Send;
 }
 
-abstract class TonWalletSendState {}
+@freezed
+class TonWalletSendState with _$TonWalletSendState {
+  const factory TonWalletSendState.initial() = _Initial;
 
-class TonWalletSendStateInitial extends TonWalletSendState {}
+  const factory TonWalletSendState.sending() = _Sending;
 
-class TonWalletSendStateSuccess extends TonWalletSendState {}
+  const factory TonWalletSendState.success() = _Success;
 
-class TonWalletSendStateError extends TonWalletSendState {
-  final Exception exception;
+  const factory TonWalletSendState.error(Exception exception) = _Error;
 
-  TonWalletSendStateError(this.exception);
+  const TonWalletSendState._();
+
+  @override
+  bool operator ==(Object other) => false;
+
+  @override
+  int get hashCode => 0;
 }

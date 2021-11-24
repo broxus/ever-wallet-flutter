@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../design/design.dart';
+import '../../design/widgets/crystal_subtitle.dart';
+import '../../design/widgets/crystal_title.dart';
 import '../../design/widgets/custom_elevated_button.dart';
 import '../../design/widgets/custom_outlined_button.dart';
 import '../router.gr.dart';
@@ -63,23 +65,12 @@ class WelcomePage extends StatelessWidget {
         ),
       );
 
-  Widget title() => Text(
-        LocaleKeys.welcome_screen_title.tr(),
-        style: const TextStyle(
-          fontSize: 36,
-          color: CrystalColor.fontHeaderDark,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.start,
+  Widget title() => CrystalSubtitle(
+        text: LocaleKeys.welcome_screen_title.tr(),
       );
 
-  Widget subtitle() => Text(
-        LocaleKeys.welcome_screen_subtitle.tr(),
-        textAlign: TextAlign.start,
-        style: const TextStyle(
-          fontSize: 16,
-          color: CrystalColor.fontHeaderDark,
-        ),
+  Widget subtitle() => CrystalTitle(
+        text: LocaleKeys.welcome_screen_subtitle.tr(),
       );
 
   Widget image() => Align(

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../design/design.dart';
+import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_app_bar.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_text_form_field.dart';
-import '../../../design/widgets/text_clear_button.dart';
+import '../../../design/widgets/text_suffix_icon_button.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';
 
 class SeedNamePage extends StatefulWidget {
@@ -55,8 +56,12 @@ class _SeedNamePageState extends State<SeedNamePage> {
                     CustomTextFormField(
                       controller: controller,
                       hintText: 'Enter the name...',
-                      suffixIcon: TextClearButton(
-                        controller: controller,
+                      suffixIcon: SuffixIconButton(
+                        onPressed: () {
+                          controller.clear();
+                          Form.of(context)?.validate();
+                        },
+                        icon: Assets.images.iconCross.svg(),
                       ),
                     ),
                   ],
@@ -76,14 +81,8 @@ class _SeedNamePageState extends State<SeedNamePage> {
         ),
       );
 
-  Widget title() => const Text(
-        'Enter the name for seed phrase',
-        style: TextStyle(
-          fontSize: 36,
-          color: CrystalColor.fontHeaderDark,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.start,
+  Widget title() => const CrystalTitle(
+        text: 'Enter the name for seed phrase',
       );
 
   Widget submitButton() => CustomElevatedButton(
