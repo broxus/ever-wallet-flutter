@@ -27,10 +27,10 @@ class TokenWalletSendBloc extends Bloc<TokenWalletSendEvent, TokenWalletSendStat
           throw TokenWalletNotFoundException();
         }
 
-        // await tokenWallet.send(
-        //   message: event.message,
-        //   password: event.password,
-        // );
+        await tokenWallet.send(
+          message: event.message,
+          password: event.password,
+        );
 
         await Future.delayed(const Duration(seconds: 3));
 

@@ -19,8 +19,8 @@ class HiveSource {
   static const _tokenContractAssetsBoxName = 'token_contract_assets_v1';
   static const _tonWalletInfosBoxName = 'ton_wallet_infos_v2';
   static const _tokenWalletInfosBoxName = 'token_wallet_infos_v2';
-  static const _tonWalletTransactionsBoxName = 'ton_wallet_transactions_v4';
-  static const _tokenWalletTransactionsBoxName = 'token_wallet_transactions_v4';
+  static const _tonWalletTransactionsBoxName = 'ton_wallet_transactions_v2';
+  static const _tokenWalletTransactionsBoxName = 'token_wallet_transactions_v2';
   static const _biometryStatusKey = 'biometry_status';
   late final Uint8List _key;
   late final Box<String> _keysPasswordsBox;
@@ -138,13 +138,6 @@ class HiveSource {
     }
 
     _key = hiveAesCipherKey;
-
-    await Hive.deleteBoxFromDisk(_userPreferencesBoxName);
-    await Hive.deleteBoxFromDisk(_tokenContractAssetsBoxName);
-    await Hive.deleteBoxFromDisk(_tonWalletInfosBoxName);
-    await Hive.deleteBoxFromDisk(_tokenWalletInfosBoxName);
-    await Hive.deleteBoxFromDisk(_tonWalletTransactionsBoxName);
-    await Hive.deleteBoxFromDisk(_tokenWalletTransactionsBoxName);
 
     _keysPasswordsBox = await Hive.openBox<String>(
       _keysPasswordsBoxName,

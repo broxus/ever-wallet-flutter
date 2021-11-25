@@ -26,10 +26,10 @@ class TonWalletSendBloc extends Bloc<TonWalletSendEvent, TonWalletSendState> {
           throw TonWalletNotFoundException();
         }
 
-        // await tonWallet.send(
-        //   message: event.message,
-        //   password: event.password,
-        // );
+        await tonWallet.send(
+          message: event.message,
+          password: event.password,
+        );
 
         await Future.delayed(const Duration(seconds: 3));
 
