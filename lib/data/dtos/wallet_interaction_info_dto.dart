@@ -16,6 +16,8 @@ class WalletInteractionInfoDto with _$WalletInteractionInfoDto {
     @HiveField(1) required KnownPayloadDto? knownPayload,
     @HiveField(2) required WalletInteractionMethodDto method,
   }) = _WalletInteractionInfoDto;
+
+  factory WalletInteractionInfoDto.fromJson(Map<String, dynamic> json) => _$WalletInteractionInfoDtoFromJson(json);
 }
 
 extension WalletInteractionInfoDtoToDomain on WalletInteractionInfoDto {

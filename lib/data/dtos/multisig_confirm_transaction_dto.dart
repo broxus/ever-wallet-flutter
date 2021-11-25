@@ -12,6 +12,9 @@ class MultisigConfirmTransactionDto with _$MultisigConfirmTransactionDto {
     @HiveField(0) required String custodian,
     @HiveField(1) required String transactionId,
   }) = _MultisigConfirmTransactionDto;
+
+  factory MultisigConfirmTransactionDto.fromJson(Map<String, dynamic> json) =>
+      _$MultisigConfirmTransactionDtoFromJson(json);
 }
 
 extension MultisigConfirmTransactionDtoToDomain on MultisigConfirmTransactionDto {

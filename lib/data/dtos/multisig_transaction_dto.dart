@@ -25,6 +25,8 @@ class MultisigTransactionDto with _$MultisigTransactionDto {
   const factory MultisigTransactionDto.confirm({
     @HiveField(0) required MultisigConfirmTransactionDto multisigConfirmTransaction,
   }) = _Confirm;
+
+  factory MultisigTransactionDto.fromJson(Map<String, dynamic> json) => _$MultisigTransactionDtoFromJson(json);
 }
 
 extension MultisigTransactionDtoToDomain on MultisigTransactionDto {

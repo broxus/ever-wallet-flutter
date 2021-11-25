@@ -12,6 +12,8 @@ class TokenIncomingTransferDto with _$TokenIncomingTransferDto {
     @HiveField(0) required String tokens,
     @HiveField(1) required String senderAddress,
   }) = _TokenIncomingTransferDto;
+
+  factory TokenIncomingTransferDto.fromJson(Map<String, dynamic> json) => _$TokenIncomingTransferDtoFromJson(json);
 }
 
 extension TokenIncomingTransferDtoToDomain on TokenIncomingTransferDto {

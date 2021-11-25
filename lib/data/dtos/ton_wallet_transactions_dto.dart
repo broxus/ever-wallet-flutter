@@ -17,6 +17,8 @@ class TonWalletTransactionsDto with _$TonWalletTransactionsDto {
     @HiveField(1) @Default([]) List<TransactionDto> sent,
     @HiveField(2) @Default([]) List<TransactionDto> expired,
   }) = _TonWalletTransactionsDto;
+
+  factory TonWalletTransactionsDto.fromJson(Map<String, dynamic> json) => _$TonWalletTransactionsDtoFromJson(json);
 }
 
 extension TonWalletTransactionsDtoToDomain on TonWalletTransactionsDto {

@@ -10,7 +10,6 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../../../../../logger.dart';
 import 'controller_extensions.dart';
 import 'provider_requests_handlers.dart';
 
@@ -360,15 +359,15 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     }
 
     if (consoleMessage.messageLevel == ConsoleMessageLevel.DEBUG) {
-      logger.d(consoleMessage.message);
+      // logger.d(consoleMessage.message);
     } else if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
-      logger.e(consoleMessage.message);
+      // logger.e(consoleMessage.message);
     } else if (consoleMessage.messageLevel == ConsoleMessageLevel.LOG) {
-      logger.d(consoleMessage.message);
+      // logger.d(consoleMessage.message);
     } else if (consoleMessage.messageLevel == ConsoleMessageLevel.TIP) {
-      logger.d(consoleMessage.message);
+      // logger.d(consoleMessage.message);
     } else if (consoleMessage.messageLevel == ConsoleMessageLevel.WARNING) {
-      logger.w(consoleMessage.message);
+      // logger.w(consoleMessage.message);
     }
   }
 }

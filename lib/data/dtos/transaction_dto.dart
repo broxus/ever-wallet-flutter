@@ -24,6 +24,8 @@ class TransactionDto with _$TransactionDto {
     @HiveField(8) required MessageDto inMessage,
     @HiveField(9) required List<MessageDto> outMessages,
   }) = _TransactionDto;
+
+  factory TransactionDto.fromJson(Map<String, dynamic> json) => _$TransactionDtoFromJson(json);
 }
 
 extension TransactionDtoToDomain on TransactionDto {

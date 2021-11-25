@@ -17,6 +17,8 @@ class MessageDto with _$MessageDto {
     @HiveField(5) String? body,
     @HiveField(6) String? bodyHash,
   }) = _MessageDto;
+
+  factory MessageDto.fromJson(Map<String, dynamic> json) => _$MessageDtoFromJson(json);
 }
 
 extension MessageDtoToDomain on MessageDto {

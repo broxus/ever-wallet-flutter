@@ -16,6 +16,8 @@ class TonWalletDetailsDto with _$TonWalletDetailsDto {
     @HiveField(3) required bool supportsMultipleOwners,
     @HiveField(4) required int expirationTime,
   }) = _TonWalletDetailsDto;
+
+  factory TonWalletDetailsDto.fromJson(Map<String, dynamic> json) => _$TonWalletDetailsDtoFromJson(json);
 }
 
 extension TonWalletDetailsDtoToDomain on TonWalletDetailsDto {

@@ -15,6 +15,8 @@ class MultisigSendTransactionDto with _$MultisigSendTransactionDto {
     @HiveField(3) required int flags,
     @HiveField(4) required String payload,
   }) = _MultisigSendTransactionDto;
+
+  factory MultisigSendTransactionDto.fromJson(Map<String, dynamic> json) => _$MultisigSendTransactionDtoFromJson(json);
 }
 
 extension MultisigSendTransactionDtoToDomain on MultisigSendTransactionDto {

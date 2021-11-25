@@ -48,6 +48,9 @@ class TransactionAdditionalInfoDto with _$TransactionAdditionalInfoDto {
   const factory TransactionAdditionalInfoDto.walletInteraction({
     @HiveField(0) required WalletInteractionInfoDto info,
   }) = _WalletInteractionDto;
+
+  factory TransactionAdditionalInfoDto.fromJson(Map<String, dynamic> json) =>
+      _$TransactionAdditionalInfoDtoFromJson(json);
 }
 
 extension TransactionAdditionalInfoDtoToDomain on TransactionAdditionalInfoDto {

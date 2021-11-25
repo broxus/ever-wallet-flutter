@@ -17,6 +17,9 @@ class DePoolOnRoundCompleteNotificationDto with _$DePoolOnRoundCompleteNotificat
     @HiveField(5) required bool reinvest,
     @HiveField(6) required int reason,
   }) = _DePoolOnRoundCompleteNotificationDto;
+
+  factory DePoolOnRoundCompleteNotificationDto.fromJson(Map<String, dynamic> json) =>
+      _$DePoolOnRoundCompleteNotificationDtoFromJson(json);
 }
 
 extension DePoolOnRoundCompleteNotificationDtoToDomain on DePoolOnRoundCompleteNotificationDto {

@@ -15,6 +15,7 @@ import '../../../../../design/widgets/crystal_bottom_sheet.dart';
 import '../../../../../design/widgets/preload_transactions_listener.dart';
 import '../../history/token_wallet_transaction_holder.dart';
 import '../receive_modal.dart';
+import '../token_send_transaction_flow/start_token_send_transaction_flow.dart';
 
 class TokenAssetObserver extends StatefulWidget {
   final String owner;
@@ -218,14 +219,11 @@ class _TokenAssetObserverState extends State<TokenAssetObserver> {
             const CrystalDivider(width: 10),
             Expanded(
               child: _assetButton(
-                onTap: () {
-                  // TokenSendTransactionFlow.start(
-                  //   context: context,
-                  //   owner: owner,
-                  //   rootTokenContract: symbol.rootTokenContract,
-                  //   ownerPublicKey: ownerPublicKey,
-                  // );
-                },
+                onTap: () => startTokenSendTransactionFlow(
+                  context: context,
+                  owner: owner,
+                  rootTokenContract: symbol.rootTokenContract,
+                ),
                 asset: Assets.images.iconSend.path,
                 title: LocaleKeys.actions_send.tr(),
               ),

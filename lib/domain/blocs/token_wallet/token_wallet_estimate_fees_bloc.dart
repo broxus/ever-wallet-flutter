@@ -14,7 +14,7 @@ part 'token_wallet_estimate_fees_bloc.freezed.dart';
 class TokenWalletEstimateFeesBloc extends Bloc<TokenWalletEstimateFeesEvent, TokenWalletEstimateFeesState> {
   final NekotonService _nekotonService;
 
-  TokenWalletEstimateFeesBloc(this._nekotonService) : super(TokenWalletEstimateFeesStateInitial());
+  TokenWalletEstimateFeesBloc(this._nekotonService) : super(const TokenWalletEstimateFeesState.initial());
 
   @override
   Stream<TokenWalletEstimateFeesState> mapEventToState(TokenWalletEstimateFeesEvent event) async* {
@@ -42,23 +42,23 @@ class TokenWalletEstimateFeesBloc extends Bloc<TokenWalletEstimateFeesEvent, Tok
         final isPossibleToSendTokens = balanceValue >= amountValue;
 
         if (isPossibleToSendMessage && isPossibleToSendTokens) {
-          yield TokenWalletEstimateFeesStateSuccess(fees);
+          yield TokenWalletEstimateFeesState.success(fees);
         } else if (!isPossibleToSendMessage) {
-          yield TokenWalletEstimateFeesStateSuccess.insufficientOwnerFunds(fees);
+          yield TokenWalletEstimateFeesState.insufficientOwnerFunds(fees);
         } else {
-          yield TokenWalletEstimateFeesStateSuccess.insufficientFunds(fees);
+          yield TokenWalletEstimateFeesState.insufficientFunds(fees);
         }
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield TokenWalletEstimateFeesStateError(err);
+      yield TokenWalletEstimateFeesState.error(err);
     }
   }
 }
 
 @freezed
 class TokenWalletEstimateFeesEvent with _$TokenWalletEstimateFeesEvent {
-  const factory TokenWalletEstimateFeesEvent.estimateEstimateFees({
+  const factory TokenWalletEstimateFeesEvent.estimateFees({
     required String owner,
     required String rootTokenContract,
     required UnsignedMessage message,
@@ -66,24 +66,23 @@ class TokenWalletEstimateFeesEvent with _$TokenWalletEstimateFeesEvent {
   }) = _EstimateFees;
 }
 
-abstract class TokenWalletEstimateFeesState {}
-
-class TokenWalletEstimateFeesStateInitial extends TokenWalletEstimateFeesState {}
-
 @freezed
-class TokenWalletEstimateFeesStateSuccess extends TokenWalletEstimateFeesState
-    with _$TokenWalletEstimateFeesStateSuccess {
-  const factory TokenWalletEstimateFeesStateSuccess(String fees) = _TokenWalletEstimateFeesStateSuccess;
+class TokenWalletEstimateFeesState with _$TokenWalletEstimateFeesState {
+  const factory TokenWalletEstimateFeesState.initial() = _Initial;
 
-  const factory TokenWalletEstimateFeesStateSuccess.insufficientFunds(String fees) =
-      _TokenWalletEstimateFeesStateSuccessInsufficientFunds;
+  const factory TokenWalletEstimateFeesState.success(String fees) = _Success;
 
-  const factory TokenWalletEstimateFeesStateSuccess.insufficientOwnerFunds(String fees) =
-      _TokenWalletEstimateFeesStateSuccessInsufficientOwnerFunds;
-}
+  const factory TokenWalletEstimateFeesState.insufficientFunds(String fees) = _InsufficientFunds;
 
-class TokenWalletEstimateFeesStateError extends TokenWalletEstimateFeesState {
-  final Exception exception;
+  const factory TokenWalletEstimateFeesState.insufficientOwnerFunds(String fees) = _InsufficientOwnerFunds;
 
-  TokenWalletEstimateFeesStateError(this.exception);
+  const factory TokenWalletEstimateFeesState.error(Exception exception) = _Error;
+
+  const TokenWalletEstimateFeesState._();
+
+  @override
+  bool operator ==(Object other) => false;
+
+  @override
+  int get hashCode => 0;
 }

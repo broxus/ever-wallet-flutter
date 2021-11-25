@@ -54,6 +54,7 @@ class _SeedNamePageState extends State<SeedNamePage> {
                     title(),
                     const SizedBox(height: 32),
                     CustomTextFormField(
+                      name: 'name',
                       controller: controller,
                       hintText: 'Enter the name...',
                       suffixIcon: SuffixIconButton(

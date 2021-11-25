@@ -71,6 +71,7 @@ class TokenWalletInfoBloc extends Bloc<_Event, TokenWalletInfo?> {
               version: tokenWallet.version,
               balance: event,
               contractState: await tokenWallet.contractState,
+              ownerPublicKey: tokenWallet.ownerPublicKey,
             );
 
             add(_LocalEvent.update(tokenWalletInfo));
@@ -83,6 +84,7 @@ class TokenWalletInfoBloc extends Bloc<_Event, TokenWalletInfo?> {
             version: tokenWallet.version,
             balance: await tokenWallet.balance,
             contractState: await tokenWallet.contractState,
+            ownerPublicKey: tokenWallet.ownerPublicKey,
           );
 
           add(_LocalEvent.update(tokenWalletInfo));

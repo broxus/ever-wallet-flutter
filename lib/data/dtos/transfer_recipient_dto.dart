@@ -16,6 +16,8 @@ class TransferRecipientDto with _$TransferRecipientDto {
   const factory TransferRecipientDto.tokenWallet({
     @HiveField(0) required String address,
   }) = _TokenWalletRecipientDto;
+
+  factory TransferRecipientDto.fromJson(Map<String, dynamic> json) => _$TransferRecipientDtoFromJson(json);
 }
 
 extension TransferRecipientDtoToDomain on TransferRecipientDto {

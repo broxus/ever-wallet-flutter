@@ -13,6 +13,8 @@ class TokenSwapBackDto with _$TokenSwapBackDto {
     @HiveField(1) required String callbackAddress,
     @HiveField(2) required String callbackPayload,
   }) = _TokenSwapBackDto;
+
+  factory TokenSwapBackDto.fromJson(Map<String, dynamic> json) => _$TokenSwapBackDtoFromJson(json);
 }
 
 extension TokenSwapBackDtoToDomain on TokenSwapBackDto {

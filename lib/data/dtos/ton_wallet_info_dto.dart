@@ -22,6 +22,8 @@ class TonWalletInfoDto with _$TonWalletInfoDto {
     @HiveField(5) required TonWalletDetailsDto details,
     @HiveField(6) required List<String>? custodians,
   }) = _TonWalletInfoDto;
+
+  factory TonWalletInfoDto.fromJson(Map<String, dynamic> json) => _$TonWalletInfoDtoFromJson(json);
 }
 
 extension TonWalletInfoDtoToDomain on TonWalletInfoDto {

@@ -17,6 +17,9 @@ class MultisigSubmitTransactionDto with _$MultisigSubmitTransactionDto {
     @HiveField(5) required String payload,
     @HiveField(6) required String transId,
   }) = _MultisigSubmitTransactionDto;
+
+  factory MultisigSubmitTransactionDto.fromJson(Map<String, dynamic> json) =>
+      _$MultisigSubmitTransactionDtoFromJson(json);
 }
 
 extension MultisigSubmitTransactionDtoToDomain on MultisigSubmitTransactionDto {

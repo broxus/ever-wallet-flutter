@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 class CustomTextFormField extends StatelessWidget {
+  final Key? fieldKey;
+  final String name;
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final TextInputType? keyboardType;
@@ -9,9 +12,9 @@ class CustomTextFormField extends StatelessWidget {
   final bool autocorrect;
   final bool enableSuggestions;
   final bool obscureText;
-  final void Function(String)? onFieldSubmitted;
+  final void Function(String?)? onSubmitted;
   final String? Function(String?)? validator;
-  final void Function(String)? onChanged;
+  final void Function(String?)? onChanged;
   final List<TextInputFormatter>? inputFormatters;
   final String? hintText;
   final Widget? prefixIcon;
@@ -20,6 +23,8 @@ class CustomTextFormField extends StatelessWidget {
 
   const CustomTextFormField({
     Key? key,
+    this.fieldKey,
+    required this.name,
     this.controller,
     this.focusNode,
     this.keyboardType,
@@ -27,7 +32,7 @@ class CustomTextFormField extends StatelessWidget {
     this.autocorrect = true,
     this.enableSuggestions = true,
     this.obscureText = false,
-    this.onFieldSubmitted,
+    this.onSubmitted,
     this.validator,
     this.onChanged,
     this.inputFormatters,
@@ -38,7 +43,9 @@ class CustomTextFormField extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => TextFormField(
+  Widget build(BuildContext context) => FormBuilderTextField(
+        key: fieldKey,
+        name: name,
         autovalidateMode: AutovalidateMode.always,
         controller: controller,
         focusNode: focusNode,
@@ -67,7 +74,7 @@ class CustomTextFormField extends StatelessWidget {
         autocorrect: autocorrect,
         enableSuggestions: enableSuggestions,
         obscureText: obscureText,
-        onFieldSubmitted: onFieldSubmitted,
+        onSubmitted: onSubmitted,
         validator: validator,
         onChanged: onChanged,
         inputFormatters: inputFormatters,
@@ -86,7 +93,7 @@ class CustomTextFormField extends StatelessWidget {
         borderSide: BorderSide(
           color: Colors.black12,
         ),
-        borderRadius: BorderRadius.all(Radius.zero),
+        borderRadius: BorderRadius.zero,
         gapPadding: 0,
       );
 
@@ -94,7 +101,7 @@ class CustomTextFormField extends StatelessWidget {
         borderSide: BorderSide(
           color: Colors.red,
         ),
-        borderRadius: BorderRadius.all(Radius.zero),
+        borderRadius: BorderRadius.zero,
         gapPadding: 0,
       );
 }

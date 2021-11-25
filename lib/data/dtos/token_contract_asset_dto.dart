@@ -20,6 +20,8 @@ class TokenContractAssetDto with _$TokenContractAssetDto {
     @HiveField(6) List<int>? gravatarIcon,
     @HiveField(7) required int version,
   }) = _TokenContractAssetDto;
+
+  factory TokenContractAssetDto.fromJson(Map<String, dynamic> json) => _$TokenContractAssetDtoFromJson(json);
 }
 
 extension TokenContractAssetDtoToDomain on TokenContractAssetDto {

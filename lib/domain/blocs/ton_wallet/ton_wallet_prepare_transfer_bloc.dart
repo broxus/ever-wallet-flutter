@@ -14,7 +14,7 @@ part 'ton_wallet_prepare_transfer_bloc.freezed.dart';
 class TonWalletPrepareTransferBloc extends Bloc<TonWalletPrepareTransferEvent, TonWalletPrepareTransferState> {
   final NekotonService _nekotonService;
 
-  TonWalletPrepareTransferBloc(this._nekotonService) : super(TonWalletPrepareTransferStateInitial());
+  TonWalletPrepareTransferBloc(this._nekotonService) : super(const TonWalletPrepareTransferState.initial());
 
   @override
   Stream<TonWalletPrepareTransferState> mapEventToState(TonWalletPrepareTransferEvent event) async* {
@@ -37,11 +37,11 @@ class TonWalletPrepareTransferBloc extends Bloc<TonWalletPrepareTransferEvent, T
           body: event.comment,
         );
 
-        yield TonWalletPrepareTransferStateSuccess(message);
+        yield TonWalletPrepareTransferState.success(message);
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield TonWalletPrepareTransferStateError(err);
+      yield TonWalletPrepareTransferState.error(err);
     }
   }
 }
@@ -56,18 +56,19 @@ class TonWalletPrepareTransferEvent with _$TonWalletPrepareTransferEvent {
   }) = _PrepareTransfer;
 }
 
-abstract class TonWalletPrepareTransferState {}
+@freezed
+class TonWalletPrepareTransferState with _$TonWalletPrepareTransferState {
+  const factory TonWalletPrepareTransferState.initial() = _Initial;
 
-class TonWalletPrepareTransferStateInitial extends TonWalletPrepareTransferState {}
+  const factory TonWalletPrepareTransferState.success(UnsignedMessage message) = _Success;
 
-class TonWalletPrepareTransferStateSuccess extends TonWalletPrepareTransferState {
-  final UnsignedMessage message;
+  const factory TonWalletPrepareTransferState.error(Exception exception) = _Error;
 
-  TonWalletPrepareTransferStateSuccess(this.message);
-}
+  const TonWalletPrepareTransferState._();
 
-class TonWalletPrepareTransferStateError extends TonWalletPrepareTransferState {
-  final Exception exception;
+  @override
+  bool operator ==(Object other) => false;
 
-  TonWalletPrepareTransferStateError(this.exception);
+  @override
+  int get hashCode => 0;
 }

@@ -13,7 +13,7 @@ part 'biometry_get_password_bloc.freezed.dart';
 class BiometryGetPasswordBloc extends Bloc<BiometryGetPasswordEvent, BiometryGetPasswordState> {
   final BiometryRepository _biometryRepository;
 
-  BiometryGetPasswordBloc(this._biometryRepository) : super(BiometryGetPasswordStateInitial());
+  BiometryGetPasswordBloc(this._biometryRepository) : super(const BiometryGetPasswordState.initial());
 
   @override
   Stream<BiometryGetPasswordState> mapEventToState(BiometryGetPasswordEvent event) async* {
@@ -25,17 +25,17 @@ class BiometryGetPasswordBloc extends Bloc<BiometryGetPasswordEvent, BiometryGet
           final isAuthenticated = await _biometryRepository.authenticate(event.localizedReason);
 
           if (isAuthenticated) {
-            yield BiometryGetPasswordStateSuccess(password);
+            yield BiometryGetPasswordState.success(password);
           } else {
-            yield BiometryGetPasswordStateSuccess();
+            yield const BiometryGetPasswordState.success();
           }
         } else {
-          yield BiometryGetPasswordStateSuccess();
+          yield const BiometryGetPasswordState.success();
         }
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield BiometryGetPasswordStateError(err);
+      yield BiometryGetPasswordState.error(err);
     }
   }
 }
@@ -48,18 +48,19 @@ class BiometryGetPasswordEvent with _$BiometryGetPasswordEvent {
   }) = _Get;
 }
 
-abstract class BiometryGetPasswordState {}
+@freezed
+class BiometryGetPasswordState with _$BiometryGetPasswordState {
+  const factory BiometryGetPasswordState.initial() = _Initial;
 
-class BiometryGetPasswordStateInitial extends BiometryGetPasswordState {}
+  const factory BiometryGetPasswordState.success([String? password]) = _Success;
 
-class BiometryGetPasswordStateSuccess extends BiometryGetPasswordState {
-  final String? password;
+  const factory BiometryGetPasswordState.error(Exception exception) = _Error;
 
-  BiometryGetPasswordStateSuccess([this.password]);
-}
+  const BiometryGetPasswordState._();
 
-class BiometryGetPasswordStateError extends BiometryGetPasswordState {
-  final Exception exception;
+  @override
+  bool operator ==(Object other) => false;
 
-  BiometryGetPasswordStateError(this.exception);
+  @override
+  int get hashCode => 0;
 }

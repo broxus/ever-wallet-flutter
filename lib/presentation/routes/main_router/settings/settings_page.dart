@@ -151,10 +151,17 @@ class _SettingsPageState extends State<SettingsPage> {
                             publicKey: currentKey.publicKey,
                           ));
 
-                          password = await biometryPasswordDataBloc.stream
-                              .firstWhere((e) => e is BiometryGetPasswordStateSuccess)
-                              .then((value) => value as BiometryGetPasswordStateSuccess)
-                              .then((value) => value.password);
+                          final state = await biometryPasswordDataBloc.stream.firstWhere(
+                            (e) => e.maybeWhen(
+                              success: (_) => true,
+                              orElse: () => false,
+                            ),
+                          );
+
+                          password = state.maybeWhen(
+                            success: (password) => password,
+                            orElse: () => null,
+                          );
 
                           if (password != null) {
                             keyExportBloc.add(KeyExportEvent.export(

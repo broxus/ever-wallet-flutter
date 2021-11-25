@@ -20,8 +20,6 @@ class TonWalletSendBloc extends Bloc<TonWalletSendEvent, TonWalletSendState> {
   Stream<TonWalletSendState> mapEventToState(TonWalletSendEvent event) async* {
     try {
       if (event is _Send) {
-        yield const TonWalletSendState.sending();
-
         final tonWallet = _nekotonService.tonWallets.firstWhereOrNull((e) => e.address == event.address);
 
         if (tonWallet == null) {
@@ -56,8 +54,6 @@ class TonWalletSendEvent with _$TonWalletSendEvent {
 @freezed
 class TonWalletSendState with _$TonWalletSendState {
   const factory TonWalletSendState.initial() = _Initial;
-
-  const factory TonWalletSendState.sending() = _Sending;
 
   const factory TonWalletSendState.success() = _Success;
 

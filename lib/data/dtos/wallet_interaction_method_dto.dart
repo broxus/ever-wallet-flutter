@@ -16,6 +16,8 @@ class WalletInteractionMethodDto with _$WalletInteractionMethodDto {
   const factory WalletInteractionMethodDto.multisig({
     @HiveField(0) required MultisigTransactionDto multisigTransaction,
   }) = _Multisig;
+
+  factory WalletInteractionMethodDto.fromJson(Map<String, dynamic> json) => _$WalletInteractionMethodDtoFromJson(json);
 }
 
 extension WalletInteractionMethodDtoToDomain on WalletInteractionMethodDto {

@@ -150,6 +150,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
   }
 
   Widget passwordField() => CustomTextFormField(
+        name: 'password',
         controller: passwordController,
         autocorrect: false,
         enableSuggestions: false,
@@ -163,7 +164,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
           },
           icon: Assets.images.iconCross.svg(),
         ),
-        onFieldSubmitted: (value) => FocusScope.of(context).nextFocus(),
+        onSubmitted: (value) => FocusScope.of(context).nextFocus(),
         validator: (String? value) {
           if (value == null || value.isEmpty) {
             return null;
@@ -176,6 +177,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
       );
 
   Widget repeatField() => CustomTextFormField(
+        name: 'repeat',
         controller: repeatController,
         autocorrect: false,
         enableSuggestions: false,

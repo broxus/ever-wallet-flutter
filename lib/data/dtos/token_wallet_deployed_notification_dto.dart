@@ -11,6 +11,9 @@ class TokenWalletDeployedNotificationDto with _$TokenWalletDeployedNotificationD
   const factory TokenWalletDeployedNotificationDto({
     @HiveField(0) required String rootTokenContract,
   }) = _TokenWalletDeployedNotificationDto;
+
+  factory TokenWalletDeployedNotificationDto.fromJson(Map<String, dynamic> json) =>
+      _$TokenWalletDeployedNotificationDtoFromJson(json);
 }
 
 extension TokenWalletDeployedNotificationDtoToDomain on TokenWalletDeployedNotificationDto {

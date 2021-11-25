@@ -14,7 +14,7 @@ part 'token_wallet_prepare_transfer_bloc.freezed.dart';
 class TokenWalletPrepareTransferBloc extends Bloc<TokenWalletPrepareTransferEvent, TokenWalletPrepareTransferState> {
   final NekotonService _nekotonService;
 
-  TokenWalletPrepareTransferBloc(this._nekotonService) : super(TokenWalletPrepareTransferStateInitial());
+  TokenWalletPrepareTransferBloc(this._nekotonService) : super(const TokenWalletPrepareTransferState.initial());
 
   @override
   Stream<TokenWalletPrepareTransferState> mapEventToState(TokenWalletPrepareTransferEvent event) async* {
@@ -36,11 +36,11 @@ class TokenWalletPrepareTransferBloc extends Bloc<TokenWalletPrepareTransferEven
           notifyReceiver: event.notifyReceiver,
         );
 
-        yield TokenWalletPrepareTransferStateSuccess(message);
+        yield TokenWalletPrepareTransferState.success(message);
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield TokenWalletPrepareTransferStateError(err);
+      yield TokenWalletPrepareTransferState.error(err);
     }
   }
 }
@@ -56,18 +56,19 @@ class TokenWalletPrepareTransferEvent with _$TokenWalletPrepareTransferEvent {
   }) = _PrepareTransfer;
 }
 
-abstract class TokenWalletPrepareTransferState {}
+@freezed
+class TokenWalletPrepareTransferState with _$TokenWalletPrepareTransferState {
+  const factory TokenWalletPrepareTransferState.initial() = _Initial;
 
-class TokenWalletPrepareTransferStateInitial extends TokenWalletPrepareTransferState {}
+  const factory TokenWalletPrepareTransferState.success(UnsignedMessage message) = _Success;
 
-class TokenWalletPrepareTransferStateSuccess extends TokenWalletPrepareTransferState {
-  final UnsignedMessage message;
+  const factory TokenWalletPrepareTransferState.error(Exception exception) = _Error;
 
-  TokenWalletPrepareTransferStateSuccess(this.message);
-}
+  const TokenWalletPrepareTransferState._();
 
-class TokenWalletPrepareTransferStateError extends TokenWalletPrepareTransferState {
-  final Exception exception;
+  @override
+  bool operator ==(Object other) => false;
 
-  TokenWalletPrepareTransferStateError(this.exception);
+  @override
+  int get hashCode => 0;
 }

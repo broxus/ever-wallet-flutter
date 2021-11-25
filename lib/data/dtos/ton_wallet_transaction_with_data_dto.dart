@@ -15,6 +15,9 @@ class TonWalletTransactionWithDataDto with _$TonWalletTransactionWithDataDto {
     @HiveField(0) required TransactionDto transaction,
     @HiveField(1) TransactionAdditionalInfoDto? data,
   }) = _TonWalletTransactionWithDataDto;
+
+  factory TonWalletTransactionWithDataDto.fromJson(Map<String, dynamic> json) =>
+      _$TonWalletTransactionWithDataDtoFromJson(json);
 }
 
 extension TonWalletTransactionWithDataDtoToDomain on TonWalletTransactionWithDataDto {

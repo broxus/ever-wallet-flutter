@@ -12,5 +12,6 @@ class TokenWalletInfo with _$TokenWalletInfo {
     required TokenWalletVersion version,
     required String balance,
     required ContractState contractState,
+    required String ownerPublicKey,
   }) = _TokenWalletInfo;
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:tuple/tuple.dart';
+import 'package:validators/validators.dart';
 
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_title.dart';
@@ -13,16 +14,17 @@ import '../../../../../design/widgets/custom_dropdown_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_text_button.dart';
 import '../../../../../design/widgets/custom_text_form_field.dart';
+import '../../../../../design/widgets/text_field_clear_button.dart';
 import '../../../../../design/widgets/text_suffix_icon_button.dart';
 import '../../../../../design/widgets/unfocusing_gesture_detector.dart';
-import 'deploy_your_wallet_page.dart';
+import 'deployment_info_page.dart';
 
-class NewSelectWalletTypePage extends StatefulWidget {
+class PrepareDeployPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
   final String publicKey;
 
-  const NewSelectWalletTypePage({
+  const PrepareDeployPage({
     Key? key,
     required this.modalContext,
     required this.address,
@@ -30,17 +32,18 @@ class NewSelectWalletTypePage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
+  _PrepareDeployPageState createState() => _PrepareDeployPageState();
 }
 
-class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
+class _PrepareDeployPageState extends State<PrepareDeployPage> {
   final formKey = GlobalKey<FormState>();
   final initialCustodiansCount = 3;
   final minCustodiansCount = 2;
   final maxCustodiansCount = 32;
   final optionNotifier = ValueNotifier<_WalletCreationOptions>(_WalletCreationOptions.standard);
   late ValueNotifier<int> custodiansNotifier;
-  final custodiansNumberController = TextEditingController();
+  final countController = TextEditingController();
+  final countFocusNode = FocusNode();
   late final List<TextEditingController> controllers;
   late final List<FocusNode> focusNodes;
   final formValidityNotifier = ValueNotifier<bool>(false);
@@ -49,8 +52,8 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
   void initState() {
     super.initState();
     custodiansNotifier = ValueNotifier<int>(initialCustodiansCount);
-    controllers = List.generate(initialCustodiansCount, (index) => TextEditingController());
-    focusNodes = List.generate(initialCustodiansCount, (index) => FocusNode());
+    controllers = List.generate(initialCustodiansCount, (_) => TextEditingController());
+    focusNodes = List.generate(initialCustodiansCount, (_) => FocusNode());
   }
 
   @override
@@ -63,7 +66,8 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
     }
     optionNotifier.dispose();
     custodiansNotifier.dispose();
-    custodiansNumberController.dispose();
+    countController.dispose();
+    countFocusNode.dispose();
     super.dispose();
   }
 
@@ -110,7 +114,7 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    nextButton(),
+                    submitButton(),
                   ],
                 ),
               ),
@@ -143,6 +147,7 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
                 children: [
                   Form(
                     key: formKey,
+                    onChanged: onFormChanged,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -164,15 +169,14 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
             : const SizedBox(),
       );
 
-  Widget nextButton() => CustomElevatedButton(
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => DeployYourWalletPage(
-            modalContext: widget.modalContext,
-            address: widget.address,
-          ),
-        )),
-        text: 'Next',
-      );
+  void onFormChanged() {
+    if (countController.text.isEmpty || controllers.any((e) => e.text.isEmpty)) {
+      formValidityNotifier.value = false;
+      return;
+    }
+
+    formValidityNotifier.value = formKey.currentState?.validate() ?? false;
+  }
 
   Widget fieldHeader(String text) => Text(
         text,
@@ -195,7 +199,9 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
   Widget countField() => ValueListenableBuilder<int>(
         valueListenable: custodiansNotifier,
         builder: (context, custodiansValue, child) => CustomTextFormField(
-          controller: custodiansNumberController,
+          name: 'count',
+          controller: countController,
+          focusNode: countFocusNode,
           keyboardType: const TextInputType.numberWithOptions(signed: true),
           textInputAction: TextInputAction.next,
           autocorrect: false,
@@ -210,7 +216,7 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
               ),
             ),
           ),
-          onFieldSubmitted: (value) => focusNodes.first.requestFocus(),
+          onSubmitted: (value) => focusNodes.first.requestFocus(),
           inputFormatters: [
             FilteringTextInputFormatter.deny(RegExp(r'\s')),
             FilteringTextInputFormatter.allow(RegExp('[0-9]')),
@@ -224,7 +230,9 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
 
             if (number == null) {
               return 'Invalid value';
-            } else if (number < 1 || number > custodiansValue) {
+            }
+
+            if (number < 1 || number > custodiansValue) {
               return 'Invalid value';
             }
           },
@@ -255,6 +263,7 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
           fieldHeader('Public key of Custodian ${index + 1}'),
           const SizedBox(height: 8),
           CustomTextFormField(
+            name: 'custodian_${index + 1}',
             controller: controllers[index],
             focusNode: focusNodes[index],
             textInputAction: index != custodians - 1 ? TextInputAction.next : TextInputAction.done,
@@ -262,18 +271,22 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
             enableSuggestions: false,
             hintText: 'Enter public key...',
             suffixIcon: suffixIcons(index),
-            onFieldSubmitted: (value) {
+            onSubmitted: (value) {
               if (index != custodians - 1) {
                 focusNodes[index + 1].requestFocus();
               }
             },
             inputFormatters: [
               FilteringTextInputFormatter.deny(RegExp(r'\s')),
-              FilteringTextInputFormatter.allow(RegExp('[a-zA-Z0-9]')),
+              FilteringTextInputFormatter.allow(RegExp('[a-fA-F0-9]')),
             ],
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return null;
+              }
+
+              if (!isAlphanumeric(value)) {
+                return 'Invalid value';
               }
 
               if (value.length != 64) {
@@ -288,12 +301,8 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
   Widget suffixIcons(int index) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SuffixIconButton(
-            onPressed: () {
-              controllers[index].clear();
-              Form.of(context)?.validate();
-            },
-            icon: Assets.images.iconCross.svg(),
+          TextFieldClearButton(
+            controller: controllers[index],
           ),
           if (index != 0 && index != 1)
             SuffixIconButton(
@@ -310,10 +319,11 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
 
       custodiansNotifier.value -= 1;
 
-      await Future.delayed(const Duration(seconds: 1));
-
-      controller.dispose();
-      focusNode.dispose();
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        controller.dispose();
+        focusNode.dispose();
+        onFormChanged();
+      });
     }
   }
 
@@ -340,9 +350,57 @@ class _NewSelectWalletTypePageState extends State<NewSelectWalletTypePage> {
     if (custodiansNotifier.value < maxCustodiansCount) {
       controllers.add(TextEditingController());
       focusNodes.add(FocusNode());
+
       custodiansNotifier.value += 1;
+
+      onFormChanged();
     }
   }
+
+  Widget submitButton() => ValueListenableBuilder<_WalletCreationOptions>(
+        valueListenable: optionNotifier,
+        builder: (context, value, child) => AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: value == _WalletCreationOptions.multisignature
+              ? ValueListenableBuilder<bool>(
+                  valueListenable: formValidityNotifier,
+                  builder: (context, value, child) => CustomElevatedButton(
+                    onPressed: value
+                        ? () {
+                            final custodians = controllers.map((e) => e.text).toList();
+                            final reqConfirms = int.tryParse(countController.text);
+
+                            onPressed(
+                              custodians: custodians,
+                              reqConfirms: reqConfirms,
+                            );
+                          }
+                        : null,
+                    text: 'Next',
+                  ),
+                )
+              : CustomElevatedButton(
+                  onPressed: onPressed,
+                  text: 'Next',
+                ),
+        ),
+      );
+
+  void onPressed({
+    List<String>? custodians,
+    int? reqConfirms,
+  }) =>
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => DeploymentInfoPage(
+            modalContext: widget.modalContext,
+            publicKey: widget.publicKey,
+            address: widget.address,
+            custodians: custodians,
+            reqConfirms: reqConfirms,
+          ),
+        ),
+      );
 }
 
 enum _WalletCreationOptions {

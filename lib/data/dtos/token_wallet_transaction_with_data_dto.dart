@@ -15,6 +15,9 @@ class TokenWalletTransactionWithDataDto with _$TokenWalletTransactionWithDataDto
     @HiveField(0) required TransactionDto transaction,
     @HiveField(1) TokenWalletTransactionDto? data,
   }) = _TokenWalletTransactionWithDataDto;
+
+  factory TokenWalletTransactionWithDataDto.fromJson(Map<String, dynamic> json) =>
+      _$TokenWalletTransactionWithDataDtoFromJson(json);
 }
 
 extension TokenWalletTransactionWithDataDtoToDomain on TokenWalletTransactionWithDataDto {

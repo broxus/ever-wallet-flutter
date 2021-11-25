@@ -18,6 +18,8 @@ class ContractStateDto with _$ContractStateDto {
     @HiveField(2) LastTransactionIdDto? lastTransactionId,
     @HiveField(3) required bool isDeployed,
   }) = _ContractStateDto;
+
+  factory ContractStateDto.fromJson(Map<String, dynamic> json) => _$ContractStateDtoFromJson(json);
 }
 
 extension ContractStateDtoToDomain on ContractStateDto {

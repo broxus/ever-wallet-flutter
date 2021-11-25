@@ -14,7 +14,7 @@ part 'token_wallet_send_bloc.freezed.dart';
 class TokenWalletSendBloc extends Bloc<TokenWalletSendEvent, TokenWalletSendState> {
   final NekotonService _nekotonService;
 
-  TokenWalletSendBloc(this._nekotonService) : super(TokenWalletSendStateInitial());
+  TokenWalletSendBloc(this._nekotonService) : super(const TokenWalletSendState.initial());
 
   @override
   Stream<TokenWalletSendState> mapEventToState(TokenWalletSendEvent event) async* {
@@ -27,16 +27,18 @@ class TokenWalletSendBloc extends Bloc<TokenWalletSendEvent, TokenWalletSendStat
           throw TokenWalletNotFoundException();
         }
 
-        await tokenWallet.send(
-          message: event.message,
-          password: event.password,
-        );
+        // await tokenWallet.send(
+        //   message: event.message,
+        //   password: event.password,
+        // );
 
-        yield TokenWalletSendStateSuccess();
+        await Future.delayed(const Duration(seconds: 3));
+
+        yield const TokenWalletSendState.success();
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield TokenWalletSendStateError(err);
+      yield TokenWalletSendState.error(err);
     }
   }
 }
@@ -51,14 +53,19 @@ class TokenWalletSendEvent with _$TokenWalletSendEvent {
   }) = _Send;
 }
 
-abstract class TokenWalletSendState {}
+@freezed
+class TokenWalletSendState with _$TokenWalletSendState {
+  const factory TokenWalletSendState.initial() = _Initial;
 
-class TokenWalletSendStateInitial extends TokenWalletSendState {}
+  const factory TokenWalletSendState.success() = _Success;
 
-class TokenWalletSendStateSuccess extends TokenWalletSendState {}
+  const factory TokenWalletSendState.error(Exception exception) = _Error;
 
-class TokenWalletSendStateError extends TokenWalletSendState {
-  final Exception exception;
+  const TokenWalletSendState._();
 
-  TokenWalletSendStateError(this.exception);
+  @override
+  bool operator ==(Object other) => false;
+
+  @override
+  int get hashCode => 0;
 }

@@ -14,6 +14,8 @@ class LastTransactionIdDto with _$LastTransactionIdDto {
     @HiveField(1) required String lt,
     @HiveField(2) String? hash,
   }) = _LastTransactionIdDto;
+
+  factory LastTransactionIdDto.fromJson(Map<String, dynamic> json) => _$LastTransactionIdDtoFromJson(json);
 }
 
 extension LastTransactionIdDtoToDomain on LastTransactionIdDto {

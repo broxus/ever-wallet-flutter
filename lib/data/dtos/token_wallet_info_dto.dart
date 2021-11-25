@@ -19,7 +19,10 @@ class TokenWalletInfoDto with _$TokenWalletInfoDto {
     @HiveField(3) required TokenWalletVersionDto version,
     @HiveField(4) required String balance,
     @HiveField(5) required ContractStateDto contractState,
+    @HiveField(6) required String ownerPublicKey,
   }) = _TokenWalletInfoDto;
+
+  factory TokenWalletInfoDto.fromJson(Map<String, dynamic> json) => _$TokenWalletInfoDtoFromJson(json);
 }
 
 extension TokenWalletInfoDtoToDomain on TokenWalletInfoDto {
@@ -30,6 +33,7 @@ extension TokenWalletInfoDtoToDomain on TokenWalletInfoDto {
         version: version.toModel(),
         balance: balance,
         contractState: contractState.toModel(),
+        ownerPublicKey: ownerPublicKey,
       );
 }
 
@@ -41,5 +45,6 @@ extension TokenWalletInfoFromDomain on TokenWalletInfo {
         version: version.toDto(),
         balance: balance,
         contractState: contractState.toDto(),
+        ownerPublicKey: ownerPublicKey,
       );
 }

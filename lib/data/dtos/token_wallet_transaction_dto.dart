@@ -40,6 +40,8 @@ class TokenWalletTransactionDto with _$TokenWalletTransactionDto {
   const factory TokenWalletTransactionDto.swapBackBounced({
     @HiveField(0) required String value,
   }) = _SwapBackBouncedDto;
+
+  factory TokenWalletTransactionDto.fromJson(Map<String, dynamic> json) => _$TokenWalletTransactionDtoFromJson(json);
 }
 
 extension TokenWalletTransactionDtoToDomain on TokenWalletTransactionDto {

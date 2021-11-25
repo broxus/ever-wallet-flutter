@@ -24,6 +24,8 @@ class KnownPayloadDto with _$KnownPayloadDto {
   const factory KnownPayloadDto.tokenSwapBack({
     @HiveField(0) required TokenSwapBackDto tokenSwapBack,
   }) = _TokenSwapBack;
+
+  factory KnownPayloadDto.fromJson(Map<String, dynamic> json) => _$KnownPayloadDtoFromJson(json);
 }
 
 extension KnownPayloadDtoToDomain on KnownPayloadDto {

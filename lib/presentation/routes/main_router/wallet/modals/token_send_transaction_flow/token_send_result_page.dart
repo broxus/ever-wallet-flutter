@@ -4,38 +4,45 @@ import 'package:lottie/lottie.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_send_bloc.dart';
+import '../../../../../../domain/blocs/token_wallet/token_wallet_send_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_title.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 
-class DeploymentResult extends StatefulWidget {
+class TokenSendResultPage extends StatefulWidget {
   final BuildContext modalContext;
-  final String address;
+  final String owner;
+  final String rootTokenContract;
   final UnsignedMessage message;
   final String password;
+  final String sendingText;
+  final String successText;
 
-  const DeploymentResult({
+  const TokenSendResultPage({
     Key? key,
     required this.modalContext,
-    required this.address,
+    required this.owner,
+    required this.rootTokenContract,
     required this.message,
     required this.password,
+    required this.sendingText,
+    required this.successText,
   }) : super(key: key);
 
   @override
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
 }
 
-class _NewSelectWalletTypePageState extends State<DeploymentResult> {
-  final bloc = getIt.get<TonWalletSendBloc>();
+class _NewSelectWalletTypePageState extends State<TokenSendResultPage> {
+  final bloc = getIt.get<TokenWalletSendBloc>();
 
   @override
   void initState() {
     super.initState();
-    bloc.add(TonWalletSendEvent.send(
-      address: widget.address,
+    bloc.add(TokenWalletSendEvent.send(
+      owner: widget.owner,
+      rootTokenContract: widget.rootTokenContract,
       message: widget.message,
       password: widget.password,
     ));
@@ -74,7 +81,7 @@ class _NewSelectWalletTypePageState extends State<DeploymentResult> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      nextButton(),
+                      submitButton(),
                     ],
                   ),
                 ),
@@ -84,15 +91,14 @@ class _NewSelectWalletTypePageState extends State<DeploymentResult> {
         ),
       );
 
-  Widget title() => BlocBuilder<TonWalletSendBloc, TonWalletSendState>(
+  Widget title() => BlocBuilder<TokenWalletSendBloc, TokenWalletSendState>(
         bloc: bloc,
         builder: (context, state) => state.when(
-          initial: () => const SizedBox(),
-          sending: () => const CrystalTitle(
-            text: 'Deploying...',
+          initial: () => CrystalTitle(
+            text: widget.sendingText,
           ),
-          success: () => const CrystalTitle(
-            text: 'Wallet has been deployed successfully',
+          success: () => CrystalTitle(
+            text: widget.successText,
           ),
           error: (exception) => CrystalTitle(
             text: exception.toString(),
@@ -100,11 +106,10 @@ class _NewSelectWalletTypePageState extends State<DeploymentResult> {
         ),
       );
 
-  Widget card() => BlocBuilder<TonWalletSendBloc, TonWalletSendState>(
+  Widget card() => BlocBuilder<TokenWalletSendBloc, TokenWalletSendState>(
         bloc: bloc,
         builder: (context, state) => state.when(
-          initial: () => const SizedBox(),
-          sending: () => animation(
+          initial: () => animation(
             Assets.animations.money,
           ),
           success: () => animation(
@@ -121,7 +126,7 @@ class _NewSelectWalletTypePageState extends State<DeploymentResult> {
         height: 180,
       );
 
-  Widget nextButton() => BlocBuilder<TonWalletSendBloc, TonWalletSendState>(
+  Widget submitButton() => BlocBuilder<TokenWalletSendBloc, TokenWalletSendState>(
         bloc: bloc,
         builder: (context, state) => CustomElevatedButton(
           onPressed: state.maybeWhen(

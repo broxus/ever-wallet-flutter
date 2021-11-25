@@ -62,10 +62,17 @@ Future<String?> showSendMessageDialog(
         publicKey: publicKey,
       ));
 
-      password = await biometryPasswordDataBloc.stream
-          .firstWhere((e) => e is BiometryGetPasswordStateSuccess)
-          .then((value) => value as BiometryGetPasswordStateSuccess)
-          .then((value) => value.password);
+      final state = await biometryPasswordDataBloc.stream.firstWhere(
+        (e) => e.maybeWhen(
+          success: (_) => true,
+          orElse: () => false,
+        ),
+      );
+
+      password = state.maybeWhen(
+        success: (password) => password,
+        orElse: () => null,
+      );
 
       password ??= await SubmitSendBody.open(
         context: context,
@@ -116,10 +123,17 @@ Future<String?> showCallContractMethodDialog(
         publicKey: selectedPublicKey,
       ));
 
-      password = await biometryPasswordDataBloc.stream
-          .firstWhere((e) => e is BiometryGetPasswordStateSuccess)
-          .then((value) => value as BiometryGetPasswordStateSuccess)
-          .then((value) => value.password);
+      final state = await biometryPasswordDataBloc.stream.firstWhere(
+        (e) => e.maybeWhen(
+          success: (_) => true,
+          orElse: () => false,
+        ),
+      );
+
+      password = state.maybeWhen(
+        success: (password) => password,
+        orElse: () => null,
+      );
 
       password ??= await SubmitSendBody.open(
         context: context,

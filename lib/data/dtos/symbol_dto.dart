@@ -14,6 +14,8 @@ class SymbolDto with _$SymbolDto {
     @HiveField(2) required int decimals,
     @HiveField(3) required String rootTokenContract,
   }) = _SymbolDto;
+
+  factory SymbolDto.fromJson(Map<String, dynamic> json) => _$SymbolDtoFromJson(json);
 }
 
 extension SymbolDtoToDomain on SymbolDto {

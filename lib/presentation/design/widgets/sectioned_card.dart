@@ -1,17 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Section {
-  final String title;
-  final String subtitle;
-
-  const Section({
-    required this.title,
-    required this.subtitle,
-  });
-}
-
 class SectionedCard extends StatelessWidget {
-  final List<Section> sections;
+  final List<Widget> sections;
 
   const SectionedCard({
     Key? key,
@@ -27,37 +17,9 @@ class SectionedCard extends StatelessWidget {
             itemCount: sections.length,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) => section(
-              title: sections[index].title,
-              subtitle: sections[index].subtitle,
-            ),
+            itemBuilder: (context, index) => sections[index],
             separatorBuilder: (context, index) => const SizedBox(height: 16),
           ),
         ),
-      );
-
-  Widget section({
-    required String title,
-    required String subtitle,
-  }) =>
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              fontSize: 16,
-            ),
-          ),
-        ],
       );
 }

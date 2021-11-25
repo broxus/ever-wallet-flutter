@@ -2,9 +2,11 @@ include: package:lint/analysis_options.yaml
 
 linter:
   rules:
-    avoid_positional_boolean_parameters: false
     prefer_single_quotes: true
     prefer_relative_imports: true
+    avoid_positional_boolean_parameters: false
+    depend_on_referenced_packages: false
+    invalid_annotation_target: false
 
 analyzer:
   exclude:

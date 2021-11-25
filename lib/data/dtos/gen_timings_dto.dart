@@ -13,6 +13,8 @@ class GenTimingsDto with _$GenTimingsDto {
     @HiveField(0) required String genLt,
     @HiveField(1) required int genUtime,
   }) = _GenTimingsDto;
+
+  factory GenTimingsDto.fromJson(Map<String, dynamic> json) => _$GenTimingsDtoFromJson(json);
 }
 
 extension GenTimingsDtoToDomain on GenTimingsDto {
