@@ -6,7 +6,7 @@ import '../../../../../../../../domain/constants/phrase_generation.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/animated_fade_slide_in.dart';
 import '../../../design/widgets/crystal_title.dart';
-import '../../../design/widgets/custom_app_bar.dart';
+import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_outlined_button.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';
@@ -32,7 +32,9 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
         value: SystemUiOverlayStyle.dark,
         child: UnfocusingGestureDetector(
           child: Scaffold(
-            appBar: const CustomAppBar(),
+            appBar: AppBar(
+              leading: const CustomBackButton(),
+            ),
             body: body(),
           ),
         ),
@@ -40,12 +42,13 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
 
   Widget body() => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16) - const EdgeInsets.only(top: 16),
           child: Stack(
             fit: StackFit.expand,
             children: [
               SingleChildScrollView(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 8),
                     title(),
@@ -135,11 +138,15 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
         delay: const Duration(seconds: 1),
         offset: const Offset(0, 1),
         child: CustomElevatedButton(
-          onPressed: () => context.router.push(SeedPhraseCheckRoute(
-            phrase: key.words,
-            seedName: widget.seedName,
-          )),
+          onPressed: onSubmitButtonPressed,
           text: LocaleKeys.seed_phrase_save_screen_action_confirm.tr(),
+        ),
+      );
+
+  Future<void> onSubmitButtonPressed() => context.router.push(
+        SeedPhraseCheckRoute(
+          phrase: key.words,
+          seedName: widget.seedName,
         ),
       );
 
@@ -150,6 +157,8 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
 
   Future<void> onCopyButtonPressed() async {
     await Clipboard.setData(ClipboardData(text: key.words.join(' ')));
+
+    if (!mounted) return;
 
     showCrystalFlushbar(
       context,

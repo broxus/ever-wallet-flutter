@@ -29,7 +29,7 @@ class TonAssetsRepositoryImpl implements TonAssetsRepository {
       hiveSource,
       restSource,
     );
-    // await tonAssetsRepositoryImpl._initialize();
+    await tonAssetsRepositoryImpl._initialize();
     return tonAssetsRepositoryImpl;
   }
 

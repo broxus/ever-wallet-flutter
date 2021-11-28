@@ -13,7 +13,8 @@ class DePoolReceiveAnswerNotificationDto with _$DePoolReceiveAnswerNotificationD
     @HiveField(1) required String comment,
   }) = _DePoolReceiveAnswerNotificationDto;
 
-  factory DePoolReceiveAnswerNotificationDto.fromJson(Map<String, dynamic> json) => _$DePoolReceiveAnswerNotificationDtoFromJson(json);
+  factory DePoolReceiveAnswerNotificationDto.fromJson(Map<String, dynamic> json) =>
+      _$DePoolReceiveAnswerNotificationDtoFromJson(json);
 }
 
 extension DePoolReceiveAnswerNotificationDtoToDomain on DePoolReceiveAnswerNotificationDto {

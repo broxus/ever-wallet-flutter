@@ -146,10 +146,12 @@ class _SettingsPageState extends State<SettingsPage> {
                         final keyExportBloc = getIt.get<KeyExportBloc>();
 
                         if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-                          biometryPasswordDataBloc.add(BiometryGetPasswordEvent.get(
-                            localizedReason: 'Please authenticate to interact with wallet',
-                            publicKey: currentKey.publicKey,
-                          ));
+                          biometryPasswordDataBloc.add(
+                            BiometryGetPasswordEvent.get(
+                              localizedReason: 'Please authenticate to interact with wallet',
+                              publicKey: currentKey.publicKey,
+                            ),
+                          );
 
                           final state = await biometryPasswordDataBloc.stream.firstWhere(
                             (e) => e.maybeWhen(
@@ -164,10 +166,12 @@ class _SettingsPageState extends State<SettingsPage> {
                           );
 
                           if (password != null) {
-                            keyExportBloc.add(KeyExportEvent.export(
-                              publicKey: currentKey.publicKey,
-                              password: password,
-                            ));
+                            keyExportBloc.add(
+                              KeyExportEvent.export(
+                                publicKey: currentKey.publicKey,
+                                password: password,
+                              ),
+                            );
 
                             final state = await keyExportBloc.stream.first;
 
@@ -175,6 +179,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               context.router.navigate(SeedPhraseExportRoute(phrase: state.phrase));
                             }
                           } else {
+                            if (!mounted) return;
+
                             showCrystalBottomSheet(
                               context,
                               title: ExportSeedPhraseModalBody.title,
@@ -235,6 +241,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           );
 
                           if (name != null) {
+                            if (!mounted) return;
+
                             showCrystalBottomSheet(
                               context,
                               title: DeriveKeyModalBody.title,

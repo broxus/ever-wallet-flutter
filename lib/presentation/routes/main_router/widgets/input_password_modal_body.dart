@@ -66,10 +66,12 @@ class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
                   final biometryInfoBloc = context.read<BiometryInfoBloc>();
 
                   if (biometryInfoBloc.state.isEnabled && biometryInfoBloc.state.isEnabled) {
-                    bloc.add(BiometrySetPasswordEvent.set(
-                      publicKey: widget.publicKey,
-                      password: password,
-                    ));
+                    bloc.add(
+                      BiometrySetPasswordEvent.set(
+                        publicKey: widget.publicKey,
+                        password: password,
+                      ),
+                    );
                   }
 
                   widget.onSubmit(password);

@@ -62,11 +62,13 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
                   final newPassword = newPasswordController.text.trim();
 
                   if (newPassword.isNotEmpty && (formKey.currentState?.validate() ?? false)) {
-                    keyUpdateBloc.add(KeyUpdateEvent.changePassword(
-                      publicKey: widget.publicKey,
-                      oldPassword: oldPasswordController.text.trim(),
-                      newPassword: newPassword,
-                    ));
+                    keyUpdateBloc.add(
+                      KeyUpdateEvent.changePassword(
+                        publicKey: widget.publicKey,
+                        oldPassword: oldPasswordController.text.trim(),
+                        newPassword: newPassword,
+                      ),
+                    );
                   }
                 } else {
                   incorrectPasswordNotifier.value = true;
@@ -145,10 +147,12 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
               text: LocaleKeys.change_seed_password_modal_actions_submit.tr(),
               onTap: () {
                 final oldPassword = oldPasswordController.text.trim();
-                checkPasswordBloc.add(KeyPasswordCheckingEvent.check(
-                  publicKey: widget.publicKey,
-                  password: oldPassword,
-                ));
+                checkPasswordBloc.add(
+                  KeyPasswordCheckingEvent.check(
+                    publicKey: widget.publicKey,
+                    password: oldPassword,
+                  ),
+                );
               },
             ),
           ],

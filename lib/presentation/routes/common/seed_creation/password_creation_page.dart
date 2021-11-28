@@ -12,11 +12,11 @@ import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_subtitle.dart';
 import '../../../design/widgets/crystal_title.dart';
-import '../../../design/widgets/custom_app_bar.dart';
+import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_checkbox.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_text_form_field.dart';
-import '../../../design/widgets/text_suffix_icon_button.dart';
+import '../../../design/widgets/text_field_clear_button.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';
 import '../../router.gr.dart';
 
@@ -66,7 +66,9 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
           value: SystemUiOverlayStyle.dark,
           child: UnfocusingGestureDetector(
             child: Scaffold(
-              appBar: const CustomAppBar(),
+              appBar: AppBar(
+                leading: const CustomBackButton(),
+              ),
               body: body(),
             ),
           ),
@@ -75,7 +77,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
 
   Widget body() => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16) - const EdgeInsets.only(top: 16),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -126,7 +128,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
             const SizedBox(height: 16),
             repeatField(),
             validationText(),
-            if (context.router.current.name != NewSeedRouterRoute.name) biometryCheckbox(),
+            if (context.router.routeData.name != NewSeedRouterRoute.name) biometryCheckbox(),
           ],
         ),
       );
@@ -157,12 +159,8 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         obscureText: true,
         textInputAction: TextInputAction.next,
         hintText: LocaleKeys.password_creation_screen_password_hint.tr(),
-        suffixIcon: SuffixIconButton(
-          onPressed: () {
-            passwordController.clear();
-            Form.of(context)?.validate();
-          },
-          icon: Assets.images.iconCross.svg(),
+        suffixIcon: TextFieldClearButton(
+          controller: passwordController,
         ),
         onSubmitted: (value) => FocusScope.of(context).nextFocus(),
         validator: (String? value) {
@@ -184,12 +182,8 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         obscureText: true,
         textInputAction: TextInputAction.done,
         hintText: LocaleKeys.password_creation_screen_password_confirmation.tr(),
-        suffixIcon: SuffixIconButton(
-          onPressed: () {
-            repeatController.clear();
-            Form.of(context)?.validate();
-          },
-          icon: Assets.images.iconCross.svg(),
+        suffixIcon: TextFieldClearButton(
+          controller: repeatController,
         ),
         validator: (String? value) {
           if (value == null || value.isEmpty) {
@@ -241,10 +235,12 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
                   CustomCheckbox(
                     value: state.isEnabled,
                     onChanged: (value) {
-                      context.read<BiometryInfoBloc>().add(BiometryInfoEvent.setStatus(
-                            localizedReason: 'Please authenticate to interact with wallet',
-                            isEnabled: !state.isEnabled,
-                          ));
+                      context.read<BiometryInfoBloc>().add(
+                            BiometryInfoEvent.setStatus(
+                              localizedReason: 'Please authenticate to interact with wallet',
+                              isEnabled: !state.isEnabled,
+                            ),
+                          );
                     },
                   ),
                   Expanded(
@@ -265,11 +261,17 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
               : () {
                   final password = passwordController.text;
 
-                  bloc.add(KeyCreationEvent.create(
-                    name: widget.seedName,
-                    phrase: widget.phrase,
-                    password: password,
-                  ));
+                  bloc.add(
+                    KeyCreationEvent.create(
+                      name: widget.seedName,
+                      phrase: widget.phrase,
+                      password: password,
+                    ),
+                  );
+
+                  if (context.router.routeData.name == NewSeedRouterRoute.name) {
+                    context.router.navigate(const SettingsRouterRoute());
+                  }
                 },
           text: LocaleKeys.actions_confirm.tr(),
         ),

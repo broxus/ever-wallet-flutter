@@ -5,13 +5,13 @@ import '../../../../design/design.dart';
 class WalletButton extends StatelessWidget {
   final String title;
   final VoidCallback? onTap;
-  final String iconAsset;
+  final Widget icon;
 
   const WalletButton({
     Key? key,
     this.onTap,
     required this.title,
-    required this.iconAsset,
+    required this.icon,
   }) : super(key: key);
 
   @override
@@ -34,13 +34,10 @@ class WalletButton extends StatelessWidget {
                   splashColor: CrystalColor.secondary,
                   highlightColor: CrystalColor.secondary,
                   child: Center(
-                    child: Image.asset(
-                      iconAsset,
+                    child: SizedBox(
                       width: 20,
                       height: 20,
-                      gaplessPlayback: true,
-                      color: CrystalColor.secondary,
-                      filterQuality: FilterQuality.high,
+                      child: icon,
                     ),
                   ),
                 ),

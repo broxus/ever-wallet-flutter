@@ -121,7 +121,7 @@ class _CustomTypeAheadFieldState extends State<CustomTypeAheadField> {
         borderSide: BorderSide(
           color: Colors.black12,
         ),
-        borderRadius: BorderRadius.all(Radius.zero),
+        borderRadius: BorderRadius.zero,
         gapPadding: 0,
       );
 
@@ -129,7 +129,7 @@ class _CustomTypeAheadFieldState extends State<CustomTypeAheadField> {
         borderSide: BorderSide(
           color: Colors.red,
         ),
-        borderRadius: BorderRadius.all(Radius.zero),
+        borderRadius: BorderRadius.zero,
         gapPadding: 0,
       );
 }

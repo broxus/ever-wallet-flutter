@@ -112,6 +112,25 @@ extension ElipseValue on String {
   }
 }
 
+extension FormatValue on String {
+  String formatValue() {
+    String addSpaces(String string) => string.replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (match) => '${match[1]},',
+        );
+
+    if (contains('.')) {
+      final values = split('.');
+      final firstPart = addSpaces(values.first);
+      final lastPart = values.last;
+
+      return [firstPart, lastPart].join('.');
+    } else {
+      return addSpaces(this);
+    }
+  }
+}
+
 extension Elipse on String {
   String ellipseAddress() => '${substring(0, 6)}...${substring(length - 4, length)}';
 

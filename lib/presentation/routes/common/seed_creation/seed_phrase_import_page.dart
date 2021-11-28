@@ -13,18 +13,13 @@ import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/action_button.dart';
 import '../../../design/widgets/crystal_title.dart';
-import '../../../design/widgets/custom_app_bar.dart';
+import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_type_ahead_field.dart';
+import '../../../design/widgets/text_field_clear_button.dart';
 import '../../../design/widgets/text_field_index_icon.dart';
-import '../../../design/widgets/text_suffix_icon_button.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';
 import '../../router.gr.dart';
-
-enum _ButtonState {
-  clear,
-  paste,
-}
 
 class SeedPhraseImportPage extends StatefulWidget {
   final String? seedName;
@@ -96,8 +91,11 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
           value: SystemUiOverlayStyle.dark,
           child: UnfocusingGestureDetector(
             child: Scaffold(
-              appBar: CustomAppBar(
-                action: action(),
+              appBar: AppBar(
+                leading: const CustomBackButton(),
+                actions: [
+                  action(),
+                ],
               ),
               body: body(),
             ),
@@ -159,6 +157,8 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
           }
 
           if (words.isEmpty) {
+            if (!mounted) return;
+
             showErrorCrystalFlushbar(
               context,
               message: 'Incorrect words format',
@@ -197,7 +197,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
 
   Widget body() => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16) - const EdgeInsets.only(top: 16),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -283,12 +283,8 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         prefixIcon: TextFieldIndexIcon(
           index: index,
         ),
-        suffixIcon: SuffixIconButton(
-          onPressed: () {
-            controllers[index].clear();
-            Form.of(context)?.validate();
-          },
-          icon: Assets.images.iconCross.svg(),
+        suffixIcon: TextFieldClearButton(
+          controller: controllers[index],
         ),
         validator: (value) => validator(
           value: value,
@@ -394,4 +390,9 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
           text: LocaleKeys.actions_confirm.tr(),
         ),
       );
+}
+
+enum _ButtonState {
+  clear,
+  paste,
 }

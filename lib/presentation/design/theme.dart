@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'design.dart';
 
@@ -12,6 +13,7 @@ final applicationTheme = ThemeData(
     iconTheme: IconThemeData(
       color: CrystalColor.accent,
     ),
+    systemOverlayStyle: SystemUiOverlayStyle.dark,
   ),
 );
 
@@ -20,6 +22,7 @@ abstract class CrystalColor {
 
   static const iosBackground = Color(0xFFF2F2F7);
 
+  static const actionButtonDark = Color(0xFF293166);
   static const background = Color(0xFF060C32);
   static const accentBackground = Color(0xFFFCF6F3);
   static const secondaryBackground = Color.fromRGBO(197, 228, 243, 0.16);

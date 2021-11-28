@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../design/widgets/crystal_title.dart';
-import '../../../design/widgets/custom_app_bar.dart';
+import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 
 class SeedPhraseTypePage extends StatelessWidget {
@@ -18,14 +18,16 @@ class SeedPhraseTypePage extends StatelessWidget {
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
         child: Scaffold(
-          appBar: const CustomAppBar(),
+          appBar: AppBar(
+            leading: const CustomBackButton(),
+          ),
           body: body(),
         ),
       );
 
   Widget body() => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16) - const EdgeInsets.only(top: 16),
           child: Stack(
             fit: StackFit.expand,
             children: [

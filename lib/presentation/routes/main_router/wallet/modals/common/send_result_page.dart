@@ -38,11 +38,13 @@ class _NewSelectWalletTypePageState extends State<SendResultPage> {
   @override
   void initState() {
     super.initState();
-    bloc.add(TonWalletSendEvent.send(
-      address: widget.address,
-      message: widget.message,
-      password: widget.password,
-    ));
+    bloc.add(
+      TonWalletSendEvent.send(
+        address: widget.address,
+        message: widget.message,
+        password: widget.password,
+      ),
+    );
   }
 
   @override

@@ -29,17 +29,20 @@ class ConnectionButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               itemBuilder: (context) => kNetworkPresets
-                  .map((e) => buildPopupMenuItem(
-                        value: e.name,
-                        text: e.name,
-                      ))
+                  .map(
+                    (e) => buildPopupMenuItem(
+                      value: e.name,
+                      text: e.name,
+                    ),
+                  )
                   .toList()
                   .fold(
-                      [],
-                      (previousValue, element) => [
-                            if (previousValue.isNotEmpty) ...[...previousValue, const PopupMenuDivider()],
-                            element
-                          ]),
+                [],
+                (previousValue, element) => [
+                  if (previousValue.isNotEmpty) ...[...previousValue, const PopupMenuDivider()],
+                  element
+                ],
+              ),
               onSelected: (value) => context
                   .read<ConnectionBloc>()
                   .add(ConnectionEvent.updateTransport(kNetworkPresets.firstWhere((e) => e.name == value))),

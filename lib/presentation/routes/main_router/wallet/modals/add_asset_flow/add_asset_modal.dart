@@ -122,26 +122,32 @@ class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateM
               address: widget.address,
               onSave: (List<TokenContractAsset> added, List<TokenContractAsset> removed) {
                 for (final asset in added) {
-                  accountAssetsAdditionBloc.add(AccountAssetsAdditionEvent.add(
-                    address: widget.address,
-                    rootTokenContract: asset.address,
-                  ));
+                  accountAssetsAdditionBloc.add(
+                    AccountAssetsAdditionEvent.add(
+                      address: widget.address,
+                      rootTokenContract: asset.address,
+                    ),
+                  );
                 }
 
                 for (final asset in removed) {
-                  accountAssetsAdditionBloc.add(AccountAssetsAdditionEvent.remove(
-                    address: widget.address,
-                    rootTokenContract: asset.address,
-                  ));
+                  accountAssetsAdditionBloc.add(
+                    AccountAssetsAdditionEvent.remove(
+                      address: widget.address,
+                      rootTokenContract: asset.address,
+                    ),
+                  );
                 }
               },
             ),
             NewAssetLayout(
               controller: newAssetLayoutScrollController,
-              onSave: (String address) => accountAssetsAdditionBloc.add(AccountAssetsAdditionEvent.add(
-                address: widget.address,
-                rootTokenContract: address,
-              )),
+              onSave: (String address) => accountAssetsAdditionBloc.add(
+                AccountAssetsAdditionEvent.add(
+                  address: widget.address,
+                  rootTokenContract: address,
+                ),
+              ),
             ),
           ]
               .map(

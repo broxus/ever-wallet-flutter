@@ -7,6 +7,7 @@ import '../../../../../../domain/blocs/key/key_password_checking_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_subtitle.dart';
+import '../../../../../design/widgets/custom_back_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_text_form_field.dart';
 import '../../../../../design/widgets/text_field_clear_button.dart';
@@ -50,6 +51,7 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
         child: UnfocusingGestureDetector(
           child: Scaffold(
             appBar: AppBar(
+              leading: const CustomBackButton(),
               title: const Text(
                 'Enter password',
                 style: TextStyle(

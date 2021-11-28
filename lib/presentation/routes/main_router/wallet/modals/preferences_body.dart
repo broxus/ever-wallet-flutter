@@ -134,10 +134,12 @@ class _PreferencesBodyState extends State<PreferencesBody> {
           duration: kThemeAnimationDuration,
           child: value.text.trim() != name
               ? GestureDetector(
-                  onTap: () => accountRenamingBloc.add(AccountRenamingEvent.rename(
-                    address: widget.address,
-                    name: value.text,
-                  )),
+                  onTap: () => accountRenamingBloc.add(
+                    AccountRenamingEvent.rename(
+                      address: widget.address,
+                      name: value.text,
+                    ),
+                  ),
                   behavior: HitTestBehavior.opaque,
                   child: child,
                 )

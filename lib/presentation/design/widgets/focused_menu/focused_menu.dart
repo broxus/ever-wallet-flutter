@@ -56,8 +56,8 @@ class FocusedMenuHolder extends StatefulWidget {
 
 class _FocusedMenuHolderState extends State<FocusedMenuHolder> {
   GlobalKey containerKey = GlobalKey();
-  Offset childOffset = const Offset(0, 0);
-  Size childSize = const Size.square(0);
+  Offset childOffset = Offset.zero;
+  Size childSize = Size.zero;
 
   @override
   void didUpdateWidget(covariant FocusedMenuHolder oldWidget) {

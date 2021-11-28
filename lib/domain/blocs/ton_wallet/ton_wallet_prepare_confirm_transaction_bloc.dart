@@ -20,7 +20,8 @@ class TonWalletPrepareConfirmTransactionBloc
 
   @override
   Stream<TonWalletPrepareConfirmTransactionState> mapEventToState(
-      TonWalletPrepareConfirmTransactionEvent event) async* {
+    TonWalletPrepareConfirmTransactionEvent event,
+  ) async* {
     try {
       if (event is _PrepareConfirmTransaction) {
         final tonWallet = _nekotonService.tonWallets.firstWhereOrNull((e) => e.address == event.address);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
+import '../../../../../design/widgets/show_platform_modal_bottom_sheet.dart';
 import 'prepare_token_transfer_page.dart';
 
 Future<void> startTokenSendTransactionFlow({
@@ -8,7 +8,7 @@ Future<void> startTokenSendTransactionFlow({
   required String owner,
   required String rootTokenContract,
 }) =>
-    showCupertinoModalBottomSheet(
+    showPlatformModalBottomSheet(
       context: context,
       builder: (context) => Navigator(
         initialRoute: '/',

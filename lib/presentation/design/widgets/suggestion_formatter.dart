@@ -1,4 +1,4 @@
-part of 'autofill_textfield.dart';
+import 'package:flutter/services.dart';
 
 class SuggestionFormatter extends TextInputFormatter {
   final int minimalLength;

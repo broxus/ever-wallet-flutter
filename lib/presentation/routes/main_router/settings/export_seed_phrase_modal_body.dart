@@ -42,10 +42,12 @@ class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
           }
         },
         child: InputPasswordModalBody(
-          onSubmit: (password) => bloc.add(KeyExportEvent.export(
-            publicKey: widget.publicKey,
-            password: password,
-          )),
+          onSubmit: (password) => bloc.add(
+            KeyExportEvent.export(
+              publicKey: widget.publicKey,
+              password: password,
+            ),
+          ),
           publicKey: widget.publicKey,
         ),
       );

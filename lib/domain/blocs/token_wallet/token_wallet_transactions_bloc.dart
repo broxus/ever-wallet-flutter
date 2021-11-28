@@ -17,6 +17,7 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, List<TokenWalletTransacti
   final NekotonService _nekotonService;
   final TokenWalletTransactionsRepository _tokenWalletTransactionsRepository;
   final _errorsSubject = PublishSubject<Exception>();
+  final _sideEffectsSubject = PublishSubject<bool>();
   StreamSubscription? _streamSubscription;
   StreamSubscription? _onTransactionsFoundSubscription;
   Future<void> Function(TransactionId from)? _preloadTransactions;
@@ -29,6 +30,7 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, List<TokenWalletTransacti
   @override
   Future<void> close() {
     _errorsSubject.close();
+    _sideEffectsSubject.close();
     _onTransactionsFoundSubscription?.cancel();
     return super.close();
   }
@@ -39,6 +41,8 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, List<TokenWalletTransacti
       if (event is _Load) {
         yield const [];
 
+        _sideEffectsSubject.add(true);
+
         final owner = event.owner;
         final rootTokenContract = event.rootTokenContract;
 
@@ -48,11 +52,13 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, List<TokenWalletTransacti
         );
 
         if (tokenWalletTransactions != null) {
-          add(_LocalEvent.update(
-            owner: owner,
-            rootTokenContract: rootTokenContract,
-            transactions: tokenWalletTransactions,
-          ));
+          add(
+            _LocalEvent.update(
+              owner: owner,
+              rootTokenContract: rootTokenContract,
+              transactions: tokenWalletTransactions,
+            ),
+          );
         }
 
         _streamSubscription?.cancel();
@@ -70,32 +76,38 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, List<TokenWalletTransacti
           _onTransactionsFoundSubscription = tokenWalletEvent.onTransactionsFoundStream
               .map((e) => e.where((e) => e.data != null).toList())
               .where((e) => e.isNotEmpty)
-              .listen((event) {
-            final transactions = [...state]
-              ..removeWhere((e) => event.any((el) => e.transaction.id == el.transaction.id))
-              ..addAll(event)
-              ..sort((a, b) => b.transaction.createdAt.compareTo(a.transaction.createdAt));
-
-            add(_LocalEvent.update(
-              owner: owner,
-              rootTokenContract: rootTokenContract,
-              transactions: transactions,
-            ));
-          });
+              .listen(
+                (event) => add(
+                  _LocalEvent.update(
+                    owner: owner,
+                    rootTokenContract: rootTokenContract,
+                    transactions: event,
+                  ),
+                ),
+              );
         });
       } else if (event is _Preload) {
         final prevTransactionId = state.lastOrNull?.transaction.prevTransactionId;
 
         if (prevTransactionId != null) {
+          _sideEffectsSubject.add(true);
+
           await _preloadTransactions?.call(prevTransactionId);
         }
       } else if (event is _Update) {
-        yield event.transactions;
+        final transactions = [...state]
+          ..removeWhere((e) => event.transactions.any((el) => e.transaction.id == el.transaction.id))
+          ..addAll(event.transactions)
+          ..sort((a, b) => b.transaction.createdAt.compareTo(a.transaction.createdAt));
+
+        yield transactions;
+
+        _sideEffectsSubject.add(false);
 
         await _tokenWalletTransactionsRepository.save(
           owner: event.owner,
           rootTokenContract: event.rootTokenContract,
-          tokenWalletTransactions: event.transactions,
+          tokenWalletTransactions: transactions,
         );
       }
     } on Exception catch (err, st) {
@@ -105,6 +117,8 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, List<TokenWalletTransacti
   }
 
   Stream<Exception> get errorsStream => _errorsSubject.stream;
+
+  Stream<bool> get sideEffectsStream => _sideEffectsSubject.stream.distinct();
 }
 
 abstract class _Event {}

@@ -40,12 +40,14 @@ class _NewSelectWalletTypePageState extends State<TokenSendResultPage> {
   @override
   void initState() {
     super.initState();
-    bloc.add(TokenWalletSendEvent.send(
-      owner: widget.owner,
-      rootTokenContract: widget.rootTokenContract,
-      message: widget.message,
-      password: widget.password,
-    ));
+    bloc.add(
+      TokenWalletSendEvent.send(
+        owner: widget.owner,
+        rootTokenContract: widget.rootTokenContract,
+        message: widget.message,
+        password: widget.password,
+      ),
+    );
   }
 
   @override

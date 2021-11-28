@@ -22,13 +22,11 @@ import 'deployment_info_page.dart';
 class PrepareDeployPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
-  final String publicKey;
 
   const PrepareDeployPage({
     Key? key,
     required this.modalContext,
     required this.address,
-    required this.publicKey,
   }) : super(key: key);
 
   @override
@@ -394,7 +392,6 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
         MaterialPageRoute(
           builder: (context) => DeploymentInfoPage(
             modalContext: widget.modalContext,
-            publicKey: widget.publicKey,
             address: widget.address,
             custodians: custodians,
             reqConfirms: reqConfirms,

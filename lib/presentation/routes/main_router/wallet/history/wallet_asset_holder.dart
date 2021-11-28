@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../design/design.dart';
-import '../../../../design/utils.dart';
 
 class WalletAssetHolder extends StatelessWidget {
   final String name;
@@ -49,7 +48,7 @@ class WalletAssetHolder extends StatelessWidget {
                       SizedBox(
                         height: 24,
                         child: Text(
-                          formatValue(balance.toTokens(decimals)),
+                          balance.toTokens(decimals).removeZeroes().formatValue(),
                           style: const TextStyle(
                             fontSize: 18,
                             letterSpacing: 0.5,

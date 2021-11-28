@@ -50,20 +50,27 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                 onTap: value.text.isEmpty
                     ? null
                     : () async {
-                        bloc.add(KeyUpdateEvent.rename(
-                          publicKey: widget.publicKey,
-                          name: value.text,
-                        ));
+                        bloc.add(
+                          KeyUpdateEvent.rename(
+                            publicKey: widget.publicKey,
+                            name: value.text,
+                          ),
+                        );
 
                         final result = await bloc.stream.first;
 
                         if (result is KeyUpdateStateSuccess) {
                           context.router.navigatorKey.currentState?.pop();
+
+                          if (!mounted) return;
+
                           showCrystalFlushbar(
                             context,
                             message: LocaleKeys.rename_key_modal_message_success.tr(),
                           );
                         } else if (result is KeyUpdateStateError) {
+                          if (!mounted) return;
+
                           showErrorCrystalFlushbar(
                             context,
                             message: result.exception.toString(),

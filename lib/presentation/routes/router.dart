@@ -65,7 +65,8 @@ import 'welcome_router/welcome_page.dart';
               name: 'NewSeedRouterRoute',
               page: EmptyRouterPage,
               children: [
-                AdaptiveRoute(page: NewSeedNamePage, initial: true),
+                AdaptiveRoute(page: AddNewSeedPage, initial: true),
+                AdaptiveRoute(page: SeedNamePage),
                 AdaptiveRoute(page: SeedPhraseSavePage),
                 AdaptiveRoute(page: SeedPhraseCheckPage),
                 AdaptiveRoute(page: SeedPhraseImportPage),

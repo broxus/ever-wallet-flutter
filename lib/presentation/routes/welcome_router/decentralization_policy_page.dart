@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../domain/utils/decentralization_policy.dart';
 import '../../design/design.dart';
 import '../../design/widgets/crystal_title.dart';
-import '../../design/widgets/custom_app_bar.dart';
+import '../../design/widgets/custom_back_button.dart';
 import '../../design/widgets/custom_checkbox.dart';
 import '../../design/widgets/custom_elevated_button.dart';
 
@@ -43,7 +43,9 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
         child: Scaffold(
-          appBar: const CustomAppBar(),
+          appBar: AppBar(
+            leading: const CustomBackButton(),
+          ),
           extendBodyBehindAppBar: true,
           body: Stack(
             children: [
@@ -61,7 +63,7 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
 
   Widget body() => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16) - const EdgeInsets.only(top: 16),
           child: Stack(
             fit: StackFit.expand,
             children: [

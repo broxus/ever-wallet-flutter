@@ -49,11 +49,13 @@ class AccountAssetsOptionsBloc extends Bloc<_Event, AccountAssetsOptionsState> {
           _nekotonService.transportStream,
           (a, b) => Tuple2(a, b),
         )
-            .map((event) => event.item1.additionalAssets.entries
-                .where((e) => e.key == event.item2.connectionData.group)
-                .map((e) => e.value.tokenWallets)
-                .expand((e) => e)
-                .toList())
+            .map(
+              (event) => event.item1.additionalAssets.entries
+                  .where((e) => e.key == event.item2.connectionData.group)
+                  .map((e) => e.value.tokenWallets)
+                  .expand((e) => e)
+                  .toList(),
+            )
             .distinct((previous, next) => listEquals(previous, next));
 
         _streamSubscription?.cancel();
@@ -64,7 +66,8 @@ class AccountAssetsOptionsBloc extends Bloc<_Event, AccountAssetsOptionsState> {
           (a, b) => Tuple2(a, b),
         )
             .distinct(
-                (previous, next) => listEquals(previous.item1, next.item1) && listEquals(previous.item2, next.item2))
+          (previous, next) => listEquals(previous.item1, next.item1) && listEquals(previous.item2, next.item2),
+        )
             .listen((value) {
           final added = value.item2.where((e) => value.item1.any((el) => el.rootTokenContract == e.address)).toList()
             ..sort((a, b) => b.address.compareTo(a.address));
@@ -74,10 +77,12 @@ class AccountAssetsOptionsBloc extends Bloc<_Event, AccountAssetsOptionsState> {
               .toList()
             ..sort((a, b) => b.address.compareTo(a.address));
 
-          add(_LocalEvent.update(
-            added: added,
-            available: available,
-          ));
+          add(
+            _LocalEvent.update(
+              added: added,
+              available: available,
+            ),
+          );
         });
       } else if (event is _Update) {
         yield AccountAssetsOptionsState(

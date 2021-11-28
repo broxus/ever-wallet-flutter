@@ -39,10 +39,12 @@ class AccountCreationOptionsBloc extends Bloc<_Event, AccountCreationOptionsStat
             .listen((event) {
           final available = kAvailableWallets.where((e) => !event.contains(e)).toList();
 
-          add(_LocalEvent.update(
-            added: event,
-            available: available,
-          ));
+          add(
+            _LocalEvent.update(
+              added: event,
+              available: available,
+            ),
+          );
         });
       } else if (event is _Update) {
         yield AccountCreationOptionsState(

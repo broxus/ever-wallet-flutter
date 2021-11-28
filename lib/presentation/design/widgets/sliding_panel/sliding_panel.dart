@@ -70,43 +70,43 @@ class SlidingUpPanel extends StatefulWidget {
 
   final SlideDirection slideDirection;
 
-  const SlidingUpPanel(
-      {Key? key,
-      this.panel,
-      this.panelBuilder,
-      this.body,
-      this.collapsed,
-      this.minHeight = 100,
-      this.maxHeight = 500,
-      this.snapPoint,
-      this.border,
-      this.borderRadius,
-      this.boxShadow = const <BoxShadow>[
-        BoxShadow(
-          blurRadius: 8,
-          color: Color.fromRGBO(0, 0, 0, 0.25),
-        )
-      ],
-      this.color = Colors.white,
-      this.padding,
-      this.margin,
-      this.renderPanelSheet = true,
-      this.panelSnapping = true,
-      this.controller,
-      this.backdropEnabled = false,
-      this.backdropColor = Colors.black,
-      this.backdropOpacity = 0.5,
-      this.backdropTapClosesPanel = true,
-      this.onPanelSlide,
-      this.onPanelOpened,
-      this.onPanelClosed,
-      this.parallaxEnabled = false,
-      this.parallaxOffset = 0.1,
-      this.isDraggable = true,
-      this.slideDirection = SlideDirection.up,
-      this.header,
-      this.footer})
-      : assert(panel != null || panelBuilder != null),
+  const SlidingUpPanel({
+    Key? key,
+    this.panel,
+    this.panelBuilder,
+    this.body,
+    this.collapsed,
+    this.minHeight = 100,
+    this.maxHeight = 500,
+    this.snapPoint,
+    this.border,
+    this.borderRadius,
+    this.boxShadow = const <BoxShadow>[
+      BoxShadow(
+        blurRadius: 8,
+        color: Color.fromRGBO(0, 0, 0, 0.25),
+      )
+    ],
+    this.color = Colors.white,
+    this.padding,
+    this.margin,
+    this.renderPanelSheet = true,
+    this.panelSnapping = true,
+    this.controller,
+    this.backdropEnabled = false,
+    this.backdropColor = Colors.black,
+    this.backdropOpacity = 0.5,
+    this.backdropTapClosesPanel = true,
+    this.onPanelSlide,
+    this.onPanelOpened,
+    this.onPanelClosed,
+    this.parallaxEnabled = false,
+    this.parallaxOffset = 0.1,
+    this.isDraggable = true,
+    this.slideDirection = SlideDirection.up,
+    this.header,
+    this.footer,
+  })  : assert(panel != null || panelBuilder != null),
         assert(0 <= backdropOpacity && backdropOpacity <= 1),
         assert(snapPoint == null || 0 < snapPoint && snapPoint < 1),
         super(key: key);
@@ -132,9 +132,11 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
     final initialState = widget.controller?.initialState ?? PanelState.closed;
 
     _ac = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200), value: initialState != PanelState.opened ? 0 : 1)
-      ..addListener(() {
-        if (widget.onPanelSlide != null) widget.onPanelSlide!(_ac.value);
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+      value: initialState != PanelState.opened ? 0 : 1,
+    )..addListener(() {
+        if (widget.onPanelSlide != null) widget.onPanelSlide?.call(_ac.value);
 
         if (widget.onPanelOpened != null && _ac.value == 1) widget.onPanelOpened!();
 
@@ -185,14 +187,15 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
                 : null,
             onTap: widget.backdropTapClosesPanel ? () => _close() : null,
             child: AnimatedBuilder(
-                animation: _ac,
-                builder: (context, _) {
-                  return Container(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    color: _ac.value == 0 ? null : widget.backdropColor.withOpacity(widget.backdropOpacity * _ac.value),
-                  );
-                }),
+              animation: _ac,
+              builder: (context, _) {
+                return Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  color: _ac.value == 0 ? null : widget.backdropColor.withOpacity(widget.backdropOpacity * _ac.value),
+                );
+              },
+            ),
           ),
         _gestureHandler(
           child: AnimatedBuilder(
@@ -381,13 +384,14 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
 
   void _flingPanelToPosition(double targetPos, double velocity) {
     final Simulation simulation = SpringSimulation(
-        SpringDescription.withDampingRatio(
-          mass: 1,
-          stiffness: 500,
-        ),
-        _ac.value,
-        targetPos,
-        velocity);
+      SpringDescription.withDampingRatio(
+        mass: 1,
+        stiffness: 500,
+      ),
+      _ac.value,
+      targetPos,
+      velocity,
+    );
 
     _ac.animateWith(simulation);
   }

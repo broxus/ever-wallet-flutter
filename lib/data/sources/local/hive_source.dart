@@ -9,7 +9,7 @@ import '../../dtos/token_contract_asset_dto.dart';
 import '../../dtos/token_wallet_info_dto.dart';
 import '../../dtos/token_wallet_transaction_with_data_dto.dart';
 import '../../dtos/ton_wallet_info_dto.dart';
-import '../../dtos/ton_wallet_transactions_dto.dart';
+import '../../dtos/ton_wallet_transaction_with_data_dto.dart';
 
 @preResolve
 @lazySingleton
@@ -28,7 +28,7 @@ class HiveSource {
   late final Box<TokenContractAssetDto> _tokenContractAssetsBox;
   late final Box<TonWalletInfoDto> _tonWalletInfosBox;
   late final Box<TokenWalletInfoDto> _tokenWalletInfosBox;
-  late final Box<TonWalletTransactionsDto> _tonWalletTransactionsBox;
+  late final Box<List> _tonWalletTransactionsBox;
   late final Box<List> _tokenWalletTransactionsBox;
 
   @factoryMethod
@@ -65,7 +65,9 @@ class HiveSource {
           .firstWhereOrNull((e) => e.owner == owner && e.symbol.rootTokenContract == rootTokenContract);
 
   Future<void> saveTokenWalletInfo(TokenWalletInfoDto tokenWalletInfo) => _tokenWalletInfosBox.put(
-      tokenWalletInfo.owner.hashCode ^ tokenWalletInfo.symbol.rootTokenContract.hashCode, tokenWalletInfo);
+        tokenWalletInfo.owner.hashCode ^ tokenWalletInfo.symbol.rootTokenContract.hashCode,
+        tokenWalletInfo,
+      );
 
   Future<void> removeTokenWalletInfo({
     required String owner,
@@ -75,11 +77,15 @@ class HiveSource {
 
   Future<void> clearTokenWalletInfos() => _tokenWalletInfosBox.clear();
 
-  TonWalletTransactionsDto? getTonWalletTransactions(String address) => _tonWalletTransactionsBox.get(address.hashCode);
+  List<TonWalletTransactionWithDataDto>? getTonWalletTransactions(String address) => _tonWalletTransactionsBox
+      .get(address.hashCode)
+      ?.where((e) => e != null)
+      .toList()
+      .cast<TonWalletTransactionWithDataDto>();
 
   Future<void> saveTonWalletTransactions({
+    required List<TonWalletTransactionWithDataDto> tonWalletTransactions,
     required String address,
-    required TonWalletTransactionsDto tonWalletTransactions,
   }) =>
       _tonWalletTransactionsBox.put(address.hashCode, tonWalletTransactions);
 
@@ -147,7 +153,7 @@ class HiveSource {
     _tokenContractAssetsBox = await Hive.openBox<TokenContractAssetDto>(_tokenContractAssetsBoxName);
     _tonWalletInfosBox = await Hive.openBox<TonWalletInfoDto>(_tonWalletInfosBoxName);
     _tokenWalletInfosBox = await Hive.openBox<TokenWalletInfoDto>(_tokenWalletInfosBoxName);
-    _tonWalletTransactionsBox = await Hive.openBox<TonWalletTransactionsDto>(_tonWalletTransactionsBoxName);
+    _tonWalletTransactionsBox = await Hive.openBox<List>(_tonWalletTransactionsBoxName);
     _tokenWalletTransactionsBox = await Hive.openBox<List>(_tokenWalletTransactionsBoxName);
   }
 }

@@ -57,10 +57,12 @@ Future<String?> showSendMessageDialog(
     final biometryPasswordDataBloc = getIt.get<BiometryGetPasswordBloc>();
 
     if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-      biometryPasswordDataBloc.add(BiometryGetPasswordEvent.get(
-        localizedReason: 'Please authenticate to interact with wallet',
-        publicKey: publicKey,
-      ));
+      biometryPasswordDataBloc.add(
+        BiometryGetPasswordEvent.get(
+          localizedReason: 'Please authenticate to interact with wallet',
+          publicKey: publicKey,
+        ),
+      );
 
       final state = await biometryPasswordDataBloc.stream.firstWhere(
         (e) => e.maybeWhen(
@@ -118,10 +120,12 @@ Future<String?> showCallContractMethodDialog(
     final biometryPasswordDataBloc = getIt.get<BiometryGetPasswordBloc>();
 
     if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-      biometryPasswordDataBloc.add(BiometryGetPasswordEvent.get(
-        localizedReason: 'Please authenticate to interact with wallet',
-        publicKey: selectedPublicKey,
-      ));
+      biometryPasswordDataBloc.add(
+        BiometryGetPasswordEvent.get(
+          localizedReason: 'Please authenticate to interact with wallet',
+          publicKey: selectedPublicKey,
+        ),
+      );
 
       final state = await biometryPasswordDataBloc.stream.firstWhere(
         (e) => e.maybeWhen(

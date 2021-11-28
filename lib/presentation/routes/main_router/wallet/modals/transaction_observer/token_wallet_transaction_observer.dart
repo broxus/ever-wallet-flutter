@@ -7,7 +7,6 @@ import '../../../../../../../../../../domain/utils/explorer.dart';
 import '../../../../../../../../../../domain/utils/transaction_data.dart';
 import '../../../../../../../../../../domain/utils/transaction_time.dart';
 import '../../../../../design/design.dart';
-import '../../../../../design/utils.dart';
 import '../../../../../design/widgets/crystal_bottom_sheet.dart';
 
 class TokenWalletTransactionObserver extends StatefulWidget {
@@ -48,10 +47,9 @@ class TokenWalletTransactionObserver extends StatefulWidget {
 
   static Future<void> open({
     required BuildContext context,
+    required TokenWalletTransactionWithData transaction,
     required String currency,
     required int decimals,
-    required Transaction transaction,
-    required TokenWalletTransaction data,
     Widget? icon,
   }) =>
       showCrystalBottomSheet(
@@ -62,8 +60,8 @@ class TokenWalletTransactionObserver extends StatefulWidget {
         body: TokenWalletTransactionObserver._(
           currency: currency,
           decimals: decimals,
-          transaction: transaction,
-          data: data,
+          transaction: transaction.transaction,
+          data: transaction.data!,
           icon: icon,
         ),
       );
@@ -129,7 +127,7 @@ class _TokenWalletTransactionObserverState extends State<TokenWalletTransactionO
                       title: LocaleKeys.fields_amount.tr(),
                       value: LocaleKeys.wallet_history_modal_holder_value.tr(
                         args: [
-                          '${isOutgoing ? '- ' : ''}${formatValue(widget.value.toTokens(widget.decimals))}',
+                          '${isOutgoing ? '- ' : ''}${widget.value.toTokens(widget.decimals).removeZeroes().formatValue()}',
                           widget.currency,
                         ],
                       ),
@@ -139,7 +137,7 @@ class _TokenWalletTransactionObserverState extends State<TokenWalletTransactionO
                       title: LocaleKeys.fields_blockchain_fee.tr(),
                       value: LocaleKeys.wallet_history_modal_holder_fee.tr(
                         args: [
-                          formatValue(widget.transaction.totalFees.toTokens()),
+                          widget.transaction.totalFees.toTokens().removeZeroes().formatValue(),
                           'TON',
                         ],
                       ),

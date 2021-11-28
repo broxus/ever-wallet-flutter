@@ -12,6 +12,7 @@ import '../../../../../../domain/blocs/token_wallet/token_wallet_prepare_transfe
 import '../../../../../../domain/models/token_wallet_info.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
+import '../../../../../design/widgets/custom_back_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/sectioned_card.dart';
 import '../../../../../design/widgets/sectioned_card_section.dart';
@@ -25,6 +26,7 @@ class TokenSendInfoPage extends StatefulWidget {
   final String destination;
   final String amount;
   final bool notifyReceiver;
+  final String? comment;
 
   const TokenSendInfoPage({
     Key? key,
@@ -34,6 +36,7 @@ class TokenSendInfoPage extends StatefulWidget {
     required this.destination,
     required this.amount,
     required this.notifyReceiver,
+    this.comment,
   }) : super(key: key);
 
   @override
@@ -61,6 +64,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
         destination: widget.destination,
         amount: widget.amount,
         notifyReceiver: widget.notifyReceiver,
+        payload: widget.comment,
       ),
     );
   }
@@ -92,6 +96,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
 
   Widget scaffold() => Scaffold(
         appBar: AppBar(
+          leading: const CustomBackButton(),
           title: const Text(
             'Confirm transaction',
             style: TextStyle(
@@ -139,6 +144,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
           recipient(),
           amount(),
           fee(),
+          if (widget.comment != null) comment(),
           notifyReceiver(),
         ],
       );
@@ -195,6 +201,11 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
             );
           },
         ),
+      );
+
+  Widget comment() => SectionedCardSection(
+        title: 'Comment',
+        subtitle: widget.comment,
       );
 
   Widget notifyReceiver() => SectionedCardSection(

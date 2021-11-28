@@ -5,7 +5,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../../../../../domain/models/transaction_type.dart';
 import '../../../../../../../../domain/utils/transaction_time.dart';
 import '../../../../design/design.dart';
-import '../../../../design/utils.dart';
 import '../modals/transaction_observer/ton_wallet_transaction_observer.dart';
 
 class TonWalletTransactionHolder extends StatelessWidget {
@@ -87,10 +86,10 @@ class TonWalletTransactionHolder extends StatelessWidget {
       );
 
   Widget _getValueTitle() {
-    final formattedValue = value.toTokens();
+    final formattedValue = value.toTokens().removeZeroes().formatValue();
 
     return Text(
-      isOutgoing ? '- ${formatValue(formattedValue)} $currency' : '${formatValue(formattedValue)} $currency',
+      isOutgoing ? '- $formattedValue $currency' : '$formattedValue $currency',
       softWrap: false,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
@@ -117,7 +116,7 @@ class TonWalletTransactionHolder extends StatelessWidget {
       );
 
   Widget _getFees() => Text(
-        'Fees: ${formatValue(transaction.totalFees.toTokens())} TON',
+        'Fees: ${transaction.totalFees.toTokens().removeZeroes().formatValue()} TON',
         style: const TextStyle(
           color: CrystalColor.fontSecondaryDark,
         ),
@@ -147,7 +146,7 @@ class TonWalletTransactionHolder extends StatelessWidget {
       : const SizedBox();
 
   Widget _getDate() => Text(
-        DateFormat('MMM d, H:mm').format(transaction.createdAt.toDateTime()).toString(),
+        DateFormat('MMM d, H:mm').format(transaction.createdAt.toDateTime()),
         style: const TextStyle(
           color: CrystalColor.fontDark,
         ),

@@ -10,11 +10,11 @@ import '../../../../domain/utils/phrase_check.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/animated_offstage.dart';
 import '../../../design/widgets/crystal_title.dart';
-import '../../../design/widgets/custom_app_bar.dart';
+import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_type_ahead_field.dart';
+import '../../../design/widgets/text_field_clear_button.dart';
 import '../../../design/widgets/text_field_index_icon.dart';
-import '../../../design/widgets/text_suffix_icon_button.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';
 import '../../router.gr.dart';
 
@@ -64,7 +64,9 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
         value: SystemUiOverlayStyle.dark,
         child: UnfocusingGestureDetector(
           child: Scaffold(
-            appBar: const CustomAppBar(),
+            appBar: AppBar(
+              leading: const CustomBackButton(),
+            ),
             body: body(),
           ),
         ),
@@ -72,7 +74,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
 
   Widget body() => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16) - const EdgeInsets.only(top: 16),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -144,12 +146,8 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
           FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]')),
           SuggestionFormatter(suggestions: getHints),
         ],
-        suffixIcon: SuffixIconButton(
-          onPressed: () {
-            controllers[index].clear();
-            Form.of(context)?.validate();
-          },
-          icon: Assets.images.iconCross.svg(),
+        suffixIcon: TextFieldClearButton(
+          controller: controllers[index],
         ),
         suggestionsCallback: (pattern) => suggestionsCallback(
           pattern: pattern,
@@ -233,10 +231,12 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
           duration: const Duration(milliseconds: 300),
           offstage: value,
           child: CustomElevatedButton(
-            onPressed: () => context.router.push(PasswordCreationRoute(
-              phrase: widget.phrase,
-              seedName: widget.seedName,
-            )),
+            onPressed: () => context.router.push(
+              PasswordCreationRoute(
+                phrase: widget.phrase,
+                seedName: widget.seedName,
+              ),
+            ),
             text: LocaleKeys.actions_confirm.tr(),
           ),
         ),

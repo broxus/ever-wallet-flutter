@@ -71,10 +71,12 @@ class AccountAssetsBloc extends Bloc<_Event, AccountAssetsState> {
           _tonAssetsRepository.assetsStream,
           (a, b) => Tuple2(a, b),
         )
-            .distinct((previous, next) =>
-                previous.item1.item1 == next.item1.item1 &&
-                listEquals(previous.item1.item2, next.item1.item2) &&
-                listEquals(previous.item2, next.item2))
+            .distinct(
+          (previous, next) =>
+              previous.item1.item1 == next.item1.item1 &&
+              listEquals(previous.item1.item2, next.item1.item2) &&
+              listEquals(previous.item2, next.item2),
+        )
             .listen((value) {
           final tonWalletAsset = value.item1.item1;
           final tokenContractAssets = value.item2
@@ -82,10 +84,12 @@ class AccountAssetsBloc extends Bloc<_Event, AccountAssetsState> {
               .toList()
             ..sort((a, b) => b.address.compareTo(a.address));
 
-          add(_LocalEvent.update(
-            tonWalletAsset: tonWalletAsset,
-            tokenContractAssets: tokenContractAssets,
-          ));
+          add(
+            _LocalEvent.update(
+              tonWalletAsset: tonWalletAsset,
+              tokenContractAssets: tokenContractAssets,
+            ),
+          );
         });
       } else if (event is _Update) {
         yield AccountAssetsState(

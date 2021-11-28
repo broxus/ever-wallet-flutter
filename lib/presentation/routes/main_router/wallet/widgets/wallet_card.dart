@@ -15,7 +15,6 @@ import '../../../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/extension.dart';
-import '../../../../design/utils.dart';
 import '../../../../design/widgets/crystal_bottom_sheet.dart';
 import '../modals/account_removement_body.dart';
 import '../modals/preferences_body.dart';
@@ -315,9 +314,7 @@ class _WalletCardState extends State<WalletCard> {
       );
 
   Widget buildBalance(String balance) {
-    final flooredBalance = balance.toTokens().floorValue();
-
-    final formattedString = formatValue(flooredBalance);
+    final formattedString = balance.toTokens().floorValue().removeZeroes().formatValue();
 
     return AutoSizeText.rich(
       TextSpan(

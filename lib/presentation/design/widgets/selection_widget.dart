@@ -128,7 +128,7 @@ class _SelectionWidgetState extends State<SelectionWidget> {
         child: ValueListenableBuilder<bool>(
           valueListenable: _selection,
           builder: (context, selected, _) => TweenAnimationBuilder<double>(
-            duration: const Duration(),
+            duration: Duration.zero,
             tween: Tween(end: selected ? 1 : 0),
             builder: (context, opacity, child) {
               final color = widget.configuration.highlightColor;
@@ -176,7 +176,7 @@ class _SelectionWidgetState extends State<SelectionWidget> {
           child: ValueListenableBuilder<bool>(
             valueListenable: _selection,
             builder: (context, value, child) => AnimatedOpacity(
-              duration: const Duration(),
+              duration: Duration.zero,
               opacity: value ? 1 : 0,
               child: child,
             ),

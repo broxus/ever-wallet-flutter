@@ -31,10 +31,12 @@ class _PreloadTransactionsListenerState extends State<PreloadTransactionsListene
           final maxScrollExtent = notification.metrics.maxScrollExtent;
           final prevTransactionId = widget.prevTransactionId;
 
-          if (pixels > maxScrollExtent && prevTransactionId != lastPrevTransactionId) {
+          if (pixels > maxScrollExtent - MediaQuery.of(context).size.longestSide / 8 &&
+              prevTransactionId != lastPrevTransactionId) {
             lastPrevTransactionId = prevTransactionId;
             widget.onLoad();
           }
+
           return false;
         },
         child: widget.child,

@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,9 +5,12 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../domain/blocs/account/account_creation_bloc.dart';
 import '../../../../../../../../injection.dart';
-import '../../../../design/design.dart';
-import '../../../../design/utils.dart';
-import '../../../../design/widgets/crystal_scaffold.dart';
+import '../../../../design/widgets/crystal_title.dart';
+import '../../../../design/widgets/custom_back_button.dart';
+import '../../../../design/widgets/custom_elevated_button.dart';
+import '../../../../design/widgets/custom_text_form_field.dart';
+import '../../../../design/widgets/text_field_clear_button.dart';
+import '../../../../design/widgets/unfocusing_gesture_detector.dart';
 import '../../../router.gr.dart';
 
 class NewAccountNamePage extends StatefulWidget {
@@ -23,80 +24,89 @@ class NewAccountNamePage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _NewAccountNamePageState createState() => _NewAccountNamePageState();
+  State<NewAccountNamePage> createState() => _NewAccountNamePageState();
 }
 
 class _NewAccountNamePageState extends State<NewAccountNamePage> {
-  final nameController = TextEditingController();
-  final accountCreationBloc = getIt.get<AccountCreationBloc>();
+  final controller = TextEditingController();
+  final bloc = getIt.get<AccountCreationBloc>();
 
   @override
   void dispose() {
-    nameController.dispose();
-    accountCreationBloc.close();
+    controller.dispose();
+    bloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
-        child: CrystalScaffold(
-          onScaffoldTap: FocusScope.of(context).unfocus,
-          headline: 'Name new account',
-          body: Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: buildBody(),
+        child: UnfocusingGestureDetector(
+          child: Scaffold(
+            appBar: AppBar(
+              leading: const CustomBackButton(),
+            ),
+            body: body(),
           ),
         ),
       );
 
-  Widget buildBody() => Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ),
-        child: Stack(
-          children: [
-            CrystalTextFormField(
-              controller: nameController,
-              hintText: 'Name',
-              keyboardType: TextInputType.text,
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: buildActions(),
-            ),
-          ],
+  Widget body() => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16) - const EdgeInsets.only(top: 16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 8),
+                    title(),
+                    const SizedBox(height: 32),
+                    field(),
+                  ],
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    submitButton(),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       );
 
-  Widget buildActions() => ValueListenableBuilder<TextEditingValue>(
-        valueListenable: nameController,
-        builder: (BuildContext context, TextEditingValue value, Widget? child) {
-          final double bottomPadding = math.max(getKeyboardInsetsBottom(context), 0) + 12;
+  Widget title() => const CrystalTitle(
+        text: 'Name new account',
+      );
 
-          return AnimatedPadding(
-            curve: Curves.decelerate,
-            duration: kThemeAnimationDuration,
-            padding: EdgeInsets.only(
-              bottom: bottomPadding,
-            ),
-            child: CrystalButton(
-              text: 'Next',
-              onTap: () => onConfirm(value.text.isNotEmpty ? value.text : null),
+  Widget field() => CustomTextFormField(
+        name: 'name',
+        controller: controller,
+        hintText: 'Enter the name...',
+        suffixIcon: TextFieldClearButton(
+          controller: controller,
+        ),
+      );
+
+  Widget submitButton() => CustomElevatedButton(
+        onPressed: () {
+          bloc.add(
+            AccountCreationEvent.create(
+              name: controller.text.isNotEmpty ? controller.text : widget.walletType.describe(),
+              publicKey: widget.publicKey,
+              walletType: widget.walletType,
             ),
           );
+
+          context.router.navigate(const WalletRouterRoute());
         },
+        text: 'Submit',
       );
-
-  void onConfirm([String? name]) {
-    FocusScope.of(context).unfocus();
-
-    accountCreationBloc.add(AccountCreationEvent.create(
-      name: name ?? widget.walletType.describe(),
-      publicKey: widget.publicKey,
-      walletType: widget.walletType,
-    ));
-
-    context.router.navigate(const WalletRouterRoute());
-  }
 }

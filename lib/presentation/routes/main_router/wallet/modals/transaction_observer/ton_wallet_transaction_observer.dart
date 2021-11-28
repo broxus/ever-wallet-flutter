@@ -8,7 +8,6 @@ import '../../../../../../../../../../domain/utils/explorer.dart';
 import '../../../../../../../../../../domain/utils/transaction_data.dart';
 import '../../../../../../../../../../domain/utils/transaction_time.dart';
 import '../../../../../design/design.dart';
-import '../../../../../design/utils.dart';
 import '../../../../../design/widgets/crystal_bottom_sheet.dart';
 
 class TonWalletTransactionObserver extends StatefulWidget {
@@ -112,7 +111,7 @@ class _TonWalletTransactionObserverState extends State<TonWalletTransactionObser
                         title: LocaleKeys.fields_amount.tr(),
                         value: LocaleKeys.wallet_history_modal_holder_value.tr(
                           args: [
-                            '${widget.isOutgoing ? '- ' : ''}${formatValue(widget.value.toTokens())}',
+                            '${widget.isOutgoing ? '- ' : ''}${widget.value.toTokens().removeZeroes().formatValue()}',
                             widget.currency,
                           ],
                         ),
@@ -122,7 +121,7 @@ class _TonWalletTransactionObserverState extends State<TonWalletTransactionObser
                         title: LocaleKeys.fields_blockchain_fee.tr(),
                         value: LocaleKeys.wallet_history_modal_holder_fee.tr(
                           args: [
-                            formatValue(widget.transaction.totalFees.toTokens()),
+                            widget.transaction.totalFees.toTokens().removeZeroes().formatValue(),
                             'TON',
                           ],
                         ),

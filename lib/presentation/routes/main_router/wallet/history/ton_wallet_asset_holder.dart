@@ -6,7 +6,8 @@ import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dar
 import '../../../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../../../../injection.dart';
 import '../../../../design/design.dart';
-import '../modals/asset_observer/ton_asset_observer.dart';
+import '../../main_router_page.dart';
+import '../modals/ton_asset_info/show_ton_asset_info.dart';
 import 'wallet_asset_holder.dart';
 
 class TonWalletAssetHolder extends StatefulWidget {
@@ -53,8 +54,8 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
           decimals: kTonDecimals,
           icon: Assets.images.ton.svg(),
           onTap: state != null
-              ? () => TonAssetObserver.open(
-                    context: context,
+              ? () => showTonAssetInfo(
+                    context: mainRouterPageKey.currentContext ?? context,
                     address: state.address,
                   )
               : () {},

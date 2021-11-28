@@ -46,9 +46,11 @@ class CustomOutlinedButton extends StatelessWidget {
               style: ButtonStyle(
                 padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
                 elevation: MaterialStateProperty.all(0),
-                shape: MaterialStateProperty.all(const BeveledRectangleBorder(
-                  side: BorderSide(color: CrystalColor.accent),
-                )),
+                shape: MaterialStateProperty.all(
+                  const BeveledRectangleBorder(
+                    side: BorderSide(color: CrystalColor.accent),
+                  ),
+                ),
                 foregroundColor: MaterialStateProperty.all(CrystalColor.accent),
                 side: MaterialStateProperty.all(
                   BorderSide(

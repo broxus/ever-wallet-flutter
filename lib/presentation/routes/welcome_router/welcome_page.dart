@@ -65,11 +65,11 @@ class WelcomePage extends StatelessWidget {
         ),
       );
 
-  Widget title() => CrystalSubtitle(
+  Widget title() => CrystalTitle(
         text: LocaleKeys.welcome_screen_title.tr(),
       );
 
-  Widget subtitle() => CrystalTitle(
+  Widget subtitle() => CrystalSubtitle(
         text: LocaleKeys.welcome_screen_subtitle.tr(),
       );
 

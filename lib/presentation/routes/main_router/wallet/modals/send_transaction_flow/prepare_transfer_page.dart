@@ -28,13 +28,11 @@ import 'send_info_page.dart';
 class PrepareTransferPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
-  final String publicKey;
 
   const PrepareTransferPage({
     Key? key,
     required this.modalContext,
     required this.address,
-    required this.publicKey,
   }) : super(key: key);
 
   @override
@@ -301,7 +299,6 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         enableSuggestions: false,
         hintText: 'Comment...',
         suffixIcon: TextFieldClearButton(controller: commentController),
-        onSubmitted: (value) => FocusScope.of(context).nextFocus(),
       );
 
   Widget submitButton() => ValueListenableBuilder<bool>(
@@ -322,7 +319,6 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         builder: (context) => SendInfoPage(
           modalContext: widget.modalContext,
           address: widget.address,
-          publicKey: widget.publicKey,
           destination: destination,
           amount: amount,
           comment: comment,

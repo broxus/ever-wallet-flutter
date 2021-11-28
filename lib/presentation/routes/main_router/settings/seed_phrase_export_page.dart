@@ -1,10 +1,11 @@
-import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../design/design.dart';
-import '../../../design/widgets/crystal_button.dart';
-import '../../../design/widgets/crystal_scaffold.dart';
+import '../../../design/widgets/crystal_title.dart';
+import '../../../design/widgets/custom_back_button.dart';
+import '../../../design/widgets/custom_outlined_button.dart';
+import '../../../design/widgets/unfocusing_gesture_detector.dart';
 
 class SeedPhraseExportPage extends StatefulWidget {
   final List<String> phrase;
@@ -15,57 +16,123 @@ class SeedPhraseExportPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _SeedPhraseExportPageState createState() => _SeedPhraseExportPageState();
+  State<SeedPhraseExportPage> createState() => _SeedPhraseExportPageState();
 }
 
 class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
-  final _scrollController = ScrollController();
-
   @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
+  Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: UnfocusingGestureDetector(
+          child: Scaffold(
+            appBar: AppBar(
+              leading: const CustomBackButton(),
+            ),
+            body: body(),
+          ),
+        ),
+      );
 
-  @override
-  Widget build(BuildContext context) => CrystalScaffold(
-        headline: LocaleKeys.seed_phrase_save_screen_title.tr(),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+  Widget body() => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16) - const EdgeInsets.only(top: 16),
           child: Stack(
+            fit: StackFit.expand,
             children: [
-              buildBody(),
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 8),
+                    title(),
+                    const SizedBox(height: 32),
+                    words(),
+                  ],
+                ),
+              ),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: buildActions(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    copyButton(),
+                  ],
+                ),
               ),
             ],
           ),
         ),
       );
 
-  Widget buildBody() => FadingEdgeScrollView.fromSingleChildScrollView(
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          padding: const EdgeInsets.only(
-            top: 20,
-            bottom: 28.0 + CrystalButton.kHeight,
+  Widget title() => CrystalTitle(
+        text: LocaleKeys.seed_phrase_save_screen_title.tr(),
+      );
+
+  Widget words() => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: column(
+              initial: 0,
+              end: widget.phrase.length ~/ 2,
+            ),
           ),
-          child: WordsGridWidget(widget.phrase),
+          Expanded(
+            child: column(
+              initial: widget.phrase.length ~/ 2,
+              end: widget.phrase.length,
+            ),
+          ),
+        ],
+      );
+
+  Widget column({
+    required int initial,
+    required int end,
+  }) =>
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = initial; i < end; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  index(i),
+                  Expanded(
+                    child: word(i),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      );
+
+  Widget index(int i) => Text(
+        '${i + 1}. ',
+        style: const TextStyle(
+          fontSize: 16,
+          color: Colors.black26,
         ),
       );
 
-  Widget buildActions() => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: CrystalButton(
-          type: CrystalButtonType.outline,
-          text: LocaleKeys.seed_phrase_save_screen_action_copy.tr(),
-          onTap: () => onCopyPhrase(),
+  Widget word(int i) => Text(
+        widget.phrase[i],
+        style: const TextStyle(
+          fontSize: 16,
         ),
       );
 
-  Future<void> onCopyPhrase() async {
+  Widget copyButton() => CustomOutlinedButton(
+        onPressed: onPressed,
+        text: LocaleKeys.seed_phrase_save_screen_action_copy.tr(),
+      );
+
+  Future<void> onPressed() async {
     await Clipboard.setData(ClipboardData(text: widget.phrase.join(' ')));
+
+    if (!mounted) return;
 
     showCrystalFlushbar(
       context,

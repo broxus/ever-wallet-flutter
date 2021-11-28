@@ -34,6 +34,7 @@ class TokenWalletPrepareTransferBloc extends Bloc<TokenWalletPrepareTransferEven
           destination: repackedDestination,
           tokens: event.amount,
           notifyReceiver: event.notifyReceiver,
+          payload: event.payload,
         );
 
         yield TokenWalletPrepareTransferState.success(message);
@@ -53,6 +54,7 @@ class TokenWalletPrepareTransferEvent with _$TokenWalletPrepareTransferEvent {
     required String destination,
     required String amount,
     required bool notifyReceiver,
+    String? payload,
   }) = _PrepareTransfer;
 }
 

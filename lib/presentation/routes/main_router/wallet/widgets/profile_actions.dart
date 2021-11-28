@@ -11,7 +11,7 @@ import '../../../../design/widgets/crystal_bottom_sheet.dart';
 import '../../main_router_page.dart';
 import '../modals/add_asset_flow/add_asset_modal.dart';
 import '../modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
-import '../modals/receive_modal.dart';
+import '../modals/receive_modal/show_receive_modal.dart';
 import '../modals/send_transaction_flow/start_send_transaction_flow.dart';
 import 'wallet_button.dart';
 
@@ -73,22 +73,24 @@ class _ProfileActionsState extends State<ProfileActions> {
               );
             },
             title: LocaleKeys.wallet_screen_actions_add_asset.tr(),
-            iconAsset: Assets.images.iconAdd.path,
+            icon: Image.asset(
+              Assets.images.iconAdd.path,
+              color: CrystalColor.secondary,
+            ),
           ),
           BlocBuilder<AccountInfoBloc, AssetsList?>(
             bloc: accountInfoBloc,
             builder: (context, state) => WalletButton(
               onTap: state != null
-                  ? () => showCrystalBottomSheet(
-                        context,
-                        title: state.name.capitalize,
-                        body: ReceiveModalBody(
-                          address: state.address,
-                        ),
+                  ? () => showReceiveModal(
+                        context: mainRouterPageKey.currentContext ?? context,
+                        address: state.address,
                       )
                   : null,
               title: LocaleKeys.actions_receive.tr(),
-              iconAsset: Assets.images.iconReceive.path,
+              icon: Assets.images.iconReceive.svg(
+                color: CrystalColor.secondary,
+              ),
             ),
           ),
           BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
@@ -97,21 +99,23 @@ class _ProfileActionsState extends State<ProfileActions> {
                 ? !state.details.requiresSeparateDeploy || state.contractState.isDeployed
                     ? WalletButton(
                         onTap: () => startSendTransactionFlow(
-                          context: context,
+                          context: mainRouterPageKey.currentContext ?? context,
                           address: state.address,
-                          publicKey: state.publicKey,
                         ),
                         title: LocaleKeys.actions_send.tr(),
-                        iconAsset: Assets.images.iconSend.path,
+                        icon: Assets.images.iconSend.svg(
+                          color: CrystalColor.secondary,
+                        ),
                       )
                     : WalletButton(
                         onTap: () => startDeployWalletFlow(
                           context: mainRouterPageKey.currentContext ?? context,
                           address: state.address,
-                          publicKey: state.publicKey,
                         ),
                         title: LocaleKeys.actions_deploy.tr(),
-                        iconAsset: Assets.images.iconDeploy.path,
+                        icon: Assets.images.iconDeploy.svg(
+                          color: CrystalColor.secondary,
+                        ),
                       )
                 : const SizedBox.square(dimension: 56),
           ),

@@ -41,10 +41,12 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
             bloc: context.watch<BiometryInfoBloc>(),
             builder: (context, state) => CrystalSwitch(
               isActive: state.isEnabled,
-              onTap: () => context.read<BiometryInfoBloc>().add(BiometryInfoEvent.setStatus(
-                    localizedReason: 'Please authenticate to interact with wallet',
-                    isEnabled: !state.isEnabled,
-                  )),
+              onTap: () => context.read<BiometryInfoBloc>().add(
+                    BiometryInfoEvent.setStatus(
+                      localizedReason: 'Please authenticate to interact with wallet',
+                      isEnabled: !state.isEnabled,
+                    ),
+                  ),
             ),
           ),
         ],

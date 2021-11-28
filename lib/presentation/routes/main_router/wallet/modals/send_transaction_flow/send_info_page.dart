@@ -7,9 +7,12 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../../../domain/blocs/biometry/biometry_get_password_bloc.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_bloc.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_transfer_bloc.dart';
+import '../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
+import '../../../../../design/widgets/custom_back_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/sectioned_card.dart';
 import '../../../../../design/widgets/sectioned_card_section.dart';
@@ -19,7 +22,6 @@ import '../common/send_result_page.dart';
 class SendInfoPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
-  final String publicKey;
   final String destination;
   final String amount;
   final String? comment;
@@ -28,7 +30,6 @@ class SendInfoPage extends StatefulWidget {
     Key? key,
     required this.modalContext,
     required this.address,
-    required this.publicKey,
     required this.destination,
     required this.amount,
     this.comment,
@@ -39,12 +40,16 @@ class SendInfoPage extends StatefulWidget {
 }
 
 class _NewSelectWalletTypePageState extends State<SendInfoPage> {
+  final infoBloc = getIt.get<TonWalletInfoBloc>();
   final prepareTransferBloc = getIt.get<TonWalletPrepareTransferBloc>();
   final estimateFeesBloc = getIt.get<TonWalletEstimateFeesBloc>();
 
   @override
   void initState() {
     super.initState();
+    infoBloc.add(
+      TonWalletInfoEvent.load(widget.address),
+    );
     prepareTransferBloc.add(
       TonWalletPrepareTransferEvent.prepareTransfer(
         address: widget.address,
@@ -79,6 +84,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
 
   Widget scaffold() => Scaffold(
         appBar: AppBar(
+          leading: const CustomBackButton(),
           title: const Text(
             'Confirm transaction',
             style: TextStyle(
@@ -178,40 +184,51 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
 
   Widget comment() => SectionedCardSection(
         title: 'Comment',
-        subtitle: widget.comment!,
+        subtitle: widget.comment,
       );
 
-  Widget submitButton() => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
-        bloc: estimateFeesBloc,
-        builder: (context, estimateFeesState) =>
-            BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
-          bloc: prepareTransferBloc,
-          builder: (context, prepareTransferState) {
-            final message = prepareTransferState.maybeWhen(
-              success: (message) => message,
-              orElse: () => null,
-            );
+  Widget submitButton() => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
+        bloc: infoBloc,
+        builder: (context, infoState) => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
+          bloc: estimateFeesBloc,
+          builder: (context, estimateFeesState) =>
+              BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
+            bloc: prepareTransferBloc,
+            builder: (context, prepareTransferState) {
+              final message = prepareTransferState.maybeWhen(
+                success: (message) => message,
+                orElse: () => null,
+              );
 
-            final sufficientFunds = estimateFeesState.maybeWhen(
-              success: (_) => true,
-              orElse: () => false,
-            );
+              final sufficientFunds = estimateFeesState.maybeWhen(
+                success: (_) => true,
+                orElse: () => false,
+              );
 
-            return CustomElevatedButton(
-              onPressed: sufficientFunds && message != null ? () => onPressed(message) : null,
-              text: 'Send',
-            );
-          },
+              return CustomElevatedButton(
+                onPressed: sufficientFunds && message != null && infoState != null
+                    ? () => onPressed(
+                          message: message,
+                          publicKey: infoState.publicKey,
+                        )
+                    : null,
+                text: 'Send',
+              );
+            },
+          ),
         ),
       );
 
-  Future<void> onPressed(UnsignedMessage message) async {
+  Future<void> onPressed({
+    required UnsignedMessage message,
+    required String publicKey,
+  }) async {
     String? password;
 
     final biometryInfoBloc = context.read<BiometryInfoBloc>();
 
     if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-      password = await getPasswordFromBiometry();
+      password = await getPasswordFromBiometry(publicKey);
     }
 
     if (!mounted) return;
@@ -226,7 +243,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
         MaterialPageRoute(
           builder: (context) => PasswordEnterPage(
             modalContext: widget.modalContext,
-            publicKey: widget.publicKey,
+            publicKey: publicKey,
             onSubmit: (password) => pushDeploymentResult(
               message: message,
               password: password,
@@ -237,13 +254,13 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
     }
   }
 
-  Future<String?> getPasswordFromBiometry() async {
+  Future<String?> getPasswordFromBiometry(String publicKey) async {
     final biometryGetPasswordBloc = getIt.get<BiometryGetPasswordBloc>();
 
     biometryGetPasswordBloc.add(
       BiometryGetPasswordEvent.get(
         localizedReason: 'Please authenticate to interact with wallet',
-        publicKey: widget.publicKey,
+        publicKey: publicKey,
       ),
     );
 

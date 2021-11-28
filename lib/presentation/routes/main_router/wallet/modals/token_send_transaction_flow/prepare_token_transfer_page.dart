@@ -48,6 +48,8 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
   final amountFocusNode = FocusNode();
   final destinationController = TextEditingController();
   final destinationFocusNode = FocusNode();
+  final commentController = TextEditingController();
+  final commentFocusNode = FocusNode();
   final notifyReceiverNotifier = ValueNotifier<bool>(false);
   final formValidityNotifier = ValueNotifier<bool>(false);
   final bloc = getIt.get<TokenWalletInfoBloc>();
@@ -69,6 +71,8 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
     amountFocusNode.dispose();
     destinationController.dispose();
     destinationFocusNode.dispose();
+    commentController.dispose();
+    commentFocusNode.dispose();
     notifyReceiverNotifier.dispose();
     formValidityNotifier.dispose();
     bloc.close();
@@ -143,6 +147,8 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
             const SizedBox(height: 16),
             destination(),
             const SizedBox(height: 16),
+            comment(),
+            const SizedBox(height: 16),
             notifyReceiver(),
           ],
         ),
@@ -169,8 +175,14 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         autocorrect: false,
         enableSuggestions: false,
         hintText: 'Amount...',
-        suffixIcon: TextFieldClearButton(controller: amountController),
         onSubmitted: (value) => destinationFocusNode.requestFocus(),
+        suffixIcon: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFieldClearButton(controller: amountController),
+            maxButton(),
+          ],
+        ),
         inputFormatters: [
           FilteringTextInputFormatter.deny(RegExp(r'\s')),
           FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
@@ -184,6 +196,27 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
             return 'Invalid value';
           }
         },
+      );
+
+  Widget maxButton() => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
+        bloc: bloc,
+        builder: (context, state) => SuffixIconButton(
+          onPressed: () async {
+            amountController.text = state?.balance.toTokens(state.symbol.decimals).removeZeroes() ?? '0';
+            amountController.selection = TextSelection.fromPosition(TextPosition(offset: amountController.text.length));
+
+            Form.of(context)?.validate();
+          },
+          icon: const SizedBox(
+            width: 64,
+            child: Text(
+              'Max',
+              style: TextStyle(
+                color: CrystalColor.accent,
+              ),
+            ),
+          ),
+        ),
       );
 
   Widget balance() => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
@@ -200,6 +233,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         name: 'destination',
         controller: destinationController,
         focusNode: destinationFocusNode,
+        textInputAction: TextInputAction.next,
         autocorrect: false,
         enableSuggestions: false,
         hintText: 'Receiver address...',
@@ -211,6 +245,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
             scanButton(),
           ],
         ),
+        onSubmitted: (value) => commentFocusNode.requestFocus(),
         inputFormatters: [
           FilteringTextInputFormatter.deny(RegExp(r'\s')),
         ],
@@ -294,6 +329,16 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
     }
   }
 
+  Widget comment() => CustomTextFormField(
+        name: 'comment',
+        controller: commentController,
+        focusNode: commentFocusNode,
+        autocorrect: false,
+        enableSuggestions: false,
+        hintText: 'Comment...',
+        suffixIcon: TextFieldClearButton(controller: commentController),
+      );
+
   Widget notifyReceiver() => Row(
         children: [
           ValueListenableBuilder<bool>(
@@ -324,6 +369,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
     final destination = destinationController.text;
     final amount = amountController.text.fromTokens(decimals);
     final notifyReceiver = notifyReceiverNotifier.value;
+    final comment = commentController.text.isNotEmpty ? commentController.text : null;
 
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -334,6 +380,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
           destination: destination,
           amount: amount,
           notifyReceiver: notifyReceiver,
+          comment: comment,
         ),
       ),
     );

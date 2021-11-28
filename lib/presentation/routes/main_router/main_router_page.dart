@@ -160,31 +160,32 @@ class _MainRouterPageState extends State<MainRouterPage> {
 
   Future<void> showAddAccountDialog() => showPlatformDialog(
         context: context,
-        barrierDismissible: true,
-        builder: (BuildContext context) => Theme(
-          data: ThemeData(),
-          child: PlatformAlertDialog(
-            title: const Text('Add account'),
-            content: const Text('To use the browser you need to add an account first'),
-            actions: [
-              PlatformDialogAction(
-                onPressed: () async {
-                  await context.router.pop();
+        builder: (BuildContext context) => PlatformAlertDialog(
+          title: const Text('Add account'),
+          content: const Text('To use the browser you need to add an account first'),
+          actions: [
+            PlatformDialogAction(
+              onPressed: () => context.router.pop(),
+              child: const Text('Cancel'),
+            ),
+            PlatformDialogAction(
+              onPressed: () async {
+                await context.router.pop();
 
-                  final mainRouterRouter = context.router.root.innerRouterOf(MainRouterRoute.name);
-                  final walletRouterRouter = mainRouterRouter?.innerRouterOf(WalletRouterRoute.name);
+                final mainRouterRouter = context.router.root.innerRouterOf(MainRouterRoute.name);
+                final walletRouterRouter = mainRouterRouter?.innerRouterOf(WalletRouterRoute.name);
 
-                  mainRouterRouter?.navigate(const WalletRouterRoute());
-                  walletRouterRouter?.navigate(const NewAccountRouterRoute());
-                },
-                cupertino: (_, __) => CupertinoDialogActionData(
-                  isDefaultAction: true,
-                ),
-                child: const Text('Add account'),
+                mainRouterRouter?.navigate(const WalletRouterRoute());
+                walletRouterRouter?.navigate(const NewAccountRouterRoute());
+              },
+              cupertino: (_, __) => CupertinoDialogActionData(
+                isDefaultAction: true,
               ),
-            ],
-          ),
+              child: const Text('Add account'),
+            ),
+          ],
         ),
+        barrierDismissible: true,
       );
 
   bool handleAndroidBackButton([bool? stopDefaultButtonEvent, RouteInfo? routeInfo]) {

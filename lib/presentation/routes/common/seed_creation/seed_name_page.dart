@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../design/design.dart';
 import '../../../design/widgets/crystal_title.dart';
-import '../../../design/widgets/custom_app_bar.dart';
+import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_text_form_field.dart';
-import '../../../design/widgets/text_suffix_icon_button.dart';
+import '../../../design/widgets/text_field_clear_button.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';
 
 class SeedNamePage extends StatefulWidget {
@@ -35,7 +34,9 @@ class _SeedNamePageState extends State<SeedNamePage> {
         value: SystemUiOverlayStyle.dark,
         child: UnfocusingGestureDetector(
           child: Scaffold(
-            appBar: const CustomAppBar(),
+            appBar: AppBar(
+              leading: const CustomBackButton(),
+            ),
             body: body(),
           ),
         ),
@@ -43,28 +44,18 @@ class _SeedNamePageState extends State<SeedNamePage> {
 
   Widget body() => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16) - const EdgeInsets.only(top: 16),
           child: Stack(
             fit: StackFit.expand,
             children: [
               SingleChildScrollView(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 8),
                     title(),
                     const SizedBox(height: 32),
-                    CustomTextFormField(
-                      name: 'name',
-                      controller: controller,
-                      hintText: 'Enter the name...',
-                      suffixIcon: SuffixIconButton(
-                        onPressed: () {
-                          controller.clear();
-                          Form.of(context)?.validate();
-                        },
-                        icon: Assets.images.iconCross.svg(),
-                      ),
-                    ),
+                    field(),
                   ],
                 ),
               ),
@@ -84,6 +75,15 @@ class _SeedNamePageState extends State<SeedNamePage> {
 
   Widget title() => const CrystalTitle(
         text: 'Enter the name for seed phrase',
+      );
+
+  Widget field() => CustomTextFormField(
+        name: 'name',
+        controller: controller,
+        hintText: 'Enter the name...',
+        suffixIcon: TextFieldClearButton(
+          controller: controller,
+        ),
       );
 
   Widget submitButton() => CustomElevatedButton(

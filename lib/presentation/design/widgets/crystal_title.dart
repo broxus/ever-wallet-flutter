@@ -12,7 +12,7 @@ class CrystalTitle extends StatelessWidget {
   Widget build(BuildContext context) => Text(
         text,
         style: const TextStyle(
-          fontSize: 36,
+          fontSize: 28,
           fontWeight: FontWeight.bold,
         ),
         textAlign: TextAlign.start,

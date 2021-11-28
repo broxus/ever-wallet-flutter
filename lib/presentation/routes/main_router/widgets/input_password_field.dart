@@ -74,10 +74,12 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
                 onTap: () {
                   final password = controller.text.trim();
 
-                  bloc.add(KeyPasswordCheckingEvent.check(
-                    publicKey: widget.publicKey,
-                    password: password,
-                  ));
+                  bloc.add(
+                    KeyPasswordCheckingEvent.check(
+                      publicKey: widget.publicKey,
+                      password: password,
+                    ),
+                  );
                 },
               ),
             ],
