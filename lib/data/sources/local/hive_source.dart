@@ -21,6 +21,7 @@ class HiveSource {
   static const _tokenWalletInfosBoxName = 'token_wallet_infos_v2';
   static const _tonWalletTransactionsBoxName = 'ton_wallet_transactions_v2';
   static const _tokenWalletTransactionsBoxName = 'token_wallet_transactions_v2';
+  static const _publicKeysLabelsBoxName = 'public_keys_labels_v1';
   static const _biometryStatusKey = 'biometry_status';
   late final Uint8List _key;
   late final Box<String> _keysPasswordsBox;
@@ -30,6 +31,7 @@ class HiveSource {
   late final Box<TokenWalletInfoDto> _tokenWalletInfosBox;
   late final Box<List> _tonWalletTransactionsBox;
   late final Box<List> _tokenWalletTransactionsBox;
+  late final Box<String> _publicKeysLabelsBox;
 
   @factoryMethod
   static Future<HiveSource> create() async {
@@ -134,6 +136,18 @@ class HiveSource {
 
   Future<void> clearKeysPasswords() => _keysPasswordsBox.clear();
 
+  Future<void> setPublicKeyLabel({
+    required String publicKey,
+    required String label,
+  }) =>
+      _publicKeysLabelsBox.put(publicKey, label);
+
+  Map<String, String> getPublicKeysLabels() => _publicKeysLabelsBox.toMap().cast<String, String>();
+
+  Future<void> removePublicKeyLabel(String publicKey) => _publicKeysLabelsBox.delete(publicKey);
+
+  Future<void> clearPublicKeysLabels() => _publicKeysLabelsBox.clear();
+
   Future<void> _initialize() async {
     final hiveAesCipherKeyString = dotenv.env['HIVE_AES_CIPHER_KEY'];
     final hiveAesCipherKeyList = hiveAesCipherKeyString?.split(' ').map((e) => int.parse(e)).toList();
@@ -155,5 +169,6 @@ class HiveSource {
     _tokenWalletInfosBox = await Hive.openBox<TokenWalletInfoDto>(_tokenWalletInfosBoxName);
     _tonWalletTransactionsBox = await Hive.openBox<List>(_tonWalletTransactionsBoxName);
     _tokenWalletTransactionsBox = await Hive.openBox<List>(_tokenWalletTransactionsBoxName);
+    _publicKeysLabelsBox = await Hive.openBox<String>(_publicKeysLabelsBoxName);
   }
 }

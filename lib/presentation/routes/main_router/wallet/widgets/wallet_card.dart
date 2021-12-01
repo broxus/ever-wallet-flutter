@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -16,8 +15,10 @@ import '../../../../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/extension.dart';
 import '../../../../design/widgets/crystal_bottom_sheet.dart';
+import '../../../../design/widgets/wallet_card_selectable_field.dart';
 import '../modals/account_removement_body.dart';
 import '../modals/preferences_body.dart';
+import 'more_button.dart';
 
 class WalletCard extends StatefulWidget {
   final String address;
@@ -121,7 +122,8 @@ class _WalletCardState extends State<WalletCard> {
                     ? Positioned(
                         top: 8,
                         right: 8,
-                        child: buildMoreButton(address: state.address),
+                        child: MoreButton(address: state.address),
+                        //  buildMoreButton(address: state.address),
                       )
                     : const SizedBox(),
               ),
@@ -248,67 +250,25 @@ class _WalletCardState extends State<WalletCard> {
                     padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                     child: buildShimmer(),
                   )
-                : SelectionWidget(
-                    controller: controller,
-                    enabled: !disabled && isSelectable,
-                    configuration: const SelectionConfiguration(
-                      openOnTap: true,
-                      openOnHold: false,
-                      highlightColor: CrystalColor.secondaryBackground,
-                    ),
-                    overlay: (context) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Material(
-                        type: MaterialType.card,
-                        color: CrystalColor.background,
-                        borderRadius: BorderRadius.circular(4),
-                        clipBehavior: Clip.antiAlias,
-                        child: CrystalInkWell(
-                          splashColor: CrystalColor.secondary,
-                          highlightColor: CrystalColor.secondary,
-                          onTap: () {
-                            controller?.dismiss();
-                            HapticFeedback.selectionClick();
-                            Clipboard.setData(ClipboardData(text: value));
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 6,
-                            ),
-                            color: CrystalColor.secondaryBackground,
-                            child: Text(
-                              LocaleKeys.actions_copy.tr(),
-                              style: const TextStyle(
-                                color: CrystalColor.secondary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                : isSelectable
+                    ? WalletCardSelectableField(
+                        value: value!,
+                        text: ellipsedValue!,
+                      )
+                    : Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        child: Text(
+                          value!,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            letterSpacing: 0.75,
+                            color: CrystalColor.secondary,
                           ),
                         ),
                       ),
-                    ),
-                    child: (onHold) => SizedBox(
-                      height: 20,
-                      child: Text(
-                        ellipsedValue ?? value!,
-                        maxLines: 1,
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                          height: 20 / 14,
-                          fontSize: 14,
-                          letterSpacing: 0.75,
-                          color: CrystalColor.secondary.withOpacity(
-                            disabled
-                                ? 0.32
-                                : !onHold && isSelectable
-                                    ? 0.64
-                                    : 1,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
           ),
         ],
       );
@@ -402,24 +362,6 @@ class _WalletCardState extends State<WalletCard> {
                           thickness: 1,
                           color: Platform.isIOS ? const Color.fromRGBO(60, 60, 67, 0.36) : CrystalColor.divider,
                         ),
-                        // buildDropDownAction(
-                        //   onTap: () {
-                        //     menuController.dismiss();
-
-                        //     showCrystalBottomSheet(
-                        //       context,
-                        //       title: ConnectedSitesBody.title,
-                        //       padding: const EdgeInsets.symmetric(horizontal: 8),
-                        //       body: ConnectedSitesBody(
-                        //         address: address,
-                        //       ),
-                        //       expand: false,
-                        //       avoidBottomInsets: false,
-                        //       hasTitleDivider: true,
-                        //     );
-                        //   },
-                        //   title: ConnectedSitesBody.title,
-                        // ),
                         Divider(
                           height: 1,
                           thickness: 1,

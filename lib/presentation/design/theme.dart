@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import 'design.dart';
 
 const applicationTitle = 'TON Crystal';
 
-final applicationTheme = ThemeData(
-  fontFamily: FontFamily.pt,
-  appBarTheme: const AppBarTheme(
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    iconTheme: IconThemeData(
-      color: CrystalColor.accent,
-    ),
-    systemOverlayStyle: SystemUiOverlayStyle.dark,
-  ),
-);
+ThemeData applicationTheme(BuildContext context) => ThemeData(
+      fontFamily: FontFamily.pt,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(
+          color: CrystalColor.accent,
+        ),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+      ),
+      splashColor: isCupertino(context) ? Colors.transparent : null,
+    );
 
 abstract class CrystalColor {
   static const primary = Color(0xFFFFFFFF);

@@ -1,202 +1,114 @@
+import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../../../domain/models/transaction_type.dart';
 import '../../../../../../../../domain/utils/transaction_time.dart';
 import '../../../../design/design.dart';
-import '../modals/transaction_observer/ton_wallet_transaction_observer.dart';
+import '../../../../design/widgets/custom_ink_well.dart';
+import '../../../../design/widgets/ton_asset_icon.dart';
+import '../modals/ton_wallet_transaction_info/show_ton_wallet_transaction_info.dart';
 
 class TonWalletTransactionHolder extends StatelessWidget {
-  final String currency;
-  final TransactionType transactionType;
-  final Transaction transaction;
-  final TransactionAdditionalInfo? data;
-  final Widget? icon;
-  final bool isOutgoing;
-  final String? address;
-  final String value;
+  final TonWalletTransactionWithData transactionWithData;
 
-  TonWalletTransactionHolder({
+  const TonWalletTransactionHolder({
     Key? key,
-    required this.currency,
-    required this.transactionType,
-    required this.transaction,
-    this.data,
-    this.icon,
-  })  : isOutgoing = transaction.outMessages.isNotEmpty,
-        address = transaction.outMessages.isNotEmpty ? transaction.outMessages.first.dst : transaction.inMessage.src,
-        value = transaction.outMessages.isNotEmpty ? transaction.outMessages.first.value : transaction.inMessage.value,
-        super(key: key);
+    required this.transactionWithData,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: CrystalColor.primary,
-        child: CrystalInkWell(
-          onTap: () => TonWalletTransactionObserver.open(
-            context: context,
-            currency: currency,
-            transactionType: transactionType,
-            transaction: transaction,
-            data: data,
-            icon: icon,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (icon != null)
-                  SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: icon,
-                  )
-                else
-                  const SizedBox(),
-                const CrystalDivider(
-                  width: 16,
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: IntrinsicWidth(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _getValueTitle(),
-                          const CrystalDivider(
-                            height: 2,
-                          ),
-                          _getLayout(),
-                          const CrystalDivider(
-                            height: 4,
-                          ),
-                          getStatusInfo(),
-                        ],
+  Widget build(BuildContext context) {
+    final isOutgoing = transactionWithData.transaction.outMessages.isNotEmpty;
+    final sender = transactionWithData.transaction.inMessage.src;
+    final recipient = transactionWithData.transaction.outMessages.firstOrNull?.dst;
+    final value = (isOutgoing
+            ? transactionWithData.transaction.outMessages.first.value
+            : transactionWithData.transaction.inMessage.value)
+        .toTokens()
+        .removeZeroes()
+        .formatValue();
+    final address = isOutgoing ? recipient : sender;
+    final date = transactionWithData.transaction.createdAt.toDateTime();
+    final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
+
+    return CustomInkWell(
+      onTap: () => showTonWalletTransactionInfo(
+        context: context,
+        transactionWithData: transactionWithData,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const TonAssetIcon(),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: valueTitle(
+                          value: value,
+                          isOutgoing: isOutgoing,
+                        ),
                       ),
-                    ),
+                      iconForward(),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  feesTitle(fees),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: address != null ? addressTitle(address) : const SizedBox(),
+                      ),
+                      dateTitle(date),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
-      );
-
-  Widget _getValueTitle() {
-    final formattedValue = value.toTokens().removeZeroes().formatValue();
-
-    return Text(
-      isOutgoing ? '- $formattedValue $currency' : '$formattedValue $currency',
-      softWrap: false,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        color: isOutgoing ? CrystalColor.error : CrystalColor.success,
-        fontWeight: FontWeight.w600,
       ),
     );
   }
 
-  Widget _getLayout() => Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _getFees(),
-              _getAddress(),
-            ],
-          ),
-          _getDate(),
-        ],
-      );
-
-  Widget _getFees() => Text(
-        'Fees: ${transaction.totalFees.toTokens().removeZeroes().formatValue()} TON',
-        style: const TextStyle(
-          color: CrystalColor.fontSecondaryDark,
-        ),
-      );
-
-  Widget _getAddress() => address != null && address!.isNotEmpty
-      ? Column(
-          children: [
-            const CrystalDivider(
-              height: 6,
-            ),
-            SizedBox(
-              width: 100,
-              child: Text(
-                address!.ellipseAddress(),
-                maxLines: 1,
-                textAlign: TextAlign.start,
-                softWrap: false,
-                style: const TextStyle(
-                  letterSpacing: 0.25,
-                  color: CrystalColor.fontDark,
-                ),
-              ),
-            ),
-          ],
-        )
-      : const SizedBox();
-
-  Widget _getDate() => Text(
-        DateFormat('MMM d, H:mm').format(transaction.createdAt.toDateTime()),
-        style: const TextStyle(
-          color: CrystalColor.fontDark,
-        ),
-      );
-
-  Widget getStatusInfo() {
-    switch (transactionType) {
-      case TransactionType.ordinary:
-        return const SizedBox();
-      case TransactionType.sent:
-        return getStatusContainer(
-          color: CrystalColor.pending,
-          status: LocaleKeys.wallet_history_modal_status_in_progress.tr(),
-        );
-      case TransactionType.expired:
-        return getStatusContainer(
-          color: CrystalColor.error,
-          status: LocaleKeys.wallet_history_modal_status_failed.tr(),
-        );
-    }
-  }
-
-  Widget getStatusContainer({
-    required String status,
-    required Color color,
+  Widget valueTitle({
+    required String value,
+    required bool isOutgoing,
   }) =>
-      Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-              top: 10,
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 3,
-              ),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(2),
-              ),
-              child: Text(
-                status,
-                style: TextStyle(
-                  color: color,
-                  letterSpacing: 0.75,
-                ),
-              ),
-            ),
-          ),
-        ],
+      Text(
+        '${isOutgoing ? '-' : ''}$value TON',
+        style: TextStyle(
+          color: isOutgoing ? CrystalColor.error : CrystalColor.success,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+
+  Widget iconForward() => const Icon(
+        Icons.arrow_forward_ios_rounded,
+        size: 18,
+        color: Colors.grey,
+      );
+
+  Widget feesTitle(String fees) => Text(
+        'Fees: $fees TON',
+        style: const TextStyle(
+          color: Colors.black45,
+        ),
+      );
+
+  Widget addressTitle(String address) => Text(
+        address.ellipseAddress(),
+      );
+
+  Widget dateTitle(DateTime date) => Text(
+        DateFormat('MMM d, H:mm').format(date),
       );
 }

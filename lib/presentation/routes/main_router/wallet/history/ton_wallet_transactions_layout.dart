@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_bloc.dart';
-import '../../../../../../../../domain/models/transaction_type.dart';
 import '../../../../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/preload_transactions_listener.dart';
@@ -68,17 +67,7 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
                       color: CrystalColor.divider,
                     ),
                     itemBuilder: (context, index) => TonWalletTransactionHolder(
-                      currency: 'TON',
-                      transactionType: TransactionType.ordinary,
-                      transaction: state[index].transaction,
-                      data: state[index].data,
-                      icon: CircleIcon(
-                        color: Colors.transparent,
-                        icon: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Assets.images.ton.svg(),
-                        ),
-                      ),
+                      transactionWithData: state[index],
                     ),
                   ),
                 )

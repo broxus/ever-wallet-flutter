@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../../../../../../../domain/blocs/connection_bloc.dart';
-import '../../../../design/design.dart';
+import '../../../../design/widgets/custom_popup_menu.dart';
 
 class ConnectionButton extends StatelessWidget {
   const ConnectionButton({Key? key}) : super(key: key);
@@ -11,44 +12,16 @@ class ConnectionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocBuilder<ConnectionBloc, ConnectionData>(
         bloc: context.watch<ConnectionBloc>(),
-        builder: (context, state) => Theme(
-          data: Theme.of(context).copyWith(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            dividerTheme: const DividerThemeData(color: Colors.grey),
-          ),
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              dividerTheme: const DividerThemeData(color: Colors.grey),
-            ),
-            child: PopupMenuButton<String>(
-              color: CrystalColor.grayBackground,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              itemBuilder: (context) => kNetworkPresets
-                  .map(
-                    (e) => buildPopupMenuItem(
-                      value: e.name,
-                      text: e.name,
-                    ),
-                  )
-                  .toList()
-                  .fold(
-                [],
-                (previousValue, element) => [
-                  if (previousValue.isNotEmpty) ...[...previousValue, const PopupMenuDivider()],
-                  element
-                ],
-              ),
-              onSelected: (value) => context
-                  .read<ConnectionBloc>()
-                  .add(ConnectionEvent.updateTransport(kNetworkPresets.firstWhere((e) => e.name == value))),
-              child: buildButton(state),
-            ),
-          ),
+        builder: (context, state) => CustomPopupMenu(
+          items: kNetworkPresets
+              .map(
+                (e) => Tuple2(
+                  e.name,
+                  () => context.read<ConnectionBloc>().add(ConnectionEvent.updateTransport(e)),
+                ),
+              )
+              .toList(),
+          icon: buildButton(state),
         ),
       );
 
@@ -59,21 +32,13 @@ class ConnectionButton extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50),
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.2),
         ),
-        child: Text(state.name),
-      );
-
-  PopupMenuEntry<String> buildPopupMenuItem({
-    required String value,
-    required String text,
-  }) =>
-      PopupMenuItem<String>(
-        value: value,
         child: Text(
-          text,
+          state.name,
           style: const TextStyle(
-            color: Colors.black,
+            color: Colors.white,
+            fontSize: 14,
           ),
         ),
       );

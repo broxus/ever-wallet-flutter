@@ -6,14 +6,14 @@ import 'token_wallet_transaction_info_modal_body.dart';
 
 Future<void> showTokenWalletTransactionInfo({
   required BuildContext context,
-  required TokenWalletTransactionWithData transaction,
+  required TokenWalletTransactionWithData transactionWithData,
   required String currency,
   required int decimals,
 }) =>
     showPlatformModalBottomSheet(
       context: context,
       builder: (context) => TokenWalletTransactionInfoModalBody(
-        transaction: transaction,
+        transactionWithData: transactionWithData,
         currency: currency,
         decimals: decimals,
       ),

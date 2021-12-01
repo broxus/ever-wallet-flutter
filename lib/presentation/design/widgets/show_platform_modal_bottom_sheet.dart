@@ -9,7 +9,6 @@ Future<T?> showPlatformModalBottomSheet<T>({
 }) {
   Widget constrainedBuilder(BuildContext context) => ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.longestSide / 2,
           maxHeight: MediaQuery.of(context).size.longestSide - MediaQuery.of(context).viewPadding.top,
         ),
         child: MediaQuery.removeViewPadding(

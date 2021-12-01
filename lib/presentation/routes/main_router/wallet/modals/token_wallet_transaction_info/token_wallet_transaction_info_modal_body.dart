@@ -9,42 +9,47 @@ import '../../../../../design/widgets/crystal_title.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
 
-class TokenWalletTransactionInfoModalBody extends StatefulWidget {
-  final TokenWalletTransactionWithData transaction;
+class TokenWalletTransactionInfoModalBody extends StatelessWidget {
+  final TokenWalletTransactionWithData transactionWithData;
   final String currency;
   final int decimals;
 
   const TokenWalletTransactionInfoModalBody({
     Key? key,
-    required this.transaction,
+    required this.transactionWithData,
     required this.currency,
     required this.decimals,
   }) : super(key: key);
 
   @override
-  _TonAssetInfoModalBodyState createState() => _TonAssetInfoModalBodyState();
-}
-
-class _TonAssetInfoModalBodyState extends State<TokenWalletTransactionInfoModalBody> {
-  @override
   Widget build(BuildContext context) {
-    final sender = widget.transaction.data!.maybeWhen(
+    final sender = transactionWithData.data!.maybeWhen(
       incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.senderAddress,
       orElse: () => null,
     );
-    final recipient = widget.transaction.data!.maybeWhen(
+    final recipient = transactionWithData.data!.maybeWhen(
       outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.address,
       orElse: () => null,
     );
-    final value = widget.transaction.data!.when(
-      incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
-      outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.tokens,
-      swapBack: (tokenSwapBack) => tokenSwapBack.tokens,
-      accept: (value) => value,
-      transferBounced: (value) => value,
-      swapBackBounced: (value) => value,
-    );
-    final type = widget.transaction.data!.when(
+    final value = transactionWithData.data!
+        .when(
+          incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
+          outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.tokens,
+          swapBack: (tokenSwapBack) => tokenSwapBack.tokens,
+          accept: (value) => value,
+          transferBounced: (value) => value,
+          swapBackBounced: (value) => value,
+        )
+        .toTokens(decimals)
+        .removeZeroes()
+        .formatValue();
+    final isOutgoing = recipient != null;
+    final address = isOutgoing ? recipient : sender;
+    final date = transactionWithData.transaction.createdAt.toDateTime();
+    final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
+    final hash = transactionWithData.transaction.id.hash;
+
+    final type = transactionWithData.data!.when(
       incomingTransfer: (tokenIncomingTransfer) => 'Token incoming transfer',
       outgoingTransfer: (tokenOutgoingTransfer) => 'Token outgoing transfer',
       swapBack: (tokenSwapBack) => 'Swap back',
@@ -52,8 +57,35 @@ class _TonAssetInfoModalBodyState extends State<TokenWalletTransactionInfoModalB
       transferBounced: (value) => 'Transfer bounced',
       swapBackBounced: (value) => 'Swap back bounced',
     );
-    final isOutgoing = recipient != null;
-    final address = isOutgoing ? (recipient ?? sender) : (sender ?? recipient);
+
+    final sections = [
+      section(
+        [
+          dateItem(date),
+          if (address != null) ...[
+            addressItem(
+              isOutgoing: isOutgoing,
+              address: address,
+            ),
+          ],
+          hashItem(hash),
+        ],
+      ),
+      section(
+        [
+          amountItem(
+            isOutgoing: isOutgoing,
+            value: value,
+          ),
+          feeItem(fees),
+        ],
+      ),
+      section(
+        [
+          typeItem(type),
+        ],
+      ),
+    ];
 
     return Material(
       color: Colors.white,
@@ -75,33 +107,9 @@ class _TonAssetInfoModalBodyState extends State<TokenWalletTransactionInfoModalB
                   ],
                 ),
                 const SizedBox(height: 16),
-                dateSection(),
-                const SizedBox(height: 16),
-                if (address != null) ...[
-                  addressSection(
-                    isOutgoing: isOutgoing,
-                    address: address,
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                hashSection(),
-                const Divider(
-                  height: 32,
-                  thickness: 1,
-                ),
-                amountSection(
-                  isOutgoing: isOutgoing,
-                  value: value,
-                ),
-                const SizedBox(height: 16),
-                feeSection(),
-                const Divider(
-                  height: 32,
-                  thickness: 1,
-                ),
-                typeSection(type),
+                list(sections),
                 const SizedBox(height: 32),
-                explorerButton(),
+                explorerButton(hash),
               ],
             ),
           ),
@@ -110,58 +118,28 @@ class _TonAssetInfoModalBodyState extends State<TokenWalletTransactionInfoModalB
     );
   }
 
-  Widget dateSection() => section(
-        title: 'Date and time',
-        subtitle: DateFormat('dd.MM.yyyy, H:mm').format(
-          widget.transaction.transaction.createdAt.toDateTime(),
+  Widget list(List<Widget> list) => ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) => list[index],
+        separatorBuilder: (context, index) => const Divider(
+          height: 32,
+          thickness: 1,
         ),
+        itemCount: list.length,
       );
 
-  Widget addressSection({
-    required bool isOutgoing,
-    required String address,
-  }) =>
-      section(
-        title: isOutgoing ? 'Recipient' : 'Sender',
-        subtitle: address,
-        isSelectable: true,
+  Widget section(List<Widget> children) => ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) => children[index],
+        separatorBuilder: (context, index) => const SizedBox(height: 16),
+        itemCount: children.length,
       );
 
-  Widget hashSection() => section(
-        title: 'Hash (ID)',
-        subtitle: widget.transaction.transaction.id.hash,
-        isSelectable: true,
-      );
-
-  Widget amountSection({
-    required bool isOutgoing,
-    required String value,
-  }) =>
-      section(
-        title: 'Amount',
-        subtitle: isOutgoing
-            ? '-${value.toTokens(widget.decimals).removeZeroes().formatValue()} ${widget.currency}'
-            : '${value.toTokens(widget.decimals).removeZeroes().formatValue()} ${widget.currency}',
-      );
-
-  Widget feeSection() => section(
-        title: 'Blockchain fee',
-        subtitle: '~${widget.transaction.transaction.totalFees.toTokens().removeZeroes().formatValue()} TON',
-      );
-
-  Widget typeSection(String type) => section(
-        title: 'Type',
-        subtitle: type,
-      );
-
-  Widget title() => const CrystalTitle(
-        text: 'Transaction information',
-      );
-
-  Widget section({
+  Widget item({
     required String title,
     required String subtitle,
-    bool isSelectable = false,
   }) =>
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -173,25 +151,59 @@ class _TonAssetInfoModalBodyState extends State<TokenWalletTransactionInfoModalB
             ),
           ),
           const SizedBox(height: 4),
-          if (isSelectable)
-            SelectableText(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 16,
-              ),
-            )
-          else
-            Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 16,
-              ),
+          SelectableText(
+            subtitle,
+            style: const TextStyle(
+              fontSize: 16,
             ),
+          )
         ],
       );
 
-  Widget explorerButton() => CustomOutlinedButton(
-        onPressed: () => launch(getTransactionExplorerLink(widget.transaction.transaction.id.hash)),
-        text: 'See in explorer',
+  Widget dateItem(DateTime date) => item(
+        title: 'Date and time',
+        subtitle: DateFormat('dd.MM.yyyy, H:mm').format(date),
+      );
+
+  Widget addressItem({
+    required bool isOutgoing,
+    required String address,
+  }) =>
+      item(
+        title: isOutgoing ? 'Recipient' : 'Sender',
+        subtitle: address,
+      );
+
+  Widget hashItem(String hash) => item(
+        title: 'Hash (ID)',
+        subtitle: hash,
+      );
+
+  Widget amountItem({
+    required bool isOutgoing,
+    required String value,
+  }) =>
+      item(
+        title: 'Amount',
+        subtitle: '${isOutgoing ? '-' : ''}$value $currency',
+      );
+
+  Widget feeItem(String fees) => item(
+        title: 'Blockchain fee',
+        subtitle: '$fees TON',
+      );
+
+  Widget typeItem(String type) => item(
+        title: 'Type',
+        subtitle: type,
+      );
+
+  Widget title() => const CrystalTitle(
+        text: 'Transaction information',
+      );
+
+  Widget explorerButton(String hash) => CustomOutlinedButton(
+        onPressed: () => launch(getTransactionExplorerLink(hash)),
+        text: 'See in the explorer',
       );
 }

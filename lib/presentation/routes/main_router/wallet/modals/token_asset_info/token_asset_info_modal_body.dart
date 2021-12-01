@@ -284,7 +284,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
             physics: const ClampingScrollPhysics(),
             shrinkWrap: true,
             itemBuilder: (context, index) => TokenWalletTransactionHolder(
-              transaction: state[index],
+              transactionWithData: state[index],
               currency: symbol.name,
               decimals: symbol.decimals,
               icon: AssetIcon(

@@ -9,7 +9,6 @@ import '../../../../../../../../../../injection.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_bloc.dart';
 import '../../../../../../domain/models/ton_wallet_info.dart';
-import '../../../../../../domain/models/transaction_type.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/preload_transactions_listener.dart';
@@ -232,11 +231,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
             physics: const ClampingScrollPhysics(),
             shrinkWrap: true,
             itemBuilder: (context, index) => TonWalletTransactionHolder(
-              currency: 'TON',
-              transactionType: TransactionType.ordinary,
-              transaction: state[index].transaction,
-              data: state[index].data,
-              icon: const TonAssetIcon(),
+              transactionWithData: state[index],
             ),
             separatorBuilder: (_, __) => const Divider(
               height: 1,

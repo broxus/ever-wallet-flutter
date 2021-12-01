@@ -13,7 +13,7 @@ part 'account_renaming_bloc.freezed.dart';
 class AccountRenamingBloc extends Bloc<AccountRenamingEvent, AccountRenamingState> {
   final NekotonService _nekotonService;
 
-  AccountRenamingBloc(this._nekotonService) : super(AccountRenamingStateInitial());
+  AccountRenamingBloc(this._nekotonService) : super(const AccountRenamingState.initial());
 
   @override
   Stream<AccountRenamingState> mapEventToState(AccountRenamingEvent event) async* {
@@ -24,11 +24,11 @@ class AccountRenamingBloc extends Bloc<AccountRenamingEvent, AccountRenamingStat
           name: event.name,
         );
 
-        yield AccountRenamingStateSuccess();
+        yield const AccountRenamingState.success();
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield AccountRenamingStateError(err);
+      yield AccountRenamingState.error(err);
     }
   }
 }
@@ -41,14 +41,19 @@ class AccountRenamingEvent with _$AccountRenamingEvent {
   }) = _Rename;
 }
 
-abstract class AccountRenamingState {}
+@freezed
+class AccountRenamingState with _$AccountRenamingState {
+  const factory AccountRenamingState.initial() = _Initial;
 
-class AccountRenamingStateInitial extends AccountRenamingState {}
+  const factory AccountRenamingState.success() = _Success;
 
-class AccountRenamingStateSuccess extends AccountRenamingState {}
+  const factory AccountRenamingState.error(Exception exception) = _Error;
 
-class AccountRenamingStateError extends AccountRenamingState {
-  final Exception exception;
+  const AccountRenamingState._();
 
-  AccountRenamingStateError(this.exception);
+  @override
+  bool operator ==(Object other) => false;
+
+  @override
+  int get hashCode => 0;
 }

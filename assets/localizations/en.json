@@ -237,7 +237,7 @@
   },
   "transaction_observer": {
     "title": "Transaction information",
-    "open_explorer": "See in explorer"
+    "open_explorer": "See in the explorer"
   },
   "settings_screen": {
     "title": "Settings",

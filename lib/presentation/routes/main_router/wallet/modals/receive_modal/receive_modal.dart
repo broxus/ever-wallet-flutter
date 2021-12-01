@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../../design/design.dart';
@@ -55,21 +54,7 @@ class _ReceiveModalBodyState extends State<ReceiveModalBody> {
         ),
       );
 
-  Widget card() => Row(
-        children: [
-          QrImage(
-            size: MediaQuery.of(context).size.shortestSide / 2.5,
-            data: widget.address,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: SelectableText(
-              widget.address,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      );
+  Widget card() => AddressCard(address: widget.address);
 
   Widget title() => const CrystalTitle(
         text: 'Your address to receive funds',
