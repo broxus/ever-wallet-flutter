@@ -3,29 +3,28 @@ import 'package:injectable/injectable.dart';
 import 'package:rxdart/subjects.dart';
 
 import '../../domain/models/token_contract_asset.dart';
-import '../../domain/repositories/ton_assets_repository.dart';
 import '../dtos/token_contract_asset_dto.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/remote/rest_source.dart';
 
 @preResolve
-@LazySingleton(as: TonAssetsRepository)
-class TonAssetsRepositoryImpl implements TonAssetsRepository {
+@lazySingleton
+class TonAssetsRepository {
   final HiveSource _hiveSource;
   final RestSource _restSource;
   final _assetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
 
-  TonAssetsRepositoryImpl._(
+  TonAssetsRepository._(
     this._hiveSource,
     this._restSource,
   );
 
   @factoryMethod
-  static Future<TonAssetsRepositoryImpl> create(
+  static Future<TonAssetsRepository> create(
     HiveSource hiveSource,
     RestSource restSource,
   ) async {
-    final tonAssetsRepositoryImpl = TonAssetsRepositoryImpl._(
+    final tonAssetsRepositoryImpl = TonAssetsRepository._(
       hiveSource,
       restSource,
     );
@@ -33,14 +32,11 @@ class TonAssetsRepositoryImpl implements TonAssetsRepository {
     return tonAssetsRepositoryImpl;
   }
 
-  @override
   Stream<List<TokenContractAsset>> get assetsStream =>
       _assetsSubject.stream.distinct((previous, next) => listEquals(previous, next));
 
-  @override
   List<TokenContractAsset> get assets => _assetsSubject.value;
 
-  @override
   Future<void> save(TokenContractAsset asset) async {
     await _hiveSource.saveTokenContractAsset(asset.toDto());
 
@@ -48,7 +44,6 @@ class TonAssetsRepositoryImpl implements TonAssetsRepository {
     _assetsSubject.add(assets);
   }
 
-  @override
   Future<void> saveCustom({
     required String name,
     required String symbol,
@@ -74,7 +69,6 @@ class TonAssetsRepositoryImpl implements TonAssetsRepository {
     _assetsSubject.add(assets);
   }
 
-  @override
   Future<void> remove(String address) async {
     final assets = _assetsSubject.value.where((e) => e.address != address).toList();
     _assetsSubject.add(assets);
@@ -82,14 +76,12 @@ class TonAssetsRepositoryImpl implements TonAssetsRepository {
     await _hiveSource.removeTokenContractAsset(address);
   }
 
-  @override
   Future<void> clear() async {
     _assetsSubject.add([]);
 
     await _hiveSource.clearTokenContractAssets();
   }
 
-  @override
   Future<void> refresh() async {
     final manifest = await _restSource.getTonAssetsManifest();
 

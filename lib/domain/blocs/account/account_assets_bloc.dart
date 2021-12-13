@@ -8,10 +8,10 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../data/repositories/ton_assets_repository.dart';
+import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
 import '../../models/token_contract_asset.dart';
-import '../../repositories/ton_assets_repository.dart';
-import '../../services/nekoton_service.dart';
 
 part 'account_assets_bloc.freezed.dart';
 

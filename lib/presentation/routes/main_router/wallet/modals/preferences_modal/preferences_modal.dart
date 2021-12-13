@@ -7,9 +7,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../../../domain/blocs/account/account_renaming_bloc.dart';
-import '../../../../../../domain/utils/explorer.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
+import '../../../../../design/explorer.dart';
 import '../../../../../design/widgets/crystal_title.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';

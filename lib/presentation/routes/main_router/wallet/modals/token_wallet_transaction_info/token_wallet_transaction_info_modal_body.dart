@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../../../domain/utils/explorer.dart';
-import '../../../../../../domain/utils/transaction_time.dart';
 import '../../../../../design/design.dart';
+import '../../../../../design/explorer.dart';
+import '../../../../../design/transaction_time.dart';
 import '../../../../../design/widgets/crystal_title.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';

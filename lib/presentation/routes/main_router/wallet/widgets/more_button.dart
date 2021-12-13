@@ -7,6 +7,7 @@ import '../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/custom_popup_menu.dart';
+import '../../main_router_page.dart';
 import '../modals/account_removement_modal/show_account_removement_modal.dart';
 import '../modals/custodians_modal/show_custodians_modal.dart';
 import '../modals/preferences_modal/show_preferences_modal.dart';
@@ -83,19 +84,19 @@ class _MoreButtonState extends State<MoreButton> {
     switch (value) {
       case _Actions.preferences:
         showPreferencesModal(
-          context: context,
+          context: mainRouterPageKey.currentContext ?? context,
           address: widget.address,
         );
         break;
       case _Actions.custodians:
         showCustodiansModal(
-          context: context,
+          context: mainRouterPageKey.currentContext ?? context,
           address: widget.address,
         );
         break;
       case _Actions.removeAccount:
         showAccountRemovementDialog(
-          context: context,
+          context: mainRouterPageKey.currentContext ?? context,
           address: widget.address,
         );
         break;

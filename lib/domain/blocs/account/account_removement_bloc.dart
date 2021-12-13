@@ -4,8 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
-import '../../services/nekoton_service.dart';
 
 part 'account_removement_bloc.freezed.dart';
 

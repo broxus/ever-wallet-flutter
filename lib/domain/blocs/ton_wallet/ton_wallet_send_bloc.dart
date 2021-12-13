@@ -5,8 +5,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
-import '../../services/nekoton_service.dart';
 
 part 'ton_wallet_send_bloc.freezed.dart';
 
@@ -30,8 +30,6 @@ class TonWalletSendBloc extends Bloc<TonWalletSendEvent, TonWalletSendState> {
           message: event.message,
           password: event.password,
         );
-
-        await Future.delayed(const Duration(seconds: 3));
 
         yield const TonWalletSendState.success();
       }

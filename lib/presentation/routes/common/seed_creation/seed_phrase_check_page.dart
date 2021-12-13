@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../domain/constants/phrase_generation.dart';
-import '../../../../domain/utils/phrase_check.dart';
 import '../../../design/design.dart';
+import '../../../design/phrase_check.dart';
+import '../../../design/phrase_generation.dart';
 import '../../../design/widgets/animated_offstage.dart';
 import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_back_button.dart';

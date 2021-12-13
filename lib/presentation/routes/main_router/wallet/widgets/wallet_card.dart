@@ -4,7 +4,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -14,10 +13,7 @@ import '../../../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/extension.dart';
-import '../../../../design/widgets/crystal_bottom_sheet.dart';
 import '../../../../design/widgets/wallet_card_selectable_field.dart';
-import '../modals/account_removement_body.dart';
-import '../modals/preferences_body.dart';
 import 'more_button.dart';
 
 class WalletCard extends StatefulWidget {
@@ -33,9 +29,6 @@ class WalletCard extends StatefulWidget {
 }
 
 class _WalletCardState extends State<WalletCard> {
-  final menuController = SelectionController();
-  final addressController = SelectionController();
-  final publicKeyController = SelectionController();
   final tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>();
   final accountInfoBloc = getIt.get<AccountInfoBloc>();
 
@@ -59,76 +52,66 @@ class _WalletCardState extends State<WalletCard> {
   void dispose() {
     tonWalletInfoBloc.close();
     accountInfoBloc.close();
-    menuController.dispose();
-    addressController.dispose();
-    publicKeyController.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: () {
-          menuController.dismiss();
-          addressController.dismiss();
-          publicKeyController.dismiss();
-        },
-        child: AnimatedAppearance(
-          child: Stack(
-            children: [
-              Container(
-                height: 200,
-                decoration: const ShapeDecoration(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))),
+  Widget build(BuildContext context) => AnimatedAppearance(
+        child: Stack(
+          children: [
+            Container(
+              height: 200,
+              decoration: const ShapeDecoration(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))),
+                gradient: LinearGradient(
+                  begin: Alignment.bottomLeft,
+                  end: Alignment.topRight,
+                  stops: [0, 0.45],
+                  colors: [
+                    Color(0xFFA6AEBD),
+                    CrystalColor.background,
+                  ],
+                ),
+              ),
+              child: Container(
+                margin: const EdgeInsets.all(1),
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(6)),
                   gradient: LinearGradient(
-                    begin: Alignment.bottomLeft,
+                    begin: const Alignment(-5, 2),
                     end: Alignment.topRight,
-                    stops: [0, 0.45],
+                    stops: const [0, 0.75],
                     colors: [
-                      Color(0xFFA6AEBD),
+                      Colors.white.withOpacity(0.1),
                       CrystalColor.background,
                     ],
                   ),
                 ),
-                child: Container(
-                  margin: const EdgeInsets.all(1),
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(6)),
-                    gradient: LinearGradient(
-                      begin: const Alignment(-5, 2),
-                      end: Alignment.topRight,
-                      stops: const [0, 0.75],
-                      colors: [
-                        Colors.white.withOpacity(0.1),
-                        CrystalColor.background,
-                      ],
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      flex: 17,
+                      child: buildInfo(),
                     ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        flex: 17,
-                        child: buildInfo(),
-                      ),
-                      Expanded(flex: 6, child: buildPattern()),
-                    ],
-                  ),
+                    Expanded(flex: 6, child: buildPattern()),
+                  ],
                 ),
               ),
-              BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-                bloc: tonWalletInfoBloc,
-                builder: (context, state) => state != null
-                    ? Positioned(
-                        top: 8,
-                        right: 8,
-                        child: MoreButton(address: state.address),
-                        //  buildMoreButton(address: state.address),
-                      )
-                    : const SizedBox(),
-              ),
-            ],
-          ),
+            ),
+            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
+              bloc: tonWalletInfoBloc,
+              builder: (context, state) => state != null
+                  ? Positioned(
+                      top: 8,
+                      right: 8,
+                      child: MoreButton(address: state.address),
+                      //  buildMoreButton(address: state.address),
+                    )
+                  : const SizedBox(),
+            ),
+          ],
         ),
       );
 
@@ -174,13 +157,11 @@ class _WalletCardState extends State<WalletCard> {
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
                   ? buildNamedField(
-                      controller: publicKeyController,
                       name: LocaleKeys.fields_public_key.tr(),
                       value: state.publicKey,
                       ellipsedValue: state.publicKey.ellipsePublicKey(),
                     )
                   : buildNamedField(
-                      controller: publicKeyController,
                       name: LocaleKeys.fields_public_key.tr(),
                     ),
             ),
@@ -188,13 +169,11 @@ class _WalletCardState extends State<WalletCard> {
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
                   ? buildNamedField(
-                      controller: addressController,
                       name: LocaleKeys.fields_address.tr(),
                       value: state.address,
                       ellipsedValue: state.address.ellipseAddress(),
                     )
                   : buildNamedField(
-                      controller: addressController,
                       name: LocaleKeys.fields_address.tr(),
                     ),
             ),
@@ -226,7 +205,6 @@ class _WalletCardState extends State<WalletCard> {
       );
 
   Widget buildNamedField({
-    SelectionController? controller,
     required String name,
     String? value,
     String? ellipsedValue,
@@ -305,137 +283,6 @@ class _WalletCardState extends State<WalletCard> {
       minFontSize: 10,
     );
   }
-
-  Widget buildMoreButton({
-    required String address,
-  }) =>
-      SelectionWidget(
-        controller: menuController,
-        configuration: const SelectionConfiguration(
-          hapticOnShown: false,
-          openOnTap: true,
-          openOnDoubleTap: false,
-          autoClose: false,
-          parentAnchor: Alignment.bottomRight,
-          childAnchor: Alignment.topRight,
-        ),
-        overlay: (context) => Padding(
-          padding: const EdgeInsets.only(right: 4, top: 4),
-          child: Material(
-            elevation: 1,
-            type: MaterialType.transparency,
-            borderRadius: BorderRadius.circular(Platform.isIOS ? 13 : 4),
-            clipBehavior: Clip.antiAlias,
-            child: IntrinsicWidth(
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: PlatformWidget(
-                      cupertino: (context, _) => BackdropFilter(
-                        filter: ImageFilter.blur(sigmaY: 30, sigmaX: 30),
-                        child: const ColoredBox(color: Colors.transparent),
-                      ),
-                    ),
-                  ),
-                  ColoredBox(
-                    color: Platform.isIOS ? const Color.fromRGBO(237, 237, 237, 0.8) : CrystalColor.primary,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        buildDropDownAction(
-                          onTap: () {
-                            menuController.dismiss();
-
-                            showCrystalBottomSheet(
-                              context,
-                              title: PreferencesBody.title,
-                              body: PreferencesBody(
-                                address: widget.address,
-                              ),
-                            );
-                          },
-                          title: PreferencesBody.title,
-                        ),
-                        Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: Platform.isIOS ? const Color.fromRGBO(60, 60, 67, 0.36) : CrystalColor.divider,
-                        ),
-                        Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: Platform.isIOS ? const Color.fromRGBO(60, 60, 67, 0.36) : CrystalColor.divider,
-                        ),
-                        buildDropDownAction(
-                          onTap: () {
-                            menuController.dismiss();
-
-                            showCrystalBottomSheet(
-                              context,
-                              title: AccountRemovementBody.title,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              body: AccountRemovementBody(
-                                address: widget.address,
-                              ),
-                              expand: false,
-                              avoidBottomInsets: false,
-                              hasTitleDivider: true,
-                            );
-                          },
-                          title: LocaleKeys.actions_remove_account.tr(),
-                          isDestructive: true,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        child: (onHold) => Container(
-          width: 28,
-          height: 28,
-          margin: const EdgeInsets.all(4),
-          decoration: ShapeDecoration(
-            shape: const CircleBorder(),
-            color: CrystalColor.actionBackground.withOpacity(0.32),
-          ),
-          child: Center(
-            child: Icon(
-              Icons.more_horiz,
-              color: onHold ? CrystalColor.secondary : CrystalColor.primary,
-            ),
-          ),
-        ),
-      );
-
-  Widget buildDropDownAction({
-    required String title,
-    VoidCallback? onTap,
-    bool isDestructive = false,
-  }) =>
-      Material(
-        type: MaterialType.transparency,
-        child: CrystalInkWell(
-          splashColor: CrystalColor.fontDark,
-          highlightColor: CrystalColor.fontDark,
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            child: Text(
-              title,
-              textAlign: TextAlign.start,
-              style: TextStyle(
-                fontSize: 16,
-                color: isDestructive ? CrystalColor.error : CrystalColor.fontDark,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
-      );
 
   Widget buildShimmer({
     double height = 16,

@@ -3,9 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../../../domain/utils/transaction_time.dart';
 import '../../../../design/design.dart';
-import '../../../../design/widgets/custom_ink_well.dart';
+import '../../../../design/transaction_time.dart';
 import '../modals/token_wallet_transaction_info/show_token_wallet_transaction_info.dart';
 
 class TokenWalletTransactionHolder extends StatelessWidget {
@@ -49,7 +48,7 @@ class TokenWalletTransactionHolder extends StatelessWidget {
     final date = transactionWithData.transaction.createdAt.toDateTime();
     final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
 
-    return CustomInkWell(
+    return InkWell(
       onTap: () => showTokenWalletTransactionInfo(
         context: context,
         transactionWithData: transactionWithData,

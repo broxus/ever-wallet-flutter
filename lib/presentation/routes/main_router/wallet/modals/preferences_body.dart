@@ -11,9 +11,9 @@ import '../../../../../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../../../../../domain/blocs/account/account_renaming_bloc.dart';
 import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../../../domain/models/ton_wallet_info.dart';
-import '../../../../../../../../domain/utils/explorer.dart';
 import '../../../../../../../../injection.dart';
 import '../../../../design/design.dart';
+import '../../../../design/explorer.dart';
 
 class PreferencesBody extends StatefulWidget {
   final String address;

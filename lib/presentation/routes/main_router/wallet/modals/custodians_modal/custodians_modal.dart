@@ -12,6 +12,7 @@ import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/crystal_title.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/custom_popup_menu.dart';
+import 'edit_custodian_label_dialog.dart';
 
 class CustodiansModalBody extends StatefulWidget {
   final String address;
@@ -57,35 +58,36 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
           builder: (context, infoState) {
             final custodians = infoState?.custodians?.map((e) => Tuple2(publicKeysLabelsState[e], e)).toList() ?? [];
 
-            return custodians.isNotEmpty
-                ? Material(
-                    color: Colors.white,
-                    child: SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: SingleChildScrollView(
-                          physics: const ClampingScrollPhysics(),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+            return ConstrainedBox(
+              constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.longestSide / 2),
+              child: Material(
+                color: Colors.white,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: title(),
-                                  ),
-                                  const CustomCloseButton(),
-                                ],
+                              Expanded(
+                                child: title(),
                               ),
-                              const SizedBox(height: 16),
-                              list(custodians),
+                              const CustomCloseButton(),
                             ],
                           ),
-                        ),
+                          const SizedBox(height: 16),
+                          if (custodians.isNotEmpty) list(custodians),
+                        ],
                       ),
                     ),
-                  )
-                : const SizedBox();
+                  ),
+                ),
+              ),
+            );
           },
         ),
       );
@@ -128,14 +130,17 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
         subtitle: Text(
           publicKey.ellipsePublicKey(),
         ),
-        trailing: more(),
+        trailing: more(publicKey),
       );
 
-  Widget more() => CustomPopupMenu(
+  Widget more(String publicKey) => CustomPopupMenu(
         items: [
           Tuple2(
             'Edit',
-            () {},
+            () => showEditCustodianLabelDialog(
+              context: context,
+              publicKey: publicKey,
+            ),
           ),
         ],
         icon: const Icon(

@@ -5,8 +5,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
-import '../../services/nekoton_service.dart';
 
 part 'ton_wallet_estimate_fees_bloc.freezed.dart';
 
@@ -32,7 +32,7 @@ class TonWalletEstimateFeesBloc extends Bloc<TonWalletEstimateFeesEvent, TonWall
         final balance = await tonWallet.contractState.then((value) => value.balance);
         final balanceValue = int.parse(balance);
 
-        final amountValue = int.parse(event.amount.fromTokens());
+        final amountValue = int.parse(event.amount);
 
         final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);
 

@@ -6,7 +6,7 @@ import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
-import '../repositories/public_keys_labels_repository.dart';
+import '../../data/repositories/public_keys_labels_repository.dart';
 
 part 'public_keys_labels_bloc.freezed.dart';
 
@@ -31,12 +31,14 @@ class PublicKeysLabelsBloc extends Bloc<_Event, Map<String, String>> {
   Stream<Map<String, String>> mapEventToState(_Event event) async* {
     try {
       if (event is _Save) {
-        await _publicKeysLabelsRepository.save(
-          publicKey: event.publicKey,
-          label: event.label,
-        );
-      } else if (event is _Remove) {
-        await _publicKeysLabelsRepository.remove(event.publicKey);
+        if (event.label.isNotEmpty) {
+          await _publicKeysLabelsRepository.save(
+            publicKey: event.publicKey,
+            label: event.label,
+          );
+        } else {
+          await _publicKeysLabelsRepository.remove(event.publicKey);
+        }
       } else if (event is _Update) {
         yield event.labels;
       }
@@ -62,6 +64,4 @@ class PublicKeysLabelsEvent extends _Event with _$PublicKeysLabelsEvent {
     required String publicKey,
     required String label,
   }) = _Save;
-
-  const factory PublicKeysLabelsEvent.remove(String publicKey) = _Remove;
 }

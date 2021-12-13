@@ -3,29 +3,28 @@ import 'dart:async';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/subjects.dart';
 
-import '../../domain/repositories/biometry_repository.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/local/local_auth_source.dart';
 
 @preResolve
-@LazySingleton(as: BiometryRepository)
-class BiometryRepositoryImpl implements BiometryRepository {
+@lazySingleton
+class BiometryRepository {
   final HiveSource _hiveSource;
   final LocalAuthSource _localAuthSource;
   final _availabilitySubject = BehaviorSubject<bool>();
   final _statusSubject = BehaviorSubject<bool>();
 
-  BiometryRepositoryImpl._(
+  BiometryRepository._(
     this._hiveSource,
     this._localAuthSource,
   );
 
   @factoryMethod
-  static Future<BiometryRepositoryImpl> create(
+  static Future<BiometryRepository> create(
     HiveSource hiveSource,
     LocalAuthSource localAuthSource,
   ) async {
-    final biometryRepositoryImpl = BiometryRepositoryImpl._(
+    final biometryRepositoryImpl = BiometryRepository._(
       hiveSource,
       localAuthSource,
     );
@@ -33,31 +32,24 @@ class BiometryRepositoryImpl implements BiometryRepository {
     return biometryRepositoryImpl;
   }
 
-  @override
   Stream<bool> get biometryAvailabilityStream => _availabilitySubject.stream.distinct();
 
-  @override
   bool get biometryAvailability => _availabilitySubject.value;
 
-  @override
   Future<void> checkBiometryAvailability() async {
     final isAvailable = await _localAuthSource.getIsBiometryAvailable();
     _availabilitySubject.add(isAvailable);
   }
 
-  @override
   Stream<bool> get biometryStatusStream => _statusSubject.stream.distinct();
 
-  @override
   bool get biometryStatus => _statusSubject.value;
 
-  @override
   Future<void> setBiometryStatus(bool isEnabled) async {
     await _hiveSource.setBiometryStatus(isEnabled);
     _statusSubject.add(isEnabled);
   }
 
-  @override
   Future<void> setKeyPassword({
     required String publicKey,
     required String password,
@@ -67,16 +59,13 @@ class BiometryRepositoryImpl implements BiometryRepository {
         password: password,
       );
 
-  @override
   String? getKeyPassword(String publicKey) => _hiveSource.getKeyPassword(publicKey);
 
-  @override
   Future<void> clear() async {
     await _hiveSource.clearKeysPasswords();
     await _hiveSource.clearUserPreferences();
   }
 
-  @override
   Future<bool> authenticate(String localizedReason) => _localAuthSource.authenticate(localizedReason);
 
   Future<void> _initialize() async {

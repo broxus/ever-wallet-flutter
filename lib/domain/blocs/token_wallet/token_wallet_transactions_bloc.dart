@@ -6,9 +6,9 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../../data/repositories/token_wallet_transactions_repository.dart';
+import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
-import '../../repositories/token_wallet_transactions_repository.dart';
-import '../../services/nekoton_service.dart';
 
 part 'token_wallet_transactions_bloc.freezed.dart';
 

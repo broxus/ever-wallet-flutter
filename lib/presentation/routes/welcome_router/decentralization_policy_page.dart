@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../domain/utils/decentralization_policy.dart';
+import '../../design/decentralization_policy.dart';
 import '../../design/design.dart';
 import '../../design/widgets/crystal_title.dart';
 import '../../design/widgets/custom_back_button.dart';

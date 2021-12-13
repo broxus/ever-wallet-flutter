@@ -1,39 +1,106 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../../../domain/blocs/key/keys_bloc.dart';
+import '../../../../../../domain/blocs/public_keys_labels_bloc.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/explorer.dart';
 import '../../../../../design/transaction_time.dart';
 import '../../../../../design/widgets/crystal_title.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
+import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
+import '../../../../../design/widgets/transaction_type_label.dart';
 
-class TonWalletTransactionInfoModalBody extends StatelessWidget {
+class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
+  final MultisigPendingTransaction? multisigPendingTransaction;
+  final WalletType? walletType;
+  final List<String>? custodians;
 
-  const TonWalletTransactionInfoModalBody({
+  const TonWalletMultisigPendingTransactionInfoModalBody({
     Key? key,
     required this.transactionWithData,
+    required this.multisigPendingTransaction,
+    required this.walletType,
+    required this.custodians,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final isOutgoing = transactionWithData.transaction.outMessages.isNotEmpty;
-    final sender = transactionWithData.transaction.inMessage.src;
-    final recipient = transactionWithData.transaction.outMessages.firstOrNull?.dst;
-    final value = (isOutgoing
-            ? transactionWithData.transaction.outMessages.first.value
+    final msgSender = transactionWithData.transaction.inMessage.src;
+
+    final dataSender = transactionWithData.data?.maybeWhen(
+      walletInteraction: (info) => info.knownPayload?.maybeWhen(
+        tokenSwapBack: (tokenSwapBack) => tokenSwapBack.callbackAddress,
+        orElse: () => null,
+      ),
+      orElse: () => null,
+    );
+
+    final sender = dataSender ?? msgSender;
+
+    final msgRecipient = transactionWithData.transaction.outMessages.firstOrNull?.dst;
+
+    final dataRecipient = transactionWithData.data?.maybeWhen(
+      walletInteraction: (info) =>
+          info.knownPayload?.maybeWhen(
+            tokenOutgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.address,
+            orElse: () => null,
+          ) ??
+          info.method.maybeWhen(
+            multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+              send: (multisigSendTransaction) => multisigSendTransaction.dest,
+              submit: (multisigSubmitTransaction) => multisigSubmitTransaction.dest,
+              orElse: () => null,
+            ),
+            orElse: () => null,
+          ) ??
+          info.recipient,
+      orElse: () => null,
+    );
+
+    final recipient = dataRecipient ?? msgRecipient;
+
+    final isOutgoing = recipient != null;
+
+    final msgValue = (isOutgoing
+            ? transactionWithData.transaction.outMessages.firstOrNull?.value
             : transactionWithData.transaction.inMessage.value)
-        .toTokens()
+        ?.toTokens()
         .removeZeroes()
         .formatValue();
+
+    final dataValue = transactionWithData.data
+        ?.maybeWhen(
+          dePoolOnRoundComplete: (notification) => notification.reward,
+          walletInteraction: (info) => info.method.maybeWhen(
+            multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+              send: (multisigSendTransaction) => multisigSendTransaction.value,
+              submit: (multisigSubmitTransaction) => multisigSubmitTransaction.value,
+              orElse: () => null,
+            ),
+            orElse: () => null,
+          ),
+          orElse: () => null,
+        )
+        ?.toTokens()
+        .removeZeroes()
+        .formatValue();
+
+    final value = dataValue ?? msgValue;
+
     final address = isOutgoing ? recipient : sender;
+
     final date = transactionWithData.transaction.createdAt.toDateTime();
+
     final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
+
     final hash = transactionWithData.transaction.id.hash;
 
     final comment = transactionWithData.data?.maybeWhen(
@@ -169,6 +236,34 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       orElse: () => null,
     );
 
+    final signsReceived = multisigPendingTransaction?.signsReceived;
+
+    final signsRequired = multisigPendingTransaction?.signsRequired;
+
+    final creator = multisigPendingTransaction?.creator;
+
+    final confirmations = multisigPendingTransaction?.confirmations;
+
+    final keys = custodians != null && confirmations != null
+        ? context
+            .read<KeysBloc>()
+            .state
+            .keys
+            .entries
+            .map(
+              (e) => [
+                e.key,
+                if (e.value != null) ...e.value!,
+              ],
+            )
+            .expand((e) => e)
+            .map((e) => e.publicKey)
+            .where(
+              (e) => custodians!.where((e) => !confirmations.contains(e)).contains(e),
+            )
+            .toList()
+        : <String>[];
+
     final sections = [
       section(
         [
@@ -184,10 +279,11 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       ),
       section(
         [
-          amountItem(
-            isOutgoing: isOutgoing,
-            value: value,
-          ),
+          if (value != null)
+            amountItem(
+              isOutgoing: isOutgoing,
+              value: value,
+            ),
           feeItem(fees),
         ],
       ),
@@ -284,6 +380,28 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
                 .toList(),
           ],
         ),
+      section(
+        [
+          if (signsReceived != null && signsRequired != null)
+            signaturesItem(
+              received: signsReceived,
+              required: signsRequired,
+            ),
+          if (custodians != null && confirmations != null)
+            ...custodians!
+                .asMap()
+                .entries
+                .map(
+                  (e) => custodiansItem(
+                    label: context.read<PublicKeysLabelsBloc>().state[e.value] ?? 'Custodian ${e.key + 1}',
+                    publicKey: e.value,
+                    isCreator: e.value == creator,
+                    isSigned: confirmations.contains(e.value),
+                  ),
+                )
+                .toList(),
+        ],
+      ),
     ];
 
     return Material(
@@ -306,8 +424,14 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
+                label(),
+                const SizedBox(height: 16),
                 list(sections),
                 const SizedBox(height: 32),
+                if (keys.isNotEmpty) ...[
+                  confirmButton(keys),
+                  const SizedBox(height: 16),
+                ],
                 explorerButton(hash),
               ],
             ),
@@ -316,6 +440,15 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       ),
     );
   }
+
+  Widget label() => Row(
+        children: const [
+          TransactionTypeLabel(
+            text: 'Waiting for confirmation',
+            color: CrystalColor.error,
+          ),
+        ],
+      );
 
   Widget list(List<Widget> list) => ListView.separated(
         shrinkWrap: true,
@@ -339,15 +472,24 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
   Widget item({
     required String title,
     required String subtitle,
+    Widget? label,
   }) =>
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.grey,
-            ),
+          Row(
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+              if (label != null) ...[
+                const SizedBox(width: 8),
+                label,
+              ]
+            ],
           ),
           const SizedBox(height: 4),
           SelectableText(
@@ -397,12 +539,68 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
         subtitle: type,
       );
 
+  Widget signaturesItem({
+    required int received,
+    required int required,
+  }) =>
+      item(
+        title: 'Signatures',
+        subtitle: '$received of $required signatures collected',
+      );
+
+  Widget custodiansItem({
+    required String label,
+    required String publicKey,
+    required bool isCreator,
+    required bool isSigned,
+  }) =>
+      item(
+        title: label,
+        subtitle: publicKey,
+        label: Row(
+          children: [
+            if (isSigned)
+              custodianLabel(
+                text: 'Signed',
+                color: CrystalColor.success,
+              )
+            else
+              custodianLabel(
+                text: 'Not signed',
+                color: CrystalColor.fontDark,
+              ),
+            if (isCreator) ...[
+              const SizedBox(width: 8),
+              custodianLabel(
+                text: 'Initiator',
+                color: CrystalColor.pending,
+              ),
+            ],
+          ],
+        ),
+      );
+
   Widget title() => const CrystalTitle(
         text: 'Transaction information',
+      );
+
+  Widget confirmButton(List<String> keys) => CustomElevatedButton(
+        onPressed: () => {},
+        text: 'Confirm transaction',
       );
 
   Widget explorerButton(String hash) => CustomOutlinedButton(
         onPressed: () => launch(getTransactionExplorerLink(hash)),
         text: 'See in the explorer',
+      );
+
+  Widget custodianLabel({
+    required String text,
+    required Color color,
+  }) =>
+      TransactionTypeLabel(
+        text: text,
+        color: color,
+        borderRadius: BorderRadius.circular(4),
       );
 }

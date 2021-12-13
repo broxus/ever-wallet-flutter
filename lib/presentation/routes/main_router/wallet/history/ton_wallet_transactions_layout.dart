@@ -12,13 +12,11 @@ import 'ton_wallet_transaction_holder.dart';
 class TonWalletTransactionsLayout extends StatefulWidget {
   final String address;
   final ScrollController controller;
-  final Widget Function(String) placeholderBuilder;
 
   const TonWalletTransactionsLayout({
     Key? key,
     required this.address,
     required this.controller,
-    required this.placeholderBuilder,
   }) : super(key: key);
 
   @override
@@ -61,17 +59,30 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
                     padding: EdgeInsets.zero,
                     controller: widget.controller,
                     itemCount: state.length,
-                    separatorBuilder: (_, __) => Container(
+                    separatorBuilder: (_, __) => const Divider(
                       height: 1,
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      color: CrystalColor.divider,
+                      thickness: 1,
                     ),
                     itemBuilder: (context, index) => TonWalletTransactionHolder(
                       transactionWithData: state[index],
                     ),
                   ),
                 )
-              : widget.placeholderBuilder(LocaleKeys.wallet_history_modal_placeholder_transactions_empty.tr()),
+              : placeholder(LocaleKeys.wallet_history_modal_placeholder_transactions_empty.tr()),
+        ),
+      );
+
+  Widget placeholder(String text) => Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 16,
+              color: CrystalColor.fontSecondaryDark,
+            ),
+          ),
         ),
       );
 }

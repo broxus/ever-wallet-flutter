@@ -7,8 +7,8 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
-import '../../services/nekoton_service.dart';
 
 part 'account_creation_options_bloc.freezed.dart';
 

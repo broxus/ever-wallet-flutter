@@ -38,78 +38,65 @@ class _WalletModalBodyState extends State<WalletModalBody> {
   }
 
   @override
-  Widget build(BuildContext context) => Container(
-        height: context.screenSize.height,
-        padding: EdgeInsets.only(top: Platform.isIOS ? 19 : 6),
-        child: DefaultTabController(
-          length: _tabs.length,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        height: 1,
-                        color: CrystalColor.divider,
-                      ),
-                    ),
-                    TabBar(
-                      tabs: _tabs,
-                      labelStyle: const TextStyle(fontSize: 16),
-                      labelColor: CrystalColor.accent,
-                      unselectedLabelColor: CrystalColor.fontSecondaryDark,
-                      labelPadding: const EdgeInsets.symmetric(vertical: 10),
-                      onTap: widget.onTabSelected,
-                    ),
-                  ],
-                ),
-              ),
-              Flexible(
-                child: BlocBuilder<AccountsBloc, AccountsState>(
-                  bloc: context.watch<AccountsBloc>(),
-                  builder: (context, state) => TabBarView(
-                    physics: const NeverScrollableScrollPhysics(),
+  Widget build(BuildContext context) => Material(
+        color: Colors.white,
+        child: Container(
+          height: context.screenSize.height,
+          padding: EdgeInsets.only(top: Platform.isIOS ? 19 : 6),
+          child: DefaultTabController(
+            length: _tabs.length,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Stack(
                     children: [
-                      if (state.currentAccount != null)
-                        AllAssetsLayout(
-                          address: state.currentAccount!.address,
-                          controller: widget.scrollController,
-                          placeholderBuilder: buildPlaceholder,
-                        )
-                      else
-                        const SizedBox(),
-                      if (state.currentAccount != null)
-                        TonWalletTransactionsLayout(
-                          address: state.currentAccount!.address,
-                          controller: widget.scrollController,
-                          placeholderBuilder: buildPlaceholder,
-                        )
-                      else
-                        const SizedBox(),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 1,
+                          color: CrystalColor.divider,
+                        ),
+                      ),
+                      TabBar(
+                        tabs: _tabs,
+                        labelStyle: const TextStyle(fontSize: 16),
+                        labelColor: CrystalColor.accent,
+                        unselectedLabelColor: CrystalColor.fontSecondaryDark,
+                        labelPadding: const EdgeInsets.symmetric(vertical: 10),
+                        onTap: widget.onTabSelected,
+                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      );
-
-  Widget buildPlaceholder(String text) => Align(
-        alignment: Alignment.topCenter,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16,
-              color: CrystalColor.fontSecondaryDark,
+                Flexible(
+                  child: BlocBuilder<AccountsBloc, AccountsState>(
+                    bloc: context.watch<AccountsBloc>(),
+                    builder: (context, state) => TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        if (state.currentAccount != null)
+                          AllAssetsLayout(
+                            address: state.currentAccount!.address,
+                            controller: widget.scrollController,
+                          )
+                        else
+                          const SizedBox(),
+                        if (state.currentAccount != null)
+                          TonWalletTransactionsLayout(
+                            address: state.currentAccount!.address,
+                            controller: widget.scrollController,
+                          )
+                        else
+                          const SizedBox(),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

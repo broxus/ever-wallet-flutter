@@ -1,17 +1,15 @@
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../domain/repositories/token_wallet_transactions_repository.dart';
 import '../dtos/token_wallet_transaction_with_data_dto.dart';
 import '../sources/local/hive_source.dart';
 
-@LazySingleton(as: TokenWalletTransactionsRepository)
-class TokenWalletTransactionsRepositoryImpl implements TokenWalletTransactionsRepository {
+@lazySingleton
+class TokenWalletTransactionsRepository {
   final HiveSource _hiveSource;
 
-  TokenWalletTransactionsRepositoryImpl(this._hiveSource);
+  TokenWalletTransactionsRepository(this._hiveSource);
 
-  @override
   List<TokenWalletTransactionWithData>? get({
     required String owner,
     required String rootTokenContract,
@@ -24,7 +22,6 @@ class TokenWalletTransactionsRepositoryImpl implements TokenWalletTransactionsRe
           ?.map((e) => e.toModel())
           .toList();
 
-  @override
   Future<void> save({
     required List<TokenWalletTransactionWithData> tokenWalletTransactions,
     required String owner,
@@ -36,7 +33,6 @@ class TokenWalletTransactionsRepositoryImpl implements TokenWalletTransactionsRe
         rootTokenContract: rootTokenContract,
       );
 
-  @override
   Future<void> remove({
     required String owner,
     required String rootTokenContract,
@@ -46,6 +42,5 @@ class TokenWalletTransactionsRepositoryImpl implements TokenWalletTransactionsRe
         rootTokenContract: rootTokenContract,
       );
 
-  @override
   Future<void> clear() => _hiveSource.clearTokenWalletTransactions();
 }

@@ -6,9 +6,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../data/repositories/biometry_repository.dart';
+import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
-import '../../repositories/biometry_repository.dart';
-import '../../services/nekoton_service.dart';
 
 part 'key_creation_bloc.freezed.dart';
 

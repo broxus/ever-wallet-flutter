@@ -7,7 +7,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../logger.dart';
-import '../services/nekoton_service.dart';
+import '../../data/services/nekoton_service.dart';
 
 part 'connection_bloc.freezed.dart';
 

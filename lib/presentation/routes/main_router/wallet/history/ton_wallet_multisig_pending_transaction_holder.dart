@@ -6,16 +6,24 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../design/design.dart';
 import '../../../../design/transaction_time.dart';
+import '../../../../design/widgets/confirmation_time_counter.dart';
 import '../../../../design/widgets/ton_asset_icon.dart';
+import '../../../../design/widgets/transaction_type_label.dart';
 import '../../main_router_page.dart';
-import '../modals/ton_wallet_transaction_info/show_ton_wallet_transaction_info.dart';
+import '../modals/ton_wallet_multisig_pending_transaction_info/show_ton_wallet_multisig_pending_transaction_info.dart';
 
-class TonWalletTransactionHolder extends StatelessWidget {
+class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
+  final MultisigPendingTransaction? multisigPendingTransaction;
+  final WalletType? walletType;
+  final List<String>? custodians;
 
-  const TonWalletTransactionHolder({
+  const TonWalletMultisigPendingTransactionHolder({
     Key? key,
     required this.transactionWithData,
+    this.multisigPendingTransaction,
+    this.walletType,
+    this.custodians,
   }) : super(key: key);
 
   @override
@@ -88,10 +96,34 @@ class TonWalletTransactionHolder extends StatelessWidget {
 
     final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
 
+    final signsReceived = multisigPendingTransaction?.signsReceived;
+
+    final signsRequired = multisigPendingTransaction?.signsRequired;
+
+    final timeForConfirmation = walletType?.maybeWhen(
+      multisig: (multisigType) {
+        switch (multisigType) {
+          case MultisigType.safeMultisigWallet:
+          case MultisigType.setcodeMultisigWallet:
+          case MultisigType.bridgeMultisigWallet:
+          case MultisigType.surfWallet:
+            return const Duration(hours: 1);
+          case MultisigType.safeMultisigWallet24h:
+            return const Duration(hours: 24);
+        }
+      },
+      orElse: () => const Duration(hours: 1),
+    );
+
+    final leftForConfirmation = timeForConfirmation != null ? date.add(timeForConfirmation) : null;
+
     return InkWell(
-      onTap: () => showTonWalletTransactionInfo(
+      onTap: () => tonWalletMultisigPendingTransactionInfo(
         context: mainRouterPageKey.currentContext ?? context,
         transactionWithData: transactionWithData,
+        multisigPendingTransaction: multisigPendingTransaction,
+        walletType: walletType,
+        custodians: custodians,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -127,6 +159,20 @@ class TonWalletTransactionHolder extends StatelessWidget {
                       dateTitle(date),
                     ],
                   ),
+                  const SizedBox(height: 4),
+                  label(),
+                  const SizedBox(height: 4),
+                  if (signsReceived != null && signsRequired != null) ...[
+                    confirmsTitle(
+                      signsReceived: signsReceived,
+                      signsRequired: signsRequired,
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                  if (leftForConfirmation != null)
+                    ConfirmationTimeCounter(
+                      expireAt: leftForConfirmation,
+                    ),
                 ],
               ),
             ),
@@ -167,5 +213,21 @@ class TonWalletTransactionHolder extends StatelessWidget {
 
   Widget dateTitle(DateTime date) => Text(
         DateFormat('MMM d, H:mm').format(date),
+      );
+
+  Widget label() => const TransactionTypeLabel(
+        text: 'Waiting for confirmation',
+        color: CrystalColor.error,
+      );
+
+  Widget confirmsTitle({
+    required int signsReceived,
+    required int signsRequired,
+  }) =>
+      Text(
+        'Signed $signsReceived of $signsRequired',
+        style: const TextStyle(
+          color: Colors.black45,
+        ),
       );
 }

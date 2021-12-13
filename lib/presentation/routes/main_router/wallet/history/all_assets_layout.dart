@@ -11,13 +11,11 @@ import 'ton_wallet_asset_holder.dart';
 class AllAssetsLayout extends StatefulWidget {
   final String address;
   final ScrollController controller;
-  final Widget Function(String) placeholderBuilder;
 
   const AllAssetsLayout({
     Key? key,
     required this.address,
     required this.controller,
-    required this.placeholderBuilder,
   }) : super(key: key);
 
   @override

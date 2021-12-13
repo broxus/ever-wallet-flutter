@@ -6,8 +6,8 @@ import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../data/repositories/biometry_repository.dart';
 import '../../../logger.dart';
-import '../../repositories/biometry_repository.dart';
 
 part 'biometry_info_bloc.freezed.dart';
 

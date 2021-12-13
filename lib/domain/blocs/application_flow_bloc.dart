@@ -5,14 +5,14 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../data/repositories/biometry_repository.dart';
+import '../../data/repositories/token_wallet_info_repository.dart';
+import '../../data/repositories/token_wallet_transactions_repository.dart';
+import '../../data/repositories/ton_assets_repository.dart';
+import '../../data/repositories/ton_wallet_info_repository.dart';
+import '../../data/repositories/ton_wallet_transactions_repository.dart';
+import '../../data/services/nekoton_service.dart';
 import '../../logger.dart';
-import '../repositories/biometry_repository.dart';
-import '../repositories/token_wallet_info_repository.dart';
-import '../repositories/token_wallet_transactions_repository.dart';
-import '../repositories/ton_assets_repository.dart';
-import '../repositories/ton_wallet_info_repository.dart';
-import '../repositories/ton_wallet_transactions_repository.dart';
-import '../services/nekoton_service.dart';
 
 part 'application_flow_bloc.freezed.dart';
 

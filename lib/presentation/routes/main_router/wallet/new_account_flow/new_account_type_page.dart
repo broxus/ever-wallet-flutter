@@ -8,8 +8,8 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../domain/blocs/account/account_creation_options_bloc.dart';
 import '../../../../../domain/blocs/key/keys_bloc.dart';
-import '../../../../../domain/constants/default_wallet_type.dart';
 import '../../../../../injection.dart';
+import '../../../../design/default_wallet_type.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/crystal_title.dart';
 import '../../../../design/widgets/custom_back_button.dart';

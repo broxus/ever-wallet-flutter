@@ -4,8 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../data/repositories/biometry_repository.dart';
 import '../../../logger.dart';
-import '../../repositories/biometry_repository.dart';
 
 part 'biometry_get_password_bloc.freezed.dart';
 

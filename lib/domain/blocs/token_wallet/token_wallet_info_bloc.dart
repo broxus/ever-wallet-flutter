@@ -5,10 +5,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../../data/repositories/token_wallet_info_repository.dart';
+import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
 import '../../models/token_wallet_info.dart';
-import '../../repositories/token_wallet_info_repository.dart';
-import '../../services/nekoton_service.dart';
 
 part 'token_wallet_info_bloc.freezed.dart';
 

@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import '../constants/phrase_generation.dart';
+import 'phrase_generation.dart';
 
 Map<int, String> generateCheckingMap(List<String> phrase) {
   final rng = Random();
