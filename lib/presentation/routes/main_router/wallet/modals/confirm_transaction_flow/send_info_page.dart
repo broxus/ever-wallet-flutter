@@ -1,15 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../domain/blocs/biometry/biometry_get_password_bloc.dart';
+import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_transfer_bloc.dart';
-import '../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/custom_back_button.dart';
@@ -83,6 +81,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
       );
 
   Widget scaffold() => Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           leading: const CustomBackButton(),
           title: const Text(
@@ -255,30 +254,14 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
   }
 
   Future<String?> getPasswordFromBiometry(String publicKey) async {
-    final biometryGetPasswordBloc = getIt.get<BiometryGetPasswordBloc>();
-
-    biometryGetPasswordBloc.add(
-      BiometryGetPasswordEvent.get(
-        localizedReason: 'Please authenticate to interact with wallet',
-        publicKey: publicKey,
-      ),
-    );
-
-    final state = await biometryGetPasswordBloc.stream.firstWhere(
-      (e) => e.maybeWhen(
-        success: (_) => true,
-        orElse: () => false,
-      ),
-    );
-
-    Future.delayed(const Duration(seconds: 1), () async {
-      biometryGetPasswordBloc.close();
-    });
-
-    return state.maybeWhen(
-      success: (password) => password,
-      orElse: () => null,
-    );
+    try {
+      return getIt.get<BiometryRepository>().getKeyPassword(
+            localizedReason: 'Please authenticate to interact with wallet',
+            publicKey: publicKey,
+          );
+    } catch (err) {
+      return null;
+    }
   }
 
   Future<void> pushDeploymentResult({

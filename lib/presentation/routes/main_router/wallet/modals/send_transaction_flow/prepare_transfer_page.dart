@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +8,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:validators/validators.dart';
 
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_title.dart';
@@ -19,7 +17,6 @@ import '../../../../../design/widgets/custom_text_form_field.dart';
 import '../../../../../design/widgets/text_field_clear_button.dart';
 import '../../../../../design/widgets/text_suffix_icon_button.dart';
 import '../../../../../design/widgets/unfocusing_gesture_detector.dart';
-import '../../../main_router_page.dart';
 import '../common/check_camera_permission.dart';
 import '../common/parse_scan_result.dart';
 import '../common/scanner_widget.dart';
@@ -72,6 +69,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
   @override
   Widget build(BuildContext context) => UnfocusingGestureDetector(
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
           body: body(),
         ),
       );
@@ -267,7 +265,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
 
     if (!mounted) return;
 
-    final result = await Navigator.of(mainRouterPageKey.currentContext ?? context).push<String>(
+    final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (context) => const ScannerWidget(),
       ),

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-import '../../../../../../domain/blocs/key/key_password_checking_bloc.dart';
+import '../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_subtitle.dart';
@@ -31,36 +30,30 @@ class PasswordEnterPage extends StatefulWidget {
 
 class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
   final controller = TextEditingController();
-  final bloc = getIt.get<KeyPasswordCheckingBloc>();
   final passwordFieldKey = GlobalKey<FormBuilderFieldState>();
+  final formValidityNotifier = ValueNotifier<bool?>(null);
 
   @override
   void dispose() {
     controller.dispose();
-    bloc.close();
+    formValidityNotifier.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocListener<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
-        bloc: bloc,
-        listener: (context, state) => state.maybeWhen(
-          success: (isCorrect) => isCorrect ? widget.onSubmit(controller.text) : null,
-          orElse: () => null,
-        ),
-        child: UnfocusingGestureDetector(
-          child: Scaffold(
-            appBar: AppBar(
-              leading: const CustomBackButton(),
-              title: const Text(
-                'Enter password',
-                style: TextStyle(
-                  color: Colors.black,
-                ),
+  Widget build(BuildContext context) => UnfocusingGestureDetector(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            leading: const CustomBackButton(),
+            title: const Text(
+              'Enter password',
+              style: TextStyle(
+                color: Colors.black,
               ),
             ),
-            body: body(),
           ),
+          body: body(),
         ),
       );
 
@@ -103,60 +96,38 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
         text: 'Enter your password to continue.',
       );
 
-  Widget passwordField() => BlocListener<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
-        bloc: bloc,
-        listener: (context, state) => state.maybeWhen(
-          success: (isCorrect) {
-            if (!isCorrect) {
-              passwordFieldKey.currentState?.invalidate('Invalid password');
-            } else {
-              passwordFieldKey.currentState?.validate();
-            }
-          },
-          error: (exception) {
-            passwordFieldKey.currentState?.invalidate(exception.toString());
-          },
-          orElse: () {
-            passwordFieldKey.currentState?.validate();
-          },
-        ),
-        child: CustomTextFormField(
-          fieldKey: passwordFieldKey,
-          name: 'password',
+  Widget passwordField() => CustomTextFormField(
+        fieldKey: passwordFieldKey,
+        name: 'password',
+        controller: controller,
+        autocorrect: false,
+        enableSuggestions: false,
+        obscureText: true,
+        hintText: 'Enter password...',
+        suffixIcon: TextFieldClearButton(
           controller: controller,
-          autocorrect: false,
-          enableSuggestions: false,
-          obscureText: true,
-          textInputAction: TextInputAction.next,
-          hintText: 'Enter password...',
-          suffixIcon: TextFieldClearButton(
-            controller: controller,
-          ),
         ),
       );
 
-  Widget validationText() => BlocBuilder<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
-        bloc: bloc,
-        builder: (context, state) => state.maybeWhen(
-          success: (isCorrect) => !isCorrect
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: const [
-                    SizedBox(height: 16),
-                    Text(
-                      'Invalid password',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: CrystalColor.error,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.25,
-                      ),
+  Widget validationText() => ValueListenableBuilder<bool?>(
+        valueListenable: formValidityNotifier,
+        builder: (context, value, child) => value ?? false
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: const [
+                  SizedBox(height: 16),
+                  Text(
+                    'Invalid password',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: CrystalColor.error,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.25,
                     ),
-                  ],
-                )
-              : const SizedBox(),
-          orElse: () => const SizedBox(),
-        ),
+                  ),
+                ],
+              )
+            : const SizedBox(),
       );
 
   Widget nextButton() => CustomElevatedButton(
@@ -164,10 +135,20 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
         text: 'Submit',
       );
 
-  void onPressed() => bloc.add(
-        KeyPasswordCheckingEvent.check(
+  Future<void> onPressed() async {
+    final isCorrect = await getIt.get<KeysRepository>().checkKeyPassword(
           publicKey: widget.publicKey,
           password: controller.text,
-        ),
-      );
+        );
+
+    formValidityNotifier.value = isCorrect;
+
+    if (!isCorrect) {
+      passwordFieldKey.currentState?.invalidate('Invalid password');
+    } else {
+      passwordFieldKey.currentState?.validate();
+
+      widget.onSubmit(controller.text);
+    }
+  }
 }

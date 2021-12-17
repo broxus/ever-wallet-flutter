@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../../../data/repositories/accounts_repository.dart';
+import '../../../../../data/repositories/external_accounts_repository.dart';
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/custom_popup_menu.dart';
-import '../../main_router_page.dart';
 import '../modals/account_removement_modal/show_account_removement_modal.dart';
 import '../modals/custodians_modal/show_custodians_modal.dart';
 import '../modals/preferences_modal/show_preferences_modal.dart';
 
 class MoreButton extends StatefulWidget {
   final String address;
+  final bool isExternal;
+  final String? publicKey;
 
   const MoreButton({
     Key? key,
     required this.address,
+    this.isExternal = false,
+    this.publicKey,
   }) : super(key: key);
 
   @override
@@ -84,20 +89,32 @@ class _MoreButtonState extends State<MoreButton> {
     switch (value) {
       case _Actions.preferences:
         showPreferencesModal(
-          context: mainRouterPageKey.currentContext ?? context,
+          context: context,
           address: widget.address,
+          isExternal: widget.isExternal,
+          publicKey: widget.publicKey,
         );
         break;
       case _Actions.custodians:
         showCustodiansModal(
-          context: mainRouterPageKey.currentContext ?? context,
+          context: context,
           address: widget.address,
         );
         break;
       case _Actions.removeAccount:
         showAccountRemovementDialog(
-          context: mainRouterPageKey.currentContext ?? context,
+          context: context,
           address: widget.address,
+          onDeletePressed: () async {
+            if (!widget.isExternal) {
+              await getIt.get<AccountsRepository>().removeAccount(widget.address);
+            } else {
+              await getIt.get<ExternalAccountsRepository>().removeExternalAccount(
+                    publicKey: widget.publicKey!,
+                    address: widget.address,
+                  );
+            }
+          },
         );
         break;
     }

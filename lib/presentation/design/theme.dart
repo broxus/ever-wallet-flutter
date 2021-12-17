@@ -17,6 +17,7 @@ ThemeData applicationTheme(BuildContext context) => ThemeData(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
       splashColor: isCupertino(context) ? Colors.transparent : null,
+      scaffoldBackgroundColor: Colors.white,
     );
 
 abstract class CrystalColor {

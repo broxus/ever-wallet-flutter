@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../../domain/blocs/key/key_creation_bloc.dart';
 import '../../../../../../injection.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../design/design.dart';
 import '../widgets/input_password_modal_body.dart';
 
@@ -23,37 +22,24 @@ class DeriveKeyModalBody extends StatefulWidget {
 }
 
 class _DeriveKeyModalBodyState extends State<DeriveKeyModalBody> {
-  late final KeyCreationBloc bloc;
-
   @override
-  void initState() {
-    super.initState();
-    bloc = getIt.get<KeyCreationBloc>();
-  }
+  Widget build(BuildContext context) => InputPasswordModalBody(
+        onSubmit: (password) async {
+          try {
+            await getIt.get<KeysRepository>().deriveKey(
+                  name: widget.name,
+                  publicKey: widget.publicKey,
+                  password: password,
+                );
 
-  @override
-  void dispose() {
-    bloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocListener<KeyCreationBloc, KeyCreationState>(
-        bloc: bloc,
-        listener: (context, state) {
-          if (state is KeyCreationStateSuccess) {
             context.router.navigatorKey.currentState?.pop();
+          } catch (err) {
+            await showCrystalFlushbar(
+              context,
+              message: err.toString(),
+            );
           }
         },
-        child: InputPasswordModalBody(
-          onSubmit: (password) => bloc.add(
-            KeyCreationEvent.derive(
-              name: widget.name,
-              publicKey: widget.publicKey,
-              password: password,
-            ),
-          ),
-          publicKey: widget.publicKey,
-        ),
+        publicKey: widget.publicKey,
       );
 }

@@ -1,6 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -14,13 +12,11 @@ import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_transactions_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_sent_transactions_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_bloc.dart';
-import '../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/preload_transactions_listener.dart';
 import '../../../../../design/widgets/ton_asset_icon.dart';
 import '../../../../../design/widgets/wallet_action_button.dart';
-import '../../../main_router_page.dart';
 import '../../history/ton_wallet_expired_transaction_holder.dart';
 import '../../history/ton_wallet_multisig_pending_transaction_holder.dart';
 import '../../history/ton_wallet_sent_transaction_holder.dart';
@@ -178,7 +174,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
               icon: Assets.images.iconReceive,
               title: LocaleKeys.actions_receive.tr(),
               onPressed: () => showReceiveModal(
-                context: mainRouterPageKey.currentContext ?? context,
+                context: context,
                 address: widget.address,
               ),
             ),
@@ -190,11 +186,11 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
               title: isDeployed ? LocaleKeys.actions_send.tr() : LocaleKeys.actions_deploy.tr(),
               onPressed: isDeployed
                   ? () => startSendTransactionFlow(
-                        context: mainRouterPageKey.currentContext ?? context,
+                        context: context,
                         address: widget.address,
                       )
                   : () => startDeployWalletFlow(
-                        context: mainRouterPageKey.currentContext ?? context,
+                        context: context,
                         address: widget.address,
                       ),
             ),

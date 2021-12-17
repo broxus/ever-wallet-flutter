@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../generated/assets.gen.dart';
 import '../theme.dart';
 import 'badge.dart';
 
@@ -35,10 +34,10 @@ class CrystalSwitch extends StatelessWidget {
             icon: AnimatedOpacity(
               duration: _kSwitchAnimationDuration * (isActive ? 1 : 0.75),
               opacity: isActive ? 1 : 0,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(6, 6, 4.5, 6),
-                child: Image.asset(
-                  Assets.images.iconDone.path,
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(6, 6, 4.5, 6),
+                child: Icon(
+                  Icons.done,
                   color: CrystalColor.success,
                 ),
               ),

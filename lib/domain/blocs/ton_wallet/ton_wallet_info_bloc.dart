@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/subjects.dart';
 
 import '../../../data/repositories/ton_wallet_info_repository.dart';
 import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
-import '../../models/ton_wallet_info.dart';
 
 part 'ton_wallet_info_bloc.freezed.dart';
 

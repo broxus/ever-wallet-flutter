@@ -1,7 +1,6 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class CrystalInkWell extends InkWell {
   CrystalInkWell({

@@ -55,6 +55,7 @@ class _NewSelectWalletTypePageState extends State<SendResultPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+        resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),

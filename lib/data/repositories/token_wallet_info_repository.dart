@@ -1,27 +1,31 @@
 import 'package:injectable/injectable.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../domain/models/token_wallet_info.dart';
-import '../dtos/token_wallet_info_dto.dart';
+import '../services/nekoton_service.dart';
 import '../sources/local/hive_source.dart';
 
 @lazySingleton
 class TokenWalletInfoRepository {
+  final NekotonService _nekotonService;
   final HiveSource _hiveSource;
 
-  TokenWalletInfoRepository(this._hiveSource);
+  TokenWalletInfoRepository(
+    this._nekotonService,
+    this._hiveSource,
+  );
 
   TokenWalletInfo? get({
     required String owner,
     required String rootTokenContract,
   }) =>
-      _hiveSource
-          .getTokenWalletInfo(
-            owner: owner,
-            rootTokenContract: rootTokenContract,
-          )
-          ?.toModel();
+      _hiveSource.getTokenWalletInfo(
+        owner: owner,
+        rootTokenContract: rootTokenContract,
+      );
 
-  Future<void> save(TokenWalletInfo tokenWalletInfo) => _hiveSource.saveTokenWalletInfo(tokenWalletInfo.toDto());
+  String getOwnerPublicKey(String owner) => _nekotonService.accounts.firstWhere((e) => e.address == owner).publicKey;
+
+  Future<void> save(TokenWalletInfo tokenWalletInfo) => _hiveSource.saveTokenWalletInfo(tokenWalletInfo);
 
   Future<void> remove({
     required String owner,

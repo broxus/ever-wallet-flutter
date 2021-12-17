@@ -1,7 +1,6 @@
 import 'package:injectable/injectable.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../domain/models/ton_wallet_info.dart';
-import '../dtos/ton_wallet_info_dto.dart';
 import '../sources/local/hive_source.dart';
 
 @lazySingleton
@@ -10,9 +9,9 @@ class TonWalletInfoRepository {
 
   TonWalletInfoRepository(this._hiveSource);
 
-  TonWalletInfo? get(String address) => _hiveSource.getTonWalletInfo(address)?.toModel();
+  TonWalletInfo? get(String address) => _hiveSource.getTonWalletInfo(address);
 
-  Future<void> save(TonWalletInfo tonWalletInfo) => _hiveSource.saveTonWalletInfo(tonWalletInfo.toDto());
+  Future<void> save(TonWalletInfo tonWalletInfo) => _hiveSource.saveTonWalletInfo(tonWalletInfo);
 
   Future<void> remove(String address) => _hiveSource.removeTonWalletInfo(address);
 

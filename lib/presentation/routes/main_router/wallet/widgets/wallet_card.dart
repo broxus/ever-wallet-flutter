@@ -1,7 +1,4 @@
-import 'dart:ui';
-
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -9,19 +6,22 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../../../../injection.dart';
+import '../../../../../domain/models/account.dart';
 import '../../../../design/design.dart';
-import '../../../../design/extension.dart';
 import '../../../../design/widgets/wallet_card_selectable_field.dart';
 import 'more_button.dart';
 
 class WalletCard extends StatefulWidget {
   final String address;
+  final bool isExternal;
+  final String? publicKey;
 
   const WalletCard({
     Key? key,
     required this.address,
+    this.isExternal = false,
+    this.publicKey,
   }) : super(key: key);
 
   @override
@@ -30,13 +30,20 @@ class WalletCard extends StatefulWidget {
 
 class _WalletCardState extends State<WalletCard> {
   final tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>();
-  final accountInfoBloc = getIt.get<AccountInfoBloc>();
+  late final AccountInfoBloc accountInfoBloc;
 
   @override
   void initState() {
     super.initState();
     tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
-    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
+
+    accountInfoBloc = getIt.get<AccountInfoBloc>();
+    accountInfoBloc.add(
+      AccountInfoEvent.load(
+        address: widget.address,
+        isExternal: widget.isExternal,
+      ),
+    );
   }
 
   @override
@@ -44,7 +51,12 @@ class _WalletCardState extends State<WalletCard> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.address != widget.address) {
       tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
-      accountInfoBloc.add(AccountInfoEvent.load(widget.address));
+      accountInfoBloc.add(
+        AccountInfoEvent.load(
+          address: widget.address,
+          isExternal: widget.isExternal,
+        ),
+      );
     }
   }
 
@@ -93,9 +105,9 @@ class _WalletCardState extends State<WalletCard> {
                   children: [
                     Expanded(
                       flex: 17,
-                      child: buildInfo(),
+                      child: info(),
                     ),
-                    Expanded(flex: 6, child: buildPattern()),
+                    Expanded(flex: 6, child: pattern()),
                   ],
                 ),
               ),
@@ -106,8 +118,11 @@ class _WalletCardState extends State<WalletCard> {
                   ? Positioned(
                       top: 8,
                       right: 8,
-                      child: MoreButton(address: state.address),
-                      //  buildMoreButton(address: state.address),
+                      child: MoreButton(
+                        address: state.address,
+                        isExternal: widget.isExternal,
+                        publicKey: widget.publicKey,
+                      ),
                     )
                   : const SizedBox(),
             ),
@@ -115,7 +130,7 @@ class _WalletCardState extends State<WalletCard> {
         ),
       );
 
-  Widget buildPattern() => ColoredBox(
+  Widget pattern() => ColoredBox(
         color: const Color(0xFFCDF8E4),
         child: ShaderMask(
           shaderCallback: (rect) => const LinearGradient(
@@ -132,16 +147,19 @@ class _WalletCardState extends State<WalletCard> {
         ),
       );
 
-  Widget buildInfo() => Padding(
+  Widget info() => Padding(
         padding: const EdgeInsets.only(top: 23, left: 23, right: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BlocBuilder<AccountInfoBloc, AssetsList?>(
+            BlocBuilder<AccountInfoBloc, Account?>(
               bloc: accountInfoBloc,
               builder: (context, state) => state != null
                   ? AutoSizeText(
-                      state.name,
+                      state.when(
+                        internal: (assetsList) => assetsList.name,
+                        external: (assetsList) => assetsList.name,
+                      ),
                       maxLines: 1,
                       maxFontSize: 16,
                       style: const TextStyle(
@@ -156,47 +174,49 @@ class _WalletCardState extends State<WalletCard> {
             BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
-                  ? buildNamedField(
+                  ? namedField(
                       name: LocaleKeys.fields_public_key.tr(),
                       value: state.publicKey,
                       ellipsedValue: state.publicKey.ellipsePublicKey(),
                     )
-                  : buildNamedField(
+                  : namedField(
                       name: LocaleKeys.fields_public_key.tr(),
                     ),
             ),
             BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
-                  ? buildNamedField(
+                  ? namedField(
                       name: LocaleKeys.fields_address.tr(),
                       value: state.address,
                       ellipsedValue: state.address.ellipseAddress(),
                     )
-                  : buildNamedField(
+                  : namedField(
                       name: LocaleKeys.fields_address.tr(),
                     ),
             ),
             BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
-                  ? buildNamedField(
+                  ? namedField(
                       name: LocaleKeys.fields_type.tr(),
                       value: state.walletType.describe(),
                       isSelectable: false,
                     )
-                  : buildNamedField(
+                  : namedField(
                       name: LocaleKeys.fields_type.tr(),
                       isSelectable: false,
                     ),
             ),
             const Spacer(),
+            if (widget.isExternal) externalAccountLabel(),
+            const Spacer(flex: 2),
             BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
                   ? Padding(
                       padding: const EdgeInsets.only(bottom: 24),
-                      child: buildBalance(state.contractState.balance),
+                      child: balance(state.contractState.balance),
                     )
                   : const SizedBox(),
             ),
@@ -204,7 +224,19 @@ class _WalletCardState extends State<WalletCard> {
         ),
       );
 
-  Widget buildNamedField({
+  Widget externalAccountLabel() => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Assets.images.iconMultisig.svg(),
+          const SizedBox(width: 8),
+          const Text(
+            'External account',
+            style: TextStyle(color: Colors.white),
+          ),
+        ],
+      );
+
+  Widget namedField({
     required String name,
     String? value,
     String? ellipsedValue,
@@ -226,7 +258,7 @@ class _WalletCardState extends State<WalletCard> {
             child: value == null && ellipsedValue == null
                 ? Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    child: buildShimmer(),
+                    child: shimmer(),
                   )
                 : isSelectable
                     ? WalletCardSelectableField(
@@ -251,7 +283,7 @@ class _WalletCardState extends State<WalletCard> {
         ],
       );
 
-  Widget buildBalance(String balance) {
+  Widget balance(String balance) {
     final formattedString = balance.toTokens().floorValue().removeZeroes().formatValue();
 
     return AutoSizeText.rich(
@@ -284,7 +316,7 @@ class _WalletCardState extends State<WalletCard> {
     );
   }
 
-  Widget buildShimmer({
+  Widget shimmer({
     double height = 16,
     double width = 80,
   }) =>

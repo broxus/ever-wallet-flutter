@@ -1,13 +1,11 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:validators/validators.dart';
 
 import '../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
-import '../../../../../domain/blocs/key/key_creation_bloc.dart';
 import '../../../../../injection.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_subtitle.dart';
@@ -40,7 +38,6 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
   final passwordController = TextEditingController();
   final repeatController = TextEditingController();
   final formValidityNotifier = ValueNotifier<String?>('');
-  final bloc = getIt.get<KeyCreationBloc>();
 
   @override
   void dispose() {
@@ -48,29 +45,18 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
     passwordController.dispose();
     repeatController.dispose();
     formValidityNotifier.dispose();
-    bloc.close();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocListener<KeyCreationBloc, KeyCreationState>(
-        bloc: bloc,
-        listener: (context, state) {
-          if (state is KeyCreationStateSuccess) {
-            if (context.router.current.name == NewSeedRouterRoute.name) {
-              context.router.navigate(const SettingsRouterRoute());
-            }
-          }
-        },
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle.dark,
-          child: UnfocusingGestureDetector(
-            child: Scaffold(
-              appBar: AppBar(
-                leading: const CustomBackButton(),
-              ),
-              body: body(),
+  Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: UnfocusingGestureDetector(
+          child: Scaffold(
+            appBar: AppBar(
+              leading: const CustomBackButton(),
             ),
+            body: body(),
           ),
         ),
       );
@@ -258,19 +244,24 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value != null
               ? null
-              : () {
-                  final password = passwordController.text;
+              : () async {
+                  try {
+                    final password = passwordController.text;
 
-                  bloc.add(
-                    KeyCreationEvent.create(
-                      name: widget.seedName,
-                      phrase: widget.phrase,
-                      password: password,
-                    ),
-                  );
+                    await getIt.get<KeysRepository>().createKey(
+                          name: widget.seedName,
+                          phrase: widget.phrase,
+                          password: password,
+                        );
 
-                  if (context.router.routeData.name == NewSeedRouterRoute.name) {
-                    context.router.navigate(const SettingsRouterRoute());
+                    if (context.router.current.name == NewSeedRouterRoute.name) {
+                      context.router.navigate(const SettingsRouterRoute());
+                    }
+                  } catch (err) {
+                    showErrorCrystalFlushbar(
+                      context,
+                      message: err.toString(),
+                    );
                   }
                 },
           text: LocaleKeys.actions_confirm.tr(),

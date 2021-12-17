@@ -1,15 +1,11 @@
 import 'dart:async';
 
 import 'package:another_flushbar/flushbar.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../domain/blocs/key/key_import_bloc.dart';
-import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/action_button.dart';
 import '../../../design/widgets/crystal_title.dart';
@@ -43,7 +39,6 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
   late final List<FocusNode> focusNodes;
   final formValidityNotifier = ValueNotifier<bool>(false);
   final buttonStateNotifier = ValueNotifier<_ButtonState>(_ButtonState.paste);
-  final bloc = getIt.get<KeyImportBloc>();
 
   @override
   void initState() {
@@ -64,41 +59,21 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
     }
     formValidityNotifier.dispose();
     buttonStateNotifier.dispose();
-    bloc.close();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocListener<KeyImportBloc, KeyImportState>(
-        bloc: bloc,
-        listener: (context, state) {
-          if (state is KeyImportStateError) {
-            showErrorDialog(state.exception.toString());
-          }
-
-          if (state is KeyImportStateSuccess) {
-            final words = controllers.map((e) => e.text).toList();
-
-            context.router.push(
-              PasswordCreationRoute(
-                phrase: words,
-                seedName: widget.seedName,
-              ),
-            );
-          }
-        },
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle.dark,
-          child: UnfocusingGestureDetector(
-            child: Scaffold(
-              appBar: AppBar(
-                leading: const CustomBackButton(),
-                actions: [
-                  action(),
-                ],
-              ),
-              body: body(),
+  Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: UnfocusingGestureDetector(
+          child: Scaffold(
+            appBar: AppBar(
+              leading: const CustomBackButton(),
+              actions: [
+                action(),
+              ],
             ),
+            body: body(),
           ),
         ),
       );
@@ -382,9 +357,24 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value
               ? () {
-                  final words = controllers.map((e) => e.text).toList();
+                  try {
+                    final phrase = controllers.map((e) => e.text).toList();
+                    final mnemonicType = widget.isLegacy ? const MnemonicType.legacy() : const MnemonicType.labs(id: 0);
 
-                  bloc.add(KeyImportEvent.import(words));
+                    deriveFromPhrase(
+                      phrase: phrase,
+                      mnemonicType: mnemonicType,
+                    );
+
+                    context.router.push(
+                      PasswordCreationRoute(
+                        phrase: phrase,
+                        seedName: widget.seedName,
+                      ),
+                    );
+                  } catch (err) {
+                    showErrorDialog(err.toString());
+                  }
                 }
               : null,
           text: LocaleKeys.actions_confirm.tr(),

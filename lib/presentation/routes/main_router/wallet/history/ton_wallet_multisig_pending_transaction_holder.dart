@@ -1,6 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
@@ -9,7 +7,6 @@ import '../../../../design/transaction_time.dart';
 import '../../../../design/widgets/confirmation_time_counter.dart';
 import '../../../../design/widgets/ton_asset_icon.dart';
 import '../../../../design/widgets/transaction_type_label.dart';
-import '../../main_router_page.dart';
 import '../modals/ton_wallet_multisig_pending_transaction_info/show_ton_wallet_multisig_pending_transaction_info.dart';
 
 class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
@@ -119,7 +116,7 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
 
     return InkWell(
       onTap: () => tonWalletMultisigPendingTransactionInfo(
-        context: mainRouterPageKey.currentContext ?? context,
+        context: context,
         transactionWithData: transactionWithData,
         multisigPendingTransaction: multisigPendingTransaction,
         walletType: walletType,

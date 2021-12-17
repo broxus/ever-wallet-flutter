@@ -7,14 +7,12 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
 import '../../../../../../../../../../domain/blocs/token_wallet/token_wallet_transactions_bloc.dart';
-import '../../../../../../../../../../domain/models/token_wallet_info.dart';
 import '../../../../../../../../../../injection.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/asset_icon.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/preload_transactions_listener.dart';
 import '../../../../../design/widgets/wallet_action_button.dart';
-import '../../../main_router_page.dart';
 import '../../history/token_wallet_transaction_holder.dart';
 import '../receive_modal/show_receive_modal.dart';
 import '../token_send_transaction_flow/start_token_send_transaction_flow.dart';
@@ -194,7 +192,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
               icon: Assets.images.iconReceive,
               title: LocaleKeys.actions_receive.tr(),
               onPressed: () => showReceiveModal(
-                context: mainRouterPageKey.currentContext ?? context,
+                context: context,
                 address: owner,
               ),
             ),
@@ -205,7 +203,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
               icon: Assets.images.iconSend,
               title: LocaleKeys.actions_send.tr(),
               onPressed: () => startTokenSendTransactionFlow(
-                context: mainRouterPageKey.currentContext ?? context,
+                context: context,
                 owner: owner,
                 rootTokenContract: symbol.rootTokenContract,
               ),

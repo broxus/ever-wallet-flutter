@@ -1,16 +1,15 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../../../../logger.dart';
+import '../../../domain/blocs/account/current_account_bloc.dart';
 import '../../design/design.dart';
 import '../router.gr.dart';
-
-late GlobalKey mainRouterPageKey;
 
 class MainRouterPage extends StatefulWidget {
   const MainRouterPage({Key? key}) : super(key: key);
@@ -24,7 +23,6 @@ class _MainRouterPageState extends State<MainRouterPage> {
   void initState() {
     super.initState();
     BackButtonInterceptor.add(handleAndroidBackButton);
-    mainRouterPageKey = GlobalKey();
   }
 
   @override
@@ -37,7 +35,7 @@ class _MainRouterPageState extends State<MainRouterPage> {
   Widget build(BuildContext context) => WillPopScope(
         onWillPop: () async => handleAndroidBackButton(),
         child: AutoTabsScaffold(
-          key: mainRouterPageKey,
+          resizeToAvoidBottomInset: true,
           lazyLoad: false,
           routes: const [
             WalletRouterRoute(),
@@ -140,22 +138,36 @@ class _MainRouterPageState extends State<MainRouterPage> {
       );
 
   Future<bool> checkForExistingAccount(int index) async {
-    final bloc = context.read<AccountsBloc>();
+    final currentAccountBloc = context.read<CurrentAccountBloc>();
+    final accountsBloc = context.read<AccountsBloc>();
 
-    final state = bloc.state;
+    final currentAccount = currentAccountBloc.state?.when(
+      internal: (assetsList) => assetsList,
+      external: (_) => null,
+    );
+    final accounts = accountsBloc.state
+        .map(
+          (e) => e.when(
+            internal: (assetsList) => assetsList,
+            external: (_) => null,
+          ),
+        )
+        .where((e) => e != null)
+        .cast<AssetsList>()
+        .toList();
 
-    if (state.currentAccount == null && state.accounts.isNotEmpty) {
-      bloc.add(AccountsEvent.setCurrent(state.accounts.firstOrNull?.address));
+    if (currentAccount == null) {
+      currentAccountBloc.add(CurrentAccountEvent.setCurrent(address: accounts.firstOrNull?.address));
 
       try {
-        await bloc.stream.first.timeout(const Duration(seconds: 1));
+        await currentAccountBloc.stream.first.timeout(const Duration(seconds: 1));
       } catch (err, st) {
         logger.e(err, err, st);
         return false;
       }
     }
 
-    return bloc.state.currentAccount != null;
+    return currentAccountBloc.state != null;
   }
 
   Future<void> showAddAccountDialog() => showPlatformDialog(

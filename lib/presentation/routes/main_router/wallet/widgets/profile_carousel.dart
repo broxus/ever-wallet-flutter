@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../../domain/models/account.dart';
 import '../../../../design/design.dart';
 import 'new_account_card.dart';
 import 'wallet_card.dart';
@@ -9,7 +9,7 @@ import 'wallet_card.dart';
 class ProfileCarousel extends StatefulWidget {
   final bool loading;
   final int initialIndex;
-  final List<AssetsList> accounts;
+  final List<Account> accounts;
   final VoidCallback? onScrollStart;
   final void Function(int)? onPageChanged;
   final void Function(int)? onPageSelected;
@@ -81,46 +81,64 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: AnimatedSwitcher(
-              duration: kThemeAnimationDuration,
-              child: PageView.builder(
-                itemCount: widget.accounts.length + 1,
-                controller: pageController,
-                onPageChanged: widget.onPageChanged,
-                itemBuilder: (context, index) => GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    if (pageController.page?.round() != index) {
-                      pageController.animateToPage(
-                        index,
-                        duration: kThemeAnimationDuration,
-                        curve: Curves.decelerate,
-                      );
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 3.5),
-                    child: index < widget.accounts.length
-                        ? WalletCard(
-                            key: ValueKey(widget.accounts[index].address),
-                            address: widget.accounts[index].address,
-                          )
-                        : NewAccountCard(),
-                  ),
+  Widget build(BuildContext context) {
+    final accounts = widget.accounts
+        .map(
+          (e) => e.when(
+            internal: (assetsList) => WalletCard(
+              key: ValueKey(assetsList.address),
+              address: assetsList.address,
+            ),
+            external: (assetsList) => WalletCard(
+              key: ValueKey(assetsList.address),
+              isExternal: true,
+              address: assetsList.address,
+            ),
+          ),
+        )
+        .toList();
+
+    final list = [
+      ...accounts,
+      NewAccountCard(),
+    ];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 200,
+          width: double.infinity,
+          child: AnimatedSwitcher(
+            duration: kThemeAnimationDuration,
+            child: PageView.builder(
+              itemCount: widget.accounts.length + 1,
+              controller: pageController,
+              onPageChanged: widget.onPageChanged,
+              itemBuilder: (context, index) => GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  if (pageController.page?.round() != index) {
+                    pageController.animateToPage(
+                      index,
+                      duration: kThemeAnimationDuration,
+                      curve: Curves.decelerate,
+                    );
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3.5),
+                  child: list[index],
                 ),
               ),
             ),
           ),
-          const CrystalDivider(height: 16),
-          pageIndicators(),
-        ],
-      );
+        ),
+        const CrystalDivider(height: 16),
+        pageIndicators(),
+      ],
+    );
+  }
 
   Widget pageIndicators() => SizedBox(
         height: 8,

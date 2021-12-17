@@ -21,7 +21,7 @@ class TonWalletExpiredTransactionHolder extends StatelessWidget {
     return InkWell(
       onTap: () => {},
       // showTonWalletTransactionInfo(
-      //   context: mainRouterPageKey.currentContext ?? context,
+      //   context:  context,
       //   transactionWithData: transactionWithData,
       // ),
       child: Padding(

@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../../domain/blocs/key/key_password_checking_bloc.dart';
 import '../../../../../../injection.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../design/design.dart';
 
 class InputPasswordField extends StatefulWidget {
@@ -27,63 +26,54 @@ class InputPasswordField extends StatefulWidget {
 
 class _InputPasswordFieldState extends State<InputPasswordField> {
   final controller = TextEditingController();
-  final bloc = getIt.get<KeyPasswordCheckingBloc>();
+  final formValidityNotifier = ValueNotifier<bool?>(null);
 
   @override
   void dispose() {
     controller.dispose();
-    bloc.close();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocConsumer<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
-        bloc: bloc,
-        listener: (context, state) => state.maybeWhen(
-          success: (isCorrect) => isCorrect ? widget.onSubmit(controller.text.trim()) : null,
-          orElse: () => null,
-        ),
-        builder: (context, state) {
-          final isCorrect = state.maybeWhen(
-            initial: () => true,
-            success: (isCorrect) => isCorrect,
-            orElse: () => false,
-          );
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CrystalTextFormField(
-                controller: controller,
-                autofocus: widget.autoFocus,
-                obscureText: true,
-                border: isCorrect
-                    ? CrystalTextFormField.kInputBorder
-                    : CrystalTextFormField.kInputBorder.copyWith(
-                        borderSide: const BorderSide(
-                          color: CrystalColor.error,
-                        ),
+  Widget build(BuildContext context) => ValueListenableBuilder<bool?>(
+        valueListenable: formValidityNotifier,
+        builder: (context, value, child) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CrystalTextFormField(
+              controller: controller,
+              autofocus: widget.autoFocus,
+              obscureText: true,
+              border: value ?? false
+                  ? CrystalTextFormField.kInputBorder
+                  : CrystalTextFormField.kInputBorder.copyWith(
+                      borderSide: const BorderSide(
+                        color: CrystalColor.error,
                       ),
-                hintText: widget.hintText ?? LocaleKeys.fields_password.tr(),
-              ),
-              const CrystalDivider(
-                height: 24,
-              ),
-              CrystalButton(
-                text: widget.buttonText ?? LocaleKeys.actions_submit.tr(),
-                onTap: () {
-                  final password = controller.text.trim();
+                    ),
+              hintText: widget.hintText ?? LocaleKeys.fields_password.tr(),
+            ),
+            const CrystalDivider(
+              height: 24,
+            ),
+            CrystalButton(
+              text: widget.buttonText ?? LocaleKeys.actions_submit.tr(),
+              onTap: () async {
+                final password = controller.text.trim();
 
-                  bloc.add(
-                    KeyPasswordCheckingEvent.check(
+                final isCorrect = await getIt.get<KeysRepository>().checkKeyPassword(
                       publicKey: widget.publicKey,
                       password: password,
-                    ),
-                  );
-                },
-              ),
-            ],
-          );
-        },
+                    );
+
+                formValidityNotifier.value = isCorrect;
+
+                if (isCorrect) {
+                  widget.onSubmit(controller.text.trim());
+                }
+              },
+            ),
+          ],
+        ),
       );
 }

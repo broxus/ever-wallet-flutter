@@ -9,21 +9,27 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
+import '../../models/account.dart';
 
 part 'accounts_bloc.freezed.dart';
 
 @injectable
-class AccountsBloc extends Bloc<_Event, AccountsState> {
+class AccountsBloc extends Bloc<_Event, List<Account>> {
   final NekotonService _nekotonService;
   final _errorsSubject = PublishSubject<Exception>();
   late final StreamSubscription _streamSubscription;
 
-  AccountsBloc(this._nekotonService) : super(const AccountsState()) {
-    _streamSubscription = Rx.combineLatest2<KeyStoreEntry?, List<AssetsList>, List<AssetsList>>(
+  AccountsBloc(this._nekotonService) : super(const []) {
+    _streamSubscription =
+        Rx.combineLatest3<KeyStoreEntry?, List<AssetsList>, Map<String, List<AssetsList>>, List<Account>>(
       _nekotonService.currentKeyStream,
       _nekotonService.accountsStream,
-      (a, b) => b.where((e) => e.publicKey == a?.publicKey).toList(),
-    ).distinct((previous, next) => listEquals(previous, next)).listen((event) => add(_LocalEvent.update(event)));
+      _nekotonService.externalAccountsStream,
+      (a, b, c) => [
+        ...b.where((e) => e.publicKey == a?.publicKey).map((e) => Account.internal(assetsList: e)),
+        ...(c[a?.publicKey] ?? []).map((e) => Account.external(assetsList: e)),
+      ],
+    ).distinct((previous, next) => listEquals(previous, next)).listen((event) => add(_Event.update(event)));
   }
 
   @override
@@ -34,23 +40,10 @@ class AccountsBloc extends Bloc<_Event, AccountsState> {
   }
 
   @override
-  Stream<AccountsState> mapEventToState(_Event event) async* {
+  Stream<List<Account>> mapEventToState(_Event event) async* {
     try {
-      if (event is _SetCurrent) {
-        final currentAccount = _nekotonService.accounts.firstWhereOrNull((e) => e.address == event.address);
-
-        yield AccountsState(
-          accounts: state.accounts,
-          currentAccount: currentAccount,
-        );
-      } else if (event is _Update) {
-        final currentAccount = event.accounts.firstWhereOrNull((e) => e.address == state.currentAccount?.address) ??
-            event.accounts.firstOrNull;
-
-        yield AccountsState(
-          accounts: event.accounts,
-          currentAccount: currentAccount,
-        );
+      if (event is _Update) {
+        yield event.accounts;
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
@@ -61,22 +54,7 @@ class AccountsBloc extends Bloc<_Event, AccountsState> {
   Stream<Exception> get errorsStream => _errorsSubject.stream;
 }
 
-abstract class _Event {}
-
 @freezed
-class _LocalEvent extends _Event with _$_LocalEvent {
-  const factory _LocalEvent.update(List<AssetsList> accounts) = _Update;
-}
-
-@freezed
-class AccountsEvent extends _Event with _$AccountsEvent {
-  const factory AccountsEvent.setCurrent(String? address) = _SetCurrent;
-}
-
-@freezed
-class AccountsState with _$AccountsState {
-  const factory AccountsState({
-    @Default([]) List<AssetsList> accounts,
-    AssetsList? currentAccount,
-  }) = _AccountsState;
+class _Event with _$_Event {
+  const factory _Event.update(List<Account> accounts) = _Update;
 }

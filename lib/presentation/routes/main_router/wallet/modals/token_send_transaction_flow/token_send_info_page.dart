@@ -1,15 +1,14 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../domain/blocs/biometry/biometry_get_password_bloc.dart';
+import '../../../../../../data/repositories/biometry_repository.dart';
+import '../../../../../../data/repositories/token_wallet_info_repository.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../../domain/blocs/token_wallet/token_wallet_estimate_fees_bloc.dart';
 import '../../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
 import '../../../../../../domain/blocs/token_wallet/token_wallet_prepare_transfer_bloc.dart';
-import '../../../../../../domain/models/token_wallet_info.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/custom_back_button.dart';
@@ -95,6 +94,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
       );
 
   Widget scaffold() => Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           leading: const CustomBackButton(),
           title: const Text(
@@ -231,11 +231,13 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
                 orElse: () => false,
               );
 
+              final ownerPublicKey = getIt.get<TokenWalletInfoRepository>().getOwnerPublicKey(widget.owner);
+
               return CustomElevatedButton(
                 onPressed: sufficientFunds && message != null && infoState != null
                     ? () => onPressed(
                           message: message,
-                          ownerPublicKey: infoState.ownerPublicKey,
+                          ownerPublicKey: ownerPublicKey,
                         )
                     : null,
                 text: 'Send',
@@ -281,30 +283,14 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
   }
 
   Future<String?> getPasswordFromBiometry(String ownerPublicKey) async {
-    final biometryGetPasswordBloc = getIt.get<BiometryGetPasswordBloc>();
-
-    biometryGetPasswordBloc.add(
-      BiometryGetPasswordEvent.get(
-        localizedReason: 'Please authenticate to interact with wallet',
-        publicKey: ownerPublicKey,
-      ),
-    );
-
-    final state = await biometryGetPasswordBloc.stream.firstWhere(
-      (e) => e.maybeWhen(
-        success: (_) => true,
-        orElse: () => false,
-      ),
-    );
-
-    Future.delayed(const Duration(seconds: 1), () async {
-      biometryGetPasswordBloc.close();
-    });
-
-    return state.maybeWhen(
-      success: (password) => password,
-      orElse: () => null,
-    );
+    try {
+      return getIt.get<BiometryRepository>().getKeyPassword(
+            localizedReason: 'Please authenticate to interact with wallet',
+            publicKey: ownerPublicKey,
+          );
+    } catch (err) {
+      return null;
+    }
   }
 
   Future<void> pushDeploymentResult({

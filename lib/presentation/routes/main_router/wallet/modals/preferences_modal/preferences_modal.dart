@@ -1,12 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../../../data/repositories/accounts_repository.dart';
+import '../../../../../../data/repositories/external_accounts_repository.dart';
 import '../../../../../../domain/blocs/account/account_info_bloc.dart';
-import '../../../../../../domain/blocs/account/account_renaming_bloc.dart';
+import '../../../../../../domain/models/account.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/explorer.dart';
@@ -19,10 +18,14 @@ import '../../../../../design/widgets/text_suffix_icon_button.dart';
 
 class PreferencesModalBody extends StatefulWidget {
   final String address;
+  final bool isExternal;
+  final String? publicKey;
 
   const PreferencesModalBody({
     Key? key,
     required this.address,
+    this.isExternal = false,
+    this.publicKey,
   }) : super(key: key);
 
   @override
@@ -31,73 +34,84 @@ class PreferencesModalBody extends StatefulWidget {
 
 class _PreferencesModalBodyState extends State<PreferencesModalBody> {
   final controller = TextEditingController();
-  final renamingBloc = getIt.get<AccountRenamingBloc>();
-  final infoBloc = getIt.get<AccountInfoBloc>();
+  late final AccountInfoBloc accountInfoBloc;
 
   @override
   void initState() {
     super.initState();
-    infoBloc.add(AccountInfoEvent.load(widget.address));
+    accountInfoBloc = getIt.get<AccountInfoBloc>();
+    accountInfoBloc.add(
+      AccountInfoEvent.load(
+        address: widget.address,
+        isExternal: widget.isExternal,
+      ),
+    );
   }
 
   @override
   void didUpdateWidget(covariant PreferencesModalBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.address != widget.address) {
-      infoBloc.add(AccountInfoEvent.load(widget.address));
+      if (!widget.isExternal) {
+        accountInfoBloc.add(
+          AccountInfoEvent.load(
+            address: widget.address,
+            isExternal: widget.isExternal,
+          ),
+        );
+      }
     }
   }
 
   @override
-  Widget build(BuildContext context) => BlocListener<AccountInfoBloc, AssetsList?>(
-        bloc: infoBloc,
+  void dispose() {
+    if (!widget.isExternal) {
+      accountInfoBloc.close();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => BlocListener<AccountInfoBloc, Account?>(
+        bloc: accountInfoBloc,
         listener: (context, state) {
           if (state != null) {
-            controller.text = state.name;
+            controller.text = state.when(
+              internal: (assetsList) => assetsList.name,
+              external: (assetsList) => assetsList.name,
+            );
             controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
           }
         },
-        child: BlocListener<AccountRenamingBloc, AccountRenamingState>(
-          bloc: renamingBloc,
-          listener: (context, state) => state.maybeWhen(
-            success: () => showCrystalFlushbar(
-              context,
-              message: LocaleKeys.preferences_modal_message_renamed.tr(),
-            ),
-            error: (exception) => showErrorCrystalFlushbar(
-              context,
-              message: exception.toString(),
-            ),
-            orElse: () => null,
-          ),
-          child: Material(
-            color: Colors.white,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: body(),
+      );
+
+  Widget body() => Material(
+        color: Colors.white,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: title(),
-                          ),
-                          const CustomCloseButton(),
-                        ],
+                      Expanded(
+                        child: title(),
                       ),
-                      const SizedBox(height: 16),
-                      field(),
-                      const SizedBox(height: 16),
-                      card(),
-                      const SizedBox(height: 16),
-                      explorerButton(),
+                      const CustomCloseButton(),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  field(),
+                  const SizedBox(height: 16),
+                  card(),
+                  const SizedBox(height: 16),
+                  explorerButton(),
+                ],
               ),
             ),
           ),
@@ -123,12 +137,36 @@ class _PreferencesModalBodyState extends State<PreferencesModalBody> {
               controller: controller,
             ),
             SuffixIconButton(
-              onPressed: () => renamingBloc.add(
-                AccountRenamingEvent.rename(
-                  address: widget.address,
-                  name: controller.text,
-                ),
-              ),
+              onPressed: () async {
+                try {
+                  if (!widget.isExternal) {
+                    await getIt.get<AccountsRepository>().renameAccount(
+                          address: widget.address,
+                          name: controller.text,
+                        );
+                  } else {
+                    await getIt.get<ExternalAccountsRepository>().renameExternalAccount(
+                          publicKey: widget.publicKey!,
+                          address: widget.address,
+                          name: controller.text,
+                        );
+                  }
+
+                  if (!mounted) return;
+
+                  showCrystalFlushbar(
+                    context,
+                    message: LocaleKeys.preferences_modal_message_renamed.tr(),
+                  );
+                } catch (err) {
+                  if (!mounted) return;
+
+                  showErrorCrystalFlushbar(
+                    context,
+                    message: err.toString(),
+                  );
+                }
+              },
               icon: const Icon(
                 Icons.save,
                 color: CrystalColor.accent,

@@ -48,6 +48,11 @@ class NekotonService {
 
   List<AssetsList> get accounts => _nekoton.accountsStorageController.accounts;
 
+  Stream<Map<String, List<AssetsList>>> get externalAccountsStream =>
+      _nekoton.externalAccountsController.externalAccountsStream;
+
+  Map<String, List<AssetsList>> get externalAccounts => _nekoton.externalAccountsController.externalAccounts;
+
   List<TonWallet> get tonWallets => _nekoton.subscriptionsController.tonWallets;
 
   List<TokenWallet> get tokenWallets => _nekoton.subscriptionsController.tokenWallets;
@@ -116,11 +121,49 @@ class NekotonService {
 
   Future<void> clearAccountsStorage() => _nekoton.accountsStorageController.clearAccountsStorage();
 
-  Future<RootTokenContractInfo> getTokenWalletInfo({
+  Future<void> addExternalAccount({
+    required String publicKey,
+    required AssetsList assetsList,
+  }) =>
+      _nekoton.externalAccountsController.addExternalAccount(
+        publicKey: publicKey,
+        assetsList: assetsList,
+      );
+
+  Future<AssetsList> renameExternalAccount({
+    required String publicKey,
+    required String address,
+    required String name,
+  }) =>
+      _nekoton.externalAccountsController.renameExternalAccount(
+        publicKey: publicKey,
+        address: address,
+        name: name,
+      );
+
+  Future<AssetsList?> removeExternalAccount({
+    required String publicKey,
+    required String address,
+  }) =>
+      _nekoton.externalAccountsController.removeExternalAccount(
+        publicKey: publicKey,
+        address: address,
+      );
+
+  Future<void> removeExternalAccounts(String publicKey) =>
+      _nekoton.externalAccountsController.removeExternalAccounts(publicKey);
+
+  Future<void> clearExternalAccounts() => _nekoton.externalAccountsController.clearExternalAccounts();
+
+  Future<TonWalletInfo> getTonWalletInfo(String address) => _nekoton.connectionController.getTonWalletInfo(
+        address,
+      );
+
+  Future<TokenWalletInfo> getTokenWalletInfo({
     required String address,
     required String rootTokenContract,
   }) =>
-      _nekoton.subscriptionsController.getTokenWalletInfo(
+      _nekoton.connectionController.getTokenWalletInfo(
         address: address,
         rootTokenContract: rootTokenContract,
       );

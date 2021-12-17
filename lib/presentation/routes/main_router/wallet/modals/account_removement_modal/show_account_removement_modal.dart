@@ -2,12 +2,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
-import '../../../../../../domain/blocs/account/account_removement_bloc.dart';
-import '../../../../../../injection.dart';
-
 Future<void> showAccountRemovementDialog({
   required BuildContext context,
   required String address,
+  required void Function() onDeletePressed,
 }) =>
     showPlatformDialog(
       context: context,
@@ -23,15 +21,8 @@ Future<void> showAccountRemovementDialog({
             child: const Text('Cancel'),
           ),
           PlatformDialogAction(
-            onPressed: () async {
-              final bloc = getIt.get<AccountRemovementBloc>();
-
-              bloc.add(AccountRemovementEvent.remove(address));
-
-              await bloc.stream.first.timeout(const Duration(seconds: 1));
-
-              bloc.close();
-
+            onPressed: () {
+              onDeletePressed();
               context.router.pop();
             },
             cupertino: (_, __) => CupertinoDialogActionData(

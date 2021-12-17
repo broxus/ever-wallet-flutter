@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../../../domain/blocs/biometry/biometry_get_password_bloc.dart';
 import '../../../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../../../../injection.dart';
+import '../../../../../data/repositories/biometry_repository.dart';
 import 'call_contract_method_body.dart';
 import 'request_permissions_body.dart';
 import 'send_message_body.dart';
@@ -54,36 +54,21 @@ Future<String?> showSendMessageDialog(
     String? password;
 
     final biometryInfoBloc = context.read<BiometryInfoBloc>();
-    final biometryPasswordDataBloc = getIt.get<BiometryGetPasswordBloc>();
 
     if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-      biometryPasswordDataBloc.add(
-        BiometryGetPasswordEvent.get(
-          localizedReason: 'Please authenticate to interact with wallet',
-          publicKey: publicKey,
-        ),
-      );
-
-      final state = await biometryPasswordDataBloc.stream.firstWhere(
-        (e) => e.maybeWhen(
-          success: (_) => true,
-          orElse: () => false,
-        ),
-      );
-
-      password = state.maybeWhen(
-        success: (password) => password,
-        orElse: () => null,
-      );
+      try {
+        password = await getIt.get<BiometryRepository>().getKeyPassword(
+              localizedReason: 'Please authenticate to interact with wallet',
+              publicKey: publicKey,
+            );
+      } catch (err) {
+        password == null;
+      }
 
       password ??= await SubmitSendBody.open(
         context: context,
         publicKey: publicKey,
       );
-
-      Future.delayed(const Duration(seconds: 1), () async {
-        biometryPasswordDataBloc.close();
-      });
     } else {
       password = await SubmitSendBody.open(
         context: context,
@@ -117,36 +102,21 @@ Future<String?> showCallContractMethodDialog(
     String? password;
 
     final biometryInfoBloc = context.read<BiometryInfoBloc>();
-    final biometryPasswordDataBloc = getIt.get<BiometryGetPasswordBloc>();
 
     if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-      biometryPasswordDataBloc.add(
-        BiometryGetPasswordEvent.get(
-          localizedReason: 'Please authenticate to interact with wallet',
-          publicKey: selectedPublicKey,
-        ),
-      );
-
-      final state = await biometryPasswordDataBloc.stream.firstWhere(
-        (e) => e.maybeWhen(
-          success: (_) => true,
-          orElse: () => false,
-        ),
-      );
-
-      password = state.maybeWhen(
-        success: (password) => password,
-        orElse: () => null,
-      );
+      try {
+        password = await getIt.get<BiometryRepository>().getKeyPassword(
+              localizedReason: 'Please authenticate to interact with wallet',
+              publicKey: selectedPublicKey,
+            );
+      } catch (err) {
+        password == null;
+      }
 
       password ??= await SubmitSendBody.open(
         context: context,
         publicKey: selectedPublicKey,
       );
-
-      Future.delayed(const Duration(seconds: 1), () async {
-        biometryPasswordDataBloc.close();
-      });
     } else {
       password = await SubmitSendBody.open(
         context: context,

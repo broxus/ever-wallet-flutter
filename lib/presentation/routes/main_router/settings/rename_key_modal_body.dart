@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../../../domain/blocs/key/key_update_bloc.dart';
 import '../../../../../../injection.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../design/design.dart';
 
 class RenameKeyModalBody extends StatefulWidget {
@@ -19,12 +19,10 @@ class RenameKeyModalBody extends StatefulWidget {
 
 class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
   final controller = TextEditingController();
-  final bloc = getIt.get<KeyUpdateBloc>();
 
   @override
   void dispose() {
     controller.dispose();
-    bloc.close();
     super.dispose();
   }
 
@@ -50,30 +48,26 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                 onTap: value.text.isEmpty
                     ? null
                     : () async {
-                        bloc.add(
-                          KeyUpdateEvent.rename(
-                            publicKey: widget.publicKey,
-                            name: value.text,
-                          ),
-                        );
-
-                        final result = await bloc.stream.first;
-
-                        if (result is KeyUpdateStateSuccess) {
-                          context.router.navigatorKey.currentState?.pop();
+                        try {
+                          await getIt.get<KeysRepository>().renameKey(
+                                publicKey: widget.publicKey,
+                                name: value.text,
+                              );
 
                           if (!mounted) return;
 
-                          showCrystalFlushbar(
+                          await showCrystalFlushbar(
                             context,
                             message: LocaleKeys.rename_key_modal_message_success.tr(),
                           );
-                        } else if (result is KeyUpdateStateError) {
+
+                          context.router.navigatorKey.currentState?.pop();
+                        } catch (err) {
                           if (!mounted) return;
 
-                          showErrorCrystalFlushbar(
+                          await showErrorCrystalFlushbar(
                             context,
-                            message: result.exception.toString(),
+                            message: err.toString(),
                           );
                         }
                       },

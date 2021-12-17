@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../../../domain/blocs/account/account_creation_bloc.dart';
 import '../../../../../../../../injection.dart';
+import '../../../../../data/repositories/accounts_repository.dart';
 import '../../../../design/widgets/crystal_title.dart';
 import '../../../../design/widgets/custom_back_button.dart';
 import '../../../../design/widgets/custom_elevated_button.dart';
@@ -29,12 +29,10 @@ class NewAccountNamePage extends StatefulWidget {
 
 class _NewAccountNamePageState extends State<NewAccountNamePage> {
   final controller = TextEditingController();
-  final bloc = getIt.get<AccountCreationBloc>();
 
   @override
   void dispose() {
     controller.dispose();
-    bloc.close();
     super.dispose();
   }
 
@@ -96,14 +94,12 @@ class _NewAccountNamePageState extends State<NewAccountNamePage> {
       );
 
   Widget submitButton() => CustomElevatedButton(
-        onPressed: () {
-          bloc.add(
-            AccountCreationEvent.create(
-              name: controller.text.isNotEmpty ? controller.text : widget.walletType.describe(),
-              publicKey: widget.publicKey,
-              walletType: widget.walletType,
-            ),
-          );
+        onPressed: () async {
+          await getIt.get<AccountsRepository>().addAccount(
+                name: controller.text.isNotEmpty ? controller.text : widget.walletType.describe(),
+                publicKey: widget.publicKey,
+                walletType: widget.walletType,
+              );
 
           context.router.navigate(const WalletRouterRoute());
         },

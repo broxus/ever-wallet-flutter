@@ -9,14 +9,15 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../../../domain/blocs/application_flow_bloc.dart';
-import '../../../../../../domain/blocs/biometry/biometry_get_password_bloc.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
-import '../../../../../../domain/blocs/key/key_export_bloc.dart';
 import '../../../../../../domain/blocs/key/keys_bloc.dart';
 import '../../../../../../injection.dart';
+import '../../../../data/repositories/biometry_repository.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_bottom_sheet.dart';
 import '../../router.gr.dart';
+import 'add_external_account_modal/show_add_external_account_modal.dart';
 import 'biometry_modal_body.dart';
 import 'change_seed_phrase_password_modal_body.dart';
 import 'derive_key_modal_body.dart';
@@ -136,49 +137,34 @@ class _SettingsPageState extends State<SettingsPage> {
             title: LocaleKeys.settings_screen_sections_current_seed_preferences_title.tr(),
             children: [
               buildSectionAction(
+                title: 'Add external account',
+                onTap: keys.isNotEmpty && currentKey != null
+                    ? () => showAddExternalAccountModal(
+                          context: context,
+                          publicKey: currentKey.publicKey,
+                        )
+                    : null,
+              ),
+              buildSectionAction(
                 title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed.tr(),
                 onTap: keys.isNotEmpty && currentKey != null
                     ? () async {
-                        String? password;
-
                         final biometryInfoBloc = context.read<BiometryInfoBloc>();
-                        final biometryPasswordDataBloc = getIt.get<BiometryGetPasswordBloc>();
-                        final keyExportBloc = getIt.get<KeyExportBloc>();
 
                         if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-                          biometryPasswordDataBloc.add(
-                            BiometryGetPasswordEvent.get(
-                              localizedReason: 'Please authenticate to interact with wallet',
-                              publicKey: currentKey.publicKey,
-                            ),
-                          );
+                          try {
+                            final password = await getIt.get<BiometryRepository>().getKeyPassword(
+                                  localizedReason: 'Please authenticate to interact with wallet',
+                                  publicKey: currentKey.publicKey,
+                                );
 
-                          final state = await biometryPasswordDataBloc.stream.firstWhere(
-                            (e) => e.maybeWhen(
-                              success: (_) => true,
-                              orElse: () => false,
-                            ),
-                          );
+                            final phrase = await getIt.get<KeysRepository>().exportKey(
+                                  publicKey: currentKey.publicKey,
+                                  password: password,
+                                );
 
-                          password = state.maybeWhen(
-                            success: (password) => password,
-                            orElse: () => null,
-                          );
-
-                          if (password != null) {
-                            keyExportBloc.add(
-                              KeyExportEvent.export(
-                                publicKey: currentKey.publicKey,
-                                password: password,
-                              ),
-                            );
-
-                            final state = await keyExportBloc.stream.first;
-
-                            if (state is KeyExportStateSuccess) {
-                              context.router.navigate(SeedPhraseExportRoute(phrase: state.phrase));
-                            }
-                          } else {
+                            context.router.navigate(SeedPhraseExportRoute(phrase: phrase));
+                          } catch (err) {
                             if (!mounted) return;
 
                             showCrystalBottomSheet(
@@ -187,11 +173,6 @@ class _SettingsPageState extends State<SettingsPage> {
                               body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
                             );
                           }
-
-                          Future.delayed(const Duration(seconds: 1), () async {
-                            biometryPasswordDataBloc.close();
-                            keyExportBloc.close();
-                          });
                         } else {
                           showCrystalBottomSheet(
                             context,

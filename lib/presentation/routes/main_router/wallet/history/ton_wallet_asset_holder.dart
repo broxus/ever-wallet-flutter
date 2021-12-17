@@ -3,10 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../../../../injection.dart';
 import '../../../../design/design.dart';
-import '../../main_router_page.dart';
 import '../modals/ton_asset_info/show_ton_asset_info.dart';
 import 'wallet_asset_holder.dart';
 
@@ -55,7 +53,7 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
           icon: Assets.images.ton.svg(),
           onTap: state != null
               ? () => showTonAssetInfo(
-                    context: mainRouterPageKey.currentContext ?? context,
+                    context: context,
                     address: state.address,
                   )
               : () {},

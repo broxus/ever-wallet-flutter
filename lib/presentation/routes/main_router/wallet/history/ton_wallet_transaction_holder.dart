@@ -1,13 +1,10 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../design/design.dart';
 import '../../../../design/transaction_time.dart';
 import '../../../../design/widgets/ton_asset_icon.dart';
-import '../../main_router_page.dart';
 import '../modals/ton_wallet_transaction_info/show_ton_wallet_transaction_info.dart';
 
 class TonWalletTransactionHolder extends StatelessWidget {
@@ -90,7 +87,7 @@ class TonWalletTransactionHolder extends StatelessWidget {
 
     return InkWell(
       onTap: () => showTonWalletTransactionInfo(
-        context: mainRouterPageKey.currentContext ?? context,
+        context: context,
         transactionWithData: transactionWithData,
       ),
       child: Padding(

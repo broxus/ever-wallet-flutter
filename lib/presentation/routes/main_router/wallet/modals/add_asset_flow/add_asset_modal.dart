@@ -1,11 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../../../../../../domain/blocs/account/account_assets_addition_bloc.dart';
 import '../../../../../../../../../../domain/models/token_contract_asset.dart';
 import '../../../../../../../../../../injection.dart';
+import '../../../../../../data/repositories/accounts_repository.dart';
 import '../../../../../design/design.dart';
 import 'assets_layout.dart';
 import 'new_asset_layout.dart';
@@ -23,16 +20,12 @@ class AddAssetModal extends StatefulWidget {
 }
 
 class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateMixin {
-  final accountAssetsAdditionBloc = getIt.get<AccountAssetsAdditionBloc>();
   final newAssetLayoutScrollController = ScrollController();
   final selectAssetsLayoutScrollController = ScrollController();
   late final tabController = TabController(length: 2, vsync: this);
 
   @override
   void dispose() {
-    Future.delayed(const Duration(seconds: 3)).then((_) {
-      accountAssetsAdditionBloc.close();
-    });
     selectAssetsLayoutScrollController.dispose();
     newAssetLayoutScrollController.dispose();
     super.dispose();
@@ -46,25 +39,17 @@ class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateM
           }
           return true;
         },
-        child: BlocListener<AccountAssetsAdditionBloc, AccountAssetsAdditionState>(
-          bloc: accountAssetsAdditionBloc,
-          listener: (context, state) {
-            if (state is AccountAssetsAdditionStateError) {
-              showErrorCrystalFlushbar(context, message: 'Invalid root token contract');
-            }
-          },
-          child: SafeArea(
-            minimum: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _modalTitle(),
-                const CrystalDivider(height: 8),
-                _tabRow(),
-                Flexible(child: _layout()),
-              ],
-            ),
+        child: SafeArea(
+          minimum: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _modalTitle(),
+              const CrystalDivider(height: 8),
+              _tabRow(),
+              Flexible(child: _layout()),
+            ],
           ),
         ),
       );
@@ -120,34 +105,54 @@ class _AddAssetModalState extends State<AddAssetModal> with TickerProviderStateM
             AssetsLayout(
               controller: selectAssetsLayoutScrollController,
               address: widget.address,
-              onSave: (List<TokenContractAsset> added, List<TokenContractAsset> removed) {
+              onSave: (List<TokenContractAsset> added, List<TokenContractAsset> removed) async {
                 for (final asset in added) {
-                  accountAssetsAdditionBloc.add(
-                    AccountAssetsAdditionEvent.add(
-                      address: widget.address,
-                      rootTokenContract: asset.address,
-                    ),
-                  );
+                  try {
+                    await getIt.get<AccountsRepository>().addTokenWallet(
+                          address: widget.address,
+                          rootTokenContract: asset.address,
+                        );
+                  } catch (err) {
+                    if (!mounted) return;
+
+                    showErrorCrystalFlushbar(
+                      context,
+                      message: err.toString(),
+                    );
+                  }
                 }
 
                 for (final asset in removed) {
-                  accountAssetsAdditionBloc.add(
-                    AccountAssetsAdditionEvent.remove(
-                      address: widget.address,
-                      rootTokenContract: asset.address,
-                    ),
-                  );
+                  try {
+                    await getIt.get<AccountsRepository>().removeTokenWallet(
+                          address: widget.address,
+                          rootTokenContract: asset.address,
+                        );
+                  } catch (err) {
+                    if (!mounted) return;
+
+                    showErrorCrystalFlushbar(
+                      context,
+                      message: err.toString(),
+                    );
+                  }
                 }
               },
             ),
             NewAssetLayout(
               controller: newAssetLayoutScrollController,
-              onSave: (String address) => accountAssetsAdditionBloc.add(
-                AccountAssetsAdditionEvent.add(
-                  address: widget.address,
-                  rootTokenContract: address,
-                ),
-              ),
+              onSave: (String address) async {
+                try {
+                  await getIt.get<AccountsRepository>().addTokenWallet(
+                        address: widget.address,
+                        rootTokenContract: address,
+                      );
+                } catch (err) {
+                  if (!mounted) return;
+
+                  showErrorCrystalFlushbar(context, message: 'Invalid root token contract');
+                }
+              },
             ),
           ]
               .map(

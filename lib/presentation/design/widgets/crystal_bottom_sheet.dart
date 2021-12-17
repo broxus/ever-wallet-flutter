@@ -115,11 +115,10 @@ Widget _getCloseButton() => Padding(
       child: CircleIcon(
         size: 24,
         color: Platform.isIOS ? CrystalColor.iconBackground : Colors.transparent,
-        icon: Image.asset(
-          Assets.images.iconClose.path,
+        icon: Icon(
+          Icons.close,
           color: Platform.isIOS ? CrystalColor.fontDark : CrystalColor.fontTitleSecondaryDark,
-          width: 10,
-          filterQuality: FilterQuality.high,
+          size: 10,
         ),
       ),
     );

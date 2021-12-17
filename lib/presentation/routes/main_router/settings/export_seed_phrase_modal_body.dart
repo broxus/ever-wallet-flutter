@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../../domain/blocs/key/key_export_bloc.dart';
 import '../../../../../../injection.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../design/design.dart';
 import '../../router.gr.dart';
 import '../widgets/input_password_modal_body.dart';
@@ -22,33 +21,32 @@ class ExportSeedPhraseModalBody extends StatefulWidget {
 }
 
 class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
-  final bloc = getIt.get<KeyExportBloc>();
   final controller = TextEditingController();
 
   @override
   void dispose() {
-    bloc.close();
     controller.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocListener<KeyExportBloc, KeyExportState>(
-        bloc: bloc,
-        listener: (context, state) {
-          if (state is KeyExportStateSuccess) {
+  Widget build(BuildContext context) => InputPasswordModalBody(
+        onSubmit: (password) async {
+          try {
+            final phrase = await getIt.get<KeysRepository>().exportKey(
+                  publicKey: widget.publicKey,
+                  password: password,
+                );
+
             context.router.navigatorKey.currentState?.pop();
-            context.topRoute.router.navigate(SeedPhraseExportRoute(phrase: state.phrase));
+            context.topRoute.router.navigate(SeedPhraseExportRoute(phrase: phrase));
+          } catch (err) {
+            await showCrystalFlushbar(
+              context,
+              message: err.toString(),
+            );
           }
         },
-        child: InputPasswordModalBody(
-          onSubmit: (password) => bloc.add(
-            KeyExportEvent.export(
-              publicKey: widget.publicKey,
-              password: password,
-            ),
-          ),
-          publicKey: widget.publicKey,
-        ),
+        publicKey: widget.publicKey,
       );
 }

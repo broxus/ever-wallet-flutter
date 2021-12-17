@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/subjects.dart';
 
+import '../exceptions.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/local/local_auth_source.dart';
 
@@ -50,6 +51,13 @@ class BiometryRepository {
     _statusSubject.add(isEnabled);
   }
 
+  Future<void> clear() async {
+    await _hiveSource.clearKeysPasswords();
+    await _hiveSource.clearUserPreferences();
+  }
+
+  Future<bool> authenticate(String localizedReason) => _localAuthSource.authenticate(localizedReason);
+
   Future<void> setKeyPassword({
     required String publicKey,
     required String password,
@@ -59,14 +67,24 @@ class BiometryRepository {
         password: password,
       );
 
-  String? getKeyPassword(String publicKey) => _hiveSource.getKeyPassword(publicKey);
+  Future<String> getKeyPassword({
+    required String localizedReason,
+    required String publicKey,
+  }) async {
+    final password = _hiveSource.getKeyPassword(publicKey);
 
-  Future<void> clear() async {
-    await _hiveSource.clearKeysPasswords();
-    await _hiveSource.clearUserPreferences();
+    if (password != null) {
+      final isAuthenticated = await authenticate(localizedReason);
+
+      if (isAuthenticated) {
+        return password;
+      } else {
+        throw UnauthorizedException();
+      }
+    } else {
+      throw PasswordNotFoundException();
+    }
   }
-
-  Future<bool> authenticate(String localizedReason) => _localAuthSource.authenticate(localizedReason);
 
   Future<void> _initialize() async {
     _availabilitySubject.listen((value) async {

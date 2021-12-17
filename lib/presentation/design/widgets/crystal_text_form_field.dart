@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../../../generated/fonts.gen.dart';
 import '../design.dart';
 
 class CrystalTextFormField extends StatelessWidget {

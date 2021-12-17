@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
-import '../../../../../../domain/blocs/biometry/biometry_set_password_bloc.dart';
 import '../../../../../../injection.dart';
+import '../../../../data/repositories/biometry_repository.dart';
 import '../../../design/design.dart';
 import 'input_password_field.dart';
 
@@ -31,11 +31,9 @@ class InputPasswordModalBody extends StatefulWidget {
 
 class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
   final controller = TextEditingController();
-  final bloc = getIt.get<BiometrySetPasswordBloc>();
 
   @override
   void dispose() {
-    bloc.close();
     controller.dispose();
     super.dispose();
   }
@@ -66,12 +64,10 @@ class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
                   final biometryInfoBloc = context.read<BiometryInfoBloc>();
 
                   if (biometryInfoBloc.state.isEnabled && biometryInfoBloc.state.isEnabled) {
-                    bloc.add(
-                      BiometrySetPasswordEvent.set(
-                        publicKey: widget.publicKey,
-                        password: password,
-                      ),
-                    );
+                    await getIt.get<BiometryRepository>().setKeyPassword(
+                          publicKey: widget.publicKey,
+                          password: password,
+                        );
                   }
 
                   widget.onSubmit(password);

@@ -3,10 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
-import '../../../../../../../../domain/models/token_wallet_info.dart';
 import '../../../../../../../../injection.dart';
 import '../../../../design/widgets/asset_icon.dart';
-import '../../main_router_page.dart';
 import '../modals/token_asset_info/show_token_asset_info.dart';
 import 'wallet_asset_holder.dart';
 
@@ -74,7 +72,7 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
           ),
           onTap: state != null
               ? () => showTokenAssetInfo(
-                    context: mainRouterPageKey.currentContext ?? context,
+                    context: context,
                     owner: state.owner,
                     rootTokenContract: state.symbol.rootTokenContract,
                     svgIcon: widget.svgIcon,

@@ -4,11 +4,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../dtos/token_contract_asset_dto.dart';
-import '../../dtos/token_wallet_info_dto.dart';
 import '../../dtos/token_wallet_transaction_with_data_dto.dart';
-import '../../dtos/ton_wallet_info_dto.dart';
 import '../../dtos/ton_wallet_transaction_with_data_dto.dart';
 
 @preResolve
@@ -27,8 +26,8 @@ class HiveSource {
   late final Box<String> _keysPasswordsBox;
   late final Box<Object?> _userPreferencesBox;
   late final Box<TokenContractAssetDto> _tokenContractAssetsBox;
-  late final Box<TonWalletInfoDto> _tonWalletInfosBox;
-  late final Box<TokenWalletInfoDto> _tokenWalletInfosBox;
+  late final Box<TonWalletInfo> _tonWalletInfosBox;
+  late final Box<TokenWalletInfo> _tokenWalletInfosBox;
   late final Box<List> _tonWalletTransactionsBox;
   late final Box<List> _tokenWalletTransactionsBox;
   late final Box<String> _publicKeysLabelsBox;
@@ -49,24 +48,24 @@ class HiveSource {
 
   Future<void> clearTokenContractAssets() => _tokenContractAssetsBox.clear();
 
-  TonWalletInfoDto? getTonWalletInfo(String address) =>
+  TonWalletInfo? getTonWalletInfo(String address) =>
       _tonWalletInfosBox.values.firstWhereOrNull((e) => e.address == address);
 
-  Future<void> saveTonWalletInfo(TonWalletInfoDto tonWalletInfo) =>
+  Future<void> saveTonWalletInfo(TonWalletInfo tonWalletInfo) =>
       _tonWalletInfosBox.put(tonWalletInfo.address.hashCode, tonWalletInfo);
 
   Future<void> removeTonWalletInfo(String address) => _tonWalletInfosBox.delete(address.hashCode);
 
   Future<void> clearTonWalletInfos() => _tonWalletInfosBox.clear();
 
-  TokenWalletInfoDto? getTokenWalletInfo({
+  TokenWalletInfo? getTokenWalletInfo({
     required String owner,
     required String rootTokenContract,
   }) =>
       _tokenWalletInfosBox.values
           .firstWhereOrNull((e) => e.owner == owner && e.symbol.rootTokenContract == rootTokenContract);
 
-  Future<void> saveTokenWalletInfo(TokenWalletInfoDto tokenWalletInfo) => _tokenWalletInfosBox.put(
+  Future<void> saveTokenWalletInfo(TokenWalletInfo tokenWalletInfo) => _tokenWalletInfosBox.put(
         tokenWalletInfo.owner.hashCode ^ tokenWalletInfo.symbol.rootTokenContract.hashCode,
         tokenWalletInfo,
       );
@@ -165,8 +164,8 @@ class HiveSource {
     );
     _userPreferencesBox = await Hive.openBox<Object?>(_userPreferencesBoxName);
     _tokenContractAssetsBox = await Hive.openBox<TokenContractAssetDto>(_tokenContractAssetsBoxName);
-    _tonWalletInfosBox = await Hive.openBox<TonWalletInfoDto>(_tonWalletInfosBoxName);
-    _tokenWalletInfosBox = await Hive.openBox<TokenWalletInfoDto>(_tokenWalletInfosBoxName);
+    _tonWalletInfosBox = await Hive.openBox<TonWalletInfo>(_tonWalletInfosBoxName);
+    _tokenWalletInfosBox = await Hive.openBox<TokenWalletInfo>(_tokenWalletInfosBoxName);
     _tonWalletTransactionsBox = await Hive.openBox<List>(_tonWalletTransactionsBoxName);
     _tokenWalletTransactionsBox = await Hive.openBox<List>(_tokenWalletTransactionsBoxName);
     _publicKeysLabelsBox = await Hive.openBox<String>(_publicKeysLabelsBoxName);

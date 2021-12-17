@@ -6,11 +6,10 @@ linter:
     prefer_relative_imports: true
     avoid_positional_boolean_parameters: false
     depend_on_referenced_packages: false
-    invalid_annotation_target: false
+    always_use_package_imports: false
 
 analyzer:
   exclude:
-    - lib/generated/**
     - lib/**.g.dart
     - lib/**.gen.dart
     - lib/**.gr.dart
@@ -20,3 +19,4 @@ analyzer:
     missing_return: error
     missing_required_param: error
     parameter_assignments: error
+    invalid_annotation_target: ignore

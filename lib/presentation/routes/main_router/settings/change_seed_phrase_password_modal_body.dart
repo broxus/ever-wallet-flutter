@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:validators/validators.dart';
 
-import '../../../../../../domain/blocs/key/key_password_checking_bloc.dart';
-import '../../../../../../domain/blocs/key/key_update_bloc.dart';
 import '../../../../../../injection.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../design/design.dart';
 
 class ChangeSeedPhrasePasswordModalBody extends StatefulWidget {
@@ -20,8 +18,6 @@ class ChangeSeedPhrasePasswordModalBody extends StatefulWidget {
 }
 
 class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePasswordModalBody> {
-  final keyUpdateBloc = getIt.get<KeyUpdateBloc>();
-  final checkPasswordBloc = getIt.get<KeyPasswordCheckingBloc>();
   final formKey = GlobalKey<FormState>();
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
@@ -30,8 +26,6 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
   @override
   void dispose() {
-    keyUpdateBloc.close();
-    checkPasswordBloc.close();
     oldPasswordController.dispose();
     newPasswordController.dispose();
     validationNotifier.dispose();
@@ -42,54 +36,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
   @override
   Widget build(BuildContext context) => SafeArea(
         minimum: const EdgeInsets.only(bottom: 16),
-        child: BlocListener<KeyUpdateBloc, KeyUpdateState>(
-          bloc: keyUpdateBloc,
-          listener: (context, state) {
-            if (state is KeyUpdateStateSuccess) {
-              context.router.navigatorKey.currentState?.pop();
-              showCrystalFlushbar(
-                context,
-                message: LocaleKeys.change_seed_password_modal_messages_success.tr(),
-              );
-            }
-          },
-          child: BlocListener<KeyPasswordCheckingBloc, KeyPasswordCheckingState>(
-            bloc: checkPasswordBloc,
-            listener: (context, state) => state.maybeWhen(
-              success: (isCorrect) {
-                if (isCorrect) {
-                  incorrectPasswordNotifier.value = false;
-                  final newPassword = newPasswordController.text.trim();
-
-                  if (newPassword.isNotEmpty && (formKey.currentState?.validate() ?? false)) {
-                    keyUpdateBloc.add(
-                      KeyUpdateEvent.changePassword(
-                        publicKey: widget.publicKey,
-                        oldPassword: oldPasswordController.text.trim(),
-                        newPassword: newPassword,
-                      ),
-                    );
-                  }
-                } else {
-                  incorrectPasswordNotifier.value = true;
-                  formKey.currentState?.validate();
-
-                  String? text;
-
-                  if (incorrectPasswordNotifier.value) {
-                    text = 'Incorrect password';
-                  } else if (newPasswordController.text.isNotEmpty && !isLength(newPasswordController.text, 8)) {
-                    text = 'Password must be at least 8 symbols';
-                  }
-
-                  validationNotifier.value = text;
-                }
-              },
-              orElse: () => false,
-            ),
-            child: buildPasswordsBody(),
-          ),
-        ),
+        child: buildPasswordsBody(),
       );
 
   Widget buildPasswordsBody() => Form(
@@ -145,14 +92,57 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
             const CrystalDivider(height: 24),
             CrystalButton(
               text: LocaleKeys.change_seed_password_modal_actions_submit.tr(),
-              onTap: () {
+              onTap: () async {
                 final oldPassword = oldPasswordController.text.trim();
-                checkPasswordBloc.add(
-                  KeyPasswordCheckingEvent.check(
-                    publicKey: widget.publicKey,
-                    password: oldPassword,
-                  ),
-                );
+
+                final isCorrect = await getIt.get<KeysRepository>().checkKeyPassword(
+                      publicKey: widget.publicKey,
+                      password: oldPassword,
+                    );
+
+                if (isCorrect) {
+                  incorrectPasswordNotifier.value = false;
+                  final newPassword = newPasswordController.text.trim();
+
+                  if (newPassword.isNotEmpty && (formKey.currentState?.validate() ?? false)) {
+                    try {
+                      await getIt.get<KeysRepository>().changePassword(
+                            publicKey: widget.publicKey,
+                            oldPassword: oldPasswordController.text.trim(),
+                            newPassword: newPassword,
+                          );
+
+                      if (!mounted) return;
+
+                      await showCrystalFlushbar(
+                        context,
+                        message: LocaleKeys.change_seed_password_modal_messages_success.tr(),
+                      );
+
+                      context.router.navigatorKey.currentState?.pop();
+                    } catch (err) {
+                      if (!mounted) return;
+
+                      await showErrorCrystalFlushbar(
+                        context,
+                        message: err.toString(),
+                      );
+                    }
+                  }
+                } else {
+                  incorrectPasswordNotifier.value = true;
+                  formKey.currentState?.validate();
+
+                  String? text;
+
+                  if (incorrectPasswordNotifier.value) {
+                    text = 'Incorrect password';
+                  } else if (newPasswordController.text.isNotEmpty && !isLength(newPasswordController.text, 8)) {
+                    text = 'Password must be at least 8 symbols';
+                  }
+
+                  validationNotifier.value = text;
+                }
               },
             ),
           ],

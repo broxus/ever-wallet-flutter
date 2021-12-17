@@ -7,6 +7,7 @@ import '../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../domain/blocs/connection_bloc.dart';
 import '../../../../domain/blocs/key/keys_bloc.dart';
 import '../../../../injection.dart';
+import '../../domain/blocs/account/current_account_bloc.dart';
 import '../../domain/blocs/public_keys_labels_bloc.dart';
 
 class ApplicationBlocProvider extends StatelessWidget {
@@ -25,6 +26,7 @@ class ApplicationBlocProvider extends StatelessWidget {
           BlocProvider(create: (_) => getIt.get<PublicKeysLabelsBloc>()),
           BlocProvider(create: (_) => getIt.get<BiometryInfoBloc>()),
           BlocProvider(create: (_) => getIt.get<KeysBloc>()),
+          BlocProvider(create: (_) => getIt.get<CurrentAccountBloc>()),
           BlocProvider(create: (_) => getIt.get<AccountsBloc>()),
         ],
         child: child,

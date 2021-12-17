@@ -1,14 +1,12 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../../../domain/blocs/public_keys_labels_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../../domain/models/ton_wallet_info.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
-import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/crystal_title.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/custom_popup_menu.dart';
