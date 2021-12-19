@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/keys_repository.dart';
+import '../../../../logger.dart';
 import '../../../design/design.dart';
+import '../../../design/widgets/crystal_flushbar.dart';
 import '../widgets/input_password_modal_body.dart';
 
 class DeriveKeyModalBody extends StatefulWidget {
@@ -33,7 +35,9 @@ class _DeriveKeyModalBodyState extends State<DeriveKeyModalBody> {
                 );
 
             context.router.navigatorKey.currentState?.pop();
-          } catch (err) {
+          } catch (err, st) {
+            logger.e(err, err, st);
+
             await showCrystalFlushbar(
               context,
               message: err.toString(),

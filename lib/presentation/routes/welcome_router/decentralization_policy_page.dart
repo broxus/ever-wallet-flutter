@@ -73,7 +73,7 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
                   children: [
                     const SizedBox(height: 8),
                     title(),
-                    const SizedBox(height: 72),
+                    const SizedBox(height: 96),
                     image(),
                   ],
                 ),

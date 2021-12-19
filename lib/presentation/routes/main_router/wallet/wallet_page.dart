@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../design/design.dart';
+import '../../../design/widgets/animated_appearance.dart';
+import '../../../design/widgets/sliding_panel.dart';
 import 'history/wallet_modal_body.dart';
 import 'widgets/wallet_body.dart';
 import 'widgets/wallet_scaffold.dart';
@@ -23,18 +24,15 @@ class _WalletPageState extends State<WalletPage> {
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
-        child: ColoredBox(
-          color: CrystalColor.background,
-          child: AnimatedAppearance(
-            child: WalletScaffold(
+        child: AnimatedAppearance(
+          child: WalletScaffold(
+            modalController: modalController,
+            body: WalletBody(
               modalController: modalController,
-              body: WalletBody(
-                modalController: modalController,
-              ),
-              modalBody: (controller) => WalletModalBody(
-                scrollController: controller,
-                onTabSelected: (_) => modalController.resetScroll(),
-              ),
+            ),
+            modalBody: (controller) => WalletModalBody(
+              scrollController: controller,
+              onTabSelected: (_) => modalController.resetScroll(),
             ),
           ),
         ),

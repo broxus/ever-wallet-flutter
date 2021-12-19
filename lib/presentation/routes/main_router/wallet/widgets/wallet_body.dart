@@ -5,6 +5,8 @@ import '../../../../../../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../../../domain/blocs/account/current_account_bloc.dart';
 import '../../../../../domain/models/account.dart';
 import '../../../../design/design.dart';
+import '../../../../design/widgets/animated_appearance.dart';
+import '../../../../design/widgets/sliding_panel.dart';
 import 'connection_button.dart';
 import 'profile_actions.dart';
 import 'profile_carousel.dart';
@@ -46,11 +48,12 @@ class WalletBody extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const CrystalDivider(height: 16),
+                  const SizedBox(height: 16),
                   AnimatedAppearance(
                     duration: const Duration(milliseconds: 250),
                     offset: const Offset(1, 0),
                     child: ProfileCarousel(
+                      publicKey: currentAccountState?.assetsList.publicKey,
                       accounts: accountsState,
                       onPageChanged: (i) {
                         if (i < accountsState.length) {
@@ -82,7 +85,7 @@ class WalletBody extends StatelessWidget {
                       },
                     ),
                   ),
-                  const CrystalDivider(height: 16),
+                  const SizedBox(height: 16),
                   if (currentAccountState != null)
                     ProfileActions(
                       address: currentAccountState.when(
@@ -94,7 +97,7 @@ class WalletBody extends StatelessWidget {
                         external: (_) => true,
                       ),
                     ),
-                  const CrystalDivider(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

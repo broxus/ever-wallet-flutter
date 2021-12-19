@@ -1,10 +1,10 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import 'data/dtos/account_status_dto.dart';
 import 'data/dtos/de_pool_on_round_complete_notification_dto.dart';
@@ -30,7 +30,7 @@ import 'data/dtos/transaction_dto.dart';
 import 'data/dtos/transaction_id_dto.dart';
 import 'data/dtos/transfer_recipient_dto.dart';
 import 'data/dtos/wallet_interaction_info_dto.dart';
-import 'data/dtos/wallet_interaction_method_dto.dart';
+import 'data/dtos/wallet_interaction_method_dto.dart' as wim;
 import 'injection.config.dart';
 
 final getIt = GetIt.instance;
@@ -40,12 +40,9 @@ Future<void> configureDependencies() => $initGetIt(getIt);
 
 @module
 abstract class FirebaseModule {
-  @lazySingleton
-  FirebaseAnalytics get firebaseAnalytics => FirebaseAnalytics.instance;
-
   @preResolve
   @lazySingleton
-  Future<FirebaseApp> firebaseApp(FirebaseAnalytics analytics) async {
+  Future<FirebaseApp> firebaseApp() async {
     final app = await Firebase.initializeApp();
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(kReleaseMode);
 
@@ -110,8 +107,27 @@ abstract class HiveModule {
       ..registerAdapter(TonEventStatusChangedDtoAdapter())
       ..registerAdapter(WalletInteractionDtoAdapter())
       ..registerAdapter(WalletInteractionInfoDtoAdapter())
-      ..registerAdapter(WalletV3TransferAdapter())
-      ..registerAdapter(MultisigAdapter());
+      ..registerAdapter(wim.WalletV3TransferAdapter())
+      ..registerAdapter(wim.MultisigAdapter())
+      ..registerAdapter(WalletContractTypeAdapter())
+      ..registerAdapter(PermissionsAdapter())
+      ..registerAdapter(AccountInteractionAdapter())
+      ..registerAdapter(TonWalletInfoAdapter())
+      ..registerAdapter(TonWalletDetailsAdapter())
+      ..registerAdapter(TokenWalletVersionAdapter())
+      ..registerAdapter(SymbolAdapter())
+      ..registerAdapter(LastTransactionIdAdapter())
+      ..registerAdapter(GenTimingsAdapter())
+      ..registerAdapter(ContractStateAdapter())
+      ..registerAdapter(WalletV3Adapter())
+      ..registerAdapter(MultisigAdapter())
+      ..registerAdapter(MultisigTypeAdapter())
+      ..registerAdapter(TokenWalletInfoAdapter())
+      ..registerAdapter(AssetsListAdapter())
+      ..registerAdapter(TonWalletAssetAdapter())
+      ..registerAdapter(AdditionalAssetsAdapter())
+      ..registerAdapter(TokenWalletAssetAdapter())
+      ..registerAdapter(DePoolAssetAdapter());
 
     return this;
   }

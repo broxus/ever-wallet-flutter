@@ -28,6 +28,7 @@ class TonWalletSendBloc extends Bloc<TonWalletSendEvent, TonWalletSendState> {
 
         await tonWallet.send(
           message: event.message,
+          publicKey: event.publicKey,
           password: event.password,
         );
 
@@ -45,6 +46,7 @@ class TonWalletSendEvent with _$TonWalletSendEvent {
   const factory TonWalletSendEvent.send({
     required String address,
     required UnsignedMessage message,
+    required String publicKey,
     required String password,
   }) = _Send;
 }

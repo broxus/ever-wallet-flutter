@@ -3,7 +3,11 @@ import 'package:validators/validators.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/keys_repository.dart';
+import '../../../../logger.dart';
 import '../../../design/design.dart';
+import '../../../design/widgets/crystal_flushbar.dart';
+import '../../../design/widgets/crystal_text_form_field.dart';
+import '../../../design/widgets/custom_elevated_button.dart';
 
 class ChangeSeedPhrasePasswordModalBody extends StatefulWidget {
   final String publicKey;
@@ -56,7 +60,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CrystalDivider(height: 24),
+            const SizedBox(height: 24),
             buildTextField(
               controller: oldPasswordController,
               autofocus: true,
@@ -72,7 +76,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
                 }
               },
             ),
-            const CrystalDivider(height: 24),
+            const SizedBox(height: 24),
             buildTextField(
               controller: newPasswordController,
               autofocus: false,
@@ -89,10 +93,9 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
               },
             ),
             buildValidationText(),
-            const CrystalDivider(height: 24),
-            CrystalButton(
-              text: LocaleKeys.change_seed_password_modal_actions_submit.tr(),
-              onTap: () async {
+            const SizedBox(height: 24),
+            CustomElevatedButton(
+              onPressed: () async {
                 final oldPassword = oldPasswordController.text.trim();
 
                 final isCorrect = await getIt.get<KeysRepository>().checkKeyPassword(
@@ -120,7 +123,9 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
                       );
 
                       context.router.navigatorKey.currentState?.pop();
-                    } catch (err) {
+                    } catch (err, st) {
+                      logger.e(err, err, st);
+
                       if (!mounted) return;
 
                       await showErrorCrystalFlushbar(
@@ -144,6 +149,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
                   validationNotifier.value = text;
                 }
               },
+              text: LocaleKeys.change_seed_password_modal_actions_submit.tr(),
             ),
           ],
         ),

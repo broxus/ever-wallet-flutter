@@ -14,6 +14,7 @@ class SendResultPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
   final UnsignedMessage message;
+  final String publicKey;
   final String password;
   final String sendingText;
   final String successText;
@@ -23,6 +24,7 @@ class SendResultPage extends StatefulWidget {
     required this.modalContext,
     required this.address,
     required this.message,
+    required this.publicKey,
     required this.password,
     required this.sendingText,
     required this.successText,
@@ -42,6 +44,7 @@ class _NewSelectWalletTypePageState extends State<SendResultPage> {
       TonWalletSendEvent.send(
         address: widget.address,
         message: widget.message,
+        publicKey: widget.publicKey,
         password: widget.password,
       ),
     );
@@ -71,7 +74,6 @@ class _NewSelectWalletTypePageState extends State<SendResultPage> {
                       title(),
                       const SizedBox(height: 16),
                       card(),
-                      const SizedBox(height: 16),
                       const SizedBox(height: 64),
                     ],
                   ),

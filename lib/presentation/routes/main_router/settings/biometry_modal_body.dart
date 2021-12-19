@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../../../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../design/design.dart';
@@ -19,9 +20,9 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const CrystalDivider(height: 20),
+            const SizedBox(height: 20),
             getBiometricSwitcher(),
-            const CrystalDivider(height: 34),
+            const SizedBox(height: 34),
           ],
         ),
       );
@@ -36,12 +37,12 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
               ),
             ),
           ),
-          const CrystalDivider(width: 16),
+          const SizedBox(width: 16),
           BlocBuilder<BiometryInfoBloc, BiometryInfoState>(
             bloc: context.watch<BiometryInfoBloc>(),
-            builder: (context, state) => CrystalSwitch(
-              isActive: state.isEnabled,
-              onTap: () => context.read<BiometryInfoBloc>().add(
+            builder: (context, state) => PlatformSwitch(
+              value: state.isEnabled,
+              onChanged: (p0) => context.read<BiometryInfoBloc>().add(
                     BiometryInfoEvent.setStatus(
                       localizedReason: 'Please authenticate to interact with wallet',
                       isEnabled: !state.isEnabled,

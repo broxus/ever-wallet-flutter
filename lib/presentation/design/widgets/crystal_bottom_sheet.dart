@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../design.dart';
+import 'circle_icon.dart';
 
 Future<T?> showCrystalBottomSheet<T>(
   BuildContext context, {
@@ -118,7 +119,7 @@ Widget _getCloseButton() => Padding(
         icon: Icon(
           Icons.close,
           color: Platform.isIOS ? CrystalColor.fontDark : CrystalColor.fontTitleSecondaryDark,
-          size: 10,
+          size: 20,
         ),
       ),
     );

@@ -3,7 +3,11 @@ import 'package:flutter/services.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/keys_repository.dart';
+import '../../../../logger.dart';
 import '../../../design/design.dart';
+import '../../../design/widgets/crystal_flushbar.dart';
+import '../../../design/widgets/crystal_text_form_field.dart';
+import '../../../design/widgets/custom_elevated_button.dart';
 
 class RenameKeyModalBody extends StatefulWidget {
   final String publicKey;
@@ -33,19 +37,18 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const CrystalDivider(height: 20),
+            const SizedBox(height: 20),
             CrystalTextFormField(
               controller: controller,
               autofocus: true,
               formatters: [LengthLimitingTextInputFormatter(50)],
               hintText: LocaleKeys.new_seed_name_hint.tr(),
             ),
-            const CrystalDivider(height: 24),
+            const SizedBox(height: 24),
             ValueListenableBuilder<TextEditingValue>(
               valueListenable: controller,
-              builder: (context, value, _) => CrystalButton(
-                text: LocaleKeys.rename_key_modal_actions_rename.tr(),
-                onTap: value.text.isEmpty
+              builder: (context, value, _) => CustomElevatedButton(
+                onPressed: value.text.isEmpty
                     ? null
                     : () async {
                         try {
@@ -62,7 +65,9 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                           );
 
                           context.router.navigatorKey.currentState?.pop();
-                        } catch (err) {
+                        } catch (err, st) {
+                          logger.e(err, err, st);
+
                           if (!mounted) return;
 
                           await showErrorCrystalFlushbar(
@@ -71,6 +76,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                           );
                         }
                       },
+                text: LocaleKeys.rename_key_modal_actions_rename.tr(),
               ),
             )
           ],

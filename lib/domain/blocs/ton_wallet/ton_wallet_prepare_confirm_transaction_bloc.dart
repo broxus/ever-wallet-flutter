@@ -16,7 +16,7 @@ class TonWalletPrepareConfirmTransactionBloc
   final NekotonService _nekotonService;
 
   TonWalletPrepareConfirmTransactionBloc(this._nekotonService)
-      : super(TonWalletPrepareConfirmTransactionStateInitial());
+      : super(const TonWalletPrepareConfirmTransactionState.initial());
 
   @override
   Stream<TonWalletPrepareConfirmTransactionState> mapEventToState(
@@ -31,15 +31,16 @@ class TonWalletPrepareConfirmTransactionBloc
         }
 
         final message = await tonWallet.prepareConfirmTransaction(
+          publicKey: event.publicKey,
           transactionId: event.transactionId,
           expiration: kDefaultMessageExpiration,
         );
 
-        yield TonWalletPrepareConfirmTransactionStateSuccess(message);
+        yield TonWalletPrepareConfirmTransactionState.success(message);
       }
     } on Exception catch (err, st) {
       logger.e(err, err, st);
-      yield TonWalletPrepareConfirmTransactionStateError(err);
+      yield TonWalletPrepareConfirmTransactionState.error(err);
     }
   }
 }
@@ -47,23 +48,25 @@ class TonWalletPrepareConfirmTransactionBloc
 @freezed
 class TonWalletPrepareConfirmTransactionEvent with _$TonWalletPrepareConfirmTransactionEvent {
   const factory TonWalletPrepareConfirmTransactionEvent.prepareConfirmTransaction({
+    required String publicKey,
     required String address,
-    required int transactionId,
+    required String transactionId,
   }) = _PrepareConfirmTransaction;
 }
 
-abstract class TonWalletPrepareConfirmTransactionState {}
+@freezed
+class TonWalletPrepareConfirmTransactionState with _$TonWalletPrepareConfirmTransactionState {
+  const factory TonWalletPrepareConfirmTransactionState.initial() = _Initial;
 
-class TonWalletPrepareConfirmTransactionStateInitial extends TonWalletPrepareConfirmTransactionState {}
+  const factory TonWalletPrepareConfirmTransactionState.success(UnsignedMessage message) = _Success;
 
-class TonWalletPrepareConfirmTransactionStateSuccess extends TonWalletPrepareConfirmTransactionState {
-  final UnsignedMessage message;
+  const factory TonWalletPrepareConfirmTransactionState.error(Exception exception) = _Error;
 
-  TonWalletPrepareConfirmTransactionStateSuccess(this.message);
-}
+  const TonWalletPrepareConfirmTransactionState._();
 
-class TonWalletPrepareConfirmTransactionStateError extends TonWalletPrepareConfirmTransactionState {
-  final Exception exception;
+  @override
+  bool operator ==(Object other) => false;
 
-  TonWalletPrepareConfirmTransactionStateError(this.exception);
+  @override
+  int get hashCode => 0;
 }

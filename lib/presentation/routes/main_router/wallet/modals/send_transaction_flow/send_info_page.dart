@@ -6,7 +6,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_transfer_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
@@ -20,6 +19,7 @@ import '../common/send_result_page.dart';
 class SendInfoPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
+  final String publicKey;
   final String destination;
   final String amount;
   final String? comment;
@@ -28,6 +28,7 @@ class SendInfoPage extends StatefulWidget {
     Key? key,
     required this.modalContext,
     required this.address,
+    required this.publicKey,
     required this.destination,
     required this.amount,
     this.comment,
@@ -38,16 +39,12 @@ class SendInfoPage extends StatefulWidget {
 }
 
 class _NewSelectWalletTypePageState extends State<SendInfoPage> {
-  final infoBloc = getIt.get<TonWalletInfoBloc>();
   final prepareTransferBloc = getIt.get<TonWalletPrepareTransferBloc>();
   final estimateFeesBloc = getIt.get<TonWalletEstimateFeesBloc>();
 
   @override
   void initState() {
     super.initState();
-    infoBloc.add(
-      TonWalletInfoEvent.load(widget.address),
-    );
     prepareTransferBloc.add(
       TonWalletPrepareTransferEvent.prepareTransfer(
         address: widget.address,
@@ -107,7 +104,6 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     card(),
-                    const SizedBox(height: 16),
                     const SizedBox(height: 64),
                   ],
                 ),
@@ -186,35 +182,32 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
         subtitle: widget.comment,
       );
 
-  Widget submitButton() => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-        bloc: infoBloc,
-        builder: (context, infoState) => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
-          bloc: estimateFeesBloc,
-          builder: (context, estimateFeesState) =>
-              BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
-            bloc: prepareTransferBloc,
-            builder: (context, prepareTransferState) {
-              final message = prepareTransferState.maybeWhen(
-                success: (message) => message,
-                orElse: () => null,
-              );
+  Widget submitButton() => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
+        bloc: estimateFeesBloc,
+        builder: (context, estimateFeesState) =>
+            BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
+          bloc: prepareTransferBloc,
+          builder: (context, prepareTransferState) {
+            final message = prepareTransferState.maybeWhen(
+              success: (message) => message,
+              orElse: () => null,
+            );
 
-              final sufficientFunds = estimateFeesState.maybeWhen(
-                success: (_) => true,
-                orElse: () => false,
-              );
+            final sufficientFunds = estimateFeesState.maybeWhen(
+              success: (_) => true,
+              orElse: () => false,
+            );
 
-              return CustomElevatedButton(
-                onPressed: sufficientFunds && message != null && infoState != null
-                    ? () => onPressed(
-                          message: message,
-                          publicKey: infoState.publicKey,
-                        )
-                    : null,
-                text: 'Send',
-              );
-            },
-          ),
+            return CustomElevatedButton(
+              onPressed: sufficientFunds && message != null
+                  ? () => onPressed(
+                        message: message,
+                        publicKey: widget.publicKey,
+                      )
+                  : null,
+              text: 'Send',
+            );
+          },
         ),
       );
 
@@ -233,8 +226,9 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
     if (!mounted) return;
 
     if (password != null) {
-      pushDeploymentResult(
+      pushSendResult(
         message: message,
+        publicKey: publicKey,
         password: password,
       );
     } else {
@@ -243,8 +237,9 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
           builder: (context) => PasswordEnterPage(
             modalContext: widget.modalContext,
             publicKey: publicKey,
-            onSubmit: (password) => pushDeploymentResult(
+            onSubmit: (password) => pushSendResult(
               message: message,
+              publicKey: publicKey,
               password: password,
             ),
           ),
@@ -255,17 +250,20 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
 
   Future<String?> getPasswordFromBiometry(String publicKey) async {
     try {
-      return getIt.get<BiometryRepository>().getKeyPassword(
+      final password = await getIt.get<BiometryRepository>().getKeyPassword(
             localizedReason: 'Please authenticate to interact with wallet',
             publicKey: publicKey,
           );
+
+      return password;
     } catch (err) {
       return null;
     }
   }
 
-  Future<void> pushDeploymentResult({
+  Future<void> pushSendResult({
     required UnsignedMessage message,
+    required String publicKey,
     required String password,
   }) =>
       Navigator.of(context).pushAndRemoveUntil(
@@ -274,6 +272,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
             modalContext: widget.modalContext,
             address: widget.address,
             message: message,
+            publicKey: publicKey,
             password: password,
             sendingText: 'Transaction is sending...',
             successText: 'Transaction has been sent successfully',

@@ -8,6 +8,7 @@ import '../../../../../injection.dart';
 import '../../../../data/repositories/keys_repository.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
+import '../../../design/widgets/crystal_flushbar.dart';
 import '../../../design/widgets/crystal_subtitle.dart';
 import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_back_button.dart';
@@ -37,6 +38,8 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
   final formKey = GlobalKey<FormState>();
   final passwordController = TextEditingController();
   final repeatController = TextEditingController();
+  final passwordFocusNode = FocusNode();
+  final repeatFocusNode = FocusNode();
   final formValidityNotifier = ValueNotifier<String?>('');
 
   @override
@@ -44,6 +47,8 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
     scrollController.dispose();
     passwordController.dispose();
     repeatController.dispose();
+    passwordFocusNode.dispose();
+    repeatFocusNode.dispose();
     formValidityNotifier.dispose();
     super.dispose();
   }
@@ -140,6 +145,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
   Widget passwordField() => CustomTextFormField(
         name: 'password',
         controller: passwordController,
+        focusNode: passwordFocusNode,
         autocorrect: false,
         enableSuggestions: false,
         obscureText: true,
@@ -148,7 +154,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         suffixIcon: TextFieldClearButton(
           controller: passwordController,
         ),
-        onSubmitted: (value) => FocusScope.of(context).nextFocus(),
+        onSubmitted: (value) => repeatFocusNode.requestFocus(),
         validator: (String? value) {
           if (value == null || value.isEmpty) {
             return null;
@@ -163,6 +169,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
   Widget repeatField() => CustomTextFormField(
         name: 'repeat',
         controller: repeatController,
+        focusNode: repeatFocusNode,
         autocorrect: false,
         enableSuggestions: false,
         obscureText: true,
@@ -208,63 +215,57 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
 
   Widget biometryCheckbox() => BlocBuilder<BiometryInfoBloc, BiometryInfoState>(
         bloc: context.watch<BiometryInfoBloc>(),
-        builder: (context, state) {
-          if (!state.isAvailable) {
-            return const SizedBox();
-          }
-
-          return Column(
-            children: [
-              const SizedBox(height: 16),
-              Row(
+        builder: (context, state) => !state.isAvailable
+            ? const SizedBox()
+            : Column(
                 children: [
-                  CustomCheckbox(
-                    value: state.isEnabled,
-                    onChanged: (value) {
-                      context.read<BiometryInfoBloc>().add(
-                            BiometryInfoEvent.setStatus(
-                              localizedReason: 'Please authenticate to interact with wallet',
-                              isEnabled: !state.isEnabled,
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      CustomCheckbox(
+                        value: state.isEnabled,
+                        onChanged: (value) => context.read<BiometryInfoBloc>().add(
+                              BiometryInfoEvent.setStatus(
+                                localizedReason: 'Please authenticate to interact with wallet',
+                                isEnabled: !state.isEnabled,
+                              ),
                             ),
-                          );
-                    },
-                  ),
-                  Expanded(
-                    child: Text(LocaleKeys.biometry_checkbox.tr()),
+                      ),
+                      Expanded(
+                        child: Text(LocaleKeys.biometry_checkbox.tr()),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          );
-        },
       );
 
   Widget submitButton() => ValueListenableBuilder<String?>(
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
-          onPressed: value != null
-              ? null
-              : () async {
-                  try {
-                    final password = passwordController.text;
-
-                    await getIt.get<KeysRepository>().createKey(
-                          name: widget.seedName,
-                          phrase: widget.phrase,
-                          password: password,
-                        );
-
-                    if (context.router.current.name == NewSeedRouterRoute.name) {
-                      context.router.navigate(const SettingsRouterRoute());
-                    }
-                  } catch (err) {
-                    showErrorCrystalFlushbar(
-                      context,
-                      message: err.toString(),
-                    );
-                  }
-                },
+          onPressed: value != null ? null : onSubmitButtonPressed,
           text: LocaleKeys.actions_confirm.tr(),
         ),
       );
+
+  Future<void> onSubmitButtonPressed() async {
+    try {
+      final password = passwordController.text;
+
+      await getIt.get<KeysRepository>().createKey(
+            name: widget.seedName,
+            phrase: widget.phrase,
+            password: password,
+          );
+
+      if (context.router.routeData.name == NewSeedRouterRoute.name) {
+        context.router.navigate(const SettingsRouterRoute());
+      }
+    } catch (err) {
+      showErrorCrystalFlushbar(
+        context,
+        message: err.toString(),
+      );
+    }
+  }
 }

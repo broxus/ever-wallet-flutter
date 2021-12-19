@@ -23,8 +23,6 @@ class TokenWalletInfoRepository {
         rootTokenContract: rootTokenContract,
       );
 
-  String getOwnerPublicKey(String owner) => _nekotonService.accounts.firstWhere((e) => e.address == owner).publicKey;
-
   Future<void> save(TokenWalletInfo tokenWalletInfo) => _hiveSource.saveTokenWalletInfo(tokenWalletInfo);
 
   Future<void> remove({

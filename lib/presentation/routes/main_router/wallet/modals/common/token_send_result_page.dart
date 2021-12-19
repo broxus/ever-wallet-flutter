@@ -15,6 +15,7 @@ class TokenSendResultPage extends StatefulWidget {
   final String owner;
   final String rootTokenContract;
   final UnsignedMessage message;
+  final String publicKey;
   final String password;
   final String sendingText;
   final String successText;
@@ -25,6 +26,7 @@ class TokenSendResultPage extends StatefulWidget {
     required this.owner,
     required this.rootTokenContract,
     required this.message,
+    required this.publicKey,
     required this.password,
     required this.sendingText,
     required this.successText,
@@ -45,6 +47,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendResultPage> {
         owner: widget.owner,
         rootTokenContract: widget.rootTokenContract,
         message: widget.message,
+        publicKey: widget.publicKey,
         password: widget.password,
       ),
     );
@@ -74,7 +77,6 @@ class _NewSelectWalletTypePageState extends State<TokenSendResultPage> {
                       title(),
                       const SizedBox(height: 16),
                       card(),
-                      const SizedBox(height: 16),
                       const SizedBox(height: 64),
                     ],
                   ),

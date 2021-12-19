@@ -5,10 +5,10 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../../../injection.dart';
+import '../../../../../domain/blocs/key/keys_bloc.dart';
 import '../../../../../domain/models/account.dart';
 import '../../../../design/design.dart';
-import '../../../../design/widgets/crystal_bottom_sheet.dart';
-import '../modals/add_asset_flow/add_asset_modal.dart';
+import '../modals/add_asset_modal/show_add_asset_modal.dart';
 import '../modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
 import '../modals/receive_modal/show_receive_modal.dart';
 import '../modals/send_transaction_flow/start_send_transaction_flow.dart';
@@ -69,27 +69,25 @@ class _ProfileActionsState extends State<ProfileActions> {
   Widget build(BuildContext context) => Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          if (!widget.isExternal)
-            WalletButton(
-              onTap: () async {
-                await showCrystalBottomSheet(
-                  context,
-                  padding: EdgeInsets.zero,
-                  draggable: false,
-                  wrapIntoAnimatedSize: false,
-                  expand: true,
-                  avoidBottomInsets: false,
-                  body: AddAssetModal(
-                    address: widget.address,
-                  ),
-                );
-              },
-              title: LocaleKeys.wallet_screen_actions_add_asset.tr(),
-              icon: const Icon(
-                Icons.add,
-                color: CrystalColor.secondary,
+          WalletButton(
+            onTap: () async => showAddAssetModal(
+              context: context,
+              address: widget.address,
+              isExternal: widget.isExternal,
+            ),
+            title: LocaleKeys.wallet_screen_actions_add_asset.tr(),
+            icon: const OverflowBox(
+              maxHeight: 30,
+              maxWidth: 30,
+              child: Center(
+                child: Icon(
+                  Icons.add,
+                  size: 30,
+                  color: CrystalColor.secondary,
+                ),
               ),
             ),
+          ),
           BlocBuilder<AccountInfoBloc, Account?>(
             bloc: accountInfoBloc,
             builder: (context, state) => WalletButton(
@@ -108,33 +106,54 @@ class _ProfileActionsState extends State<ProfileActions> {
               ),
             ),
           ),
-          if (!widget.isExternal)
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
+          BlocBuilder<KeysBloc, KeysState>(
+            bloc: context.watch<KeysBloc>(),
+            builder: (context, keysState) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
-              builder: (context, state) => state != null
-                  ? !state.details.requiresSeparateDeploy || state.contractState.isDeployed
-                      ? WalletButton(
-                          onTap: () => startSendTransactionFlow(
-                            context: context,
-                            address: state.address,
-                          ),
-                          title: LocaleKeys.actions_send.tr(),
-                          icon: Assets.images.iconSend.svg(
-                            color: CrystalColor.secondary,
-                          ),
-                        )
-                      : WalletButton(
-                          onTap: () => startDeployWalletFlow(
-                            context: context,
-                            address: state.address,
-                          ),
-                          title: LocaleKeys.actions_deploy.tr(),
-                          icon: Assets.images.iconDeploy.svg(
-                            color: CrystalColor.secondary,
-                          ),
-                        )
-                  : const SizedBox.square(dimension: 56),
+              builder: (context, infoState) {
+                final publicKey = keysState.currentKey?.publicKey;
+                final isCustodian = infoState?.custodians?.any((e) => e == publicKey) ?? false;
+                final requiresSeparateDeploy = infoState?.details.requiresSeparateDeploy ?? false;
+                final isDeployed = infoState?.contractState.isDeployed ?? false;
+
+                if (publicKey != null && isCustodian) {
+                  if (!requiresSeparateDeploy || isDeployed) {
+                    return WalletButton(
+                      onTap: () => startSendTransactionFlow(
+                        context: context,
+                        address: widget.address,
+                        publicKey: publicKey,
+                      ),
+                      title: LocaleKeys.actions_send.tr(),
+                      icon: Assets.images.iconSend.svg(
+                        color: CrystalColor.secondary,
+                      ),
+                    );
+                  } else {
+                    return WalletButton(
+                      onTap: () => startDeployWalletFlow(
+                        context: context,
+                        address: widget.address,
+                        publicKey: publicKey,
+                      ),
+                      title: LocaleKeys.actions_deploy.tr(),
+                      icon: Assets.images.iconDeploy.svg(
+                        color: CrystalColor.secondary,
+                      ),
+                    );
+                  }
+                } else {
+                  return WalletButton(
+                    onTap: () {},
+                    title: LocaleKeys.actions_send.tr(),
+                    icon: Assets.images.iconSend.svg(
+                      color: CrystalColor.secondary,
+                    ),
+                  );
+                }
+              },
             ),
+          ),
         ],
       );
 }

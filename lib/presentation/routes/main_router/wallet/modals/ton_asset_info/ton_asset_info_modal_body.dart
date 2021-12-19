@@ -7,6 +7,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../../../../../../../injection.dart';
+import '../../../../../../domain/blocs/key/keys_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_expired_transactions_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_transactions_bloc.dart';
@@ -27,10 +28,12 @@ import '../send_transaction_flow/start_send_transaction_flow.dart';
 
 class TonAssetInfoModalBody extends StatefulWidget {
   final String address;
+  final bool isExternal;
 
   const TonAssetInfoModalBody({
     Key? key,
     required this.address,
+    this.isExternal = false,
   }) : super(key: key);
 
   @override
@@ -90,6 +93,8 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
   void dispose() {
     infoBloc.close();
     transactionsBloc.close();
+    sentTransactionsBloc.close();
+    expiredTransactionsBloc.close();
     multisigPendingTransactionsBloc.close();
     super.dispose();
   }
@@ -129,7 +134,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
           children: [
             info(balance),
             const SizedBox(height: 24),
-            actions(contractState.isDeployed),
+            actions(),
           ],
         ),
       );
@@ -167,75 +172,95 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         ),
       );
 
-  Widget actions(bool isDeployed) => Row(
-        children: [
-          Expanded(
-            child: WalletActionButton(
-              icon: Assets.images.iconReceive,
-              title: LocaleKeys.actions_receive.tr(),
-              onPressed: () => showReceiveModal(
-                context: context,
-                address: widget.address,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: WalletActionButton(
-              icon: isDeployed ? Assets.images.iconSend : Assets.images.iconDeploy,
-              title: isDeployed ? LocaleKeys.actions_send.tr() : LocaleKeys.actions_deploy.tr(),
-              onPressed: isDeployed
-                  ? () => startSendTransactionFlow(
-                        context: context,
-                        address: widget.address,
-                      )
-                  : () => startDeployWalletFlow(
-                        context: context,
-                        address: widget.address,
-                      ),
-            ),
-          ),
-        ],
-      );
+  Widget actions() => BlocBuilder<KeysBloc, KeysState>(
+        bloc: context.watch<KeysBloc>(),
+        builder: (context, keysState) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
+          bloc: infoBloc,
+          builder: (context, infoState) {
+            final publicKey = keysState.currentKey?.publicKey;
+            final isCustodian = infoState?.custodians?.any((e) => e == publicKey) ?? false;
+            final isDeployed = infoState?.contractState.isDeployed ?? false;
 
-  Widget history() => BlocBuilder<TonWalletTransactionsBloc, List<TonWalletTransactionWithData>>(
-        bloc: transactionsBloc,
-        builder: (context, transactionsState) =>
-            BlocBuilder<TonWalletSentTransactionsBloc, List<Tuple2<PendingTransaction, Transaction?>>>(
-          bloc: sentTransactionsBloc,
-          builder: (context, sentTransactionsState) =>
-              BlocBuilder<TonWalletExpiredTransactionsBloc, List<PendingTransaction>>(
-            bloc: expiredTransactionsBloc,
-            builder: (context, expiredTransactionsState) =>
-                BlocBuilder<TonWalletMultisigPendingTransactionsBloc, List<MultisigPendingTransaction>>(
-              bloc: multisigPendingTransactionsBloc,
-              builder: (context, multisigPendingTransactionsState) => Column(
-                children: [
-                  historyTitle(
-                    transactionsState: transactionsState,
-                    sentTransactionsState: sentTransactionsState,
-                    expiredTransactionsState: expiredTransactionsState,
-                    multisigPendingTransactionsState: multisigPendingTransactionsState,
+            return Row(
+              children: [
+                Expanded(
+                  child: WalletActionButton(
+                    icon: Assets.images.iconReceive,
+                    title: LocaleKeys.actions_receive.tr(),
+                    onPressed: () => showReceiveModal(
+                      context: context,
+                      address: widget.address,
+                    ),
                   ),
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                  ),
-                  Flexible(
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        list(
-                          transactionsState: transactionsState,
-                          sentTransactionsState: sentTransactionsState,
-                          expiredTransactionsState: expiredTransactionsState,
-                          multisigPendingTransactionsState: multisigPendingTransactionsState,
-                        ),
-                        loader(),
-                      ],
+                ),
+                if (publicKey != null && isCustodian) ...[
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: WalletActionButton(
+                      icon: isDeployed ? Assets.images.iconSend : Assets.images.iconDeploy,
+                      title: isDeployed ? LocaleKeys.actions_send.tr() : LocaleKeys.actions_deploy.tr(),
+                      onPressed: isDeployed
+                          ? () => startSendTransactionFlow(
+                                context: context,
+                                address: widget.address,
+                                publicKey: publicKey,
+                              )
+                          : () => startDeployWalletFlow(
+                                context: context,
+                                address: widget.address,
+                                publicKey: publicKey,
+                              ),
                     ),
                   ),
                 ],
+              ],
+            );
+          },
+        ),
+      );
+
+  Widget history() => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
+        bloc: infoBloc,
+        builder: (context, infoState) => BlocBuilder<TonWalletTransactionsBloc, List<TonWalletTransactionWithData>>(
+          bloc: transactionsBloc,
+          builder: (context, transactionsState) =>
+              BlocBuilder<TonWalletSentTransactionsBloc, List<Tuple2<PendingTransaction, Transaction?>>>(
+            bloc: sentTransactionsBloc,
+            builder: (context, sentTransactionsState) =>
+                BlocBuilder<TonWalletExpiredTransactionsBloc, List<PendingTransaction>>(
+              bloc: expiredTransactionsBloc,
+              builder: (context, expiredTransactionsState) =>
+                  BlocBuilder<TonWalletMultisigPendingTransactionsBloc, List<MultisigPendingTransaction>>(
+                bloc: multisigPendingTransactionsBloc,
+                builder: (context, multisigPendingTransactionsState) => Column(
+                  children: [
+                    historyTitle(
+                      transactionsState: transactionsState,
+                      sentTransactionsState: sentTransactionsState,
+                      expiredTransactionsState: expiredTransactionsState,
+                      multisigPendingTransactionsState: multisigPendingTransactionsState,
+                    ),
+                    const Divider(
+                      height: 1,
+                      thickness: 1,
+                    ),
+                    Flexible(
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          list(
+                            infoState: infoState,
+                            transactionsState: transactionsState,
+                            sentTransactionsState: sentTransactionsState,
+                            expiredTransactionsState: expiredTransactionsState,
+                            multisigPendingTransactionsState: multisigPendingTransactionsState,
+                          ),
+                          loader(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -276,6 +301,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget list({
+    required TonWalletInfo? infoState,
     required List<TonWalletTransactionWithData> transactionsState,
     required List<Tuple2<PendingTransaction, Transaction?>> sentTransactionsState,
     required List<PendingTransaction> expiredTransactionsState,
@@ -354,8 +380,9 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                       orElse: () => null,
                     ),
               ),
-              walletType: infoBloc.state?.walletType,
-              custodians: infoBloc.state?.custodians,
+              walletAddress: infoState?.address,
+              walletType: infoState?.walletType,
+              custodians: infoState?.custodians,
             ),
           ),
         )

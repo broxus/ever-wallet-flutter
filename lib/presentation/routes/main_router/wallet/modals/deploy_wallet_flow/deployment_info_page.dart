@@ -21,6 +21,7 @@ import '../common/send_result_page.dart';
 class DeploymentInfoPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
+  final String publicKey;
   final List<String>? custodians;
   final int? reqConfirms;
 
@@ -28,6 +29,7 @@ class DeploymentInfoPage extends StatefulWidget {
     Key? key,
     required this.modalContext,
     required this.address,
+    required this.publicKey,
     this.custodians,
     this.reqConfirms,
   }) : super(key: key);
@@ -110,7 +112,6 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
                     subtitle(),
                     const SizedBox(height: 16),
                     card(),
-                    const SizedBox(height: 16),
                     const SizedBox(height: 64),
                   ],
                 ),
@@ -202,34 +203,31 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
         subtitle: '${widget.reqConfirms!.toString()} of ${widget.custodians!.length}',
       );
 
-  Widget submitButton() => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-        bloc: infoBloc,
-        builder: (context, infoState) => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
-          bloc: estimateFeesBloc,
-          builder: (context, estimateFeesState) => BlocBuilder<TonWalletPrepareDeployBloc, TonWalletPrepareDeployState>(
-            bloc: prepareDeployBloc,
-            builder: (context, prepareTransferState) {
-              final message = prepareTransferState.maybeWhen(
-                success: (message) => message,
-                orElse: () => null,
-              );
+  Widget submitButton() => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
+        bloc: estimateFeesBloc,
+        builder: (context, estimateFeesState) => BlocBuilder<TonWalletPrepareDeployBloc, TonWalletPrepareDeployState>(
+          bloc: prepareDeployBloc,
+          builder: (context, prepareTransferState) {
+            final message = prepareTransferState.maybeWhen(
+              success: (message) => message,
+              orElse: () => null,
+            );
 
-              final sufficientFunds = estimateFeesState.maybeWhen(
-                success: (_) => true,
-                orElse: () => false,
-              );
+            final sufficientFunds = estimateFeesState.maybeWhen(
+              success: (_) => true,
+              orElse: () => false,
+            );
 
-              return CustomElevatedButton(
-                onPressed: sufficientFunds && message != null && infoState != null
-                    ? () => onPressed(
-                          message: message,
-                          publicKey: infoState.publicKey,
-                        )
-                    : null,
-                text: 'Deploy',
-              );
-            },
-          ),
+            return CustomElevatedButton(
+              onPressed: sufficientFunds && message != null
+                  ? () => onPressed(
+                        message: message,
+                        publicKey: widget.publicKey,
+                      )
+                  : null,
+              text: 'Deploy',
+            );
+          },
         ),
       );
 
@@ -250,6 +248,7 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
     if (password != null) {
       pushDeploymentResult(
         message: message,
+        publicKey: publicKey,
         password: password,
       );
     } else {
@@ -260,6 +259,7 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
             publicKey: publicKey,
             onSubmit: (password) => pushDeploymentResult(
               message: message,
+              publicKey: publicKey,
               password: password,
             ),
           ),
@@ -270,10 +270,12 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
 
   Future<String?> getPasswordFromBiometry(String publicKey) async {
     try {
-      return getIt.get<BiometryRepository>().getKeyPassword(
+      final password = await getIt.get<BiometryRepository>().getKeyPassword(
             localizedReason: 'Please authenticate to interact with wallet',
             publicKey: publicKey,
           );
+
+      return password;
     } catch (err) {
       return null;
     }
@@ -281,6 +283,7 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
 
   Future<void> pushDeploymentResult({
     required UnsignedMessage message,
+    required String publicKey,
     required String password,
   }) =>
       Navigator.of(context).pushAndRemoveUntil(
@@ -289,6 +292,7 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
             modalContext: widget.modalContext,
             address: widget.address,
             message: message,
+            publicKey: publicKey,
             password: password,
             sendingText: 'Deploying...',
             successText: 'Wallet has been deployed successfully',

@@ -7,12 +7,11 @@ import 'package:tuple/tuple.dart';
 import 'package:validators/validators.dart';
 
 import '../../../../../design/design.dart';
-import '../../../../../design/widgets/crystal_title.dart';
-import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/custom_dropdown_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_text_button.dart';
 import '../../../../../design/widgets/custom_text_form_field.dart';
+import '../../../../../design/widgets/modal_header.dart';
 import '../../../../../design/widgets/text_field_clear_button.dart';
 import '../../../../../design/widgets/text_suffix_icon_button.dart';
 import '../../../../../design/widgets/unfocusing_gesture_detector.dart';
@@ -21,11 +20,13 @@ import 'deployment_info_page.dart';
 class PrepareDeployPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
+  final String publicKey;
 
   const PrepareDeployPage({
     Key? key,
     required this.modalContext,
     required this.address,
+    required this.publicKey,
   }) : super(key: key);
 
   @override
@@ -82,30 +83,29 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              SingleChildScrollView(
-                controller: ModalScrollController.of(context),
-                physics: const ClampingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: title(),
-                        ),
-                        CustomCloseButton(
-                          onPressed: Navigator.of(widget.modalContext).pop,
-                        ),
-                      ],
+              Column(
+                children: [
+                  ModalHeader(
+                    text: 'Select wallet type to create',
+                    onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: ModalScrollController.of(context),
+                      physics: const ClampingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          dropdownButton(),
+                          const SizedBox(height: 16),
+                          multisigOptions(),
+                          const SizedBox(height: 64),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    dropdownButton(),
-                    const SizedBox(height: 16),
-                    multisigOptions(),
-                    const SizedBox(height: 64),
-                  ],
-                ),
+                  ),
+                ],
               ),
               Align(
                 alignment: Alignment.bottomCenter,
@@ -119,10 +119,6 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
             ],
           ),
         ),
-      );
-
-  Widget title() => const CrystalTitle(
-        text: 'Select wallet type to create',
       );
 
   Widget dropdownButton() => ValueListenableBuilder<_WalletCreationOptions>(
@@ -393,6 +389,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
           builder: (context) => DeploymentInfoPage(
             modalContext: widget.modalContext,
             address: widget.address,
+            publicKey: widget.publicKey,
             custodians: custodians,
             reqConfirms: reqConfirms,
           ),

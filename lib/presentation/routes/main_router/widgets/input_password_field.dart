@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/keys_repository.dart';
 import '../../../design/design.dart';
+import '../../../design/widgets/crystal_text_form_field.dart';
+import '../../../design/widgets/custom_elevated_button.dart';
 
 class InputPasswordField extends StatefulWidget {
   final Function(String password) onSubmit;
@@ -44,7 +46,7 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
               controller: controller,
               autofocus: widget.autoFocus,
               obscureText: true,
-              border: value ?? false
+              border: value ?? true
                   ? CrystalTextFormField.kInputBorder
                   : CrystalTextFormField.kInputBorder.copyWith(
                       borderSide: const BorderSide(
@@ -53,12 +55,11 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
                     ),
               hintText: widget.hintText ?? LocaleKeys.fields_password.tr(),
             ),
-            const CrystalDivider(
+            const SizedBox(
               height: 24,
             ),
-            CrystalButton(
-              text: widget.buttonText ?? LocaleKeys.actions_submit.tr(),
-              onTap: () async {
+            CustomElevatedButton(
+              onPressed: () async {
                 final password = controller.text.trim();
 
                 final isCorrect = await getIt.get<KeysRepository>().checkKeyPassword(
@@ -72,6 +73,7 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
                   widget.onSubmit(controller.text.trim());
                 }
               },
+              text: widget.buttonText ?? LocaleKeys.actions_submit.tr(),
             ),
           ],
         ),

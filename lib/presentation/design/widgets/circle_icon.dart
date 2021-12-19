@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 
 class CircleIcon extends StatelessWidget {
+  final Color color;
+  final double size;
+  final Widget? icon;
+
   const CircleIcon({
     Key? key,
     this.size = 40,
     required this.color,
     this.icon,
   }) : super(key: key);
-
-  final Color color;
-
-  final double size;
-  final Widget? icon;
 
   @override
   Widget build(BuildContext context) => IgnorePointer(

@@ -3,7 +3,9 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../data/repositories/external_accounts_repository.dart';
 import '../../../../../injection.dart';
+import '../../../../../logger.dart';
 import '../../../../design/design.dart';
+import '../../../../design/widgets/crystal_flushbar.dart';
 import '../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../design/widgets/custom_text_form_field.dart';
 import '../../../../design/widgets/modal_header.dart';
@@ -41,7 +43,7 @@ class _AddExternalAccountModalBodyState extends State<AddExternalAccountModalBod
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: MediaQuery.of(context).size.longestSide / 2,
+        height: MediaQuery.of(context).size.longestSide / 1.75,
         child: Material(
           color: Colors.white,
           child: SafeArea(
@@ -152,20 +154,25 @@ class _AddExternalAccountModalBodyState extends State<AddExternalAccountModalBod
   Widget submitButton() => ValueListenableBuilder<String?>(
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
-          onPressed: value != null
-              ? null
-              : () async {
-                  await getIt.get<ExternalAccountsRepository>().addExternalAccount(
-                        publicKey: widget.publicKey,
-                        address: addressController.text,
-                        name: nameController.text.isNotEmpty ? nameController.text : null,
-                      );
-
-                  if (!mounted) return;
-
-                  Navigator.of(context).pop();
-                },
+          onPressed: value != null ? null : onSubmitButtonPressed,
           text: LocaleKeys.actions_confirm.tr(),
         ),
       );
+
+  Future<void> onSubmitButtonPressed() async {
+    try {
+      await getIt.get<ExternalAccountsRepository>().addExternalAccount(
+            address: addressController.text,
+            name: nameController.text.trim().isNotEmpty ? nameController.text.trim() : null,
+          );
+    } catch (err, st) {
+      logger.e(err, err, st);
+
+      showErrorCrystalFlushbar(context, message: err.toString());
+    }
+
+    if (!mounted) return;
+
+    Navigator.of(context).pop();
+  }
 }

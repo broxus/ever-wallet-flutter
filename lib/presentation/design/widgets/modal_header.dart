@@ -5,10 +5,12 @@ import 'custom_close_button.dart';
 
 class ModalHeader extends StatelessWidget {
   final String text;
+  final void Function()? onCloseButtonPressed;
 
   const ModalHeader({
     Key? key,
     required this.text,
+    this.onCloseButtonPressed,
   }) : super(key: key);
 
   @override
@@ -22,7 +24,9 @@ class ModalHeader extends StatelessWidget {
                 text: text,
               ),
             ),
-            const CustomCloseButton(),
+            CustomCloseButton(
+              onPressed: onCloseButtonPressed,
+            ),
           ],
         ),
       );

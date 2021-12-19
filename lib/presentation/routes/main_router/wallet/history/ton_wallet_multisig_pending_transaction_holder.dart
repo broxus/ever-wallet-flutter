@@ -12,6 +12,7 @@ import '../modals/ton_wallet_multisig_pending_transaction_info/show_ton_wallet_m
 class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
   final MultisigPendingTransaction? multisigPendingTransaction;
+  final String? walletAddress;
   final WalletType? walletType;
   final List<String>? custodians;
 
@@ -19,6 +20,7 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
     Key? key,
     required this.transactionWithData,
     this.multisigPendingTransaction,
+    this.walletAddress,
     this.walletType,
     this.custodians,
   }) : super(key: key);
@@ -119,6 +121,7 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
         context: context,
         transactionWithData: transactionWithData,
         multisigPendingTransaction: multisigPendingTransaction,
+        walletAddress: walletAddress,
         walletType: walletType,
         custodians: custodians,
       ),

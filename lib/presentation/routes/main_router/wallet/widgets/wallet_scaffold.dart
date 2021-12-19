@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../../../../design/design.dart';
+import '../../../../design/widgets/sliding_panel.dart';
 
 class WalletScaffold extends StatefulWidget {
   final Widget body;

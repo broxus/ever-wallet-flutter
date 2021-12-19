@@ -57,7 +57,7 @@ class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
                   ),
                   textAlign: TextAlign.start,
                 ),
-                const CrystalDivider(height: 24),
+                const SizedBox(height: 24),
               ],
               InputPasswordField(
                 onSubmit: (password) async {

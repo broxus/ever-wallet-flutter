@@ -12,6 +12,7 @@ import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_type_ahead_field.dart';
+import '../../../design/widgets/suggestion_formatter.dart';
 import '../../../design/widgets/text_field_clear_button.dart';
 import '../../../design/widgets/text_field_index_icon.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';

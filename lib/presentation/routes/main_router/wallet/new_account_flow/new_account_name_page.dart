@@ -96,7 +96,7 @@ class _NewAccountNamePageState extends State<NewAccountNamePage> {
   Widget submitButton() => CustomElevatedButton(
         onPressed: () async {
           await getIt.get<AccountsRepository>().addAccount(
-                name: controller.text.isNotEmpty ? controller.text : widget.walletType.describe(),
+                name: controller.text.trim().isNotEmpty ? controller.text.trim() : widget.walletType.describe(),
                 publicKey: widget.publicKey,
                 walletType: widget.walletType,
               );

@@ -6,28 +6,31 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_transfer_bloc.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_confirm_transaction_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
-import '../../../../../design/widgets/custom_back_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
+import '../../../../../design/widgets/modal_header.dart';
 import '../../../../../design/widgets/sectioned_card.dart';
 import '../../../../../design/widgets/sectioned_card_section.dart';
 import '../common/password_enter_page.dart';
 import '../common/send_result_page.dart';
 
-class SendInfoPage extends StatefulWidget {
+class ConfirmTransactionInfoPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
+  final String publicKey;
+  final String transactionId;
   final String destination;
   final String amount;
   final String? comment;
 
-  const SendInfoPage({
+  const ConfirmTransactionInfoPage({
     Key? key,
     required this.modalContext,
     required this.address,
+    required this.publicKey,
+    required this.transactionId,
     required this.destination,
     required this.amount,
     this.comment,
@@ -37,36 +40,33 @@ class SendInfoPage extends StatefulWidget {
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
 }
 
-class _NewSelectWalletTypePageState extends State<SendInfoPage> {
-  final infoBloc = getIt.get<TonWalletInfoBloc>();
-  final prepareTransferBloc = getIt.get<TonWalletPrepareTransferBloc>();
+class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
+  final prepareConfirmTransactionBloc = getIt.get<TonWalletPrepareConfirmTransactionBloc>();
   final estimateFeesBloc = getIt.get<TonWalletEstimateFeesBloc>();
 
   @override
   void initState() {
     super.initState();
-    infoBloc.add(
-      TonWalletInfoEvent.load(widget.address),
-    );
-    prepareTransferBloc.add(
-      TonWalletPrepareTransferEvent.prepareTransfer(
+    prepareConfirmTransactionBloc.add(
+      TonWalletPrepareConfirmTransactionEvent.prepareConfirmTransaction(
+        publicKey: widget.publicKey,
         address: widget.address,
-        destination: widget.destination,
-        amount: widget.amount,
+        transactionId: widget.transactionId,
       ),
     );
   }
 
   @override
   void dispose() {
-    prepareTransferBloc.close();
+    prepareConfirmTransactionBloc.close();
     estimateFeesBloc.close();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocListener<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
-        bloc: prepareTransferBloc,
+  Widget build(BuildContext context) =>
+      BlocListener<TonWalletPrepareConfirmTransactionBloc, TonWalletPrepareConfirmTransactionState>(
+        bloc: prepareConfirmTransactionBloc,
         listener: (context, state) => state.maybeWhen(
           success: (message) => estimateFeesBloc.add(
             TonWalletEstimateFeesEvent.estimateFees(
@@ -82,46 +82,45 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
 
   Widget scaffold() => Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          leading: const CustomBackButton(),
-          title: const Text(
-            'Confirm transaction',
-            style: TextStyle(
-              color: Colors.black,
-            ),
-          ),
-        ),
-        body: body(),
-      );
-
-  Widget body() => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              SingleChildScrollView(
-                controller: ModalScrollController.of(context),
-                physics: const ClampingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Column(
                   children: [
-                    card(),
+                    ModalHeader(
+                      text: 'Confirm transaction',
+                      onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
+                    ),
                     const SizedBox(height: 16),
-                    const SizedBox(height: 64),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: ModalScrollController.of(context),
+                        physics: const ClampingScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            card(),
+                            const SizedBox(height: 64),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    submitButton(),
-                  ],
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      submitButton(),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
@@ -146,12 +145,13 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
         subtitle: '${widget.amount.toTokens().removeZeroes()} TON',
       );
 
-  Widget fee() => BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
-        bloc: prepareTransferBloc,
-        builder: (context, prepareTransferState) => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
+  Widget fee() => BlocBuilder<TonWalletPrepareConfirmTransactionBloc, TonWalletPrepareConfirmTransactionState>(
+        bloc: prepareConfirmTransactionBloc,
+        builder: (context, prepareConfirmTransactionState) =>
+            BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
           bloc: estimateFeesBloc,
           builder: (context, estimateFeesState) {
-            final subtitle = prepareTransferState.maybeWhen(
+            final subtitle = prepareConfirmTransactionState.maybeWhen(
                   error: (exception) => exception.toString(),
                   orElse: () => null,
                 ) ??
@@ -162,7 +162,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
                   error: (exception) => exception.toString(),
                 );
 
-            final hasError = prepareTransferState.maybeWhen(
+            final hasError = prepareConfirmTransactionState.maybeWhen(
                   error: (_) => true,
                   orElse: () => false,
                 ) ||
@@ -186,35 +186,32 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
         subtitle: widget.comment,
       );
 
-  Widget submitButton() => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-        bloc: infoBloc,
-        builder: (context, infoState) => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
-          bloc: estimateFeesBloc,
-          builder: (context, estimateFeesState) =>
-              BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
-            bloc: prepareTransferBloc,
-            builder: (context, prepareTransferState) {
-              final message = prepareTransferState.maybeWhen(
-                success: (message) => message,
-                orElse: () => null,
-              );
+  Widget submitButton() => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
+        bloc: estimateFeesBloc,
+        builder: (context, estimateFeesState) =>
+            BlocBuilder<TonWalletPrepareConfirmTransactionBloc, TonWalletPrepareConfirmTransactionState>(
+          bloc: prepareConfirmTransactionBloc,
+          builder: (context, prepareConfirmTransactionState) {
+            final message = prepareConfirmTransactionState.maybeWhen(
+              success: (message) => message,
+              orElse: () => null,
+            );
 
-              final sufficientFunds = estimateFeesState.maybeWhen(
-                success: (_) => true,
-                orElse: () => false,
-              );
+            final sufficientFunds = estimateFeesState.maybeWhen(
+              success: (_) => true,
+              orElse: () => false,
+            );
 
-              return CustomElevatedButton(
-                onPressed: sufficientFunds && message != null && infoState != null
-                    ? () => onPressed(
-                          message: message,
-                          publicKey: infoState.publicKey,
-                        )
-                    : null,
-                text: 'Send',
-              );
-            },
-          ),
+            return CustomElevatedButton(
+              onPressed: sufficientFunds && message != null
+                  ? () => onPressed(
+                        message: message,
+                        publicKey: widget.publicKey,
+                      )
+                  : null,
+              text: 'Send',
+            );
+          },
         ),
       );
 
@@ -255,10 +252,12 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
 
   Future<String?> getPasswordFromBiometry(String publicKey) async {
     try {
-      return getIt.get<BiometryRepository>().getKeyPassword(
+      final password = await getIt.get<BiometryRepository>().getKeyPassword(
             localizedReason: 'Please authenticate to interact with wallet',
             publicKey: publicKey,
           );
+
+      return password;
     } catch (err) {
       return null;
     }
@@ -274,6 +273,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
             modalContext: widget.modalContext,
             address: widget.address,
             message: message,
+            publicKey: widget.publicKey,
             password: password,
             sendingText: 'Transaction is sending...',
             successText: 'Transaction has been sent successfully',

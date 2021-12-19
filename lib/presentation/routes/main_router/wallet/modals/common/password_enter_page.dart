@@ -73,7 +73,6 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
                     const SizedBox(height: 16),
                     passwordField(),
                     validationText(),
-                    const SizedBox(height: 16),
                     const SizedBox(height: 64),
                   ],
                 ),

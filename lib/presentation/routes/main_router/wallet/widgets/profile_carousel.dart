@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../../../../../domain/models/account.dart';
-import '../../../../design/design.dart';
+import '../../../../design/widgets/animated_appearance.dart';
+import '../../../../design/widgets/circle_icon.dart';
 import 'new_account_card.dart';
 import 'wallet_card.dart';
 
 class ProfileCarousel extends StatefulWidget {
   final bool loading;
   final int initialIndex;
+  final String? publicKey;
   final List<Account> accounts;
   final VoidCallback? onScrollStart;
   final void Function(int)? onPageChanged;
@@ -16,6 +18,7 @@ class ProfileCarousel extends StatefulWidget {
 
   const ProfileCarousel({
     Key? key,
+    required this.publicKey,
     required this.accounts,
     this.loading = false,
     this.initialIndex = 0,
@@ -93,6 +96,7 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
               key: ValueKey(assetsList.address),
               isExternal: true,
               address: assetsList.address,
+              publicKey: widget.publicKey,
             ),
           ),
         )
@@ -134,7 +138,7 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
             ),
           ),
         ),
-        const CrystalDivider(height: 16),
+        const SizedBox(height: 16),
         pageIndicators(),
       ],
     );

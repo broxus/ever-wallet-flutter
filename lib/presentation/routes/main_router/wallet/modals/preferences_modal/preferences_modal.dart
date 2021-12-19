@@ -7,12 +7,14 @@ import '../../../../../../data/repositories/external_accounts_repository.dart';
 import '../../../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../../../domain/models/account.dart';
 import '../../../../../../injection.dart';
+import '../../../../../../logger.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/explorer.dart';
-import '../../../../../design/widgets/crystal_title.dart';
-import '../../../../../design/widgets/custom_close_button.dart';
+import '../../../../../design/widgets/address_card.dart';
+import '../../../../../design/widgets/crystal_flushbar.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
 import '../../../../../design/widgets/custom_text_form_field.dart';
+import '../../../../../design/widgets/modal_header.dart';
 import '../../../../../design/widgets/text_field_clear_button.dart';
 import '../../../../../design/widgets/text_suffix_icon_button.dart';
 
@@ -91,38 +93,25 @@ class _PreferencesModalBodyState extends State<PreferencesModalBody> {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: title(),
-                      ),
-                      const CustomCloseButton(),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  field(),
-                  const SizedBox(height: 16),
-                  card(),
-                  const SizedBox(height: 16),
-                  explorerButton(),
-                ],
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const ModalHeader(
+                  text: 'Preferences',
+                ),
+                const SizedBox(height: 16),
+                field(),
+                const SizedBox(height: 16),
+                card(),
+                const SizedBox(height: 16),
+                explorerButton(),
+              ],
             ),
           ),
         ),
       );
 
   Widget card() => AddressCard(address: widget.address);
-
-  Widget title() => const CrystalTitle(
-        text: 'Preferences',
-      );
 
   Widget field() => CustomTextFormField(
         name: 'name',
@@ -146,7 +135,6 @@ class _PreferencesModalBodyState extends State<PreferencesModalBody> {
                         );
                   } else {
                     await getIt.get<ExternalAccountsRepository>().renameExternalAccount(
-                          publicKey: widget.publicKey!,
                           address: widget.address,
                           name: controller.text,
                         );
@@ -158,7 +146,9 @@ class _PreferencesModalBodyState extends State<PreferencesModalBody> {
                     context,
                     message: LocaleKeys.preferences_modal_message_renamed.tr(),
                   );
-                } catch (err) {
+                } catch (err, st) {
+                  logger.e(err, err, st);
+
                   if (!mounted) return;
 
                   showErrorCrystalFlushbar(

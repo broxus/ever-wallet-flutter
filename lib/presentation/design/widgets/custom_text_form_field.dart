@@ -20,6 +20,8 @@ class CustomTextFormField extends StatelessWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final int? maxLength;
+  final Color? borderColor;
+  final Color? errorBorderColor;
 
   const CustomTextFormField({
     Key? key,
@@ -40,6 +42,8 @@ class CustomTextFormField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.maxLength,
+    this.borderColor,
+    this.errorBorderColor,
   }) : super(key: key);
 
   @override
@@ -89,17 +93,17 @@ class CustomTextFormField extends StatelessWidget {
             null,
       );
 
-  InputBorder border() => const OutlineInputBorder(
+  InputBorder border() => OutlineInputBorder(
         borderSide: BorderSide(
-          color: Colors.black12,
+          color: borderColor ?? Colors.black12,
         ),
         borderRadius: BorderRadius.zero,
         gapPadding: 0,
       );
 
-  InputBorder errorBorder() => const OutlineInputBorder(
+  InputBorder errorBorder() => OutlineInputBorder(
         borderSide: BorderSide(
-          color: Colors.red,
+          color: errorBorderColor ?? Colors.red,
         ),
         borderRadius: BorderRadius.zero,
         gapPadding: 0,

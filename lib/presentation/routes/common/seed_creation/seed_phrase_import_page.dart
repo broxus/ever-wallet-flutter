@@ -8,10 +8,12 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../design/design.dart';
 import '../../../design/widgets/action_button.dart';
+import '../../../design/widgets/crystal_flushbar.dart';
 import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_type_ahead_field.dart';
+import '../../../design/widgets/suggestion_formatter.dart';
 import '../../../design/widgets/text_field_clear_button.dart';
 import '../../../design/widgets/text_field_index_icon.dart';
 import '../../../design/widgets/unfocusing_gesture_detector.dart';
@@ -78,23 +80,6 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         ),
       );
 
-  void showErrorDialog(String text) => showPlatformDialog(
-        context: context,
-        builder: (context) => Theme(
-          data: ThemeData(),
-          child: PlatformAlertDialog(
-            title: const Text('Error'),
-            content: Text(text),
-            actions: <Widget>[
-              PlatformDialogAction(
-                onPressed: () => context.router.navigatorKey.currentState?.pop(),
-                child: const Text('Ok'),
-              ),
-            ],
-          ),
-        ),
-      );
-
   Widget action() => ValueListenableBuilder<_ButtonState>(
         valueListenable: buttonStateNotifier,
         builder: (context, value, child) {
@@ -115,47 +100,49 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
 
   Widget pasteButton() => ActionButton(
         key: const ValueKey(_ButtonState.paste),
-        onPressed: () async {
-          final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
-
-          final words = <String>[...clipboard?.text?.split(' ') ?? []];
-
-          if (words.isNotEmpty && words.length == wordsLength) {
-            for (final word in words) {
-              if (getHints(word).isEmpty) {
-                words.clear();
-                break;
-              }
-            }
-          } else {
-            words.clear();
-          }
-
-          if (words.isEmpty) {
-            if (!mounted) return;
-
-            showErrorCrystalFlushbar(
-              context,
-              message: 'Incorrect words format',
-              flushbarPosition: FlushbarPosition.BOTTOM,
-              margin: const EdgeInsets.only(bottom: 12),
-            );
-            return;
-          }
-
-          words.asMap().forEach((index, word) {
-            controllers[index].value = TextEditingValue(
-              text: word,
-              selection: TextSelection.fromPosition(TextPosition(offset: word.length)),
-            );
-            words[index] = word;
-          });
-
-          formValidityNotifier.value = formKey.currentState?.validate() ?? false;
-          buttonStateNotifier.value = _ButtonState.clear;
-        },
+        onPressed: onPasteButtonPressed,
         text: LocaleKeys.actions_paste.tr(),
       );
+
+  Future<void> onPasteButtonPressed() async {
+    final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
+
+    final words = <String>[...clipboard?.text?.split(' ') ?? []];
+
+    if (words.isNotEmpty && words.length == wordsLength) {
+      for (final word in words) {
+        if (getHints(word).isEmpty) {
+          words.clear();
+          break;
+        }
+      }
+    } else {
+      words.clear();
+    }
+
+    if (words.isEmpty) {
+      if (!mounted) return;
+
+      showErrorCrystalFlushbar(
+        context,
+        message: 'Incorrect words format',
+        flushbarPosition: FlushbarPosition.BOTTOM,
+        margin: const EdgeInsets.only(bottom: 12),
+      );
+      return;
+    }
+
+    words.asMap().forEach((index, word) {
+      controllers[index].value = TextEditingValue(
+        text: word,
+        selection: TextSelection.fromPosition(TextPosition(offset: word.length)),
+      );
+      words[index] = word;
+    });
+
+    formValidityNotifier.value = formKey.currentState?.validate() ?? false;
+    buttonStateNotifier.value = _ButtonState.clear;
+  }
 
   Widget clearButton() => ActionButton(
         key: const ValueKey(_ButtonState.clear),
@@ -355,29 +342,46 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
   Widget submitButton() => ValueListenableBuilder<bool>(
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
-          onPressed: value
-              ? () {
-                  try {
-                    final phrase = controllers.map((e) => e.text).toList();
-                    final mnemonicType = widget.isLegacy ? const MnemonicType.legacy() : const MnemonicType.labs(id: 0);
-
-                    deriveFromPhrase(
-                      phrase: phrase,
-                      mnemonicType: mnemonicType,
-                    );
-
-                    context.router.push(
-                      PasswordCreationRoute(
-                        phrase: phrase,
-                        seedName: widget.seedName,
-                      ),
-                    );
-                  } catch (err) {
-                    showErrorDialog(err.toString());
-                  }
-                }
-              : null,
+          onPressed: value ? onSubmitButtonPressed : null,
           text: LocaleKeys.actions_confirm.tr(),
+        ),
+      );
+
+  void onSubmitButtonPressed() {
+    try {
+      final phrase = controllers.map((e) => e.text).toList();
+      final mnemonicType = widget.isLegacy ? const MnemonicType.legacy() : const MnemonicType.labs(id: 0);
+
+      deriveFromPhrase(
+        phrase: phrase,
+        mnemonicType: mnemonicType,
+      );
+
+      context.router.push(
+        PasswordCreationRoute(
+          phrase: phrase,
+          seedName: widget.seedName,
+        ),
+      );
+    } catch (err) {
+      showErrorDialog(err.toString());
+    }
+  }
+
+  void showErrorDialog(String text) => showPlatformDialog(
+        context: context,
+        builder: (context) => Theme(
+          data: ThemeData(),
+          child: PlatformAlertDialog(
+            title: const Text('Error'),
+            content: Text(text),
+            actions: <Widget>[
+              PlatformDialogAction(
+                onPressed: () => context.router.navigatorKey.currentState?.pop(),
+                child: const Text('Ok'),
+              ),
+            ],
+          ),
         ),
       );
 }

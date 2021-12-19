@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/keys_repository.dart';
+import '../../../../logger.dart';
 import '../../../design/design.dart';
+import '../../../design/widgets/crystal_flushbar.dart';
+import '../../../design/widgets/custom_elevated_button.dart';
 
 class RemoveSeedPhraseModalBody extends StatefulWidget {
   final String publicKey;
@@ -26,7 +29,7 @@ class _RemoveSeedPhraseModalBodyState extends State<RemoveSeedPhraseModalBody> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const CrystalDivider(height: 20),
+            const SizedBox(height: 20),
             Text(
               LocaleKeys.remove_seed_modal_description.tr(),
               style: const TextStyle(
@@ -35,23 +38,25 @@ class _RemoveSeedPhraseModalBodyState extends State<RemoveSeedPhraseModalBody> {
                 fontWeight: FontWeight.normal,
               ),
             ),
-            const CrystalDivider(height: 24),
-            CrystalButton(
-              text: LocaleKeys.remove_seed_modal_actions_remove.tr(),
-              onTap: () async {
+            const SizedBox(height: 24),
+            CustomElevatedButton(
+              onPressed: () async {
                 try {
                   await getIt.get<KeysRepository>().removeKey(
                         widget.publicKey,
                       );
 
                   context.router.navigatorKey.currentState?.pop();
-                } catch (err) {
+                } catch (err, st) {
+                  logger.e(err, err, st);
+
                   await showCrystalFlushbar(
                     context,
                     message: err.toString(),
                   );
                 }
               },
+              text: LocaleKeys.remove_seed_modal_actions_remove.tr(),
             ),
           ],
         ),

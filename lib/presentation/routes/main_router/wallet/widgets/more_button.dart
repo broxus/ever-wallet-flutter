@@ -110,7 +110,6 @@ class _MoreButtonState extends State<MoreButton> {
               await getIt.get<AccountsRepository>().removeAccount(widget.address);
             } else {
               await getIt.get<ExternalAccountsRepository>().removeExternalAccount(
-                    publicKey: widget.publicKey!,
                     address: widget.address,
                   );
             }

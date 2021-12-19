@@ -29,6 +29,7 @@ class TokenWalletSendBloc extends Bloc<TokenWalletSendEvent, TokenWalletSendStat
 
         await tokenWallet.send(
           message: event.message,
+          publicKey: event.publicKey,
           password: event.password,
         );
 
@@ -47,6 +48,7 @@ class TokenWalletSendEvent with _$TokenWalletSendEvent {
     required String owner,
     required String rootTokenContract,
     required UnsignedMessage message,
+    required String publicKey,
     required String password,
   }) = _Send;
 }

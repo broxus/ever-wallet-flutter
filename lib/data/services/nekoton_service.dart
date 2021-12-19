@@ -121,7 +121,7 @@ class NekotonService {
 
   Future<void> clearAccountsStorage() => _nekoton.accountsStorageController.clearAccountsStorage();
 
-  Future<void> addExternalAccount({
+  Future<AssetsList> addExternalAccount({
     required String publicKey,
     required AssetsList assetsList,
   }) =>
@@ -148,6 +148,28 @@ class NekotonService {
       _nekoton.externalAccountsController.removeExternalAccount(
         publicKey: publicKey,
         address: address,
+      );
+
+  Future<AssetsList> addExternalAccountTokenWallet({
+    required String publicKey,
+    required String address,
+    required String rootTokenContract,
+  }) =>
+      _nekoton.externalAccountsController.addExternalAccountTokenWallet(
+        publicKey: publicKey,
+        address: address,
+        rootTokenContract: rootTokenContract,
+      );
+
+  Future<AssetsList> removeExternalAccountTokenWallet({
+    required String publicKey,
+    required String address,
+    required String rootTokenContract,
+  }) =>
+      _nekoton.externalAccountsController.removeExternalAccountTokenWallet(
+        publicKey: publicKey,
+        address: address,
+        rootTokenContract: rootTokenContract,
       );
 
   Future<void> removeExternalAccounts(String publicKey) =>

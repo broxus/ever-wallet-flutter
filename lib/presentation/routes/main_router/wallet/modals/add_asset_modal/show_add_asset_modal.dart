@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../design/widgets/show_platform_modal_bottom_sheet.dart';
-import 'ton_asset_info_modal_body.dart';
+import 'add_asset_modal_body.dart';
 
-Future<void> showTonAssetInfo({
+Future<void> showAddAssetModal({
   required BuildContext context,
   required String address,
   bool isExternal = false,
 }) =>
     showPlatformModalBottomSheet(
       context: context,
-      builder: (context) => TonAssetInfoModalBody(
+      builder: (context) => AddAssetModalBody(
         address: address,
         isExternal: isExternal,
       ),

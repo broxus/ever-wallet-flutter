@@ -9,6 +9,7 @@ import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dar
 import '../../../../../../../../injection.dart';
 import '../../../../../domain/models/account.dart';
 import '../../../../design/design.dart';
+import '../../../../design/widgets/animated_appearance.dart';
 import '../../../../design/widgets/wallet_card_selectable_field.dart';
 import 'more_button.dart';
 
@@ -170,7 +171,7 @@ class _WalletCardState extends State<WalletCard> {
                     )
                   : const SizedBox(),
             ),
-            const CrystalDivider(height: 8),
+            const SizedBox(height: 8),
             BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
               builder: (context, state) => state != null
@@ -253,7 +254,7 @@ class _WalletCardState extends State<WalletCard> {
               color: CrystalColor.secondary,
             ),
           ),
-          const CrystalDivider(width: 8),
+          const SizedBox(width: 8),
           Flexible(
             child: value == null && ellipsedValue == null
                 ? Padding(

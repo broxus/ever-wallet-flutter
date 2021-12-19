@@ -3,6 +3,8 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../design/design.dart';
 import '../../../../design/widgets/crystal_bottom_sheet.dart';
+import '../../../../design/widgets/custom_elevated_button.dart';
+import '../../../../design/widgets/custom_outlined_button.dart';
 
 class SendMessageBody extends StatefulWidget {
   final String origin;
@@ -141,7 +143,7 @@ class _SendMessageBodyState extends State<SendMessageBody> {
               fontSize: 16,
             ),
           ),
-          const CrystalDivider(height: 4),
+          const SizedBox(height: 4),
           Text(
             value,
             style: const TextStyle(
@@ -160,18 +162,17 @@ class _SendMessageBodyState extends State<SendMessageBody> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child: CrystalButton(
-              type: CrystalButtonType.outline,
+            child: CustomOutlinedButton(
+              onPressed: onDenyTapped,
               text: 'Reject',
-              onTap: onDenyTapped,
             ),
           ),
           const SizedBox(width: 16),
           Expanded(
             flex: 2,
-            child: CrystalButton(
+            child: CustomElevatedButton(
+              onPressed: onAllowTapped,
               text: 'Send',
-              onTap: onAllowTapped,
             ),
           ),
         ],

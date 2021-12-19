@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../design/design.dart';
+import '../../../design/widgets/crystal_flushbar.dart';
 import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_outlined_button.dart';
@@ -47,6 +48,7 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
                     title(),
                     const SizedBox(height: 32),
                     words(),
+                    const SizedBox(height: 64),
                   ],
                 ),
               ),

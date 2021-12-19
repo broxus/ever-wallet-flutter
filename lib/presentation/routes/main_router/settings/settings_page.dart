@@ -490,9 +490,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Material(
       type: MaterialType.transparency,
-      child: CrystalInkWell(
+      child: InkWell(
         onTap: onTap,
-        highlightColor: isDestructive ? CrystalColor.error : null,
         child: Container(
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -523,7 +522,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }) =>
       Material(
         type: MaterialType.transparency,
-        child: CrystalInkWell(
+        child: InkWell(
           onTap: onTap,
           highlightColor: color,
           child: Container(

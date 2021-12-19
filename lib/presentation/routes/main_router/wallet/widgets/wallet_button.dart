@@ -29,10 +29,8 @@ class WalletButton extends StatelessWidget {
               ),
               child: Material(
                 type: MaterialType.transparency,
-                child: CrystalInkWell(
+                child: InkWell(
                   onTap: onTap,
-                  splashColor: CrystalColor.secondary,
-                  highlightColor: CrystalColor.secondary,
                   child: Center(
                     child: SizedBox(
                       width: 20,
@@ -43,7 +41,7 @@ class WalletButton extends StatelessWidget {
                 ),
               ),
             ),
-            const CrystalDivider(height: 4),
+            const SizedBox(height: 4),
             Text(
               title,
               style: const TextStyle(

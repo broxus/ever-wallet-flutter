@@ -8,6 +8,7 @@ Future<void> tonWalletMultisigPendingTransactionInfo({
   required BuildContext context,
   required TonWalletTransactionWithData transactionWithData,
   required MultisigPendingTransaction? multisigPendingTransaction,
+  required String? walletAddress,
   required WalletType? walletType,
   required List<String>? custodians,
 }) =>
@@ -16,6 +17,7 @@ Future<void> tonWalletMultisigPendingTransactionInfo({
       builder: (context) => TonWalletMultisigPendingTransactionInfoModalBody(
         transactionWithData: transactionWithData,
         multisigPendingTransaction: multisigPendingTransaction,
+        walletAddress: walletAddress,
         walletType: walletType,
         custodians: custodians,
       ),

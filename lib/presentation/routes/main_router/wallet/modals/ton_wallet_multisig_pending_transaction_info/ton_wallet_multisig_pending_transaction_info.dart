@@ -11,15 +11,16 @@ import '../../../../../../domain/blocs/public_keys_labels_bloc.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/explorer.dart';
 import '../../../../../design/transaction_time.dart';
-import '../../../../../design/widgets/crystal_title.dart';
-import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
+import '../../../../../design/widgets/modal_header.dart';
 import '../../../../../design/widgets/transaction_type_label.dart';
+import '../confirm_transaction_flow/start_confirm_transaction_flow.dart';
 
 class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
   final MultisigPendingTransaction? multisigPendingTransaction;
+  final String? walletAddress;
   final WalletType? walletType;
   final List<String>? custodians;
 
@@ -27,6 +28,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
     Key? key,
     required this.transactionWithData,
     required this.multisigPendingTransaction,
+    required this.walletAddress,
     required this.walletType,
     required this.custodians,
   }) : super(key: key);
@@ -244,25 +246,15 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
 
     final confirmations = multisigPendingTransaction?.confirmations;
 
-    final keys = custodians != null && confirmations != null
-        ? context
-            .read<KeysBloc>()
-            .state
-            .keys
-            .entries
-            .map(
-              (e) => [
-                e.key,
-                if (e.value != null) ...e.value!,
-              ],
-            )
-            .expand((e) => e)
-            .map((e) => e.publicKey)
-            .where(
-              (e) => custodians!.where((e) => !confirmations.contains(e)).contains(e),
-            )
-            .toList()
-        : <String>[];
+    final transactionId = multisigPendingTransaction?.id;
+
+    final currentKey = context.read<KeysBloc>().state.currentKey?.publicKey;
+
+    final canConfirm = currentKey != null &&
+        custodians != null &&
+        custodians!.any((e) => e == currentKey) &&
+        confirmations != null &&
+        confirmations.every((e) => e != currentKey);
 
     final sections = [
       section(
@@ -409,32 +401,35 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: title(),
-                    ),
-                    const CustomCloseButton(),
-                  ],
+          child: Column(
+            children: [
+              const ModalHeader(
+                text: 'Transaction information',
+              ),
+              const SizedBox(height: 16),
+              label(),
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: list(sections),
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (canConfirm && walletAddress != null && transactionId != null && address != null && value != null) ...[
+                confirmButton(
+                  context: context,
+                  address: walletAddress!,
+                  publicKey: currentKey,
+                  transactionId: transactionId,
+                  destination: address,
+                  amount: value,
+                  comment: comment,
                 ),
                 const SizedBox(height: 16),
-                label(),
-                const SizedBox(height: 16),
-                list(sections),
-                const SizedBox(height: 32),
-                if (keys.isNotEmpty) ...[
-                  confirmButton(keys),
-                  const SizedBox(height: 16),
-                ],
-                explorerButton(hash),
               ],
-            ),
+              explorerButton(hash),
+            ],
           ),
         ),
       ),
@@ -580,12 +575,25 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
         ),
       );
 
-  Widget title() => const CrystalTitle(
-        text: 'Transaction information',
-      );
-
-  Widget confirmButton(List<String> keys) => CustomElevatedButton(
-        onPressed: () => {},
+  Widget confirmButton({
+    required BuildContext context,
+    required String address,
+    required String publicKey,
+    required String transactionId,
+    required String destination,
+    required String amount,
+    String? comment,
+  }) =>
+      CustomElevatedButton(
+        onPressed: () => startConfirmTransactionFlow(
+          context: context,
+          address: address,
+          publicKey: publicKey,
+          transactionId: transactionId,
+          destination: destination,
+          amount: amount,
+          comment: comment,
+        ),
         text: 'Confirm transaction',
       );
 

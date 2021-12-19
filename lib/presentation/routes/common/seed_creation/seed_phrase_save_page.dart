@@ -5,6 +5,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../design/design.dart';
 import '../../../design/phrase_generation.dart';
 import '../../../design/widgets/animated_fade_slide_in.dart';
+import '../../../design/widgets/crystal_flushbar.dart';
 import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
@@ -54,6 +55,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
                     title(),
                     const SizedBox(height: 32),
                     words(),
+                    const SizedBox(height: 128),
                   ],
                 ),
               ),

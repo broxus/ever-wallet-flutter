@@ -31,14 +31,8 @@ class _WalletModalBodyState extends State<WalletModalBody> {
           child: BlocBuilder<CurrentAccountBloc, Account?>(
             bloc: context.watch<CurrentAccountBloc>(),
             builder: (context, currentAccountState) {
-              final showAssetsTab = currentAccountState?.when(
-                    internal: (_) => true,
-                    external: (_) => false,
-                  ) ??
-                  false;
-
               final _tabs = [
-                if (showAssetsTab) LocaleKeys.wallet_history_modal_tabs_assets,
+                LocaleKeys.wallet_history_modal_tabs_assets,
                 LocaleKeys.wallet_history_modal_tabs_transactions,
               ].map((e) => Text(e.tr())).toList();
 
@@ -77,17 +71,20 @@ class _WalletModalBodyState extends State<WalletModalBody> {
                         builder: (context, currentAccountState) => TabBarView(
                           physics: const NeverScrollableScrollPhysics(),
                           children: [
-                            if (showAssetsTab)
-                              if (currentAccountState != null)
-                                AllAssetsLayout(
-                                  address: currentAccountState.when(
-                                    internal: (assetsList) => assetsList.address,
-                                    external: (assetsList) => assetsList.address,
-                                  ),
-                                  controller: widget.scrollController,
-                                )
-                              else
-                                const SizedBox(),
+                            if (currentAccountState != null)
+                              AllAssetsLayout(
+                                address: currentAccountState.when(
+                                  internal: (assetsList) => assetsList.address,
+                                  external: (assetsList) => assetsList.address,
+                                ),
+                                controller: widget.scrollController,
+                                isExternal: currentAccountState.when(
+                                  internal: (_) => false,
+                                  external: (_) => true,
+                                ),
+                              )
+                            else
+                              const SizedBox(),
                             if (currentAccountState != null)
                               TonWalletTransactionsLayout(
                                 address: currentAccountState.when(

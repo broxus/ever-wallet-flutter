@@ -7,9 +7,8 @@ import '../../../../../../domain/blocs/public_keys_labels_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
-import '../../../../../design/widgets/crystal_title.dart';
-import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/custom_popup_menu.dart';
+import '../../../../../design/widgets/modal_header.dart';
 import 'edit_custodian_label_dialog.dart';
 
 class CustodiansModalBody extends StatefulWidget {
@@ -56,31 +55,26 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
           builder: (context, infoState) {
             final custodians = infoState?.custodians?.map((e) => Tuple2(publicKeysLabelsState[e], e)).toList() ?? [];
 
-            return ConstrainedBox(
-              constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.longestSide / 2),
+            return SizedBox(
+              height: MediaQuery.of(context).size.longestSide / 1.75,
               child: Material(
                 color: Colors.white,
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: SingleChildScrollView(
-                      physics: const ClampingScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: title(),
-                              ),
-                              const CustomCloseButton(),
-                            ],
+                    child: Column(
+                      children: [
+                        const ModalHeader(
+                          text: 'Custodians',
+                        ),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            physics: const ClampingScrollPhysics(),
+                            child: list(custodians),
                           ),
-                          const SizedBox(height: 16),
-                          if (custodians.isNotEmpty) list(custodians),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -88,10 +82,6 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
             );
           },
         ),
-      );
-
-  Widget title() => const CrystalTitle(
-        text: 'Custodians',
       );
 
   Widget list(List<Tuple2<String?, String>> custodians) => ListView.separated(

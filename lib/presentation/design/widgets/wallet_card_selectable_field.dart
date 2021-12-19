@@ -4,6 +4,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 
 import '../design.dart';
 import 'animated_visibility.dart';
+import 'crystal_flushbar.dart';
 
 class WalletCardSelectableField extends StatefulWidget {
   final String text;

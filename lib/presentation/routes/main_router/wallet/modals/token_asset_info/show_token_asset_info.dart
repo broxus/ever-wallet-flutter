@@ -9,6 +9,7 @@ Future<void> showTokenAssetInfo({
   required String rootTokenContract,
   String? svgIcon,
   List<int>? gravatarIcon,
+  bool isExternal = false,
 }) =>
     showPlatformModalBottomSheet(
       context: context,
@@ -17,5 +18,6 @@ Future<void> showTokenAssetInfo({
         rootTokenContract: rootTokenContract,
         svgIcon: svgIcon,
         gravatarIcon: gravatarIcon,
+        isExternal: isExternal,
       ),
     );

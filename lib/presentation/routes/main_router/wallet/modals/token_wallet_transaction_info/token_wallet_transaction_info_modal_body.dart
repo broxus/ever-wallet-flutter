@@ -5,9 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/explorer.dart';
 import '../../../../../design/transaction_time.dart';
-import '../../../../../design/widgets/crystal_title.dart';
-import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
+import '../../../../../design/widgets/modal_header.dart';
 
 class TokenWalletTransactionInfoModalBody extends StatelessWidget {
   final TokenWalletTransactionWithData transactionWithData;
@@ -92,26 +91,21 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: title(),
-                    ),
-                    const CustomCloseButton(),
-                  ],
+          child: Column(
+            children: [
+              const ModalHeader(
+                text: 'Transaction information',
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: list(sections),
                 ),
-                const SizedBox(height: 16),
-                list(sections),
-                const SizedBox(height: 32),
-                explorerButton(hash),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+              explorerButton(hash),
+            ],
           ),
         ),
       ),
@@ -196,10 +190,6 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
   Widget typeItem(String type) => item(
         title: 'Type',
         subtitle: type,
-      );
-
-  Widget title() => const CrystalTitle(
-        text: 'Transaction information',
       );
 
   Widget explorerButton(String hash) => CustomOutlinedButton(

@@ -24,6 +24,11 @@ class _ConfirmationTimeCounterState extends State<ConfirmationTimeCounter> {
     remaining = widget.expireAt.difference(DateTime.now());
 
     Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
       setState(() => remaining = widget.expireAt.difference(DateTime.now()));
 
       if (remaining.isNegative) {

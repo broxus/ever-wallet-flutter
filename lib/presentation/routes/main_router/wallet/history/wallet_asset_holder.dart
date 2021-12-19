@@ -23,7 +23,7 @@ class WalletAssetHolder extends StatelessWidget {
   Widget build(BuildContext context) => Material(
         type: MaterialType.card,
         color: CrystalColor.primary,
-        child: CrystalInkWell(
+        child: InkWell(
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -32,14 +32,11 @@ class WalletAssetHolder extends StatelessWidget {
             ),
             child: Row(
               children: [
-                CircleIcon(
-                  color: Colors.transparent,
-                  icon: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: icon,
-                  ),
+                SizedBox.square(
+                  dimension: 36,
+                  child: icon,
                 ),
-                const CrystalDivider(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -57,7 +54,7 @@ class WalletAssetHolder extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const CrystalDivider(height: 2),
+                      const SizedBox(height: 2),
                       SizedBox(
                         height: 20,
                         child: Text(

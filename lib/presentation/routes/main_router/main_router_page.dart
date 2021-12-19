@@ -1,13 +1,10 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../../../../logger.dart';
-import '../../../domain/blocs/account/current_account_bloc.dart';
+import '../../../domain/blocs/account/browser_current_account_bloc.dart';
 import '../../design/design.dart';
 import '../router.gr.dart';
 
@@ -94,13 +91,9 @@ class _MainRouterPageState extends State<MainRouterPage> {
     required int index,
     required TabsRouter router,
   }) async {
-    if (index == 1) {
-      final exist = await checkForExistingAccount(index);
-
-      if (!exist) {
-        showAddAccountDialog();
-        return;
-      }
+    if (index == 1 && context.read<BrowserCurrentAccountBloc>().state == null) {
+      showAddAccountDialog();
+      return;
     }
 
     if (index == router.activeIndex) {
@@ -136,39 +129,6 @@ class _MainRouterPageState extends State<MainRouterPage> {
         ),
         label: label,
       );
-
-  Future<bool> checkForExistingAccount(int index) async {
-    final currentAccountBloc = context.read<CurrentAccountBloc>();
-    final accountsBloc = context.read<AccountsBloc>();
-
-    final currentAccount = currentAccountBloc.state?.when(
-      internal: (assetsList) => assetsList,
-      external: (_) => null,
-    );
-    final accounts = accountsBloc.state
-        .map(
-          (e) => e.when(
-            internal: (assetsList) => assetsList,
-            external: (_) => null,
-          ),
-        )
-        .where((e) => e != null)
-        .cast<AssetsList>()
-        .toList();
-
-    if (currentAccount == null) {
-      currentAccountBloc.add(CurrentAccountEvent.setCurrent(address: accounts.firstOrNull?.address));
-
-      try {
-        await currentAccountBloc.stream.first.timeout(const Duration(seconds: 1));
-      } catch (err, st) {
-        logger.e(err, err, st);
-        return false;
-      }
-    }
-
-    return currentAccountBloc.state != null;
-  }
 
   Future<void> showAddAccountDialog() => showPlatformDialog(
         context: context,

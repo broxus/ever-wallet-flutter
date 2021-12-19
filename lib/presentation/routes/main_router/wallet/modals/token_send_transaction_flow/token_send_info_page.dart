@@ -4,7 +4,6 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
-import '../../../../../../data/repositories/token_wallet_info_repository.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../../domain/blocs/token_wallet/token_wallet_estimate_fees_bloc.dart';
 import '../../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
@@ -16,12 +15,13 @@ import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/sectioned_card.dart';
 import '../../../../../design/widgets/sectioned_card_section.dart';
 import '../common/password_enter_page.dart';
-import 'token_send_result_page.dart';
+import '../common/token_send_result_page.dart';
 
 class TokenSendInfoPage extends StatefulWidget {
   final BuildContext modalContext;
   final String owner;
   final String rootTokenContract;
+  final String publicKey;
   final String destination;
   final String amount;
   final bool notifyReceiver;
@@ -32,6 +32,7 @@ class TokenSendInfoPage extends StatefulWidget {
     required this.modalContext,
     required this.owner,
     required this.rootTokenContract,
+    required this.publicKey,
     required this.destination,
     required this.amount,
     required this.notifyReceiver,
@@ -120,7 +121,6 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     card(),
-                    const SizedBox(height: 16),
                     const SizedBox(height: 64),
                   ],
                 ),
@@ -213,57 +213,53 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
         subtitle: widget.notifyReceiver ? 'Yes' : 'No',
       );
 
-  Widget submitButton() => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
-        bloc: infoBloc,
-        builder: (context, infoState) => BlocBuilder<TokenWalletEstimateFeesBloc, TokenWalletEstimateFeesState>(
-          bloc: estimateFeesBloc,
-          builder: (context, estimateFeesState) =>
-              BlocBuilder<TokenWalletPrepareTransferBloc, TokenWalletPrepareTransferState>(
-            bloc: prepareTransferBloc,
-            builder: (context, prepareTransferState) {
-              final message = prepareTransferState.maybeWhen(
-                success: (message) => message,
-                orElse: () => null,
-              );
+  Widget submitButton() => BlocBuilder<TokenWalletEstimateFeesBloc, TokenWalletEstimateFeesState>(
+        bloc: estimateFeesBloc,
+        builder: (context, estimateFeesState) =>
+            BlocBuilder<TokenWalletPrepareTransferBloc, TokenWalletPrepareTransferState>(
+          bloc: prepareTransferBloc,
+          builder: (context, prepareTransferState) {
+            final message = prepareTransferState.maybeWhen(
+              success: (message) => message,
+              orElse: () => null,
+            );
 
-              final sufficientFunds = estimateFeesState.maybeWhen(
-                success: (_) => true,
-                orElse: () => false,
-              );
+            final sufficientFunds = estimateFeesState.maybeWhen(
+              success: (_) => true,
+              orElse: () => false,
+            );
 
-              final ownerPublicKey = getIt.get<TokenWalletInfoRepository>().getOwnerPublicKey(widget.owner);
-
-              return CustomElevatedButton(
-                onPressed: sufficientFunds && message != null && infoState != null
-                    ? () => onPressed(
-                          message: message,
-                          ownerPublicKey: ownerPublicKey,
-                        )
-                    : null,
-                text: 'Send',
-              );
-            },
-          ),
+            return CustomElevatedButton(
+              onPressed: sufficientFunds && message != null
+                  ? () => onPressed(
+                        message: message,
+                        publicKey: widget.publicKey,
+                      )
+                  : null,
+              text: 'Send',
+            );
+          },
         ),
       );
 
   Future<void> onPressed({
     required UnsignedMessage message,
-    required String ownerPublicKey,
+    required String publicKey,
   }) async {
     String? password;
 
     final biometryInfoBloc = context.read<BiometryInfoBloc>();
 
     if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-      password = await getPasswordFromBiometry(ownerPublicKey);
+      password = await getPasswordFromBiometry(publicKey);
     }
 
     if (!mounted) return;
 
     if (password != null) {
-      pushDeploymentResult(
+      pushTokenSendResult(
         message: message,
+        publicKey: publicKey,
         password: password,
       );
     } else {
@@ -271,9 +267,10 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
         MaterialPageRoute(
           builder: (context) => PasswordEnterPage(
             modalContext: widget.modalContext,
-            publicKey: ownerPublicKey,
-            onSubmit: (password) => pushDeploymentResult(
+            publicKey: publicKey,
+            onSubmit: (password) => pushTokenSendResult(
               message: message,
+              publicKey: publicKey,
               password: password,
             ),
           ),
@@ -284,17 +281,20 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
 
   Future<String?> getPasswordFromBiometry(String ownerPublicKey) async {
     try {
-      return getIt.get<BiometryRepository>().getKeyPassword(
+      final password = await getIt.get<BiometryRepository>().getKeyPassword(
             localizedReason: 'Please authenticate to interact with wallet',
             publicKey: ownerPublicKey,
           );
+
+      return password;
     } catch (err) {
       return null;
     }
   }
 
-  Future<void> pushDeploymentResult({
+  Future<void> pushTokenSendResult({
     required UnsignedMessage message,
+    required String publicKey,
     required String password,
   }) =>
       Navigator.of(context).pushAndRemoveUntil(
@@ -304,6 +304,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
             owner: widget.owner,
             rootTokenContract: widget.rootTokenContract,
             message: message,
+            publicKey: publicKey,
             password: password,
             sendingText: 'Transaction is sending...',
             successText: 'Transaction has been sent successfully',

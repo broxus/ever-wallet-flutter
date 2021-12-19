@@ -48,17 +48,19 @@ class CurrentAccountBloc extends Bloc<_Event, Account?> {
         if (!event.isExternal) {
           final assetsList = _nekotonService.accounts.firstWhereOrNull((e) => e.address == event.address);
 
-          account = assetsList != null ? Account.external(assetsList: assetsList) : null;
+          account = assetsList != null ? Account.internal(assetsList: assetsList) : null;
         } else {
           final assetsList = _nekotonService.externalAccounts[_nekotonService.currentKey?.publicKey]
               ?.firstWhereOrNull((e) => e.address == event.address);
 
-          account = assetsList != null ? Account.internal(assetsList: assetsList) : null;
+          account = assetsList != null ? Account.external(assetsList: assetsList) : null;
         }
 
         yield account;
       } else if (event is _Update) {
-        final currentAccount = event.accounts.firstWhereOrNull((e) => e == state) ?? event.accounts.firstOrNull;
+        final currentAccount =
+            event.accounts.firstWhereOrNull((e) => e.assetsList.address == state?.assetsList.address) ??
+                event.accounts.firstOrNull;
 
         yield currentAccount;
       }

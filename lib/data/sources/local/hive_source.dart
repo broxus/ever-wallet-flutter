@@ -16,8 +16,8 @@ class HiveSource {
   static const _keysPasswordsBoxName = 'keys_passwords_v1';
   static const _userPreferencesBoxName = 'user_preferences_v1';
   static const _tokenContractAssetsBoxName = 'token_contract_assets_v1';
-  static const _tonWalletInfosBoxName = 'ton_wallet_infos_v2';
-  static const _tokenWalletInfosBoxName = 'token_wallet_infos_v2';
+  static const _tonWalletInfosBoxName = 'ton_wallet_infos_v3';
+  static const _tokenWalletInfosBoxName = 'token_wallet_infos_v3';
   static const _tonWalletTransactionsBoxName = 'ton_wallet_transactions_v2';
   static const _tokenWalletTransactionsBoxName = 'token_wallet_transactions_v2';
   static const _publicKeysLabelsBoxName = 'public_keys_labels_v1';

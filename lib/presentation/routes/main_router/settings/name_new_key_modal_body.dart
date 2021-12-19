@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../design/design.dart';
+import '../../../design/widgets/crystal_text_form_field.dart';
+import '../../../design/widgets/custom_elevated_button.dart';
 
 class NameNewKeyModalBody extends StatefulWidget {
   const NameNewKeyModalBody({
@@ -29,18 +31,18 @@ class NameNewKeyModalBodyState extends State<NameNewKeyModalBody> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CrystalDivider(height: 24),
+            const SizedBox(height: 24),
             CrystalTextFormField(
               controller: nameController,
               autofocus: true,
               hintText: 'Name',
             ),
-            const CrystalDivider(height: 24),
-            CrystalButton(
-              text: 'Submit',
-              onTap: () {
+            const SizedBox(height: 24),
+            CustomElevatedButton(
+              onPressed: () {
                 context.router.pop<String>(nameController.text);
               },
+              text: 'Submit',
             ),
           ],
         ),

@@ -9,12 +9,13 @@ import 'package:validators/validators.dart';
 
 import '../../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
 import '../../../../../../injection.dart';
+import '../../../../../../logger.dart';
 import '../../../../../design/design.dart';
-import '../../../../../design/widgets/crystal_title.dart';
+import '../../../../../design/widgets/crystal_flushbar.dart';
 import '../../../../../design/widgets/custom_checkbox.dart';
-import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_text_form_field.dart';
+import '../../../../../design/widgets/modal_header.dart';
 import '../../../../../design/widgets/text_field_clear_button.dart';
 import '../../../../../design/widgets/text_suffix_icon_button.dart';
 import '../../../../../design/widgets/unfocusing_gesture_detector.dart';
@@ -27,12 +28,14 @@ class PrepareTokenTransferPage extends StatefulWidget {
   final BuildContext modalContext;
   final String owner;
   final String rootTokenContract;
+  final String publicKey;
 
   const PrepareTokenTransferPage({
     Key? key,
     required this.modalContext,
     required this.owner,
     required this.rootTokenContract,
+    required this.publicKey,
   }) : super(key: key);
 
   @override
@@ -90,29 +93,27 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              SingleChildScrollView(
-                controller: ModalScrollController.of(context),
-                physics: const ClampingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: title(),
-                        ),
-                        CustomCloseButton(
-                          onPressed: Navigator.of(widget.modalContext).pop,
-                        ),
-                      ],
+              Column(
+                children: [
+                  ModalHeader(
+                    text: 'Send your funds',
+                    onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: ModalScrollController.of(context),
+                      physics: const ClampingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          form(),
+                          const SizedBox(height: 64),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    form(),
-                    const SizedBox(height: 16),
-                    const SizedBox(height: 64),
-                  ],
-                ),
+                  ),
+                ],
               ),
               Align(
                 alignment: Alignment.bottomCenter,
@@ -126,10 +127,6 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
             ],
           ),
         ),
-      );
-
-  Widget title() => const CrystalTitle(
-        text: 'Send your funds',
       );
 
   Widget form() => Form(
@@ -316,7 +313,9 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
 
         destinationController.text = parsed.item1;
         if (parsed.item2 != null) amountController.text = parsed.item2!;
-      } catch (err) {
+      } catch (err, st) {
+        logger.e(err, err, st);
+
         if (!mounted) return;
 
         await showErrorCrystalFlushbar(
@@ -375,6 +374,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
           modalContext: widget.modalContext,
           owner: widget.owner,
           rootTokenContract: widget.rootTokenContract,
+          publicKey: widget.publicKey,
           destination: destination,
           amount: amount,
           notifyReceiver: notifyReceiver,

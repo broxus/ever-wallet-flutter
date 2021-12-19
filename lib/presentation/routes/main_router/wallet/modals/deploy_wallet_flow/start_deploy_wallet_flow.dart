@@ -6,6 +6,7 @@ import 'prepare_deploy_page.dart';
 Future<void> startDeployWalletFlow({
   required BuildContext context,
   required String address,
+  required String publicKey,
 }) =>
     showPlatformModalBottomSheet(
       context: context,
@@ -15,6 +16,7 @@ Future<void> startDeployWalletFlow({
           builder: (_) => PrepareDeployPage(
             modalContext: context,
             address: address,
+            publicKey: publicKey,
           ),
         ),
       ),

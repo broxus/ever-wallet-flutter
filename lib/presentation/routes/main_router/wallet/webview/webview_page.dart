@@ -7,11 +7,11 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../../../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../../../../../../domain/blocs/provider/approvals_bloc.dart';
 import '../../../../../../../../injection.dart';
+import '../../../../../domain/blocs/account/browser_accounts_bloc.dart';
+import '../../../../../domain/blocs/account/browser_current_account_bloc.dart';
 import '../../../../../domain/blocs/account/current_account_bloc.dart';
-import '../../../../../domain/models/account.dart';
 import '../../../../design/design.dart';
 import 'account_selection.dart';
 import 'approvals_listener.dart';
@@ -112,9 +112,10 @@ class _WebviewPageState extends State<WebviewPage> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<CurrentAccountBloc, Account?>(
-        builder: (context, currentAccountState) => BlocConsumer<AccountsBloc, List<Account>>(
-          bloc: context.watch<AccountsBloc>(),
+  Widget build(BuildContext context) => BlocBuilder<BrowserCurrentAccountBloc, AssetsList?>(
+        bloc: context.watch<BrowserCurrentAccountBloc>(),
+        builder: (context, currentAccountState) => BlocConsumer<BrowserAccountsBloc, List<AssetsList>>(
+          bloc: context.watch<BrowserAccountsBloc>(),
           listener: (context, accountsState) async {
             final currentOrigin = await controller?.getCurrentOrigin();
 
@@ -123,20 +124,8 @@ class _WebviewPageState extends State<WebviewPage> {
             }
           },
           builder: (context, accountsState) => buildApprovalsListener(
-            accounts: accountsState
-                .map(
-                  (e) => e.when(
-                    internal: (assetsList) => assetsList,
-                    external: (_) => null,
-                  ),
-                )
-                .where((e) => e != null)
-                .cast<AssetsList>()
-                .toList(),
-            currentAccount: currentAccountState?.when(
-              internal: (assetsList) => assetsList,
-              external: (_) => null,
-            ),
+            accounts: accountsState,
+            currentAccount: currentAccountState,
           ),
         ),
       );

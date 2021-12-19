@@ -63,6 +63,7 @@ class ApplicationFlowBloc extends Bloc<_Event, ApplicationFlowState> {
 
         await _nekotonService.clearAccountsStorage();
         await _nekotonService.clearKeystore();
+        await _nekotonService.clearExternalAccounts();
         await _biometryRepository.clear();
         await _tonAssetsRepository.clear();
         await _tonWalletInfoRepository.clear();
