@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../../../../data/repositories/accounts_repository.dart';
 import '../../../../../data/repositories/external_accounts_repository.dart';
+import '../../../../../domain/blocs/external_accounts_bloc.dart';
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
+import '../../../../design/widgets/custom_popup_item.dart';
 import '../../../../design/widgets/custom_popup_menu.dart';
 import '../modals/account_removement_modal/show_account_removement_modal.dart';
 import '../modals/custodians_modal/show_custodians_modal.dart';
@@ -15,13 +16,11 @@ import '../modals/preferences_modal/show_preferences_modal.dart';
 
 class MoreButton extends StatefulWidget {
   final String address;
-  final bool isExternal;
   final String? publicKey;
 
   const MoreButton({
     Key? key,
     required this.address,
-    this.isExternal = false,
     this.publicKey,
   }) : super(key: key);
 
@@ -65,9 +64,12 @@ class _MoreButtonState extends State<MoreButton> {
           _Actions.removeAccount,
         ]
             .map(
-              (e) => Tuple2(
-                e.describe(),
-                () => onSelected(e),
+              (e) => CustomPopupItem(
+                title: Text(
+                  e.describe(),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                onTap: () => onSelected(e),
               ),
             )
             .toList(),
@@ -91,7 +93,6 @@ class _MoreButtonState extends State<MoreButton> {
         showPreferencesModal(
           context: context,
           address: widget.address,
-          isExternal: widget.isExternal,
           publicKey: widget.publicKey,
         );
         break;
@@ -106,12 +107,12 @@ class _MoreButtonState extends State<MoreButton> {
           context: context,
           address: widget.address,
           onDeletePressed: () async {
-            if (!widget.isExternal) {
-              await getIt.get<AccountsRepository>().removeAccount(widget.address);
+            final bloc = context.read<ExternalAccountsBloc>();
+
+            if (bloc.state.any((e) => e == widget.address)) {
+              await getIt.get<ExternalAccountsRepository>().removeExternalAccount(widget.address);
             } else {
-              await getIt.get<ExternalAccountsRepository>().removeExternalAccount(
-                    address: widget.address,
-                  );
+              await getIt.get<AccountsRepository>().removeAccount(widget.address);
             }
           },
         );

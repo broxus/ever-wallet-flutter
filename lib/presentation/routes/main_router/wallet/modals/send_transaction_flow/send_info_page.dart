@@ -48,6 +48,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
     prepareTransferBloc.add(
       TonWalletPrepareTransferEvent.prepareTransfer(
         address: widget.address,
+        publicKey: widget.publicKey,
         destination: widget.destination,
         amount: widget.amount,
       ),

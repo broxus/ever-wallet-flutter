@@ -6,12 +6,10 @@ import 'ton_asset_info_modal_body.dart';
 Future<void> showTonAssetInfo({
   required BuildContext context,
   required String address,
-  bool isExternal = false,
 }) =>
     showPlatformModalBottomSheet(
       context: context,
       builder: (context) => TonAssetInfoModalBody(
         address: address,
-        isExternal: isExternal,
       ),
     );

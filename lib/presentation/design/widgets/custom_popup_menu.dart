@@ -2,14 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:tuple/tuple.dart';
 
 import 'animated_visibility.dart';
+import 'custom_popup_item.dart';
 
 class CustomPopupMenu extends StatefulWidget {
   final Alignment portalAnchor;
   final Alignment childAnchor;
-  final List<Tuple2<String, VoidCallback>> items;
+  final List<CustomPopupItem> items;
   final Widget icon;
 
   const CustomPopupMenu({
@@ -29,16 +29,42 @@ class _CustomPopupMenuState extends State<CustomPopupMenu> {
 
   @override
   Widget build(BuildContext context) {
-    final list = widget.items.map<Widget>((e) => item(e)).toList().fold<List<Widget>>(
-      <Widget>[],
-      (previousValue, element) => [
-        if (previousValue.isNotEmpty) ...[
-          ...previousValue,
-          divider(),
-        ],
-        element,
-      ],
-    );
+    final list = widget.items
+        .asMap()
+        .entries
+        .map<Widget>(
+          (e) {
+            BorderRadius? borderRadius;
+
+            if (e.key == 0) {
+              borderRadius = const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              );
+            } else if (e.key == widget.items.length - 1) {
+              borderRadius = const BorderRadius.only(
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+              );
+            }
+
+            return item(
+              element: e.value,
+              borderRadius: borderRadius,
+            );
+          },
+        )
+        .toList()
+        .fold<List<Widget>>(
+          <Widget>[],
+          (previousValue, element) => [
+            if (previousValue.isNotEmpty) ...[
+              ...previousValue,
+              divider(),
+            ],
+            element,
+          ],
+        );
 
     return PortalEntry(
       visible: isOpen,
@@ -56,12 +82,41 @@ class _CustomPopupMenuState extends State<CustomPopupMenu> {
     );
   }
 
-  Widget item(Tuple2<String, VoidCallback> element) => ListTile(
-        title: Text(element.item1),
+  Widget item({
+    required CustomPopupItem element,
+    BorderRadius? borderRadius,
+  }) =>
+      InkWell(
+        borderRadius: borderRadius,
         onTap: () {
-          element.item2();
+          element.onTap?.call();
           setState(() => isOpen = false);
         },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              if (element.leading != null) ...[
+                element.leading!,
+                const SizedBox(width: 16),
+              ],
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  element.title,
+                  if (element.subtitle != null) ...[
+                    const SizedBox(height: 4),
+                    element.subtitle!,
+                  ],
+                ],
+              ),
+              if (element.trailing != null) ...[
+                const SizedBox(width: 16),
+                element.trailing!,
+              ],
+            ],
+          ),
+        ),
       );
 
   Widget divider() => const Divider(
@@ -73,12 +128,16 @@ class _CustomPopupMenuState extends State<CustomPopupMenu> {
         duration: const Duration(milliseconds: 100),
         visible: isOpen,
         child: Material(
+          borderRadius: BorderRadius.circular(12),
           color: Colors.white,
           elevation: 8,
-          child: IntrinsicWidth(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: list,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: IntrinsicWidth(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: list,
+              ),
             ),
           ),
         ),

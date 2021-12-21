@@ -6,12 +6,10 @@ import 'add_asset_modal_body.dart';
 Future<void> showAddAssetModal({
   required BuildContext context,
   required String address,
-  bool isExternal = false,
 }) =>
     showPlatformModalBottomSheet(
       context: context,
       builder: (context) => AddAssetModalBody(
         address: address,
-        isExternal: isExternal,
       ),
     );

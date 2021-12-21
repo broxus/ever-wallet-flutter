@@ -248,13 +248,19 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
 
     final transactionId = multisigPendingTransaction?.id;
 
-    final currentKey = context.read<KeysBloc>().state.currentKey?.publicKey;
+    final localKeys = [
+      ...context.read<KeysBloc>().state.keys.keys,
+      ...context.read<KeysBloc>().state.keys.values.where((e) => e != null).cast<List<KeyStoreEntry>>().expand((e) => e)
+    ];
 
-    final canConfirm = currentKey != null &&
-        custodians != null &&
-        custodians!.any((e) => e == currentKey) &&
-        confirmations != null &&
-        confirmations.every((e) => e != currentKey);
+    final localCustodians = localKeys.where((e) => custodians?.any((el) => el == e.publicKey) ?? false).toList();
+
+    final nonConfirmedLocalCustodians =
+        localCustodians.where((e) => confirmations?.every((el) => el != e.publicKey) ?? false);
+
+    final publicKeys = nonConfirmedLocalCustodians.map((e) => e.publicKey).toList();
+
+    final canConfirm = publicKeys.isNotEmpty;
 
     final sections = [
       section(
@@ -420,7 +426,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                 confirmButton(
                   context: context,
                   address: walletAddress!,
-                  publicKey: currentKey,
+                  publicKeys: publicKeys,
                   transactionId: transactionId,
                   destination: address,
                   amount: value,
@@ -578,7 +584,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
   Widget confirmButton({
     required BuildContext context,
     required String address,
-    required String publicKey,
+    required List<String> publicKeys,
     required String transactionId,
     required String destination,
     required String amount,
@@ -588,7 +594,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
         onPressed: () => startConfirmTransactionFlow(
           context: context,
           address: address,
-          publicKey: publicKey,
+          publicKeys: publicKeys,
           transactionId: transactionId,
           destination: destination,
           amount: amount,

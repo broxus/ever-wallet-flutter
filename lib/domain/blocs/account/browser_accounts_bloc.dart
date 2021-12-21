@@ -19,11 +19,31 @@ class BrowserAccountsBloc extends Bloc<_Event, List<AssetsList>> {
   late final StreamSubscription _streamSubscription;
 
   BrowserAccountsBloc(this._nekotonService) : super(const []) {
-    _streamSubscription = Rx.combineLatest2<KeyStoreEntry?, List<AssetsList>, List<AssetsList>>(
+    _streamSubscription =
+        Rx.combineLatest3<KeyStoreEntry?, List<AssetsList>, Map<String, List<String>>, List<AssetsList>>(
       _nekotonService.currentKeyStream,
       _nekotonService.accountsStream,
-      (a, b) => b.where((e) => e.publicKey == a?.publicKey).toList(),
-    ).distinct((previous, next) => listEquals(previous, next)).listen((event) => add(_Event.update(event)));
+      _nekotonService.externalAccountsStream,
+      (a, b, c) {
+        final currentKey = a;
+
+        List<AssetsList> internalAccounts = [];
+        List<AssetsList> externalAccounts = [];
+
+        if (currentKey != null) {
+          final externalAddresses = c[a?.publicKey] ?? [];
+
+          internalAccounts = b.where((e) => e.publicKey == a?.publicKey).toList();
+          externalAccounts =
+              b.where((e) => e.publicKey != a?.publicKey && externalAddresses.any((el) => el == e.address)).toList();
+        }
+
+        return [
+          ...internalAccounts,
+          ...externalAccounts,
+        ];
+      },
+    ).listen((event) => add(_Event.update(event)));
   }
 
   @override

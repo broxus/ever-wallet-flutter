@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/subjects.dart';
 
-import '../../domain/models/token_contract_asset.dart';
 import '../dtos/token_contract_asset_dto.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/remote/rest_source.dart';
@@ -12,7 +11,7 @@ import '../sources/remote/rest_source.dart';
 class TonAssetsRepository {
   final HiveSource _hiveSource;
   final RestSource _restSource;
-  final _assetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
+  final _assetsSubject = BehaviorSubject<List<TokenContractAssetDto>>.seeded([]);
 
   TonAssetsRepository._(
     this._hiveSource,
@@ -32,13 +31,13 @@ class TonAssetsRepository {
     return tonAssetsRepositoryImpl;
   }
 
-  Stream<List<TokenContractAsset>> get assetsStream =>
+  Stream<List<TokenContractAssetDto>> get assetsStream =>
       _assetsSubject.stream.distinct((previous, next) => listEquals(previous, next));
 
-  List<TokenContractAsset> get assets => _assetsSubject.value;
+  List<TokenContractAssetDto> get assets => _assetsSubject.value;
 
-  Future<void> save(TokenContractAsset asset) async {
-    await _hiveSource.saveTokenContractAsset(asset.toDto());
+  Future<void> save(TokenContractAssetDto asset) async {
+    await _hiveSource.saveTokenContractAsset(asset);
 
     final assets = _assetsSubject.value.where((e) => e.address != asset.address).toList()..add(asset);
     _assetsSubject.add(assets);
@@ -53,7 +52,7 @@ class TonAssetsRepository {
   }) async {
     final gravatarIcon = await _restSource.getGravatarIcon(address);
 
-    final assetDto = TokenContractAssetDto(
+    final asset = TokenContractAssetDto(
       name: name,
       symbol: symbol,
       decimals: decimals,
@@ -61,9 +60,8 @@ class TonAssetsRepository {
       gravatarIcon: gravatarIcon,
       version: version,
     );
-    final asset = assetDto.toModel();
 
-    await _hiveSource.saveTokenContractAsset(assetDto);
+    await _hiveSource.saveTokenContractAsset(asset);
 
     final assets = _assetsSubject.value.where((e) => e.address != asset.address).toList()..add(asset);
     _assetsSubject.add(assets);
@@ -85,7 +83,7 @@ class TonAssetsRepository {
   Future<void> refresh() async {
     final manifest = await _restSource.getTonAssetsManifest();
 
-    final assets = <TokenContractAsset>[];
+    final assets = <TokenContractAssetDto>[];
 
     for (final token in manifest.tokens) {
       String? svgIcon;
@@ -99,7 +97,7 @@ class TonAssetsRepository {
         gravatarIcon = await _restSource.getGravatarIcon(token.address);
       }
 
-      final assetDto = TokenContractAssetDto(
+      final asset = TokenContractAssetDto(
         name: token.name,
         chainId: token.chainId,
         symbol: token.symbol,
@@ -109,9 +107,8 @@ class TonAssetsRepository {
         gravatarIcon: gravatarIcon,
         version: token.version,
       );
-      final asset = assetDto.toModel();
 
-      await _hiveSource.saveTokenContractAsset(assetDto);
+      await _hiveSource.saveTokenContractAsset(asset);
 
       assets.add(asset);
     }
@@ -127,7 +124,7 @@ class TonAssetsRepository {
   }
 
   Future<void> _initialize() async {
-    final assets = _hiveSource.getTokenContractAssets().map((e) => e.toModel()).toList();
+    final assets = _hiveSource.getTokenContractAssets();
 
     if (assets.isEmpty) {
       await refresh();

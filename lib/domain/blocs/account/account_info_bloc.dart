@@ -8,12 +8,11 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
-import '../../models/account.dart';
 
 part 'account_info_bloc.freezed.dart';
 
 @injectable
-class AccountInfoBloc extends Bloc<_Event, Account?> {
+class AccountInfoBloc extends Bloc<_Event, AssetsList?> {
   final NekotonService _nekotonService;
   final _errorsSubject = PublishSubject<Exception>();
   StreamSubscription? _streamSubscription;
@@ -28,50 +27,21 @@ class AccountInfoBloc extends Bloc<_Event, Account?> {
   }
 
   @override
-  Stream<Account?> mapEventToState(_Event event) async* {
+  Stream<AssetsList?> mapEventToState(_Event event) async* {
     try {
       if (event is _Load) {
-        if (!event.isExternal) {
-          final account = _nekotonService.accounts.firstWhereOrNull((e) => e.address == event.address);
+        final account = _nekotonService.accounts.firstWhereOrNull((e) => e.address == event.address);
 
-          if (account == null) {
-            throw AccountNotFoundException();
-          }
-
-          _streamSubscription?.cancel();
-          _streamSubscription = _nekotonService.accountsStream
-              .expand((e) => e)
-              .where((e) => e.address == event.address)
-              .distinct()
-              .listen(
-                (value) => add(
-                  _LocalEvent.update(
-                    Account.external(assetsList: value),
-                  ),
-                ),
-              );
-        } else {
-          final account = _nekotonService.externalAccounts[_nekotonService.currentKey?.publicKey]
-              ?.firstWhereOrNull((e) => e.address == event.address);
-
-          if (account == null) {
-            throw ExternalAccountNotFoundException();
-          }
-
-          _streamSubscription?.cancel();
-          _streamSubscription = _nekotonService.externalAccountsStream
-              .map((e) => e[_nekotonService.currentKey?.publicKey] ?? [])
-              .expand((e) => e)
-              .where((e) => e.address == event.address)
-              .distinct()
-              .listen(
-                (value) => add(
-                  _LocalEvent.update(
-                    Account.internal(assetsList: value),
-                  ),
-                ),
-              );
+        if (account == null) {
+          throw AccountNotFoundException();
         }
+
+        _streamSubscription?.cancel();
+        _streamSubscription = _nekotonService.accountsStream
+            .expand((e) => e)
+            .where((e) => e.address == event.address)
+            .distinct()
+            .listen((value) => add(_LocalEvent.update(value)));
       } else if (event is _Update) {
         yield event.account;
       }
@@ -88,13 +58,10 @@ abstract class _Event {}
 
 @freezed
 class _LocalEvent extends _Event with _$_LocalEvent {
-  const factory _LocalEvent.update(Account account) = _Update;
+  const factory _LocalEvent.update(AssetsList account) = _Update;
 }
 
 @freezed
 class AccountInfoEvent extends _Event with _$AccountInfoEvent {
-  const factory AccountInfoEvent.load({
-    String? address,
-    @Default(false) bool isExternal,
-  }) = _Load;
+  const factory AccountInfoEvent.load(String address) = _Load;
 }

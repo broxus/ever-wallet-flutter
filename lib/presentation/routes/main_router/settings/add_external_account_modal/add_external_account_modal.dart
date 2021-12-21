@@ -12,10 +12,12 @@ import '../../../../design/widgets/modal_header.dart';
 import '../../../../design/widgets/text_field_clear_button.dart';
 
 class AddExternalAccountModalBody extends StatefulWidget {
+  final BuildContext ctx;
   final String publicKey;
 
   const AddExternalAccountModalBody({
     Key? key,
+    required this.ctx,
     required this.publicKey,
   }) : super(key: key);
 
@@ -168,7 +170,7 @@ class _AddExternalAccountModalBodyState extends State<AddExternalAccountModalBod
     } catch (err, st) {
       logger.e(err, err, st);
 
-      showErrorCrystalFlushbar(context, message: err.toString());
+      showErrorCrystalFlushbar(widget.ctx, message: err.toString());
     }
 
     if (!mounted) return;

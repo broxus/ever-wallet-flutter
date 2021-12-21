@@ -8,10 +8,10 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../data/dtos/token_contract_asset_dto.dart';
 import '../../../data/repositories/ton_assets_repository.dart';
 import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
-import '../../models/token_contract_asset.dart';
 
 part 'account_assets_bloc.freezed.dart';
 
@@ -65,8 +65,8 @@ class AccountAssetsBloc extends Bloc<_Event, AccountAssetsState> {
         _streamSubscription?.cancel();
         _streamSubscription = Rx.combineLatest2<
                 Tuple2<TonWalletAsset, List<TokenWalletAsset>>,
-                List<TokenContractAsset>,
-                Tuple2<Tuple2<TonWalletAsset, List<TokenWalletAsset>>, List<TokenContractAsset>>>(
+                List<TokenContractAssetDto>,
+                Tuple2<Tuple2<TonWalletAsset, List<TokenWalletAsset>>, List<TokenContractAssetDto>>>(
           accountAssetsStream,
           _tonAssetsRepository.assetsStream,
           (a, b) => Tuple2(a, b),
@@ -112,7 +112,7 @@ abstract class _Event {}
 class _LocalEvent extends _Event with _$_LocalEvent {
   const factory _LocalEvent.update({
     required TonWalletAsset tonWalletAsset,
-    required List<TokenContractAsset> tokenContractAssets,
+    required List<TokenContractAssetDto> tokenContractAssets,
   }) = _Update;
 }
 
@@ -125,6 +125,6 @@ class AccountAssetsEvent extends _Event with _$AccountAssetsEvent {
 class AccountAssetsState with _$AccountAssetsState {
   const factory AccountAssetsState({
     TonWalletAsset? tonWalletAsset,
-    @Default([]) List<TokenContractAsset> tokenContractAssets,
+    @Default([]) List<TokenContractAssetDto> tokenContractAssets,
   }) = _AccountAssetsState;
 }

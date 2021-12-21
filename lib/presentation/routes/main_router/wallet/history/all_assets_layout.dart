@@ -10,13 +10,11 @@ import 'ton_wallet_asset_holder.dart';
 class AllAssetsLayout extends StatefulWidget {
   final String address;
   final ScrollController controller;
-  final bool isExternal;
 
   const AllAssetsLayout({
     Key? key,
     required this.address,
     required this.controller,
-    this.isExternal = false,
   }) : super(key: key);
 
   @override
@@ -55,7 +53,6 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
               TonWalletAssetHolder(
                 key: ValueKey(state.tonWalletAsset),
                 address: state.tonWalletAsset!.address,
-                isExternal: widget.isExternal,
               ),
             if (state.tonWalletAsset != null)
               ...state.tokenContractAssets
@@ -66,7 +63,6 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
                       rootTokenContract: tokenContractAsset.address,
                       svgIcon: tokenContractAsset.svgIcon,
                       gravatarIcon: tokenContractAsset.gravatarIcon,
-                      isExternal: widget.isExternal,
                     ),
                   )
                   .toList(),

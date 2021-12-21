@@ -7,6 +7,7 @@ import '../../../../../../domain/blocs/public_keys_labels_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
+import '../../../../../design/widgets/custom_popup_item.dart';
 import '../../../../../design/widgets/custom_popup_menu.dart';
 import '../../../../../design/widgets/modal_header.dart';
 import 'edit_custodian_label_dialog.dart';
@@ -25,7 +26,6 @@ class CustodiansModalBody extends StatefulWidget {
 
 class _CustodiansModalBodyState extends State<CustodiansModalBody> {
   final infoBloc = getIt.get<TonWalletInfoBloc>();
-  final publicKeysLabelsBloc = getIt.get<PublicKeysLabelsBloc>();
 
   @override
   void initState() {
@@ -45,7 +45,6 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
   void dispose() {
     super.dispose();
     infoBloc.close();
-    publicKeysLabelsBloc.close();
   }
 
   @override
@@ -123,9 +122,12 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
 
   Widget more(String publicKey) => CustomPopupMenu(
         items: [
-          Tuple2(
-            'Edit',
-            () => showEditCustodianLabelDialog(
+          CustomPopupItem(
+            title: const Text(
+              'Edit',
+              style: TextStyle(fontSize: 16),
+            ),
+            onTap: () => showEditCustodianLabelDialog(
               context: context,
               publicKey: publicKey,
             ),

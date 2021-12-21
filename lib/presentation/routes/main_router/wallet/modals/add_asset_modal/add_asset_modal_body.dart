@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../data/dtos/token_contract_asset_dto.dart';
 import '../../../../../../data/repositories/accounts_repository.dart';
-import '../../../../../../domain/models/token_contract_asset.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_flushbar.dart';
@@ -12,12 +12,10 @@ import 'custom_token_layout.dart';
 
 class AddAssetModalBody extends StatefulWidget {
   final String address;
-  final bool isExternal;
 
   const AddAssetModalBody({
     Key? key,
     required this.address,
-    this.isExternal = false,
   }) : super(key: key);
 
   @override
@@ -106,7 +104,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
         ],
       );
 
-  Future<void> onAssetsLayoutSave(List<TokenContractAsset> added, List<TokenContractAsset> removed) async {
+  Future<void> onAssetsLayoutSave(List<TokenContractAssetDto> added, List<TokenContractAssetDto> removed) async {
     for (final asset in added) {
       try {
         await getIt.get<AccountsRepository>().addTokenWallet(

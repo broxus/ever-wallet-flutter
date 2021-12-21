@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../../../../../../../domain/blocs/connection_bloc.dart';
+import '../../../../design/widgets/custom_popup_item.dart';
 import '../../../../design/widgets/custom_popup_menu.dart';
 
 class ConnectionButton extends StatelessWidget {
@@ -15,9 +15,12 @@ class ConnectionButton extends StatelessWidget {
         builder: (context, state) => CustomPopupMenu(
           items: kNetworkPresets
               .map(
-                (e) => Tuple2(
-                  e.name,
-                  () => context.read<ConnectionBloc>().add(ConnectionEvent.updateTransport(e)),
+                (e) => CustomPopupItem(
+                  title: Text(
+                    e.name,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  onTap: () => context.read<ConnectionBloc>().add(ConnectionEvent.updateTransport(e)),
                 ),
               )
               .toList(),

@@ -7,8 +7,6 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../dtos/token_contract_asset_dto.dart';
-import '../../dtos/token_wallet_transaction_with_data_dto.dart';
-import '../../dtos/ton_wallet_transaction_with_data_dto.dart';
 
 @preResolve
 @lazySingleton
@@ -78,14 +76,14 @@ class HiveSource {
 
   Future<void> clearTokenWalletInfos() => _tokenWalletInfosBox.clear();
 
-  List<TonWalletTransactionWithDataDto>? getTonWalletTransactions(String address) => _tonWalletTransactionsBox
+  List<TonWalletTransactionWithData>? getTonWalletTransactions(String address) => _tonWalletTransactionsBox
       .get(address.hashCode)
       ?.where((e) => e != null)
       .toList()
-      .cast<TonWalletTransactionWithDataDto>();
+      .cast<TonWalletTransactionWithData>();
 
   Future<void> saveTonWalletTransactions({
-    required List<TonWalletTransactionWithDataDto> tonWalletTransactions,
+    required List<TonWalletTransactionWithData> tonWalletTransactions,
     required String address,
   }) =>
       _tonWalletTransactionsBox.put(address.hashCode, tonWalletTransactions);
@@ -94,7 +92,7 @@ class HiveSource {
 
   Future<void> clearTonWalletTransactions() => _tonWalletTransactionsBox.clear();
 
-  List<TokenWalletTransactionWithDataDto>? getTokenWalletTransactions({
+  List<TokenWalletTransactionWithData>? getTokenWalletTransactions({
     required String owner,
     required String rootTokenContract,
   }) =>
@@ -102,10 +100,10 @@ class HiveSource {
           .get(owner.hashCode ^ rootTokenContract.hashCode)
           ?.where((e) => e != null)
           .toList()
-          .cast<TokenWalletTransactionWithDataDto>();
+          .cast<TokenWalletTransactionWithData>();
 
   Future<void> saveTokenWalletTransactions({
-    required List<TokenWalletTransactionWithDataDto> tokenWalletTransactions,
+    required List<TokenWalletTransactionWithData> tokenWalletTransactions,
     required String owner,
     required String rootTokenContract,
   }) =>

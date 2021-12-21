@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../domain/models/account.dart';
 import '../../../../design/widgets/animated_appearance.dart';
 import '../../../../design/widgets/circle_icon.dart';
 import 'new_account_card.dart';
@@ -11,7 +11,7 @@ class ProfileCarousel extends StatefulWidget {
   final bool loading;
   final int initialIndex;
   final String? publicKey;
-  final List<Account> accounts;
+  final List<AssetsList> accounts;
   final VoidCallback? onScrollStart;
   final void Function(int)? onPageChanged;
   final void Function(int)? onPageSelected;
@@ -87,17 +87,9 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
   Widget build(BuildContext context) {
     final accounts = widget.accounts
         .map(
-          (e) => e.when(
-            internal: (assetsList) => WalletCard(
-              key: ValueKey(assetsList.address),
-              address: assetsList.address,
-            ),
-            external: (assetsList) => WalletCard(
-              key: ValueKey(assetsList.address),
-              isExternal: true,
-              address: assetsList.address,
-              publicKey: widget.publicKey,
-            ),
+          (e) => WalletCard(
+            key: ValueKey(e.address),
+            address: e.address,
           ),
         )
         .toList();

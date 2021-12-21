@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../domain/blocs/account/accounts_bloc.dart';
 import '../../../../../domain/blocs/account/current_account_bloc.dart';
-import '../../../../../domain/models/account.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/animated_appearance.dart';
 import '../../../../design/widgets/sliding_panel.dart';
@@ -24,8 +24,8 @@ class WalletBody extends StatelessWidget {
         bottom: false,
         child: Padding(
           padding: const EdgeInsets.only(top: 14),
-          child: BlocBuilder<CurrentAccountBloc, Account?>(
-            builder: (context, currentAccountState) => BlocBuilder<AccountsBloc, List<Account>>(
+          child: BlocBuilder<CurrentAccountBloc, AssetsList?>(
+            builder: (context, currentAccountState) => BlocBuilder<AccountsBloc, List<AssetsList>>(
               bloc: context.watch<AccountsBloc>(),
               builder: (context, accountsState) => Column(
                 mainAxisSize: MainAxisSize.min,
@@ -53,27 +53,16 @@ class WalletBody extends StatelessWidget {
                     duration: const Duration(milliseconds: 250),
                     offset: const Offset(1, 0),
                     child: ProfileCarousel(
-                      publicKey: currentAccountState?.assetsList.publicKey,
+                      publicKey: currentAccountState?.publicKey,
                       accounts: accountsState,
                       onPageChanged: (i) {
                         if (i < accountsState.length) {
-                          context.read<CurrentAccountBloc>().add(
-                                CurrentAccountEvent.setCurrent(
-                                  address: accountsState[i].when(
-                                    internal: (assetsList) => assetsList.address,
-                                    external: (assetsList) => assetsList.address,
-                                  ),
-                                  isExternal: accountsState[i].when(
-                                    internal: (_) => false,
-                                    external: (_) => true,
-                                  ),
-                                ),
-                              );
+                          context
+                              .read<CurrentAccountBloc>()
+                              .add(CurrentAccountEvent.setCurrent(accountsState[i].address));
                         } else {
                           modalController.hide();
-                          context.read<CurrentAccountBloc>().add(
-                                const CurrentAccountEvent.setCurrent(),
-                              );
+                          context.read<CurrentAccountBloc>().add(const CurrentAccountEvent.setCurrent());
                         }
                       },
                       onPageSelected: (i) {
@@ -86,17 +75,7 @@ class WalletBody extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  if (currentAccountState != null)
-                    ProfileActions(
-                      address: currentAccountState.when(
-                        internal: (assetsList) => assetsList.address,
-                        external: (assetsList) => assetsList.address,
-                      ),
-                      isExternal: currentAccountState.when(
-                        internal: (_) => false,
-                        external: (_) => true,
-                      ),
-                    ),
+                  if (currentAccountState != null) ProfileActions(address: currentAccountState.address),
                   const SizedBox(height: 20),
                 ],
               ),

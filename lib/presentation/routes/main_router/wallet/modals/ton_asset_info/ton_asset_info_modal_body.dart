@@ -28,12 +28,10 @@ import '../send_transaction_flow/start_send_transaction_flow.dart';
 
 class TonAssetInfoModalBody extends StatefulWidget {
   final String address;
-  final bool isExternal;
 
   const TonAssetInfoModalBody({
     Key? key,
     required this.address,
-    this.isExternal = false,
   }) : super(key: key);
 
   @override

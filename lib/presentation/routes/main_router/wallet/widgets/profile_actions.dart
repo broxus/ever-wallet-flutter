@@ -6,7 +6,6 @@ import '../../../../../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../../../injection.dart';
 import '../../../../../domain/blocs/key/keys_bloc.dart';
-import '../../../../../domain/models/account.dart';
 import '../../../../design/design.dart';
 import '../modals/add_asset_modal/show_add_asset_modal.dart';
 import '../modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
@@ -16,12 +15,10 @@ import 'wallet_button.dart';
 
 class ProfileActions extends StatefulWidget {
   final String address;
-  final bool isExternal;
 
   const ProfileActions({
     Key? key,
     required this.address,
-    this.isExternal = false,
   }) : super(key: key);
 
   @override
@@ -36,12 +33,7 @@ class _ProfileActionsState extends State<ProfileActions> {
   void initState() {
     super.initState();
     tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
-    accountInfoBloc.add(
-      AccountInfoEvent.load(
-        address: widget.address,
-        isExternal: widget.isExternal,
-      ),
-    );
+    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
   }
 
   @override
@@ -49,12 +41,7 @@ class _ProfileActionsState extends State<ProfileActions> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.address != widget.address) {
       tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
-      accountInfoBloc.add(
-        AccountInfoEvent.load(
-          address: widget.address,
-          isExternal: widget.isExternal,
-        ),
-      );
+      accountInfoBloc.add(AccountInfoEvent.load(widget.address));
     }
   }
 
@@ -73,7 +60,6 @@ class _ProfileActionsState extends State<ProfileActions> {
             onTap: () async => showAddAssetModal(
               context: context,
               address: widget.address,
-              isExternal: widget.isExternal,
             ),
             title: LocaleKeys.wallet_screen_actions_add_asset.tr(),
             icon: const OverflowBox(
@@ -88,16 +74,13 @@ class _ProfileActionsState extends State<ProfileActions> {
               ),
             ),
           ),
-          BlocBuilder<AccountInfoBloc, Account?>(
+          BlocBuilder<AccountInfoBloc, AssetsList?>(
             bloc: accountInfoBloc,
             builder: (context, state) => WalletButton(
               onTap: state != null
                   ? () => showReceiveModal(
                         context: context,
-                        address: state.when(
-                          internal: (assetsList) => assetsList.address,
-                          external: (assetsList) => assetsList.address,
-                        ),
+                        address: state.address,
                       )
                   : null,
               title: LocaleKeys.actions_receive.tr(),

@@ -9,27 +9,41 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../data/services/nekoton_service.dart';
 import '../../../logger.dart';
-import '../../models/account.dart';
 
 part 'accounts_bloc.freezed.dart';
 
 @injectable
-class AccountsBloc extends Bloc<_Event, List<Account>> {
+class AccountsBloc extends Bloc<_Event, List<AssetsList>> {
   final NekotonService _nekotonService;
   final _errorsSubject = PublishSubject<Exception>();
   late final StreamSubscription _streamSubscription;
 
   AccountsBloc(this._nekotonService) : super(const []) {
     _streamSubscription =
-        Rx.combineLatest3<KeyStoreEntry?, List<AssetsList>, Map<String, List<AssetsList>>, List<Account>>(
+        Rx.combineLatest3<KeyStoreEntry?, List<AssetsList>, Map<String, List<String>>, List<AssetsList>>(
       _nekotonService.currentKeyStream,
       _nekotonService.accountsStream,
       _nekotonService.externalAccountsStream,
-      (a, b, c) => [
-        ...b.where((e) => e.publicKey == a?.publicKey).map((e) => Account.internal(assetsList: e)),
-        ...(c[a?.publicKey] ?? []).map((e) => Account.external(assetsList: e)),
-      ],
-    ).distinct((previous, next) => listEquals(previous, next)).listen((event) => add(_Event.update(event)));
+      (a, b, c) {
+        final currentKey = a;
+
+        List<AssetsList> internalAccounts = [];
+        List<AssetsList> externalAccounts = [];
+
+        if (currentKey != null) {
+          final externalAddresses = c[a?.publicKey] ?? [];
+
+          internalAccounts = b.where((e) => e.publicKey == a?.publicKey).toList();
+          externalAccounts =
+              b.where((e) => e.publicKey != a?.publicKey && externalAddresses.any((el) => el == e.address)).toList();
+        }
+
+        return [
+          ...internalAccounts,
+          ...externalAccounts,
+        ];
+      },
+    ).listen((event) => add(_Event.update(event)));
   }
 
   @override
@@ -40,7 +54,7 @@ class AccountsBloc extends Bloc<_Event, List<Account>> {
   }
 
   @override
-  Stream<List<Account>> mapEventToState(_Event event) async* {
+  Stream<List<AssetsList>> mapEventToState(_Event event) async* {
     try {
       if (event is _Update) {
         yield event.accounts;
@@ -56,5 +70,5 @@ class AccountsBloc extends Bloc<_Event, List<Account>> {
 
 @freezed
 class _Event with _$_Event {
-  const factory _Event.update(List<Account> accounts) = _Update;
+  const factory _Event.update(List<AssetsList> accounts) = _Update;
 }

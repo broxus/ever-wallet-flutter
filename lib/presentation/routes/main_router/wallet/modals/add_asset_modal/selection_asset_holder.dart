@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
-import '../../../../../../../../../../domain/models/token_contract_asset.dart';
+import '../../../../../../data/dtos/token_contract_asset_dto.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/asset_icon.dart';
 
 class SelectionAssetHolder extends StatelessWidget {
-  final TokenContractAsset asset;
+  final TokenContractAssetDto asset;
   final bool isSelected;
   final VoidCallback onTap;
 

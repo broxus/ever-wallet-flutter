@@ -89,16 +89,16 @@ class KeysRepository {
     required CreateKeyInput createKeyInput,
     required String password,
   }) async {
-    final keyStoreEntry = await _nekotonService.addKey(createKeyInput);
+    final key = await _nekotonService.addKey(createKeyInput);
 
     if (_biometryRepository.biometryAvailability && _biometryRepository.biometryStatus) {
       await _biometryRepository.setKeyPassword(
-        publicKey: keyStoreEntry.publicKey,
+        publicKey: key.publicKey,
         password: password,
       );
     }
 
-    return keyStoreEntry;
+    return key;
   }
 
   Future<List<String>> exportKey({
@@ -146,17 +146,17 @@ class KeysRepository {
     required String publicKey,
     required String password,
   }) {
-    final keyStoreEntry = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == publicKey);
+    final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == publicKey);
 
-    if (keyStoreEntry == null) {
+    if (key == null) {
       throw KeyNotFoundException();
     }
 
     late final SignInput signInput;
 
-    if (keyStoreEntry.isLegacy) {
+    if (key.isLegacy) {
       signInput = EncryptedKeyPassword(
-        publicKey: keyStoreEntry.publicKey,
+        publicKey: key.publicKey,
         password: Password.explicit(
           password: password,
           cacheBehavior: const PasswordCacheBehavior.remove(),
@@ -164,8 +164,8 @@ class KeysRepository {
       );
     } else {
       signInput = DerivedKeySignParams.byAccountId(
-        masterKey: keyStoreEntry.masterKey,
-        accountId: keyStoreEntry.accountId,
+        masterKey: key.masterKey,
+        accountId: key.accountId,
         password: Password.explicit(
           password: password,
           cacheBehavior: const PasswordCacheBehavior.remove(),
@@ -183,17 +183,17 @@ class KeysRepository {
     required String oldPassword,
     required String newPassword,
   }) async {
-    final keyStoreEntry = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == publicKey);
+    final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == publicKey);
 
-    if (keyStoreEntry == null) {
+    if (key == null) {
       throw KeyNotFoundException();
     }
 
     late final UpdateKeyInput updateKeyInput;
 
-    if (keyStoreEntry.isLegacy) {
+    if (key.isLegacy) {
       updateKeyInput = EncryptedKeyUpdateParams.changePassword(
-        publicKey: keyStoreEntry.publicKey,
+        publicKey: key.publicKey,
         oldPassword: Password.explicit(
           password: oldPassword,
           cacheBehavior: const PasswordCacheBehavior.remove(),
@@ -205,7 +205,7 @@ class KeysRepository {
       );
     } else {
       updateKeyInput = DerivedKeyUpdateParams.changePassword(
-        masterKey: keyStoreEntry.masterKey,
+        masterKey: key.masterKey,
         oldPassword: Password.explicit(
           password: oldPassword,
           cacheBehavior: const PasswordCacheBehavior.remove(),
@@ -231,23 +231,23 @@ class KeysRepository {
     required String publicKey,
     required String name,
   }) {
-    final keyStoreEntry = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == publicKey);
+    final key = _nekotonService.keys.firstWhereOrNull((e) => e.publicKey == publicKey);
 
-    if (keyStoreEntry == null) {
+    if (key == null) {
       throw KeyNotFoundException();
     }
 
     late final UpdateKeyInput updateKeyInput;
 
-    if (keyStoreEntry.isLegacy) {
+    if (key.isLegacy) {
       updateKeyInput = EncryptedKeyUpdateParams.rename(
-        publicKey: keyStoreEntry.publicKey,
+        publicKey: key.publicKey,
         name: name,
       );
     } else {
       updateKeyInput = DerivedKeyUpdateParams.renameKey(
-        masterKey: keyStoreEntry.masterKey,
-        publicKey: keyStoreEntry.publicKey,
+        masterKey: key.masterKey,
+        publicKey: key.publicKey,
         name: name,
       );
     }

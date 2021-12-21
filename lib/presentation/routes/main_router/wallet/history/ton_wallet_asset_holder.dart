@@ -10,12 +10,10 @@ import 'wallet_asset_holder.dart';
 
 class TonWalletAssetHolder extends StatefulWidget {
   final String address;
-  final bool isExternal;
 
   const TonWalletAssetHolder({
     Key? key,
     required this.address,
-    this.isExternal = false,
   }) : super(key: key);
 
   @override
@@ -57,7 +55,6 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
               ? () => showTonAssetInfo(
                     context: context,
                     address: state.address,
-                    isExternal: widget.isExternal,
                   )
               : () {},
         ),

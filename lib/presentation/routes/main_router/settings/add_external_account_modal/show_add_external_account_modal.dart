@@ -9,7 +9,8 @@ Future<void> showAddExternalAccountModal({
 }) =>
     showPlatformModalBottomSheet(
       context: context,
-      builder: (context) => AddExternalAccountModalBody(
+      builder: (_) => AddExternalAccountModalBody(
+        ctx: context,
         publicKey: publicKey,
       ),
     );

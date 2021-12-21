@@ -6,31 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import 'data/dtos/account_status_dto.dart';
-import 'data/dtos/de_pool_on_round_complete_notification_dto.dart';
-import 'data/dtos/de_pool_receive_answer_notification_dto.dart';
-import 'data/dtos/eth_event_status_dto.dart';
-import 'data/dtos/known_payload_dto.dart';
-import 'data/dtos/message_dto.dart';
-import 'data/dtos/multisig_confirm_transaction_dto.dart';
-import 'data/dtos/multisig_send_transaction_dto.dart';
-import 'data/dtos/multisig_submit_transaction_dto.dart';
-import 'data/dtos/multisig_transaction_dto.dart';
 import 'data/dtos/token_contract_asset_dto.dart';
-import 'data/dtos/token_incoming_transfer_dto.dart';
-import 'data/dtos/token_outgoing_transfer_dto.dart';
-import 'data/dtos/token_swap_back_dto.dart';
-import 'data/dtos/token_wallet_deployed_notification_dto.dart';
-import 'data/dtos/token_wallet_transaction_dto.dart';
-import 'data/dtos/token_wallet_transaction_with_data_dto.dart';
-import 'data/dtos/ton_event_status_dto.dart';
-import 'data/dtos/ton_wallet_transaction_with_data_dto.dart';
-import 'data/dtos/transaction_additional_info_dto.dart';
-import 'data/dtos/transaction_dto.dart';
-import 'data/dtos/transaction_id_dto.dart';
-import 'data/dtos/transfer_recipient_dto.dart';
-import 'data/dtos/wallet_interaction_info_dto.dart';
-import 'data/dtos/wallet_interaction_method_dto.dart' as wim;
 import 'injection.config.dart';
 
 final getIt = GetIt.instance;
@@ -68,47 +44,47 @@ abstract class HiveModule {
 
     Hive
       ..registerAdapter(TokenContractAssetDtoAdapter())
-      ..registerAdapter(AccountStatusDtoAdapter())
-      ..registerAdapter(MessageDtoAdapter())
-      ..registerAdapter(TokenIncomingTransferDtoAdapter())
-      ..registerAdapter(TokenOutgoingTransferDtoAdapter())
-      ..registerAdapter(TokenSwapBackDtoAdapter())
-      ..registerAdapter(IncomingTransferDtoAdapter())
-      ..registerAdapter(OutgoingTransferDtoAdapter())
-      ..registerAdapter(SwapBackDtoAdapter())
-      ..registerAdapter(AcceptDtoAdapter())
-      ..registerAdapter(TransferBouncedDtoAdapter())
-      ..registerAdapter(SwapBackBouncedDtoAdapter())
-      ..registerAdapter(TokenWalletTransactionWithDataDtoAdapter())
-      ..registerAdapter(TransactionDtoAdapter())
-      ..registerAdapter(TransactionIdDtoAdapter())
-      ..registerAdapter(OwnerWalletRecipientDtoAdapter())
-      ..registerAdapter(TokenWalletRecipientDtoAdapter())
-      ..registerAdapter(DePoolOnRoundCompleteNotificationDtoAdapter())
-      ..registerAdapter(DePoolReceiveAnswerNotificationDtoAdapter())
-      ..registerAdapter(EthEventStatusDtoAdapter())
-      ..registerAdapter(CommentAdapter())
+      ..registerAdapter(AccountStatusAdapter())
+      ..registerAdapter(MessageAdapter())
+      ..registerAdapter(TokenIncomingTransferAdapter())
       ..registerAdapter(TokenOutgoingTransferAdapter())
       ..registerAdapter(TokenSwapBackAdapter())
-      ..registerAdapter(MultisigConfirmTransactionDtoAdapter())
-      ..registerAdapter(MultisigSendTransactionDtoAdapter())
-      ..registerAdapter(MultisigSubmitTransactionDtoAdapter())
+      ..registerAdapter(IncomingTransferAdapter())
+      ..registerAdapter(OutgoingTransferAdapter())
+      ..registerAdapter(SwapBackAdapter())
+      ..registerAdapter(KnownPayloadCommentAdapter())
+      ..registerAdapter(KnownPayloadTokenSwapBackAdapter())
+      ..registerAdapter(AcceptAdapter())
+      ..registerAdapter(TransferBouncedAdapter())
+      ..registerAdapter(SwapBackBouncedAdapter())
+      ..registerAdapter(TokenWalletTransactionWithDataAdapter())
+      ..registerAdapter(TransactionAdapter())
+      ..registerAdapter(TransactionIdAdapter())
+      ..registerAdapter(OwnerWalletRecipientAdapter())
+      ..registerAdapter(TokenWalletRecipientAdapter())
+      ..registerAdapter(DePoolOnRoundCompleteNotificationAdapter())
+      ..registerAdapter(DePoolReceiveAnswerNotificationAdapter())
+      ..registerAdapter(EthEventStatusAdapter())
+      ..registerAdapter(MultisigConfirmTransactionAdapter())
+      ..registerAdapter(MultisigSendTransactionAdapter())
+      ..registerAdapter(MultisigSubmitTransactionAdapter())
       ..registerAdapter(SendAdapter())
       ..registerAdapter(SubmitAdapter())
       ..registerAdapter(ConfirmAdapter())
-      ..registerAdapter(TokenWalletDeployedNotificationDtoAdapter())
-      ..registerAdapter(TonEventStatusDtoAdapter())
-      ..registerAdapter(TonWalletTransactionWithDataDtoAdapter())
-      ..registerAdapter(CommentDtoAdapter())
-      ..registerAdapter(DePoolOnRoundCompleteDtoAdapter())
-      ..registerAdapter(DePoolReceiveAnswerDtoAdapter())
-      ..registerAdapter(TokenWalletDeployedDtoAdapter())
-      ..registerAdapter(EthEventStatusChangedDtoAdapter())
-      ..registerAdapter(TonEventStatusChangedDtoAdapter())
-      ..registerAdapter(WalletInteractionDtoAdapter())
-      ..registerAdapter(WalletInteractionInfoDtoAdapter())
-      ..registerAdapter(wim.WalletV3TransferAdapter())
-      ..registerAdapter(wim.MultisigAdapter())
+      ..registerAdapter(KnownPayloadTokenOutgoingTransferAdapter())
+      ..registerAdapter(TokenWalletDeployedNotificationAdapter())
+      ..registerAdapter(TonEventStatusAdapter())
+      ..registerAdapter(TonWalletTransactionWithDataAdapter())
+      ..registerAdapter(TransactionAdditionalInfoCommentAdapter())
+      ..registerAdapter(DePoolOnRoundCompleteAdapter())
+      ..registerAdapter(DePoolReceiveAnswerAdapter())
+      ..registerAdapter(TokenWalletDeployedAdapter())
+      ..registerAdapter(EthEventStatusChangedAdapter())
+      ..registerAdapter(TonEventStatusChangedAdapter())
+      ..registerAdapter(WalletInteractionAdapter())
+      ..registerAdapter(WalletInteractionInfoAdapter())
+      ..registerAdapter(WalletV3TransferAdapter())
+      ..registerAdapter(WalletTypeMultisigAdapter())
       ..registerAdapter(WalletContractTypeAdapter())
       ..registerAdapter(PermissionsAdapter())
       ..registerAdapter(AccountInteractionAdapter())
@@ -120,7 +96,7 @@ abstract class HiveModule {
       ..registerAdapter(GenTimingsAdapter())
       ..registerAdapter(ContractStateAdapter())
       ..registerAdapter(WalletV3Adapter())
-      ..registerAdapter(MultisigAdapter())
+      ..registerAdapter(WalletInteractionMethodMultisigAdapter())
       ..registerAdapter(MultisigTypeAdapter())
       ..registerAdapter(TokenWalletInfoAdapter())
       ..registerAdapter(AssetsListAdapter())

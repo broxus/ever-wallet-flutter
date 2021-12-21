@@ -5,6 +5,8 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../design/design.dart';
 import '../../../../design/widgets/account_icon.dart';
+import '../../../../design/widgets/custom_popup_item.dart';
+import '../../../../design/widgets/custom_popup_menu.dart';
 
 class BrowserAppBar extends StatefulWidget {
   final AssetsList? currentAccount;
@@ -159,111 +161,72 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
               ),
       );
 
-  Widget buildPopupAccountMenu() => Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          dividerTheme: const DividerThemeData(color: Colors.grey),
-        ),
-        child: PopupMenuButton<int>(
-          color: CrystalColor.grayBackground,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          icon: const Icon(
-            CupertinoIcons.ellipsis,
-            color: CrystalColor.accent,
-          ),
-          itemBuilder: (context) => [
-            if (widget.currentAccount != null) ...[
-              buildPopupAccountMenuItem(value: 0, currentAccount: widget.currentAccount!),
-              const PopupMenuDivider(),
-            ],
-            buildPopupMenuItem(
-              value: 1,
-              text: LocaleKeys.browser_reload.tr(),
-            ),
-            const PopupMenuDivider(),
-            buildPopupMenuItem(
-              value: 2,
-              text: LocaleKeys.browser_share.tr(),
-            ),
-          ],
-          onSelected: onItemSelected,
+  Widget buildPopupAccountMenu() => CustomPopupMenu(
+        items: [
+          accountItem(),
+          reloadItem(),
+          shareItem(),
+        ],
+        icon: const Icon(
+          CupertinoIcons.ellipsis,
+          color: CrystalColor.accent,
         ),
       );
 
-  PopupMenuEntry<int> buildPopupAccountMenuItem({
-    required int value,
-    required AssetsList currentAccount,
-  }) =>
-      PopupMenuItem<int>(
-        value: 0,
-        child: Row(
+  CustomPopupItem accountItem() => CustomPopupItem(
+        leading: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox.square(
-              dimension: 24,
-              child: AccountIcon(address: currentAccount.address),
+              dimension: 32,
+              child: AccountIcon(address: widget.currentAccount!.address),
             ),
-            const SizedBox(
-              width: 8,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  currentAccount.name,
-                  style: const TextStyle(color: Colors.black),
-                ),
-                Text(
-                  widget.currentAccount!.address.ellipseAddress(),
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-            const Spacer(),
-            const SizedBox(
+          ],
+        ),
+        title: Text(
+          widget.currentAccount!.name,
+          style: const TextStyle(fontSize: 16),
+        ),
+        subtitle: Text(
+          widget.currentAccount!.address.ellipseAddress(),
+          style: const TextStyle(
+            color: Colors.grey,
+          ),
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            SizedBox(
               height: 20,
               width: 20,
               child: Center(
                 child: Icon(
                   Icons.arrow_forward_ios,
                   color: CrystalColor.icon,
-                  size: 14,
+                  size: 18,
                 ),
               ),
             ),
           ],
         ),
+        onTap: widget.onAccountButtonTapped,
       );
 
-  PopupMenuEntry<int> buildPopupMenuItem({
-    required int value,
-    required String text,
-  }) =>
-      PopupMenuItem<int>(
-        value: value,
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: Colors.black,
-          ),
+  CustomPopupItem reloadItem() => CustomPopupItem(
+        title: Text(
+          LocaleKeys.browser_reload.tr(),
+          style: const TextStyle(fontSize: 16),
         ),
+        onTap: widget.onRefreshButtonTapped,
       );
 
-  void onItemSelected(int item) {
-    switch (item) {
-      case 0:
-        widget.onAccountButtonTapped();
-        break;
-      case 1:
-        widget.onRefreshButtonTapped();
-        break;
-      case 2:
-        widget.onShareButtonTapped();
-        break;
-    }
-  }
+  CustomPopupItem shareItem() => CustomPopupItem(
+        title: Text(
+          LocaleKeys.browser_share.tr(),
+          style: const TextStyle(fontSize: 16),
+        ),
+        onTap: widget.onShareButtonTapped,
+      );
 
   void selectTextOnFocus() {
     if (widget.addressFieldFocusedNotifier.value == true) {

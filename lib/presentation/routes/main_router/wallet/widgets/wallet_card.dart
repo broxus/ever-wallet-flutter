@@ -7,7 +7,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../../../../../domain/blocs/account/account_info_bloc.dart';
 import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../../../injection.dart';
-import '../../../../../domain/models/account.dart';
+import '../../../../../domain/blocs/external_accounts_bloc.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/animated_appearance.dart';
 import '../../../../design/widgets/wallet_card_selectable_field.dart';
@@ -15,13 +15,11 @@ import 'more_button.dart';
 
 class WalletCard extends StatefulWidget {
   final String address;
-  final bool isExternal;
   final String? publicKey;
 
   const WalletCard({
     Key? key,
     required this.address,
-    this.isExternal = false,
     this.publicKey,
   }) : super(key: key);
 
@@ -39,12 +37,7 @@ class _WalletCardState extends State<WalletCard> {
     tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
 
     accountInfoBloc = getIt.get<AccountInfoBloc>();
-    accountInfoBloc.add(
-      AccountInfoEvent.load(
-        address: widget.address,
-        isExternal: widget.isExternal,
-      ),
-    );
+    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
   }
 
   @override
@@ -52,12 +45,7 @@ class _WalletCardState extends State<WalletCard> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.address != widget.address) {
       tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
-      accountInfoBloc.add(
-        AccountInfoEvent.load(
-          address: widget.address,
-          isExternal: widget.isExternal,
-        ),
-      );
+      accountInfoBloc.add(AccountInfoEvent.load(widget.address));
     }
   }
 
@@ -121,7 +109,6 @@ class _WalletCardState extends State<WalletCard> {
                       right: 8,
                       child: MoreButton(
                         address: state.address,
-                        isExternal: widget.isExternal,
                         publicKey: widget.publicKey,
                       ),
                     )
@@ -153,14 +140,11 @@ class _WalletCardState extends State<WalletCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BlocBuilder<AccountInfoBloc, Account?>(
+            BlocBuilder<AccountInfoBloc, AssetsList?>(
               bloc: accountInfoBloc,
               builder: (context, state) => state != null
                   ? AutoSizeText(
-                      state.when(
-                        internal: (assetsList) => assetsList.name,
-                        external: (assetsList) => assetsList.name,
-                      ),
+                      state.name,
                       maxLines: 1,
                       maxFontSize: 16,
                       style: const TextStyle(
@@ -210,7 +194,11 @@ class _WalletCardState extends State<WalletCard> {
                     ),
             ),
             const Spacer(),
-            if (widget.isExternal) externalAccountLabel(),
+            BlocBuilder<ExternalAccountsBloc, List<String>>(
+              bloc: context.watch<ExternalAccountsBloc>(),
+              builder: (context, state) =>
+                  state.any((e) => e == widget.address) ? externalAccountLabel() : const SizedBox(),
+            ),
             const Spacer(flex: 2),
             BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,

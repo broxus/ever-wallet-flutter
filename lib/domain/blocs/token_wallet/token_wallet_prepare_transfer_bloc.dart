@@ -30,6 +30,7 @@ class TokenWalletPrepareTransferBloc extends Bloc<TokenWalletPrepareTransferEven
         final repackedDestination = repackAddress(event.destination);
 
         final message = await tokenWallet.prepareTransfer(
+          publicKey: event.publicKey,
           expiration: kDefaultMessageExpiration,
           destination: repackedDestination,
           tokens: event.amount,
@@ -51,6 +52,7 @@ class TokenWalletPrepareTransferEvent with _$TokenWalletPrepareTransferEvent {
   const factory TokenWalletPrepareTransferEvent.prepareTransfer({
     required String owner,
     required String rootTokenContract,
+    required String publicKey,
     required String destination,
     required String amount,
     required bool notifyReceiver,

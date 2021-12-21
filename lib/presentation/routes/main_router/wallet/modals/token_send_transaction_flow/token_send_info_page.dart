@@ -61,6 +61,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
       TokenWalletPrepareTransferEvent.prepareTransfer(
         owner: widget.owner,
         rootTokenContract: widget.rootTokenContract,
+        publicKey: widget.publicKey,
         destination: widget.destination,
         amount: widget.amount,
         notifyReceiver: widget.notifyReceiver,

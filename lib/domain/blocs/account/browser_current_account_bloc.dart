@@ -19,11 +19,31 @@ class BrowserCurrentAccountBloc extends Bloc<_Event, AssetsList?> {
   late final StreamSubscription _streamSubscription;
 
   BrowserCurrentAccountBloc(this._nekotonService) : super(null) {
-    _streamSubscription = Rx.combineLatest2<KeyStoreEntry?, List<AssetsList>, List<AssetsList>>(
+    _streamSubscription =
+        Rx.combineLatest3<KeyStoreEntry?, List<AssetsList>, Map<String, List<String>>, List<AssetsList>>(
       _nekotonService.currentKeyStream,
       _nekotonService.accountsStream,
-      (a, b) => b.where((e) => e.publicKey == a?.publicKey).toList(),
-    ).distinct((previous, next) => listEquals(previous, next)).listen((event) => add(_LocalEvent.update(event)));
+      _nekotonService.externalAccountsStream,
+      (a, b, c) {
+        final currentKey = a;
+
+        List<AssetsList> internalAccounts = [];
+        List<AssetsList> externalAccounts = [];
+
+        if (currentKey != null) {
+          final externalAddresses = c[a?.publicKey] ?? [];
+
+          internalAccounts = b.where((e) => e.publicKey == a?.publicKey).toList();
+          externalAccounts =
+              b.where((e) => e.publicKey != a?.publicKey && externalAddresses.any((el) => el == e.address)).toList();
+        }
+
+        return [
+          ...internalAccounts,
+          ...externalAccounts,
+        ];
+      },
+    ).listen((event) => add(_LocalEvent.update(event)));
   }
 
   @override
@@ -64,8 +84,5 @@ class _LocalEvent extends _Event with _$_LocalEvent {
 
 @freezed
 class BrowserCurrentAccountEvent extends _Event with _$BrowserCurrentAccountEvent {
-  const factory BrowserCurrentAccountEvent.setCurrent({
-    String? address,
-    @Default(false) bool isExternal,
-  }) = _SetCurrent;
+  const factory BrowserCurrentAccountEvent.setCurrent(String address) = _SetCurrent;
 }

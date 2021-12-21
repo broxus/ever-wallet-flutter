@@ -9,8 +9,8 @@ import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_bloc.
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_confirm_transaction_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
+import '../../../../../design/widgets/custom_back_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
-import '../../../../../design/widgets/modal_header.dart';
 import '../../../../../design/widgets/sectioned_card.dart';
 import '../../../../../design/widgets/sectioned_card_section.dart';
 import '../common/password_enter_page.dart';
@@ -82,45 +82,45 @@ class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
 
   Widget scaffold() => Scaffold(
         resizeToAvoidBottomInset: false,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Column(
+        appBar: AppBar(
+          leading: const CustomBackButton(),
+          title: const Text(
+            'Confirm transaction',
+            style: TextStyle(
+              color: Colors.black,
+            ),
+          ),
+        ),
+        body: body(),
+      );
+
+  Widget body() => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              SingleChildScrollView(
+                controller: ModalScrollController.of(context),
+                physics: const ClampingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    ModalHeader(
-                      text: 'Confirm transaction',
-                      onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: ModalScrollController.of(context),
-                        physics: const ClampingScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            card(),
-                            const SizedBox(height: 64),
-                          ],
-                        ),
-                      ),
-                    ),
+                    card(),
+                    const SizedBox(height: 64),
                   ],
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      submitButton(),
-                    ],
-                  ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    submitButton(),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );

@@ -1,7 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../dtos/token_wallet_transaction_with_data_dto.dart';
 import '../sources/local/hive_source.dart';
 
 @lazySingleton
@@ -14,13 +13,10 @@ class TokenWalletTransactionsRepository {
     required String owner,
     required String rootTokenContract,
   }) =>
-      _hiveSource
-          .getTokenWalletTransactions(
-            owner: owner,
-            rootTokenContract: rootTokenContract,
-          )
-          ?.map((e) => e.toModel())
-          .toList();
+      _hiveSource.getTokenWalletTransactions(
+        owner: owner,
+        rootTokenContract: rootTokenContract,
+      );
 
   Future<void> save({
     required List<TokenWalletTransactionWithData> tokenWalletTransactions,
@@ -28,7 +24,7 @@ class TokenWalletTransactionsRepository {
     required String rootTokenContract,
   }) =>
       _hiveSource.saveTokenWalletTransactions(
-        tokenWalletTransactions: tokenWalletTransactions.map((e) => e.toDto()).toList(),
+        tokenWalletTransactions: tokenWalletTransactions,
         owner: owner,
         rootTokenContract: rootTokenContract,
       );

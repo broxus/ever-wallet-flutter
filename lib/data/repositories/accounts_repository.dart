@@ -42,7 +42,7 @@ class AccountsRepository {
     required String address,
     required String rootTokenContract,
   }) async {
-    final assetsList = await _nekotonService.addTokenWallet(
+    final account = await _nekotonService.addTokenWallet(
       address: address,
       rootTokenContract: rootTokenContract,
     );
@@ -62,7 +62,7 @@ class AccountsRepository {
       );
     }
 
-    return assetsList;
+    return account;
   }
 
   Future<AssetsList> removeTokenWallet({

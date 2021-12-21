@@ -24,7 +24,6 @@ class TokenAssetInfoModalBody extends StatefulWidget {
   final String rootTokenContract;
   final String? svgIcon;
   final List<int>? gravatarIcon;
-  final bool isExternal;
 
   const TokenAssetInfoModalBody({
     Key? key,
@@ -32,7 +31,6 @@ class TokenAssetInfoModalBody extends StatefulWidget {
     required this.rootTokenContract,
     this.svgIcon,
     this.gravatarIcon,
-    this.isExternal = false,
   }) : super(key: key);
 
   @override

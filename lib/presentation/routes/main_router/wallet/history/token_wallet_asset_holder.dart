@@ -13,7 +13,6 @@ class TokenWalletAssetHolder extends StatefulWidget {
   final String rootTokenContract;
   final String? svgIcon;
   final List<int>? gravatarIcon;
-  final bool isExternal;
 
   const TokenWalletAssetHolder({
     Key? key,
@@ -21,7 +20,6 @@ class TokenWalletAssetHolder extends StatefulWidget {
     required this.rootTokenContract,
     this.svgIcon,
     this.gravatarIcon,
-    this.isExternal = false,
   }) : super(key: key);
 
   @override
@@ -79,7 +77,6 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
                     rootTokenContract: state.symbol.rootTokenContract,
                     svgIcon: widget.svgIcon,
                     gravatarIcon: widget.gravatarIcon,
-                    isExternal: widget.isExternal,
                   )
               : () {},
         ),

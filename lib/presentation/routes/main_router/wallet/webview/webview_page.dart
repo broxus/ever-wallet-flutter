@@ -11,9 +11,8 @@ import '../../../../../../../../domain/blocs/provider/approvals_bloc.dart';
 import '../../../../../../../../injection.dart';
 import '../../../../../domain/blocs/account/browser_accounts_bloc.dart';
 import '../../../../../domain/blocs/account/browser_current_account_bloc.dart';
-import '../../../../../domain/blocs/account/current_account_bloc.dart';
 import '../../../../design/design.dart';
-import 'account_selection.dart';
+import '../modals/browser_accounts_modal/show_browser_accounts_modal.dart';
 import 'approvals_listener.dart';
 import 'browser_app_bar.dart';
 import 'browser_web_view.dart';
@@ -206,14 +205,11 @@ class _WebviewPageState extends State<WebviewPage> {
         onUrlEntered: (String url) => controller?.parseAndLoadUrl(url),
       );
 
-  void onAccountButtonTapped(List<AssetsList> accounts) => AccountSelection.open(
+  void onAccountButtonTapped(List<AssetsList> accounts) => showBrowserAccountsModal(
         context: context,
         accounts: accounts,
-        onTap: (String address) => context.read<CurrentAccountBloc>().add(
-              CurrentAccountEvent.setCurrent(
-                address: address,
-              ),
-            ),
+        onTap: (String address) =>
+            context.read<BrowserCurrentAccountBloc>().add(BrowserCurrentAccountEvent.setCurrent(address)),
       );
 
   Future<void> onShareButtonTapped() async {

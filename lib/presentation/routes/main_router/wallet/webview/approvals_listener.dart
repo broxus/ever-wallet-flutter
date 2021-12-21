@@ -8,7 +8,9 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../domain/blocs/provider/approvals_bloc.dart';
 import '../../../../../../../../injection.dart';
-import 'approval_dialogs.dart';
+import '../modals/call_contract_method/show_call_contract_method.dart';
+import '../modals/request_permissions_modal/show_preferences_modal.dart';
+import '../modals/send_message/show_send_message.dart';
 
 class ApprovalsListener extends StatefulWidget {
   final String address;
@@ -57,35 +59,16 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
     List<Permission> permissions,
     Completer<Permissions> completer,
   ) async {
-    final result = await showRequestPermissionsDialog(
-      context,
+    final result = await showRequestPermissionsModal(
+      context: context,
       origin: origin,
       permissions: permissions,
       address: widget.address,
       publicKey: widget.publicKey,
     );
 
-    if (result) {
-      var grantedPermissions = const Permissions();
-
-      for (final permission in permissions) {
-        switch (permission) {
-          case Permission.tonClient:
-            grantedPermissions = grantedPermissions.copyWith(tonClient: true);
-            break;
-          case Permission.accountInteraction:
-            grantedPermissions = grantedPermissions.copyWith(
-              accountInteraction: AccountInteraction(
-                address: widget.address,
-                publicKey: widget.publicKey,
-                contractType: widget.walletType.toWalletType(),
-              ),
-            );
-            break;
-        }
-      }
-
-      completer.complete(grantedPermissions);
+    if (result != null) {
+      completer.complete(result);
     } else {
       completer.completeError(Exception('Not granted'));
     }
@@ -101,8 +84,8 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
     KnownPayload? knownPayload,
     Completer<String> completer,
   ) async {
-    final result = await showSendMessageDialog(
-      context,
+    final result = await showSendMessage(
+      context: context,
       origin: origin,
       sender: sender,
       publicKey: widget.publicKey,
@@ -127,11 +110,11 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
     FunctionCall payload,
     Completer<String> completer,
   ) async {
-    final result = await showCallContractMethodDialog(
-      context,
+    final result = await showCallContractMethod(
+      context: context,
       origin: origin,
-      selectedPublicKey: selectedPublicKey,
-      repackedRecipient: repackedRecipient,
+      publicKey: selectedPublicKey,
+      recipient: repackedRecipient,
       payload: payload,
     );
 

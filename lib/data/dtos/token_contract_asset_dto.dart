@@ -1,8 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
 
-import '../../domain/models/token_contract_asset.dart';
-
 part 'token_contract_asset_dto.freezed.dart';
 part 'token_contract_asset_dto.g.dart';
 
@@ -21,30 +19,4 @@ class TokenContractAssetDto with _$TokenContractAssetDto {
   }) = _TokenContractAssetDto;
 
   factory TokenContractAssetDto.fromJson(Map<String, dynamic> json) => _$TokenContractAssetDtoFromJson(json);
-}
-
-extension TokenContractAssetDtoToDomain on TokenContractAssetDto {
-  TokenContractAsset toModel() => TokenContractAsset(
-        name: name,
-        chainId: chainId,
-        symbol: symbol,
-        decimals: decimals,
-        address: address,
-        svgIcon: svgIcon,
-        gravatarIcon: gravatarIcon,
-        version: version,
-      );
-}
-
-extension TokenContractAssetFromDomain on TokenContractAsset {
-  TokenContractAssetDto toDto() => TokenContractAssetDto(
-        name: name,
-        chainId: chainId,
-        symbol: symbol,
-        decimals: decimals,
-        address: address,
-        svgIcon: svgIcon,
-        gravatarIcon: gravatarIcon,
-        version: version,
-      );
 }

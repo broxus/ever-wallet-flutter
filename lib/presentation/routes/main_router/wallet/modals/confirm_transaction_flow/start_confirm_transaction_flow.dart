@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../design/widgets/show_platform_modal_bottom_sheet.dart';
-import 'confirm_transaction_info_page.dart';
+import 'prepare_confirm_transaction_page.dart';
 
 Future<void> startConfirmTransactionFlow({
   required BuildContext context,
   required String address,
-  required String publicKey,
+  required List<String> publicKeys,
   required String transactionId,
   required String destination,
   required String amount,
@@ -17,10 +17,10 @@ Future<void> startConfirmTransactionFlow({
       builder: (context) => Navigator(
         initialRoute: '/',
         onGenerateRoute: (_) => MaterialPageRoute(
-          builder: (_) => ConfirmTransactionInfoPage(
+          builder: (_) => PrepareConfirmTransactionPage(
             modalContext: context,
             address: address,
-            publicKey: publicKey,
+            publicKeys: publicKeys,
             transactionId: transactionId,
             destination: destination,
             amount: amount,

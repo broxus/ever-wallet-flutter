@@ -146,7 +146,7 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
   Widget balance() => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
         bloc: infoBloc,
         builder: (context, state) => SectionedCardSection(
-          title: 'Account balance',
+          title: 'AssetsList balance',
           subtitle: '${state?.contractState.balance.toTokens().removeZeroes()} TON',
         ),
       );

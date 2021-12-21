@@ -31,6 +31,7 @@ class TonWalletPrepareTransferBloc extends Bloc<TonWalletPrepareTransferEvent, T
         final amountValue = int.parse(event.amount);
 
         final message = await tonWallet.prepareTransfer(
+          publicKey: event.publicKey,
           expiration: kDefaultMessageExpiration,
           destination: repackedDestination,
           amount: amountValue,
@@ -50,6 +51,7 @@ class TonWalletPrepareTransferBloc extends Bloc<TonWalletPrepareTransferEvent, T
 class TonWalletPrepareTransferEvent with _$TonWalletPrepareTransferEvent {
   const factory TonWalletPrepareTransferEvent.prepareTransfer({
     required String address,
+    required String publicKey,
     required String destination,
     required String amount,
     String? comment,

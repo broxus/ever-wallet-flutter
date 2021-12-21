@@ -1,16 +1,13 @@
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../services/nekoton_service.dart';
 import '../sources/local/hive_source.dart';
 
 @lazySingleton
 class TokenWalletInfoRepository {
-  final NekotonService _nekotonService;
   final HiveSource _hiveSource;
 
   TokenWalletInfoRepository(
-    this._nekotonService,
     this._hiveSource,
   );
 
