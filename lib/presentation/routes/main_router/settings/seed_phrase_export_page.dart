@@ -6,7 +6,6 @@ import '../../../design/widgets/crystal_flushbar.dart';
 import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_outlined_button.dart';
-import '../../../design/widgets/unfocusing_gesture_detector.dart';
 
 class SeedPhraseExportPage extends StatefulWidget {
   final List<String> phrase;
@@ -24,13 +23,11 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
-        child: UnfocusingGestureDetector(
-          child: Scaffold(
-            appBar: AppBar(
-              leading: const CustomBackButton(),
-            ),
-            body: body(),
+        child: Scaffold(
+          appBar: AppBar(
+            leading: const CustomBackButton(),
           ),
+          body: body(),
         ),
       );
 

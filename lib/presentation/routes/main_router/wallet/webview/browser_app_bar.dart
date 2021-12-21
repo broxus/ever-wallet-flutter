@@ -163,7 +163,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
 
   Widget buildPopupAccountMenu() => CustomPopupMenu(
         items: [
-          accountItem(),
+          if (widget.currentAccount != null) accountItem(),
           reloadItem(),
           shareItem(),
         ],

@@ -10,7 +10,6 @@ import '../../../design/widgets/crystal_title.dart';
 import '../../../design/widgets/custom_back_button.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 import '../../../design/widgets/custom_outlined_button.dart';
-import '../../../design/widgets/unfocusing_gesture_detector.dart';
 import '../../router.gr.dart';
 
 class SeedPhraseSavePage extends StatefulWidget {
@@ -31,13 +30,11 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
-        child: UnfocusingGestureDetector(
-          child: Scaffold(
-            appBar: AppBar(
-              leading: const CustomBackButton(),
-            ),
-            body: body(),
+        child: Scaffold(
+          appBar: AppBar(
+            leading: const CustomBackButton(),
           ),
+          body: body(),
         ),
       );
 

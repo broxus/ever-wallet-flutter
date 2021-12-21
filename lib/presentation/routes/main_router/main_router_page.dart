@@ -7,6 +7,7 @@ import '../../../../../../logger.dart';
 import '../../../domain/blocs/account/browser_current_account_bloc.dart';
 import '../../design/design.dart';
 import '../router.gr.dart';
+import 'show_add_account_dialog.dart';
 
 class MainRouterPage extends StatefulWidget {
   const MainRouterPage({Key? key}) : super(key: key);
@@ -92,7 +93,7 @@ class _MainRouterPageState extends State<MainRouterPage> {
     required TabsRouter router,
   }) async {
     if (index == 1 && context.read<BrowserCurrentAccountBloc>().state == null) {
-      showAddAccountDialog();
+      showAddAccountDialog(context: context);
       return;
     }
 
@@ -128,36 +129,6 @@ class _MainRouterPageState extends State<MainRouterPage> {
           color: CrystalColor.fontHeaderDark,
         ),
         label: label,
-      );
-
-  Future<void> showAddAccountDialog() => showPlatformDialog(
-        context: context,
-        builder: (BuildContext context) => PlatformAlertDialog(
-          title: const Text('Add account'),
-          content: const Text('To use the browser you need to add an account first'),
-          actions: [
-            PlatformDialogAction(
-              onPressed: () => context.router.pop(),
-              child: const Text('Cancel'),
-            ),
-            PlatformDialogAction(
-              onPressed: () async {
-                await context.router.pop();
-
-                final mainRouterRouter = context.router.root.innerRouterOf(MainRouterRoute.name);
-                final walletRouterRouter = mainRouterRouter?.innerRouterOf(WalletRouterRoute.name);
-
-                mainRouterRouter?.navigate(const WalletRouterRoute());
-                walletRouterRouter?.navigate(const NewAccountRouterRoute());
-              },
-              cupertino: (_, __) => CupertinoDialogActionData(
-                isDefaultAction: true,
-              ),
-              child: const Text('Add account'),
-            ),
-          ],
-        ),
-        barrierDismissible: true,
       );
 
   bool handleAndroidBackButton([bool? stopDefaultButtonEvent, RouteInfo? routeInfo]) {

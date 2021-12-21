@@ -13,6 +13,7 @@ Future<void> showEditCustodianLabelDialog({
 }) =>
     showPlatformDialog(
       context: context,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         final controller = TextEditingController(text: context.read<PublicKeysLabelsBloc>().state[publicKey]);
 
@@ -56,5 +57,4 @@ Future<void> showEditCustodianLabelDialog({
           ),
         );
       },
-      barrierDismissible: true,
     );

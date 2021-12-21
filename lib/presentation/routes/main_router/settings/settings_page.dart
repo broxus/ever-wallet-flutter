@@ -3,12 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../../../domain/blocs/application_flow_bloc.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../../domain/blocs/key/keys_bloc.dart';
 import '../../../../../../injection.dart';
@@ -22,8 +20,9 @@ import 'biometry_modal_body.dart';
 import 'change_seed_phrase_password_modal_body.dart';
 import 'derive_key_modal_body.dart';
 import 'export_seed_phrase_modal_body.dart';
+import 'key_removement_modal/show_key_removement_modal.dart';
+import 'logout_modal/show_logout_modal.dart';
 import 'name_new_key_modal_body.dart';
-import 'remove_seed_phrase_modal_body.dart';
 import 'rename_key_modal_body.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -186,28 +185,20 @@ class _SettingsPageState extends State<SettingsPage> {
               buildSectionAction(
                 title: LocaleKeys.settings_screen_sections_current_seed_preferences_remove_seed.tr(),
                 onTap: keys.isNotEmpty && currentKey != null
-                    ? () {
-                        showCrystalBottomSheet(
-                          context,
-                          title: RemoveSeedPhraseModalBody.title,
-                          body: RemoveSeedPhraseModalBody(publicKey: currentKey.publicKey),
-                          expand: false,
-                          avoidBottomInsets: false,
-                          hasTitleDivider: true,
-                        );
-                      }
+                    ? () => showKeyRemovementDialog(
+                          context: context,
+                          publicKey: currentKey.publicKey,
+                        )
                     : null,
               ),
               buildSectionAction(
                 title: LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
                 onTap: keys.isNotEmpty && currentKey != null
-                    ? () {
-                        showCrystalBottomSheet(
+                    ? () => showCrystalBottomSheet(
                           context,
                           title: LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
                           body: ChangeSeedPhrasePasswordModalBody(publicKey: currentKey.publicKey),
-                        );
-                      }
+                        )
                     : null,
               ),
               if (currentKey != null && currentKey.isNotLegacy && currentKey.publicKey == currentKey.masterKey)
@@ -252,64 +243,30 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           BlocBuilder<BiometryInfoBloc, BiometryInfoState>(
             bloc: context.watch<BiometryInfoBloc>(),
-            builder: (context, biometryInfoState) {
-              return biometryInfoState.isAvailable
-                  ? buildSection(
-                      title: LocaleKeys.settings_screen_sections_wallet_preferences_title.tr(),
-                      children: [
-                        buildSectionAction(
-                          title: LocaleKeys.biometry_title.tr(),
-                          onTap: () {
-                            showCrystalBottomSheet(
-                              context,
-                              title: LocaleKeys.biometry_title.tr(),
-                              body: const BiometryModalBody(),
-                            );
-                          },
-                        ),
-                      ],
-                    )
-                  : const SizedBox();
-            },
+            builder: (context, biometryInfoState) => biometryInfoState.isAvailable
+                ? buildSection(
+                    title: LocaleKeys.settings_screen_sections_wallet_preferences_title.tr(),
+                    children: [
+                      buildSectionAction(
+                        title: LocaleKeys.biometry_title.tr(),
+                        onTap: () {
+                          showCrystalBottomSheet(
+                            context,
+                            title: LocaleKeys.biometry_title.tr(),
+                            body: const BiometryModalBody(),
+                          );
+                        },
+                      ),
+                    ],
+                  )
+                : const SizedBox(),
           ),
           buildSection(
             children: [
               buildSectionAction(
                 isDestructive: true,
                 title: LocaleKeys.settings_screen_sections_logout_action.tr(),
-                onTap: () {
-                  showPlatformDialog(
-                    context: context,
-                    barrierDismissible: true,
-                    builder: (context) => Theme(
-                      data: ThemeData(),
-                      child: PlatformAlertDialog(
-                        title: Text(LocaleKeys.settings_screen_sections_logout_confirmation.tr()),
-                        actions: [
-                          PlatformDialogAction(
-                            onPressed: Navigator.of(context).pop,
-                            child: Text(LocaleKeys.actions_cancel.tr()),
-                          ),
-                          PlatformDialogAction(
-                            onPressed: () {
-                              context.read<ApplicationFlowBloc>().add(const ApplicationFlowEvent.logOut());
-                              Navigator.of(context).pop();
-                            },
-                            cupertino: (_, __) => CupertinoDialogActionData(
-                              isDestructiveAction: true,
-                            ),
-                            material: (_, __) => MaterialDialogActionData(
-                              style: TextButton.styleFrom(
-                                primary: CrystalColor.error,
-                              ),
-                            ),
-                            child: Text(LocaleKeys.settings_screen_sections_logout_action.tr()),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => showLogoutDialog(context: context),
               ),
             ],
           ),

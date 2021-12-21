@@ -111,17 +111,17 @@ class _WebviewPageState extends State<WebviewPage> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<BrowserCurrentAccountBloc, AssetsList?>(
-        bloc: context.watch<BrowserCurrentAccountBloc>(),
-        builder: (context, currentAccountState) => BlocConsumer<BrowserAccountsBloc, List<AssetsList>>(
-          bloc: context.watch<BrowserAccountsBloc>(),
-          listener: (context, accountsState) async {
-            final currentOrigin = await controller?.getCurrentOrigin();
+  Widget build(BuildContext context) => BlocConsumer<BrowserCurrentAccountBloc, AssetsList?>(
+        listener: (context, accountsState) async {
+          final currentOrigin = await controller?.getCurrentOrigin();
 
-            if (currentOrigin != null) {
-              await disconnect(origin: currentOrigin);
-            }
-          },
+          if (currentOrigin != null) {
+            await disconnect(origin: currentOrigin);
+          }
+        },
+        bloc: context.watch<BrowserCurrentAccountBloc>(),
+        builder: (context, currentAccountState) => BlocBuilder<BrowserAccountsBloc, List<AssetsList>>(
+          bloc: context.watch<BrowserAccountsBloc>(),
           builder: (context, accountsState) => buildApprovalsListener(
             accounts: accountsState,
             currentAccount: currentAccountState,
