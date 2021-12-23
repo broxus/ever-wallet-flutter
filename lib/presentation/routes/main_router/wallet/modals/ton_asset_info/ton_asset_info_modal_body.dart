@@ -174,46 +174,42 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         bloc: context.watch<KeysBloc>(),
         builder: (context, keysState) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
           bloc: infoBloc,
-          builder: (context, infoState) {
-            final publicKey = keysState.currentKey?.publicKey;
-            final isCustodian = infoState?.custodians?.any((e) => e == publicKey) ?? false;
-            final isDeployed = infoState?.contractState.isDeployed ?? false;
-
-            return Row(
-              children: [
-                Expanded(
-                  child: WalletActionButton(
-                    icon: Assets.images.iconReceive,
-                    title: LocaleKeys.actions_receive.tr(),
-                    onPressed: () => showReceiveModal(
-                      context: context,
-                      address: widget.address,
-                    ),
+          builder: (context, infoState) => Row(
+            children: [
+              Expanded(
+                child: WalletActionButton(
+                  icon: Assets.images.iconReceive,
+                  title: LocaleKeys.actions_receive.tr(),
+                  onPressed: () => showReceiveModal(
+                    context: context,
+                    address: widget.address,
                   ),
                 ),
-                if (publicKey != null && isCustodian) ...[
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: WalletActionButton(
-                      icon: isDeployed ? Assets.images.iconSend : Assets.images.iconDeploy,
-                      title: isDeployed ? LocaleKeys.actions_send.tr() : LocaleKeys.actions_deploy.tr(),
-                      onPressed: isDeployed
-                          ? () => startSendTransactionFlow(
-                                context: context,
-                                address: widget.address,
-                                publicKey: publicKey,
-                              )
-                          : () => startDeployWalletFlow(
-                                context: context,
-                                address: widget.address,
-                                publicKey: publicKey,
-                              ),
-                    ),
+              ),
+              if (keysState.currentKey != null && infoState != null) ...[
+                const SizedBox(width: 16),
+                Expanded(
+                  child: WalletActionButton(
+                    icon: infoState.contractState.isDeployed ? Assets.images.iconSend : Assets.images.iconDeploy,
+                    title: infoState.contractState.isDeployed
+                        ? LocaleKeys.actions_send.tr()
+                        : LocaleKeys.actions_deploy.tr(),
+                    onPressed: infoState.contractState.isDeployed
+                        ? () => startSendTransactionFlow(
+                              context: context,
+                              address: widget.address,
+                              publicKey: keysState.currentKey!.publicKey,
+                            )
+                        : () => startDeployWalletFlow(
+                              context: context,
+                              address: widget.address,
+                              publicKey: keysState.currentKey!.publicKey,
+                            ),
                   ),
-                ],
+                ),
               ],
-            );
-          },
+            ],
+          ),
         ),
       );
 
@@ -430,7 +426,9 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                     width: double.infinity,
                     height: double.infinity,
                     color: Colors.black12,
-                    child: PlatformCircularProgressIndicator(),
+                    child: Center(
+                      child: PlatformCircularProgressIndicator(),
+                    ),
                   ),
           ),
         ),

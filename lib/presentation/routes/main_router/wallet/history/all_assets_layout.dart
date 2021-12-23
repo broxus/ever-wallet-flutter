@@ -51,14 +51,14 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
           final list = [
             if (state.tonWalletAsset != null)
               TonWalletAssetHolder(
-                key: ValueKey(state.tonWalletAsset),
+                key: ValueKey(state.tonWalletAsset!.address),
                 address: state.tonWalletAsset!.address,
               ),
             if (state.tonWalletAsset != null)
               ...state.tokenContractAssets
                   .map(
                     (tokenContractAsset) => TokenWalletAssetHolder(
-                      key: ValueKey(tokenContractAsset),
+                      key: ValueKey(tokenContractAsset.address),
                       owner: state.tonWalletAsset!.address,
                       rootTokenContract: tokenContractAsset.address,
                       svgIcon: tokenContractAsset.svgIcon,

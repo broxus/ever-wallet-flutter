@@ -4,7 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../domain/blocs/token_wallet/token_wallet_send_bloc.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_send_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_title.dart';
@@ -37,15 +37,14 @@ class TokenSendResultPage extends StatefulWidget {
 }
 
 class _NewSelectWalletTypePageState extends State<TokenSendResultPage> {
-  final bloc = getIt.get<TokenWalletSendBloc>();
+  final bloc = getIt.get<TonWalletSendBloc>();
 
   @override
   void initState() {
     super.initState();
     bloc.add(
-      TokenWalletSendEvent.send(
-        owner: widget.owner,
-        rootTokenContract: widget.rootTokenContract,
+      TonWalletSendEvent.send(
+        address: widget.owner,
         message: widget.message,
         publicKey: widget.publicKey,
         password: widget.password,
@@ -96,7 +95,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendResultPage> {
         ),
       );
 
-  Widget title() => BlocBuilder<TokenWalletSendBloc, TokenWalletSendState>(
+  Widget title() => BlocBuilder<TonWalletSendBloc, TonWalletSendState>(
         bloc: bloc,
         builder: (context, state) => state.when(
           initial: () => CrystalTitle(
@@ -111,7 +110,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendResultPage> {
         ),
       );
 
-  Widget card() => BlocBuilder<TokenWalletSendBloc, TokenWalletSendState>(
+  Widget card() => BlocBuilder<TonWalletSendBloc, TonWalletSendState>(
         bloc: bloc,
         builder: (context, state) => state.when(
           initial: () => animation(
@@ -131,7 +130,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendResultPage> {
         height: 180,
       );
 
-  Widget submitButton() => BlocBuilder<TokenWalletSendBloc, TokenWalletSendState>(
+  Widget submitButton() => BlocBuilder<TonWalletSendBloc, TonWalletSendState>(
         bloc: bloc,
         builder: (context, state) => CustomElevatedButton(
           onPressed: state.maybeWhen(

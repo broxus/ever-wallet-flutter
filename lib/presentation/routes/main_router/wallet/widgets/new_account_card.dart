@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../domain/blocs/key/keys_bloc.dart';
 import '../../../../design/design.dart';
-import '../../../router.gr.dart';
+import '../modals/add_account_flow/start_add_account_flow.dart';
 
 class NewAccountCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: () => context.router.push(const NewAccountRouterRoute()),
+        onTap: () {
+          final publicKey = context.read<KeysBloc>().state.currentKey?.publicKey;
+
+          if (publicKey != null) {
+            startAddAccountFlow(
+              context: context,
+              publicKey: publicKey,
+            );
+          }
+        },
         child: Container(
           height: 200,
           decoration: BoxDecoration(

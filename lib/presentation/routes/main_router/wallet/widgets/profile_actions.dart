@@ -94,12 +94,11 @@ class _ProfileActionsState extends State<ProfileActions> {
             builder: (context, keysState) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
               bloc: tonWalletInfoBloc,
               builder: (context, infoState) {
-                final publicKey = keysState.currentKey?.publicKey;
-                final isCustodian = infoState?.custodians?.any((e) => e == publicKey) ?? false;
-                final requiresSeparateDeploy = infoState?.details.requiresSeparateDeploy ?? false;
-                final isDeployed = infoState?.contractState.isDeployed ?? false;
+                if (keysState.currentKey != null && infoState != null) {
+                  final publicKey = keysState.currentKey!.publicKey;
+                  final requiresSeparateDeploy = infoState.details.requiresSeparateDeploy;
+                  final isDeployed = infoState.contractState.isDeployed;
 
-                if (publicKey != null && isCustodian) {
                   if (!requiresSeparateDeploy || isDeployed) {
                     return WalletButton(
                       onTap: () => startSendTransactionFlow(

@@ -28,22 +28,26 @@ class KeysRepository {
     late final CreateKeyInput createKeyInput;
 
     if (isLegacy) {
-      createKeyInput = EncryptedKeyCreateInput(
-        name: name,
-        phrase: phrase.join(' '),
-        mnemonicType: mnemonicType,
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+      createKeyInput = CreateKeyInput.encryptedKeyCreateInput(
+        EncryptedKeyCreateInput(
+          name: name,
+          phrase: phrase.join(' '),
+          mnemonicType: mnemonicType,
+          password: Password.explicit(
+            password: password,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
         ),
       );
     } else {
-      createKeyInput = DerivedKeyCreateInput.import(
-        keyName: name,
-        phrase: phrase.join(' '),
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+      createKeyInput = CreateKeyInput.derivedKeyCreateInput(
+        DerivedKeyCreateInput.import(
+          keyName: name,
+          phrase: phrase.join(' '),
+          password: Password.explicit(
+            password: password,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
         ),
       );
     }
@@ -66,13 +70,15 @@ class KeysRepository {
       final id = derivedKeys.isNotEmpty ? derivedKeys.map((e) => e.nextAccountId).reduce(max) : 1;
       final masterKey = key.publicKey;
 
-      final createKeyInput = DerivedKeyCreateInput.derive(
-        keyName: name,
-        masterKey: masterKey,
-        accountId: id,
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+      final createKeyInput = CreateKeyInput.derivedKeyCreateInput(
+        DerivedKeyCreateInput.derive(
+          keyName: name,
+          masterKey: masterKey,
+          accountId: id,
+          password: Password.explicit(
+            password: password,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
         ),
       );
 
@@ -114,32 +120,33 @@ class KeysRepository {
     late final ExportKeyInput exportKeyInput;
 
     if (key.isLegacy) {
-      exportKeyInput = EncryptedKeyPassword(
-        publicKey: key.publicKey,
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+      exportKeyInput = ExportKeyInput.encryptedKeyPassword(
+        EncryptedKeyPassword(
+          publicKey: key.publicKey,
+          password: Password.explicit(
+            password: password,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
         ),
       );
     } else {
-      exportKeyInput = DerivedKeyExportParams(
-        masterKey: key.masterKey,
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+      exportKeyInput = ExportKeyInput.derivedKeyExportParams(
+        DerivedKeyExportParams(
+          masterKey: key.masterKey,
+          password: Password.explicit(
+            password: password,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
         ),
       );
     }
 
     final exportKeyOutput = await _nekotonService.exportKey(exportKeyInput);
 
-    if (exportKeyOutput is EncryptedKeyExportOutput) {
-      return exportKeyOutput.phrase.split(' ');
-    } else if (exportKeyOutput is DerivedKeyExportOutput) {
-      return exportKeyOutput.phrase.split(' ');
-    } else {
-      throw UnknownSignerException();
-    }
+    return exportKeyOutput.when(
+      derivedKeyExportOutput: (derivedKeyExportOutput) => derivedKeyExportOutput.phrase.split(' '),
+      encryptedKeyExportOutput: (encryptedKeyExportOutput) => encryptedKeyExportOutput.phrase.split(' '),
+    );
   }
 
   Future<bool> checkKeyPassword({
@@ -155,20 +162,24 @@ class KeysRepository {
     late final SignInput signInput;
 
     if (key.isLegacy) {
-      signInput = EncryptedKeyPassword(
-        publicKey: key.publicKey,
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+      signInput = SignInput.encryptedKeyPassword(
+        EncryptedKeyPassword(
+          publicKey: key.publicKey,
+          password: Password.explicit(
+            password: password,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
         ),
       );
     } else {
-      signInput = DerivedKeySignParams.byAccountId(
-        masterKey: key.masterKey,
-        accountId: key.accountId,
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+      signInput = SignInput.derivedKeySignParams(
+        DerivedKeySignParams.byAccountId(
+          masterKey: key.masterKey,
+          accountId: key.accountId,
+          password: Password.explicit(
+            password: password,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
         ),
       );
     }
@@ -192,27 +203,31 @@ class KeysRepository {
     late final UpdateKeyInput updateKeyInput;
 
     if (key.isLegacy) {
-      updateKeyInput = EncryptedKeyUpdateParams.changePassword(
-        publicKey: key.publicKey,
-        oldPassword: Password.explicit(
-          password: oldPassword,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
-        ),
-        newPassword: Password.explicit(
-          password: newPassword,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+      updateKeyInput = UpdateKeyInput.encryptedKeyUpdateParams(
+        EncryptedKeyUpdateParams.changePassword(
+          publicKey: key.publicKey,
+          oldPassword: Password.explicit(
+            password: oldPassword,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
+          newPassword: Password.explicit(
+            password: newPassword,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
         ),
       );
     } else {
-      updateKeyInput = DerivedKeyUpdateParams.changePassword(
-        masterKey: key.masterKey,
-        oldPassword: Password.explicit(
-          password: oldPassword,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
-        ),
-        newPassword: Password.explicit(
-          password: newPassword,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+      updateKeyInput = UpdateKeyInput.derivedKeyUpdateParams(
+        DerivedKeyUpdateParams.changePassword(
+          masterKey: key.masterKey,
+          oldPassword: Password.explicit(
+            password: oldPassword,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
+          newPassword: Password.explicit(
+            password: newPassword,
+            cacheBehavior: const PasswordCacheBehavior.remove(),
+          ),
         ),
       );
     }
@@ -240,15 +255,19 @@ class KeysRepository {
     late final UpdateKeyInput updateKeyInput;
 
     if (key.isLegacy) {
-      updateKeyInput = EncryptedKeyUpdateParams.rename(
-        publicKey: key.publicKey,
-        name: name,
+      updateKeyInput = UpdateKeyInput.encryptedKeyUpdateParams(
+        EncryptedKeyUpdateParams.rename(
+          publicKey: key.publicKey,
+          name: name,
+        ),
       );
     } else {
-      updateKeyInput = DerivedKeyUpdateParams.renameKey(
-        masterKey: key.masterKey,
-        publicKey: key.publicKey,
-        name: name,
+      updateKeyInput = UpdateKeyInput.derivedKeyUpdateParams(
+        DerivedKeyUpdateParams.renameKey(
+          masterKey: key.masterKey,
+          publicKey: key.publicKey,
+          name: name,
+        ),
       );
     }
 

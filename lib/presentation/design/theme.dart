@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -6,7 +7,8 @@ import 'design.dart';
 
 const applicationTitle = 'TON Crystal';
 
-ThemeData applicationTheme(BuildContext context) => ThemeData(
+ThemeData materialTheme(BuildContext context) => ThemeData(
+      primaryColor: CrystalColor.accent,
       fontFamily: FontFamily.pt,
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -17,6 +19,14 @@ ThemeData applicationTheme(BuildContext context) => ThemeData(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
       splashColor: isCupertino(context) ? Colors.transparent : null,
+      scaffoldBackgroundColor: Colors.white,
+    );
+
+CupertinoThemeData cupertinoTheme(BuildContext context) => const CupertinoThemeData(
+      primaryColor: CrystalColor.accent,
+      textTheme: CupertinoTextThemeData(
+        primaryColor: CrystalColor.accent,
+      ),
       scaffoldBackgroundColor: Colors.white,
     );
 

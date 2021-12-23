@@ -255,7 +255,9 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
                     width: double.infinity,
                     height: double.infinity,
                     color: Colors.black12,
-                    child: PlatformCircularProgressIndicator(),
+                    child: Center(
+                      child: PlatformCircularProgressIndicator(),
+                    ),
                   ),
           ),
         ),

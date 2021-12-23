@@ -10,7 +10,6 @@ import 'wallet_card.dart';
 class ProfileCarousel extends StatefulWidget {
   final bool loading;
   final int initialIndex;
-  final String? publicKey;
   final List<AssetsList> accounts;
   final VoidCallback? onScrollStart;
   final void Function(int)? onPageChanged;
@@ -18,7 +17,6 @@ class ProfileCarousel extends StatefulWidget {
 
   const ProfileCarousel({
     Key? key,
-    required this.publicKey,
     required this.accounts,
     this.loading = false,
     this.initialIndex = 0,

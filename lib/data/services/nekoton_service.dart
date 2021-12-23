@@ -59,7 +59,7 @@ class NekotonService {
 
   KeyStoreEntry? get currentKey => _nekoton.keystoreController.currentKey;
 
-  set currentKey(KeyStoreEntry? currentKey) => _nekoton.keystoreController.currentKey = currentKey;
+  Future<void> setCurrentKey(KeyStoreEntry? currentKey) => _nekoton.keystoreController.setCurrentKey(currentKey);
 
   String get networkGroup => _nekoton.connectionController.transport.connectionData.group;
 
@@ -72,6 +72,15 @@ class NekotonService {
       _nekoton.keystoreController.exportKey(exportKeyInput);
 
   Future<bool> checkKeyPassword(SignInput signInput) => _nekoton.keystoreController.checkKeyPassword(signInput);
+
+  Future<SignInput> getSignInput({
+    required String publicKey,
+    required String password,
+  }) =>
+      _nekoton.keystoreController.getSignInput(
+        publicKey: publicKey,
+        password: password,
+      );
 
   Future<KeyStoreEntry?> removeKey(String publicKey) => _nekoton.keystoreController.removeKey(publicKey);
 
@@ -124,10 +133,12 @@ class NekotonService {
   Future<void> addExternalAccount({
     required String publicKey,
     required String address,
+    String? name,
   }) =>
       _nekoton.externalAccountsController.addExternalAccount(
         publicKey: publicKey,
         address: address,
+        name: name,
       );
 
   Future<void> removeExternalAccount({
@@ -158,7 +169,7 @@ class NekotonService {
 
   Future<void> _initialize() async {
     _nekoton = await Nekoton.getInstance(
-      logger: logger,
+      appLogger: logger,
     );
   }
 }

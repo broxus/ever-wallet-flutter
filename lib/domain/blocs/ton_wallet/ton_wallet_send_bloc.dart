@@ -26,10 +26,14 @@ class TonWalletSendBloc extends Bloc<TonWalletSendEvent, TonWalletSendState> {
           throw TonWalletNotFoundException();
         }
 
-        await tonWallet.send(
-          message: event.message,
+        final signInput = await _nekotonService.getSignInput(
           publicKey: event.publicKey,
           password: event.password,
+        );
+
+        await tonWallet.send(
+          message: event.message,
+          signInput: signInput,
         );
 
         yield const TonWalletSendState.success();

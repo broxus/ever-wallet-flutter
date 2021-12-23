@@ -32,10 +32,11 @@ class TonWalletPrepareTransferBloc extends Bloc<TonWalletPrepareTransferEvent, T
 
         final message = await tonWallet.prepareTransfer(
           publicKey: event.publicKey,
-          expiration: kDefaultMessageExpiration,
           destination: repackedDestination,
           amount: amountValue,
-          body: event.comment,
+          body: event.body,
+          isComment: event.isComment,
+          expiration: kDefaultMessageExpiration,
         );
 
         yield TonWalletPrepareTransferState.success(message);
@@ -54,7 +55,8 @@ class TonWalletPrepareTransferEvent with _$TonWalletPrepareTransferEvent {
     required String publicKey,
     required String destination,
     required String amount,
-    String? comment,
+    String? body,
+    @Default(true) bool isComment,
   }) = _PrepareTransfer;
 }
 

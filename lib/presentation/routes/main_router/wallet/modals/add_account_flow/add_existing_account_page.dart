@@ -1,31 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../data/repositories/external_accounts_repository.dart';
-import '../../../../../injection.dart';
-import '../../../../../logger.dart';
-import '../../../../design/design.dart';
-import '../../../../design/widgets/crystal_flushbar.dart';
-import '../../../../design/widgets/custom_elevated_button.dart';
-import '../../../../design/widgets/custom_text_form_field.dart';
-import '../../../../design/widgets/modal_header.dart';
-import '../../../../design/widgets/text_field_clear_button.dart';
+import '../../../../../../data/repositories/external_accounts_repository.dart';
+import '../../../../../../injection.dart';
+import '../../../../../../logger.dart';
+import '../../../../../design/design.dart';
+import '../../../../../design/widgets/crystal_flushbar.dart';
+import '../../../../../design/widgets/crystal_subtitle.dart';
+import '../../../../../design/widgets/custom_back_button.dart';
+import '../../../../../design/widgets/custom_elevated_button.dart';
+import '../../../../../design/widgets/custom_text_form_field.dart';
+import '../../../../../design/widgets/text_field_clear_button.dart';
+import '../../../../../design/widgets/unfocusing_gesture_detector.dart';
 
-class AddExternalAccountModalBody extends StatefulWidget {
-  final BuildContext ctx;
+class AddExistingAccountPage extends StatefulWidget {
+  final BuildContext modalContext;
   final String publicKey;
 
-  const AddExternalAccountModalBody({
+  const AddExistingAccountPage({
     Key? key,
-    required this.ctx,
+    required this.modalContext,
     required this.publicKey,
   }) : super(key: key);
 
   @override
-  State<AddExternalAccountModalBody> createState() => _AddExternalAccountModalBodyState();
+  _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
 }
 
-class _AddExternalAccountModalBodyState extends State<AddExternalAccountModalBody> {
+class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
   final formKey = GlobalKey<FormState>();
   final addressController = TextEditingController();
   final nameController = TextEditingController();
@@ -44,28 +47,52 @@ class _AddExternalAccountModalBodyState extends State<AddExternalAccountModalBod
   }
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        height: MediaQuery.of(context).size.longestSide / 1.75,
-        child: Material(
-          color: Colors.white,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  const ModalHeader(text: 'Add external account'),
-                  const SizedBox(height: 16),
-                  fields(),
-                  const Spacer(),
-                  submitButton(),
-                ],
+  Widget build(BuildContext context) => UnfocusingGestureDetector(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            leading: const CustomBackButton(),
+            title: const Text(
+              'Add existing account',
+              style: TextStyle(
+                color: Colors.black,
               ),
             ),
+          ),
+          body: body(),
+        ),
+      );
+
+  Widget body() => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: ModalScrollController.of(context),
+                  physics: const ClampingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      subtitle(),
+                      const SizedBox(height: 16),
+                      form(),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              submitButton(),
+            ],
           ),
         ),
       );
 
-  Widget fields() => Form(
+  Widget subtitle() => const CrystalSubtitle(
+        text: 'You can add only those addresses where your public key is a custodian.',
+      );
+
+  Widget form() => Form(
         key: formKey,
         onChanged: onChanged,
         child: Column(
@@ -156,25 +183,30 @@ class _AddExternalAccountModalBodyState extends State<AddExternalAccountModalBod
   Widget submitButton() => ValueListenableBuilder<String?>(
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
-          onPressed: value != null ? null : onSubmitButtonPressed,
+          onPressed: value != null ? null : onPressed,
           text: LocaleKeys.actions_confirm.tr(),
         ),
       );
 
-  Future<void> onSubmitButtonPressed() async {
+  Future<void> onPressed() async {
+    final name = nameController.text.trim().isNotEmpty ? nameController.text.trim() : null;
+
+    Navigator.of(widget.modalContext).pop();
+
     try {
       await getIt.get<ExternalAccountsRepository>().addExternalAccount(
             address: addressController.text,
-            name: nameController.text.trim().isNotEmpty ? nameController.text.trim() : null,
+            name: name,
           );
-    } catch (err, st) {
-      logger.e(err, err, st);
+    } catch (err) {
+      logger.e(err, err);
 
-      showErrorCrystalFlushbar(widget.ctx, message: err.toString());
+      if (!mounted) return;
+
+      showErrorCrystalFlushbar(
+        widget.modalContext,
+        message: err.toString(),
+      );
     }
-
-    if (!mounted) return;
-
-    Navigator.of(context).pop();
   }
 }

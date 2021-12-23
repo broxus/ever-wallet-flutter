@@ -15,7 +15,6 @@ import '../../../../data/repositories/keys_repository.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_bottom_sheet.dart';
 import '../../router.gr.dart';
-import 'add_external_account_modal/show_add_external_account_modal.dart';
 import 'biometry_modal_body.dart';
 import 'change_seed_phrase_password_modal_body.dart';
 import 'derive_key_modal_body.dart';
@@ -135,15 +134,6 @@ class _SettingsPageState extends State<SettingsPage> {
           buildSection(
             title: LocaleKeys.settings_screen_sections_current_seed_preferences_title.tr(),
             children: [
-              buildSectionAction(
-                title: 'Add external account',
-                onTap: keys.isNotEmpty && currentKey != null
-                    ? () => showAddExternalAccountModal(
-                          context: context,
-                          publicKey: currentKey.publicKey,
-                        )
-                    : null,
-              ),
               buildSectionAction(
                 title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed.tr(),
                 onTap: keys.isNotEmpty && currentKey != null

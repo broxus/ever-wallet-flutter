@@ -30,17 +30,6 @@ class TonWalletExpiredTransactionsBloc extends Bloc<_Event, List<PendingTransact
 
   @override
   Stream<List<PendingTransaction>> mapEventToState(_Event event) async* {
-    // yield [
-    //   PendingTransaction(
-    //     messageHash: '0xDEAFBEAF',
-    //     bodyHash: '0xDEAFBEAF',
-    //     src: '0:9c1811c276eec34c6d690cfacf8ceb8f4beb50bb5df73c2b1b2be633c03a19cc',
-    //     expireAt: (DateTime.now().millisecondsSinceEpoch + 100000000) ~/ 1000,
-    //   ),
-    // ];
-
-    // return;
-
     try {
       if (event is _Load) {
         yield const [];

@@ -55,7 +55,7 @@ class KeysBloc extends Bloc<_Event, KeysState> {
       } else if (event is _SetCurrent) {
         final key = _nekotonService.keys.firstWhere((e) => e.publicKey == event.publicKey);
 
-        _nekotonService.currentKey = key;
+        _nekotonService.setCurrentKey(key);
 
         yield KeysState(
           keys: state.keys,

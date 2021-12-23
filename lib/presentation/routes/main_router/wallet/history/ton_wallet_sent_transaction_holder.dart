@@ -33,10 +33,6 @@ class TonWalletSentTransactionHolder extends StatelessWidget {
 
     return InkWell(
       onTap: () => {},
-      // showTonWalletTransactionInfo(
-      //   context:  context,
-      //   transactionWithData: transactionWithData,
-      // ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(

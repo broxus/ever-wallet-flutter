@@ -24,62 +24,64 @@ class WalletBody extends StatelessWidget {
         bottom: false,
         child: Padding(
           padding: const EdgeInsets.only(top: 14),
-          child: BlocBuilder<CurrentAccountBloc, AssetsList?>(
-            builder: (context, currentAccountState) => BlocBuilder<AccountsBloc, List<AssetsList>>(
-              bloc: context.watch<AccountsBloc>(),
-              builder: (context, accountsState) => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          LocaleKeys.wallet_screen_title.tr(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,
-                            letterSpacing: 0.25,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const ConnectionButton(),
-                      ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      LocaleKeys.wallet_screen_title.tr(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        letterSpacing: 0.25,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  AnimatedAppearance(
-                    duration: const Duration(milliseconds: 250),
-                    offset: const Offset(1, 0),
-                    child: ProfileCarousel(
-                      publicKey: currentAccountState?.publicKey,
-                      accounts: accountsState,
-                      onPageChanged: (i) {
-                        if (i < accountsState.length) {
-                          context
-                              .read<CurrentAccountBloc>()
-                              .add(CurrentAccountEvent.setCurrent(accountsState[i].address));
-                        } else {
-                          modalController.hide();
-                          context.read<CurrentAccountBloc>().add(const CurrentAccountEvent.setCurrent());
-                        }
-                      },
-                      onPageSelected: (i) {
-                        if (i == accountsState.length) {
-                          modalController.hide();
-                        } else {
-                          modalController.show();
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (currentAccountState != null) ProfileActions(address: currentAccountState.address),
-                  const SizedBox(height: 20),
-                ],
+                    const ConnectionButton(),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(height: 16),
+              AnimatedAppearance(
+                duration: const Duration(milliseconds: 250),
+                offset: const Offset(1, 0),
+                child: BlocBuilder<AccountsBloc, List<AssetsList>>(
+                  bloc: context.watch<AccountsBloc>(),
+                  builder: (context, accountsState) => ProfileCarousel(
+                    accounts: accountsState,
+                    onPageChanged: (i) {
+                      if (i < accountsState.length) {
+                        context
+                            .read<CurrentAccountBloc>()
+                            .add(CurrentAccountEvent.setCurrent(accountsState[i].address));
+                      } else {
+                        modalController.hide();
+                        context.read<CurrentAccountBloc>().add(const CurrentAccountEvent.setCurrent());
+                      }
+                    },
+                    onPageSelected: (i) {
+                      if (i == accountsState.length) {
+                        modalController.hide();
+                      } else {
+                        modalController.show();
+                      }
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              BlocBuilder<CurrentAccountBloc, AssetsList?>(
+                bloc: context.watch<CurrentAccountBloc>(),
+                builder: (context, currentAccountState) => currentAccountState != null
+                    ? ProfileActions(address: currentAccountState.address)
+                    : const SizedBox(),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       );

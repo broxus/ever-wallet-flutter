@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
@@ -18,16 +19,19 @@ class MaterialApplication extends StatelessWidget {
         child: Portal(
           child: MaterialApp.router(
             title: applicationTitle,
-            theme: applicationTheme(context),
+            theme: materialTheme(context),
             debugShowCheckedModeBanner: false,
             supportedLocales: context.supportedLocales,
             locale: context.locale,
             localizationsDelegates: context.localizationDelegates,
             routerDelegate: appRouter.delegate(),
             routeInformationParser: appRouter.defaultRouteParser(),
-            builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-              child: child ?? const SizedBox(),
+            builder: (context, child) => CupertinoTheme(
+              data: cupertinoTheme(context),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: child ?? const SizedBox(),
+              ),
             ),
           ),
         ),

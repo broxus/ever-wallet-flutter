@@ -31,55 +31,6 @@ class TonWalletSentTransactionsBloc extends Bloc<_Event, List<Tuple2<PendingTran
 
   @override
   Stream<List<Tuple2<PendingTransaction, Transaction?>>> mapEventToState(_Event event) async* {
-    // yield [
-    //   Tuple2(
-    //     PendingTransaction(
-    //       messageHash: '0xDEAFBEAF',
-    //       bodyHash: '0xDEAFBEAF',
-    //       src: '0:9c1811c276eec34c6d690cfacf8ceb8f4beb50bb5df73c2b1b2be633c03a19cc',
-    //       expireAt: (DateTime.now().millisecondsSinceEpoch + 1000000000) ~/ 1000,
-    //     ),
-    //     Transaction(
-    //       id: const TransactionId(
-    //         lt: 'lt',
-    //         hash: 'hash',
-    //       ),
-    //       prevTransactionId: const TransactionId(
-    //         lt: 'lt',
-    //         hash: 'hash',
-    //       ),
-    //       createdAt: (DateTime.now().millisecondsSinceEpoch + 1000000000) ~/ 1000,
-    //       aborted: false,
-    //       exitCode: 0,
-    //       origStatus: AccountStatus.active,
-    //       endStatus: AccountStatus.active,
-    //       totalFees: '100099999999',
-    //       inMessage: const Message(
-    //         src: '0:9c1811c276eec34c6d690cfacf8ceb8f4beb50bb5df73c2b1b2be633c03a19cc',
-    //         dst: '0:9c1811c276eec34c6d690cfacf8ceb8f4beb50bb5df73c2b1b2be633c03a19cc',
-    //         value: '1000000000000',
-    //         bounce: true,
-    //         bounced: false,
-    //         body: '0xDEAFBEAF',
-    //         bodyHash: '0xDEAFBEAF',
-    //       ),
-    //       outMessages: [
-    //         const Message(
-    //           src: '0:9c1811c276eec34c6d690cfacf8ceb8f4beb50bb5df73c2b1b2be633c03a19cc',
-    //           dst: '0:9c1811c276eec34c6d690cfacf8ceb8f4beb50bb5df73c2b1b2be633c03a19cc',
-    //           value: '1000000000000',
-    //           bounce: true,
-    //           bounced: false,
-    //           body: '0xDEAFBEAF',
-    //           bodyHash: '0xDEAFBEAF',
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // ];
-
-    // return;
-
     try {
       if (event is _Load) {
         yield const [];
