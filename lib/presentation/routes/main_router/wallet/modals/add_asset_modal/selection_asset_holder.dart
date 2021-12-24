@@ -3,7 +3,8 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../../../../../../data/dtos/token_contract_asset_dto.dart';
 import '../../../../../design/design.dart';
-import '../../../../../design/widgets/asset_icon.dart';
+import '../../../../../design/widgets/address_generated_icon.dart';
+import '../../../../../design/widgets/token_asset_icon.dart';
 
 class SelectionAssetHolder extends StatelessWidget {
   final TokenContractAssetDto asset;
@@ -50,13 +51,13 @@ class SelectionAssetHolder extends StatelessWidget {
         ),
       );
 
-  Widget icon() => SizedBox.square(
-        dimension: 36,
-        child: AssetIcon(
-          svgIcon: asset.svgIcon,
-          gravatarIcon: asset.gravatarIcon,
-        ),
-      );
+  Widget icon() => asset.icon != null
+      ? TokenAssetIcon(
+          icon: asset.icon!,
+        )
+      : AddressGeneratedIcon(
+          address: asset.address,
+        );
 
   Widget name() => SizedBox(
         height: 24,

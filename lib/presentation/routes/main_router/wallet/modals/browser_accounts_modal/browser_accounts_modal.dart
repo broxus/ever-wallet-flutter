@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../design/design.dart';
-import '../../../../../design/widgets/account_icon.dart';
+import '../../../../../design/widgets/address_generated_icon.dart';
 import '../../../../../design/widgets/modal_header.dart';
 
 class BrowserAccountsModalBody extends StatefulWidget {
@@ -53,7 +53,9 @@ class _BrowserAccountsModalBodyState extends State<BrowserAccountsModalBody> {
         itemBuilder: (context, index) => ListTile(
           leading: SizedBox.square(
             dimension: 32,
-            child: AccountIcon(address: widget.accounts[index].address),
+            child: AddressGeneratedIcon(
+              address: widget.accounts[index].address,
+            ),
           ),
           title: Text(
             widget.accounts[index].name,

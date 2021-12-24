@@ -11,9 +11,10 @@ import '../../../../../../../../../../injection.dart';
 import '../../../../../../domain/blocs/key/keys_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../design/design.dart';
-import '../../../../../design/widgets/asset_icon.dart';
+import '../../../../../design/widgets/address_generated_icon.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/preload_transactions_listener.dart';
+import '../../../../../design/widgets/token_asset_icon.dart';
 import '../../../../../design/widgets/wallet_action_button.dart';
 import '../../history/token_wallet_transaction_holder.dart';
 import '../receive_modal/show_receive_modal.dart';
@@ -22,15 +23,13 @@ import '../token_send_transaction_flow/start_token_send_transaction_flow.dart';
 class TokenAssetInfoModalBody extends StatefulWidget {
   final String owner;
   final String rootTokenContract;
-  final String? svgIcon;
-  final List<int>? gravatarIcon;
+  final String? icon;
 
   const TokenAssetInfoModalBody({
     Key? key,
     required this.owner,
     required this.rootTokenContract,
-    this.svgIcon,
-    this.gravatarIcon,
+    this.icon,
   }) : super(key: key);
 
   @override
@@ -167,10 +166,13 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
         ],
       );
 
-  Widget icon() => AssetIcon(
-        svgIcon: widget.svgIcon,
-        gravatarIcon: widget.gravatarIcon,
-      );
+  Widget icon() => widget.icon != null
+      ? TokenAssetIcon(
+          icon: widget.icon!,
+        )
+      : AddressGeneratedIcon(
+          address: widget.rootTokenContract,
+        );
 
   Widget balanceText({
     required String balance,
@@ -304,10 +306,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
               transactionWithData: state[index],
               currency: symbol.name,
               decimals: symbol.decimals,
-              icon: AssetIcon(
-                svgIcon: widget.svgIcon,
-                gravatarIcon: widget.gravatarIcon,
-              ),
+              icon: icon(),
             ),
             separatorBuilder: (_, __) => const Divider(
               height: 1,

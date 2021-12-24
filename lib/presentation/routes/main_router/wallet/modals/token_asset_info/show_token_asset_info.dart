@@ -7,15 +7,13 @@ Future<void> showTokenAssetInfo({
   required BuildContext context,
   required String owner,
   required String rootTokenContract,
-  String? svgIcon,
-  List<int>? gravatarIcon,
+  String? icon,
 }) =>
     showPlatformModalBottomSheet(
       context: context,
       builder: (context) => TokenAssetInfoModalBody(
         owner: owner,
         rootTokenContract: rootTokenContract,
-        svgIcon: svgIcon,
-        gravatarIcon: gravatarIcon,
+        icon: icon,
       ),
     );

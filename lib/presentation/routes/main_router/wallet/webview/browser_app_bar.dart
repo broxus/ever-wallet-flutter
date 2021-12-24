@@ -4,7 +4,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../design/design.dart';
-import '../../../../design/widgets/account_icon.dart';
+import '../../../../design/widgets/address_generated_icon.dart';
 import '../../../../design/widgets/custom_popup_item.dart';
 import '../../../../design/widgets/custom_popup_menu.dart';
 
@@ -179,7 +179,9 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
           children: [
             SizedBox.square(
               dimension: 32,
-              child: AccountIcon(address: widget.currentAccount!.address),
+              child: AddressGeneratedIcon(
+                address: widget.currentAccount!.address,
+              ),
             ),
           ],
         ),

@@ -13,9 +13,8 @@ class TokenContractAssetDto with _$TokenContractAssetDto {
     @HiveField(2) required String symbol,
     @HiveField(3) required int decimals,
     @HiveField(4) required String address,
-    @HiveField(5) String? svgIcon,
-    @HiveField(6) List<int>? gravatarIcon,
-    @HiveField(7) required int version,
+    @HiveField(5) String? icon,
+    @HiveField(6) required int version,
   }) = _TokenContractAssetDto;
 
   factory TokenContractAssetDto.fromJson(Map<String, dynamic> json) => _$TokenContractAssetDtoFromJson(json);

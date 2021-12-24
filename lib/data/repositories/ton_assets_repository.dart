@@ -50,14 +50,11 @@ class TonAssetsRepository {
     required String address,
     required int version,
   }) async {
-    final gravatarIcon = await _restSource.getGravatarIcon(address);
-
     final asset = TokenContractAssetDto(
       name: name,
       symbol: symbol,
       decimals: decimals,
       address: address,
-      gravatarIcon: gravatarIcon,
       version: version,
     );
 
@@ -86,15 +83,12 @@ class TonAssetsRepository {
     final assets = <TokenContractAssetDto>[];
 
     for (final token in manifest.tokens) {
-      String? svgIcon;
-      List<int>? gravatarIcon;
+      String? icon;
 
       final logoURI = token.logoURI;
 
       if (logoURI != null) {
-        svgIcon = await _restSource.getTokenSvgIcon(logoURI);
-      } else {
-        gravatarIcon = await _restSource.getGravatarIcon(token.address);
+        icon = await _restSource.getTokenSvgIcon(logoURI);
       }
 
       final asset = TokenContractAssetDto(
@@ -103,8 +97,7 @@ class TonAssetsRepository {
         symbol: token.symbol,
         decimals: token.decimals,
         address: token.address,
-        svgIcon: svgIcon,
-        gravatarIcon: gravatarIcon,
+        icon: icon,
         version: token.version,
       );
 

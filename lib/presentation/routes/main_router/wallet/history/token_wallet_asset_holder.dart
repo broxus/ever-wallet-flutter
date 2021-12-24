@@ -4,22 +4,21 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
 import '../../../../../../../../injection.dart';
-import '../../../../design/widgets/asset_icon.dart';
+import '../../../../design/widgets/address_generated_icon.dart';
+import '../../../../design/widgets/token_asset_icon.dart';
 import '../modals/token_asset_info/show_token_asset_info.dart';
 import 'wallet_asset_holder.dart';
 
 class TokenWalletAssetHolder extends StatefulWidget {
   final String owner;
   final String rootTokenContract;
-  final String? svgIcon;
-  final List<int>? gravatarIcon;
+  final String? icon;
 
   const TokenWalletAssetHolder({
     Key? key,
     required this.owner,
     required this.rootTokenContract,
-    this.svgIcon,
-    this.gravatarIcon,
+    this.icon,
   }) : super(key: key);
 
   @override
@@ -66,17 +65,19 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
           name: state != null ? state.symbol.name : '',
           balance: state != null ? state.balance : '0',
           decimals: state != null ? state.symbol.decimals : kTonDecimals,
-          icon: AssetIcon(
-            svgIcon: widget.svgIcon,
-            gravatarIcon: widget.gravatarIcon,
-          ),
+          icon: widget.icon != null
+              ? TokenAssetIcon(
+                  icon: widget.icon!,
+                )
+              : AddressGeneratedIcon(
+                  address: widget.rootTokenContract,
+                ),
           onTap: state != null
               ? () => showTokenAssetInfo(
                     context: context,
                     owner: state.owner,
-                    rootTokenContract: state.symbol.rootTokenContract,
-                    svgIcon: widget.svgIcon,
-                    gravatarIcon: widget.gravatarIcon,
+                    rootTokenContract: widget.rootTokenContract,
+                    icon: widget.icon,
                   )
               : () {},
         ),

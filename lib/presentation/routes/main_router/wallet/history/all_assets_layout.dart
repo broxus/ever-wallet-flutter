@@ -61,8 +61,7 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
                       key: ValueKey(tokenContractAsset.address),
                       owner: state.tonWalletAsset!.address,
                       rootTokenContract: tokenContractAsset.address,
-                      svgIcon: tokenContractAsset.svgIcon,
-                      gravatarIcon: tokenContractAsset.gravatarIcon,
+                      icon: tokenContractAsset.icon,
                     ),
                   )
                   .toList(),
