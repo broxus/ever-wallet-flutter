@@ -40,7 +40,6 @@ class KeyInfoBloc extends Bloc<_Event, KeyStoreEntry?> {
         _streamSubscription = _nekotonService.keysStream
             .expand((e) => e)
             .where((e) => e.publicKey == event.publicKey)
-            .distinct()
             .listen((value) => add(_LocalEvent.update(value)));
       } else if (event is _Update) {
         yield event.key;

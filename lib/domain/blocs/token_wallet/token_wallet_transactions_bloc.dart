@@ -67,7 +67,6 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, List<TokenWalletTransacti
         _streamSubscription = _nekotonService.tokenWalletsStream
             .expand((e) => e)
             .where((e) => e.owner == event.owner && e.symbol.rootTokenContract == event.rootTokenContract)
-            .distinct()
             .listen((tokenWalletEvent) {
           _onTransactionsFoundSubscription?.cancel();
 
@@ -118,7 +117,7 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, List<TokenWalletTransacti
 
   Stream<Exception> get errorsStream => _errorsSubject.stream;
 
-  Stream<bool> get sideEffectsStream => _sideEffectsSubject.stream.distinct();
+  Stream<bool> get sideEffectsStream => _sideEffectsSubject.stream;
 }
 
 abstract class _Event {}

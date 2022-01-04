@@ -259,10 +259,12 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
           FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]')),
           SuggestionFormatter(suggestions: getHints),
         ],
-        suggestionsCallback: (pattern) => suggestionsCallback(
-          pattern: pattern,
-          index: index,
-        ),
+        suggestionsCallback: (pattern) => pattern.isNotEmpty
+            ? suggestionsCallback(
+                pattern: pattern,
+                index: index,
+              )
+            : [],
         itemBuilder: (context, suggestion) => itemBuilder(suggestion: suggestion),
         onSuggestionSelected: (suggestion) => onSuggestionSelected(
           suggestion: suggestion,

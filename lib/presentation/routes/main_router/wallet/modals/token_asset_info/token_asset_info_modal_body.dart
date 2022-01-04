@@ -201,35 +201,55 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
         bloc: context.watch<KeysBloc>(),
         builder: (context, keysState) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
           bloc: tonWalletInfoBloc,
-          builder: (context, tonWalletInfoState) => Row(
-            children: [
-              Expanded(
-                child: WalletActionButton(
-                  icon: Assets.images.iconReceive,
-                  title: LocaleKeys.actions_receive.tr(),
-                  onPressed: () => showReceiveModal(
-                    context: context,
-                    address: owner,
-                  ),
-                ),
+          builder: (context, tonWalletInfoState) {
+            final receiveButton = WalletActionButton(
+              icon: Assets.images.iconReceive,
+              title: LocaleKeys.actions_receive.tr(),
+              onPressed: () => showReceiveModal(
+                context: context,
+                address: owner,
               ),
-              if (keysState.currentKey != null) ...[
-                const SizedBox(width: 16),
-                Expanded(
-                  child: WalletActionButton(
-                    icon: Assets.images.iconSend,
-                    title: LocaleKeys.actions_send.tr(),
-                    onPressed: () => startTokenSendTransactionFlow(
-                      context: context,
-                      owner: owner,
-                      rootTokenContract: symbol.rootTokenContract,
-                      publicKey: keysState.currentKey!.publicKey,
-                    ),
-                  ),
+            );
+
+            WalletActionButton? actionButton;
+
+            if (keysState.currentKey != null && tonWalletInfoState != null) {
+              final publicKey = keysState.currentKey!.publicKey;
+
+              final keys = [
+                ...keysState.keys.keys,
+                ...keysState.keys.values.whereNotNull().expand((e) => e),
+              ];
+              final publicKeys =
+                  tonWalletInfoState.custodians?.where((e) => keys.any((el) => el.publicKey == e)).toList() ??
+                      [publicKey];
+
+              actionButton = WalletActionButton(
+                icon: Assets.images.iconSend,
+                title: LocaleKeys.actions_send.tr(),
+                onPressed: () => startTokenSendTransactionFlow(
+                  context: context,
+                  owner: owner,
+                  rootTokenContract: symbol.rootTokenContract,
+                  publicKeys: publicKeys,
                 ),
+              );
+            }
+
+            return Row(
+              children: [
+                Expanded(
+                  child: receiveButton,
+                ),
+                if (actionButton != null) ...[
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: actionButton,
+                  ),
+                ],
               ],
-            ],
-          ),
+            );
+          },
         ),
       );
 

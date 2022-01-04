@@ -39,11 +39,8 @@ class TonWalletMultisigPendingTransactionsBloc extends Bloc<_Event, List<Multisi
         _streamSubscription?.cancel();
         _onStateChangedSubscription?.cancel();
 
-        _streamSubscription = _nekotonService.tonWalletsStream
-            .expand((e) => e)
-            .where((e) => e.address == address)
-            .distinct()
-            .listen((event) async {
+        _streamSubscription =
+            _nekotonService.tonWalletsStream.expand((e) => e).where((e) => e.address == address).listen((event) async {
           final tonWallet = event;
 
           _onStateChangedSubscription?.cancel();

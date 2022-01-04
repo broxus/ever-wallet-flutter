@@ -45,7 +45,7 @@ class AccountAssetsBloc extends Bloc<_Event, AccountAssetsState> {
         }
 
         final accountAssetsStream = Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
-          _nekotonService.accountsStream.expand((e) => e).where((e) => e.address == event.address).distinct(),
+          _nekotonService.accountsStream.expand((e) => e).where((e) => e.address == event.address),
           _nekotonService.transportStream,
           (a, b) => Tuple2(a, b),
         ).map((event) {
@@ -60,24 +60,17 @@ class AccountAssetsBloc extends Bloc<_Event, AccountAssetsState> {
             tonWalletAsset,
             tokenWalletAssets,
           );
-        }).distinct((previous, next) => previous.item1 == next.item1 && listEquals(previous.item2, next.item2));
+        });
 
         _streamSubscription?.cancel();
         _streamSubscription = Rx.combineLatest2<
-                Tuple2<TonWalletAsset, List<TokenWalletAsset>>,
-                List<TokenContractAssetDto>,
-                Tuple2<Tuple2<TonWalletAsset, List<TokenWalletAsset>>, List<TokenContractAssetDto>>>(
+            Tuple2<TonWalletAsset, List<TokenWalletAsset>>,
+            List<TokenContractAssetDto>,
+            Tuple2<Tuple2<TonWalletAsset, List<TokenWalletAsset>>, List<TokenContractAssetDto>>>(
           accountAssetsStream,
           _tonAssetsRepository.assetsStream,
           (a, b) => Tuple2(a, b),
-        )
-            .distinct(
-          (previous, next) =>
-              previous.item1.item1 == next.item1.item1 &&
-              listEquals(previous.item1.item2, next.item1.item2) &&
-              listEquals(previous.item2, next.item2),
-        )
-            .listen((value) {
+        ).listen((value) {
           final tonWalletAsset = value.item1.item1;
           final tokenContractAssets = value.item2
               .where((e) => value.item1.item2.any((el) => el.rootTokenContract == e.address))

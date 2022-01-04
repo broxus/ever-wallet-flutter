@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -100,11 +101,18 @@ class _ProfileActionsState extends State<ProfileActions> {
                   final isDeployed = infoState.contractState.isDeployed;
 
                   if (!requiresSeparateDeploy || isDeployed) {
+                    final keys = [
+                      ...keysState.keys.keys,
+                      ...keysState.keys.values.whereNotNull().expand((e) => e),
+                    ];
+                    final publicKeys =
+                        infoState.custodians?.where((e) => keys.any((el) => el.publicKey == e)).toList() ?? [publicKey];
+
                     return WalletButton(
                       onTap: () => startSendTransactionFlow(
                         context: context,
                         address: widget.address,
-                        publicKey: publicKey,
+                        publicKeys: publicKeys,
                       ),
                       title: LocaleKeys.actions_send.tr(),
                       icon: Assets.images.iconSend.svg(

@@ -129,9 +129,13 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
 
     String? text;
 
+    if (repeatController.text.isEmpty) {
+      text = '';
+    }
+
     if (!isLength(passwordController.text, 8)) {
       text = 'Password must be at least 8 symbols';
-    } else if (passwordController.text != repeatController.text) {
+    } else if (repeatController.text.isNotEmpty && passwordController.text != repeatController.text) {
       text = 'Passwords must match';
     }
 

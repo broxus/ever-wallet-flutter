@@ -174,42 +174,67 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         bloc: context.watch<KeysBloc>(),
         builder: (context, keysState) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
           bloc: infoBloc,
-          builder: (context, infoState) => Row(
-            children: [
-              Expanded(
-                child: WalletActionButton(
-                  icon: Assets.images.iconReceive,
-                  title: LocaleKeys.actions_receive.tr(),
-                  onPressed: () => showReceiveModal(
+          builder: (context, infoState) {
+            final receiveButton = WalletActionButton(
+              icon: Assets.images.iconReceive,
+              title: LocaleKeys.actions_receive.tr(),
+              onPressed: () => showReceiveModal(
+                context: context,
+                address: widget.address,
+              ),
+            );
+
+            WalletActionButton? actionButton;
+
+            if (keysState.currentKey != null && infoState != null) {
+              final publicKey = keysState.currentKey!.publicKey;
+              final requiresSeparateDeploy = infoState.details.requiresSeparateDeploy;
+              final isDeployed = infoState.contractState.isDeployed;
+
+              if (!requiresSeparateDeploy || isDeployed) {
+                final keys = [
+                  ...keysState.keys.keys,
+                  ...keysState.keys.values.whereNotNull().expand((e) => e),
+                ];
+                final publicKeys =
+                    infoState.custodians?.where((e) => keys.any((el) => el.publicKey == e)).toList() ?? [publicKey];
+
+                actionButton = WalletActionButton(
+                  icon: Assets.images.iconSend,
+                  title: LocaleKeys.actions_send.tr(),
+                  onPressed: () => startSendTransactionFlow(
                     context: context,
                     address: widget.address,
+                    publicKeys: publicKeys,
                   ),
-                ),
-              ),
-              if (keysState.currentKey != null && infoState != null) ...[
-                const SizedBox(width: 16),
+                );
+              } else {
+                actionButton = WalletActionButton(
+                  icon: Assets.images.iconDeploy,
+                  title: LocaleKeys.actions_deploy.tr(),
+                  onPressed: () => startDeployWalletFlow(
+                    context: context,
+                    address: widget.address,
+                    publicKey: keysState.currentKey!.publicKey,
+                  ),
+                );
+              }
+            }
+
+            return Row(
+              children: [
                 Expanded(
-                  child: WalletActionButton(
-                    icon: infoState.contractState.isDeployed ? Assets.images.iconSend : Assets.images.iconDeploy,
-                    title: infoState.contractState.isDeployed
-                        ? LocaleKeys.actions_send.tr()
-                        : LocaleKeys.actions_deploy.tr(),
-                    onPressed: infoState.contractState.isDeployed
-                        ? () => startSendTransactionFlow(
-                              context: context,
-                              address: widget.address,
-                              publicKey: keysState.currentKey!.publicKey,
-                            )
-                        : () => startDeployWalletFlow(
-                              context: context,
-                              address: widget.address,
-                              publicKey: keysState.currentKey!.publicKey,
-                            ),
-                  ),
+                  child: receiveButton,
                 ),
+                if (actionButton != null) ...[
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: actionButton,
+                  ),
+                ],
               ],
-            ],
-          ),
+            );
+          },
         ),
       );
 

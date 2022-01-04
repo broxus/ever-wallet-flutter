@@ -47,11 +47,13 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
             const SizedBox(height: 24),
             ValueListenableBuilder<TextEditingValue>(
               valueListenable: controller,
-              builder: (context, value, _) => CustomElevatedButton(
+              builder: (_, value, __) => CustomElevatedButton(
                 onPressed: value.text.isEmpty
                     ? null
                     : () async {
                         try {
+                          context.router.navigatorKey.currentState?.pop();
+
                           await getIt.get<KeysRepository>().renameKey(
                                 publicKey: widget.publicKey,
                                 name: value.text,
@@ -63,8 +65,6 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                             context,
                             message: LocaleKeys.rename_key_modal_message_success.tr(),
                           );
-
-                          context.router.navigatorKey.currentState?.pop();
                         } catch (err, st) {
                           logger.e(err, err, st);
 

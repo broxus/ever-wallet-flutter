@@ -45,30 +45,24 @@ class AccountAssetsOptionsBloc extends Bloc<_Event, AccountAssetsOptionsState> {
         }
 
         final accountAssetsStream = Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
-          _nekotonService.accountsStream.expand((e) => e).where((e) => e.address == event.address).distinct(),
+          _nekotonService.accountsStream.expand((e) => e).where((e) => e.address == event.address),
           _nekotonService.transportStream,
           (a, b) => Tuple2(a, b),
-        )
-            .map(
-              (event) => event.item1.additionalAssets.entries
-                  .where((e) => e.key == event.item2.connectionData.group)
-                  .map((e) => e.value.tokenWallets)
-                  .expand((e) => e)
-                  .toList(),
-            )
-            .distinct((previous, next) => listEquals(previous, next));
+        ).map(
+          (event) => event.item1.additionalAssets.entries
+              .where((e) => e.key == event.item2.connectionData.group)
+              .map((e) => e.value.tokenWallets)
+              .expand((e) => e)
+              .toList(),
+        );
 
         _streamSubscription?.cancel();
         _streamSubscription = Rx.combineLatest2<List<TokenWalletAsset>, List<TokenContractAssetDto>,
-                Tuple2<List<TokenWalletAsset>, List<TokenContractAssetDto>>>(
+            Tuple2<List<TokenWalletAsset>, List<TokenContractAssetDto>>>(
           accountAssetsStream,
           _tonAssetsRepository.assetsStream,
           (a, b) => Tuple2(a, b),
-        )
-            .distinct(
-          (previous, next) => listEquals(previous.item1, next.item1) && listEquals(previous.item2, next.item2),
-        )
-            .listen((value) {
+        ).listen((value) {
           final added = value.item2.where((e) => value.item1.any((el) => el.rootTokenContract == e.address)).toList()
             ..sort((a, b) => b.address.compareTo(a.address));
 

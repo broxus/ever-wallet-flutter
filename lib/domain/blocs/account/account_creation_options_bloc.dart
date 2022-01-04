@@ -35,7 +35,6 @@ class AccountCreationOptionsBloc extends Bloc<_Event, AccountCreationOptionsStat
         _streamSubscription = _nekotonService.accountsStream
             .map((e) => e.where((e) => e.publicKey == event.publicKey).toList())
             .map((e) => e.map((e) => e.tonWallet.contract).toList())
-            .distinct((previous, next) => listEquals(previous, next))
             .listen((event) {
           final available = kAvailableWallets.where((e) => !event.contains(e)).toList();
 

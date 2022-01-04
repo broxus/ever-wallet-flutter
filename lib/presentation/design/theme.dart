@@ -8,6 +8,7 @@ import 'design.dart';
 const applicationTitle = 'TON Crystal';
 
 ThemeData materialTheme(BuildContext context) => ThemeData(
+      brightness: Brightness.light,
       primaryColor: CrystalColor.accent,
       fontFamily: FontFamily.pt,
       appBarTheme: const AppBarTheme(
@@ -23,6 +24,7 @@ ThemeData materialTheme(BuildContext context) => ThemeData(
     );
 
 CupertinoThemeData cupertinoTheme(BuildContext context) => const CupertinoThemeData(
+      brightness: Brightness.light,
       primaryColor: CrystalColor.accent,
       textTheme: CupertinoTextThemeData(
         primaryColor: CrystalColor.accent,

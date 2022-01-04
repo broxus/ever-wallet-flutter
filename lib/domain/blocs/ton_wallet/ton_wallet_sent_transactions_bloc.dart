@@ -40,11 +40,8 @@ class TonWalletSentTransactionsBloc extends Bloc<_Event, List<Tuple2<PendingTran
         _streamSubscription?.cancel();
         _onMessageSentSubscription?.cancel();
 
-        _streamSubscription = _nekotonService.tonWalletsStream
-            .expand((e) => e)
-            .where((e) => e.address == address)
-            .distinct()
-            .listen((event) {
+        _streamSubscription =
+            _nekotonService.tonWalletsStream.expand((e) => e).where((e) => e.address == address).listen((event) {
           final tonWallet = event;
 
           _onMessageSentSubscription?.cancel();

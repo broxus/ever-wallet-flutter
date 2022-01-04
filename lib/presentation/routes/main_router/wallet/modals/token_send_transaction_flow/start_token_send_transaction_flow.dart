@@ -7,7 +7,7 @@ Future<void> startTokenSendTransactionFlow({
   required BuildContext context,
   required String owner,
   required String rootTokenContract,
-  required String publicKey,
+  required List<String> publicKeys,
 }) =>
     showPlatformModalBottomSheet(
       context: context,
@@ -18,7 +18,7 @@ Future<void> startTokenSendTransactionFlow({
             modalContext: context,
             owner: owner,
             rootTokenContract: rootTokenContract,
-            publicKey: publicKey,
+            publicKeys: publicKeys,
           ),
         ),
       ),

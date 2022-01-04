@@ -7,6 +7,7 @@ import 'package:tuple/tuple.dart';
 import '../../../../../../domain/blocs/public_keys_labels_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../injection.dart';
+import '../../../../../../logger.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/custom_dropdown_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
@@ -146,15 +147,24 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
 
   void onPressed(String publicKey) => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ConfirmTransactionInfoPage(
-            modalContext: widget.modalContext,
-            address: widget.address,
-            publicKey: publicKey,
-            transactionId: widget.transactionId,
-            destination: widget.destination,
-            amount: widget.amount,
-            comment: widget.comment,
-          ),
+          builder: (context) {
+            try {
+              final a = ConfirmTransactionInfoPage(
+                modalContext: widget.modalContext,
+                address: widget.address,
+                publicKey: publicKey,
+                transactionId: widget.transactionId,
+                destination: widget.destination,
+                amount: widget.amount,
+                comment: widget.comment,
+              );
+
+              return a;
+            } catch (err, st) {
+              logger.e(err, err, st);
+              rethrow;
+            }
+          },
         ),
       );
 }

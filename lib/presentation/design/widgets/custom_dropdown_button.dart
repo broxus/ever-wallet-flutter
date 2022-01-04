@@ -1,3 +1,4 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
@@ -19,7 +20,7 @@ class CustomDropdownButton<T> extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(color: Colors.black12),
         ),
-        child: DropdownButton<T>(
+        child: DropdownButton2<T>(
           items: items
               .map(
                 (e) => DropdownMenuItem<T>(
@@ -44,7 +45,11 @@ class CustomDropdownButton<T> extends StatelessWidget {
             color: Colors.black,
           ),
           isExpanded: true,
-          dropdownColor: Colors.white,
+          offset: Offset.zero,
+          dropdownPadding: EdgeInsets.zero,
+          buttonDecoration: const BoxDecoration(
+            color: Colors.white,
+          ),
         ),
       );
 }

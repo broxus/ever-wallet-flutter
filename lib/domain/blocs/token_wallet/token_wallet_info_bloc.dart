@@ -57,7 +57,6 @@ class TokenWalletInfoBloc extends Bloc<_Event, TokenWalletInfo?> {
         _streamSubscription = _nekotonService.tokenWalletsStream
             .expand((e) => e)
             .where((e) => e.owner == owner && e.symbol.rootTokenContract == rootTokenContract)
-            .distinct()
             .listen((event) async {
           final tokenWallet = event;
 

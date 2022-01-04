@@ -40,7 +40,6 @@ class AccountInfoBloc extends Bloc<_Event, AssetsList?> {
         _streamSubscription = _nekotonService.accountsStream
             .expand((e) => e)
             .where((e) => e.address == event.address)
-            .distinct()
             .listen((value) => add(_LocalEvent.update(value)));
       } else if (event is _Update) {
         yield event.account;

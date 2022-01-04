@@ -6,7 +6,7 @@ import 'prepare_transfer_page.dart';
 Future<void> startSendTransactionFlow({
   required BuildContext context,
   required String address,
-  required String publicKey,
+  required List<String> publicKeys,
 }) =>
     showPlatformModalBottomSheet(
       context: context,
@@ -16,7 +16,7 @@ Future<void> startSendTransactionFlow({
           builder: (_) => PrepareTransferPage(
             modalContext: context,
             address: address,
-            publicKey: publicKey,
+            publicKeys: publicKeys,
           ),
         ),
       ),

@@ -33,7 +33,7 @@ class BiometryRepository {
     return biometryRepositoryImpl;
   }
 
-  Stream<bool> get biometryAvailabilityStream => _availabilitySubject.stream.distinct();
+  Stream<bool> get biometryAvailabilityStream => _availabilitySubject.stream;
 
   bool get biometryAvailability => _availabilitySubject.value;
 
@@ -42,7 +42,7 @@ class BiometryRepository {
     _availabilitySubject.add(isAvailable);
   }
 
-  Stream<bool> get biometryStatusStream => _statusSubject.stream.distinct();
+  Stream<bool> get biometryStatusStream => _statusSubject.stream;
 
   bool get biometryStatus => _statusSubject.value;
 

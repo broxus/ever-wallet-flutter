@@ -25,14 +25,14 @@ class KeysBloc extends Bloc<_Event, KeysState> {
       _nekotonService.currentKeyStream,
       _nekotonService.keysStream,
       (a, b) => Tuple2(a, b),
-    ).distinct((previous, next) => previous.item1 == next.item1 && listEquals(previous.item2, next.item2)).listen(
-              (event) => add(
-                _LocalEvent.update(
-                  keys: event.item2,
-                  currentKey: event.item1,
-                ),
-              ),
-            );
+    ).listen(
+      (event) => add(
+        _LocalEvent.update(
+          keys: event.item2,
+          currentKey: event.item1,
+        ),
+      ),
+    );
   }
 
   @override

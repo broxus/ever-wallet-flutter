@@ -69,20 +69,24 @@ class _AssetsLayoutState extends State<AssetsLayout> {
   Widget build(BuildContext context) => BlocConsumer<AccountAssetsOptionsBloc, AccountAssetsOptionsState>(
         bloc: accountAssetsOptionsBloc,
         listener: (context, state) {
-          selectedNotifier.value = [...state.added];
-          filteredNotifier.value = [...state.added, ...state.available];
+          selectedNotifier.value = [...state.added]..sort((a, b) => a.name.compareTo(b.name));
+          filteredNotifier.value = [...state.added, ...state.available]..sort((a, b) => a.name.compareTo(b.name));
         },
         builder: (context, state) => UnfocusingGestureDetector(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              field(state),
-              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: field(state),
+              ),
               Expanded(
                 child: list(),
               ),
-              const SizedBox(height: 16),
-              submitButton(state),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: submitButton(state),
+              ),
             ],
           ),
         ),
@@ -116,6 +120,7 @@ class _AssetsLayoutState extends State<AssetsLayout> {
           valueListenable: selectedNotifier,
           builder: (context, value, child) => ListView.separated(
             physics: const ClampingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             itemCount: filteredValue.length,
             itemBuilder: (context, index) {
               final asset = filteredValue[index];

@@ -149,10 +149,12 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
         suffixIcon: TextFieldClearButton(
           controller: controllers[index],
         ),
-        suggestionsCallback: (pattern) => suggestionsCallback(
-          pattern: pattern,
-          index: index,
-        ),
+        suggestionsCallback: (pattern) => pattern.isNotEmpty
+            ? suggestionsCallback(
+                pattern: pattern,
+                index: index,
+              )
+            : [],
         itemBuilder: (context, suggestion) => itemBuilder(suggestion),
         onSuggestionSelected: (suggestion) => onSuggestionSelected(
           suggestion: suggestion,

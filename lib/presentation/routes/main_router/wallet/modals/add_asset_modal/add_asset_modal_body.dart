@@ -38,22 +38,20 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
   Widget build(BuildContext context) => Material(
         color: Colors.white,
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ModalHeader(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: ModalHeader(
                   text: LocaleKeys.add_assets_modal_title.tr(),
                 ),
-                const SizedBox(height: 16),
-                tabs(),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: layout(),
-                ),
-              ],
-            ),
+              ),
+              tabs(),
+              Expanded(
+                child: layout(),
+              ),
+            ],
           ),
         ),
       );

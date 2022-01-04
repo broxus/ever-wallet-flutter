@@ -5,13 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:tuple/tuple.dart';
 import 'package:validators/validators.dart';
 
+import '../../../../../../domain/blocs/public_keys_labels_bloc.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../../../logger.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_flushbar.dart';
+import '../../../../../design/widgets/custom_dropdown_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_text_form_field.dart';
 import '../../../../../design/widgets/modal_header.dart';
@@ -26,13 +29,13 @@ import 'send_info_page.dart';
 class PrepareTransferPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
-  final String publicKey;
+  final List<String> publicKeys;
 
   const PrepareTransferPage({
     Key? key,
     required this.modalContext,
     required this.address,
-    required this.publicKey,
+    required this.publicKeys,
   }) : super(key: key);
 
   @override
@@ -48,11 +51,13 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
   final commentController = TextEditingController();
   final commentFocusNode = FocusNode();
   final formValidityNotifier = ValueNotifier<bool>(false);
+  late final ValueNotifier<String> publicKeyNotifier;
   final bloc = getIt.get<TonWalletInfoBloc>();
 
   @override
   void initState() {
     super.initState();
+    publicKeyNotifier = ValueNotifier<String>(widget.publicKeys.first);
     bloc.add(TonWalletInfoEvent.load(widget.address));
   }
 
@@ -65,6 +70,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
     commentController.dispose();
     commentFocusNode.dispose();
     formValidityNotifier.dispose();
+    publicKeyNotifier.dispose();
     bloc.close();
     super.dispose();
   }
@@ -126,6 +132,10 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (widget.publicKeys.length > 1) ...[
+              dropdownButton(),
+              const SizedBox(height: 16),
+            ],
             amount(),
             const SizedBox(height: 8),
             balance(),
@@ -145,6 +155,29 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
 
     formValidityNotifier.value = formKey.currentState?.validate() ?? false;
   }
+
+  Widget dropdownButton() => BlocBuilder<PublicKeysLabelsBloc, Map<String, String>>(
+        bloc: context.watch<PublicKeysLabelsBloc>(),
+        builder: (context, state) => ValueListenableBuilder<String>(
+          valueListenable: publicKeyNotifier,
+          builder: (context, value, child) => CustomDropdownButton<String>(
+            items: widget.publicKeys
+                .map(
+                  (e) => Tuple2(
+                    e,
+                    state[e] != null ? '${state[e]} (${e.ellipsePublicKey()})' : e.ellipsePublicKey(),
+                  ),
+                )
+                .toList(),
+            value: value,
+            onChanged: (value) {
+              if (value != null) {
+                publicKeyNotifier.value = value;
+              }
+            },
+          ),
+        ),
+      );
 
   Widget amount() => CustomTextFormField(
         name: 'amount',
@@ -310,13 +343,14 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
     final destination = destinationController.text;
     final amount = amountController.text.fromTokens();
     final comment = commentController.text.isNotEmpty ? commentController.text : null;
+    final publicKey = publicKeyNotifier.value;
 
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => SendInfoPage(
           modalContext: widget.modalContext,
           address: widget.address,
-          publicKey: widget.publicKey,
+          publicKey: publicKey,
           destination: destination,
           amount: amount,
           comment: comment,

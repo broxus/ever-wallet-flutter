@@ -35,25 +35,17 @@ class _CustomTokenLayoutState extends State<CustomTokenLayout> {
 
   @override
   Widget build(BuildContext context) => UnfocusingGestureDetector(
-        child: Stack(
-          fit: StackFit.expand,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  form(),
-                ],
-              ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: form(),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  submitButton(),
-                ],
-              ),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: submitButton(),
             ),
           ],
         ),

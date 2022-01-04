@@ -63,7 +63,6 @@ class TonWalletTransactionsBloc extends Bloc<_Event, List<TonWalletTransactionWi
         _streamSubscription = _nekotonService.tonWalletsStream
             .expand((e) => e)
             .where((e) => e.address == address)
-            .distinct()
             .listen((tonWalletEvent) {
           _onTransactionsFoundSubscription?.cancel();
 
@@ -109,7 +108,7 @@ class TonWalletTransactionsBloc extends Bloc<_Event, List<TonWalletTransactionWi
 
   Stream<Exception> get errorsStream => _errorsSubject.stream;
 
-  Stream<bool> get sideEffectsStream => _sideEffectsSubject.stream.distinct();
+  Stream<bool> get sideEffectsStream => _sideEffectsSubject.stream;
 }
 
 abstract class _Event {}

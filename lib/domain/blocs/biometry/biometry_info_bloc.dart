@@ -22,14 +22,14 @@ class BiometryInfoBloc extends Bloc<_Event, BiometryInfoState> {
       _biometryRepository.biometryAvailabilityStream,
       _biometryRepository.biometryStatusStream,
       (a, b) => Tuple2(a, b),
-    ).distinct().listen(
-          (Tuple2<bool, bool> tuple) => add(
-            _LocalEvent.update(
-              isAvailable: tuple.item1,
-              isEnabled: tuple.item2,
-            ),
-          ),
-        );
+    ).listen(
+      (Tuple2<bool, bool> tuple) => add(
+        _LocalEvent.update(
+          isAvailable: tuple.item1,
+          isEnabled: tuple.item2,
+        ),
+      ),
+    );
   }
 
   @override

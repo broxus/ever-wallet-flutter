@@ -41,7 +41,7 @@ class BrowserCurrentAccountBloc extends Bloc<_Event, AssetsList?> {
         return [
           ...internalAccounts,
           ...externalAccounts,
-        ];
+        ]..sort((a, b) => a.name.compareTo(b.name));
       },
     ).listen((event) => add(_LocalEvent.update(event)));
   }

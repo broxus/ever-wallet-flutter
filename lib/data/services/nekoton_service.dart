@@ -36,13 +36,11 @@ class NekotonService {
 
   Stream<KeyStoreEntry?> get currentKeyStream => _nekoton.keystoreController.currentKeyStream;
 
-  Stream<bool> get keysPresenceStream => _nekoton.keystoreController.keysStream
-      .transform<bool>(
+  Stream<bool> get keysPresenceStream => _nekoton.keystoreController.keysStream.transform<bool>(
         StreamTransformer.fromHandlers(
           handleData: (data, sink) => sink.add(data.isNotEmpty),
         ),
-      )
-      .distinct();
+      );
 
   List<KeyStoreEntry> get keys => _nekoton.keystoreController.keys;
 

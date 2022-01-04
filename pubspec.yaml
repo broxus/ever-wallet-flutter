@@ -17,6 +17,7 @@ dependencies:
   bloc: ^7.2.1
   cupertino_icons: ^1.0.4
   dio: ^4.0.4
+  dropdown_button2: ^1.0.7
   duration: ^3.0.8
   easy_localization: ^3.0.0
   expand_tap_area: ^1.1.0

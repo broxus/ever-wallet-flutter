@@ -23,7 +23,7 @@ class ExternalAccountsBloc extends Bloc<_Event, List<String>> {
       _nekotonService.currentKeyStream,
       _nekotonService.externalAccountsStream,
       (a, b) => b[a?.publicKey] ?? [],
-    ).distinct((previous, next) => listEquals(previous, next)).listen((event) => add(_Event.update(event)));
+    ).listen((event) => add(_Event.update(event)));
   }
 
   @override
