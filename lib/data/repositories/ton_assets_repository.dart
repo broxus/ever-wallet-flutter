@@ -119,8 +119,6 @@ class TonAssetsRepository {
   }
 
   Future<void> _initialize() async {
-    await _hiveSource.clearTokenContractAssets();
-
     final cached = _hiveSource.getTokenContractAssets();
 
     _assetsSubject.add(cached);
