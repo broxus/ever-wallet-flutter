@@ -9,7 +9,7 @@ class TokenWalletTransactionsRepository {
 
   TokenWalletTransactionsRepository(this._hiveSource);
 
-  List<TokenWalletTransactionWithData>? get({
+  List<TokenWalletTransactionWithData> get({
     required String owner,
     required String rootTokenContract,
   }) =>

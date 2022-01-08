@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_send_bloc.dart';
-import '../../../../../../injection.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_send_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_title.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 
-class SendResultPage extends StatefulWidget {
+class SendResultPage extends ConsumerStatefulWidget {
   final BuildContext modalContext;
   final String address;
   final UnsignedMessage message;
@@ -34,92 +33,82 @@ class SendResultPage extends StatefulWidget {
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
 }
 
-class _NewSelectWalletTypePageState extends State<SendResultPage> {
-  final bloc = getIt.get<TonWalletSendBloc>();
-
+class _NewSelectWalletTypePageState extends ConsumerState<SendResultPage> {
   @override
   void initState() {
     super.initState();
-    bloc.add(
-      TonWalletSendEvent.send(
-        address: widget.address,
-        message: widget.message,
-        publicKey: widget.publicKey,
-        password: widget.password,
-      ),
-    );
+    ref.read(tonWalletSendProvider.notifier).send(
+          address: widget.address,
+          message: widget.message,
+          publicKey: widget.publicKey,
+          password: widget.password,
+        );
   }
 
   @override
-  void dispose() {
-    bloc.close();
-    super.dispose();
-  }
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          final value = ref.watch(tonWalletSendProvider);
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                SingleChildScrollView(
-                  controller: ModalScrollController.of(context),
-                  physics: const ClampingScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      title(),
-                      const SizedBox(height: 16),
-                      card(),
-                      const SizedBox(height: 64),
-                    ],
-                  ),
+          return Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    SingleChildScrollView(
+                      controller: ModalScrollController.of(context),
+                      physics: const ClampingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          title(value),
+                          const SizedBox(height: 16),
+                          card(value),
+                          const SizedBox(height: 64),
+                        ],
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          submitButton(value),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      submitButton(),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          );
+        },
+      );
+
+  Widget title(AsyncValue<PendingTransaction> value) => value.when(
+        data: (data) => CrystalTitle(
+          text: widget.successText,
+        ),
+        error: (err, st) => CrystalTitle(
+          text: err.toString(),
+        ),
+        loading: () => CrystalTitle(
+          text: widget.sendingText,
         ),
       );
 
-  Widget title() => BlocBuilder<TonWalletSendBloc, TonWalletSendState>(
-        bloc: bloc,
-        builder: (context, state) => state.when(
-          initial: () => CrystalTitle(
-            text: widget.sendingText,
-          ),
-          success: () => CrystalTitle(
-            text: widget.successText,
-          ),
-          error: (exception) => CrystalTitle(
-            text: exception.toString(),
-          ),
+  Widget card(AsyncValue<PendingTransaction> value) => value.when(
+        data: (data) => animation(
+          Assets.animations.done,
         ),
-      );
-
-  Widget card() => BlocBuilder<TonWalletSendBloc, TonWalletSendState>(
-        bloc: bloc,
-        builder: (context, state) => state.when(
-          initial: () => animation(
-            Assets.animations.money,
-          ),
-          success: () => animation(
-            Assets.animations.done,
-          ),
-          error: (exception) => animation(
-            Assets.animations.failed,
-          ),
+        error: (err, st) => animation(
+          Assets.animations.failed,
+        ),
+        loading: () => animation(
+          Assets.animations.money,
         ),
       );
 
@@ -128,16 +117,13 @@ class _NewSelectWalletTypePageState extends State<SendResultPage> {
         height: 180,
       );
 
-  Widget submitButton() => BlocBuilder<TonWalletSendBloc, TonWalletSendState>(
-        bloc: bloc,
-        builder: (context, state) => CustomElevatedButton(
-          onPressed: state.maybeWhen(
-            success: () => onPressed,
-            error: (_) => onPressed,
-            orElse: () => null,
-          ),
-          text: 'Ok',
+  Widget submitButton(AsyncValue<PendingTransaction> value) => CustomElevatedButton(
+        onPressed: value.when(
+          data: (data) => onPressed,
+          error: (err, st) => onPressed,
+          loading: () => null,
         ),
+        text: 'Ok',
       );
 
   void onPressed() => Navigator.of(widget.modalContext).pop();

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../../data/repositories/accounts_repository.dart';
-import '../../../../../../domain/blocs/account/account_info_bloc.dart';
+import '../../../../../../domain/blocs/account/account_info_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../../logger.dart';
 import '../../../../../design/design.dart';
@@ -17,7 +16,7 @@ import '../../../../../design/widgets/modal_header.dart';
 import '../../../../../design/widgets/text_field_clear_button.dart';
 import '../../../../../design/widgets/text_suffix_icon_button.dart';
 
-class PreferencesModalBody extends StatefulWidget {
+class PreferencesModalBody extends ConsumerStatefulWidget {
   final String address;
   final String? publicKey;
 
@@ -28,47 +27,23 @@ class PreferencesModalBody extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<PreferencesModalBody> createState() => _PreferencesModalBodyState();
+  ConsumerState<PreferencesModalBody> createState() => _PreferencesModalBodyConsumerState();
 }
 
-class _PreferencesModalBodyState extends State<PreferencesModalBody> {
+class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalBody> {
   final controller = TextEditingController();
-  late final AccountInfoBloc accountInfoBloc;
 
   @override
   void initState() {
     super.initState();
-    accountInfoBloc = getIt.get<AccountInfoBloc>();
-    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
+    ref.read(accountInfoProvider(widget.address).future).then((value) {
+      controller.text = value.name;
+      controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+    });
   }
 
   @override
-  void didUpdateWidget(covariant PreferencesModalBody oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.address != widget.address) {
-      accountInfoBloc.add(AccountInfoEvent.load(widget.address));
-    }
-  }
-
-  @override
-  void dispose() {
-    accountInfoBloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocListener<AccountInfoBloc, AssetsList?>(
-        bloc: accountInfoBloc,
-        listener: (context, state) {
-          if (state != null) {
-            controller.text = state.name;
-            controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
-          }
-        },
-        child: body(),
-      );
-
-  Widget body() => Material(
+  Widget build(BuildContext context) => Material(
         color: Colors.white,
         child: SafeArea(
           child: Padding(

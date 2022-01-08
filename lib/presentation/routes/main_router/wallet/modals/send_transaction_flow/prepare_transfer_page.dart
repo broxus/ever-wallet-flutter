@@ -2,15 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 import 'package:validators/validators.dart';
 
-import '../../../../../../domain/blocs/public_keys_labels_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../../injection.dart';
+import '../../../../../../domain/blocs/key/public_keys_labels_bloc.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../../logger.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_flushbar.dart';
@@ -52,13 +51,11 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
   final commentFocusNode = FocusNode();
   final formValidityNotifier = ValueNotifier<bool>(false);
   late final ValueNotifier<String> publicKeyNotifier;
-  final bloc = getIt.get<TonWalletInfoBloc>();
 
   @override
   void initState() {
     super.initState();
     publicKeyNotifier = ValueNotifier<String>(widget.publicKeys.first);
-    bloc.add(TonWalletInfoEvent.load(widget.address));
   }
 
   @override
@@ -71,7 +68,6 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
     commentFocusNode.dispose();
     formValidityNotifier.dispose();
     publicKeyNotifier.dispose();
-    bloc.close();
     super.dispose();
   }
 
@@ -156,27 +152,32 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
     formValidityNotifier.value = formKey.currentState?.validate() ?? false;
   }
 
-  Widget dropdownButton() => BlocBuilder<PublicKeysLabelsBloc, Map<String, String>>(
-        bloc: context.watch<PublicKeysLabelsBloc>(),
-        builder: (context, state) => ValueListenableBuilder<String>(
-          valueListenable: publicKeyNotifier,
-          builder: (context, value, child) => CustomDropdownButton<String>(
-            items: widget.publicKeys
-                .map(
-                  (e) => Tuple2(
-                    e,
-                    state[e] != null ? '${state[e]} (${e.ellipsePublicKey()})' : e.ellipsePublicKey(),
-                  ),
-                )
-                .toList(),
-            value: value,
-            onChanged: (value) {
-              if (value != null) {
-                publicKeyNotifier.value = value;
-              }
-            },
-          ),
-        ),
+  Widget dropdownButton() => Consumer(
+        builder: (context, ref, child) {
+          final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
+
+          return ValueListenableBuilder<String>(
+            valueListenable: publicKeyNotifier,
+            builder: (context, value, child) => CustomDropdownButton<String>(
+              items: widget.publicKeys
+                  .map(
+                    (e) => Tuple2(
+                      e,
+                      publicKeysLabels[e] != null
+                          ? '${publicKeysLabels[e]} (${e.ellipsePublicKey()})'
+                          : e.ellipsePublicKey(),
+                    ),
+                  )
+                  .toList(),
+              value: value,
+              onChanged: (value) {
+                if (value != null) {
+                  publicKeyNotifier.value = value;
+                }
+              },
+            ),
+          );
+        },
       );
 
   Widget amount() => CustomTextFormField(
@@ -208,14 +209,17 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         },
       );
 
-  Widget balance() => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-        bloc: bloc,
-        builder: (context, state) => Text(
-          'Your balance: ${state?.contractState.balance.toTokens().removeZeroes() ?? '0'} TON',
-          style: const TextStyle(
-            color: Colors.black54,
-          ),
-        ),
+  Widget balance() => Consumer(
+        builder: (context, ref, child) {
+          final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
+
+          return Text(
+            'Your balance: ${tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0'} TON',
+            style: const TextStyle(
+              color: Colors.black54,
+            ),
+          );
+        },
       );
 
   Widget destination() => CustomTextFormField(

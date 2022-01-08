@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../../../domain/blocs/account/account_assets_bloc.dart';
-import '../../../../../../../../injection.dart';
+import '../../../../../domain/blocs/account/account_assets_provider.dart';
 import '../../../../design/design.dart';
 import 'token_wallet_asset_holder.dart';
 import 'ton_wallet_asset_holder.dart';
@@ -22,44 +21,26 @@ class AllAssetsLayout extends StatefulWidget {
 }
 
 class _AllAssetsLayoutState extends State<AllAssetsLayout> {
-  final bloc = getIt.get<AccountAssetsBloc>();
-
   @override
-  void initState() {
-    super.initState();
-    bloc.add(AccountAssetsEvent.load(widget.address));
-  }
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          final accountAssets = ref.watch(accountAssetsProvider(widget.address)).asData?.value;
 
-  @override
-  void didUpdateWidget(covariant AllAssetsLayout oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.address != widget.address) {
-      bloc.add(AccountAssetsEvent.load(widget.address));
-    }
-  }
+          final tonWalletAsset = accountAssets?.item1;
+          final tokenContractAssets = accountAssets?.item2 ?? [];
 
-  @override
-  void dispose() {
-    bloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocBuilder<AccountAssetsBloc, AccountAssetsState>(
-        bloc: bloc,
-        builder: (context, state) {
           final list = [
-            if (state.tonWalletAsset != null)
+            if (tonWalletAsset != null)
               TonWalletAssetHolder(
-                key: ValueKey(state.tonWalletAsset!.address),
-                address: state.tonWalletAsset!.address,
+                key: ValueKey(tonWalletAsset.address),
+                address: tonWalletAsset.address,
               ),
-            if (state.tonWalletAsset != null)
-              ...state.tokenContractAssets
+            if (tonWalletAsset != null)
+              ...tokenContractAssets
                   .map(
                     (tokenContractAsset) => TokenWalletAssetHolder(
                       key: ValueKey(tokenContractAsset.address),
-                      owner: state.tonWalletAsset!.address,
+                      owner: tonWalletAsset.address,
                       rootTokenContract: tokenContractAsset.address,
                       icon: tokenContractAsset.icon,
                     ),

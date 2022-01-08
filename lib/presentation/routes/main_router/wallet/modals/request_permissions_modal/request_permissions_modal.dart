@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../domain/blocs/account/accounts_bloc.dart';
+import '../../../../../../domain/blocs/account/accounts_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
@@ -128,16 +128,22 @@ class _RequestPermissionsModalBodyState extends State<RequestPermissionsModalBod
         text: 'Deny',
       );
 
-  Widget submitButton() => CustomElevatedButton(
-        onPressed: () => onSubmitPressed(widget.publicKey),
-        text: 'Allow',
+  Widget submitButton() => Consumer(
+        builder: (context, ref, child) => CustomElevatedButton(
+          onPressed: () => onSubmitPressed(read: ref.read, publicKey: widget.publicKey),
+          text: 'Allow',
+        ),
       );
 
-  Future<void> onSubmitPressed(String publicKey) async {
+  Future<void> onSubmitPressed({
+    required Reader read,
+    required String publicKey,
+  }) async {
     var permissions = const Permissions();
 
-    final walletType =
-        context.read<AccountsBloc>().state.firstWhere((e) => e.address == widget.address).tonWallet.contract;
+    final accounts = await read(accountsProvider.future);
+
+    final walletType = accounts.firstWhere((e) => e.address == widget.address).tonWallet.contract;
 
     for (final permission in widget.permissions) {
       switch (permission) {
@@ -155,6 +161,8 @@ class _RequestPermissionsModalBodyState extends State<RequestPermissionsModalBod
           break;
       }
     }
+
+    if (!mounted) return;
 
     Navigator.of(context).pop(permissions);
   }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
+import '../../../../data/repositories/biometry_repository.dart';
+import '../../../../domain/blocs/biometry/biometry_info_provider.dart';
+import '../../../../injection.dart';
 import '../../../design/design.dart';
 
 class BiometryModalBody extends StatefulWidget {
@@ -38,17 +40,18 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
             ),
           ),
           const SizedBox(width: 16),
-          BlocBuilder<BiometryInfoBloc, BiometryInfoState>(
-            bloc: context.watch<BiometryInfoBloc>(),
-            builder: (context, state) => PlatformSwitch(
-              value: state.isEnabled,
-              onChanged: (p0) => context.read<BiometryInfoBloc>().add(
-                    BiometryInfoEvent.setStatus(
+          Consumer(
+            builder: (context, ref, child) {
+              final info = ref.watch(biometryInfoProvider).asData?.value;
+
+              return PlatformSwitch(
+                value: info?.isEnabled ?? false,
+                onChanged: (p0) => getIt.get<BiometryRepository>().setBiometryStatus(
                       localizedReason: 'Please authenticate to interact with wallet',
-                      isEnabled: !state.isEnabled,
+                      isEnabled: !(info?.isEnabled ?? false),
                     ),
-                  ),
-            ),
+              );
+            },
           ),
         ],
       );

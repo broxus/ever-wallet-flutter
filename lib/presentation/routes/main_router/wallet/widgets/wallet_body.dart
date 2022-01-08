@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../../../domain/blocs/account/accounts_bloc.dart';
-import '../../../../../domain/blocs/account/current_account_bloc.dart';
+import '../../../../../domain/blocs/account/accounts_provider.dart';
+import '../../../../../domain/blocs/account/current_account_provider.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/animated_appearance.dart';
 import '../../../../design/widgets/sliding_panel.dart';
@@ -49,36 +48,39 @@ class WalletBody extends StatelessWidget {
               AnimatedAppearance(
                 duration: const Duration(milliseconds: 250),
                 offset: const Offset(1, 0),
-                child: BlocBuilder<AccountsBloc, List<AssetsList>>(
-                  bloc: context.watch<AccountsBloc>(),
-                  builder: (context, accountsState) => ProfileCarousel(
-                    accounts: accountsState,
-                    onPageChanged: (i) {
-                      if (i < accountsState.length) {
-                        context
-                            .read<CurrentAccountBloc>()
-                            .add(CurrentAccountEvent.setCurrent(accountsState[i].address));
-                      } else {
-                        modalController.hide();
-                        context.read<CurrentAccountBloc>().add(const CurrentAccountEvent.setCurrent());
-                      }
-                    },
-                    onPageSelected: (i) {
-                      if (i == accountsState.length) {
-                        modalController.hide();
-                      } else {
-                        modalController.show();
-                      }
-                    },
-                  ),
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final accounts = ref.watch(accountsProvider).asData?.value ?? [];
+
+                    return ProfileCarousel(
+                      accounts: accounts,
+                      onPageChanged: (i) {
+                        if (i < accounts.length) {
+                          ref.read(currentAccountProvider.notifier).setCurrent(accounts[i].address);
+                        } else {
+                          modalController.hide();
+
+                          ref.read(currentAccountProvider.notifier).setCurrent(null);
+                        }
+                      },
+                      onPageSelected: (i) {
+                        if (i == accounts.length) {
+                          modalController.hide();
+                        } else {
+                          modalController.show();
+                        }
+                      },
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 16),
-              BlocBuilder<CurrentAccountBloc, AssetsList?>(
-                bloc: context.watch<CurrentAccountBloc>(),
-                builder: (context, currentAccountState) => currentAccountState != null
-                    ? ProfileActions(address: currentAccountState.address)
-                    : const SizedBox(),
+              Consumer(
+                builder: (context, ref, child) {
+                  final currentAccount = ref.watch(currentAccountProvider);
+
+                  return currentAccount != null ? ProfileActions(address: currentAccount.address) : const SizedBox();
+                },
               ),
               const SizedBox(height: 20),
             ],

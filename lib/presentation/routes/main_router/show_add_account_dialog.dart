@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../domain/blocs/key/current_key_provider.dart';
 import '../../design/design.dart';
-import '../router.gr.dart';
+import 'wallet/modals/add_account_flow/start_add_account_flow.dart';
 
 Future<void> showAddAccountDialog({
   required BuildContext context,
@@ -19,20 +21,25 @@ Future<void> showAddAccountDialog({
             onPressed: () => context.router.pop(),
             child: const Text('Cancel'),
           ),
-          PlatformDialogAction(
-            onPressed: () async {
-              await context.router.pop();
+          Consumer(
+            builder: (context, ref, child) => PlatformDialogAction(
+              onPressed: () async {
+                final currentKey = await ref.read(currentKeyProvider.future);
 
-              final mainRouterRouter = context.router.root.innerRouterOf(MainRouterRoute.name);
-              final walletRouterRouter = mainRouterRouter?.innerRouterOf(WalletRouterRoute.name);
+                await context.router.pop();
 
-              mainRouterRouter?.navigate(const WalletRouterRoute());
-              walletRouterRouter?.navigate(const NewAccountRouterRoute());
-            },
-            cupertino: (_, __) => CupertinoDialogActionData(
-              isDefaultAction: true,
+                if (currentKey == null) return;
+
+                startAddAccountFlow(
+                  context: context,
+                  publicKey: currentKey.publicKey,
+                );
+              },
+              cupertino: (_, __) => CupertinoDialogActionData(
+                isDefaultAction: true,
+              ),
+              child: const Text('Add account'),
             ),
-            child: const Text('Add account'),
           ),
         ],
       ),

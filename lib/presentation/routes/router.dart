@@ -11,8 +11,6 @@ import 'loading_page/loading_page.dart';
 import 'main_router/main_router_page.dart';
 import 'main_router/settings/seed_phrase_export_page.dart';
 import 'main_router/settings/settings_page.dart';
-import 'main_router/wallet/new_account_flow/new_account_name_page.dart';
-import 'main_router/wallet/new_account_flow/new_account_type_page.dart';
 import 'main_router/wallet/wallet_page.dart';
 import 'main_router/wallet/webview/webview_page.dart';
 import 'welcome_router/decentralization_policy_page.dart';
@@ -39,22 +37,7 @@ import 'welcome_router/welcome_page.dart';
     AdaptiveRoute(
       page: MainRouterPage,
       children: [
-        AdaptiveRoute(
-          name: 'WalletRouterRoute',
-          page: EmptyRouterPage,
-          initial: true,
-          children: [
-            AdaptiveRoute(page: WalletPage, initial: true),
-            AdaptiveRoute(
-              name: 'NewAccountRouterRoute',
-              page: EmptyRouterPage,
-              children: [
-                AdaptiveRoute(page: NewAccountTypePage, initial: true),
-                AdaptiveRoute(page: NewAccountNamePage),
-              ],
-            ),
-          ],
-        ),
+        AdaptiveRoute(page: WalletPage, initial: true),
         AdaptiveRoute(page: WebviewPage),
         AdaptiveRoute(
           name: 'SettingsRouterRoute',

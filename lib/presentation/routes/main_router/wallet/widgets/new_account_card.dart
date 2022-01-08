@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../domain/blocs/key/keys_bloc.dart';
+import '../../../../../domain/blocs/key/current_key_provider.dart';
 import '../../../../design/design.dart';
 import '../modals/add_account_flow/start_add_account_flow.dart';
 
 class NewAccountCard extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: () {
-          final publicKey = context.read<KeysBloc>().state.currentKey?.publicKey;
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) => GestureDetector(
+          onTap: () async {
+            final currentKey = await ref.read(currentKeyProvider.future);
 
-          if (publicKey != null) {
-            startAddAccountFlow(
-              context: context,
-              publicKey: publicKey,
-            );
-          }
-        },
+            if (currentKey != null) {
+              startAddAccountFlow(
+                context: context,
+                publicKey: currentKey.publicKey,
+              );
+            }
+          },
+          child: child,
+        ),
         child: Container(
           height: 200,
           decoration: BoxDecoration(

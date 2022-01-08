@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../../domain/blocs/public_keys_labels_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../../injection.dart';
+import '../../../../../../domain/blocs/key/public_keys_labels_bloc.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/custom_popup_item.dart';
 import '../../../../../design/widgets/custom_popup_menu.dart';
@@ -25,62 +23,39 @@ class CustodiansModalBody extends StatefulWidget {
 }
 
 class _CustodiansModalBodyState extends State<CustodiansModalBody> {
-  final infoBloc = getIt.get<TonWalletInfoBloc>();
-
   @override
-  void initState() {
-    super.initState();
-    infoBloc.add(TonWalletInfoEvent.load(widget.address));
-  }
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
+          final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
+          final custodians = tonWalletInfo?.custodians?.map((e) => Tuple2(publicKeysLabels[e], e)).toList() ?? [];
 
-  @override
-  void didUpdateWidget(covariant CustodiansModalBody oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.address != widget.address) {
-      infoBloc.add(TonWalletInfoEvent.load(widget.address));
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    infoBloc.close();
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocBuilder<PublicKeysLabelsBloc, Map<String, String>>(
-        builder: (context, publicKeysLabelsState) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-          bloc: infoBloc,
-          builder: (context, infoState) {
-            final custodians = infoState?.custodians?.map((e) => Tuple2(publicKeysLabelsState[e], e)).toList() ?? [];
-
-            return SizedBox(
-              height: MediaQuery.of(context).size.longestSide / 1.75,
-              child: Material(
-                color: Colors.white,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        const ModalHeader(
-                          text: 'Custodians',
+          return SizedBox(
+            height: MediaQuery.of(context).size.longestSide / 1.75,
+            child: Material(
+              color: Colors.white,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      const ModalHeader(
+                        text: 'Custodians',
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          physics: const ClampingScrollPhysics(),
+                          child: list(custodians),
                         ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            physics: const ClampingScrollPhysics(),
-                            child: list(custodians),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       );
 
   Widget list(List<Tuple2<String?, String>> custodians) => ListView.separated(

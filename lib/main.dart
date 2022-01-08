@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'injection.dart';
 import 'logger.dart';
@@ -37,7 +38,7 @@ Future<void> main() async {
     await configureDependencies();
 
     runZonedGuarded(
-      () => runApp(const Application()),
+      () => runApp(const ProviderScope(child: Application())),
       FirebaseCrashlytics.instance.recordError,
     );
   } catch (err, st) {

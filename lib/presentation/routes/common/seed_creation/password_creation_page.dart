@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:validators/validators.dart';
 
-import '../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../injection.dart';
+import '../../../../data/repositories/biometry_repository.dart';
 import '../../../../data/repositories/keys_repository.dart';
+import '../../../../domain/blocs/biometry/biometry_info_provider.dart';
 import '../../../../injection.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_flushbar.dart';
@@ -217,31 +218,35 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
             : const SizedBox(),
       );
 
-  Widget biometryCheckbox() => BlocBuilder<BiometryInfoBloc, BiometryInfoState>(
-        bloc: context.watch<BiometryInfoBloc>(),
-        builder: (context, state) => !state.isAvailable
-            ? const SizedBox()
-            : Column(
-                children: [
-                  const SizedBox(height: 16),
-                  Row(
+  Widget biometryCheckbox() => Consumer(
+        builder: (context, ref, child) {
+          final info = ref.watch(biometryInfoProvider);
+
+          return info.maybeWhen(
+            data: (data) => !data.isAvailable
+                ? const SizedBox()
+                : Column(
                     children: [
-                      CustomCheckbox(
-                        value: state.isEnabled,
-                        onChanged: (value) => context.read<BiometryInfoBloc>().add(
-                              BiometryInfoEvent.setStatus(
-                                localizedReason: 'Please authenticate to interact with wallet',
-                                isEnabled: !state.isEnabled,
-                              ),
-                            ),
-                      ),
-                      Expanded(
-                        child: Text(LocaleKeys.biometry_checkbox.tr()),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          CustomCheckbox(
+                            value: data.isEnabled,
+                            onChanged: (value) => getIt.get<BiometryRepository>().setBiometryStatus(
+                                  localizedReason: 'Please authenticate to interact with wallet',
+                                  isEnabled: !data.isEnabled,
+                                ),
+                          ),
+                          Expanded(
+                            child: Text(LocaleKeys.biometry_checkbox.tr()),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+            orElse: () => const SizedBox(),
+          );
+        },
       );
 
   Widget submitButton() => ValueListenableBuilder<String?>(

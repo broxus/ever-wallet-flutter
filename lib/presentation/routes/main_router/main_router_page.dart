@@ -1,10 +1,10 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../logger.dart';
-import '../../../domain/blocs/account/browser_current_account_bloc.dart';
+import '../../../domain/blocs/account/browser_current_account_provider.dart';
 import '../../design/design.dart';
 import '../router.gr.dart';
 import 'show_add_account_dialog.dart';
@@ -36,7 +36,7 @@ class _MainRouterPageState extends State<MainRouterPage> {
           resizeToAvoidBottomInset: true,
           lazyLoad: false,
           routes: const [
-            WalletRouterRoute(),
+            WalletRoute(),
             WebviewRoute(),
             SettingsRouterRoute(),
           ],
@@ -56,43 +56,49 @@ class _MainRouterPageState extends State<MainRouterPage> {
             ),
           ),
         ),
-        child: PlatformNavBar(
-          currentIndex: router.activeIndex,
-          itemChanged: (index) => itemChanged(
-            index: index,
-            router: router,
-          ),
-          backgroundColor: CrystalColor.navigationBarBackground,
-          material: (context, target) => MaterialNavBarData(
-            selectedItemColor: CrystalColor.fontHeaderDark,
-            unselectedItemColor: const Color(0xFFC4C4C4),
-          ),
-          cupertino: (context, target) => CupertinoTabBarData(
-            activeColor: CrystalColor.fontHeaderDark,
-            inactiveColor: const Color(0xFFC4C4C4),
-          ),
-          items: [
-            item(
-              image: Assets.images.wallet,
-              label: LocaleKeys.wallet_screen_title.tr(),
+        child: Consumer(
+          builder: (context, ref, child) => PlatformNavBar(
+            currentIndex: router.activeIndex,
+            itemChanged: (index) => itemChanged(
+              read: ref.read,
+              index: index,
+              router: router,
             ),
-            item(
-              image: Assets.images.browser,
-              label: LocaleKeys.browser_title.tr(),
+            backgroundColor: CrystalColor.navigationBarBackground,
+            material: (context, target) => MaterialNavBarData(
+              selectedItemColor: CrystalColor.fontHeaderDark,
+              unselectedItemColor: const Color(0xFFC4C4C4),
             ),
-            item(
-              image: Assets.images.profile,
-              label: 'Profile',
+            cupertino: (context, target) => CupertinoTabBarData(
+              activeColor: CrystalColor.fontHeaderDark,
+              inactiveColor: const Color(0xFFC4C4C4),
             ),
-          ],
+            items: [
+              item(
+                image: Assets.images.wallet,
+                label: LocaleKeys.wallet_screen_title.tr(),
+              ),
+              item(
+                image: Assets.images.browser,
+                label: LocaleKeys.browser_title.tr(),
+              ),
+              item(
+                image: Assets.images.profile,
+                label: 'Profile',
+              ),
+            ],
+          ),
         ),
       );
 
   Future<void> itemChanged({
+    required Reader read,
     required int index,
     required TabsRouter router,
   }) async {
-    if (index == 1 && context.read<BrowserCurrentAccountBloc>().state == null) {
+    final currentAccount = read(browserCurrentAccountProvider);
+
+    if (index == 1 && currentAccount == null) {
       showAddAccountDialog(context: context);
       return;
     }
@@ -100,7 +106,7 @@ class _MainRouterPageState extends State<MainRouterPage> {
     if (index == router.activeIndex) {
       switch (index) {
         case 0:
-          router.navigate(const WalletRouterRoute());
+          router.navigate(const WalletRoute());
           break;
         case 1:
           router.navigate(const WebviewRoute());

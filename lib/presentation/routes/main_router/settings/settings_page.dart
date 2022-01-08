@@ -2,16 +2,17 @@ import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
-import '../../../../../../domain/blocs/key/keys_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
 import '../../../../data/repositories/keys_repository.dart';
+import '../../../../domain/blocs/biometry/biometry_info_provider.dart';
+import '../../../../domain/blocs/key/current_key_provider.dart';
+import '../../../../domain/blocs/key/keys_provider.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_bottom_sheet.dart';
 import '../../router.gr.dart';
@@ -95,12 +96,16 @@ class _SettingsPageState extends State<SettingsPage> {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(bottom: 16),
                 controller: scrollController,
-                child: BlocBuilder<KeysBloc, KeysState>(
-                  bloc: context.watch<KeysBloc>(),
-                  builder: (context, state) => buildSettingsItemsList(
-                    keys: state.keys,
-                    currentKey: state.currentKey,
-                  ),
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final keys = ref.watch(keysProvider).asData?.value ?? {};
+                    final currentKey = ref.watch(currentKeyProvider).asData?.value;
+
+                    return buildSettingsItemsList(
+                      keys: keys,
+                      currentKey: currentKey,
+                    );
+                  },
                 ),
               ),
             ),
@@ -112,156 +117,160 @@ class _SettingsPageState extends State<SettingsPage> {
     required Map<KeyStoreEntry, List<KeyStoreEntry>?> keys,
     KeyStoreEntry? currentKey,
   }) =>
-      Column(
-        children: [
-          buildSection(
-            title: LocaleKeys.settings_screen_sections_seeds_title.tr(),
-            children: [
-              if (keys.isNotEmpty)
-                buildSeedsList(
-                  selectedSeed: currentKey,
-                  seeds: keys,
-                  onAdd: () {
-                    context.router.push(const NewSeedRouterRoute());
-                  },
-                  onSelect: (seed) {
-                    context.read<KeysBloc>().add(KeysEvent.setCurrent(seed.publicKey));
-                  },
-                  showAddAction: true,
-                ),
-            ],
-          ),
-          buildSection(
-            title: LocaleKeys.settings_screen_sections_current_seed_preferences_title.tr(),
-            children: [
-              buildSectionAction(
-                title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed.tr(),
-                onTap: keys.isNotEmpty && currentKey != null
-                    ? () async {
-                        final biometryInfoBloc = context.read<BiometryInfoBloc>();
+      Consumer(
+        builder: (context, ref, child) => Column(
+          children: [
+            buildSection(
+              title: LocaleKeys.settings_screen_sections_seeds_title.tr(),
+              children: [
+                if (keys.isNotEmpty)
+                  buildSeedsList(
+                    selectedSeed: currentKey,
+                    seeds: keys,
+                    onAdd: () {
+                      context.router.push(const NewSeedRouterRoute());
+                    },
+                    onSelect: (seed) => getIt.get<KeysRepository>().setCurrentKey(seed),
+                    showAddAction: true,
+                  ),
+              ],
+            ),
+            buildSection(
+              title: LocaleKeys.settings_screen_sections_current_seed_preferences_title.tr(),
+              children: [
+                buildSectionAction(
+                  title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed.tr(),
+                  onTap: keys.isNotEmpty && currentKey != null
+                      ? () async {
+                          final info = await ref.read(biometryInfoProvider.future);
 
-                        if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
-                          try {
-                            final password = await getIt.get<BiometryRepository>().getKeyPassword(
-                                  localizedReason: 'Please authenticate to interact with wallet',
-                                  publicKey: currentKey.publicKey,
-                                );
+                          if (info.isAvailable && info.isEnabled) {
+                            try {
+                              final password = await getIt.get<BiometryRepository>().getKeyPassword(
+                                    localizedReason: 'Please authenticate to interact with wallet',
+                                    publicKey: currentKey.publicKey,
+                                  );
 
-                            final phrase = await getIt.get<KeysRepository>().exportKey(
-                                  publicKey: currentKey.publicKey,
-                                  password: password,
-                                );
+                              final phrase = await getIt.get<KeysRepository>().exportKey(
+                                    publicKey: currentKey.publicKey,
+                                    password: password,
+                                  );
 
-                            context.router.navigate(SeedPhraseExportRoute(phrase: phrase));
-                          } catch (err) {
-                            if (!mounted) return;
+                              context.router.navigate(SeedPhraseExportRoute(phrase: phrase));
+                            } catch (err) {
+                              if (!mounted) return;
 
+                              showCrystalBottomSheet(
+                                context,
+                                title: ExportSeedPhraseModalBody.title,
+                                body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
+                              );
+                            }
+                          } else {
                             showCrystalBottomSheet(
                               context,
                               title: ExportSeedPhraseModalBody.title,
                               body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
                             );
                           }
-                        } else {
-                          showCrystalBottomSheet(
-                            context,
-                            title: ExportSeedPhraseModalBody.title,
-                            body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
-                          );
-                        }
-                      }
-                    : null,
-              ),
-              buildSectionAction(
-                title: LocaleKeys.settings_screen_sections_current_seed_preferences_remove_seed.tr(),
-                onTap: keys.isNotEmpty && currentKey != null
-                    ? () => showKeyRemovementDialog(
-                          context: context,
-                          publicKey: currentKey.publicKey,
-                        )
-                    : null,
-              ),
-              buildSectionAction(
-                title: LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
-                onTap: keys.isNotEmpty && currentKey != null
-                    ? () => showCrystalBottomSheet(
-                          context,
-                          title: LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
-                          body: ChangeSeedPhrasePasswordModalBody(publicKey: currentKey.publicKey),
-                        )
-                    : null,
-              ),
-              if (currentKey != null && currentKey.isNotLegacy && currentKey.publicKey == currentKey.masterKey)
-                buildSectionAction(
-                  title: LocaleKeys.settings_screen_sections_current_seed_preferences_derive_key.tr(),
-                  onTap: keys.isNotEmpty
-                      ? () async {
-                          final name = await showCrystalBottomSheet<String?>(
-                            context,
-                            title: NameNewKeyModalBody.title,
-                            body: const NameNewKeyModalBody(),
-                          );
-
-                          if (name != null) {
-                            if (!mounted) return;
-
-                            showCrystalBottomSheet(
-                              context,
-                              title: DeriveKeyModalBody.title,
-                              body: DeriveKeyModalBody(
-                                publicKey: currentKey.publicKey,
-                                name: name.isNotEmpty ? name : null,
-                              ),
-                            );
-                          }
                         }
                       : null,
                 ),
-              buildSectionAction(
-                title: LocaleKeys.settings_screen_sections_current_seed_preferences_rename_key.tr(),
-                onTap: keys.isNotEmpty && currentKey != null
-                    ? () {
-                        showCrystalBottomSheet(
-                          context,
-                          title: LocaleKeys.rename_key_modal_title.tr(),
-                          body: RenameKeyModalBody(publicKey: currentKey.publicKey),
-                        );
-                      }
-                    : null,
-              ),
-            ],
-          ),
-          BlocBuilder<BiometryInfoBloc, BiometryInfoState>(
-            bloc: context.watch<BiometryInfoBloc>(),
-            builder: (context, biometryInfoState) => biometryInfoState.isAvailable
-                ? buildSection(
-                    title: LocaleKeys.settings_screen_sections_wallet_preferences_title.tr(),
-                    children: [
-                      buildSectionAction(
-                        title: LocaleKeys.biometry_title.tr(),
-                        onTap: () {
+                buildSectionAction(
+                  title: LocaleKeys.settings_screen_sections_current_seed_preferences_remove_seed.tr(),
+                  onTap: keys.isNotEmpty && currentKey != null
+                      ? () => showKeyRemovementDialog(
+                            context: context,
+                            publicKey: currentKey.publicKey,
+                          )
+                      : null,
+                ),
+                buildSectionAction(
+                  title: LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
+                  onTap: keys.isNotEmpty && currentKey != null
+                      ? () => showCrystalBottomSheet(
+                            context,
+                            title:
+                                LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
+                            body: ChangeSeedPhrasePasswordModalBody(publicKey: currentKey.publicKey),
+                          )
+                      : null,
+                ),
+                if (currentKey != null && currentKey.isNotLegacy && currentKey.publicKey == currentKey.masterKey)
+                  buildSectionAction(
+                    title: LocaleKeys.settings_screen_sections_current_seed_preferences_derive_key.tr(),
+                    onTap: keys.isNotEmpty
+                        ? () async {
+                            final name = await showCrystalBottomSheet<String?>(
+                              context,
+                              title: NameNewKeyModalBody.title,
+                              body: const NameNewKeyModalBody(),
+                            );
+
+                            if (name != null) {
+                              if (!mounted) return;
+
+                              showCrystalBottomSheet(
+                                context,
+                                title: DeriveKeyModalBody.title,
+                                body: DeriveKeyModalBody(
+                                  publicKey: currentKey.publicKey,
+                                  name: name.isNotEmpty ? name : null,
+                                ),
+                              );
+                            }
+                          }
+                        : null,
+                  ),
+                buildSectionAction(
+                  title: LocaleKeys.settings_screen_sections_current_seed_preferences_rename_key.tr(),
+                  onTap: keys.isNotEmpty && currentKey != null
+                      ? () {
                           showCrystalBottomSheet(
                             context,
-                            title: LocaleKeys.biometry_title.tr(),
-                            body: const BiometryModalBody(),
+                            title: LocaleKeys.rename_key_modal_title.tr(),
+                            body: RenameKeyModalBody(publicKey: currentKey.publicKey),
                           );
-                        },
-                      ),
-                    ],
-                  )
-                : const SizedBox(),
-          ),
-          buildSection(
-            children: [
-              buildSectionAction(
-                isDestructive: true,
-                title: LocaleKeys.settings_screen_sections_logout_action.tr(),
-                onTap: () => showLogoutDialog(context: context),
-              ),
-            ],
-          ),
-          buildAppVersion(),
-        ],
+                        }
+                      : null,
+                ),
+              ],
+            ),
+            Consumer(
+              builder: (context, ref, child) {
+                final info = ref.watch(biometryInfoProvider).asData?.value;
+
+                return (info?.isAvailable ?? false)
+                    ? buildSection(
+                        title: LocaleKeys.settings_screen_sections_wallet_preferences_title.tr(),
+                        children: [
+                          buildSectionAction(
+                            title: LocaleKeys.biometry_title.tr(),
+                            onTap: () {
+                              showCrystalBottomSheet(
+                                context,
+                                title: LocaleKeys.biometry_title.tr(),
+                                body: const BiometryModalBody(),
+                              );
+                            },
+                          ),
+                        ],
+                      )
+                    : const SizedBox();
+              },
+            ),
+            buildSection(
+              children: [
+                buildSectionAction(
+                  isDestructive: true,
+                  title: LocaleKeys.settings_screen_sections_logout_action.tr(),
+                  onTap: () => showLogoutDialog(context: context),
+                ),
+              ],
+            ),
+            buildAppVersion(),
+          ],
+        ),
       );
 
   Widget buildSeedsList({

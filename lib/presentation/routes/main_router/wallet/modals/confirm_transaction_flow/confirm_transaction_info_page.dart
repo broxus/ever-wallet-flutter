@@ -1,12 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
-import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_confirm_transaction_bloc.dart';
+import '../../../../../../domain/blocs/biometry/biometry_info_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_confirm_transaction_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/custom_back_button.dart';
@@ -16,7 +18,7 @@ import '../../../../../design/widgets/sectioned_card_section.dart';
 import '../common/password_enter_page.dart';
 import '../common/send_result_page.dart';
 
-class ConfirmTransactionInfoPage extends StatefulWidget {
+class ConfirmTransactionInfoPage extends ConsumerStatefulWidget {
   final BuildContext modalContext;
   final String address;
   final String publicKey;
@@ -40,47 +42,26 @@ class ConfirmTransactionInfoPage extends StatefulWidget {
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
 }
 
-class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
-  final prepareConfirmTransactionBloc = getIt.get<TonWalletPrepareConfirmTransactionBloc>();
-  final estimateFeesBloc = getIt.get<TonWalletEstimateFeesBloc>();
-
+class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfoPage> {
   @override
   void initState() {
     super.initState();
-    prepareConfirmTransactionBloc.add(
-      TonWalletPrepareConfirmTransactionEvent.prepareConfirmTransaction(
-        publicKey: widget.publicKey,
-        address: widget.address,
-        transactionId: widget.transactionId,
-      ),
-    );
+    ref.read(tonWalletPrepareConfirmTransactionProvider.notifier).prepareConfirmTransaction(
+          publicKey: widget.publicKey,
+          address: widget.address,
+          transactionId: widget.transactionId,
+        );
+    ref.read(tonWalletPrepareConfirmTransactionProvider.future).then(
+          (value) => ref.read(tonWalletEstimateFeesProvider.notifier).estimateFees(
+                address: widget.address,
+                message: value,
+                amount: widget.amount,
+              ),
+        );
   }
 
   @override
-  void dispose() {
-    prepareConfirmTransactionBloc.close();
-    estimateFeesBloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) =>
-      BlocListener<TonWalletPrepareConfirmTransactionBloc, TonWalletPrepareConfirmTransactionState>(
-        bloc: prepareConfirmTransactionBloc,
-        listener: (context, state) => state.maybeWhen(
-          success: (message) => estimateFeesBloc.add(
-            TonWalletEstimateFeesEvent.estimateFees(
-              address: widget.address,
-              message: message,
-              amount: widget.amount,
-            ),
-          ),
-          orElse: () => null,
-        ),
-        child: scaffold(),
-      );
-
-  Widget scaffold() => Scaffold(
+  Widget build(BuildContext context) => Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           leading: const CustomBackButton(),
@@ -145,40 +126,38 @@ class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
         subtitle: '${widget.amount.toTokens().removeZeroes()} TON',
       );
 
-  Widget fee() => BlocBuilder<TonWalletPrepareConfirmTransactionBloc, TonWalletPrepareConfirmTransactionState>(
-        bloc: prepareConfirmTransactionBloc,
-        builder: (context, prepareConfirmTransactionState) =>
-            BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
-          bloc: estimateFeesBloc,
-          builder: (context, estimateFeesState) {
-            final subtitle = prepareConfirmTransactionState.maybeWhen(
-                  error: (exception) => exception.toString(),
-                  orElse: () => null,
-                ) ??
-                estimateFeesState.when(
-                  initial: () => null,
-                  success: (fees) => '${fees.toTokens().removeZeroes()} TON',
-                  insufficientFunds: (fees) => 'Insufficient funds',
-                  error: (exception) => exception.toString(),
-                );
+  Widget fee() => Consumer(
+        builder: (context, ref, child) {
+          final message = ref.watch(tonWalletPrepareConfirmTransactionProvider);
 
-            final hasError = prepareConfirmTransactionState.maybeWhen(
-                  error: (_) => true,
-                  orElse: () => false,
-                ) ||
-                estimateFeesState.maybeWhen(
-                  insufficientFunds: (_) => true,
-                  error: (_) => true,
-                  orElse: () => false,
-                );
+          final fees = message.asData?.value != null ? ref.watch(tonWalletEstimateFeesProvider) : null;
 
-            return SectionedCardSection(
-              title: 'Blockchain fee',
-              subtitle: subtitle,
-              hasError: hasError,
-            );
-          },
-        ),
+          final subtitle = message.maybeWhen(
+                error: (err, st) => err.toString(),
+                orElse: () => null,
+              ) ??
+              fees?.when(
+                data: (data) => '${data.toTokens().removeZeroes()} TON',
+                error: (err, st) => err.toString(),
+                loading: () => null,
+              );
+
+          final hasError = message.maybeWhen(
+                error: (err, st) => true,
+                orElse: () => false,
+              ) ||
+              (fees?.maybeWhen(
+                    error: (err, st) => true,
+                    orElse: () => false,
+                  ) ??
+                  false);
+
+          return SectionedCardSection(
+            title: 'Blockchain fee',
+            subtitle: subtitle,
+            hasError: hasError,
+          );
+        },
       );
 
   Widget comment() => SectionedCardSection(
@@ -186,44 +165,35 @@ class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
         subtitle: widget.comment,
       );
 
-  Widget submitButton() => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
-        bloc: estimateFeesBloc,
-        builder: (context, estimateFeesState) =>
-            BlocBuilder<TonWalletPrepareConfirmTransactionBloc, TonWalletPrepareConfirmTransactionState>(
-          bloc: prepareConfirmTransactionBloc,
-          builder: (context, prepareConfirmTransactionState) {
-            final message = prepareConfirmTransactionState.maybeWhen(
-              success: (message) => message,
-              orElse: () => null,
-            );
+  Widget submitButton() => Consumer(
+        builder: (context, ref, child) {
+          final message = ref.watch(tonWalletPrepareConfirmTransactionProvider).asData?.value;
 
-            final sufficientFunds = estimateFeesState.maybeWhen(
-              success: (_) => true,
-              orElse: () => false,
-            );
+          final fees = message != null ? ref.watch(tonWalletEstimateFeesProvider).asData?.value : null;
 
-            return CustomElevatedButton(
-              onPressed: sufficientFunds && message != null
-                  ? () => onPressed(
-                        message: message,
-                        publicKey: widget.publicKey,
-                      )
-                  : null,
-              text: 'Send',
-            );
-          },
-        ),
+          return CustomElevatedButton(
+            onPressed: message != null && fees != null
+                ? () => onPressed(
+                      read: ref.read,
+                      message: message,
+                      publicKey: widget.publicKey,
+                    )
+                : null,
+            text: 'Send',
+          );
+        },
       );
 
   Future<void> onPressed({
+    required Reader read,
     required UnsignedMessage message,
     required String publicKey,
   }) async {
     String? password;
 
-    final biometryInfoBloc = context.read<BiometryInfoBloc>();
+    final info = await read(biometryInfoProvider.future);
 
-    if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
+    if (info.isAvailable && info.isEnabled) {
       password = await getPasswordFromBiometry(publicKey);
     }
 

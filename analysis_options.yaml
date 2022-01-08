@@ -9,6 +9,8 @@ linter:
     always_use_package_imports: false
 
 analyzer:
+  language:
+    strict-inference: true
   exclude:
     - lib/**.g.dart
     - lib/**.gen.dart

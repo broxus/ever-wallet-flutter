@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../domain/blocs/account/current_account_bloc.dart';
+import '../../../../../domain/blocs/account/current_account_provider.dart';
 import '../../../../design/design.dart';
 import 'all_assets_layout.dart';
 import 'ton_wallet_transactions_layout.dart';
@@ -63,27 +62,30 @@ class _WalletModalBodyState extends State<WalletModalBody> {
                   ),
                 ),
                 Flexible(
-                  child: BlocBuilder<CurrentAccountBloc, AssetsList?>(
-                    bloc: context.watch<CurrentAccountBloc>(),
-                    builder: (context, currentAccountState) => TabBarView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        if (currentAccountState != null)
-                          AllAssetsLayout(
-                            address: currentAccountState.address,
-                            controller: widget.scrollController,
-                          )
-                        else
-                          const SizedBox(),
-                        if (currentAccountState != null)
-                          TonWalletTransactionsLayout(
-                            address: currentAccountState.address,
-                            controller: widget.scrollController,
-                          )
-                        else
-                          const SizedBox(),
-                      ],
-                    ),
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final currentAccount = ref.watch(currentAccountProvider);
+
+                      return TabBarView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          if (currentAccount != null)
+                            AllAssetsLayout(
+                              address: currentAccount.address,
+                              controller: widget.scrollController,
+                            )
+                          else
+                            const SizedBox(),
+                          if (currentAccount != null)
+                            TonWalletTransactionsLayout(
+                              address: currentAccount.address,
+                              controller: widget.scrollController,
+                            )
+                          else
+                            const SizedBox(),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ],

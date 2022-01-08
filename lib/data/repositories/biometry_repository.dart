@@ -46,9 +46,16 @@ class BiometryRepository {
 
   bool get biometryStatus => _statusSubject.value;
 
-  Future<void> setBiometryStatus(bool isEnabled) async {
-    await _hiveSource.setBiometryStatus(isEnabled);
-    _statusSubject.add(isEnabled);
+  Future<void> setBiometryStatus({
+    required String localizedReason,
+    required bool isEnabled,
+  }) async {
+    final isAuthenticated = await authenticate(localizedReason);
+
+    if (isAuthenticated) {
+      await _hiveSource.setBiometryStatus(isEnabled);
+      _statusSubject.add(isEnabled);
+    }
   }
 
   Future<void> clear() async {

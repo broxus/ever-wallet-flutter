@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../../../domain/blocs/connection_bloc.dart';
+import '../../../../../data/repositories/transport_repository.dart';
+import '../../../../../domain/blocs/transport_provider.dart';
+import '../../../../../injection.dart';
 import '../../../../design/widgets/custom_popup_item.dart';
 import '../../../../design/widgets/custom_popup_menu.dart';
 
@@ -10,22 +12,28 @@ class ConnectionButton extends StatelessWidget {
   const ConnectionButton({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<ConnectionBloc, ConnectionData>(
-        bloc: context.watch<ConnectionBloc>(),
-        builder: (context, state) => CustomPopupMenu(
-          items: kNetworkPresets
-              .map(
-                (e) => CustomPopupItem(
-                  title: Text(
-                    e.name,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  onTap: () => context.read<ConnectionBloc>().add(ConnectionEvent.updateTransport(e)),
-                ),
-              )
-              .toList(),
-          icon: buildButton(state),
-        ),
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          final connectionData = ref.watch(transportProvider);
+
+          return connectionData.maybeWhen(
+            data: (data) => CustomPopupMenu(
+              items: kNetworkPresets
+                  .map(
+                    (e) => CustomPopupItem(
+                      title: Text(
+                        e.name,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      onTap: () => getIt.get<TransportRepository>().updateTransport(e),
+                    ),
+                  )
+                  .toList(),
+              icon: buildButton(data),
+            ),
+            orElse: () => const SizedBox(),
+          );
+        },
       );
 
   Container buildButton(ConnectionData state) => Container(

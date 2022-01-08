@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
-import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
-import '../../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
-import '../../../../../../domain/blocs/token_wallet/token_wallet_prepare_transfer_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_transfer_bloc.dart';
+import '../../../../../../domain/blocs/biometry/biometry_info_provider.dart';
+import '../../../../../../domain/blocs/token_wallet/token_wallet_info_provider.dart';
+import '../../../../../../domain/blocs/token_wallet/token_wallet_prepare_transfer_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_transfer_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/custom_back_button.dart';
@@ -18,7 +19,7 @@ import '../../../../../design/widgets/sectioned_card_section.dart';
 import '../common/password_enter_page.dart';
 import '../common/token_send_result_page.dart';
 
-class TokenSendInfoPage extends StatefulWidget {
+class TokenSendInfoPage extends ConsumerStatefulWidget {
   final BuildContext modalContext;
   final String owner;
   final String rootTokenContract;
@@ -44,74 +45,37 @@ class TokenSendInfoPage extends StatefulWidget {
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
 }
 
-class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
-  final tokenWalletInfoBloc = getIt.get<TokenWalletInfoBloc>();
-  final tokenWalletPrepareTransferBloc = getIt.get<TokenWalletPrepareTransferBloc>();
-  final tonWalletPrepareTransferBloc = getIt.get<TonWalletPrepareTransferBloc>();
-  final tonWalletEstimateFeesBloc = getIt.get<TonWalletEstimateFeesBloc>();
-
+class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
   @override
   void initState() {
     super.initState();
-    tokenWalletInfoBloc.add(
-      TokenWalletInfoEvent.load(
-        owner: widget.owner,
-        rootTokenContract: widget.rootTokenContract,
-      ),
-    );
-    tokenWalletPrepareTransferBloc.add(
-      TokenWalletPrepareTransferEvent.prepareTransfer(
-        owner: widget.owner,
-        rootTokenContract: widget.rootTokenContract,
-        destination: widget.destination,
-        amount: widget.amount,
-        notifyReceiver: widget.notifyReceiver,
-        payload: widget.comment,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    tokenWalletInfoBloc.close();
-    tokenWalletPrepareTransferBloc.close();
-    tonWalletPrepareTransferBloc.close();
-    tonWalletEstimateFeesBloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocListener<TokenWalletPrepareTransferBloc, TokenWalletPrepareTransferState>(
-        bloc: tokenWalletPrepareTransferBloc,
-        listener: (context, state) => state.maybeWhen(
-          success: (message) => tonWalletPrepareTransferBloc.add(
-            TonWalletPrepareTransferEvent.prepareTransfer(
-              address: widget.owner,
-              publicKey: widget.publicKey,
-              destination: message.destination,
-              amount: message.amount,
-              body: message.body,
-              isComment: false,
-            ),
-          ),
-          orElse: () => null,
-        ),
-        child: BlocListener<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
-          bloc: tonWalletPrepareTransferBloc,
-          listener: (context, state) => state.maybeWhen(
-            success: (message) => tonWalletEstimateFeesBloc.add(
-              TonWalletEstimateFeesEvent.estimateFees(
+    ref.read(tokenWalletPrepareTransferProvider.notifier).prepareTransfer(
+          owner: widget.owner,
+          rootTokenContract: widget.rootTokenContract,
+          destination: widget.destination,
+          amount: widget.amount,
+          notifyReceiver: widget.notifyReceiver,
+          payload: widget.comment,
+        );
+    ref.read(tokenWalletPrepareTransferProvider.future).then(
+          (value) => ref.read(tonWalletPrepareTransferProvider.notifier).prepareTransfer(
                 address: widget.owner,
-                message: message,
+                publicKey: widget.publicKey,
+                destination: widget.destination,
+                amount: widget.amount,
               ),
-            ),
-            orElse: () => null,
-          ),
-          child: scaffold(),
-        ),
-      );
+        );
+    ref.read(tonWalletPrepareTransferProvider.future).then(
+          (value) => ref.read(tonWalletEstimateFeesProvider.notifier).estimateFees(
+                address: widget.owner,
+                message: value,
+                amount: widget.amount,
+              ),
+        );
+  }
 
-  Widget scaffold() => Scaffold(
+  @override
+  Widget build(BuildContext context) => Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           leading: const CustomBackButton(),
@@ -172,49 +136,72 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
         isSelectable: true,
       );
 
-  Widget amount() => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
-        bloc: tokenWalletInfoBloc,
-        builder: (context, state) => SectionedCardSection(
-          title: 'Amount',
-          subtitle: state != null
-              ? '${widget.amount.toTokens(state.symbol.decimals).removeZeroes()} ${state.symbol.name}'
-              : null,
-        ),
+  Widget amount() => Consumer(
+        builder: (context, ref, child) {
+          final tokenWalletInfo = ref
+              .watch(
+                tokenWalletInfoProvider(
+                  Tuple2(
+                    widget.owner,
+                    widget.rootTokenContract,
+                  ),
+                ),
+              )
+              .asData
+              ?.value;
+
+          return SectionedCardSection(
+            title: 'Amount',
+            subtitle: tokenWalletInfo != null
+                ? '${widget.amount.toTokens(tokenWalletInfo.symbol.decimals).removeZeroes()} ${tokenWalletInfo.symbol.name}'
+                : null,
+          );
+        },
       );
 
-  Widget fee() => BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
-        bloc: tonWalletPrepareTransferBloc,
-        builder: (context, prepareTransferState) => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
-          bloc: tonWalletEstimateFeesBloc,
-          builder: (context, estimateFeesState) {
-            final subtitle = prepareTransferState.maybeWhen(
-                  error: (exception) => exception.toString(),
-                  orElse: () => null,
-                ) ??
-                estimateFeesState.when(
-                  initial: () => null,
-                  success: (fees) => '${fees.toTokens().removeZeroes()} TON',
-                  insufficientFunds: (fees) => 'Insufficient funds',
-                  error: (exception) => exception.toString(),
-                );
+  Widget fee() => Consumer(
+        builder: (context, ref, child) {
+          final internalMessage = ref.watch(tokenWalletPrepareTransferProvider);
 
-            final hasError = prepareTransferState.maybeWhen(
-                  error: (_) => true,
-                  orElse: () => false,
-                ) ||
-                estimateFeesState.maybeWhen(
-                  insufficientFunds: (_) => true,
-                  error: (_) => true,
-                  orElse: () => false,
-                );
+          final message = internalMessage.asData?.value != null ? ref.watch(tonWalletPrepareTransferProvider) : null;
 
-            return SectionedCardSection(
-              title: 'Blockchain fee',
-              subtitle: subtitle,
-              hasError: hasError,
-            );
-          },
-        ),
+          final fees = message?.asData?.value != null ? ref.watch(tonWalletEstimateFeesProvider) : null;
+
+          final subtitle = internalMessage.maybeWhen(
+                error: (err, st) => err.toString(),
+                orElse: () => null,
+              ) ??
+              message?.maybeWhen(
+                error: (err, st) => err.toString(),
+                orElse: () => null,
+              ) ??
+              fees?.when(
+                data: (data) => '${data.toTokens().removeZeroes()} TON',
+                error: (err, st) => err.toString(),
+                loading: () => null,
+              );
+
+          final hasError = internalMessage.maybeWhen(
+                error: (err, st) => true,
+                orElse: () => false,
+              ) ||
+              (message?.maybeWhen(
+                    error: (err, st) => true,
+                    orElse: () => false,
+                  ) ??
+                  false) ||
+              (fees?.maybeWhen(
+                    error: (err, st) => true,
+                    orElse: () => false,
+                  ) ??
+                  false);
+
+          return SectionedCardSection(
+            title: 'Blockchain fee',
+            subtitle: subtitle,
+            hasError: hasError,
+          );
+        },
       );
 
   Widget comment() => SectionedCardSection(
@@ -227,44 +214,39 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
         subtitle: widget.notifyReceiver ? 'Yes' : 'No',
       );
 
-  Widget submitButton() => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
-        bloc: tonWalletEstimateFeesBloc,
-        builder: (context, estimateFeesState) =>
-            BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
-          bloc: tonWalletPrepareTransferBloc,
-          builder: (context, prepareTransferState) {
-            final message = prepareTransferState.maybeWhen(
-              success: (message) => message,
-              orElse: () => null,
-            );
+  Widget submitButton() => Consumer(
+        builder: (context, ref, child) {
+          final internalMessage = ref.watch(tokenWalletPrepareTransferProvider).asData?.value;
 
-            final sufficientFunds = estimateFeesState.maybeWhen(
-              success: (_) => true,
-              orElse: () => false,
-            );
+          final message = internalMessage != null ? ref.watch(tonWalletPrepareTransferProvider).asData?.value : null;
 
-            return CustomElevatedButton(
-              onPressed: sufficientFunds && message != null
+          final fees = message != null ? ref.watch(tonWalletEstimateFeesProvider).asData?.value : null;
+
+          return Consumer(
+            builder: (context, ref, child) => CustomElevatedButton(
+              onPressed: message != null && fees != null
                   ? () => onPressed(
+                        read: ref.read,
                         message: message,
                         publicKey: widget.publicKey,
                       )
                   : null,
               text: 'Send',
-            );
-          },
-        ),
+            ),
+          );
+        },
       );
 
   Future<void> onPressed({
+    required Reader read,
     required UnsignedMessage message,
     required String publicKey,
   }) async {
     String? password;
 
-    final biometryInfoBloc = context.read<BiometryInfoBloc>();
+    final info = await read(biometryInfoProvider.future);
 
-    if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
+    if (info.isAvailable && info.isEnabled) {
       password = await getPasswordFromBiometry(publicKey);
     }
 

@@ -9,7 +9,7 @@ class TonWalletTransactionsRepository {
 
   TonWalletTransactionsRepository(this._hiveSource);
 
-  List<TonWalletTransactionWithData>? get(String address) => _hiveSource.getTonWalletTransactions(address);
+  List<TonWalletTransactionWithData> get(String address) => _hiveSource.getTonWalletTransactions(address);
 
   Future<void> save({
     required List<TonWalletTransactionWithData> tonWalletTransactions,

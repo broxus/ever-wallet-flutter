@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
-import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_deploy_bloc.dart';
+import '../../../../../../domain/blocs/biometry/biometry_info_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_deploy_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_deploy_with_multiple_owners_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/crystal_subtitle.dart';
@@ -18,7 +19,7 @@ import '../../../../../design/widgets/sectioned_card_section.dart';
 import '../common/password_enter_page.dart';
 import '../common/send_result_page.dart';
 
-class DeploymentInfoPage extends StatefulWidget {
+class DeploymentInfoPage extends ConsumerStatefulWidget {
   final BuildContext modalContext;
   final String address;
   final String publicKey;
@@ -38,52 +39,30 @@ class DeploymentInfoPage extends StatefulWidget {
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
 }
 
-class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
-  final prepareDeployBloc = getIt.get<TonWalletPrepareDeployBloc>();
-  final estimateFeesBloc = getIt.get<TonWalletEstimateFeesBloc>();
-  final infoBloc = getIt.get<TonWalletInfoBloc>();
-
+class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
   @override
   void initState() {
     super.initState();
-    infoBloc.add(TonWalletInfoEvent.load(widget.address));
-    if (widget.custodians != null && widget.reqConfirms != null) {
-      prepareDeployBloc.add(
-        TonWalletPrepareDeployEvent.prepareDeployWithMultipleOwners(
-          address: widget.address,
-          custodians: widget.custodians!,
-          reqConfirms: widget.reqConfirms!,
-        ),
-      );
-    } else {
-      prepareDeployBloc.add(TonWalletPrepareDeployEvent.prepareDeploy(widget.address));
-    }
-  }
-
-  @override
-  void dispose() {
-    prepareDeployBloc.close();
-    estimateFeesBloc.close();
-    infoBloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocListener<TonWalletPrepareDeployBloc, TonWalletPrepareDeployState>(
-        bloc: prepareDeployBloc,
-        listener: (context, state) => state.maybeWhen(
-          success: (message) => estimateFeesBloc.add(
-            TonWalletEstimateFeesEvent.estimateFees(
+    widget.custodians != null && widget.reqConfirms != null
+        ? ref.read(tonWalletPrepareDeployWithMultipleOwnersProvider.notifier).prepareDeployWithMultipleOwners(
               address: widget.address,
-              message: message,
-            ),
+              custodians: widget.custodians!,
+              reqConfirms: widget.reqConfirms!,
+            )
+        : ref.read(tonWalletPrepareDeployProvider.notifier).prepareDeploy(address: widget.address);
+    final future = widget.custodians != null && widget.reqConfirms != null
+        ? ref.read(tonWalletPrepareDeployWithMultipleOwnersProvider.future)
+        : ref.read(tonWalletPrepareDeployProvider.future);
+    future.then(
+      (value) => ref.read(tonWalletEstimateFeesProvider.notifier).estimateFees(
+            address: widget.address,
+            message: value,
           ),
-          orElse: () => null,
-        ),
-        child: scaffold(),
-      );
+    );
+  }
 
-  Widget scaffold() => Scaffold(
+  @override
+  Widget build(BuildContext context) => Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           leading: const CustomBackButton(),
@@ -143,47 +122,51 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
         ],
       );
 
-  Widget balance() => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-        bloc: infoBloc,
-        builder: (context, state) => SectionedCardSection(
-          title: 'AssetsList balance',
-          subtitle: '${state?.contractState.balance.toTokens().removeZeroes()} TON',
-        ),
+  Widget balance() => Consumer(
+        builder: (context, ref, child) {
+          final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
+
+          return SectionedCardSection(
+            title: 'AssetsList balance',
+            subtitle: '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes()} TON',
+          );
+        },
       );
 
-  Widget fee() => BlocBuilder<TonWalletPrepareDeployBloc, TonWalletPrepareDeployState>(
-        bloc: prepareDeployBloc,
-        builder: (context, prepareDeployState) => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
-          bloc: estimateFeesBloc,
-          builder: (context, estimateFeesState) {
-            final subtitle = prepareDeployState.maybeWhen(
-                  error: (exception) => exception.toString(),
-                  orElse: () => null,
-                ) ??
-                estimateFeesState.when(
-                  initial: () => null,
-                  success: (fees) => '${fees.toTokens().removeZeroes()} TON',
-                  insufficientFunds: (fees) => 'Insufficient funds',
-                  error: (exception) => exception.toString(),
-                );
+  Widget fee() => Consumer(
+        builder: (context, ref, child) {
+          final message = widget.custodians != null && widget.reqConfirms != null
+              ? ref.watch(tonWalletPrepareDeployWithMultipleOwnersProvider)
+              : ref.watch(tonWalletPrepareDeployProvider);
 
-            final hasError = prepareDeployState.maybeWhen(
-                  error: (_) => true,
-                  orElse: () => false,
-                ) ||
-                estimateFeesState.maybeWhen(
-                  insufficientFunds: (_) => true,
-                  error: (_) => true,
-                  orElse: () => false,
-                );
+          final fees = message.asData?.value != null ? ref.watch(tonWalletEstimateFeesProvider) : null;
 
-            return SectionedCardSection(
-              title: 'Blockchain fee',
-              subtitle: subtitle,
-              hasError: hasError,
-            );
-          },
-        ),
+          final subtitle = message.maybeWhen(
+                error: (err, st) => err.toString(),
+                orElse: () => null,
+              ) ??
+              fees?.when(
+                data: (data) => '${data.toTokens().removeZeroes()} TON',
+                error: (err, st) => err.toString(),
+                loading: () => null,
+              );
+
+          final hasError = message.maybeWhen(
+                error: (err, st) => true,
+                orElse: () => false,
+              ) ||
+              (fees?.maybeWhen(
+                    error: (err, st) => true,
+                    orElse: () => false,
+                  ) ??
+                  false);
+
+          return SectionedCardSection(
+            title: 'Blockchain fee',
+            subtitle: subtitle,
+            hasError: hasError,
+          );
+        },
       );
 
   List<Widget> custodians() => widget.custodians!
@@ -203,43 +186,39 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
         subtitle: '${widget.reqConfirms!.toString()} of ${widget.custodians!.length}',
       );
 
-  Widget submitButton() => BlocBuilder<TonWalletEstimateFeesBloc, TonWalletEstimateFeesState>(
-        bloc: estimateFeesBloc,
-        builder: (context, estimateFeesState) => BlocBuilder<TonWalletPrepareDeployBloc, TonWalletPrepareDeployState>(
-          bloc: prepareDeployBloc,
-          builder: (context, prepareTransferState) {
-            final message = prepareTransferState.maybeWhen(
-              success: (message) => message,
-              orElse: () => null,
-            );
+  Widget submitButton() => Consumer(
+        builder: (context, ref, child) {
+          final message = widget.custodians != null && widget.reqConfirms != null
+              ? ref.watch(tonWalletPrepareDeployWithMultipleOwnersProvider).asData?.value
+              : ref.watch(tonWalletPrepareDeployProvider).asData?.value;
 
-            final sufficientFunds = estimateFeesState.maybeWhen(
-              success: (_) => true,
-              orElse: () => false,
-            );
+          final fees = message != null ? ref.watch(tonWalletEstimateFeesProvider).asData?.value : null;
 
-            return CustomElevatedButton(
-              onPressed: sufficientFunds && message != null
+          return Consumer(
+            builder: (context, ref, child) => CustomElevatedButton(
+              onPressed: message != null && fees != null
                   ? () => onPressed(
+                        read: ref.read,
                         message: message,
                         publicKey: widget.publicKey,
                       )
                   : null,
               text: 'Deploy',
-            );
-          },
-        ),
+            ),
+          );
+        },
       );
 
   Future<void> onPressed({
+    required Reader read,
     required UnsignedMessage message,
     required String publicKey,
   }) async {
     String? password;
 
-    final biometryInfoBloc = context.read<BiometryInfoBloc>();
+    final info = await read(biometryInfoProvider.future);
 
-    if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
+    if (info.isAvailable && info.isEnabled) {
       password = await getPasswordFromBiometry(publicKey);
     }
 

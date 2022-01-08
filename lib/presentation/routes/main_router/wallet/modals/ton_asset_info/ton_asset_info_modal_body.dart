@@ -1,18 +1,18 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../../../../../../injection.dart';
-import '../../../../../../domain/blocs/key/keys_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_expired_transactions_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_transactions_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_sent_transactions_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_bloc.dart';
+import '../../../../../../domain/blocs/key/current_key_provider.dart';
+import '../../../../../../domain/blocs/key/keys_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_expired_transactions_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_transactions_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_sent_transactions_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_state_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/preload_transactions_listener.dart';
@@ -39,86 +39,31 @@ class TonAssetInfoModalBody extends StatefulWidget {
 }
 
 class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
-  final infoBloc = getIt.get<TonWalletInfoBloc>();
-  final transactionsBloc = getIt.get<TonWalletTransactionsBloc>();
-  final sentTransactionsBloc = getIt.get<TonWalletSentTransactionsBloc>();
-  final expiredTransactionsBloc = getIt.get<TonWalletExpiredTransactionsBloc>();
-  final multisigPendingTransactionsBloc = getIt.get<TonWalletMultisigPendingTransactionsBloc>();
-
   @override
-  void initState() {
-    super.initState();
-    infoBloc.add(
-      TonWalletInfoEvent.load(widget.address),
-    );
-    transactionsBloc.add(
-      TonWalletTransactionsEvent.load(widget.address),
-    );
-    sentTransactionsBloc.add(
-      TonWalletSentTransactionsEvent.load(widget.address),
-    );
-    expiredTransactionsBloc.add(
-      TonWalletExpiredTransactionsEvent.load(widget.address),
-    );
-    multisigPendingTransactionsBloc.add(
-      TonWalletMultisigPendingTransactionsEvent.load(widget.address),
-    );
-  }
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
-  @override
-  void didUpdateWidget(covariant TonAssetInfoModalBody oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.address != widget.address) {
-      infoBloc.add(
-        TonWalletInfoEvent.load(widget.address),
-      );
-      transactionsBloc.add(
-        TonWalletTransactionsEvent.load(widget.address),
-      );
-      sentTransactionsBloc.add(
-        TonWalletSentTransactionsEvent.load(widget.address),
-      );
-      expiredTransactionsBloc.add(
-        TonWalletExpiredTransactionsEvent.load(widget.address),
-      );
-      multisigPendingTransactionsBloc.add(
-        TonWalletMultisigPendingTransactionsEvent.load(widget.address),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    infoBloc.close();
-    transactionsBloc.close();
-    sentTransactionsBloc.close();
-    expiredTransactionsBloc.close();
-    multisigPendingTransactionsBloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-        bloc: infoBloc,
-        builder: (context, state) => state != null
-            ? Material(
-                color: Colors.white,
-                child: SafeArea(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      header(
-                        balance: state.contractState.balance,
-                        contractState: state.contractState,
-                      ),
-                      Expanded(
-                        child: history(),
-                      ),
-                    ],
+          return tonWalletInfo != null
+              ? Material(
+                  color: Colors.white,
+                  child: SafeArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        header(
+                          balance: tonWalletInfo.contractState.balance,
+                          contractState: tonWalletInfo.contractState,
+                        ),
+                        Expanded(
+                          child: history(),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              )
-            : const SizedBox(),
+                )
+              : const SizedBox();
+        },
       );
 
   Widget header({
@@ -170,120 +115,115 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         ),
       );
 
-  Widget actions() => BlocBuilder<KeysBloc, KeysState>(
-        bloc: context.watch<KeysBloc>(),
-        builder: (context, keysState) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-          bloc: infoBloc,
-          builder: (context, infoState) {
-            final receiveButton = WalletActionButton(
-              icon: Assets.images.iconReceive,
-              title: LocaleKeys.actions_receive.tr(),
-              onPressed: () => showReceiveModal(
-                context: context,
-                address: widget.address,
-              ),
-            );
+  Widget actions() => Consumer(
+        builder: (context, ref, child) {
+          final keys = ref.watch(keysProvider).asData?.value ?? {};
+          final currentKey = ref.watch(currentKeyProvider).asData?.value;
+          final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
-            WalletActionButton? actionButton;
+          final receiveButton = WalletActionButton(
+            icon: Assets.images.iconReceive,
+            title: LocaleKeys.actions_receive.tr(),
+            onPressed: () => showReceiveModal(
+              context: context,
+              address: widget.address,
+            ),
+          );
 
-            if (keysState.currentKey != null && infoState != null) {
-              final publicKey = keysState.currentKey!.publicKey;
-              final requiresSeparateDeploy = infoState.details.requiresSeparateDeploy;
-              final isDeployed = infoState.contractState.isDeployed;
+          WalletActionButton? actionButton;
 
-              if (!requiresSeparateDeploy || isDeployed) {
-                final keys = [
-                  ...keysState.keys.keys,
-                  ...keysState.keys.values.whereNotNull().expand((e) => e),
-                ];
-                final publicKeys =
-                    infoState.custodians?.where((e) => keys.any((el) => el.publicKey == e)).toList() ?? [publicKey];
+          if (currentKey != null && tonWalletInfo != null) {
+            final publicKey = currentKey.publicKey;
+            final requiresSeparateDeploy = tonWalletInfo.details.requiresSeparateDeploy;
+            final isDeployed = tonWalletInfo.contractState.isDeployed;
 
-                actionButton = WalletActionButton(
-                  icon: Assets.images.iconSend,
-                  title: LocaleKeys.actions_send.tr(),
-                  onPressed: () => startSendTransactionFlow(
-                    context: context,
-                    address: widget.address,
-                    publicKeys: publicKeys,
-                  ),
-                );
-              } else {
-                actionButton = WalletActionButton(
-                  icon: Assets.images.iconDeploy,
-                  title: LocaleKeys.actions_deploy.tr(),
-                  onPressed: () => startDeployWalletFlow(
-                    context: context,
-                    address: widget.address,
-                    publicKey: keysState.currentKey!.publicKey,
-                  ),
-                );
-              }
-            }
+            if (!requiresSeparateDeploy || isDeployed) {
+              final items = [
+                ...keys.keys,
+                ...keys.values.whereNotNull().expand((e) => e),
+              ];
+              final publicKeys =
+                  tonWalletInfo.custodians?.where((e) => items.any((el) => el.publicKey == e)).toList() ?? [publicKey];
 
-            return Row(
-              children: [
-                Expanded(
-                  child: receiveButton,
+              actionButton = WalletActionButton(
+                icon: Assets.images.iconSend,
+                title: LocaleKeys.actions_send.tr(),
+                onPressed: () => startSendTransactionFlow(
+                  context: context,
+                  address: widget.address,
+                  publicKeys: publicKeys,
                 ),
-                if (actionButton != null) ...[
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: actionButton,
-                  ),
-                ],
+              );
+            } else {
+              actionButton = WalletActionButton(
+                icon: Assets.images.iconDeploy,
+                title: LocaleKeys.actions_deploy.tr(),
+                onPressed: () => startDeployWalletFlow(
+                  context: context,
+                  address: widget.address,
+                  publicKey: currentKey.publicKey,
+                ),
+              );
+            }
+          }
+
+          return Row(
+            children: [
+              Expanded(
+                child: receiveButton,
+              ),
+              if (actionButton != null) ...[
+                const SizedBox(width: 16),
+                Expanded(
+                  child: actionButton,
+                ),
               ],
-            );
-          },
-        ),
+            ],
+          );
+        },
       );
 
-  Widget history() => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-        bloc: infoBloc,
-        builder: (context, infoState) => BlocBuilder<TonWalletTransactionsBloc, List<TonWalletTransactionWithData>>(
-          bloc: transactionsBloc,
-          builder: (context, transactionsState) =>
-              BlocBuilder<TonWalletSentTransactionsBloc, List<Tuple2<PendingTransaction, Transaction?>>>(
-            bloc: sentTransactionsBloc,
-            builder: (context, sentTransactionsState) =>
-                BlocBuilder<TonWalletExpiredTransactionsBloc, List<PendingTransaction>>(
-              bloc: expiredTransactionsBloc,
-              builder: (context, expiredTransactionsState) =>
-                  BlocBuilder<TonWalletMultisigPendingTransactionsBloc, List<MultisigPendingTransaction>>(
-                bloc: multisigPendingTransactionsBloc,
-                builder: (context, multisigPendingTransactionsState) => Column(
+  Widget history() => Consumer(
+        builder: (context, ref, child) {
+          final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
+          final transactionsState = ref.watch(tonWalletTransactionsStateProvider(widget.address));
+          final sentTransactionsState =
+              ref.watch(tonWalletSentTransactionsProvider(widget.address)).asData?.value ?? [];
+          final expiredTransactionsState =
+              ref.watch(tonWalletExpiredTransactionsProvider(widget.address)).asData?.value ?? [];
+          final multisigPendingTransactionsState =
+              ref.watch(tonWalletMultisigPendingTransactionsProvider(widget.address)).asData?.value ?? [];
+
+          return Column(
+            children: [
+              historyTitle(
+                transactionsState: transactionsState.item1,
+                sentTransactionsState: sentTransactionsState,
+                expiredTransactionsState: expiredTransactionsState,
+                multisigPendingTransactionsState: multisigPendingTransactionsState,
+              ),
+              const Divider(
+                height: 1,
+                thickness: 1,
+              ),
+              Flexible(
+                child: Stack(
+                  fit: StackFit.expand,
                   children: [
-                    historyTitle(
-                      transactionsState: transactionsState,
+                    list(
+                      tonWalletInfo: tonWalletInfo,
+                      transactionsState: transactionsState.item1,
                       sentTransactionsState: sentTransactionsState,
                       expiredTransactionsState: expiredTransactionsState,
                       multisigPendingTransactionsState: multisigPendingTransactionsState,
                     ),
-                    const Divider(
-                      height: 1,
-                      thickness: 1,
-                    ),
-                    Flexible(
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          list(
-                            infoState: infoState,
-                            transactionsState: transactionsState,
-                            sentTransactionsState: sentTransactionsState,
-                            expiredTransactionsState: expiredTransactionsState,
-                            multisigPendingTransactionsState: multisigPendingTransactionsState,
-                          ),
-                          loader(),
-                        ],
-                      ),
-                    ),
+                    if (transactionsState.item2) loader(),
                   ],
                 ),
               ),
-            ),
-          ),
-        ),
+            ],
+          );
+        },
       );
 
   Widget historyTitle({
@@ -320,7 +260,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget list({
-    required TonWalletInfo? infoState,
+    required TonWalletInfo? tonWalletInfo,
     required List<TonWalletTransactionWithData> transactionsState,
     required List<Tuple2<PendingTransaction, Transaction?>> sentTransactionsState,
     required List<PendingTransaction> expiredTransactionsState,
@@ -399,9 +339,9 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                       orElse: () => null,
                     ),
               ),
-              walletAddress: infoState?.address,
-              walletType: infoState?.walletType,
-              custodians: infoState?.custodians,
+              walletAddress: tonWalletInfo?.address,
+              walletType: tonWalletInfo?.walletType,
+              custodians: tonWalletInfo?.custodians,
             ),
           ),
         )
@@ -422,39 +362,40 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       thumbColor: CrystalColor.secondary,
       radius: const Radius.circular(8),
       controller: ModalScrollController.of(context),
-      child: PreloadTransactionsListener(
-        prevTransactionId: transactionsState.lastOrNull?.transaction.prevTransactionId,
-        onLoad: () => transactionsBloc.add(const TonWalletTransactionsEvent.preload()),
-        child: ListView.separated(
-          controller: ModalScrollController.of(context),
-          physics: const ClampingScrollPhysics(),
-          shrinkWrap: true,
-          itemBuilder: (context, index) => all[index],
-          separatorBuilder: (_, __) => const Divider(
-            height: 1,
-            thickness: 1,
+      child: Consumer(
+        builder: (context, ref, child) => PreloadTransactionsListener(
+          prevTransactionId: transactionsState.lastOrNull?.transaction.prevTransactionId,
+          onLoad: () => ref
+              .read(
+                tonWalletTransactionsStateProvider(widget.address).notifier,
+              )
+              .preload(),
+          child: ListView.separated(
+            controller: ModalScrollController.of(context),
+            physics: const ClampingScrollPhysics(),
+            shrinkWrap: true,
+            itemBuilder: (context, index) => all[index],
+            separatorBuilder: (_, __) => const Divider(
+              height: 1,
+              thickness: 1,
+            ),
+            itemCount: all.length,
           ),
-          itemCount: all.length,
         ),
       ),
     );
   }
 
-  Widget loader() => StreamBuilder<bool>(
-        stream: transactionsBloc.sideEffectsStream,
-        builder: (context, snapshot) => IgnorePointer(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: !(snapshot.data ?? false)
-                ? const SizedBox()
-                : Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    color: Colors.black12,
-                    child: Center(
-                      child: PlatformCircularProgressIndicator(),
-                    ),
-                  ),
+  Widget loader() => IgnorePointer(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: Colors.black12,
+            child: Center(
+              child: PlatformCircularProgressIndicator(),
+            ),
           ),
         ),
       );

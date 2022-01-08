@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
-import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
+import '../../../../../../domain/blocs/biometry/biometry_info_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
@@ -124,17 +124,22 @@ class _CallContractMethodModalBodyState extends State<CallContractMethodModalBod
         text: 'Reject',
       );
 
-  Widget submitButton() => CustomElevatedButton(
-        onPressed: () => onSubmitPressed(widget.publicKey),
-        text: 'Call',
+  Widget submitButton() => Consumer(
+        builder: (context, ref, child) => CustomElevatedButton(
+          onPressed: () => onSubmitPressed(read: ref.read, publicKey: widget.publicKey),
+          text: 'Call',
+        ),
       );
 
-  Future<void> onSubmitPressed(String publicKey) async {
+  Future<void> onSubmitPressed({
+    required Reader read,
+    required String publicKey,
+  }) async {
     String? password;
 
-    final biometryInfoBloc = context.read<BiometryInfoBloc>();
+    final info = await read(biometryInfoProvider.future);
 
-    if (biometryInfoBloc.state.isAvailable && biometryInfoBloc.state.isEnabled) {
+    if (info.isAvailable && info.isEnabled) {
       password = await getPasswordFromBiometry(publicKey);
     }
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../domain/blocs/application_flow_bloc.dart';
-import '../../../../domain/blocs/biometry/biometry_info_bloc.dart';
+import '../../data/repositories/biometry_repository.dart';
+import '../../domain/blocs/application_flow_provider.dart';
+import '../../domain/models/application_flow_state.dart';
+import '../../injection.dart';
 import '../routes/router.gr.dart';
 
 class ApplicationBlocListener extends StatefulWidget {
@@ -35,32 +37,32 @@ class _ApplicationBlocListenerState extends State<ApplicationBlocListener> with 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      context.read<BiometryInfoBloc>().add(const BiometryInfoEvent.checkAvailability());
+      getIt.get<BiometryRepository>().checkBiometryAvailability();
     }
   }
 
   @override
-  Widget build(BuildContext context) => MultiBlocListener(
-        listeners: [
-          applicationFlowListener(context),
-        ],
-        child: widget.child,
-      );
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          ref.listen<ApplicationFlowState>(
+            applicationFlowProvider,
+            (previous, next) => next.when(
+              loading: () => widget.appRouter.root.pushAndPopUntil(
+                const LoadingRoute(),
+                predicate: (route) => false,
+              ),
+              welcome: () => widget.appRouter.root.pushAndPopUntil(
+                const WelcomeRouterRoute(),
+                predicate: (route) => false,
+              ),
+              home: () => widget.appRouter.root.pushAndPopUntil(
+                const MainRouterRoute(),
+                predicate: (route) => false,
+              ),
+            ),
+          );
 
-  BlocListener applicationFlowListener(BuildContext context) => BlocListener<ApplicationFlowBloc, ApplicationFlowState>(
-        listener: (context, state) => state.when(
-          loading: () => widget.appRouter.root.pushAndPopUntil(
-            const LoadingRoute(),
-            predicate: (route) => false,
-          ),
-          welcome: () => widget.appRouter.root.pushAndPopUntil(
-            const WelcomeRouterRoute(),
-            predicate: (route) => false,
-          ),
-          home: () => widget.appRouter.root.pushAndPopUntil(
-            const MainRouterRoute(),
-            predicate: (route) => false,
-          ),
-        ),
+          return widget.child;
+        },
       );
 }

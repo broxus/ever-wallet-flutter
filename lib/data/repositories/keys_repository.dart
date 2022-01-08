@@ -17,6 +17,8 @@ class KeysRepository {
     this._biometryRepository,
   );
 
+  Future<void> setCurrentKey(KeyStoreEntry? currentKey) => _nekotonService.setCurrentKey(currentKey);
+
   Future<KeyStoreEntry> createKey({
     String? name,
     required List<String> phrase,

@@ -76,9 +76,9 @@ class HiveSource {
 
   Future<void> clearTokenWalletInfos() => _tokenWalletInfosBox.clear();
 
-  List<TonWalletTransactionWithData>? getTonWalletTransactions(String address) => _tonWalletTransactionsBox
-      .get(address.hashCode)
-      ?.where((e) => e != null)
+  List<TonWalletTransactionWithData> getTonWalletTransactions(String address) => _tonWalletTransactionsBox
+      .get(address.hashCode, defaultValue: [])!
+      .whereNotNull()
       .toList()
       .cast<TonWalletTransactionWithData>();
 
@@ -92,13 +92,13 @@ class HiveSource {
 
   Future<void> clearTonWalletTransactions() => _tonWalletTransactionsBox.clear();
 
-  List<TokenWalletTransactionWithData>? getTokenWalletTransactions({
+  List<TokenWalletTransactionWithData> getTokenWalletTransactions({
     required String owner,
     required String rootTokenContract,
   }) =>
       _tokenWalletTransactionsBox
-          .get(owner.hashCode ^ rootTokenContract.hashCode)
-          ?.where((e) => e != null)
+          .get(owner.hashCode ^ rootTokenContract.hashCode, defaultValue: [])!
+          .whereNotNull()
           .toList()
           .cast<TokenWalletTransactionWithData>();
 

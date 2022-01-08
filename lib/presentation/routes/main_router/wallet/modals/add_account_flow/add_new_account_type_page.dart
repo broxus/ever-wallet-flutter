@@ -1,10 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../data/repositories/accounts_repository.dart';
-import '../../../../../../domain/blocs/account/account_creation_options_bloc.dart';
+import '../../../../../../domain/blocs/account/account_creation_options_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/default_wallet_type.dart';
 import '../../../../../design/design.dart';
@@ -12,7 +12,7 @@ import '../../../../../design/widgets/custom_back_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/unfocusing_gesture_detector.dart';
 
-class AddNewAccountTypePage extends StatefulWidget {
+class AddNewAccountTypePage extends ConsumerStatefulWidget {
   final BuildContext modalContext;
   final String publicKey;
   final String? name;
@@ -28,20 +28,20 @@ class AddNewAccountTypePage extends StatefulWidget {
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
 }
 
-class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
+class _NewSelectWalletTypePageState extends ConsumerState<AddNewAccountTypePage> {
   final optionNotifier = ValueNotifier<WalletType?>(null);
-  final bloc = getIt.get<AccountCreationOptionsBloc>();
 
   @override
   void initState() {
     super.initState();
-    bloc.add(AccountCreationOptionsEvent.load(widget.publicKey));
+    ref
+        .read(accountCreationOptionsProvider(widget.publicKey).future)
+        .then((value) => optionNotifier.value = value.item2.firstOrNull);
   }
 
   @override
   void dispose() {
     optionNotifier.dispose();
-    bloc.close();
     super.dispose();
   }
 
@@ -85,20 +85,23 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
         ),
       );
 
-  Widget list() => BlocConsumer<AccountCreationOptionsBloc, AccountCreationOptionsState>(
-        bloc: bloc,
-        listener: (context, state) => optionNotifier.value = state.available.firstOrNull,
-        builder: (context, state) {
-          final list = [...state.added, ...state.available]..sort((a, b) => a.toInt().compareTo(b.toInt()));
+  Widget list() => Consumer(
+        builder: (context, ref, child) {
+          final options = ref.watch(accountCreationOptionsProvider(widget.publicKey)).asData?.value;
+          final added = options?.item1 ?? [];
+          final available = options?.item2 ?? [];
+
+          final list = [...added, ...available]..sort((a, b) => a.toInt().compareTo(b.toInt()));
 
           return ListView.builder(
-            itemCount: state.added.length + state.available.length,
+            itemCount: list.length,
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             itemBuilder: (BuildContext context, int index) => item(
               list: list,
               index: index,
-              state: state,
+              added: added,
+              available: available,
             ),
           );
         },
@@ -107,14 +110,15 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
   Widget item({
     required List<WalletType> list,
     required int index,
-    required AccountCreationOptionsState state,
+    required List<WalletType> added,
+    required List<WalletType> available,
   }) =>
       ValueListenableBuilder<WalletType?>(
         valueListenable: optionNotifier,
         builder: (context, value, child) => RadioListTile<WalletType>(
           value: list[index],
           groupValue: value,
-          onChanged: !state.added.contains(list[index]) ? (value) => optionNotifier.value = value : null,
+          onChanged: !added.contains(list[index]) ? (value) => optionNotifier.value = value : null,
           activeColor: CrystalColor.accent,
           title: Text('${list[index].describe()}${list[index] == kDefaultWalletType ? ' (default)' : ""}'),
         ),

@@ -1,15 +1,16 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:tuple/tuple.dart';
 
-import '../../../../../../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
-import '../../../../../../../../../../domain/blocs/token_wallet/token_wallet_transactions_bloc.dart';
-import '../../../../../../../../../../injection.dart';
-import '../../../../../../domain/blocs/key/keys_bloc.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
+import '../../../../../../domain/blocs/key/current_key_provider.dart';
+import '../../../../../../domain/blocs/key/keys_provider.dart';
+import '../../../../../../domain/blocs/token_wallet/token_wallet_info_provider.dart';
+import '../../../../../../domain/blocs/token_wallet/token_wallet_transactions_state_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/address_generated_icon.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
@@ -37,84 +38,45 @@ class TokenAssetInfoModalBody extends StatefulWidget {
 }
 
 class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
-  final tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>();
-  final tokenWalletInfoBloc = getIt.get<TokenWalletInfoBloc>();
-  final tokenWalletTransactionsBloc = getIt.get<TokenWalletTransactionsBloc>();
-
   @override
-  void initState() {
-    super.initState();
-    tonWalletInfoBloc.add(
-      TonWalletInfoEvent.load(widget.owner),
-    );
-    tokenWalletInfoBloc.add(
-      TokenWalletInfoEvent.load(
-        owner: widget.owner,
-        rootTokenContract: widget.rootTokenContract,
-      ),
-    );
-    tokenWalletTransactionsBloc.add(
-      TokenWalletTransactionsEvent.load(
-        owner: widget.owner,
-        rootTokenContract: widget.rootTokenContract,
-      ),
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant TokenAssetInfoModalBody oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.owner != widget.owner || oldWidget.rootTokenContract != widget.rootTokenContract) {
-      tonWalletInfoBloc.add(
-        TonWalletInfoEvent.load(widget.owner),
-      );
-      tokenWalletInfoBloc.add(
-        TokenWalletInfoEvent.load(
-          owner: widget.owner,
-          rootTokenContract: widget.rootTokenContract,
-        ),
-      );
-      tokenWalletTransactionsBloc.add(
-        TokenWalletTransactionsEvent.load(
-          owner: widget.owner,
-          rootTokenContract: widget.rootTokenContract,
-        ),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    tonWalletInfoBloc.close();
-    tokenWalletInfoBloc.close();
-    tokenWalletTransactionsBloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
-        bloc: tokenWalletInfoBloc,
-        builder: (context, state) => state != null
-            ? Material(
-                color: Colors.white,
-                child: SafeArea(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      header(
-                        owner: state.owner,
-                        balance: state.balance,
-                        contractState: state.contractState,
-                        symbol: state.symbol,
-                      ),
-                      Expanded(
-                        child: history(symbol: state.symbol),
-                      ),
-                    ],
-                  ),
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          final tokenWalletInfo = ref
+              .watch(
+                tokenWalletInfoProvider(
+                  Tuple2(widget.owner, widget.rootTokenContract),
                 ),
               )
-            : const SizedBox(),
+              .asData
+              ?.value;
+          final transactionsState = ref.watch(
+            tokenWalletTransactionsStateProvider(
+              Tuple2(widget.owner, widget.rootTokenContract),
+            ),
+          );
+
+          return tokenWalletInfo != null
+              ? Material(
+                  color: Colors.white,
+                  child: SafeArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        header(
+                          owner: tokenWalletInfo.owner,
+                          balance: tokenWalletInfo.balance,
+                          contractState: tokenWalletInfo.contractState,
+                          symbol: tokenWalletInfo.symbol,
+                        ),
+                        Expanded(
+                          child: history(symbol: tokenWalletInfo.symbol, transactionsState: transactionsState),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : const SizedBox();
+        },
       );
 
   Widget header({
@@ -197,88 +159,85 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
     required String owner,
     required Symbol symbol,
   }) =>
-      BlocBuilder<KeysBloc, KeysState>(
-        bloc: context.watch<KeysBloc>(),
-        builder: (context, keysState) => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-          bloc: tonWalletInfoBloc,
-          builder: (context, tonWalletInfoState) {
-            final receiveButton = WalletActionButton(
-              icon: Assets.images.iconReceive,
-              title: LocaleKeys.actions_receive.tr(),
-              onPressed: () => showReceiveModal(
+      Consumer(
+        builder: (context, ref, child) {
+          final keys = ref.watch(keysProvider).asData?.value ?? {};
+          final currentKey = ref.watch(currentKeyProvider).asData?.value;
+          final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.owner)).asData?.value;
+
+          final receiveButton = WalletActionButton(
+            icon: Assets.images.iconReceive,
+            title: LocaleKeys.actions_receive.tr(),
+            onPressed: () => showReceiveModal(
+              context: context,
+              address: owner,
+            ),
+          );
+
+          WalletActionButton? actionButton;
+
+          if (currentKey != null && tonWalletInfo != null) {
+            final publicKey = currentKey.publicKey;
+
+            final items = [
+              ...keys.keys,
+              ...keys.values.whereNotNull().expand((e) => e),
+            ];
+            final publicKeys =
+                tonWalletInfo.custodians?.where((e) => items.any((el) => el.publicKey == e)).toList() ?? [publicKey];
+
+            actionButton = WalletActionButton(
+              icon: Assets.images.iconSend,
+              title: LocaleKeys.actions_send.tr(),
+              onPressed: () => startTokenSendTransactionFlow(
                 context: context,
-                address: owner,
+                owner: owner,
+                rootTokenContract: symbol.rootTokenContract,
+                publicKeys: publicKeys,
               ),
             );
+          }
 
-            WalletActionButton? actionButton;
-
-            if (keysState.currentKey != null && tonWalletInfoState != null) {
-              final publicKey = keysState.currentKey!.publicKey;
-
-              final keys = [
-                ...keysState.keys.keys,
-                ...keysState.keys.values.whereNotNull().expand((e) => e),
-              ];
-              final publicKeys =
-                  tonWalletInfoState.custodians?.where((e) => keys.any((el) => el.publicKey == e)).toList() ??
-                      [publicKey];
-
-              actionButton = WalletActionButton(
-                icon: Assets.images.iconSend,
-                title: LocaleKeys.actions_send.tr(),
-                onPressed: () => startTokenSendTransactionFlow(
-                  context: context,
-                  owner: owner,
-                  rootTokenContract: symbol.rootTokenContract,
-                  publicKeys: publicKeys,
-                ),
-              );
-            }
-
-            return Row(
-              children: [
+          return Row(
+            children: [
+              Expanded(
+                child: receiveButton,
+              ),
+              if (actionButton != null) ...[
+                const SizedBox(width: 16),
                 Expanded(
-                  child: receiveButton,
+                  child: actionButton,
                 ),
-                if (actionButton != null) ...[
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: actionButton,
-                  ),
-                ],
               ],
-            );
-          },
-        ),
+            ],
+          );
+        },
       );
 
   Widget history({
     required Symbol symbol,
+    required Tuple2<List<TokenWalletTransactionWithData>, bool> transactionsState,
   }) =>
-      BlocBuilder<TokenWalletTransactionsBloc, List<TokenWalletTransactionWithData>>(
-        bloc: tokenWalletTransactionsBloc,
-        builder: (context, state) => Column(
-          children: [
-            historyTitle(state),
-            const Divider(
-              height: 1,
-              thickness: 1,
+      Column(
+        children: [
+          historyTitle(transactionsState.item1),
+          const Divider(
+            height: 1,
+            thickness: 1,
+          ),
+          Flexible(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                list(
+                  state: transactionsState.item1,
+                  symbol: symbol,
+                ),
+                if (transactionsState.item2) loader(),
+              ],
             ),
-            Flexible(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  list(
-                    state: state,
-                    symbol: symbol,
-                  ),
-                  loader(),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
 
   Widget historyTitle(List<TokenWalletTransactionWithData> state) => Padding(
@@ -315,43 +274,46 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
         thumbColor: CrystalColor.secondary,
         radius: const Radius.circular(8),
         controller: ModalScrollController.of(context),
-        child: PreloadTransactionsListener(
-          prevTransactionId: state.lastOrNull?.transaction.prevTransactionId,
-          onLoad: () => tokenWalletTransactionsBloc.add(const TokenWalletTransactionsEvent.preload()),
-          child: ListView.separated(
-            controller: ModalScrollController.of(context),
-            physics: const ClampingScrollPhysics(),
-            shrinkWrap: true,
-            itemBuilder: (context, index) => TokenWalletTransactionHolder(
-              transactionWithData: state[index],
-              currency: symbol.name,
-              decimals: symbol.decimals,
-              icon: icon(),
+        child: Consumer(
+          builder: (context, ref, child) => PreloadTransactionsListener(
+            prevTransactionId: state.lastOrNull?.transaction.prevTransactionId,
+            onLoad: () => ref
+                .read(
+                  tokenWalletTransactionsStateProvider(
+                    Tuple2(widget.owner, widget.rootTokenContract),
+                  ).notifier,
+                )
+                .preload(),
+            child: ListView.separated(
+              controller: ModalScrollController.of(context),
+              physics: const ClampingScrollPhysics(),
+              shrinkWrap: true,
+              itemBuilder: (context, index) => TokenWalletTransactionHolder(
+                transactionWithData: state[index],
+                currency: symbol.name,
+                decimals: symbol.decimals,
+                icon: icon(),
+              ),
+              separatorBuilder: (_, __) => const Divider(
+                height: 1,
+                thickness: 1,
+              ),
+              itemCount: state.length,
             ),
-            separatorBuilder: (_, __) => const Divider(
-              height: 1,
-              thickness: 1,
-            ),
-            itemCount: state.length,
           ),
         ),
       );
 
-  Widget loader() => StreamBuilder<bool>(
-        stream: tokenWalletTransactionsBloc.sideEffectsStream,
-        builder: (context, snapshot) => IgnorePointer(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: !(snapshot.data ?? false)
-                ? const SizedBox()
-                : Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    color: Colors.black12,
-                    child: Center(
-                      child: PlatformCircularProgressIndicator(),
-                    ),
-                  ),
+  Widget loader() => IgnorePointer(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: Colors.black12,
+            child: Center(
+              child: PlatformCircularProgressIndicator(),
+            ),
           ),
         ),
       );

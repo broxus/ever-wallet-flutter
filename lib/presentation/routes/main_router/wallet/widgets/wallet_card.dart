@@ -1,19 +1,18 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../../../../../domain/blocs/account/account_info_bloc.dart';
-import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../../../../injection.dart';
-import '../../../../../domain/blocs/external_accounts_bloc.dart';
+import '../../../../../domain/blocs/account/account_info_provider.dart';
+import '../../../../../domain/blocs/account/external_accounts_provider.dart';
+import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/animated_appearance.dart';
 import '../../../../design/widgets/wallet_card_selectable_field.dart';
 import 'more_button.dart';
 
-class WalletCard extends StatefulWidget {
+class WalletCard extends StatelessWidget {
   final String address;
   final String? publicKey;
 
@@ -22,39 +21,6 @@ class WalletCard extends StatefulWidget {
     required this.address,
     this.publicKey,
   }) : super(key: key);
-
-  @override
-  _WalletCardState createState() => _WalletCardState();
-}
-
-class _WalletCardState extends State<WalletCard> {
-  final tonWalletInfoBloc = getIt.get<TonWalletInfoBloc>();
-  late final AccountInfoBloc accountInfoBloc;
-
-  @override
-  void initState() {
-    super.initState();
-    tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
-
-    accountInfoBloc = getIt.get<AccountInfoBloc>();
-    accountInfoBloc.add(AccountInfoEvent.load(widget.address));
-  }
-
-  @override
-  void didUpdateWidget(covariant WalletCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.address != widget.address) {
-      tonWalletInfoBloc.add(TonWalletInfoEvent.load(widget.address));
-      accountInfoBloc.add(AccountInfoEvent.load(widget.address));
-    }
-  }
-
-  @override
-  void dispose() {
-    tonWalletInfoBloc.close();
-    accountInfoBloc.close();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) => AnimatedAppearance(
@@ -101,18 +67,21 @@ class _WalletCardState extends State<WalletCard> {
                 ),
               ),
             ),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-              bloc: tonWalletInfoBloc,
-              builder: (context, state) => state != null
-                  ? Positioned(
-                      top: 8,
-                      right: 8,
-                      child: MoreButton(
-                        address: state.address,
-                        publicKey: widget.publicKey,
-                      ),
-                    )
-                  : const SizedBox(),
+            Consumer(
+              builder: (context, ref, child) {
+                final tonWalletInfo = ref.watch(tonWalletInfoProvider(address)).asData?.value;
+
+                return tonWalletInfo != null
+                    ? Positioned(
+                        top: 8,
+                        right: 8,
+                        child: MoreButton(
+                          address: tonWalletInfo.address,
+                          publicKey: publicKey,
+                        ),
+                      )
+                    : const SizedBox();
+              },
             ),
           ],
         ),
@@ -140,74 +109,91 @@ class _WalletCardState extends State<WalletCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BlocBuilder<AccountInfoBloc, AssetsList?>(
-              bloc: accountInfoBloc,
-              builder: (context, state) => state != null
-                  ? AutoSizeText(
-                      state.name,
-                      maxLines: 1,
-                      maxFontSize: 16,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        letterSpacing: 0.75,
-                        color: CrystalColor.fontLight,
-                      ),
-                    )
-                  : const SizedBox(),
+            Consumer(
+              builder: (context, ref, child) {
+                final value = ref.watch(accountInfoProvider(address)).asData?.value;
+
+                return value != null
+                    ? AutoSizeText(
+                        value.name,
+                        maxLines: 1,
+                        maxFontSize: 16,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          letterSpacing: 0.75,
+                          color: CrystalColor.fontLight,
+                        ),
+                      )
+                    : const SizedBox();
+              },
             ),
             const SizedBox(height: 8),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-              bloc: tonWalletInfoBloc,
-              builder: (context, state) => state != null
-                  ? namedField(
-                      name: LocaleKeys.fields_public_key.tr(),
-                      value: state.publicKey,
-                      ellipsedValue: state.publicKey.ellipsePublicKey(),
-                    )
-                  : namedField(
-                      name: LocaleKeys.fields_public_key.tr(),
-                    ),
+            Consumer(
+              builder: (context, ref, child) {
+                final tonWalletInfo = ref.watch(tonWalletInfoProvider(address)).asData?.value;
+
+                return tonWalletInfo != null
+                    ? namedField(
+                        name: LocaleKeys.fields_public_key.tr(),
+                        value: tonWalletInfo.publicKey,
+                        ellipsedValue: tonWalletInfo.publicKey.ellipsePublicKey(),
+                      )
+                    : namedField(
+                        name: LocaleKeys.fields_public_key.tr(),
+                      );
+              },
             ),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-              bloc: tonWalletInfoBloc,
-              builder: (context, state) => state != null
-                  ? namedField(
-                      name: LocaleKeys.fields_address.tr(),
-                      value: state.address,
-                      ellipsedValue: state.address.ellipseAddress(),
-                    )
-                  : namedField(
-                      name: LocaleKeys.fields_address.tr(),
-                    ),
+            Consumer(
+              builder: (context, ref, child) {
+                final tonWalletInfo = ref.watch(tonWalletInfoProvider(address)).asData?.value;
+
+                return tonWalletInfo != null
+                    ? namedField(
+                        name: LocaleKeys.fields_address.tr(),
+                        value: tonWalletInfo.address,
+                        ellipsedValue: tonWalletInfo.address.ellipseAddress(),
+                      )
+                    : namedField(
+                        name: LocaleKeys.fields_address.tr(),
+                      );
+              },
             ),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-              bloc: tonWalletInfoBloc,
-              builder: (context, state) => state != null
-                  ? namedField(
-                      name: LocaleKeys.fields_type.tr(),
-                      value: state.walletType.describe(),
-                      isSelectable: false,
-                    )
-                  : namedField(
-                      name: LocaleKeys.fields_type.tr(),
-                      isSelectable: false,
-                    ),
+            Consumer(
+              builder: (context, ref, child) {
+                final tonWalletInfo = ref.watch(tonWalletInfoProvider(address)).asData?.value;
+
+                return tonWalletInfo != null
+                    ? namedField(
+                        name: LocaleKeys.fields_type.tr(),
+                        value: tonWalletInfo.walletType.describe(),
+                        isSelectable: false,
+                      )
+                    : namedField(
+                        name: LocaleKeys.fields_type.tr(),
+                        isSelectable: false,
+                      );
+              },
             ),
             const Spacer(),
-            BlocBuilder<ExternalAccountsBloc, List<String>>(
-              bloc: context.watch<ExternalAccountsBloc>(),
-              builder: (context, state) =>
-                  state.any((e) => e == widget.address) ? externalAccountLabel() : const SizedBox(),
+            Consumer(
+              builder: (context, ref, child) {
+                final externalAccounts = ref.watch(externalAccountsProvider).asData?.value ?? [];
+
+                return externalAccounts.any((e) => e == address) ? externalAccountLabel() : const SizedBox();
+              },
             ),
             const Spacer(flex: 2),
-            BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-              bloc: tonWalletInfoBloc,
-              builder: (context, state) => state != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(bottom: 24),
-                      child: balance(state.contractState.balance),
-                    )
-                  : const SizedBox(),
+            Consumer(
+              builder: (context, ref, child) {
+                final tonWalletInfo = ref.watch(tonWalletInfoProvider(address)).asData?.value;
+
+                return tonWalletInfo != null
+                    ? Padding(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        child: balance(tonWalletInfo.contractState.balance),
+                      )
+                    : const SizedBox();
+              },
             ),
           ],
         ),

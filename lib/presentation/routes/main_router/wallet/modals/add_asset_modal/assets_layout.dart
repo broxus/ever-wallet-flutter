@@ -1,14 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../../../../../domain/blocs/account/account_assets_options_bloc.dart';
-import '../../../../../../../../../../injection.dart';
 import '../../../../../../data/dtos/token_contract_asset_dto.dart';
+import '../../../../../../domain/blocs/account/account_assets_options_provider.dart';
 import '../../../../../design/design.dart';
-import '../../../../../design/widgets/crystal_flushbar.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_text_form_field.dart';
 import '../../../../../design/widgets/text_field_clear_button.dart';
@@ -34,65 +30,59 @@ class AssetsLayout extends StatefulWidget {
 
 class _AssetsLayoutState extends State<AssetsLayout> {
   final controller = TextEditingController();
-  final accountAssetsOptionsBloc = getIt.get<AccountAssetsOptionsBloc>();
   final selectedNotifier = ValueNotifier<List<TokenContractAssetDto>>([]);
   final filteredNotifier = ValueNotifier<List<TokenContractAssetDto>>([]);
-  late final StreamSubscription accountAssetsErrorsSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    accountAssetsErrorsSubscription = accountAssetsOptionsBloc.errorsStream
-        .listen((event) => showErrorCrystalFlushbar(context, message: event.toString()));
-    accountAssetsOptionsBloc.add(AccountAssetsOptionsEvent.load(widget.address));
-  }
-
-  @override
-  void didUpdateWidget(covariant AssetsLayout oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.address != widget.address) {
-      accountAssetsOptionsBloc.add(AccountAssetsOptionsEvent.load(widget.address));
-    }
-  }
 
   @override
   void dispose() {
     controller.dispose();
-    accountAssetsOptionsBloc.close();
     selectedNotifier.dispose();
     filteredNotifier.dispose();
-    accountAssetsErrorsSubscription.cancel();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocConsumer<AccountAssetsOptionsBloc, AccountAssetsOptionsState>(
-        bloc: accountAssetsOptionsBloc,
-        listener: (context, state) {
-          selectedNotifier.value = [...state.added]..sort((a, b) => a.name.compareTo(b.name));
-          filteredNotifier.value = [...state.added, ...state.available]..sort((a, b) => a.name.compareTo(b.name));
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          final accountAssetsOptions = ref.watch(accountAssetsOptionsProvider(widget.address)).asData?.value;
+          final added = accountAssetsOptions?.item1 ?? [];
+          final available = accountAssetsOptions?.item2 ?? [];
+
+          selectedNotifier.value = [...added]..sort((a, b) => a.name.compareTo(b.name));
+          filteredNotifier.value = [...added, ...available]..sort((a, b) => a.name.compareTo(b.name));
+
+          return UnfocusingGestureDetector(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: field(
+                    added: added,
+                    available: available,
+                  ),
+                ),
+                Expanded(
+                  child: list(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: submitButton(
+                    added: added,
+                    available: available,
+                  ),
+                ),
+              ],
+            ),
+          );
         },
-        builder: (context, state) => UnfocusingGestureDetector(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: field(state),
-              ),
-              Expanded(
-                child: list(),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: submitButton(state),
-              ),
-            ],
-          ),
-        ),
       );
 
-  Widget field(AccountAssetsOptionsState state) => DecoratedBox(
+  Widget field({
+    required List<TokenContractAssetDto> added,
+    required List<TokenContractAssetDto> available,
+  }) =>
+      DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.grey.withOpacity(0.15),
         ),
@@ -105,7 +95,7 @@ class _AssetsLayoutState extends State<AssetsLayout> {
           suffixIcon: TextFieldClearButton(controller: controller),
           onChanged: (value) {
             final text = value?.toLowerCase().trim() ?? '';
-            filteredNotifier.value = [...state.added, ...state.available]
+            filteredNotifier.value = [...added, ...available]
                 .where((e) => e.name.toLowerCase().contains(text) || e.symbol.toLowerCase().contains(text))
                 .toList();
           },
@@ -147,15 +137,19 @@ class _AssetsLayoutState extends State<AssetsLayout> {
         ),
       );
 
-  Widget submitButton(AccountAssetsOptionsState state) => ValueListenableBuilder<List<TokenContractAssetDto>>(
+  Widget submitButton({
+    required List<TokenContractAssetDto> added,
+    required List<TokenContractAssetDto> available,
+  }) =>
+      ValueListenableBuilder<List<TokenContractAssetDto>>(
         valueListenable: selectedNotifier,
         builder: (context, value, child) => CustomElevatedButton(
-          onPressed: !listEquals(value, state.added)
+          onPressed: !listEquals(value, added)
               ? () {
                   context.router.pop();
                   widget.onSave(
-                    value.where((e) => !state.added.contains(e)).toList(),
-                    state.added.where((e) => !value.contains(e)).toList(),
+                    value.where((e) => !added.contains(e)).toList(),
+                    added.where((e) => !value.contains(e)).toList(),
                   );
                 }
               : null,

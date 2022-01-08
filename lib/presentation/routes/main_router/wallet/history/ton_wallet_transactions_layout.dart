@@ -1,16 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_bloc.dart';
-import '../../../../../../../../injection.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_expired_transactions_bloc.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_bloc.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_transactions_bloc.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_sent_transactions_bloc.dart';
+import '../../../../../domain/blocs/ton_wallet/ton_wallet_expired_transactions_provider.dart';
+import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_transactions_provider.dart';
+import '../../../../../domain/blocs/ton_wallet/ton_wallet_sent_transactions_provider.dart';
+import '../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_state_provider.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/preload_transactions_listener.dart';
 import 'ton_wallet_expired_transaction_holder.dart';
@@ -33,97 +32,32 @@ class TonWalletTransactionsLayout extends StatefulWidget {
 }
 
 class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayout> {
-  final infoBloc = getIt.get<TonWalletInfoBloc>();
-  final transactionsBloc = getIt.get<TonWalletTransactionsBloc>();
-  final sentTransactionsBloc = getIt.get<TonWalletSentTransactionsBloc>();
-  final expiredTransactionsBloc = getIt.get<TonWalletExpiredTransactionsBloc>();
-  final multisigPendingTransactionsBloc = getIt.get<TonWalletMultisigPendingTransactionsBloc>();
-
   @override
-  void initState() {
-    super.initState();
-    infoBloc.add(
-      TonWalletInfoEvent.load(widget.address),
-    );
-    transactionsBloc.add(
-      TonWalletTransactionsEvent.load(widget.address),
-    );
-    sentTransactionsBloc.add(
-      TonWalletSentTransactionsEvent.load(widget.address),
-    );
-    expiredTransactionsBloc.add(
-      TonWalletExpiredTransactionsEvent.load(widget.address),
-    );
-    multisigPendingTransactionsBloc.add(
-      TonWalletMultisigPendingTransactionsEvent.load(widget.address),
-    );
-  }
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
+          final transactionsState = ref.watch(tonWalletTransactionsStateProvider(widget.address));
+          final sentTransactionsState =
+              ref.watch(tonWalletSentTransactionsProvider(widget.address)).asData?.value ?? [];
+          final expiredTransactionsState =
+              ref.watch(tonWalletExpiredTransactionsProvider(widget.address)).asData?.value ?? [];
+          final multisigPendingTransactionsState =
+              ref.watch(tonWalletMultisigPendingTransactionsProvider(widget.address)).asData?.value ?? [];
 
-  @override
-  void didUpdateWidget(covariant TonWalletTransactionsLayout oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.address != widget.address) {
-      infoBloc.add(
-        TonWalletInfoEvent.load(widget.address),
-      );
-      transactionsBloc.add(
-        TonWalletTransactionsEvent.load(widget.address),
-      );
-      sentTransactionsBloc.add(
-        TonWalletSentTransactionsEvent.load(widget.address),
-      );
-      expiredTransactionsBloc.add(
-        TonWalletExpiredTransactionsEvent.load(widget.address),
-      );
-      multisigPendingTransactionsBloc.add(
-        TonWalletMultisigPendingTransactionsEvent.load(widget.address),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    infoBloc.close();
-    transactionsBloc.close();
-    sentTransactionsBloc.close();
-    expiredTransactionsBloc.close();
-    multisigPendingTransactionsBloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => history();
-
-  Widget history() => BlocBuilder<TonWalletInfoBloc, TonWalletInfo?>(
-        bloc: infoBloc,
-        builder: (context, infoState) => BlocBuilder<TonWalletTransactionsBloc, List<TonWalletTransactionWithData>>(
-          bloc: transactionsBloc,
-          builder: (context, transactionsState) =>
-              BlocBuilder<TonWalletSentTransactionsBloc, List<Tuple2<PendingTransaction, Transaction?>>>(
-            bloc: sentTransactionsBloc,
-            builder: (context, sentTransactionsState) =>
-                BlocBuilder<TonWalletExpiredTransactionsBloc, List<PendingTransaction>>(
-              bloc: expiredTransactionsBloc,
-              builder: (context, expiredTransactionsState) =>
-                  BlocBuilder<TonWalletMultisigPendingTransactionsBloc, List<MultisigPendingTransaction>>(
-                bloc: multisigPendingTransactionsBloc,
-                builder: (context, multisigPendingTransactionsState) => Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    list(
-                      infoState: infoState,
-                      transactionsState: transactionsState,
-                      sentTransactionsState: sentTransactionsState,
-                      expiredTransactionsState: expiredTransactionsState,
-                      multisigPendingTransactionsState: multisigPendingTransactionsState,
-                    ),
-                    loader(),
-                  ],
-                ),
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              list(
+                infoState: tonWalletInfo,
+                transactionsState: transactionsState.item1,
+                sentTransactionsState: sentTransactionsState,
+                expiredTransactionsState: expiredTransactionsState,
+                multisigPendingTransactionsState: multisigPendingTransactionsState,
               ),
-            ),
-          ),
-        ),
+              if (transactionsState.item2) loader(),
+            ],
+          );
+        },
       );
 
   Widget list({
@@ -226,39 +160,36 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
     return AnimatedSwitcher(
       duration: kThemeAnimationDuration,
       child: all.isNotEmpty
-          ? PreloadTransactionsListener(
-              prevTransactionId: transactionsState.lastOrNull?.transaction.prevTransactionId,
-              onLoad: () => transactionsBloc.add(const TonWalletTransactionsEvent.preload()),
-              child: ListView.separated(
-                padding: EdgeInsets.zero,
-                controller: widget.controller,
-                itemBuilder: (context, index) => all[index],
-                separatorBuilder: (_, __) => const Divider(
-                  height: 1,
-                  thickness: 1,
+          ? Consumer(
+              builder: (context, ref, child) => PreloadTransactionsListener(
+                prevTransactionId: transactionsState.lastOrNull?.transaction.prevTransactionId,
+                onLoad: () => ref.read(tonWalletTransactionsStateProvider(widget.address).notifier).preload(),
+                child: ListView.separated(
+                  padding: EdgeInsets.zero,
+                  controller: widget.controller,
+                  itemBuilder: (context, index) => all[index],
+                  separatorBuilder: (_, __) => const Divider(
+                    height: 1,
+                    thickness: 1,
+                  ),
+                  itemCount: all.length,
                 ),
-                itemCount: all.length,
               ),
             )
           : placeholder(LocaleKeys.wallet_history_modal_placeholder_transactions_empty.tr()),
     );
   }
 
-  Widget loader() => StreamBuilder<bool>(
-        stream: transactionsBloc.sideEffectsStream,
-        builder: (context, snapshot) => IgnorePointer(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: !(snapshot.data ?? false)
-                ? const SizedBox()
-                : Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    color: Colors.black12,
-                    child: Center(
-                      child: PlatformCircularProgressIndicator(),
-                    ),
-                  ),
+  Widget loader() => IgnorePointer(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: Colors.black12,
+            child: Center(
+              child: PlatformCircularProgressIndicator(),
+            ),
           ),
         ),
       );

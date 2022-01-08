@@ -8,7 +8,7 @@ import '../../../design/widgets/crystal_text_form_field.dart';
 import '../../../design/widgets/custom_elevated_button.dart';
 
 class InputPasswordField extends StatefulWidget {
-  final Function(String password) onSubmit;
+  final void Function(String password) onSubmit;
   final String? buttonText;
   final bool autoFocus;
   final String publicKey;

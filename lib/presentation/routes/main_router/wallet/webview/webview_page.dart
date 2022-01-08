@@ -2,15 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../../../../../domain/blocs/provider/approvals_bloc.dart';
-import '../../../../../../../../injection.dart';
-import '../../../../../domain/blocs/account/browser_accounts_bloc.dart';
-import '../../../../../domain/blocs/account/browser_current_account_bloc.dart';
+import '../../../../../domain/blocs/account/accounts_provider.dart';
+import '../../../../../domain/blocs/account/browser_current_account_provider.dart';
 import '../../../../design/design.dart';
 import '../modals/browser_accounts_modal/show_browser_accounts_modal.dart';
 import 'approvals_listener.dart';
@@ -25,7 +23,6 @@ class WebviewPage extends StatefulWidget {
 }
 
 class _WebviewPageState extends State<WebviewPage> {
-  final approvalsBloc = getIt.get<ApprovalsBloc>();
   InAppWebViewController? controller;
   late final PullToRefreshController pullToRefreshController;
   late final StreamSubscription disconnectedStreamSubscription;
@@ -95,7 +92,6 @@ class _WebviewPageState extends State<WebviewPage> {
 
   @override
   void dispose() {
-    approvalsBloc.close();
     disconnectedStreamSubscription.cancel();
     transactionsFoundStreamSubscription.cancel();
     contractStateChangedStreamSubscription.cancel();
@@ -111,22 +107,27 @@ class _WebviewPageState extends State<WebviewPage> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocConsumer<BrowserCurrentAccountBloc, AssetsList?>(
-        listener: (context, accountsState) async {
-          final currentOrigin = await controller?.getCurrentOrigin();
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          ref.listen<AssetsList?>(
+            browserCurrentAccountProvider,
+            (previous, next) async {
+              final currentOrigin = await controller?.getCurrentOrigin();
 
-          if (currentOrigin != null) {
-            await disconnect(origin: currentOrigin);
-          }
+              if (currentOrigin != null) {
+                await disconnect(origin: currentOrigin);
+              }
+            },
+          );
+
+          final accounts = ref.watch(accountsProvider).asData?.value ?? [];
+          final currentAccount = ref.watch(browserCurrentAccountProvider);
+
+          return buildApprovalsListener(
+            accounts: accounts,
+            currentAccount: currentAccount,
+          );
         },
-        bloc: context.watch<BrowserCurrentAccountBloc>(),
-        builder: (context, currentAccountState) => BlocBuilder<BrowserAccountsBloc, List<AssetsList>>(
-          bloc: context.watch<BrowserAccountsBloc>(),
-          builder: (context, accountsState) => buildApprovalsListener(
-            accounts: accountsState,
-            currentAccount: currentAccountState,
-          ),
-        ),
       );
 
   Widget buildApprovalsListener({
@@ -189,27 +190,32 @@ class _WebviewPageState extends State<WebviewPage> {
     required List<AssetsList> accounts,
     AssetsList? currentAccount,
   }) =>
-      BrowserAppBar(
-        currentAccount: currentAccount,
-        urlController: urlController,
-        backButtonEnabledNotifier: backButtonEnabledNotifier,
-        forwardButtonEnabledNotifier: forwardButtonEnabledNotifier,
-        addressFieldFocusedNotifier: addressFieldFocusedNotifier,
-        progressNotifier: progressNotifier,
-        onGoBack: () => controller?.goBack(),
-        onGoForward: () => controller?.goForward(),
-        onGoHome: () => controller?.openInitialPage(),
-        onAccountButtonTapped: () => onAccountButtonTapped(accounts),
-        onRefreshButtonTapped: () => controller?.reload(),
-        onShareButtonTapped: onShareButtonTapped,
-        onUrlEntered: (String url) => controller?.parseAndLoadUrl(url),
+      Consumer(
+        builder: (context, ref, child) => BrowserAppBar(
+          currentAccount: currentAccount,
+          urlController: urlController,
+          backButtonEnabledNotifier: backButtonEnabledNotifier,
+          forwardButtonEnabledNotifier: forwardButtonEnabledNotifier,
+          addressFieldFocusedNotifier: addressFieldFocusedNotifier,
+          progressNotifier: progressNotifier,
+          onGoBack: () => controller?.goBack(),
+          onGoForward: () => controller?.goForward(),
+          onGoHome: () => controller?.openInitialPage(),
+          onAccountButtonTapped: () => onAccountButtonTapped(read: ref.read, accounts: accounts),
+          onRefreshButtonTapped: () => controller?.reload(),
+          onShareButtonTapped: onShareButtonTapped,
+          onUrlEntered: (String url) => controller?.parseAndLoadUrl(url),
+        ),
       );
 
-  void onAccountButtonTapped(List<AssetsList> accounts) => showBrowserAccountsModal(
+  void onAccountButtonTapped({
+    required Reader read,
+    required List<AssetsList> accounts,
+  }) =>
+      showBrowserAccountsModal(
         context: context,
         accounts: accounts,
-        onTap: (String address) =>
-            context.read<BrowserCurrentAccountBloc>().add(BrowserCurrentAccountEvent.setCurrent(address)),
+        onTap: (String address) => read(browserCurrentAccountProvider.notifier).setCurrent(address),
       );
 
   Future<void> onShareButtonTapped() async {

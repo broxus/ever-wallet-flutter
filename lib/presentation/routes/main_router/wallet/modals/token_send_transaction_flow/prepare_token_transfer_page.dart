@@ -2,15 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 import 'package:validators/validators.dart';
 
-import '../../../../../../domain/blocs/public_keys_labels_bloc.dart';
-import '../../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
-import '../../../../../../injection.dart';
+import '../../../../../../domain/blocs/key/public_keys_labels_bloc.dart';
+import '../../../../../../domain/blocs/token_wallet/token_wallet_info_provider.dart';
 import '../../../../../../logger.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_flushbar.dart';
@@ -56,18 +55,11 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
   final notifyReceiverNotifier = ValueNotifier<bool>(false);
   final formValidityNotifier = ValueNotifier<bool>(false);
   late final ValueNotifier<String> publicKeyNotifier;
-  final bloc = getIt.get<TokenWalletInfoBloc>();
 
   @override
   void initState() {
     super.initState();
     publicKeyNotifier = ValueNotifier<String>(widget.publicKeys.first);
-    bloc.add(
-      TokenWalletInfoEvent.load(
-        owner: widget.owner,
-        rootTokenContract: widget.rootTokenContract,
-      ),
-    );
   }
 
   @override
@@ -81,7 +73,6 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
     notifyReceiverNotifier.dispose();
     formValidityNotifier.dispose();
     publicKeyNotifier.dispose();
-    bloc.close();
     super.dispose();
   }
 
@@ -168,27 +159,32 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
     formValidityNotifier.value = formKey.currentState?.validate() ?? false;
   }
 
-  Widget dropdownButton() => BlocBuilder<PublicKeysLabelsBloc, Map<String, String>>(
-        bloc: context.watch<PublicKeysLabelsBloc>(),
-        builder: (context, state) => ValueListenableBuilder<String>(
-          valueListenable: publicKeyNotifier,
-          builder: (context, value, child) => CustomDropdownButton<String>(
-            items: widget.publicKeys
-                .map(
-                  (e) => Tuple2(
-                    e,
-                    state[e] != null ? '${state[e]} (${e.ellipsePublicKey()})' : e.ellipsePublicKey(),
-                  ),
-                )
-                .toList(),
-            value: value,
-            onChanged: (value) {
-              if (value != null) {
-                publicKeyNotifier.value = value;
-              }
-            },
-          ),
-        ),
+  Widget dropdownButton() => Consumer(
+        builder: (context, ref, child) {
+          final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
+
+          return ValueListenableBuilder<String>(
+            valueListenable: publicKeyNotifier,
+            builder: (context, value, child) => CustomDropdownButton<String>(
+              items: widget.publicKeys
+                  .map(
+                    (e) => Tuple2(
+                      e,
+                      publicKeysLabels[e] != null
+                          ? '${publicKeysLabels[e]} (${e.ellipsePublicKey()})'
+                          : e.ellipsePublicKey(),
+                    ),
+                  )
+                  .toList(),
+              value: value,
+              onChanged: (value) {
+                if (value != null) {
+                  publicKeyNotifier.value = value;
+                }
+              },
+            ),
+          );
+        },
       );
 
   Widget amount() => CustomTextFormField(
@@ -226,35 +222,57 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         },
       );
 
-  Widget maxButton() => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
-        bloc: bloc,
-        builder: (context, state) => SuffixIconButton(
-          onPressed: () async {
-            amountController.text = state?.balance.toTokens(state.symbol.decimals).removeZeroes() ?? '0';
-            amountController.selection = TextSelection.fromPosition(TextPosition(offset: amountController.text.length));
+  Widget maxButton() => Consumer(
+        builder: (context, ref, child) {
+          final tokenWalletInfo = ref
+              .watch(
+                tokenWalletInfoProvider(
+                  Tuple2(widget.owner, widget.rootTokenContract),
+                ),
+              )
+              .asData
+              ?.value;
 
-            Form.of(context)?.validate();
-          },
-          icon: const SizedBox(
-            width: 64,
-            child: Text(
-              'Max',
-              style: TextStyle(
-                color: CrystalColor.accent,
+          return SuffixIconButton(
+            onPressed: () async {
+              amountController.text =
+                  tokenWalletInfo?.balance.toTokens(tokenWalletInfo.symbol.decimals).removeZeroes() ?? '0';
+              amountController.selection =
+                  TextSelection.fromPosition(TextPosition(offset: amountController.text.length));
+
+              Form.of(context)?.validate();
+            },
+            icon: const SizedBox(
+              width: 64,
+              child: Text(
+                'Max',
+                style: TextStyle(
+                  color: CrystalColor.accent,
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       );
 
-  Widget balance() => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
-        bloc: bloc,
-        builder: (context, state) => Text(
-          'Your balance: ${state?.balance.toTokens(state.symbol.decimals).removeZeroes() ?? '0'} ${state?.symbol.name}',
-          style: const TextStyle(
-            color: Colors.black54,
-          ),
-        ),
+  Widget balance() => Consumer(
+        builder: (context, ref, child) {
+          final tokenWalletInfo = ref
+              .watch(
+                tokenWalletInfoProvider(
+                  Tuple2(widget.owner, widget.rootTokenContract),
+                ),
+              )
+              .asData
+              ?.value;
+
+          return Text(
+            'Your balance: ${tokenWalletInfo?.balance.toTokens(tokenWalletInfo.symbol.decimals).removeZeroes() ?? '0'} ${tokenWalletInfo?.symbol.name}',
+            style: const TextStyle(
+              color: Colors.black54,
+            ),
+          );
+        },
       );
 
   Widget destination() => CustomTextFormField(
@@ -384,15 +402,25 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         ],
       );
 
-  Widget submitButton() => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
-        bloc: bloc,
-        builder: (context, state) => ValueListenableBuilder<bool>(
-          valueListenable: formValidityNotifier,
-          builder: (context, value, child) => CustomElevatedButton(
-            onPressed: value && state != null ? () => onPressed(state.symbol.decimals) : null,
-            text: 'Next',
-          ),
-        ),
+  Widget submitButton() => Consumer(
+        builder: (context, ref, child) {
+          final tokenWalletInfo = ref
+              .watch(
+                tokenWalletInfoProvider(
+                  Tuple2(widget.owner, widget.rootTokenContract),
+                ),
+              )
+              .asData
+              ?.value;
+
+          return ValueListenableBuilder<bool>(
+            valueListenable: formValidityNotifier,
+            builder: (context, value, child) => CustomElevatedButton(
+              onPressed: value && tokenWalletInfo != null ? () => onPressed(tokenWalletInfo.symbol.decimals) : null,
+              text: 'Next',
+            ),
+          );
+        },
       );
 
   void onPressed(int decimals) {

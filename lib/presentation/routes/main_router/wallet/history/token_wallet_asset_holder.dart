@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:tuple/tuple.dart';
 
-import '../../../../../../../../domain/blocs/token_wallet/token_wallet_info_bloc.dart';
-import '../../../../../../../../injection.dart';
+import '../../../../../domain/blocs/token_wallet/token_wallet_info_provider.dart';
 import '../../../../design/widgets/address_generated_icon.dart';
 import '../../../../design/widgets/token_asset_icon.dart';
 import '../modals/token_asset_info/show_token_asset_info.dart';
@@ -26,60 +26,38 @@ class TokenWalletAssetHolder extends StatefulWidget {
 }
 
 class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
-  final bloc = getIt.get<TokenWalletInfoBloc>();
-
   @override
-  void initState() {
-    bloc.add(
-      TokenWalletInfoEvent.load(
-        owner: widget.owner,
-        rootTokenContract: widget.rootTokenContract,
-      ),
-    );
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant TokenWalletAssetHolder oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.owner != widget.owner || oldWidget.rootTokenContract != widget.rootTokenContract) {
-      bloc.add(
-        TokenWalletInfoEvent.load(
-          owner: widget.owner,
-          rootTokenContract: widget.rootTokenContract,
-        ),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    bloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocBuilder<TokenWalletInfoBloc, TokenWalletInfo?>(
-        bloc: bloc,
-        builder: (context, state) => WalletAssetHolder(
-          name: state != null ? state.symbol.name : '',
-          balance: state != null ? state.balance : '0',
-          decimals: state != null ? state.symbol.decimals : kTonDecimals,
-          icon: widget.icon != null
-              ? TokenAssetIcon(
-                  icon: widget.icon!,
-                )
-              : AddressGeneratedIcon(
-                  address: widget.rootTokenContract,
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          final tokenWalletInfo = ref
+              .watch(
+                tokenWalletInfoProvider(
+                  Tuple2(widget.owner, widget.rootTokenContract),
                 ),
-          onTap: state != null
-              ? () => showTokenAssetInfo(
-                    context: context,
-                    owner: state.owner,
-                    rootTokenContract: widget.rootTokenContract,
-                    icon: widget.icon,
+              )
+              .asData
+              ?.value;
+
+          return WalletAssetHolder(
+            name: tokenWalletInfo != null ? tokenWalletInfo.symbol.name : '',
+            balance: tokenWalletInfo != null ? tokenWalletInfo.balance : '0',
+            decimals: tokenWalletInfo != null ? tokenWalletInfo.symbol.decimals : kTonDecimals,
+            icon: widget.icon != null
+                ? TokenAssetIcon(
+                    icon: widget.icon!,
                   )
-              : () {},
-        ),
+                : AddressGeneratedIcon(
+                    address: widget.rootTokenContract,
+                  ),
+            onTap: tokenWalletInfo != null
+                ? () => showTokenAssetInfo(
+                      context: context,
+                      owner: tokenWalletInfo.owner,
+                      rootTokenContract: widget.rootTokenContract,
+                      icon: widget.icon,
+                    )
+                : () {},
+          );
+        },
       );
 }

@@ -24,3 +24,12 @@ class AccountAlreadyAddedException implements Exception {
   @override
   String toString() => info ?? super.toString();
 }
+
+class InsufficientFundsException implements Exception {
+  final String? info;
+
+  InsufficientFundsException([this.info]);
+
+  @override
+  String toString() => info ?? super.toString();
+}

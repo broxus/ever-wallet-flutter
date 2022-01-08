@@ -1,15 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../domain/blocs/biometry/biometry_info_bloc.dart';
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
+import '../../../../domain/blocs/biometry/biometry_info_provider.dart';
 import '../../../design/design.dart';
 import 'input_password_field.dart';
 
 class InputPasswordModalBody extends StatefulWidget {
-  final Function(String password) onSubmit;
+  final void Function(String password) onSubmit;
   final String? buttonText;
   final String descriptions;
   final bool autoFocus;
@@ -59,20 +59,22 @@ class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
                 ),
                 const SizedBox(height: 24),
               ],
-              InputPasswordField(
-                onSubmit: (password) async {
-                  final biometryInfoBloc = context.read<BiometryInfoBloc>();
+              Consumer(
+                builder: (context, ref, child) => InputPasswordField(
+                  onSubmit: (password) async {
+                    final info = await ref.read(biometryInfoProvider.future);
 
-                  if (biometryInfoBloc.state.isEnabled && biometryInfoBloc.state.isEnabled) {
-                    await getIt.get<BiometryRepository>().setKeyPassword(
-                          publicKey: widget.publicKey,
-                          password: password,
-                        );
-                  }
+                    if (info.isEnabled && info.isEnabled) {
+                      await getIt.get<BiometryRepository>().setKeyPassword(
+                            publicKey: widget.publicKey,
+                            password: password,
+                          );
+                    }
 
-                  widget.onSubmit(password);
-                },
-                publicKey: widget.publicKey,
+                    widget.onSubmit(password);
+                  },
+                  publicKey: widget.publicKey,
+                ),
               ),
             ],
           ),

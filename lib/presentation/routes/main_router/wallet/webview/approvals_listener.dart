@@ -3,16 +3,15 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../../../domain/blocs/provider/approvals_bloc.dart';
-import '../../../../../../../../injection.dart';
+import '../../../../../domain/blocs/provider/approvals_provider.dart';
 import '../modals/call_contract_method/show_call_contract_method.dart';
 import '../modals/request_permissions_modal/show_preferences_modal.dart';
 import '../modals/send_message/show_send_message.dart';
 
-class ApprovalsListener extends StatefulWidget {
+class ApprovalsListener extends StatelessWidget {
   final String address;
   final String publicKey;
   final WalletType walletType;
@@ -27,44 +26,57 @@ class ApprovalsListener extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ApprovalsListenerState createState() => _ApprovalsListenerState();
-}
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          ref.listen<AsyncValue<ApprovalRequest>>(
+            approvalsProvider,
+            (previous, next) => next.asData?.value.when(
+              requestPermissions: (origin, permissions, completer) => requestPermissions(
+                context: context,
+                origin: origin,
+                permissions: permissions,
+                completer: completer,
+              ),
+              sendMessage: (origin, sender, recipient, amount, bounce, payload, knownPayload, completer) => sendMessage(
+                context: context,
+                origin: origin,
+                sender: sender,
+                recipient: recipient,
+                amount: amount,
+                bounce: bounce,
+                payload: payload,
+                knownPayload: knownPayload,
+                completer: completer,
+              ),
+              callContractMethod: (origin, selectedPublicKey, repackedRecipient, payload, completer) =>
+                  callContractMethod(
+                context: context,
+                origin: origin,
+                selectedPublicKey: selectedPublicKey,
+                repackedRecipient: repackedRecipient,
+                payload: payload,
+                completer: completer,
+              ),
+            ),
+          );
 
-class _ApprovalsListenerState extends State<ApprovalsListener> {
-  final approvalsBloc = getIt.get<ApprovalsBloc>();
-
-  @override
-  void dispose() {
-    approvalsBloc.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocListener<ApprovalsBloc, ApprovalsState>(
-        bloc: approvalsBloc,
-        listener: (context, state) async {
-          if (state is ApprovalsStateShown) {
-            state.request.when(
-              requestPermissions: requestPermissions,
-              sendMessage: sendMessage,
-              callContractMethod: callContractMethod,
-            );
-          }
+          return child!;
         },
-        child: widget.child,
+        child: child,
       );
 
-  Future<void> requestPermissions(
-    String origin,
-    List<Permission> permissions,
-    Completer<Permissions> completer,
-  ) async {
+  Future<void> requestPermissions({
+    required BuildContext context,
+    required String origin,
+    required List<Permission> permissions,
+    required Completer<Permissions> completer,
+  }) async {
     final result = await showRequestPermissionsModal(
       context: context,
       origin: origin,
       permissions: permissions,
-      address: widget.address,
-      publicKey: widget.publicKey,
+      address: address,
+      publicKey: publicKey,
     );
 
     if (result != null) {
@@ -74,21 +86,22 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
     }
   }
 
-  Future<void> sendMessage(
-    String origin,
-    String sender,
-    String recipient,
-    String amount,
-    bool bounce,
-    FunctionCall? payload,
-    KnownPayload? knownPayload,
-    Completer<String> completer,
-  ) async {
+  Future<void> sendMessage({
+    required BuildContext context,
+    required String origin,
+    required String sender,
+    required String recipient,
+    required String amount,
+    required bool bounce,
+    required FunctionCall? payload,
+    required KnownPayload? knownPayload,
+    required Completer<String> completer,
+  }) async {
     final result = await showSendMessage(
       context: context,
       origin: origin,
       sender: sender,
-      publicKey: widget.publicKey,
+      publicKey: publicKey,
       recipient: recipient,
       amount: amount,
       bounce: bounce,
@@ -103,13 +116,14 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
     }
   }
 
-  Future<void> callContractMethod(
-    String origin,
-    String selectedPublicKey,
-    String repackedRecipient,
-    FunctionCall payload,
-    Completer<String> completer,
-  ) async {
+  Future<void> callContractMethod({
+    required BuildContext context,
+    required String origin,
+    required String selectedPublicKey,
+    required String repackedRecipient,
+    required FunctionCall payload,
+    required Completer<String> completer,
+  }) async {
     final result = await showCallContractMethod(
       context: context,
       origin: origin,
