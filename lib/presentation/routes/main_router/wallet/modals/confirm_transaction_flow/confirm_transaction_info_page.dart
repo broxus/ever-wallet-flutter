@@ -7,7 +7,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_provider.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_confirm_transaction_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
@@ -50,13 +49,6 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
           publicKey: widget.publicKey,
           address: widget.address,
           transactionId: widget.transactionId,
-        );
-    ref.read(tonWalletPrepareConfirmTransactionProvider.future).then(
-          (value) => ref.read(tonWalletEstimateFeesProvider.notifier).estimateFees(
-                address: widget.address,
-                message: value,
-                amount: widget.amount,
-              ),
         );
   }
 
@@ -128,29 +120,18 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
 
   Widget fee() => Consumer(
         builder: (context, ref, child) {
-          final message = ref.watch(tonWalletPrepareConfirmTransactionProvider);
+          final result = ref.watch(tonWalletPrepareConfirmTransactionProvider);
 
-          final fees = message.asData?.value != null ? ref.watch(tonWalletEstimateFeesProvider) : null;
+          final subtitle = result.when(
+            data: (data) => '${data.item2.toTokens().removeZeroes()} TON',
+            error: (err, st) => err.toString(),
+            loading: () => null,
+          );
 
-          final subtitle = message.maybeWhen(
-                error: (err, st) => err.toString(),
-                orElse: () => null,
-              ) ??
-              fees?.when(
-                data: (data) => '${data.toTokens().removeZeroes()} TON',
-                error: (err, st) => err.toString(),
-                loading: () => null,
-              );
-
-          final hasError = message.maybeWhen(
-                error: (err, st) => true,
-                orElse: () => false,
-              ) ||
-              (fees?.maybeWhen(
-                    error: (err, st) => true,
-                    orElse: () => false,
-                  ) ??
-                  false);
+          final hasError = result.maybeWhen(
+            error: (error, stackTrace) => true,
+            orElse: () => false,
+          );
 
           return SectionedCardSection(
             title: 'Blockchain fee',
@@ -167,15 +148,13 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
 
   Widget submitButton() => Consumer(
         builder: (context, ref, child) {
-          final message = ref.watch(tonWalletPrepareConfirmTransactionProvider).asData?.value;
-
-          final fees = message != null ? ref.watch(tonWalletEstimateFeesProvider).asData?.value : null;
+          final result = ref.watch(tonWalletPrepareConfirmTransactionProvider).asData?.value;
 
           return CustomElevatedButton(
-            onPressed: message != null && fees != null
+            onPressed: result?.item1 != null && result?.item2 != null
                 ? () => onPressed(
                       read: ref.read,
-                      message: message,
+                      message: result!.item1,
                       publicKey: widget.publicKey,
                     )
                 : null,

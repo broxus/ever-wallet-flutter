@@ -5,10 +5,8 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_provider.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_deploy_provider.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_deploy_with_multiple_owners_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/crystal_subtitle.dart';
@@ -43,22 +41,11 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
   @override
   void initState() {
     super.initState();
-    widget.custodians != null && widget.reqConfirms != null
-        ? ref.read(tonWalletPrepareDeployWithMultipleOwnersProvider.notifier).prepareDeployWithMultipleOwners(
-              address: widget.address,
-              custodians: widget.custodians!,
-              reqConfirms: widget.reqConfirms!,
-            )
-        : ref.read(tonWalletPrepareDeployProvider.notifier).prepareDeploy(address: widget.address);
-    final future = widget.custodians != null && widget.reqConfirms != null
-        ? ref.read(tonWalletPrepareDeployWithMultipleOwnersProvider.future)
-        : ref.read(tonWalletPrepareDeployProvider.future);
-    future.then(
-      (value) => ref.read(tonWalletEstimateFeesProvider.notifier).estimateFees(
-            address: widget.address,
-            message: value,
-          ),
-    );
+    ref.read(tonWalletPrepareDeployProvider.notifier).prepareDeploy(
+          address: widget.address,
+          custodians: widget.custodians,
+          reqConfirms: widget.reqConfirms,
+        );
   }
 
   @override
@@ -118,7 +105,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
           balance(),
           fee(),
           if (widget.custodians != null) ...custodians(),
-          if (widget.custodians != null && widget.reqConfirms != null) reqConfirms(),
+          if (widget.reqConfirms != null) reqConfirms(),
         ],
       );
 
@@ -135,31 +122,18 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
 
   Widget fee() => Consumer(
         builder: (context, ref, child) {
-          final message = widget.custodians != null && widget.reqConfirms != null
-              ? ref.watch(tonWalletPrepareDeployWithMultipleOwnersProvider)
-              : ref.watch(tonWalletPrepareDeployProvider);
+          final result = ref.watch(tonWalletPrepareDeployProvider);
 
-          final fees = message.asData?.value != null ? ref.watch(tonWalletEstimateFeesProvider) : null;
+          final subtitle = result.when(
+            data: (data) => '${data.item2.toTokens().removeZeroes()} TON',
+            error: (err, st) => err.toString(),
+            loading: () => null,
+          );
 
-          final subtitle = message.maybeWhen(
-                error: (err, st) => err.toString(),
-                orElse: () => null,
-              ) ??
-              fees?.when(
-                data: (data) => '${data.toTokens().removeZeroes()} TON',
-                error: (err, st) => err.toString(),
-                loading: () => null,
-              );
-
-          final hasError = message.maybeWhen(
-                error: (err, st) => true,
-                orElse: () => false,
-              ) ||
-              (fees?.maybeWhen(
-                    error: (err, st) => true,
-                    orElse: () => false,
-                  ) ??
-                  false);
+          final hasError = result.maybeWhen(
+            error: (error, stackTrace) => true,
+            orElse: () => false,
+          );
 
           return SectionedCardSection(
             title: 'Blockchain fee',
@@ -188,23 +162,17 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
 
   Widget submitButton() => Consumer(
         builder: (context, ref, child) {
-          final message = widget.custodians != null && widget.reqConfirms != null
-              ? ref.watch(tonWalletPrepareDeployWithMultipleOwnersProvider).asData?.value
-              : ref.watch(tonWalletPrepareDeployProvider).asData?.value;
+          final result = ref.watch(tonWalletPrepareDeployProvider).asData?.value;
 
-          final fees = message != null ? ref.watch(tonWalletEstimateFeesProvider).asData?.value : null;
-
-          return Consumer(
-            builder: (context, ref, child) => CustomElevatedButton(
-              onPressed: message != null && fees != null
-                  ? () => onPressed(
-                        read: ref.read,
-                        message: message,
-                        publicKey: widget.publicKey,
-                      )
-                  : null,
-              text: 'Deploy',
-            ),
+          return CustomElevatedButton(
+            onPressed: result?.item1 != null && result?.item2 != null
+                ? () => onPressed(
+                      read: ref.read,
+                      message: result!.item1,
+                      publicKey: widget.publicKey,
+                    )
+                : null,
+            text: 'Deploy',
           );
         },
       );

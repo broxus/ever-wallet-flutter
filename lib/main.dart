@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'injection.dart';
 import 'logger.dart';
 import 'presentation/application/application.dart';
+import 'provider_observer.dart';
 
 Future<void> main() async {
   try {
@@ -38,7 +39,14 @@ Future<void> main() async {
     await configureDependencies();
 
     runZonedGuarded(
-      () => runApp(const ProviderScope(child: Application())),
+      () => runApp(
+        ProviderScope(
+          observers: [
+            ProviderLogger(logger),
+          ],
+          child: const Application(),
+        ),
+      ),
       FirebaseCrashlytics.instance.recordError,
     );
   } catch (err, st) {

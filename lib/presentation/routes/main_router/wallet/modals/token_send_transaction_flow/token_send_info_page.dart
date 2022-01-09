@@ -8,8 +8,6 @@ import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_provider.dart';
 import '../../../../../../domain/blocs/token_wallet/token_wallet_info_provider.dart';
 import '../../../../../../domain/blocs/token_wallet/token_wallet_prepare_transfer_provider.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_estimate_fees_provider.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_prepare_transfer_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/custom_back_button.dart';
@@ -50,27 +48,13 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
   void initState() {
     super.initState();
     ref.read(tokenWalletPrepareTransferProvider.notifier).prepareTransfer(
+          publicKey: widget.publicKey,
           owner: widget.owner,
           rootTokenContract: widget.rootTokenContract,
           destination: widget.destination,
           amount: widget.amount,
           notifyReceiver: widget.notifyReceiver,
           payload: widget.comment,
-        );
-    ref.read(tokenWalletPrepareTransferProvider.future).then(
-          (value) => ref.read(tonWalletPrepareTransferProvider.notifier).prepareTransfer(
-                address: widget.owner,
-                publicKey: widget.publicKey,
-                destination: widget.destination,
-                amount: widget.amount,
-              ),
-        );
-    ref.read(tonWalletPrepareTransferProvider.future).then(
-          (value) => ref.read(tonWalletEstimateFeesProvider.notifier).estimateFees(
-                address: widget.owner,
-                message: value,
-                amount: widget.amount,
-              ),
         );
   }
 
@@ -161,40 +145,18 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
 
   Widget fee() => Consumer(
         builder: (context, ref, child) {
-          final internalMessage = ref.watch(tokenWalletPrepareTransferProvider);
+          final result = ref.watch(tokenWalletPrepareTransferProvider);
 
-          final message = internalMessage.asData?.value != null ? ref.watch(tonWalletPrepareTransferProvider) : null;
+          final subtitle = result.when(
+            data: (data) => '${data.item2.toTokens().removeZeroes()} TON',
+            error: (err, st) => err.toString(),
+            loading: () => null,
+          );
 
-          final fees = message?.asData?.value != null ? ref.watch(tonWalletEstimateFeesProvider) : null;
-
-          final subtitle = internalMessage.maybeWhen(
-                error: (err, st) => err.toString(),
-                orElse: () => null,
-              ) ??
-              message?.maybeWhen(
-                error: (err, st) => err.toString(),
-                orElse: () => null,
-              ) ??
-              fees?.when(
-                data: (data) => '${data.toTokens().removeZeroes()} TON',
-                error: (err, st) => err.toString(),
-                loading: () => null,
-              );
-
-          final hasError = internalMessage.maybeWhen(
-                error: (err, st) => true,
-                orElse: () => false,
-              ) ||
-              (message?.maybeWhen(
-                    error: (err, st) => true,
-                    orElse: () => false,
-                  ) ??
-                  false) ||
-              (fees?.maybeWhen(
-                    error: (err, st) => true,
-                    orElse: () => false,
-                  ) ??
-                  false);
+          final hasError = result.maybeWhen(
+            error: (error, stackTrace) => true,
+            orElse: () => false,
+          );
 
           return SectionedCardSection(
             title: 'Blockchain fee',
@@ -216,23 +178,17 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
 
   Widget submitButton() => Consumer(
         builder: (context, ref, child) {
-          final internalMessage = ref.watch(tokenWalletPrepareTransferProvider).asData?.value;
+          final result = ref.watch(tokenWalletPrepareTransferProvider).asData?.value;
 
-          final message = internalMessage != null ? ref.watch(tonWalletPrepareTransferProvider).asData?.value : null;
-
-          final fees = message != null ? ref.watch(tonWalletEstimateFeesProvider).asData?.value : null;
-
-          return Consumer(
-            builder: (context, ref, child) => CustomElevatedButton(
-              onPressed: message != null && fees != null
-                  ? () => onPressed(
-                        read: ref.read,
-                        message: message,
-                        publicKey: widget.publicKey,
-                      )
-                  : null,
-              text: 'Send',
-            ),
+          return CustomElevatedButton(
+            onPressed: result?.item1 != null && result?.item2 != null
+                ? () => onPressed(
+                      read: ref.read,
+                      message: result!.item1,
+                      publicKey: widget.publicKey,
+                    )
+                : null,
+            text: 'Send',
           );
         },
       );

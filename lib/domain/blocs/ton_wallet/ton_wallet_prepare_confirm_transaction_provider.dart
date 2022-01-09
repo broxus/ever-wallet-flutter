@@ -2,16 +2,18 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:tuple/tuple.dart';
 
+import '../../../data/exceptions.dart';
 import '../../../data/services/nekoton_service.dart';
 import '../../../injection.dart';
 
-final tonWalletPrepareConfirmTransactionProvider =
-    StateNotifierProvider.autoDispose<TonWalletPrepareConfirmTransactionNotifier, AsyncValue<UnsignedMessage>>(
+final tonWalletPrepareConfirmTransactionProvider = StateNotifierProvider.autoDispose<
+    TonWalletPrepareConfirmTransactionNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
   (ref) => TonWalletPrepareConfirmTransactionNotifier(ref.read),
 );
 
-class TonWalletPrepareConfirmTransactionNotifier extends StateNotifier<AsyncValue<UnsignedMessage>> {
+class TonWalletPrepareConfirmTransactionNotifier extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
   final Reader read;
 
   TonWalletPrepareConfirmTransactionNotifier(this.read) : super(const AsyncValue.loading());
@@ -34,11 +36,25 @@ class TonWalletPrepareConfirmTransactionNotifier extends StateNotifier<AsyncValu
             onTimeout: () => throw TonWalletNotFoundException(),
           );
 
-      return tonWallet.prepareConfirmTransaction(
+      final message = await tonWallet.prepareConfirmTransaction(
         publicKey: publicKey,
         transactionId: transactionId,
         expiration: kDefaultMessageExpiration,
       );
+
+      final feesValue = await tonWallet.estimateFees(message);
+      final fees = feesValue.toString();
+
+      final balance = await tonWallet.contractState.then((value) => value.balance);
+      final balanceValue = int.parse(balance);
+
+      final isPossibleToSendMessage = balanceValue > feesValue;
+
+      if (isPossibleToSendMessage) {
+        return Tuple2(message, fees);
+      } else {
+        throw InsufficientFundsException();
+      }
     });
   }
 }
