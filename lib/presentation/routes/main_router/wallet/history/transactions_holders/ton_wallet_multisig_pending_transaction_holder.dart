@@ -2,17 +2,35 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../design/design.dart';
-import '../../../../design/transaction_time.dart';
-import '../../../../design/widgets/ton_asset_icon.dart';
-import '../modals/ton_wallet_transaction_info/show_ton_wallet_transaction_info.dart';
+import '../../../../../design/design.dart';
+import '../../../../../design/transaction_time.dart';
+import '../../../../../design/widgets/ton_asset_icon.dart';
+import '../../../../../design/widgets/transaction_type_label.dart';
+import '../../modals/ton_wallet_multisig_pending_transaction_info/show_ton_wallet_multisig_pending_transaction_info.dart';
+import 'widgets/address_title.dart';
+import 'widgets/confirmation_time_counter.dart';
+import 'widgets/confirms_title.dart';
+import 'widgets/date_title.dart';
+import 'widgets/fees_title.dart';
+import 'widgets/icon_forward.dart';
+import 'widgets/value_title.dart';
 
-class TonWalletTransactionHolder extends StatelessWidget {
+class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
+  final MultisigPendingTransaction multisigPendingTransaction;
+  final String walletAddress;
+  final String walletPublicKey;
+  final WalletType walletType;
+  final List<String> custodians;
 
-  const TonWalletTransactionHolder({
+  const TonWalletMultisigPendingTransactionHolder({
     Key? key,
     required this.transactionWithData,
+    required this.multisigPendingTransaction,
+    required this.walletAddress,
+    required this.walletPublicKey,
+    required this.walletType,
+    required this.custodians,
   }) : super(key: key);
 
   @override
@@ -53,10 +71,11 @@ class TonWalletTransactionHolder extends StatelessWidget {
 
     final isOutgoing = recipient != null;
 
-    final msgValue = (isOutgoing
-            ? transactionWithData.transaction.outMessages.firstOrNull?.value
-            : transactionWithData.transaction.inMessage.value)
-        ?.toTokens()
+    final msgValue = ((isOutgoing
+                ? transactionWithData.transaction.outMessages.firstOrNull?.value
+                : transactionWithData.transaction.inMessage.value) ??
+            transactionWithData.transaction.inMessage.value)
+        .toTokens()
         .removeZeroes()
         .formatValue();
 
@@ -79,16 +98,42 @@ class TonWalletTransactionHolder extends StatelessWidget {
 
     final value = dataValue ?? msgValue;
 
-    final address = isOutgoing ? recipient : sender;
+    final address = (isOutgoing ? recipient : sender) ?? walletAddress;
 
     final date = transactionWithData.transaction.createdAt.toDateTime();
 
     final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
 
+    final signsReceived = multisigPendingTransaction.signsReceived;
+
+    final signsRequired = multisigPendingTransaction.signsRequired;
+
+    final timeForConfirmation = walletType.maybeWhen(
+      multisig: (multisigType) {
+        switch (multisigType) {
+          case MultisigType.safeMultisigWallet:
+          case MultisigType.setcodeMultisigWallet:
+          case MultisigType.bridgeMultisigWallet:
+          case MultisigType.surfWallet:
+            return const Duration(hours: 1);
+          case MultisigType.safeMultisigWallet24h:
+            return const Duration(hours: 24);
+        }
+      },
+      orElse: () => const Duration(hours: 1),
+    );
+
+    final expireAt = date.add(timeForConfirmation);
+
     return InkWell(
-      onTap: () => showTonWalletTransactionInfo(
+      onTap: () => showTonWalletMultisigPendingTransactionInfo(
         context: context,
         transactionWithData: transactionWithData,
+        multisigPendingTransaction: multisigPendingTransaction,
+        walletAddress: walletAddress,
+        walletPublicKey: walletPublicKey,
+        walletType: walletType,
+        custodians: custodians,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -103,26 +148,39 @@ class TonWalletTransactionHolder extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: value != null
-                            ? valueTitle(
-                                value: value,
-                                isOutgoing: isOutgoing,
-                              )
-                            : const SizedBox(),
+                        child: ValueTitle(
+                          value: value,
+                          currency: 'TON',
+                          isOutgoing: isOutgoing,
+                        ),
                       ),
-                      iconForward(),
+                      const IconForward(),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  feesTitle(fees),
+                  FeesTitle(fees: fees),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Expanded(
-                        child: address != null ? addressTitle(address) : const SizedBox(),
+                        child: AddressTitle(address: address),
                       ),
-                      dateTitle(date),
+                      DateTitle(date: date),
                     ],
+                  ),
+                  const SizedBox(height: 4),
+                  const TransactionTypeLabel(
+                    text: 'Waiting for confirmation',
+                    color: CrystalColor.error,
+                  ),
+                  const SizedBox(height: 4),
+                  ConfirmsTitle(
+                    signsReceived: signsReceived,
+                    signsRequired: signsRequired,
+                  ),
+                  const SizedBox(height: 4),
+                  ConfirmationTimeCounter(
+                    expireAt: expireAt,
                   ),
                 ],
               ),
@@ -132,37 +190,4 @@ class TonWalletTransactionHolder extends StatelessWidget {
       ),
     );
   }
-
-  Widget valueTitle({
-    required String value,
-    required bool isOutgoing,
-  }) =>
-      Text(
-        '${isOutgoing ? '-' : ''}$value TON',
-        style: TextStyle(
-          color: isOutgoing ? CrystalColor.error : CrystalColor.success,
-          fontWeight: FontWeight.w600,
-        ),
-      );
-
-  Widget iconForward() => const Icon(
-        Icons.arrow_forward_ios_rounded,
-        size: 18,
-        color: Colors.grey,
-      );
-
-  Widget feesTitle(String fees) => Text(
-        'Fees: $fees TON',
-        style: const TextStyle(
-          color: Colors.black45,
-        ),
-      );
-
-  Widget addressTitle(String address) => Text(
-        address.ellipseAddress(),
-      );
-
-  Widget dateTitle(DateTime date) => Text(
-        DateFormat('MMM d, H:mm').format(date),
-      );
 }

@@ -18,10 +18,10 @@ import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/preload_transactions_listener.dart';
 import '../../../../../design/widgets/ton_asset_icon.dart';
 import '../../../../../design/widgets/wallet_action_button.dart';
-import '../../history/ton_wallet_expired_transaction_holder.dart';
-import '../../history/ton_wallet_multisig_pending_transaction_holder.dart';
-import '../../history/ton_wallet_sent_transaction_holder.dart';
-import '../../history/ton_wallet_transaction_holder.dart';
+import '../../history/transactions_holders/ton_wallet_expired_transaction_holder.dart';
+import '../../history/transactions_holders/ton_wallet_multisig_pending_transaction_holder.dart';
+import '../../history/transactions_holders/ton_wallet_sent_transaction_holder.dart';
+import '../../history/transactions_holders/ton_wallet_transaction_holder.dart';
 import '../deploy_wallet_flow/start_deploy_wallet_flow.dart';
 import '../receive_modal/show_receive_modal.dart';
 import '../send_transaction_flow/start_send_transaction_flow.dart';
@@ -51,12 +51,9 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        header(
-                          balance: tonWalletInfo.contractState.balance,
-                          contractState: tonWalletInfo.contractState,
-                        ),
+                        header(tonWalletInfo: tonWalletInfo),
                         Expanded(
-                          child: history(),
+                          child: history(tonWalletInfo: tonWalletInfo),
                         ),
                       ],
                     ),
@@ -67,17 +64,16 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget header({
-    required String balance,
-    required ContractState contractState,
+    required TonWalletInfo tonWalletInfo,
   }) =>
       Container(
         padding: const EdgeInsets.all(16),
         color: CrystalColor.accentBackground,
         child: Column(
           children: [
-            info(balance),
+            info(tonWalletInfo.contractState.balance),
             const SizedBox(height: 24),
-            actions(),
+            actions(tonWalletInfo),
           ],
         ),
       );
@@ -115,11 +111,10 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         ),
       );
 
-  Widget actions() => Consumer(
+  Widget actions(TonWalletInfo tonWalletInfo) => Consumer(
         builder: (context, ref, child) {
           final keys = ref.watch(keysProvider).asData?.value ?? {};
           final currentKey = ref.watch(currentKeyProvider).asData?.value;
-          final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
           final receiveButton = WalletActionButton(
             icon: Assets.images.iconReceive,
@@ -132,18 +127,28 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
 
           WalletActionButton? actionButton;
 
-          if (currentKey != null && tonWalletInfo != null) {
-            final publicKey = currentKey.publicKey;
+          if (currentKey != null) {
             final requiresSeparateDeploy = tonWalletInfo.details.requiresSeparateDeploy;
             final isDeployed = tonWalletInfo.contractState.isDeployed;
 
             if (!requiresSeparateDeploy || isDeployed) {
-              final items = [
+              final keysList = [
                 ...keys.keys,
                 ...keys.values.whereNotNull().expand((e) => e),
               ];
-              final publicKeys =
-                  tonWalletInfo.custodians?.where((e) => items.any((el) => el.publicKey == e)).toList() ?? [publicKey];
+
+              final custodians = tonWalletInfo.custodians ?? [];
+
+              final localCustodians = keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
+
+              final initiatorKey = currentKey;
+
+              final listOfKeys = [
+                initiatorKey,
+                ...localCustodians.where((e) => e.publicKey != initiatorKey.publicKey),
+              ];
+
+              final publicKeys = listOfKeys.map((e) => e.publicKey).toList();
 
               actionButton = WalletActionButton(
                 icon: Assets.images.iconSend,
@@ -183,9 +188,11 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         },
       );
 
-  Widget history() => Consumer(
+  Widget history({
+    required TonWalletInfo tonWalletInfo,
+  }) =>
+      Consumer(
         builder: (context, ref, child) {
-          final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
           final transactionsState = ref.watch(tonWalletTransactionsStateProvider(widget.address));
           final sentTransactionsState =
               ref.watch(tonWalletSentTransactionsProvider(widget.address)).asData?.value ?? [];
@@ -217,7 +224,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                       expiredTransactionsState: expiredTransactionsState,
                       multisigPendingTransactionsState: multisigPendingTransactionsState,
                     ),
-                    if (transactionsState.item2) loader(),
+                    loader(transactionsState.item2),
                   ],
                 ),
               ),
@@ -260,7 +267,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget list({
-    required TonWalletInfo? tonWalletInfo,
+    required TonWalletInfo tonWalletInfo,
     required List<TonWalletTransactionWithData> transactionsState,
     required List<Tuple2<PendingTransaction, Transaction?>> sentTransactionsState,
     required List<PendingTransaction> expiredTransactionsState,
@@ -291,6 +298,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
             e.transaction.createdAt,
             TonWalletTransactionHolder(
               transactionWithData: e,
+              walletAddress: tonWalletInfo.address,
             ),
           ),
         )
@@ -303,6 +311,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
             TonWalletSentTransactionHolder(
               pendingTransaction: e.item1,
               transaction: e.item2,
+              walletAddress: tonWalletInfo.address,
             ),
           ),
         )
@@ -314,6 +323,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
             e.expireAt,
             TonWalletExpiredTransactionHolder(
               pendingTransaction: e,
+              walletAddress: tonWalletInfo.address,
             ),
           ),
         )
@@ -339,9 +349,10 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                       orElse: () => null,
                     ),
               ),
-              walletAddress: tonWalletInfo?.address,
-              walletType: tonWalletInfo?.walletType,
-              custodians: tonWalletInfo?.custodians,
+              walletAddress: tonWalletInfo.address,
+              walletPublicKey: tonWalletInfo.publicKey,
+              walletType: tonWalletInfo.walletType,
+              custodians: tonWalletInfo.custodians ?? [],
             ),
           ),
         )
@@ -386,17 +397,19 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
     );
   }
 
-  Widget loader() => IgnorePointer(
+  Widget loader(bool loading) => IgnorePointer(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.black12,
-            child: Center(
-              child: PlatformCircularProgressIndicator(),
-            ),
-          ),
+          child: loading
+              ? Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.black12,
+                  child: Center(
+                    child: PlatformCircularProgressIndicator(),
+                  ),
+                )
+              : const SizedBox(),
         ),
       );
 }

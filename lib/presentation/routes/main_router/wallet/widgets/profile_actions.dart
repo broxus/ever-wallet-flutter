@@ -73,13 +73,23 @@ class ProfileActions extends StatelessWidget {
                 final isDeployed = tonWalletInfo.contractState.isDeployed;
 
                 if (!requiresSeparateDeploy || isDeployed) {
-                  final items = [
+                  final keysList = [
                     ...keys.keys,
                     ...keys.values.whereNotNull().expand((e) => e),
                   ];
-                  final publicKeys =
-                      tonWalletInfo.custodians?.where((e) => items.any((el) => el.publicKey == e)).toList() ??
-                          [publicKey];
+
+                  final custodians = tonWalletInfo.custodians ?? [];
+
+                  final localCustodians = keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
+
+                  final initiatorKey = currentKey;
+
+                  final listOfKeys = [
+                    initiatorKey,
+                    ...localCustodians.where((e) => e.publicKey != initiatorKey.publicKey),
+                  ];
+
+                  final publicKeys = listOfKeys.map((e) => e.publicKey).toList();
 
                   return WalletButton(
                     onTap: () => startSendTransactionFlow(

@@ -7,7 +7,7 @@ import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../../domain/blocs/key/keys_provider.dart';
-import '../../../../../../domain/blocs/key/public_keys_labels_bloc.dart';
+import '../../../../../../domain/blocs/key/public_keys_labels_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/explorer.dart';
 import '../../../../../design/transaction_time.dart';
@@ -20,15 +20,17 @@ import '../confirm_transaction_flow/start_confirm_transaction_flow.dart';
 class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
   final MultisigPendingTransaction? multisigPendingTransaction;
-  final String? walletAddress;
-  final WalletType? walletType;
-  final List<String>? custodians;
+  final String walletAddress;
+  final String walletPublicKey;
+  final WalletType walletType;
+  final List<String> custodians;
 
   const TonWalletMultisigPendingTransactionInfoModalBody({
     Key? key,
     required this.transactionWithData,
     required this.multisigPendingTransaction,
     required this.walletAddress,
+    required this.walletPublicKey,
     required this.walletType,
     required this.custodians,
   }) : super(key: key);
@@ -37,6 +39,11 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
   Widget build(BuildContext context) => Consumer(
         builder: (context, ref, child) {
           final keys = ref.watch(keysProvider).asData?.value ?? {};
+          final keysList = [
+            ...keys.keys,
+            ...keys.values.whereNotNull().expand((e) => e),
+          ];
+
           final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
 
           final msgSender = transactionWithData.transaction.inMessage.src;
@@ -252,15 +259,17 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
 
           final transactionId = multisigPendingTransaction?.id;
 
-          final localKeys = [
-            ...keys.keys,
-            ...keys.values.where((e) => e != null).cast<List<KeyStoreEntry>>().expand((e) => e)
+          final localCustodians = keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
+
+          final initiatorKey = localCustodians.firstWhereOrNull((e) => e.publicKey == walletPublicKey);
+
+          final listOfKeys = [
+            if (initiatorKey != null) initiatorKey,
+            ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
           ];
 
-          final localCustodians = localKeys.where((e) => custodians?.any((el) => el == e.publicKey) ?? false).toList();
-
           final nonConfirmedLocalCustodians =
-              localCustodians.where((e) => confirmations?.every((el) => el != e.publicKey) ?? false);
+              listOfKeys.where((e) => confirmations?.every((el) => el != e.publicKey) ?? false);
 
           final publicKeys = nonConfirmedLocalCustodians.map((e) => e.publicKey).toList();
 
@@ -389,19 +398,21 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                     received: signsReceived,
                     required: signsRequired,
                   ),
-                if (custodians != null && confirmations != null)
-                  ...custodians!
-                      .asMap()
-                      .entries
-                      .map(
-                        (e) => custodiansItem(
-                          label: publicKeysLabels[e.value] ?? 'Custodian ${e.key + 1}',
-                          publicKey: e.value,
-                          isCreator: e.value == creator,
-                          isSigned: confirmations.contains(e.value),
-                        ),
-                      )
-                      .toList(),
+                if (confirmations != null)
+                  ...custodians.asMap().entries.map(
+                    (e) {
+                      final title = keysList.firstWhereOrNull((el) => el.publicKey == e.value)?.name ??
+                          publicKeysLabels[e] ??
+                          'Custodian ${e.key + 1}';
+
+                      return custodiansItem(
+                        label: title,
+                        publicKey: e.value,
+                        isCreator: e.value == creator,
+                        isSigned: confirmations.contains(e.value),
+                      );
+                    },
+                  ).toList(),
               ],
             ),
           ];
@@ -426,14 +437,10 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    if (canConfirm &&
-                        walletAddress != null &&
-                        transactionId != null &&
-                        address != null &&
-                        value != null) ...[
+                    if (canConfirm && transactionId != null && address != null && value != null) ...[
                       confirmButton(
                         context: context,
-                        address: walletAddress!,
+                        address: walletAddress,
                         publicKeys: publicKeys,
                         transactionId: transactionId,
                         destination: address,

@@ -1,9 +1,15 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../design/design.dart';
-import '../../../../design/transaction_time.dart';
-import '../modals/token_wallet_transaction_info/show_token_wallet_transaction_info.dart';
+import '../../../../../design/design.dart';
+import '../../../../../design/transaction_time.dart';
+import '../../modals/token_wallet_transaction_info/show_token_wallet_transaction_info.dart';
+import 'widgets/address_title.dart';
+import 'widgets/date_title.dart';
+import 'widgets/fees_title.dart';
+import 'widgets/icon_forward.dart';
+import 'widgets/value_title.dart';
 
 class TokenWalletTransactionHolder extends StatelessWidget {
   final TokenWalletTransactionWithData transactionWithData;
@@ -22,13 +28,17 @@ class TokenWalletTransactionHolder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sender = transactionWithData.data!.maybeWhen(
-      incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.senderAddress,
-      orElse: () => null,
-    );
+          incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.senderAddress,
+          orElse: () => null,
+        ) ??
+        transactionWithData.transaction.inMessage.src;
+
     final recipient = transactionWithData.data!.maybeWhen(
-      outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.address,
-      orElse: () => null,
-    );
+          outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.address,
+          orElse: () => null,
+        ) ??
+        transactionWithData.transaction.outMessages.firstOrNull?.dst;
+
     final value = transactionWithData.data!
         .when(
           incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
@@ -41,9 +51,20 @@ class TokenWalletTransactionHolder extends StatelessWidget {
         .toTokens(decimals)
         .removeZeroes()
         .formatValue();
-    final isOutgoing = recipient != null;
+
+    final isOutgoing = transactionWithData.data!.when(
+      incomingTransfer: (tokenIncomingTransfer) => false,
+      outgoingTransfer: (tokenOutgoingTransfer) => true,
+      swapBack: (tokenSwapBack) => true,
+      accept: (value) => false,
+      transferBounced: (value) => false,
+      swapBackBounced: (value) => false,
+    );
+
     final address = isOutgoing ? recipient : sender;
+
     final date = transactionWithData.transaction.createdAt.toDateTime();
+
     final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
 
     return InkWell(
@@ -66,23 +87,24 @@ class TokenWalletTransactionHolder extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: valueTitle(
+                        child: ValueTitle(
                           value: value,
+                          currency: currency,
                           isOutgoing: isOutgoing,
                         ),
                       ),
-                      iconForward(),
+                      const IconForward(),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  feesTitle(fees),
+                  FeesTitle(fees: fees),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Expanded(
-                        child: address != null ? addressTitle(address) : const SizedBox(),
+                        child: address != null ? AddressTitle(address: address) : const SizedBox(),
                       ),
-                      dateTitle(date),
+                      DateTitle(date: date),
                     ],
                   ),
                 ],
@@ -93,37 +115,4 @@ class TokenWalletTransactionHolder extends StatelessWidget {
       ),
     );
   }
-
-  Widget valueTitle({
-    required String value,
-    required bool isOutgoing,
-  }) =>
-      Text(
-        '${isOutgoing ? '-' : ''}$value $currency',
-        style: TextStyle(
-          color: isOutgoing ? CrystalColor.error : CrystalColor.success,
-          fontWeight: FontWeight.w600,
-        ),
-      );
-
-  Widget iconForward() => const Icon(
-        Icons.arrow_forward_ios_rounded,
-        size: 18,
-        color: Colors.grey,
-      );
-
-  Widget feesTitle(String fees) => Text(
-        'Fees: $fees TON',
-        style: const TextStyle(
-          color: Colors.black45,
-        ),
-      );
-
-  Widget addressTitle(String address) => Text(
-        address.ellipseAddress(),
-      );
-
-  Widget dateTitle(DateTime date) => Text(
-        DateFormat('MMM d, H:mm').format(date),
-      );
 }

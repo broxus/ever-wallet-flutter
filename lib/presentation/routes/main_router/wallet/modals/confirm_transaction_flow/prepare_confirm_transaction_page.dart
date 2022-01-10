@@ -1,10 +1,12 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../../domain/blocs/key/public_keys_labels_bloc.dart';
+import '../../../../../../domain/blocs/key/keys_provider.dart';
+import '../../../../../../domain/blocs/key/public_keys_labels_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../../logger.dart';
 import '../../../../../design/design.dart';
@@ -103,20 +105,27 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
   Widget dropdownButton() => Consumer(
         builder: (context, ref, child) {
           final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
+          final keys = ref.watch(keysProvider).asData?.value ?? {};
+          final keysList = [
+            ...keys.keys,
+            ...keys.values.whereNotNull().expand((e) => e),
+          ];
 
           return ValueListenableBuilder<String>(
             valueListenable: publicKeyNotifier,
             builder: (context, value, child) => CustomDropdownButton<String>(
-              items: widget.publicKeys
-                  .map(
-                    (e) => Tuple2(
-                      e,
-                      publicKeysLabels[e] != null
-                          ? '${publicKeysLabels[e]} (${e.ellipsePublicKey()})'
-                          : e.ellipsePublicKey(),
-                    ),
-                  )
-                  .toList(),
+              items: widget.publicKeys.map(
+                (e) {
+                  final title = keysList.firstWhereOrNull((el) => el.publicKey == e)?.name ??
+                      publicKeysLabels[e] ??
+                      e.ellipsePublicKey();
+
+                  return Tuple2(
+                    e,
+                    title,
+                  );
+                },
+              ).toList(),
               value: value,
               onChanged: (value) {
                 if (value != null) {

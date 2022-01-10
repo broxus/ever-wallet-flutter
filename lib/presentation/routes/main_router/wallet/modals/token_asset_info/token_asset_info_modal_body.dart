@@ -17,7 +17,7 @@ import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/preload_transactions_listener.dart';
 import '../../../../../design/widgets/token_asset_icon.dart';
 import '../../../../../design/widgets/wallet_action_button.dart';
-import '../../history/token_wallet_transaction_holder.dart';
+import '../../history/transactions_holders/token_wallet_transaction_holder.dart';
 import '../receive_modal/show_receive_modal.dart';
 import '../token_send_transaction_flow/start_token_send_transaction_flow.dart';
 
@@ -69,7 +69,10 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
                           symbol: tokenWalletInfo.symbol,
                         ),
                         Expanded(
-                          child: history(symbol: tokenWalletInfo.symbol, transactionsState: transactionsState),
+                          child: history(
+                            symbol: tokenWalletInfo.symbol,
+                            transactionsState: transactionsState,
+                          ),
                         ),
                       ],
                     ),
@@ -177,14 +180,23 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
           WalletActionButton? actionButton;
 
           if (currentKey != null && tonWalletInfo != null) {
-            final publicKey = currentKey.publicKey;
-
-            final items = [
+            final keysList = [
               ...keys.keys,
               ...keys.values.whereNotNull().expand((e) => e),
             ];
-            final publicKeys =
-                tonWalletInfo.custodians?.where((e) => items.any((el) => el.publicKey == e)).toList() ?? [publicKey];
+
+            final custodians = tonWalletInfo.custodians ?? [];
+
+            final localCustodians = keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
+
+            final initiatorKey = currentKey;
+
+            final listOfKeys = [
+              initiatorKey,
+              ...localCustodians.where((e) => e.publicKey != initiatorKey.publicKey),
+            ];
+
+            final publicKeys = listOfKeys.map((e) => e.publicKey).toList();
 
             actionButton = WalletActionButton(
               icon: Assets.images.iconSend,
@@ -233,7 +245,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
                   state: transactionsState.item1,
                   symbol: symbol,
                 ),
-                if (transactionsState.item2) loader(),
+                loader(transactionsState.item2),
               ],
             ),
           ),
@@ -304,17 +316,19 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
         ),
       );
 
-  Widget loader() => IgnorePointer(
+  Widget loader(bool loading) => IgnorePointer(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.black12,
-            child: Center(
-              child: PlatformCircularProgressIndicator(),
-            ),
-          ),
+          child: loading
+              ? Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.black12,
+                  child: Center(
+                    child: PlatformCircularProgressIndicator(),
+                  ),
+                )
+              : const SizedBox(),
         ),
       );
 }

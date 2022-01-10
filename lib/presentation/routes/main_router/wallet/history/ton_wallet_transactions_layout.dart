@@ -12,10 +12,10 @@ import '../../../../../domain/blocs/ton_wallet/ton_wallet_sent_transactions_prov
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_state_provider.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/preload_transactions_listener.dart';
-import 'ton_wallet_expired_transaction_holder.dart';
-import 'ton_wallet_multisig_pending_transaction_holder.dart';
-import 'ton_wallet_sent_transaction_holder.dart';
-import 'ton_wallet_transaction_holder.dart';
+import 'transactions_holders/ton_wallet_expired_transaction_holder.dart';
+import 'transactions_holders/ton_wallet_multisig_pending_transaction_holder.dart';
+import 'transactions_holders/ton_wallet_sent_transaction_holder.dart';
+import 'transactions_holders/ton_wallet_transaction_holder.dart';
 
 class TonWalletTransactionsLayout extends StatefulWidget {
   final String address;
@@ -47,21 +47,22 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
           return Stack(
             fit: StackFit.expand,
             children: [
-              list(
-                infoState: tonWalletInfo,
-                transactionsState: transactionsState.item1,
-                sentTransactionsState: sentTransactionsState,
-                expiredTransactionsState: expiredTransactionsState,
-                multisigPendingTransactionsState: multisigPendingTransactionsState,
-              ),
-              if (transactionsState.item2) loader(),
+              if (tonWalletInfo != null)
+                list(
+                  tonWalletInfo: tonWalletInfo,
+                  transactionsState: transactionsState.item1,
+                  sentTransactionsState: sentTransactionsState,
+                  expiredTransactionsState: expiredTransactionsState,
+                  multisigPendingTransactionsState: multisigPendingTransactionsState,
+                ),
+              loader(transactionsState.item2),
             ],
           );
         },
       );
 
   Widget list({
-    required TonWalletInfo? infoState,
+    required TonWalletInfo tonWalletInfo,
     required List<TonWalletTransactionWithData> transactionsState,
     required List<Tuple2<PendingTransaction, Transaction?>> sentTransactionsState,
     required List<PendingTransaction> expiredTransactionsState,
@@ -92,6 +93,7 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
             e.transaction.createdAt,
             TonWalletTransactionHolder(
               transactionWithData: e,
+              walletAddress: tonWalletInfo.address,
             ),
           ),
         )
@@ -104,6 +106,7 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
             TonWalletSentTransactionHolder(
               pendingTransaction: e.item1,
               transaction: e.item2,
+              walletAddress: tonWalletInfo.address,
             ),
           ),
         )
@@ -115,6 +118,7 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
             e.expireAt,
             TonWalletExpiredTransactionHolder(
               pendingTransaction: e,
+              walletAddress: tonWalletInfo.address,
             ),
           ),
         )
@@ -140,9 +144,10 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
                       orElse: () => null,
                     ),
               ),
-              walletAddress: infoState?.address,
-              walletType: infoState?.walletType,
-              custodians: infoState?.custodians,
+              walletAddress: tonWalletInfo.address,
+              walletType: tonWalletInfo.walletType,
+              walletPublicKey: tonWalletInfo.publicKey,
+              custodians: tonWalletInfo.custodians ?? [],
             ),
           ),
         )
@@ -180,17 +185,19 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
     );
   }
 
-  Widget loader() => IgnorePointer(
+  Widget loader(bool loading) => IgnorePointer(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.black12,
-            child: Center(
-              child: PlatformCircularProgressIndicator(),
-            ),
-          ),
+          child: loading
+              ? Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.black12,
+                  child: Center(
+                    child: PlatformCircularProgressIndicator(),
+                  ),
+                )
+              : const SizedBox(),
         ),
       );
 

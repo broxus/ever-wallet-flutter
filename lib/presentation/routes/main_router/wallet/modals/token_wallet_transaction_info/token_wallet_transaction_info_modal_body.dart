@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,13 +24,17 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sender = transactionWithData.data!.maybeWhen(
-      incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.senderAddress,
-      orElse: () => null,
-    );
+          incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.senderAddress,
+          orElse: () => null,
+        ) ??
+        transactionWithData.transaction.inMessage.src;
+
     final recipient = transactionWithData.data!.maybeWhen(
-      outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.address,
-      orElse: () => null,
-    );
+          outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.address,
+          orElse: () => null,
+        ) ??
+        transactionWithData.transaction.outMessages.firstOrNull?.dst;
+
     final value = transactionWithData.data!
         .when(
           incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
@@ -42,10 +47,22 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
         .toTokens(decimals)
         .removeZeroes()
         .formatValue();
-    final isOutgoing = recipient != null;
+
+    final isOutgoing = transactionWithData.data!.when(
+      incomingTransfer: (tokenIncomingTransfer) => false,
+      outgoingTransfer: (tokenOutgoingTransfer) => true,
+      swapBack: (tokenSwapBack) => true,
+      accept: (value) => false,
+      transferBounced: (value) => false,
+      swapBackBounced: (value) => false,
+    );
+
     final address = isOutgoing ? recipient : sender;
+
     final date = transactionWithData.transaction.createdAt.toDateTime();
+
     final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
+
     final hash = transactionWithData.transaction.id.hash;
 
     final type = transactionWithData.data!.when(

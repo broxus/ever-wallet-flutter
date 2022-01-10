@@ -5,7 +5,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../data/repositories/public_keys_labels_repository.dart';
-import '../../../../../../domain/blocs/key/public_keys_labels_bloc.dart';
+import '../../../../../../domain/blocs/key/public_keys_labels_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/widgets/unfocusing_gesture_detector.dart';
 

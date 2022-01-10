@@ -1,8 +1,10 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../../domain/blocs/key/public_keys_labels_bloc.dart';
+import '../../../../../../domain/blocs/key/keys_provider.dart';
+import '../../../../../../domain/blocs/key/public_keys_labels_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/custom_popup_item.dart';
@@ -28,7 +30,20 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
         builder: (context, ref, child) {
           final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
-          final custodians = tonWalletInfo?.custodians?.map((e) => Tuple2(publicKeysLabels[e], e)).toList() ?? [];
+          final keys = ref.watch(keysProvider).asData?.value ?? {};
+          final keysList = [
+            ...keys.keys,
+            ...keys.values.whereNotNull().expand((e) => e),
+          ];
+
+          final custodians = tonWalletInfo?.custodians?.map((e) {
+                final title = keysList.firstWhereOrNull((el) => el.publicKey == e)?.name ??
+                    publicKeysLabels[e] ??
+                    e.ellipsePublicKey();
+
+                return Tuple2(title, e);
+              }).toList() ??
+              [];
 
           return SizedBox(
             height: MediaQuery.of(context).size.longestSide / 1.75,

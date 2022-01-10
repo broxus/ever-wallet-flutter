@@ -109,6 +109,8 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
                   if (newPassword.isNotEmpty && (formKey.currentState?.validate() ?? false)) {
                     try {
+                      context.router.pop();
+
                       await getIt.get<KeysRepository>().changePassword(
                             publicKey: widget.publicKey,
                             oldPassword: oldPasswordController.text.trim(),
@@ -121,10 +123,10 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
                         context,
                         message: LocaleKeys.change_seed_password_modal_messages_success.tr(),
                       );
-
-                      context.router.navigatorKey.currentState?.pop();
                     } catch (err, st) {
                       logger.e(err, err, st);
+
+                      context.router.pop();
 
                       if (!mounted) return;
 

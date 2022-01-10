@@ -8,3 +8,5 @@ export 'package:easy_localization/easy_localization.dart';
 
 export 'extension.dart';
 export 'theme.dart';
+
+const nonBreakingHyphen = '\u2011';

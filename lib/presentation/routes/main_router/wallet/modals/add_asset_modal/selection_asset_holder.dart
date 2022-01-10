@@ -4,6 +4,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import '../../../../../../data/dtos/token_contract_asset_dto.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/address_generated_icon.dart';
+import '../../../../../design/widgets/marquee_widget.dart';
 import '../../../../../design/widgets/token_asset_icon.dart';
 
 class SelectionAssetHolder extends StatelessWidget {
@@ -19,36 +20,12 @@ class SelectionAssetHolder extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: Colors.white,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 14,
-              horizontal: 16,
-            ),
-            child: Row(
-              children: [
-                icon(),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      name(),
-                      const SizedBox(height: 2),
-                      fullName(),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                assetSwitch(),
-              ],
-            ),
-          ),
-        ),
+  Widget build(BuildContext context) => ListTile(
+        onTap: onTap,
+        leading: icon(),
+        title: name(),
+        subtitle: fullName(),
+        trailing: assetSwitch(),
       );
 
   Widget icon() => asset.icon != null
@@ -59,23 +36,23 @@ class SelectionAssetHolder extends StatelessWidget {
           address: asset.address,
         );
 
-  Widget name() => SizedBox(
-        height: 24,
+  Widget name() => MarqueeWidget(
         child: Text(
-          asset.symbol,
+          asset.symbol.replaceAll('-', nonBreakingHyphen),
+          maxLines: 1,
           style: const TextStyle(
-            fontSize: 18,
-            letterSpacing: 0.5,
+            fontSize: 16,
+            letterSpacing: 0.75,
             fontWeight: FontWeight.w700,
             color: CrystalColor.fontDark,
           ),
         ),
       );
 
-  Widget fullName() => SizedBox(
-        height: 20,
+  Widget fullName() => MarqueeWidget(
         child: Text(
-          asset.name,
+          asset.name.replaceAll('-', nonBreakingHyphen),
+          maxLines: 1,
           style: const TextStyle(
             fontSize: 14,
             letterSpacing: 0.75,
