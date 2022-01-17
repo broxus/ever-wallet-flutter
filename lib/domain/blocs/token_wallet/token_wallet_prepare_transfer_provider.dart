@@ -63,7 +63,7 @@ class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2
 
       final message = await tonWallet.prepareTransfer(
         publicKey: publicKey,
-        destination: repackedDestination,
+        destination: internalMessage.destination,
         amount: amountValue,
         body: internalMessage.body,
         isComment: false,
