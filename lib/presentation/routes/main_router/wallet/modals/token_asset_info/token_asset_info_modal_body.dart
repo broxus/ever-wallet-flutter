@@ -189,11 +189,11 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
 
             final localCustodians = keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
 
-            final initiatorKey = currentKey;
+            final initiatorKey = localCustodians.firstWhereOrNull((e) => e.publicKey == currentKey.publicKey);
 
             final listOfKeys = [
-              initiatorKey,
-              ...localCustodians.where((e) => e.publicKey != initiatorKey.publicKey),
+              if (initiatorKey != null) initiatorKey,
+              ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
             ];
 
             final publicKeys = listOfKeys.map((e) => e.publicKey).toList();
@@ -201,12 +201,14 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
             actionButton = WalletActionButton(
               icon: Assets.images.iconSend,
               title: LocaleKeys.actions_send.tr(),
-              onPressed: () => startTokenSendTransactionFlow(
-                context: context,
-                owner: owner,
-                rootTokenContract: symbol.rootTokenContract,
-                publicKeys: publicKeys,
-              ),
+              onPressed: publicKeys.isNotEmpty
+                  ? () => startTokenSendTransactionFlow(
+                        context: context,
+                        owner: owner,
+                        rootTokenContract: symbol.rootTokenContract,
+                        publicKeys: publicKeys,
+                      )
+                  : null,
             );
           }
 

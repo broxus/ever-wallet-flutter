@@ -141,11 +141,11 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
 
               final localCustodians = keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
 
-              final initiatorKey = currentKey;
+              final initiatorKey = localCustodians.firstWhereOrNull((e) => e.publicKey == currentKey.publicKey);
 
               final listOfKeys = [
-                initiatorKey,
-                ...localCustodians.where((e) => e.publicKey != initiatorKey.publicKey),
+                if (initiatorKey != null) initiatorKey,
+                ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
               ];
 
               final publicKeys = listOfKeys.map((e) => e.publicKey).toList();
@@ -153,11 +153,13 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
               actionButton = WalletActionButton(
                 icon: Assets.images.iconSend,
                 title: LocaleKeys.actions_send.tr(),
-                onPressed: () => startSendTransactionFlow(
-                  context: context,
-                  address: widget.address,
-                  publicKeys: publicKeys,
-                ),
+                onPressed: publicKeys.isNotEmpty
+                    ? () => startSendTransactionFlow(
+                          context: context,
+                          address: widget.address,
+                          publicKeys: publicKeys,
+                        )
+                    : null,
               );
             } else {
               actionButton = WalletActionButton(

@@ -106,7 +106,7 @@ class ApprovalsListener extends StatelessWidget {
     final currentKey = reader(currentKeyProvider).asData?.value;
     final tonWalletInfo = reader(tonWalletInfoProvider(address)).asData?.value;
 
-    var publicKeys = [publicKey];
+    var publicKeys = <String>[];
 
     if (currentKey != null && tonWalletInfo != null) {
       final publicKey = currentKey.publicKey;
@@ -123,15 +123,20 @@ class ApprovalsListener extends StatelessWidget {
 
         final localCustodians = keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
 
-        final initiatorKey = currentKey;
+        final initiatorKey = localCustodians.firstWhereOrNull((e) => e.publicKey == currentKey.publicKey);
 
         final listOfKeys = [
-          initiatorKey,
-          ...localCustodians.where((e) => e.publicKey != initiatorKey.publicKey),
+          if (initiatorKey != null) initiatorKey,
+          ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
         ];
 
         publicKeys = listOfKeys.map((e) => e.publicKey).toList();
       }
+    }
+
+    if (publicKeys.isEmpty) {
+      completer.completeError(Exception('No keys'));
+      return;
     }
 
     final result = await showSendMessage(

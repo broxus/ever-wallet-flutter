@@ -82,21 +82,23 @@ class ProfileActions extends StatelessWidget {
 
                   final localCustodians = keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
 
-                  final initiatorKey = currentKey;
+                  final initiatorKey = localCustodians.firstWhereOrNull((e) => e.publicKey == currentKey.publicKey);
 
                   final listOfKeys = [
-                    initiatorKey,
-                    ...localCustodians.where((e) => e.publicKey != initiatorKey.publicKey),
+                    if (initiatorKey != null) initiatorKey,
+                    ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
                   ];
 
                   final publicKeys = listOfKeys.map((e) => e.publicKey).toList();
 
                   return WalletButton(
-                    onTap: () => startSendTransactionFlow(
-                      context: context,
-                      address: address,
-                      publicKeys: publicKeys,
-                    ),
+                    onTap: publicKeys.isNotEmpty
+                        ? () => startSendTransactionFlow(
+                              context: context,
+                              address: address,
+                              publicKeys: publicKeys,
+                            )
+                        : null,
                     title: LocaleKeys.actions_send.tr(),
                     icon: Assets.images.iconSend.svg(
                       color: CrystalColor.secondary,
