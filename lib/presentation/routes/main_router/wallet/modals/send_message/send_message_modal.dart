@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -6,8 +7,11 @@ import 'package:tuple/tuple.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../domain/blocs/biometry/biometry_info_provider.dart';
+import '../../../../../../domain/blocs/key/keys_provider.dart';
+import '../../../../../../domain/blocs/key/public_keys_labels_provider.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/extension.dart';
+import '../../../../../design/widgets/custom_dropdown_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
 import '../../../../../design/widgets/modal_header.dart';
@@ -19,7 +23,7 @@ class SendMessageModalBody extends StatefulWidget {
   final BuildContext modalContext;
   final String origin;
   final String sender;
-  final String publicKey;
+  final List<String> publicKeys;
   final String recipient;
   final String amount;
   final bool bounce;
@@ -31,7 +35,7 @@ class SendMessageModalBody extends StatefulWidget {
     required this.modalContext,
     required this.origin,
     required this.sender,
-    required this.publicKey,
+    required this.publicKeys,
     required this.recipient,
     required this.amount,
     required this.bounce,
@@ -44,6 +48,20 @@ class SendMessageModalBody extends StatefulWidget {
 }
 
 class _SendMessageModalBodyState extends State<SendMessageModalBody> {
+  late final ValueNotifier<String> publicKeyNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    publicKeyNotifier = ValueNotifier<String>(widget.publicKeys.first);
+  }
+
+  @override
+  void dispose() {
+    publicKeyNotifier.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         resizeToAvoidBottomInset: false,
@@ -67,6 +85,10 @@ class _SendMessageModalBodyState extends State<SendMessageModalBody> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            if (widget.publicKeys.length > 1) ...[
+                              dropdownButton(),
+                              const SizedBox(height: 16),
+                            ],
                             card(),
                             const SizedBox(height: 64),
                           ],
@@ -90,11 +112,46 @@ class _SendMessageModalBodyState extends State<SendMessageModalBody> {
         ),
       );
 
+  Widget dropdownButton() => Consumer(
+        builder: (context, ref, child) {
+          final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
+          final keys = ref.watch(keysProvider).asData?.value ?? {};
+          final keysList = [
+            ...keys.keys,
+            ...keys.values.whereNotNull().expand((e) => e),
+          ];
+
+          return ValueListenableBuilder<String>(
+            valueListenable: publicKeyNotifier,
+            builder: (context, value, child) => CustomDropdownButton<String>(
+              items: widget.publicKeys.map(
+                (e) {
+                  final title = keysList.firstWhereOrNull((el) => el.publicKey == e)?.name ??
+                      publicKeysLabels[e] ??
+                      e.ellipsePublicKey();
+
+                  return Tuple2(
+                    e,
+                    title,
+                  );
+                },
+              ).toList(),
+              value: value,
+              onChanged: (value) {
+                if (value != null) {
+                  publicKeyNotifier.value = value;
+                }
+              },
+            ),
+          );
+        },
+      );
+
   Widget card() => SectionedCard(
         sections: [
           origin(),
           address(),
-          publicKey(),
+          if (widget.publicKeys.length == 1) publicKey(),
           recipient(),
           amount(),
           bounce(),
@@ -116,7 +173,7 @@ class _SendMessageModalBodyState extends State<SendMessageModalBody> {
 
   Widget publicKey() => SectionedCardSection(
         title: 'Account public key',
-        subtitle: widget.publicKey,
+        subtitle: widget.publicKeys.first,
         isSelectable: true,
       );
 
@@ -214,15 +271,16 @@ class _SendMessageModalBodyState extends State<SendMessageModalBody> {
 
   Widget submitButton() => Consumer(
         builder: (context, ref, child) => CustomElevatedButton(
-          onPressed: () => onSubmitPressed(read: ref.read, publicKey: widget.publicKey),
+          onPressed: () => onSubmitPressed(read: ref.read),
           text: 'Send',
         ),
       );
 
   Future<void> onSubmitPressed({
     required Reader read,
-    required String publicKey,
   }) async {
+    final publicKey = publicKeyNotifier.value;
+
     String? password;
 
     final info = await read(biometryInfoProvider.future);
@@ -234,14 +292,14 @@ class _SendMessageModalBodyState extends State<SendMessageModalBody> {
     if (!mounted) return;
 
     if (password != null) {
-      Navigator.of(widget.modalContext).pop(password);
+      Navigator.of(widget.modalContext).pop(Tuple2(publicKey, password));
     } else {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => PasswordEnterPage(
             modalContext: widget.modalContext,
             publicKey: publicKey,
-            onSubmit: (password) => Navigator.of(widget.modalContext).pop(password),
+            onSubmit: (password) => Navigator.of(widget.modalContext).pop(Tuple2(publicKey, password)),
           ),
         ),
       );

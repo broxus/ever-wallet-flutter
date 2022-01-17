@@ -138,7 +138,6 @@ class _WebviewPageState extends State<WebviewPage> {
           ? ApprovalsListener(
               address: currentAccount.address,
               publicKey: currentAccount.publicKey,
-              walletType: currentAccount.tonWallet.contract,
               child: buildScaffold(
                 accounts: accounts,
                 currentAccount: currentAccount,
