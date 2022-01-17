@@ -16,12 +16,4 @@ class RestSource {
     final json = jsonDecode(response.data!) as Map<String, dynamic>;
     return TonAssetsManifestDto.fromJson(json);
   }
-
-  Future<String> getTokenSvgIcon(String url) async {
-    final response = await _dio.get<String>(
-      url,
-      options: Options(responseType: ResponseType.plain),
-    );
-    return response.data!;
-  }
 }

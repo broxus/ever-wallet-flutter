@@ -28,9 +28,9 @@ class SelectionAssetHolder extends StatelessWidget {
         trailing: assetSwitch(),
       );
 
-  Widget icon() => asset.icon != null
+  Widget icon() => asset.logoURI != null
       ? TokenAssetIcon(
-          icon: asset.icon!,
+          logoURI: asset.logoURI!,
         )
       : AddressGeneratedIcon(
           address: asset.address,

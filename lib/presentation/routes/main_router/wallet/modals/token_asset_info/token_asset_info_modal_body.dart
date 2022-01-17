@@ -24,13 +24,13 @@ import '../token_send_transaction_flow/start_token_send_transaction_flow.dart';
 class TokenAssetInfoModalBody extends StatefulWidget {
   final String owner;
   final String rootTokenContract;
-  final String? icon;
+  final String? logoURI;
 
   const TokenAssetInfoModalBody({
     Key? key,
     required this.owner,
     required this.rootTokenContract,
-    this.icon,
+    this.logoURI,
   }) : super(key: key);
 
   @override
@@ -131,9 +131,9 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
         ],
       );
 
-  Widget icon() => widget.icon != null
+  Widget icon() => widget.logoURI != null
       ? TokenAssetIcon(
-          icon: widget.icon!,
+          logoURI: widget.logoURI!,
         )
       : AddressGeneratedIcon(
           address: widget.rootTokenContract,

@@ -12,13 +12,13 @@ import 'wallet_asset_holder.dart';
 class TokenWalletAssetHolder extends StatefulWidget {
   final String owner;
   final String rootTokenContract;
-  final String? icon;
+  final String? logoURI;
 
   const TokenWalletAssetHolder({
     Key? key,
     required this.owner,
     required this.rootTokenContract,
-    this.icon,
+    this.logoURI,
   }) : super(key: key);
 
   @override
@@ -42,9 +42,9 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
             name: tokenWalletInfo != null ? tokenWalletInfo.symbol.name : '',
             balance: tokenWalletInfo != null ? tokenWalletInfo.balance : '0',
             decimals: tokenWalletInfo != null ? tokenWalletInfo.symbol.decimals : kTonDecimals,
-            icon: widget.icon != null
+            icon: widget.logoURI != null
                 ? TokenAssetIcon(
-                    icon: widget.icon!,
+                    logoURI: widget.logoURI!,
                   )
                 : AddressGeneratedIcon(
                     address: widget.rootTokenContract,
@@ -54,7 +54,7 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
                       context: context,
                       owner: tokenWalletInfo.owner,
                       rootTokenContract: widget.rootTokenContract,
-                      icon: widget.icon,
+                      logoURI: widget.logoURI,
                     )
                 : () {},
           );

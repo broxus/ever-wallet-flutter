@@ -42,7 +42,7 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
                       key: ValueKey(tokenContractAsset.address),
                       owner: tonWalletAsset.address,
                       rootTokenContract: tokenContractAsset.address,
-                      icon: tokenContractAsset.icon,
+                      logoURI: tokenContractAsset.logoURI,
                     ),
                   )
                   .toList(),

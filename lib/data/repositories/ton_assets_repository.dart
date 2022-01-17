@@ -66,21 +66,13 @@ class TonAssetsRepository {
     final manifest = await _restSource.getTonAssetsManifest();
 
     for (final token in manifest.tokens) {
-      String? icon;
-
-      final logoURI = token.logoURI;
-
-      if (logoURI != null) {
-        icon = await _restSource.getTokenSvgIcon(logoURI);
-      }
-
       final asset = TokenContractAssetDto(
         name: token.name,
         chainId: token.chainId,
         symbol: token.symbol,
         decimals: token.decimals,
         address: token.address,
-        icon: icon,
+        logoURI: token.logoURI,
         version: token.version,
       );
 
