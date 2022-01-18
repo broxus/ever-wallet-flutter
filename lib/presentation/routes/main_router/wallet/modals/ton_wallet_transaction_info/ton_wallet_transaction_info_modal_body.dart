@@ -43,10 +43,10 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
     final dePoolOnRoundComplete = transactionWithData.data?.maybeWhen(
       dePoolOnRoundComplete: (notification) => {
         'Round ID': notification.roundId,
-        'Reward': '${notification.reward.toTokens().removeZeroes().formatValue()} TON',
-        'Ordinary stake': '${notification.ordinaryStake.toTokens().removeZeroes().formatValue()} TON',
-        'Vesting stake': '${notification.vestingStake.toTokens().removeZeroes().formatValue()} TON',
-        'Lock stake': '${notification.lockStake.toTokens().removeZeroes().formatValue()} TON',
+        'Reward': '${notification.reward.toTokens().removeZeroes().formatValue()} EVER',
+        'Ordinary stake': '${notification.ordinaryStake.toTokens().removeZeroes().formatValue()} EVER',
+        'Vesting stake': '${notification.vestingStake.toTokens().removeZeroes().formatValue()} EVER',
+        'Lock stake': '${notification.lockStake.toTokens().removeZeroes().formatValue()} EVER',
         'Reinvest': notification.reinvest ? 'Yes' : 'No',
         'Reason': notification.reason.toString(),
       },
@@ -127,7 +127,7 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
               'Multisig send transaction',
               {
                 'Destination': multisigSendTransaction.dest,
-                'Value': '${multisigSendTransaction.value.toTokens().removeZeroes().formatValue()} TON',
+                'Value': '${multisigSendTransaction.value.toTokens().removeZeroes().formatValue()} EVER',
                 'Bounce': multisigSendTransaction.bounce ? 'Yes' : 'No',
                 'Flags': multisigSendTransaction.flags.toString(),
                 'Payload': multisigSendTransaction.payload,
@@ -138,7 +138,7 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
               {
                 'Custodian': multisigSubmitTransaction.custodian,
                 'Destination': multisigSubmitTransaction.dest,
-                'Value': '${multisigSubmitTransaction.value.toTokens().removeZeroes().formatValue()} TON',
+                'Value': '${multisigSubmitTransaction.value.toTokens().removeZeroes().formatValue()} EVER',
                 'Bounce': multisigSubmitTransaction.bounce ? 'Yes' : 'No',
                 'All balance': multisigSubmitTransaction.allBalance ? 'Yes' : 'No',
                 'Payload': multisigSubmitTransaction.payload,
@@ -378,12 +378,12 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
   }) =>
       item(
         title: 'Amount',
-        subtitle: '${isOutgoing ? '-' : ''}$value TON',
+        subtitle: '${isOutgoing ? '-' : ''}$value EVER',
       );
 
   Widget feeItem(String fees) => item(
         title: 'Blockchain fee',
-        subtitle: '$fees TON',
+        subtitle: '$fees EVER',
       );
 
   Widget typeItem(String type) => item(

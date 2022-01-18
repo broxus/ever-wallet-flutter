@@ -275,8 +275,8 @@ class WalletCard extends StatelessWidget {
         children: [
           TextSpan(
             text: formattedString.contains('.')
-                ? "${formattedString.substring(formattedString.indexOf('.'), formattedString.length)} TON"
-                : ' TON',
+                ? "${formattedString.substring(formattedString.indexOf('.'), formattedString.length)} EVER"
+                : ' EVER',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,

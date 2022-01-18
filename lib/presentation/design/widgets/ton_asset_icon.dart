@@ -9,7 +9,7 @@ class TonAssetIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ClipOval(
-        child: Assets.images.ton.svg(
+        child: Assets.images.ever.svg(
           width: 36,
           height: 36,
         ),

@@ -60,7 +60,7 @@ class TonWalletSentTransactionHolder extends StatelessWidget {
                   if (value != null) ...[
                     ValueTitle(
                       value: value,
-                      currency: 'TON',
+                      currency: 'EVER',
                       isOutgoing: isOutgoing,
                     ),
                     const SizedBox(height: 4),

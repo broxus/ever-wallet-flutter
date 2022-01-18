@@ -201,7 +201,7 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
 
   Widget feeItem(String fees) => item(
         title: 'Blockchain fee',
-        subtitle: '$fees TON',
+        subtitle: '$fees EVER',
       );
 
   Widget typeItem(String type) => item(

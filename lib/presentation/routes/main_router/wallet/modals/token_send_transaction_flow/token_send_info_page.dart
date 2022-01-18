@@ -148,7 +148,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
           final result = ref.watch(tokenWalletPrepareTransferProvider);
 
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} TON',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} EVER',
             error: (err, st) => err.toString(),
             loading: () => null,
           );

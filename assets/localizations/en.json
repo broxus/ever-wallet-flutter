@@ -57,7 +57,7 @@
     "description": {
       "common": "I accept the",
       "link": "the decentralization policy",
-      "application": "of TON Crystal Wallet",
+      "application": "of EVER Wallet",
       "text": "@:welcome_policy_screen_description.common @:welcome_policy_screen_description.link @:welcome_policy_screen_description.application"
     }
   },
@@ -149,7 +149,7 @@
   "deploy_wallet_modal": {
     "title": "Deploy your wallet",
     "available_message": "Funds will be debited from your balance to deploy.",
-    "unavailable_message": "You need to have at least {} TON on your account balance to deploy.",
+    "unavailable_message": "You need to have at least {} EVER on your account balance to deploy.",
     "password": "Enter password to deploy",
     "deploying": "Wallet is deploying…",
     "success": "Wallet has been deployed successfully",
@@ -197,7 +197,7 @@
   },
   "deploy_asset_modal": {
     "title": "Deploy asset",
-    "description": "Select the account you want to use for payment blockchain fee. There is minimum 1 TON.",
+    "description": "Select the account you want to use for payment blockchain fee. There is minimum 1 EVER.",
     "not_enough_money_error": "You don’t have enough money on this account balance.",
     "value": "{} {}",
     "states": {

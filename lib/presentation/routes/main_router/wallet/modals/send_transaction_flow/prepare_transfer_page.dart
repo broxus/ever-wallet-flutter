@@ -223,7 +223,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
           return Text(
-            'Your balance: ${tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0'} TON',
+            'Your balance: ${tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0'} EVER',
             style: const TextStyle(
               color: Colors.black54,
             ),

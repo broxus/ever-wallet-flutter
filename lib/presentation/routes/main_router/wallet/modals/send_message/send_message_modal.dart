@@ -185,7 +185,7 @@ class _SendMessageModalBodyState extends State<SendMessageModalBody> {
 
   Widget amount() => SectionedCardSection(
         title: 'Amount',
-        subtitle: '${widget.amount.toTokens().removeZeroes()} TON',
+        subtitle: '${widget.amount.toTokens().removeZeroes()} EVER',
         isSelectable: true,
       );
 

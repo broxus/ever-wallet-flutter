@@ -115,7 +115,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
 
   Widget amount() => SectionedCardSection(
         title: 'Amount',
-        subtitle: '${widget.amount.toTokens().removeZeroes()} TON',
+        subtitle: '${widget.amount.toTokens().removeZeroes()} EVER',
       );
 
   Widget fee() => Consumer(
@@ -123,7 +123,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
           final result = ref.watch(tonWalletPrepareConfirmTransactionProvider);
 
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} TON',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} EVER',
             error: (err, st) => err.toString(),
             loading: () => null,
           );

@@ -26,10 +26,10 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
           return WalletAssetHolder(
-            name: 'TON',
+            name: 'EVER',
             balance: tonWalletInfo != null ? tonWalletInfo.contractState.balance : '0',
             decimals: kTonDecimals,
-            icon: Assets.images.ton.svg(),
+            icon: Assets.images.ever.svg(),
             onTap: tonWalletInfo != null
                 ? () => showTonAssetInfo(
                       context: context,

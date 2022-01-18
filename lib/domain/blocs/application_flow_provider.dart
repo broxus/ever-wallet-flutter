@@ -17,13 +17,15 @@ import 'key/keys_presence_provider.dart';
 final applicationFlowProvider = StateNotifierProvider.autoDispose<ApplicationFlowNotifier, ApplicationFlowState>((ref) {
   final notifier = ApplicationFlowNotifier(ref.read);
 
-  ref.onDispose(
-    ref.listen<AsyncValue<bool>>(
-      keysPresenceProvider,
-      notifier.callback,
-      fireImmediately: true,
-    ),
-  );
+  scheduleMicrotask(() {
+    ref.onDispose(
+      ref.listen<AsyncValue<bool>>(
+        keysPresenceProvider,
+        notifier.callback,
+        fireImmediately: true,
+      ),
+    );
+  });
 
   return notifier;
 });

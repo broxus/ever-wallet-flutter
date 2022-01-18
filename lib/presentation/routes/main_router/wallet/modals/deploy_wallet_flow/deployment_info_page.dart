@@ -115,7 +115,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
 
           return SectionedCardSection(
             title: 'AssetsList balance',
-            subtitle: '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes()} TON',
+            subtitle: '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes()} EVER',
           );
         },
       );
@@ -125,7 +125,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
           final result = ref.watch(tonWalletPrepareDeployProvider);
 
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} TON',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} EVER',
             error: (err, st) => err.toString(),
             loading: () => null,
           );

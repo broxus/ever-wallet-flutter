@@ -113,7 +113,7 @@ class TonWalletTransactionHolder extends StatelessWidget {
                       Expanded(
                         child: ValueTitle(
                           value: value,
-                          currency: 'TON',
+                          currency: 'EVER',
                           isOutgoing: isOutgoing,
                         ),
                       ),

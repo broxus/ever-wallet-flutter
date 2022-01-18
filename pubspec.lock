@@ -50,13 +50,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.2.1"
-  auto_route_generator:
-    dependency: "direct dev"
-    description:
-      name: auto_route_generator
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.2.1"
   auto_size_text:
     dependency: "direct main"
     description:
@@ -390,14 +383,14 @@ packages:
       name: flutter_gen_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.4"
+    version: "4.1.5"
   flutter_gen_runner:
     dependency: "direct dev"
     description:
       name: flutter_gen_runner
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.4"
+    version: "4.1.5"
   flutter_inappwebview:
     dependency: "direct main"
     description:
@@ -427,7 +420,7 @@ packages:
     source: hosted
     version: "2.0.0"
   flutter_launcher_icons:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: flutter_launcher_icons
       url: "https://pub.dartlang.org"
@@ -439,7 +432,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_native_splash:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: flutter_native_splash
       url: "https://pub.dartlang.org"

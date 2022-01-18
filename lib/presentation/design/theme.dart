@@ -5,7 +5,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import 'design.dart';
 
-const applicationTitle = 'TON Crystal';
+const applicationTitle = 'EVER Wallet';
 
 ThemeData materialTheme(BuildContext context) => ThemeData(
       brightness: Brightness.light,

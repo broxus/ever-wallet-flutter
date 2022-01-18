@@ -10,7 +10,7 @@ class FeesTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        'Fees: $fees TON',
+        'Fees: $fees EVER',
         style: const TextStyle(
           color: Colors.black45,
         ),

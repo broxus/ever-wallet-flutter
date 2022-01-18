@@ -97,7 +97,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget balanceText(String balance) => Text(
-        '${balance.toTokens().removeZeroes().formatValue()} TON',
+        '${balance.toTokens().removeZeroes().formatValue()} EVER',
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w700,
@@ -105,7 +105,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget nameText() => const Text(
-        'TON Crystal',
+        'Everscale',
         style: TextStyle(
           fontSize: 16,
         ),
