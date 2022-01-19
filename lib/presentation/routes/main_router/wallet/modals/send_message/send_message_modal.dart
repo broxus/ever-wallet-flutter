@@ -68,44 +68,26 @@ class _SendMessageModalBodyState extends State<SendMessageModalBody> {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Stack(
-              fit: StackFit.expand,
+            child: Column(
               children: [
-                Column(
-                  children: [
-                    ModalHeader(
-                      text: 'Send message',
-                      onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: ModalScrollController.of(context),
-                        physics: const ClampingScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (widget.publicKeys.length > 1) ...[
-                              dropdownButton(),
-                              const SizedBox(height: 16),
-                            ],
-                            card(),
-                            const SizedBox(height: 64),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                ModalHeader(
+                  text: 'Send message',
+                  onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      buttons(),
-                    ],
+                const SizedBox(height: 16),
+                if (widget.publicKeys.length > 1) ...[
+                  dropdownButton(),
+                  const SizedBox(height: 16),
+                ],
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: ModalScrollController.of(context),
+                    physics: const ClampingScrollPhysics(),
+                    child: card(),
                   ),
                 ),
+                const SizedBox(height: 16),
+                buttons(),
               ],
             ),
           ),

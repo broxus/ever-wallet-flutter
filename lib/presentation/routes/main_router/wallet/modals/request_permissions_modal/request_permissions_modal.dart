@@ -37,40 +37,22 @@ class _RequestPermissionsModalBodyState extends State<RequestPermissionsModalBod
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Stack(
-              fit: StackFit.expand,
+            child: Column(
               children: [
-                Column(
-                  children: [
-                    ModalHeader(
-                      text: 'Grant permissions',
-                      onCloseButtonPressed: Navigator.of(context).pop,
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: ModalScrollController.of(context),
-                        physics: const ClampingScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            card(),
-                            const SizedBox(height: 64),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                ModalHeader(
+                  text: 'Grant permissions',
+                  onCloseButtonPressed: Navigator.of(context).pop,
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      buttons(),
-                    ],
+                const SizedBox(height: 16),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: ModalScrollController.of(context),
+                    physics: const ClampingScrollPhysics(),
+                    child: card(),
                   ),
                 ),
+                const SizedBox(height: 16),
+                buttons(),
               ],
             ),
           ),

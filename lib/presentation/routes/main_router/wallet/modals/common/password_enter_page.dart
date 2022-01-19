@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
+import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
@@ -135,9 +136,11 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
       );
 
   Future<void> onPressed() async {
+    final password = controller.text;
+
     final isCorrect = await getIt.get<KeysRepository>().checkKeyPassword(
           publicKey: widget.publicKey,
-          password: controller.text,
+          password: password,
         );
 
     formValidityNotifier.value = isCorrect;
@@ -147,7 +150,12 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
     } else {
       passwordFieldKey.currentState?.validate();
 
-      widget.onSubmit(controller.text);
+      widget.onSubmit(password);
+
+      await getIt.get<BiometryRepository>().setKeyPassword(
+            publicKey: widget.publicKey,
+            password: password,
+          );
     }
   }
 }
