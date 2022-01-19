@@ -11,8 +11,10 @@ import '../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_trans
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_sent_transactions_provider.dart';
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_state_provider.dart';
 import '../../../../design/design.dart';
+import '../../../../design/transaction_time.dart';
 import '../../../../design/widgets/preload_transactions_listener.dart';
 import 'transactions_holders/ton_wallet_expired_transaction_holder.dart';
+import 'transactions_holders/ton_wallet_multisig_expired_transaction_holder.dart';
 import 'transactions_holders/ton_wallet_multisig_pending_transaction_holder.dart';
 import 'transactions_holders/ton_wallet_sent_transaction_holder.dart';
 import 'transactions_holders/ton_wallet_transaction_holder.dart';
@@ -68,26 +70,37 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
     required List<PendingTransaction> expiredTransactionsState,
     required List<MultisigPendingTransaction> multisigPendingTransactionsState,
   }) {
-    final accountPendingTransactions = transactionsState
-        .where((e) => e.data != null)
-        .toList()
-        .where(
-          (e) => e.data!.maybeWhen(
-            walletInteraction: (info) => info.method.maybeWhen(
-              multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
-                submit: (multisigSubmitTransaction) =>
-                    multisigPendingTransactionsState.any((e) => e.id == multisigSubmitTransaction.transId),
-                orElse: () => false,
-              ),
-              orElse: () => false,
-            ),
-            orElse: () => false,
-          ),
-        )
-        .toList();
+    final timeForConfirmation = tonWalletInfo.walletType.maybeWhen(
+      multisig: (multisigType) {
+        switch (multisigType) {
+          case MultisigType.safeMultisigWallet:
+          case MultisigType.setcodeMultisigWallet:
+          case MultisigType.bridgeMultisigWallet:
+          case MultisigType.surfWallet:
+            return const Duration(hours: 1);
+          case MultisigType.safeMultisigWallet24h:
+            return const Duration(hours: 24);
+        }
+      },
+      orElse: () => const Duration(hours: 1),
+    );
 
     final ordinary = transactionsState
-        .where((e) => !accountPendingTransactions.any((el) => el == e))
+        .where(
+          (e) =>
+              e.data?.maybeWhen(
+                walletInteraction: (info) => info.method.maybeWhen(
+                  multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                    submit: (multisigSubmitTransaction) => false,
+                    confirm: (multisigConfirmTransaction) => false,
+                    orElse: () => true,
+                  ),
+                  orElse: () => true,
+                ),
+                orElse: () => true,
+              ) ??
+              true,
+        )
         .map(
           (e) => Tuple2(
             e.transaction.createdAt,
@@ -96,35 +109,111 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
               walletAddress: tonWalletInfo.address,
             ),
           ),
-        )
-        .toList();
+        );
 
-    final sent = sentTransactionsState
+    final sent = sentTransactionsState.map(
+      (e) => Tuple2(
+        e.item2?.createdAt ?? e.item1.expireAt,
+        TonWalletSentTransactionHolder(
+          pendingTransaction: e.item1,
+          transaction: e.item2,
+          walletAddress: tonWalletInfo.address,
+        ),
+      ),
+    );
+
+    final expired = expiredTransactionsState.map(
+      (e) => Tuple2(
+        e.expireAt,
+        TonWalletExpiredTransactionHolder(
+          pendingTransaction: e,
+          walletAddress: tonWalletInfo.address,
+        ),
+      ),
+    );
+
+    final multisigSent = transactionsState
+        .where(
+          (e) =>
+              e.data != null &&
+              e.data!.maybeWhen(
+                walletInteraction: (info) => info.method.maybeWhen(
+                  multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                    submit: (multisigSubmitTransaction) {
+                      final submitTransactionId = multisigSubmitTransaction.transId;
+                      final custodians = tonWalletInfo.custodians ?? [];
+                      final confirmations = transactionsState
+                          .where(
+                            (e) =>
+                                e.data != null &&
+                                e.data!.maybeWhen(
+                                  walletInteraction: (info) => info.method.maybeWhen(
+                                    multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                                      submit: (multisigSubmitTransaction) =>
+                                          multisigSubmitTransaction.transId == submitTransactionId,
+                                      confirm: (multisigConfirmTransaction) =>
+                                          multisigConfirmTransaction.transactionId == submitTransactionId,
+                                      orElse: () => false,
+                                    ),
+                                    orElse: () => false,
+                                  ),
+                                  orElse: () => false,
+                                ),
+                          )
+                          .map(
+                            (e) => e.data?.maybeWhen(
+                              walletInteraction: (info) => info.method.maybeWhen(
+                                multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                                  submit: (multisigSubmitTransaction) => multisigSubmitTransaction.custodian,
+                                  confirm: (multisigConfirmTransaction) => multisigConfirmTransaction.custodian,
+                                  orElse: () => null,
+                                ),
+                                orElse: () => null,
+                              ),
+                              orElse: () => null,
+                            ),
+                          )
+                          .whereNotNull();
+
+                      final signed = custodians.every((e) => confirmations.contains(e));
+
+                      return signed &&
+                          e.transaction.createdAt.toDateTime().add(timeForConfirmation).isBefore(DateTime.now());
+                    },
+                    orElse: () => false,
+                  ),
+                  orElse: () => false,
+                ),
+                orElse: () => false,
+              ),
+        )
         .map(
           (e) => Tuple2(
-            e.item2?.createdAt ?? e.item1.expireAt,
-            TonWalletSentTransactionHolder(
-              pendingTransaction: e.item1,
-              transaction: e.item2,
+            e.transaction.createdAt,
+            TonWalletTransactionHolder(
+              transactionWithData: e,
               walletAddress: tonWalletInfo.address,
             ),
           ),
-        )
-        .toList();
+        );
 
-    final expired = expiredTransactionsState
-        .map(
-          (e) => Tuple2(
-            e.expireAt,
-            TonWalletExpiredTransactionHolder(
-              pendingTransaction: e,
-              walletAddress: tonWalletInfo.address,
-            ),
-          ),
+    final multisigPending = transactionsState
+        .where(
+          (e) =>
+              e.data != null &&
+              e.data!.maybeWhen(
+                walletInteraction: (info) => info.method.maybeWhen(
+                  multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                    submit: (multisigSubmitTransaction) =>
+                        e.transaction.createdAt.toDateTime().add(timeForConfirmation).isAfter(DateTime.now()) &&
+                        multisigPendingTransactionsState.any((e) => e.id == multisigSubmitTransaction.transId),
+                    orElse: () => false,
+                  ),
+                  orElse: () => false,
+                ),
+                orElse: () => false,
+              ),
         )
-        .toList();
-
-    final multisigPending = accountPendingTransactions
         .map(
           (e) => Tuple2(
             e.transaction.createdAt,
@@ -145,19 +234,88 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
                     ),
               ),
               walletAddress: tonWalletInfo.address,
-              walletType: tonWalletInfo.walletType,
               walletPublicKey: tonWalletInfo.publicKey,
+              walletType: tonWalletInfo.walletType,
               custodians: tonWalletInfo.custodians ?? [],
             ),
           ),
+        );
+
+    final multisigExpired = transactionsState
+        .where(
+          (e) =>
+              e.data != null &&
+              e.data!.maybeWhen(
+                walletInteraction: (info) => info.method.maybeWhen(
+                  multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                    submit: (multisigSubmitTransaction) {
+                      final submitTransactionId = multisigSubmitTransaction.transId;
+                      final custodians = tonWalletInfo.custodians ?? [];
+                      final confirmations = transactionsState
+                          .where(
+                            (e) =>
+                                e.data != null &&
+                                e.data!.maybeWhen(
+                                  walletInteraction: (info) => info.method.maybeWhen(
+                                    multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                                      submit: (multisigSubmitTransaction) =>
+                                          multisigSubmitTransaction.transId == submitTransactionId,
+                                      confirm: (multisigConfirmTransaction) =>
+                                          multisigConfirmTransaction.transactionId == submitTransactionId,
+                                      orElse: () => false,
+                                    ),
+                                    orElse: () => false,
+                                  ),
+                                  orElse: () => false,
+                                ),
+                          )
+                          .map(
+                            (e) => e.data?.maybeWhen(
+                              walletInteraction: (info) => info.method.maybeWhen(
+                                multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                                  submit: (multisigSubmitTransaction) => multisigSubmitTransaction.custodian,
+                                  confirm: (multisigConfirmTransaction) => multisigConfirmTransaction.custodian,
+                                  orElse: () => null,
+                                ),
+                                orElse: () => null,
+                              ),
+                              orElse: () => null,
+                            ),
+                          )
+                          .whereNotNull();
+
+                      final signed = custodians.every((e) => confirmations.contains(e));
+
+                      return !signed &&
+                          e.transaction.createdAt.toDateTime().add(timeForConfirmation).isBefore(DateTime.now());
+                    },
+                    orElse: () => false,
+                  ),
+                  orElse: () => false,
+                ),
+                orElse: () => false,
+              ),
         )
-        .toList();
+        .map(
+          (e) => Tuple2(
+            e.transaction.createdAt,
+            TonWalletMultisigExpiredTransactionHolder(
+              transactionWithData: e,
+              walletAddress: tonWalletInfo.address,
+              walletPublicKey: tonWalletInfo.publicKey,
+              walletType: tonWalletInfo.walletType,
+              custodians: tonWalletInfo.custodians ?? [],
+            ),
+          ),
+        );
 
     final sorted = [
       ...ordinary,
       ...sent,
       ...expired,
+      ...multisigSent,
       ...multisigPending,
+      ...multisigExpired,
     ]..sort((a, b) => b.item1.compareTo(a.item1));
 
     final all = sorted.map((e) => e.item2).toList();
