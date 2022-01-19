@@ -4,7 +4,7 @@ class UnauthorizedException implements Exception {
   UnauthorizedException([this.info]);
 
   @override
-  String toString() => info ?? super.toString();
+  String toString() => info ?? 'Unauthorized';
 }
 
 class PasswordNotFoundException implements Exception {
@@ -13,7 +13,7 @@ class PasswordNotFoundException implements Exception {
   PasswordNotFoundException([this.info]);
 
   @override
-  String toString() => info ?? super.toString();
+  String toString() => info ?? 'Password not found';
 }
 
 class AccountAlreadyAddedException implements Exception {
@@ -22,7 +22,7 @@ class AccountAlreadyAddedException implements Exception {
   AccountAlreadyAddedException([this.info]);
 
   @override
-  String toString() => info ?? super.toString();
+  String toString() => info ?? 'Account already added';
 }
 
 class InsufficientFundsException implements Exception {
@@ -31,5 +31,5 @@ class InsufficientFundsException implements Exception {
   InsufficientFundsException([this.info]);
 
   @override
-  String toString() => info ?? super.toString();
+  String toString() => info ?? 'Insufficient funds';
 }
