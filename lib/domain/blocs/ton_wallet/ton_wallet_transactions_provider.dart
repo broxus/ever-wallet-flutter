@@ -12,7 +12,7 @@ final tonWalletTransactionsProvider = StreamProvider.family<List<TonWalletTransa
       .tonWalletsStream
       .expand((e) => e)
       .where((e) => e.address == address)
-      .flatMap((e) => e.onTransactionsFoundStream);
+      .flatMap((e) => e.transactionsStream);
 
   final cached = getIt.get<TonWalletTransactionsRepository>().get(address);
 

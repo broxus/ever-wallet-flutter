@@ -13,7 +13,11 @@ final tonWalletInfoProvider = StreamProvider.family<TonWalletInfo?, String>((ref
 
   return Rx.combineLatest2<TonWallet, ContractState?, TonWallet>(
     stream,
-    stream.flatMap((e) => e.onStateChangedStream).cast<ContractState?>().startWith(null),
+    stream
+        .flatMap((e) => e.onStateChangedStream)
+        .cast<OnStateChangedPayload?>()
+        .map((e) => e?.newState)
+        .startWith(null),
     (a, b) => a,
   )
       .asyncMap(

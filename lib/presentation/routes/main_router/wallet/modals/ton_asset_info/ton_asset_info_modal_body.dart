@@ -11,7 +11,7 @@ import '../../../../../../domain/blocs/key/keys_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_expired_transactions_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_transactions_provider.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_sent_transactions_provider.dart';
+import '../../../../../../domain/blocs/ton_wallet/ton_wallet_pending_transactions_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_state_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/transaction_time.dart';
@@ -22,7 +22,7 @@ import '../../../../../design/widgets/wallet_action_button.dart';
 import '../../history/transactions_holders/ton_wallet_expired_transaction_holder.dart';
 import '../../history/transactions_holders/ton_wallet_multisig_expired_transaction_holder.dart';
 import '../../history/transactions_holders/ton_wallet_multisig_pending_transaction_holder.dart';
-import '../../history/transactions_holders/ton_wallet_sent_transaction_holder.dart';
+import '../../history/transactions_holders/ton_wallet_pending_transaction_holder.dart';
 import '../../history/transactions_holders/ton_wallet_transaction_holder.dart';
 import '../deploy_wallet_flow/start_deploy_wallet_flow.dart';
 import '../receive_modal/show_receive_modal.dart';
@@ -198,8 +198,8 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       Consumer(
         builder: (context, ref, child) {
           final transactionsState = ref.watch(tonWalletTransactionsStateProvider(widget.address));
-          final sentTransactionsState =
-              ref.watch(tonWalletSentTransactionsProvider(widget.address)).asData?.value ?? [];
+          final pendingTransactionsState =
+              ref.watch(tonWalletPendingTransactionsProvider(widget.address)).asData?.value ?? [];
           final expiredTransactionsState =
               ref.watch(tonWalletExpiredTransactionsProvider(widget.address)).asData?.value ?? [];
           final multisigPendingTransactionsState =
@@ -209,7 +209,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
             children: [
               historyTitle(
                 transactionsState: transactionsState.item1,
-                sentTransactionsState: sentTransactionsState,
+                pendingTransactionsState: pendingTransactionsState,
                 expiredTransactionsState: expiredTransactionsState,
                 multisigPendingTransactionsState: multisigPendingTransactionsState,
               ),
@@ -224,7 +224,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                     list(
                       tonWalletInfo: tonWalletInfo,
                       transactionsState: transactionsState.item1,
-                      sentTransactionsState: sentTransactionsState,
+                      pendingTransactionsState: pendingTransactionsState,
                       expiredTransactionsState: expiredTransactionsState,
                       multisigPendingTransactionsState: multisigPendingTransactionsState,
                     ),
@@ -239,7 +239,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
 
   Widget historyTitle({
     required List<TonWalletTransactionWithData> transactionsState,
-    required List<Tuple2<PendingTransaction, Transaction?>> sentTransactionsState,
+    required List<PendingTransaction> pendingTransactionsState,
     required List<PendingTransaction> expiredTransactionsState,
     required List<MultisigPendingTransaction> multisigPendingTransactionsState,
   }) =>
@@ -256,7 +256,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
             ),
             const Spacer(),
             if (transactionsState.isEmpty &&
-                sentTransactionsState.isEmpty &&
+                pendingTransactionsState.isEmpty &&
                 expiredTransactionsState.isEmpty &&
                 multisigPendingTransactionsState.isEmpty)
               Text(
@@ -273,7 +273,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
   Widget list({
     required TonWalletInfo tonWalletInfo,
     required List<TonWalletTransactionWithData> transactionsState,
-    required List<Tuple2<PendingTransaction, Transaction?>> sentTransactionsState,
+    required List<PendingTransaction> pendingTransactionsState,
     required List<PendingTransaction> expiredTransactionsState,
     required List<MultisigPendingTransaction> multisigPendingTransactionsState,
   }) {
@@ -317,12 +317,11 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       ),
     );
 
-    final sent = sentTransactionsState.map(
+    final pending = pendingTransactionsState.map(
       (e) => Tuple2(
-        e.item2?.createdAt ?? e.item1.expireAt,
-        TonWalletSentTransactionHolder(
-          pendingTransaction: e.item1,
-          transaction: e.item2,
+        e.expireAt,
+        TonWalletPendingTransactionHolder(
+          pendingTransaction: e,
           walletAddress: tonWalletInfo.address,
         ),
       ),
@@ -476,7 +475,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
 
     final sorted = [
       ...ordinary,
-      ...sent,
+      ...pending,
       ...expired,
       ...multisigSent,
       ...multisigPending,

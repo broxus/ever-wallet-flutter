@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
@@ -9,18 +8,14 @@ import '../../../../../design/widgets/transaction_type_label.dart';
 import 'widgets/address_title.dart';
 import 'widgets/date_title.dart';
 import 'widgets/expire_title.dart';
-import 'widgets/fees_title.dart';
-import 'widgets/value_title.dart';
 
-class TonWalletSentTransactionHolder extends StatelessWidget {
+class TonWalletPendingTransactionHolder extends StatelessWidget {
   final PendingTransaction pendingTransaction;
-  final Transaction? transaction;
   final String walletAddress;
 
-  const TonWalletSentTransactionHolder({
+  const TonWalletPendingTransactionHolder({
     Key? key,
     required this.pendingTransaction,
-    this.transaction,
     required this.walletAddress,
   }) : super(key: key);
 
@@ -28,22 +23,9 @@ class TonWalletSentTransactionHolder extends StatelessWidget {
   Widget build(BuildContext context) {
     final expireAt = pendingTransaction.expireAt.toDateTime();
 
-    final isOutgoing = transaction?.outMessages.isNotEmpty ?? true;
+    final address = walletAddress;
 
-    final sender = transaction?.inMessage.src;
-
-    final recipient = transaction?.outMessages.firstOrNull?.dst;
-
-    final value = (isOutgoing ? transaction?.outMessages.first.value : transaction?.inMessage.value)
-        ?.toTokens()
-        .removeZeroes()
-        .formatValue();
-
-    final address = (isOutgoing ? recipient : sender) ?? walletAddress;
-
-    final date = transaction?.createdAt.toDateTime() ?? DateTime.now();
-
-    final fees = transaction?.totalFees.toTokens().removeZeroes().formatValue();
+    final date = DateTime.now();
 
     return InkWell(
       onTap: () => {},
@@ -57,18 +39,6 @@ class TonWalletSentTransactionHolder extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (value != null) ...[
-                    ValueTitle(
-                      value: value,
-                      currency: 'EVER',
-                      isOutgoing: isOutgoing,
-                    ),
-                    const SizedBox(height: 4),
-                  ],
-                  if (fees != null) ...[
-                    FeesTitle(fees: fees),
-                    const SizedBox(height: 4),
-                  ],
                   Row(
                     children: [
                       Expanded(

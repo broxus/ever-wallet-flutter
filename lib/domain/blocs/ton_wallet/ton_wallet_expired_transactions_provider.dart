@@ -11,5 +11,5 @@ final tonWalletExpiredTransactionsProvider = StreamProvider.family<List<PendingT
       .tonWalletsStream
       .expand((e) => e)
       .where((e) => e.address == address)
-      .flatMap((e) => e.onMessageExpiredStream),
+      .flatMap((e) => e.expiredTransactionsStream),
 );

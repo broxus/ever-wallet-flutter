@@ -8,7 +8,7 @@ import 'package:tuple/tuple.dart';
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_expired_transactions_provider.dart';
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_transactions_provider.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_sent_transactions_provider.dart';
+import '../../../../../domain/blocs/ton_wallet/ton_wallet_pending_transactions_provider.dart';
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_state_provider.dart';
 import '../../../../design/design.dart';
 import '../../../../design/transaction_time.dart';
@@ -16,7 +16,7 @@ import '../../../../design/widgets/preload_transactions_listener.dart';
 import 'transactions_holders/ton_wallet_expired_transaction_holder.dart';
 import 'transactions_holders/ton_wallet_multisig_expired_transaction_holder.dart';
 import 'transactions_holders/ton_wallet_multisig_pending_transaction_holder.dart';
-import 'transactions_holders/ton_wallet_sent_transaction_holder.dart';
+import 'transactions_holders/ton_wallet_pending_transaction_holder.dart';
 import 'transactions_holders/ton_wallet_transaction_holder.dart';
 
 class TonWalletTransactionsLayout extends StatefulWidget {
@@ -39,8 +39,8 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
         builder: (context, ref, child) {
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
           final transactionsState = ref.watch(tonWalletTransactionsStateProvider(widget.address));
-          final sentTransactionsState =
-              ref.watch(tonWalletSentTransactionsProvider(widget.address)).asData?.value ?? [];
+          final pendingTransactionsState =
+              ref.watch(tonWalletPendingTransactionsProvider(widget.address)).asData?.value ?? [];
           final expiredTransactionsState =
               ref.watch(tonWalletExpiredTransactionsProvider(widget.address)).asData?.value ?? [];
           final multisigPendingTransactionsState =
@@ -53,7 +53,7 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
                 list(
                   tonWalletInfo: tonWalletInfo,
                   transactionsState: transactionsState.item1,
-                  sentTransactionsState: sentTransactionsState,
+                  pendingTransactionsState: pendingTransactionsState,
                   expiredTransactionsState: expiredTransactionsState,
                   multisigPendingTransactionsState: multisigPendingTransactionsState,
                 ),
@@ -66,7 +66,7 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
   Widget list({
     required TonWalletInfo tonWalletInfo,
     required List<TonWalletTransactionWithData> transactionsState,
-    required List<Tuple2<PendingTransaction, Transaction?>> sentTransactionsState,
+    required List<PendingTransaction> pendingTransactionsState,
     required List<PendingTransaction> expiredTransactionsState,
     required List<MultisigPendingTransaction> multisigPendingTransactionsState,
   }) {
@@ -110,12 +110,11 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
       ),
     );
 
-    final sent = sentTransactionsState.map(
+    final pending = pendingTransactionsState.map(
       (e) => Tuple2(
-        e.item2?.createdAt ?? e.item1.expireAt,
-        TonWalletSentTransactionHolder(
-          pendingTransaction: e.item1,
-          transaction: e.item2,
+        e.expireAt,
+        TonWalletPendingTransactionHolder(
+          pendingTransaction: e,
           walletAddress: tonWalletInfo.address,
         ),
       ),
@@ -269,7 +268,7 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
 
     final sorted = [
       ...ordinary,
-      ...sent,
+      ...pending,
       ...expired,
       ...multisigSent,
       ...multisigPending,

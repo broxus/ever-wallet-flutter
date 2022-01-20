@@ -17,7 +17,7 @@ final tokenWalletTransactionsProvider =
       .tokenWalletsStream
       .expand((e) => e)
       .where((e) => e.owner == owner && e.symbol.rootTokenContract == rootTokenContract)
-      .flatMap((e) => e.onTransactionsFoundStream)
+      .flatMap((e) => e.transactionsStream)
       .map((e) => e.where((e) => e.data != null).toList());
 
   final cached = getIt.get<TokenWalletTransactionsRepository>().get(
