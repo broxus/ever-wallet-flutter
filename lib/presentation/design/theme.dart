@@ -49,6 +49,7 @@ abstract class CrystalColor {
   static const success = Color(0xFF00AC47);
   static const error = Color(0xFFCC0022);
   static const pending = Color(0xFFE6AC00);
+  static const expired = Color(0xFF060c32);
 
   static const accent = Color(0xFF0088CC);
   static const secondary = Color(0xFFC5E4F3);

@@ -6,6 +6,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../../../../data/services/nekoton_service.dart';
 import '../../../../../../domain/blocs/key/current_key_provider.dart';
 import '../../../../../../domain/blocs/key/keys_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_expired_transactions_provider.dart';
@@ -13,6 +14,7 @@ import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart'
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_transactions_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_sent_transactions_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_state_provider.dart';
+import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/transaction_time.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
@@ -161,7 +163,33 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                           address: widget.address,
                           publicKeys: publicKeys,
                         )
-                    : null,
+                    : () async {
+                        final custodians = tonWalletInfo.custodians ??
+                            await getIt
+                                .get<NekotonService>()
+                                .getTonWalletInfo(tonWalletInfo.address)
+                                .then((v) => v.custodians) ??
+                            [];
+
+                        final localCustodians =
+                            keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
+
+                        final initiatorKey =
+                            localCustodians.firstWhereOrNull((e) => e.publicKey == currentKey.publicKey);
+
+                        final listOfKeys = [
+                          if (initiatorKey != null) initiatorKey,
+                          ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
+                        ];
+
+                        final publicKeys = listOfKeys.map((e) => e.publicKey).toList();
+
+                        return startSendTransactionFlow(
+                          context: context,
+                          address: widget.address,
+                          publicKeys: publicKeys,
+                        );
+                      },
               );
             } else {
               actionButton = WalletActionButton(

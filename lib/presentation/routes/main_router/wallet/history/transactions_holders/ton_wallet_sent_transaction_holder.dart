@@ -79,7 +79,7 @@ class TonWalletSentTransactionHolder extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   const TransactionTypeLabel(
-                    text: 'Transaction in progress',
+                    text: 'In progress',
                     color: CrystalColor.pending,
                   ),
                   const SizedBox(height: 4),

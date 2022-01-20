@@ -395,8 +395,8 @@ class TonWalletMultisigExpiredTransactionInfoModalBody extends StatelessWidget {
   Widget label() => Row(
         children: const [
           TransactionTypeLabel(
-            text: 'Transaction expired',
-            color: CrystalColor.error,
+            text: 'Expired',
+            color: CrystalColor.expired,
           ),
         ],
       );

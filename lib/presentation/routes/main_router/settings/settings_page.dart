@@ -210,14 +210,42 @@ class _SettingsPageState extends State<SettingsPage> {
                             if (name != null) {
                               if (!mounted) return;
 
-                              showCrystalBottomSheet(
-                                context,
-                                title: DeriveKeyModalBody.title,
-                                body: DeriveKeyModalBody(
-                                  publicKey: currentKey.publicKey,
-                                  name: name.isNotEmpty ? name : null,
-                                ),
-                              );
+                              final info = await ref.read(biometryInfoProvider.future);
+
+                              if (info.isAvailable && info.isEnabled) {
+                                try {
+                                  final password = await getIt.get<BiometryRepository>().getKeyPassword(
+                                        localizedReason: 'Please authenticate to interact with wallet',
+                                        publicKey: currentKey.publicKey,
+                                      );
+
+                                  await getIt.get<KeysRepository>().deriveKey(
+                                        name: name.isNotEmpty ? name : null,
+                                        publicKey: currentKey.publicKey,
+                                        password: password,
+                                      );
+                                } catch (err) {
+                                  if (!mounted) return;
+
+                                  showCrystalBottomSheet(
+                                    context,
+                                    title: DeriveKeyModalBody.title,
+                                    body: DeriveKeyModalBody(
+                                      publicKey: currentKey.publicKey,
+                                      name: name.isNotEmpty ? name : null,
+                                    ),
+                                  );
+                                }
+                              } else {
+                                showCrystalBottomSheet(
+                                  context,
+                                  title: DeriveKeyModalBody.title,
+                                  body: DeriveKeyModalBody(
+                                    publicKey: currentKey.publicKey,
+                                    name: name.isNotEmpty ? name : null,
+                                  ),
+                                );
+                              }
                             }
                           }
                         : null,

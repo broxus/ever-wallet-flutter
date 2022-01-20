@@ -49,8 +49,8 @@ class TonWalletExpiredTransactionHolder extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   const TransactionTypeLabel(
-                    text: 'Transaction expired',
-                    color: CrystalColor.error,
+                    text: 'Expired',
+                    color: CrystalColor.expired,
                   ),
                   const SizedBox(height: 4),
                   ExpireTitle(
