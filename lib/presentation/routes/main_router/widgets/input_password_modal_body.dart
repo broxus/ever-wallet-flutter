@@ -6,7 +6,7 @@ import '../../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
 import '../../../../domain/blocs/biometry/biometry_info_provider.dart';
 import '../../../design/design.dart';
-import 'input_password_field.dart';
+import 'input_password_field/input_password_field.dart';
 
 class InputPasswordModalBody extends StatefulWidget {
   final void Function(String password) onSubmit;

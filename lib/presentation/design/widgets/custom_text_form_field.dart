@@ -111,9 +111,9 @@ class CustomTextFormField extends StatelessWidget {
 }
 
 class CustomTextFormFieldWithDecoration extends StatelessWidget {
-  final String name;
   final TextEditingController? controller;
   final FocusNode? focusNode;
+  final bool autofocus;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final bool autocorrect;
@@ -133,9 +133,9 @@ class CustomTextFormFieldWithDecoration extends StatelessWidget {
 
   const CustomTextFormFieldWithDecoration({
     Key? key,
-    required this.name,
     this.controller,
     this.focusNode,
+    this.autofocus = false,
     this.keyboardType,
     this.textInputAction,
     this.autocorrect = true,
@@ -158,6 +158,7 @@ class CustomTextFormFieldWithDecoration extends StatelessWidget {
   Widget build(BuildContext context) => TextField(
         controller: controller,
         focusNode: focusNode,
+        autofocus: autofocus,
         decoration: InputDecoration(
           errorText: errorText,
           hintText: hintText,

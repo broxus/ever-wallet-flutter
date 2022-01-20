@@ -105,8 +105,8 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
   Widget passwordField() => ChangeNotifierBuilder<PasswordEnterPageNotifier>(
         notifier: notifier,
         builder: (context, notifier, child) => CustomTextFormFieldWithDecoration(
-          name: 'password',
           controller: controller,
+          autofocus: true,
           autocorrect: false,
           enableSuggestions: false,
           obscureText: true,
