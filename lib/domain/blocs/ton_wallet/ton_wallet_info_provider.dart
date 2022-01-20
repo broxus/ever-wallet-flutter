@@ -25,7 +25,7 @@ final tonWalletInfoProvider = StreamProvider.family<TonWalletInfo?, String>((ref
             walletType: e.walletType,
             contractState: await e.contractState,
             details: e.details,
-            custodians: e.custodians,
+            custodians: await e.custodians,
           );
 
           await getIt.get<TonWalletInfoRepository>().save(tonWalletInfo);

@@ -1,17 +1,17 @@
+import 'package:change_notifier_builder/change_notifier_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-import '../../../../../../data/repositories/biometry_repository.dart';
-import '../../../../../../data/repositories/keys_repository.dart';
-import '../../../../../../injection.dart';
-import '../../../../../design/design.dart';
-import '../../../../../design/widgets/crystal_subtitle.dart';
-import '../../../../../design/widgets/custom_back_button.dart';
-import '../../../../../design/widgets/custom_elevated_button.dart';
-import '../../../../../design/widgets/custom_text_form_field.dart';
-import '../../../../../design/widgets/text_field_clear_button.dart';
-import '../../../../../design/widgets/unfocusing_gesture_detector.dart';
+import '../../../../../../../data/repositories/biometry_repository.dart';
+import '../../../../../../../injection.dart';
+import '../../../../../../design/design.dart';
+import '../../../../../../design/widgets/crystal_subtitle.dart';
+import '../../../../../../design/widgets/custom_back_button.dart';
+import '../../../../../../design/widgets/custom_elevated_button.dart';
+import '../../../../../../design/widgets/custom_text_form_field.dart';
+import '../../../../../../design/widgets/text_field_clear_button.dart';
+import '../../../../../../design/widgets/unfocusing_gesture_detector.dart';
+import 'password_enter_page_notifier.dart';
 
 class PasswordEnterPage extends StatefulWidget {
   final BuildContext modalContext;
@@ -31,13 +31,19 @@ class PasswordEnterPage extends StatefulWidget {
 
 class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
   final controller = TextEditingController();
-  final passwordFieldKey = GlobalKey<FormBuilderFieldState>();
-  final formValidityNotifier = ValueNotifier<bool?>(null);
+  late final PasswordEnterPageNotifier notifier;
+
+  @override
+  void initState() {
+    notifier = PasswordEnterPageNotifier(widget.publicKey);
+    controller.addListener(() => notifier.onPasswordChange(controller.text));
+    super.initState();
+  }
 
   @override
   void dispose() {
+    notifier.dispose();
     controller.dispose();
-    formValidityNotifier.dispose();
     super.dispose();
   }
 
@@ -96,29 +102,32 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
         text: 'Enter your password to continue.',
       );
 
-  Widget passwordField() => CustomTextFormField(
-        fieldKey: passwordFieldKey,
-        name: 'password',
-        controller: controller,
-        autocorrect: false,
-        enableSuggestions: false,
-        obscureText: true,
-        hintText: 'Enter password...',
-        suffixIcon: TextFieldClearButton(
+  Widget passwordField() => ChangeNotifierBuilder<PasswordEnterPageNotifier>(
+        notifier: notifier,
+        builder: (context, notifier, child) => CustomTextFormFieldWithDecoration(
+          name: 'password',
           controller: controller,
+          autocorrect: false,
+          enableSuggestions: false,
+          obscureText: true,
+          errorText: notifier?.state.passwordState.errorText,
+          hintText: 'Enter password...',
+          suffixIcon: TextFieldClearButton(
+            controller: controller,
+          ),
         ),
       );
 
-  Widget validationText() => ValueListenableBuilder<bool?>(
-        valueListenable: formValidityNotifier,
-        builder: (context, value, child) => value ?? false
+  Widget validationText() => ChangeNotifierBuilder<PasswordEnterPageNotifier>(
+        notifier: notifier,
+        builder: (context, notifier, child) => notifier?.state.formState.errorText != null
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: const [
-                  SizedBox(height: 16),
+                children: [
+                  const SizedBox(height: 16),
                   Text(
-                    'Invalid password',
-                    style: TextStyle(
+                    notifier!.state.formState.errorText!,
+                    style: const TextStyle(
                       fontSize: 14,
                       color: CrystalColor.error,
                       fontWeight: FontWeight.w400,
@@ -130,32 +139,21 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
             : const SizedBox(),
       );
 
-  Widget nextButton() => CustomElevatedButton(
-        onPressed: onPressed,
-        text: 'Submit',
+  Widget nextButton() => ChangeNotifierBuilder<PasswordEnterPageNotifier>(
+        notifier: notifier,
+        builder: (context, notifier, child) => CustomElevatedButton(
+          onPressed:
+              notifier?.state.formState.isValid ?? false ? () => onPressed(notifier!.state.passwordState.value) : null,
+          text: 'Submit',
+        ),
       );
 
-  Future<void> onPressed() async {
-    final password = controller.text;
+  Future<void> onPressed(String value) async {
+    widget.onSubmit(value);
 
-    final isCorrect = await getIt.get<KeysRepository>().checkKeyPassword(
+    await getIt.get<BiometryRepository>().setKeyPassword(
           publicKey: widget.publicKey,
-          password: password,
+          password: value,
         );
-
-    formValidityNotifier.value = isCorrect;
-
-    if (!isCorrect) {
-      passwordFieldKey.currentState?.invalidate('Invalid password');
-    } else {
-      passwordFieldKey.currentState?.validate();
-
-      widget.onSubmit(password);
-
-      await getIt.get<BiometryRepository>().setKeyPassword(
-            publicKey: widget.publicKey,
-            password: password,
-          );
-    }
   }
 }

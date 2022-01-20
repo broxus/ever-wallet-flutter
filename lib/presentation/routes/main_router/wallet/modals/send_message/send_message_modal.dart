@@ -17,7 +17,7 @@ import '../../../../../design/widgets/custom_outlined_button.dart';
 import '../../../../../design/widgets/modal_header.dart';
 import '../../../../../design/widgets/sectioned_card.dart';
 import '../../../../../design/widgets/sectioned_card_section.dart';
-import '../common/password_enter_page.dart';
+import '../common/password_enter_page/password_enter_page.dart';
 
 class SendMessageModalBody extends StatefulWidget {
   final BuildContext modalContext;

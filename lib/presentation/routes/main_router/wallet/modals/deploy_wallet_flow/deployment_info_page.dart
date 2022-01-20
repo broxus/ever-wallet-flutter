@@ -14,7 +14,7 @@ import '../../../../../design/widgets/custom_back_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/sectioned_card.dart';
 import '../../../../../design/widgets/sectioned_card_section.dart';
-import '../common/password_enter_page.dart';
+import '../common/password_enter_page/password_enter_page.dart';
 import '../common/send_result_page.dart';
 
 class DeploymentInfoPage extends ConsumerStatefulWidget {

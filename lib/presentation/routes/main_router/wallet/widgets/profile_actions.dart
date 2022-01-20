@@ -2,12 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../data/services/nekoton_service.dart';
 import '../../../../../domain/blocs/account/account_info_provider.dart';
 import '../../../../../domain/blocs/key/current_key_provider.dart';
 import '../../../../../domain/blocs/key/keys_provider.dart';
 import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
-import '../../../../../injection.dart';
 import '../../../../design/design.dart';
 import '../modals/add_asset_modal/show_add_asset_modal.dart';
 import '../modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
@@ -69,8 +67,6 @@ class ProfileActions extends StatelessWidget {
               final currentKey = ref.watch(currentKeyProvider).asData?.value;
               final tonWalletInfo = ref.watch(tonWalletInfoProvider(address)).asData?.value;
 
-              print('$tonWalletInfo');
-
               if (currentKey != null && tonWalletInfo != null) {
                 final publicKey = currentKey.publicKey;
                 final requiresSeparateDeploy = tonWalletInfo.details.requiresSeparateDeploy;
@@ -96,40 +92,13 @@ class ProfileActions extends StatelessWidget {
                   final publicKeys = listOfKeys.map((e) => e.publicKey).toList();
 
                   return WalletButton(
-                    key: const ValueKey('send'),
                     onTap: publicKeys.isNotEmpty
                         ? () => startSendTransactionFlow(
                               context: context,
                               address: address,
                               publicKeys: publicKeys,
                             )
-                        : () async {
-                            final custodians = tonWalletInfo.custodians ??
-                                await getIt
-                                    .get<NekotonService>()
-                                    .getTonWalletInfo(tonWalletInfo.address)
-                                    .then((v) => v.custodians) ??
-                                [];
-
-                            final localCustodians =
-                                keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
-
-                            final initiatorKey =
-                                localCustodians.firstWhereOrNull((e) => e.publicKey == currentKey.publicKey);
-
-                            final listOfKeys = [
-                              if (initiatorKey != null) initiatorKey,
-                              ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
-                            ];
-
-                            final publicKeys = listOfKeys.map((e) => e.publicKey).toList();
-
-                            return startSendTransactionFlow(
-                              context: context,
-                              address: address,
-                              publicKeys: publicKeys,
-                            );
-                          },
+                        : null,
                     title: LocaleKeys.actions_send.tr(),
                     icon: Assets.images.iconSend.svg(
                       color: CrystalColor.secondary,
@@ -137,7 +106,6 @@ class ProfileActions extends StatelessWidget {
                   );
                 } else {
                   return WalletButton(
-                    key: const ValueKey('deploy'),
                     onTap: () => startDeployWalletFlow(
                       context: context,
                       address: address,
@@ -151,7 +119,6 @@ class ProfileActions extends StatelessWidget {
                 }
               } else {
                 return WalletButton(
-                  key: const ValueKey('none'),
                   onTap: () {},
                   title: LocaleKeys.actions_send.tr(),
                   icon: Assets.images.iconSend.svg(
