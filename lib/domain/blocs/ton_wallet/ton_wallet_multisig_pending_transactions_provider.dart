@@ -6,11 +6,17 @@ import '../../../data/services/nekoton_service.dart';
 import '../../../injection.dart';
 
 final tonWalletMultisigPendingTransactionsProvider = StreamProvider.family<List<MultisigPendingTransaction>, String>(
-  (ref, address) => getIt
-      .get<NekotonService>()
-      .tonWalletsStream
-      .expand((e) => e)
-      .where((e) => e.address == address)
-      .flatMap((e) => e.onStateChangedStream.asyncMap((_) => e.unconfirmedTransactions))
-      .startWith([]),
+  (ref, address) {
+    final stream = getIt.get<NekotonService>().tonWalletsStream.expand((e) => e).where((e) => e.address == address);
+
+    return Rx.combineLatest2<TonWallet, ContractState?, TonWallet>(
+      stream,
+      stream
+          .flatMap((e) => e.onStateChangedStream)
+          .cast<OnStateChangedPayload?>()
+          .map((e) => e?.newState)
+          .startWith(null),
+      (a, b) => a,
+    ).asyncMap((e) => e.unconfirmedTransactions).startWith([]);
+  },
 );

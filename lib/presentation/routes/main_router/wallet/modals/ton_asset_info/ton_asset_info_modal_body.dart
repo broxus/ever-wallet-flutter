@@ -277,20 +277,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
     required List<PendingTransaction> expiredTransactionsState,
     required List<MultisigPendingTransaction> multisigPendingTransactionsState,
   }) {
-    final timeForConfirmation = tonWalletInfo.walletType.maybeWhen(
-      multisig: (multisigType) {
-        switch (multisigType) {
-          case MultisigType.safeMultisigWallet:
-          case MultisigType.setcodeMultisigWallet:
-          case MultisigType.bridgeMultisigWallet:
-          case MultisigType.surfWallet:
-            return const Duration(hours: 1);
-          case MultisigType.safeMultisigWallet24h:
-            return const Duration(hours: 24);
-        }
-      },
-      orElse: () => const Duration(hours: 1),
-    );
+    final timeForConfirmation = Duration(seconds: tonWalletInfo.details.expirationTime);
 
     final ordinaryTransactions = transactionsState.where(
       (e) =>
@@ -376,6 +363,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
           walletPublicKey: tonWalletInfo.publicKey,
           walletType: tonWalletInfo.walletType,
           custodians: tonWalletInfo.custodians ?? [],
+          details: tonWalletInfo.details,
         ),
       ),
     );

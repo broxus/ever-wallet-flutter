@@ -16,8 +16,8 @@ class HiveSource {
   static const _tokenContractAssetsBoxName = 'token_contract_assets_v3';
   static const _tonWalletInfosBoxName = 'ton_wallet_infos_v2';
   static const _tokenWalletInfosBoxName = 'token_wallet_infos_v2';
-  static const _tonWalletTransactionsBoxName = 'ton_wallet_transactions_v2';
-  static const _tokenWalletTransactionsBoxName = 'token_wallet_transactions_v2';
+  static const _tonWalletTransactionsBoxName = 'ton_wallet_transactions_v3';
+  static const _tokenWalletTransactionsBoxName = 'token_wallet_transactions_v3';
   static const _publicKeysLabelsBoxName = 'public_keys_labels_v1';
   static const _biometryStatusKey = 'biometry_status';
   late final Uint8List _key;

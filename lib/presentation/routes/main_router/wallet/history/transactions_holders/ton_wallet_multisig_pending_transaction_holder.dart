@@ -22,6 +22,7 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
   final String walletPublicKey;
   final WalletType walletType;
   final List<String> custodians;
+  final TonWalletDetails details;
 
   const TonWalletMultisigPendingTransactionHolder({
     Key? key,
@@ -31,6 +32,7 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
     required this.walletPublicKey,
     required this.walletType,
     required this.custodians,
+    required this.details,
   }) : super(key: key);
 
   @override
@@ -108,20 +110,7 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
 
     final signsRequired = multisigPendingTransaction.signsRequired;
 
-    final timeForConfirmation = walletType.maybeWhen(
-      multisig: (multisigType) {
-        switch (multisigType) {
-          case MultisigType.safeMultisigWallet:
-          case MultisigType.setcodeMultisigWallet:
-          case MultisigType.bridgeMultisigWallet:
-          case MultisigType.surfWallet:
-            return const Duration(hours: 1);
-          case MultisigType.safeMultisigWallet24h:
-            return const Duration(hours: 24);
-        }
-      },
-      orElse: () => const Duration(hours: 1),
-    );
+    final timeForConfirmation = Duration(seconds: details.expirationTime);
 
     final expireAt = date.add(timeForConfirmation);
 
