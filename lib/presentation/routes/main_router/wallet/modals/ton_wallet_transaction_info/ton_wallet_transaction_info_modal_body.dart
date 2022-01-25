@@ -24,15 +24,12 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
     final isOutgoing = transactionWithData.transaction.outMessages.isNotEmpty;
     final sender = transactionWithData.transaction.inMessage.src;
     final recipient = transactionWithData.transaction.outMessages.firstOrNull?.dst;
-    final value = (isOutgoing
-            ? transactionWithData.transaction.outMessages.first.value
-            : transactionWithData.transaction.inMessage.value)
-        .toTokens()
-        .removeZeroes()
-        .formatValue();
+    final value = isOutgoing
+        ? transactionWithData.transaction.outMessages.first.value
+        : transactionWithData.transaction.inMessage.value;
     final address = isOutgoing ? recipient : sender;
     final date = transactionWithData.transaction.createdAt.toDateTime();
-    final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
+    final fees = transactionWithData.transaction.totalFees;
     final hash = transactionWithData.transaction.id.hash;
 
     final comment = transactionWithData.data?.maybeWhen(
@@ -185,9 +182,9 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
         [
           amountItem(
             isOutgoing: isOutgoing,
-            value: value,
+            value: value.toTokens().removeZeroes().formatValue(),
           ),
-          feeItem(fees),
+          feeItem(fees.toTokens().removeZeroes().formatValue()),
         ],
       ),
       if (comment != null && comment.isNotEmpty)

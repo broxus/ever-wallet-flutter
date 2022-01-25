@@ -67,30 +67,23 @@ class TonWalletMultisigExpiredTransactionHolder extends StatelessWidget {
 
     final isOutgoing = recipient != null;
 
-    final msgValue = ((isOutgoing
-                ? transactionWithData.transaction.outMessages.firstOrNull?.value
-                : transactionWithData.transaction.inMessage.value) ??
-            transactionWithData.transaction.inMessage.value)
-        .toTokens()
-        .removeZeroes()
-        .formatValue();
+    final msgValue = (isOutgoing
+            ? transactionWithData.transaction.outMessages.firstOrNull?.value
+            : transactionWithData.transaction.inMessage.value) ??
+        transactionWithData.transaction.inMessage.value;
 
-    final dataValue = transactionWithData.data
-        ?.maybeWhen(
-          dePoolOnRoundComplete: (notification) => notification.reward,
-          walletInteraction: (info) => info.method.maybeWhen(
-            multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
-              send: (multisigSendTransaction) => multisigSendTransaction.value,
-              submit: (multisigSubmitTransaction) => multisigSubmitTransaction.value,
-              orElse: () => null,
-            ),
-            orElse: () => null,
-          ),
+    final dataValue = transactionWithData.data?.maybeWhen(
+      dePoolOnRoundComplete: (notification) => notification.reward,
+      walletInteraction: (info) => info.method.maybeWhen(
+        multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+          send: (multisigSendTransaction) => multisigSendTransaction.value,
+          submit: (multisigSubmitTransaction) => multisigSubmitTransaction.value,
           orElse: () => null,
-        )
-        ?.toTokens()
-        .removeZeroes()
-        .formatValue();
+        ),
+        orElse: () => null,
+      ),
+      orElse: () => null,
+    );
 
     final value = dataValue ?? msgValue;
 
@@ -98,7 +91,7 @@ class TonWalletMultisigExpiredTransactionHolder extends StatelessWidget {
 
     final date = transactionWithData.transaction.createdAt.toDateTime();
 
-    final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
+    final fees = transactionWithData.transaction.totalFees;
 
     return InkWell(
       onTap: () => showTonWalletMultisigExpiredTransactionInfo(
@@ -123,7 +116,7 @@ class TonWalletMultisigExpiredTransactionHolder extends StatelessWidget {
                     children: [
                       Expanded(
                         child: ValueTitle(
-                          value: value,
+                          value: value.toTokens().removeZeroes().formatValue(),
                           currency: 'EVER',
                           isOutgoing: isOutgoing,
                         ),
@@ -132,7 +125,7 @@ class TonWalletMultisigExpiredTransactionHolder extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  FeesTitle(fees: fees),
+                  FeesTitle(fees: fees.toTokens().removeZeroes().formatValue()),
                   const SizedBox(height: 4),
                   Row(
                     children: [

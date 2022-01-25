@@ -1,6 +1,6 @@
 # ton-wallet-crystal-flutter
 
-TON Wallet Flutter application. Manage Free TON wallets and access dApps directly from your cellphone
+EVER Wallet Flutter application. Manage Everscale wallets and access dApps directly from your cellphone
 
 ## How to build & run
 

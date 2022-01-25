@@ -39,18 +39,14 @@ class TokenWalletTransactionHolder extends StatelessWidget {
         ) ??
         transactionWithData.transaction.outMessages.firstOrNull?.dst;
 
-    final value = transactionWithData.data!
-        .when(
-          incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
-          outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.tokens,
-          swapBack: (tokenSwapBack) => tokenSwapBack.tokens,
-          accept: (value) => value,
-          transferBounced: (value) => value,
-          swapBackBounced: (value) => value,
-        )
-        .toTokens(decimals)
-        .removeZeroes()
-        .formatValue();
+    final value = transactionWithData.data!.when(
+      incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
+      outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.tokens,
+      swapBack: (tokenSwapBack) => tokenSwapBack.tokens,
+      accept: (value) => value,
+      transferBounced: (value) => value,
+      swapBackBounced: (value) => value,
+    );
 
     final isOutgoing = transactionWithData.data!.when(
       incomingTransfer: (tokenIncomingTransfer) => false,
@@ -65,7 +61,7 @@ class TokenWalletTransactionHolder extends StatelessWidget {
 
     final date = transactionWithData.transaction.createdAt.toDateTime();
 
-    final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
+    final fees = transactionWithData.transaction.totalFees;
 
     return InkWell(
       onTap: () => showTokenWalletTransactionInfo(
@@ -88,7 +84,7 @@ class TokenWalletTransactionHolder extends StatelessWidget {
                     children: [
                       Expanded(
                         child: ValueTitle(
-                          value: value,
+                          value: value.toTokens(decimals).removeZeroes().formatValue(),
                           currency: currency,
                           isOutgoing: isOutgoing,
                         ),
@@ -97,7 +93,7 @@ class TokenWalletTransactionHolder extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  FeesTitle(fees: fees),
+                  FeesTitle(fees: fees.toTokens().removeZeroes().formatValue()),
                   const SizedBox(height: 4),
                   Row(
                     children: [

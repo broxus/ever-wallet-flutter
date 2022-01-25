@@ -45,7 +45,7 @@
     }
   },
   "welcome_screen": {
-    "title": "Welcome to\nTON Crystal Wallet",
+    "title": "Welcome to\nEVER Wallet",
     "subtitle": "Create a new wallet or sign in",
     "action": {
       "create": "Create a new wallet",

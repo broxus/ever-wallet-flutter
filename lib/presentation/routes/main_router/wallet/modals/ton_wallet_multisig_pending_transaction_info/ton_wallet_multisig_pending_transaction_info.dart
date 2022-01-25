@@ -82,29 +82,22 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
 
           final isOutgoing = recipient != null;
 
-          final msgValue = (isOutgoing
-                  ? transactionWithData.transaction.outMessages.firstOrNull?.value
-                  : transactionWithData.transaction.inMessage.value)
-              ?.toTokens()
-              .removeZeroes()
-              .formatValue();
+          final msgValue = isOutgoing
+              ? transactionWithData.transaction.outMessages.firstOrNull?.value
+              : transactionWithData.transaction.inMessage.value;
 
-          final dataValue = transactionWithData.data
-              ?.maybeWhen(
-                dePoolOnRoundComplete: (notification) => notification.reward,
-                walletInteraction: (info) => info.method.maybeWhen(
-                  multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
-                    send: (multisigSendTransaction) => multisigSendTransaction.value,
-                    submit: (multisigSubmitTransaction) => multisigSubmitTransaction.value,
-                    orElse: () => null,
-                  ),
-                  orElse: () => null,
-                ),
+          final dataValue = transactionWithData.data?.maybeWhen(
+            dePoolOnRoundComplete: (notification) => notification.reward,
+            walletInteraction: (info) => info.method.maybeWhen(
+              multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                send: (multisigSendTransaction) => multisigSendTransaction.value,
+                submit: (multisigSubmitTransaction) => multisigSubmitTransaction.value,
                 orElse: () => null,
-              )
-              ?.toTokens()
-              .removeZeroes()
-              .formatValue();
+              ),
+              orElse: () => null,
+            ),
+            orElse: () => null,
+          );
 
           final value = dataValue ?? msgValue;
 
@@ -112,7 +105,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
 
           final date = transactionWithData.transaction.createdAt.toDateTime();
 
-          final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
+          final fees = transactionWithData.transaction.totalFees;
 
           final hash = transactionWithData.transaction.id.hash;
 
@@ -293,9 +286,11 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                 if (value != null)
                   amountItem(
                     isOutgoing: isOutgoing,
-                    value: value,
+                    value: value.toTokens().removeZeroes().formatValue(),
                   ),
-                feeItem(fees),
+                feeItem(
+                  fees.toTokens().removeZeroes().formatValue(),
+                ),
               ],
             ),
             if (comment != null && comment.isNotEmpty)

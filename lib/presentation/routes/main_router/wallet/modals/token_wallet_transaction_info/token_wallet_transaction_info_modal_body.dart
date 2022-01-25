@@ -35,18 +35,14 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
         ) ??
         transactionWithData.transaction.outMessages.firstOrNull?.dst;
 
-    final value = transactionWithData.data!
-        .when(
-          incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
-          outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.tokens,
-          swapBack: (tokenSwapBack) => tokenSwapBack.tokens,
-          accept: (value) => value,
-          transferBounced: (value) => value,
-          swapBackBounced: (value) => value,
-        )
-        .toTokens(decimals)
-        .removeZeroes()
-        .formatValue();
+    final value = transactionWithData.data!.when(
+      incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
+      outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.tokens,
+      swapBack: (tokenSwapBack) => tokenSwapBack.tokens,
+      accept: (value) => value,
+      transferBounced: (value) => value,
+      swapBackBounced: (value) => value,
+    );
 
     final isOutgoing = transactionWithData.data!.when(
       incomingTransfer: (tokenIncomingTransfer) => false,
@@ -61,7 +57,7 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
 
     final date = transactionWithData.transaction.createdAt.toDateTime();
 
-    final fees = transactionWithData.transaction.totalFees.toTokens().removeZeroes().formatValue();
+    final fees = transactionWithData.transaction.totalFees;
 
     final hash = transactionWithData.transaction.id.hash;
 
@@ -91,9 +87,9 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
         [
           amountItem(
             isOutgoing: isOutgoing,
-            value: value,
+            value: value.toTokens(decimals).removeZeroes().formatValue(),
           ),
-          feeItem(fees),
+          feeItem(fees.toTokens().removeZeroes().formatValue()),
         ],
       ),
       section(
