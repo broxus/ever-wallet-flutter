@@ -1,0 +1,1 @@
+const kTonDecimals = 9;

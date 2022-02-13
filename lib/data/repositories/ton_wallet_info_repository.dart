@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../models/ton_wallet_info.dart';
 import '../sources/local/hive_source.dart';
 
 @lazySingleton

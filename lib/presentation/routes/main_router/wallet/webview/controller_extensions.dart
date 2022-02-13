@@ -62,9 +62,9 @@ extension InAppWebViewControllerX on InAppWebViewController {
     }
   }
 
-  Future<String?> getStringifiedUrl() => getUrl().then((value) => value?.toString());
+  Future<String?> getStringifiedUrl() => getUrl().then((v) => v?.toString());
 
-  Future<String?> getCurrentOrigin() => getUrl().then((value) => value?.authority);
+  Future<String?> getCurrentOrigin() => getUrl().then((v) => v?.authority);
 
   Future<void> loadUrlWithResult({
     required URLRequest urlRequest,

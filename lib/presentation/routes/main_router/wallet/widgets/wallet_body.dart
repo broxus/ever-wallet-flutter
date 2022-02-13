@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../domain/blocs/account/accounts_provider.dart';
-import '../../../../../domain/blocs/account/current_account_provider.dart';
+import '../../../../../providers/account/accounts_provider.dart';
+import '../../../../../providers/account/current_account_provider.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/animated_appearance.dart';
 import '../../../../design/widgets/sliding_panel.dart';

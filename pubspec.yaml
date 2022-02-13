@@ -3,7 +3,7 @@ description: EVER Wallet
 
 publish_to: 'none'
 
-version: 1.0.6+66
+version: 1.0.7+68
 
 environment:
   sdk: '>=2.15.1 <3.0.0'
@@ -47,7 +47,7 @@ dependencies:
   lottie: ^1.2.1
   modal_bottom_sheet: ^2.0.0
   nekoton_flutter:
-    path: ../nekoton-flutter
+    path: ../nekoton-flutter-rework
   package_info_plus: ^1.3.0
   permission_handler: ^8.3.0
   qr_code_scanner: ^0.6.1

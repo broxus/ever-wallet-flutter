@@ -9,11 +9,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import 'injection.dart';
 import 'logger.dart';
 import 'presentation/application/application.dart';
-import 'provider_observer.dart';
 
 Future<void> main() async {
   try {
@@ -25,6 +25,8 @@ Future<void> main() async {
       logger.e(exception, exception, stack);
     });
     Isolate.current.addErrorListener(rawReceivePort.sendPort);
+
+    loadNekotonLibrary();
 
     await dotenv.load();
 
@@ -38,13 +40,12 @@ Future<void> main() async {
 
     await configureDependencies();
 
+    nekotonErrorsStream.listen((e) => logger.e(e.item1, e.item1, e.item2));
+
     runZonedGuarded(
       () => runApp(
-        ProviderScope(
-          observers: [
-            ProviderLogger(logger),
-          ],
-          child: const Application(),
+        const ProviderScope(
+          child: Application(),
         ),
       ),
       FirebaseCrashlytics.instance.recordError,

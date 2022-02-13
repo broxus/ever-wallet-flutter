@@ -4,8 +4,8 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
-import '../../../../../../domain/blocs/biometry/biometry_info_provider.dart';
 import '../../../../../../injection.dart';
+import '../../../../../../providers/biometry/biometry_info_provider.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
 import '../../../../../design/widgets/modal_header.dart';

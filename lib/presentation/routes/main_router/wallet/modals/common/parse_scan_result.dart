@@ -1,4 +1,3 @@
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
 Future<Tuple3<String, String?, String?>> parseScanResult(String value) async {
@@ -15,7 +14,7 @@ Future<Tuple3<String, String?, String?>> parseScanResult(String value) async {
   if (addressMatch != null) {
     address = addressMatch;
   } else {
-    throw InvalidAddressException();
+    throw Exception();
   }
 
   final amountRegExp = RegExp(

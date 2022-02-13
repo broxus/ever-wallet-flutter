@@ -5,11 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_expired_transactions_provider.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_multisig_pending_transactions_provider.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_pending_transactions_provider.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_transactions_state_provider.dart';
+import '../../../../../data/models/ton_wallet_info.dart';
+import '../../../../../providers/ton_wallet/ton_wallet_expired_transactions_provider.dart';
+import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../../../providers/ton_wallet/ton_wallet_multisig_pending_transactions_provider.dart';
+import '../../../../../providers/ton_wallet/ton_wallet_pending_transactions_provider.dart';
+import '../../../../../providers/ton_wallet/ton_wallet_transactions_state_provider.dart';
 import '../../../../design/design.dart';
 import '../../../../design/transaction_time.dart';
 import '../../../../design/widgets/preload_transactions_listener.dart';

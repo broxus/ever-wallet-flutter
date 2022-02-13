@@ -22,7 +22,7 @@ class LocalAuthSource {
         biometricOnly: true,
       );
     } else {
-      throw Exception();
+      throw Exception('Biometry unavailable');
     }
   }
 }

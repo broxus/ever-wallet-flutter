@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../data/repositories/accounts_repository.dart';
-import '../../../../../../domain/blocs/account/account_creation_options_provider.dart';
+import '../../../../../../data/constants.dart';
+import '../../../../../../data/repositories/accounts_storage_repository.dart';
 import '../../../../../../injection.dart';
+import '../../../../../../providers/account/account_creation_options_provider.dart';
 import '../../../../../design/default_wallet_type.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/custom_back_button.dart';
@@ -36,7 +37,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<AddNewAccountTypePage>
     super.initState();
     ref
         .read(accountCreationOptionsProvider(widget.publicKey).future)
-        .then((value) => optionNotifier.value = value.item2.firstOrNull);
+        .then((v) => optionNotifier.value = v.item2.firstOrNull);
   }
 
   @override
@@ -133,10 +134,11 @@ class _NewSelectWalletTypePageState extends ConsumerState<AddNewAccountTypePage>
       );
 
   Future<void> onPressed(WalletType value) async {
-    await getIt.get<AccountsRepository>().addAccount(
+    await getIt.get<AccountsStorageRepository>().addAccount(
           name: widget.name ?? value.describe(),
           publicKey: widget.publicKey,
           walletType: value,
+          workchain: kDefaultWorkchain,
         );
 
     if (!mounted) return;

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
-import '../../../../../../data/dtos/token_contract_asset_dto.dart';
+import '../../../../../../data/extensions.dart';
+import '../../../../../../data/models/token_contract_asset.dart';
 import '../../../../../design/design.dart';
-import '../../../../../design/widgets/address_generated_icon.dart';
 import '../../../../../design/widgets/marquee_widget.dart';
+import '../../../../../design/widgets/token_address_generated_icon.dart';
 import '../../../../../design/widgets/token_asset_icon.dart';
 
 class SelectionAssetHolder extends StatelessWidget {
-  final TokenContractAssetDto asset;
+  final TokenContractAsset asset;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -31,9 +32,11 @@ class SelectionAssetHolder extends StatelessWidget {
   Widget icon() => asset.logoURI != null
       ? TokenAssetIcon(
           logoURI: asset.logoURI!,
+          version: tokenWalletVersionFromManifest(asset.version),
         )
-      : AddressGeneratedIcon(
+      : TokenAddressGeneratedIcon(
           address: asset.address,
+          version: tokenWalletVersionFromManifest(asset.version),
         );
 
   Widget name() => MarqueeWidget(

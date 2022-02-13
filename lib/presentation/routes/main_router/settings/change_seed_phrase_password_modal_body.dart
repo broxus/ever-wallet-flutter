@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:validators/validators.dart';
 
 import '../../../../../../injection.dart';
-import '../../../../data/repositories/keys_repository.dart';
+import '../../../../data/repositories/keystore_repository.dart';
 import '../../../../logger.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_flushbar.dart';
@@ -98,7 +98,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
               onPressed: () async {
                 final oldPassword = oldPasswordController.text.trim();
 
-                final isCorrect = await getIt.get<KeysRepository>().checkKeyPassword(
+                final isCorrect = await getIt.get<KeystoreRepository>().checkKeyPassword(
                       publicKey: widget.publicKey,
                       password: oldPassword,
                     );
@@ -111,7 +111,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
                     try {
                       context.router.pop();
 
-                      await getIt.get<KeysRepository>().changePassword(
+                      await getIt.get<KeystoreRepository>().changePassword(
                             publicKey: widget.publicKey,
                             oldPassword: oldPasswordController.text.trim(),
                             newPassword: newPassword,

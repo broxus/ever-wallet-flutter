@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../dtos/ton_assets_manifest_dto.dart';
+import '../../models/ton_assets_manifest.dart';
 
 @lazySingleton
 class RestSource {

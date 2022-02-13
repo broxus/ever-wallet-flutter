@@ -5,6 +5,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../logger.dart';
+import '../../../../../data/repositories/provider_repository.dart';
+import '../../../../../injection.dart';
 import 'controller_extensions.dart';
 
 Future<dynamic> codeToTvcHandler({
@@ -16,10 +18,10 @@ Future<dynamic> codeToTvcHandler({
 
     final input = CodeToTvcInput.fromJson(jsonInput);
 
-    final output = await codeToTvc(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().codeToTvc(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -38,10 +40,10 @@ Future<dynamic> decodeEventHandler({
 
     final input = DecodeEventInput.fromJson(jsonInput);
 
-    final output = await decodeEvent(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().decodeEvent(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output?.toJson());
 
@@ -60,10 +62,10 @@ Future<dynamic> decodeInputHandler({
 
     final input = DecodeInputInput.fromJson(jsonInput);
 
-    final output = await decodeInput(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().decodeInput(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output?.toJson());
 
@@ -82,10 +84,10 @@ Future<dynamic> decodeOutputHandler({
 
     final input = DecodeOutputInput.fromJson(jsonInput);
 
-    final output = await decodeOutput(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().decodeOutput(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output?.toJson());
 
@@ -104,10 +106,10 @@ Future<dynamic> decodeTransactionEventsHandler({
 
     final input = DecodeTransactionEventsInput.fromJson(jsonInput);
 
-    final output = await decodeTransactionEvents(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().decodeTransactionEvents(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -126,10 +128,10 @@ Future<dynamic> decodeTransactionHandler({
 
     final input = DecodeTransactionInput.fromJson(jsonInput);
 
-    final output = await decodeTransaction(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().decodeTransaction(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output?.toJson());
 
@@ -144,9 +146,9 @@ Future<dynamic> disconnectHandler({
   required List<dynamic> args,
 }) async {
   try {
-    await disconnect(
-      origin: (await controller.getCurrentOrigin())!,
-    );
+    await getIt.get<ProviderRepository>().disconnect(
+          origin: (await controller.getCurrentOrigin())!,
+        );
 
     final jsonOutput = jsonEncode({});
 
@@ -165,10 +167,10 @@ Future<dynamic> encodeInternalInputHandler({
 
     final input = EncodeInternalInputInput.fromJson(jsonInput);
 
-    final output = await encodeInternalInput(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().encodeInternalInput(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -187,10 +189,10 @@ Future<dynamic> estimateFeesHandler({
 
     final input = EstimateFeesInput.fromJson(jsonInput);
 
-    final output = await estimateFees(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().estimateFees(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -209,10 +211,10 @@ Future<dynamic> extractPublicKeyHandler({
 
     final input = ExtractPublicKeyInput.fromJson(jsonInput);
 
-    final output = await extractPublicKey(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().extractPublicKey(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -231,10 +233,10 @@ Future<dynamic> getExpectedAddressHandler({
 
     final input = GetExpectedAddressInput.fromJson(jsonInput);
 
-    final output = await getExpectedAddress(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().getExpectedAddress(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -253,10 +255,10 @@ Future<dynamic> getFullContractStateHandler({
 
     final input = GetFullContractStateInput.fromJson(jsonInput);
 
-    final output = await getFullContractState(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().getFullContractState(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -271,9 +273,9 @@ Future<dynamic> getProviderStateHandler({
   required List<dynamic> args,
 }) async {
   try {
-    final output = await getProviderState(
-      origin: (await controller.getCurrentOrigin())!,
-    );
+    final output = await getIt.get<ProviderRepository>().getProviderState(
+          origin: (await controller.getCurrentOrigin())!,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -292,10 +294,10 @@ Future<dynamic> getTransactionsHandler({
 
     final input = GetTransactionsInput.fromJson(jsonInput);
 
-    final output = await getTransactions(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().getTransactions(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -314,10 +316,10 @@ Future<dynamic> packIntoCellHandler({
 
     final input = PackIntoCellInput.fromJson(jsonInput);
 
-    final output = await packIntoCell(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().packIntoCell(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -336,10 +338,10 @@ Future<dynamic> requestPermissionsHandler({
 
     final input = RequestPermissionsInput.fromJson(jsonInput);
 
-    final output = await requestPermissions(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().requestPermissions(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -358,10 +360,10 @@ Future<dynamic> runLocalHandler({
 
     final input = RunLocalInput.fromJson(jsonInput);
 
-    final output = await runLocal(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().runLocal(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -380,10 +382,10 @@ Future<dynamic> sendExternalMessageHandler({
 
     final input = SendExternalMessageInput.fromJson(jsonInput);
 
-    final output = await sendExternalMessage(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().sendExternalMessage(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -402,10 +404,10 @@ Future<dynamic> sendMessageHandler({
 
     final input = SendMessageInput.fromJson(jsonInput);
 
-    final output = await sendMessage(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().sendMessage(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -424,10 +426,10 @@ Future<dynamic> splitTvcHandler({
 
     final input = SplitTvcInput.fromJson(jsonInput);
 
-    final output = await splitTvc(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().splitTvc(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -446,10 +448,10 @@ Future<dynamic> subscribeHandler({
 
     final input = SubscribeInput.fromJson(jsonInput);
 
-    final output = await subscribe(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().subscribe(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -468,10 +470,10 @@ Future<dynamic> unpackFromCellHandler({
 
     final input = UnpackFromCellInput.fromJson(jsonInput);
 
-    final output = await unpackFromCell(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    final output = await getIt.get<ProviderRepository>().unpackFromCell(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode(output.toJson());
 
@@ -486,9 +488,9 @@ Future<dynamic> unsubscribeAllHandler({
   required List<dynamic> args,
 }) async {
   try {
-    await unsubscribeAll(
-      origin: (await controller.getCurrentOrigin())!,
-    );
+    await getIt.get<ProviderRepository>().unsubscribeAll(
+          origin: (await controller.getCurrentOrigin())!,
+        );
 
     final jsonOutput = jsonEncode({});
 
@@ -507,10 +509,10 @@ Future<dynamic> unsubscribeHandler({
 
     final input = UnsubscribeInput.fromJson(jsonInput);
 
-    await unsubscribe(
-      origin: (await controller.getCurrentOrigin())!,
-      input: input,
-    );
+    await getIt.get<ProviderRepository>().unsubscribe(
+          origin: (await controller.getCurrentOrigin())!,
+          input: input,
+        );
 
     final jsonOutput = jsonEncode({});
 

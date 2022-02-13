@@ -8,10 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../domain/blocs/key/current_key_provider.dart';
-import '../../../../../domain/blocs/key/keys_provider.dart';
-import '../../../../../domain/blocs/provider/approvals_provider.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../../../data/models/approval_request.dart';
+import '../../../../../providers/key/current_key_provider.dart';
+import '../../../../../providers/key/keys_provider.dart';
+import '../../../../../providers/provider/approvals_provider.dart';
+import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../modals/call_contract_method/show_call_contract_method.dart';
 import '../modals/request_permissions_modal/show_preferences_modal.dart';
 import '../modals/send_message/show_send_message.dart';
@@ -109,7 +110,6 @@ class ApprovalsListener extends StatelessWidget {
     var publicKeys = <String>[];
 
     if (currentKey != null && tonWalletInfo != null) {
-      final publicKey = currentKey.publicKey;
       final requiresSeparateDeploy = tonWalletInfo.details.requiresSeparateDeploy;
       final isDeployed = tonWalletInfo.contractState.isDeployed;
 

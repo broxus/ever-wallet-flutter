@@ -19,9 +19,9 @@ class PublicKeysLabelsRepository {
     HiveSource hiveSource,
     LocalAuthSource localAuthSource,
   ) async {
-    final biometryRepositoryImpl = PublicKeysLabelsRepository._(hiveSource);
-    await biometryRepositoryImpl._initialize();
-    return biometryRepositoryImpl;
+    final publicKeysLabelsRepository = PublicKeysLabelsRepository._(hiveSource);
+    await publicKeysLabelsRepository._initialize();
+    return publicKeysLabelsRepository;
   }
 
   Stream<Map<String, String>> get labelsStream => _labelsSubject.stream;
@@ -34,16 +34,19 @@ class PublicKeysLabelsRepository {
       publicKey: publicKey,
       label: label,
     );
+
     _labelsSubject.add(_hiveSource.getPublicKeysLabels());
   }
 
   Future<void> remove(String publicKey) async {
     await _hiveSource.removePublicKeyLabel(publicKey);
+
     _labelsSubject.add(_hiveSource.getPublicKeysLabels());
   }
 
   Future<void> clear() async {
     await _hiveSource.clearPublicKeysLabels();
+
     _labelsSubject.add(_hiveSource.getPublicKeysLabels());
   }
 

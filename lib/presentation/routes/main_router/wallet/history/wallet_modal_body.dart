@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../domain/blocs/account/current_account_provider.dart';
+import '../../../../../providers/account/current_account_provider.dart';
 import '../../../../design/design.dart';
 import 'all_assets_layout.dart';
 import 'ton_wallet_transactions_layout.dart';

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../../../data/repositories/accounts_repository.dart';
-import '../../../../../../domain/blocs/account/account_info_provider.dart';
+import '../../../../../../data/repositories/accounts_storage_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../../logger.dart';
+import '../../../../../../providers/account/account_info_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/explorer.dart';
 import '../../../../../design/widgets/address_card.dart';
@@ -83,7 +83,7 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
             SuffixIconButton(
               onPressed: () async {
                 try {
-                  await getIt.get<AccountsRepository>().renameAccount(
+                  await getIt.get<AccountsStorageRepository>().renameAccount(
                         address: widget.address,
                         name: controller.text,
                       );

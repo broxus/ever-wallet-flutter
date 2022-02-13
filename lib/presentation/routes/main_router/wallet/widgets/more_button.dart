@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../data/repositories/accounts_repository.dart';
+import '../../../../../data/repositories/accounts_storage_repository.dart';
+import '../../../../../data/repositories/current_key_repository.dart';
 import '../../../../../data/repositories/external_accounts_repository.dart';
-import '../../../../../domain/blocs/account/external_accounts_provider.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../injection.dart';
+import '../../../../../providers/account/external_accounts_provider.dart';
+import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/custom_popup_item.dart';
 import '../../../../design/widgets/custom_popup_menu.dart';
@@ -87,9 +88,14 @@ class MoreButton extends StatelessWidget {
             final externalAccounts = await read(externalAccountsProvider.future);
 
             if (externalAccounts.any((e) => e == address)) {
-              await getIt.get<ExternalAccountsRepository>().removeExternalAccount(address);
+              final currentKey = getIt.get<CurrentKeyRepository>().currentKey;
+
+              await getIt.get<ExternalAccountsRepository>().removeExternalAccount(
+                    publicKey: currentKey!.publicKey,
+                    address: address,
+                  );
             } else {
-              await getIt.get<AccountsRepository>().removeAccount(address);
+              await getIt.get<AccountsStorageRepository>().removeAccount(address);
             }
           },
         );

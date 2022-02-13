@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../domain/blocs/key/current_key_provider.dart';
+import '../../../providers/key/current_key_provider.dart';
 import '../../design/design.dart';
 import 'wallet/modals/add_account_flow/start_add_account_flow.dart';
 

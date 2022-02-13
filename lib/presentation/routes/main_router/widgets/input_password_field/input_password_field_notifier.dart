@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../../injection.dart';
+import '../../../../../data/repositories/keystore_repository.dart';
 import '../../../../design/form/field_state.dart';
 import '../../../../design/form/form_state.dart';
 import '../../../../design/form/value_state.dart';
@@ -11,7 +11,7 @@ import '../../../../design/form/value_state.dart';
 part 'input_password_field_notifier.freezed.dart';
 
 class InputPasswordFieldNotifier extends ChangeNotifier {
-  final _keysRepository = getIt.get<KeysRepository>();
+  final _keystoreRepository = getIt.get<KeystoreRepository>();
   final _passwordInputSubject = PublishSubject<String>();
   final String _publicKey;
   var _state = InputPasswordFieldState.empty();
@@ -44,7 +44,7 @@ class InputPasswordFieldNotifier extends ChangeNotifier {
       );
     }
 
-    final isCorrect = await _keysRepository.checkKeyPassword(
+    final isCorrect = await _keystoreRepository.checkKeyPassword(
       publicKey: _publicKey,
       password: value,
     );

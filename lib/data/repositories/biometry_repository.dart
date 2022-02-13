@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/subjects.dart';
 
-import '../exceptions.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/local/local_auth_source.dart';
 
@@ -21,10 +20,10 @@ class BiometryRepository {
   );
 
   @factoryMethod
-  static Future<BiometryRepository> create(
-    HiveSource hiveSource,
-    LocalAuthSource localAuthSource,
-  ) async {
+  static Future<BiometryRepository> create({
+    required HiveSource hiveSource,
+    required LocalAuthSource localAuthSource,
+  }) async {
     final biometryRepositoryImpl = BiometryRepository._(
       hiveSource,
       localAuthSource,
@@ -86,10 +85,10 @@ class BiometryRepository {
       if (isAuthenticated) {
         return password;
       } else {
-        throw UnauthorizedException();
+        throw Exception('Is not authenticated');
       }
     } else {
-      throw PasswordNotFoundException();
+      throw Exception('Password is not stored');
     }
   }
 

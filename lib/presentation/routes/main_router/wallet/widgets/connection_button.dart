@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../../data/constants.dart';
 import '../../../../../data/repositories/transport_repository.dart';
-import '../../../../../domain/blocs/transport_provider.dart';
 import '../../../../../injection.dart';
+import '../../../../../providers/transport_provider.dart';
 import '../../../../design/widgets/custom_popup_item.dart';
 import '../../../../design/widgets/custom_popup_menu.dart';
 

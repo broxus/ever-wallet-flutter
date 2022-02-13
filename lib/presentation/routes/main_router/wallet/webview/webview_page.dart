@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../../domain/blocs/account/accounts_provider.dart';
-import '../../../../../domain/blocs/account/browser_current_account_provider.dart';
+import '../../../../../data/repositories/provider_repository.dart';
+import '../../../../../injection.dart';
+import '../../../../../providers/account/accounts_provider.dart';
+import '../../../../../providers/account/browser_current_account_provider.dart';
 import '../../../../design/design.dart';
 import '../modals/browser_accounts_modal/show_browser_accounts_modal.dart';
 import 'approvals_listener.dart';
@@ -43,12 +45,12 @@ class _WebviewPageState extends State<WebviewPage> {
     pullToRefreshController = PullToRefreshController(
       onRefresh: () => controller?.refresh(),
     );
-    disconnectedStreamSubscription = disconnectedStream.listen((event) {
+    disconnectedStreamSubscription = getIt.get<ProviderRepository>().disconnectedStream.listen((event) {
       if (controller != null) {
         disconnectedCaller(controller: controller!, event: event);
       }
     });
-    transactionsFoundStreamSubscription = transactionsFoundStream.listen((event) {
+    transactionsFoundStreamSubscription = getIt.get<ProviderRepository>().transactionsFoundStream.listen((event) {
       if (controller != null) {
         transactionsFoundCaller(
           controller: controller!,
@@ -56,7 +58,7 @@ class _WebviewPageState extends State<WebviewPage> {
         );
       }
     });
-    contractStateChangedStreamSubscription = contractStateChangedStream.listen((event) {
+    contractStateChangedStreamSubscription = getIt.get<ProviderRepository>().contractStateChangedStream.listen((event) {
       if (controller != null) {
         contractStateChangedCaller(
           controller: controller!,
@@ -64,7 +66,7 @@ class _WebviewPageState extends State<WebviewPage> {
         );
       }
     });
-    networkChangedStreamSubscription = networkChangedStream.listen((event) {
+    networkChangedStreamSubscription = getIt.get<ProviderRepository>().networkChangedStream.listen((event) {
       if (controller != null) {
         networkChangedCaller(
           controller: controller!,
@@ -72,7 +74,7 @@ class _WebviewPageState extends State<WebviewPage> {
         );
       }
     });
-    permissionsChangedStreamSubscription = permissionsChangedStream.listen((event) {
+    permissionsChangedStreamSubscription = getIt.get<ProviderRepository>().permissionsChangedStream.listen((event) {
       if (controller != null) {
         permissionsChangedCaller(
           controller: controller!,
@@ -80,7 +82,7 @@ class _WebviewPageState extends State<WebviewPage> {
         );
       }
     });
-    loggedOutStreamSubscription = loggedOutStream.listen((event) {
+    loggedOutStreamSubscription = getIt.get<ProviderRepository>().loggedOutStream.listen((event) {
       if (controller != null) {
         loggedOutCaller(
           controller: controller!,
@@ -115,7 +117,7 @@ class _WebviewPageState extends State<WebviewPage> {
               final currentOrigin = await controller?.getCurrentOrigin();
 
               if (currentOrigin != null) {
-                await disconnect(origin: currentOrigin);
+                await getIt.get<ProviderRepository>().disconnect(origin: currentOrigin);
               }
             },
           );

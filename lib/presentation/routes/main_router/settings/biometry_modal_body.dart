@@ -3,8 +3,8 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/repositories/biometry_repository.dart';
-import '../../../../domain/blocs/biometry/biometry_info_provider.dart';
 import '../../../../injection.dart';
+import '../../../../providers/biometry/biometry_info_provider.dart';
 import '../../../design/design.dart';
 
 class BiometryModalBody extends StatefulWidget {

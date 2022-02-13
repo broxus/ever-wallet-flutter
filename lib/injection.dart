@@ -6,7 +6,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import 'data/dtos/token_contract_asset_dto.dart';
+import 'data/models/token_contract_asset.dart';
+import 'data/models/token_wallet_info.dart';
+import 'data/models/ton_wallet_info.dart';
 import 'injection.config.dart';
 
 final getIt = GetIt.instance;
@@ -43,7 +45,7 @@ abstract class HiveModule {
     await Hive.initFlutter();
 
     Hive
-      ..registerAdapter(TokenContractAssetDtoAdapter())
+      ..registerAdapter(TokenContractAssetAdapter())
       ..registerAdapter(AccountStatusAdapter())
       ..registerAdapter(MessageAdapter())
       ..registerAdapter(TokenIncomingTransferAdapter())
@@ -64,7 +66,6 @@ abstract class HiveModule {
       ..registerAdapter(TokenWalletRecipientAdapter())
       ..registerAdapter(DePoolOnRoundCompleteNotificationAdapter())
       ..registerAdapter(DePoolReceiveAnswerNotificationAdapter())
-      ..registerAdapter(EthEventStatusAdapter())
       ..registerAdapter(MultisigConfirmTransactionAdapter())
       ..registerAdapter(MultisigSendTransactionAdapter())
       ..registerAdapter(MultisigSubmitTransactionAdapter())
@@ -73,14 +74,11 @@ abstract class HiveModule {
       ..registerAdapter(ConfirmAdapter())
       ..registerAdapter(KnownPayloadTokenOutgoingTransferAdapter())
       ..registerAdapter(TokenWalletDeployedNotificationAdapter())
-      ..registerAdapter(TonEventStatusAdapter())
       ..registerAdapter(TonWalletTransactionWithDataAdapter())
       ..registerAdapter(TransactionAdditionalInfoCommentAdapter())
       ..registerAdapter(DePoolOnRoundCompleteAdapter())
       ..registerAdapter(DePoolReceiveAnswerAdapter())
       ..registerAdapter(TokenWalletDeployedAdapter())
-      ..registerAdapter(EthEventStatusChangedAdapter())
-      ..registerAdapter(TonEventStatusChangedAdapter())
       ..registerAdapter(WalletInteractionAdapter())
       ..registerAdapter(WalletInteractionInfoAdapter())
       ..registerAdapter(WalletV3TransferAdapter())

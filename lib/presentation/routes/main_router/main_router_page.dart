@@ -4,7 +4,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../logger.dart';
-import '../../../domain/blocs/account/browser_current_account_provider.dart';
+import '../../../providers/account/browser_current_account_provider.dart';
 import '../../design/design.dart';
 import '../router.gr.dart';
 import 'show_add_account_dialog.dart';

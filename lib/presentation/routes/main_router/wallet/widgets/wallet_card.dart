@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../../domain/blocs/account/account_info_provider.dart';
-import '../../../../../domain/blocs/account/external_accounts_provider.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../../../providers/account/account_info_provider.dart';
+import '../../../../../providers/account/external_accounts_provider.dart';
+import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../design/design.dart';
 import '../../../../design/widgets/animated_appearance.dart';
 import '../../../../design/widgets/wallet_card_selectable_field.dart';

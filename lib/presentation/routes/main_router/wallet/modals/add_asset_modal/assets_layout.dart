@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../data/dtos/token_contract_asset_dto.dart';
-import '../../../../../../domain/blocs/account/account_assets_options_provider.dart';
+import '../../../../../../data/models/token_contract_asset.dart';
+import '../../../../../../providers/account/account_assets_options_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_text_form_field.dart';
@@ -14,8 +14,8 @@ import 'selection_asset_holder.dart';
 class AssetsLayout extends StatefulWidget {
   final String address;
   final void Function(
-    List<TokenContractAssetDto> added,
-    List<TokenContractAssetDto> removed,
+    List<TokenContractAsset> added,
+    List<TokenContractAsset> removed,
   ) onSave;
 
   const AssetsLayout({
@@ -30,8 +30,8 @@ class AssetsLayout extends StatefulWidget {
 
 class _AssetsLayoutState extends State<AssetsLayout> {
   final controller = TextEditingController();
-  final selectedNotifier = ValueNotifier<List<TokenContractAssetDto>>([]);
-  final filteredNotifier = ValueNotifier<List<TokenContractAssetDto>>([]);
+  final selectedNotifier = ValueNotifier<List<TokenContractAsset>>([]);
+  final filteredNotifier = ValueNotifier<List<TokenContractAsset>>([]);
 
   @override
   void dispose() {
@@ -79,8 +79,8 @@ class _AssetsLayoutState extends State<AssetsLayout> {
       );
 
   Widget field({
-    required List<TokenContractAssetDto> added,
-    required List<TokenContractAssetDto> available,
+    required List<TokenContractAsset> added,
+    required List<TokenContractAsset> available,
   }) =>
       DecoratedBox(
         decoration: BoxDecoration(
@@ -104,9 +104,9 @@ class _AssetsLayoutState extends State<AssetsLayout> {
         ),
       );
 
-  Widget list() => ValueListenableBuilder<List<TokenContractAssetDto>>(
+  Widget list() => ValueListenableBuilder<List<TokenContractAsset>>(
         valueListenable: filteredNotifier,
-        builder: (context, filteredValue, child) => ValueListenableBuilder<List<TokenContractAssetDto>>(
+        builder: (context, filteredValue, child) => ValueListenableBuilder<List<TokenContractAsset>>(
           valueListenable: selectedNotifier,
           builder: (context, value, child) => ListView.separated(
             physics: const ClampingScrollPhysics(),
@@ -138,10 +138,10 @@ class _AssetsLayoutState extends State<AssetsLayout> {
       );
 
   Widget submitButton({
-    required List<TokenContractAssetDto> added,
-    required List<TokenContractAssetDto> available,
+    required List<TokenContractAsset> added,
+    required List<TokenContractAsset> available,
   }) =>
-      ValueListenableBuilder<List<TokenContractAssetDto>>(
+      ValueListenableBuilder<List<TokenContractAsset>>(
         valueListenable: selectedNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: !listEquals(value, added)

@@ -5,10 +5,10 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
-import '../../../../../../domain/blocs/biometry/biometry_info_provider.dart';
-import '../../../../../../domain/blocs/token_wallet/token_wallet_info_provider.dart';
-import '../../../../../../domain/blocs/token_wallet/token_wallet_prepare_transfer_provider.dart';
 import '../../../../../../injection.dart';
+import '../../../../../../providers/biometry/biometry_info_provider.dart';
+import '../../../../../../providers/token_wallet/token_wallet_info_provider.dart';
+import '../../../../../../providers/token_wallet/token_wallet_prepare_transfer_provider.dart';
 import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/custom_back_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';

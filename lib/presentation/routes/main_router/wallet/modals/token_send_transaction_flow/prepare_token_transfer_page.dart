@@ -9,10 +9,10 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 import 'package:validators/validators.dart';
 
-import '../../../../../../domain/blocs/key/keys_provider.dart';
-import '../../../../../../domain/blocs/key/public_keys_labels_provider.dart';
-import '../../../../../../domain/blocs/token_wallet/token_wallet_info_provider.dart';
 import '../../../../../../logger.dart';
+import '../../../../../../providers/key/keys_provider.dart';
+import '../../../../../../providers/key/public_keys_labels_provider.dart';
+import '../../../../../../providers/token_wallet/token_wallet_info_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_flushbar.dart';
 import '../../../../../design/widgets/custom_checkbox.dart';
@@ -387,7 +387,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
   }
 
   Widget comment() => CustomTextFormField(
-        name: 'comment',
+        name: 'Comment',
         controller: commentController,
         focusNode: commentFocusNode,
         autocorrect: false,

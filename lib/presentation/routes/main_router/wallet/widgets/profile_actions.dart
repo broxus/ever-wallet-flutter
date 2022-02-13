@@ -2,10 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../domain/blocs/account/account_info_provider.dart';
-import '../../../../../domain/blocs/key/current_key_provider.dart';
-import '../../../../../domain/blocs/key/keys_provider.dart';
-import '../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../../../providers/account/account_info_provider.dart';
+import '../../../../../providers/key/current_key_provider.dart';
+import '../../../../../providers/key/keys_provider.dart';
+import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../design/design.dart';
 import '../modals/add_asset_modal/show_add_asset_modal.dart';
 import '../modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';

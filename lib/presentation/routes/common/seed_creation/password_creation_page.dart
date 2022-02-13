@@ -5,9 +5,9 @@ import 'package:validators/validators.dart';
 
 import '../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
-import '../../../../data/repositories/keys_repository.dart';
-import '../../../../domain/blocs/biometry/biometry_info_provider.dart';
+import '../../../../data/repositories/keystore_repository.dart';
 import '../../../../injection.dart';
+import '../../../../providers/biometry/biometry_info_provider.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_flushbar.dart';
 import '../../../design/widgets/crystal_subtitle.dart';
@@ -261,7 +261,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
     try {
       final password = passwordController.text;
 
-      await getIt.get<KeysRepository>().createKey(
+      await getIt.get<KeystoreRepository>().createKey(
             name: widget.seedName,
             phrase: widget.phrase,
             password: password,

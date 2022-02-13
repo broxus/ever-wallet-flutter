@@ -1,46 +1,53 @@
 import 'package:injectable/injectable.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:tuple/tuple.dart';
 
-import '../dtos/token_contract_asset_dto.dart';
-import '../services/nekoton_service.dart';
+import '../extensions.dart';
+import '../models/token_contract_asset.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/remote/rest_source.dart';
+import 'accounts_storage_repository.dart';
+import 'transport_repository.dart';
 
 @preResolve
 @lazySingleton
 class TonAssetsRepository {
   final HiveSource _hiveSource;
   final RestSource _restSource;
-  final NekotonService _nekotonService;
-  final _assetsSubject = BehaviorSubject<List<TokenContractAssetDto>>.seeded([]);
+  final TransportRepository _transportRepository;
+  final AccountsStorageRepository _accountsStorageRepository;
+  final _assetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
 
   TonAssetsRepository._(
     this._hiveSource,
     this._restSource,
-    this._nekotonService,
+    this._transportRepository,
+    this._accountsStorageRepository,
   );
 
   @factoryMethod
-  static Future<TonAssetsRepository> create(
-    HiveSource hiveSource,
-    RestSource restSource,
-    NekotonService nekotonService,
-  ) async {
+  static Future<TonAssetsRepository> create({
+    required HiveSource hiveSource,
+    required RestSource restSource,
+    required TransportRepository transportRepository,
+    required AccountsStorageRepository accountsStorageRepository,
+  }) async {
     final tonAssetsRepositoryImpl = TonAssetsRepository._(
       hiveSource,
       restSource,
-      nekotonService,
+      transportRepository,
+      accountsStorageRepository,
     );
     await tonAssetsRepositoryImpl._initialize();
     return tonAssetsRepositoryImpl;
   }
 
-  Stream<List<TokenContractAssetDto>> get assetsStream => _assetsSubject.stream;
+  Stream<List<TokenContractAsset>> get assetsStream => _assetsSubject.stream;
 
-  List<TokenContractAssetDto> get assets => _assetsSubject.value;
+  List<TokenContractAsset> get assets => _assetsSubject.value;
 
-  Future<void> save(TokenContractAssetDto asset) async {
+  Future<void> save(TokenContractAsset asset) async {
     await _hiveSource.saveTokenContractAsset(asset);
 
     _assetsSubject.add([
@@ -66,7 +73,7 @@ class TonAssetsRepository {
     final manifest = await _restSource.getTonAssetsManifest();
 
     for (final token in manifest.tokens) {
-      final asset = TokenContractAssetDto(
+      final asset = TokenContractAsset(
         name: token.name,
         chainId: token.chainId,
         symbol: token.symbol,
@@ -89,18 +96,21 @@ class TonAssetsRepository {
     required String address,
     required String rootTokenContract,
   }) async {
-    final tokenWalletInfo = await _nekotonService.getTokenWalletInfo(
-      address: address,
+    final tokenWallet = await TokenWallet.subscribe(
+      transport: _transportRepository.transport,
+      owner: address,
       rootTokenContract: rootTokenContract,
     );
 
-    final asset = TokenContractAssetDto(
-      name: tokenWalletInfo.symbol.fullName,
-      symbol: tokenWalletInfo.symbol.name,
-      decimals: tokenWalletInfo.symbol.decimals,
-      address: tokenWalletInfo.symbol.rootTokenContract,
-      version: tokenWalletInfo.version.index + 1,
+    final asset = TokenContractAsset(
+      name: tokenWallet.symbol.fullName,
+      symbol: tokenWallet.symbol.name,
+      decimals: tokenWallet.symbol.decimals,
+      address: tokenWallet.symbol.rootTokenContract,
+      version: tokenWallet.version.toManifest(),
     );
+
+    await tokenWallet.freePtr();
 
     await _hiveSource.saveTokenContractAsset(asset);
 
@@ -117,7 +127,7 @@ class TonAssetsRepository {
 
     await refresh();
 
-    _nekotonService.accountsStream
+    _accountsStorageRepository.accountsStream
         .expand((e) => e)
         .map(
           (e) => e.additionalAssets.values

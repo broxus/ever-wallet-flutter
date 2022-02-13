@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../design/design.dart';
 

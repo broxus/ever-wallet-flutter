@@ -9,10 +9,11 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
-import '../../../../data/repositories/keys_repository.dart';
-import '../../../../domain/blocs/biometry/biometry_info_provider.dart';
-import '../../../../domain/blocs/key/current_key_provider.dart';
-import '../../../../domain/blocs/key/keys_provider.dart';
+import '../../../../data/repositories/current_key_repository.dart';
+import '../../../../data/repositories/keystore_repository.dart';
+import '../../../../providers/biometry/biometry_info_provider.dart';
+import '../../../../providers/key/current_key_provider.dart';
+import '../../../../providers/key/keys_provider.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_bottom_sheet.dart';
 import '../../router.gr.dart';
@@ -130,7 +131,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     onAdd: () {
                       context.router.push(const NewSeedRouterRoute());
                     },
-                    onSelect: (seed) => getIt.get<KeysRepository>().setCurrentKey(seed),
+                    onSelect: (seed) => getIt.get<CurrentKeyRepository>().setCurrentKey(seed),
                     showAddAction: true,
                   ),
               ],
@@ -151,7 +152,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     publicKey: currentKey.publicKey,
                                   );
 
-                              final phrase = await getIt.get<KeysRepository>().exportKey(
+                              final phrase = await getIt.get<KeystoreRepository>().exportKey(
                                     publicKey: currentKey.publicKey,
                                     password: password,
                                   );
@@ -196,7 +197,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           )
                       : null,
                 ),
-                if (currentKey != null && currentKey.isNotLegacy && currentKey.publicKey == currentKey.masterKey)
+                if (currentKey != null && currentKey.isNotLegacy && currentKey.isMaster)
                   buildSectionAction(
                     title: LocaleKeys.settings_screen_sections_current_seed_preferences_derive_key.tr(),
                     onTap: keys.isNotEmpty
@@ -219,7 +220,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         publicKey: currentKey.publicKey,
                                       );
 
-                                  await getIt.get<KeysRepository>().deriveKey(
+                                  await getIt.get<KeystoreRepository>().deriveKey(
                                         name: name.isNotEmpty ? name : null,
                                         publicKey: currentKey.publicKey,
                                         password: password,

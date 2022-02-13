@@ -4,7 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_send_provider.dart';
+import '../../../../../../providers/ton_wallet/ton_wallet_send_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_title.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';

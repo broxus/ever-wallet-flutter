@@ -4,10 +4,10 @@ import 'dart:collection';
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'controller_extensions.dart';
@@ -64,10 +64,11 @@ class _BrowserWebViewState extends State<BrowserWebView> {
       allowsInlineMediaPlayback: true,
     ),
   );
+  final mainScript = rootBundle.loadString('packages/nekoton_flutter/assets/js/main.js');
 
   @override
   Widget build(BuildContext context) => FutureBuilder<String>(
-        future: loadMainScript(),
+        future: mainScript,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return InAppWebView(

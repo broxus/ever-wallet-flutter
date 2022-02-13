@@ -2,13 +2,12 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../../domain/blocs/key/keys_provider.dart';
-import '../../../../../../domain/blocs/key/public_keys_labels_provider.dart';
-import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../../logger.dart';
+import '../../../../../../providers/key/keys_provider.dart';
+import '../../../../../../providers/key/public_keys_labels_provider.dart';
+import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/custom_dropdown_button.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';

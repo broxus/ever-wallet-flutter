@@ -710,7 +710,7 @@ packages:
   nekoton_flutter:
     dependency: "direct main"
     description:
-      path: "../nekoton-flutter"
+      path: "../nekoton-flutter-rework"
       relative: true
     source: path
     version: "0.2.0"
