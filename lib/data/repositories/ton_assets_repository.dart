@@ -3,6 +3,7 @@ import 'package:rxdart/subjects.dart';
 import 'package:tuple/tuple.dart';
 
 import '../dtos/token_contract_asset_dto.dart';
+import '../extensions.dart';
 import '../services/nekoton_service.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/remote/rest_source.dart';
@@ -99,7 +100,7 @@ class TonAssetsRepository {
       symbol: tokenWalletInfo.symbol.name,
       decimals: tokenWalletInfo.symbol.decimals,
       address: tokenWalletInfo.symbol.rootTokenContract,
-      version: tokenWalletInfo.version.index + 1,
+      version: tokenWalletInfo.version.toManifest(),
     );
 
     await _hiveSource.saveTokenContractAsset(asset);

@@ -335,7 +335,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
   }
 
   Widget comment() => CustomTextFormField(
-        name: 'comment',
+        name: 'Comment',
         controller: commentController,
         focusNode: commentFocusNode,
         autocorrect: false,

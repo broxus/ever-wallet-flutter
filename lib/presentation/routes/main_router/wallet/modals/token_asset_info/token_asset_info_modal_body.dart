@@ -12,9 +12,9 @@ import '../../../../../../domain/blocs/token_wallet/token_wallet_info_provider.d
 import '../../../../../../domain/blocs/token_wallet/token_wallet_transactions_state_provider.dart';
 import '../../../../../../domain/blocs/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../design/design.dart';
-import '../../../../../design/widgets/address_generated_icon.dart';
 import '../../../../../design/widgets/custom_close_button.dart';
 import '../../../../../design/widgets/preload_transactions_listener.dart';
+import '../../../../../design/widgets/token_address_generated_icon.dart';
 import '../../../../../design/widgets/token_asset_icon.dart';
 import '../../../../../design/widgets/wallet_action_button.dart';
 import '../../history/transactions_holders/token_wallet_transaction_holder.dart';
@@ -67,11 +67,13 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
                           balance: tokenWalletInfo.balance,
                           contractState: tokenWalletInfo.contractState,
                           symbol: tokenWalletInfo.symbol,
+                          version: tokenWalletInfo.version,
                         ),
                         Expanded(
                           child: history(
                             symbol: tokenWalletInfo.symbol,
                             transactionsState: transactionsState,
+                            version: tokenWalletInfo.version,
                           ),
                         ),
                       ],
@@ -87,6 +89,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
     required String balance,
     required ContractState contractState,
     required Symbol symbol,
+    required TokenWalletVersion version,
   }) =>
       Container(
         padding: const EdgeInsets.all(16),
@@ -96,6 +99,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
             info(
               balance: balance,
               symbol: symbol,
+              version: version,
             ),
             const SizedBox(height: 24),
             actions(
@@ -109,10 +113,11 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
   Widget info({
     required String balance,
     required Symbol symbol,
+    required TokenWalletVersion version,
   }) =>
       Row(
         children: [
-          icon(),
+          icon(version: version),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -131,13 +136,18 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
         ],
       );
 
-  Widget icon() => widget.logoURI != null
-      ? TokenAssetIcon(
-          logoURI: widget.logoURI!,
-        )
-      : AddressGeneratedIcon(
-          address: widget.rootTokenContract,
-        );
+  Widget icon({
+    required TokenWalletVersion version,
+  }) =>
+      widget.logoURI != null
+          ? TokenAssetIcon(
+              logoURI: widget.logoURI!,
+              version: version,
+            )
+          : TokenAddressGeneratedIcon(
+              address: widget.rootTokenContract,
+              version: version,
+            );
 
   Widget balanceText({
     required String balance,
@@ -231,6 +241,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
   Widget history({
     required Symbol symbol,
     required Tuple2<List<TokenWalletTransactionWithData>, bool> transactionsState,
+    required TokenWalletVersion version,
   }) =>
       Column(
         children: [
@@ -246,6 +257,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
                 list(
                   state: transactionsState.item1,
                   symbol: symbol,
+                  version: version,
                 ),
                 loader(transactionsState.item2),
               ],
@@ -281,6 +293,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
   Widget list({
     required List<TokenWalletTransactionWithData> state,
     required Symbol symbol,
+    required TokenWalletVersion version,
   }) =>
       RawScrollbar(
         thickness: 4,
@@ -306,7 +319,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
                 transactionWithData: state[index],
                 currency: symbol.name,
                 decimals: symbol.decimals,
-                icon: icon(),
+                icon: icon(version: version),
               ),
               separatorBuilder: (_, __) => const Divider(
                 height: 1,

@@ -42,8 +42,8 @@ class TonWalletPrepareConfirmTransactionNotifier extends StateNotifier<AsyncValu
         expiration: kDefaultMessageExpiration,
       );
 
-      final feesValue = await tonWallet.estimateFees(message);
-      final fees = feesValue.toString();
+      final fees = await tonWallet.estimateFees(message);
+      final feesValue = int.parse(fees);
 
       final balance = await tonWallet.contractState.then((value) => value.balance);
       final balanceValue = int.parse(balance);

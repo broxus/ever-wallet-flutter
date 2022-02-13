@@ -4,7 +4,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../../domain/blocs/token_wallet/token_wallet_info_provider.dart';
-import '../../../../design/widgets/address_generated_icon.dart';
+import '../../../../design/widgets/token_address_generated_icon.dart';
 import '../../../../design/widgets/token_asset_icon.dart';
 import '../modals/token_asset_info/show_token_asset_info.dart';
 import 'wallet_asset_holder.dart';
@@ -45,9 +45,11 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
             icon: widget.logoURI != null
                 ? TokenAssetIcon(
                     logoURI: widget.logoURI!,
+                    version: tokenWalletInfo?.version ?? TokenWalletVersion.oldTip3v4,
                   )
-                : AddressGeneratedIcon(
+                : TokenAddressGeneratedIcon(
                     address: widget.rootTokenContract,
+                    version: tokenWalletInfo?.version ?? TokenWalletVersion.oldTip3v4,
                   ),
             onTap: tokenWalletInfo != null
                 ? () => showTokenAssetInfo(

@@ -53,7 +53,7 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
     final dePoolReceiveAnswer = transactionWithData.data?.maybeWhen(
       dePoolReceiveAnswer: (notification) => {
         'Error code': notification.errorCode.toString(),
-        'comment': notification.comment,
+        'Comment': notification.comment,
       },
       orElse: () => null,
     );
@@ -61,20 +61,6 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
     final tokenWalletDeployed = transactionWithData.data?.maybeWhen(
       tokenWalletDeployed: (notification) => {
         'Root token contract': notification.rootTokenContract,
-      },
-      orElse: () => null,
-    );
-
-    final ethEventStatusChanged = transactionWithData.data?.maybeWhen(
-      ethEventStatusChanged: (status) => {
-        'Status': describeEnum(status).capitalize,
-      },
-      orElse: () => null,
-    );
-
-    final tonEventStatusChanged = transactionWithData.data?.maybeWhen(
-      tonEventStatusChanged: (status) => {
-        'Status': describeEnum(status).capitalize,
       },
       orElse: () => null,
     );
@@ -229,34 +215,6 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
           [
             typeItem('Token wallet deployed'),
             ...tokenWalletDeployed.entries
-                .map(
-                  (e) => item(
-                    title: e.key,
-                    subtitle: e.value,
-                  ),
-                )
-                .toList(),
-          ],
-        ),
-      if (ethEventStatusChanged != null)
-        section(
-          [
-            typeItem('Eth event status changed'),
-            ...ethEventStatusChanged.entries
-                .map(
-                  (e) => item(
-                    title: e.key,
-                    subtitle: e.value,
-                  ),
-                )
-                .toList(),
-          ],
-        ),
-      if (tonEventStatusChanged != null)
-        section(
-          [
-            typeItem('Ton event status changed'),
-            ...tonEventStatusChanged.entries
                 .map(
                   (e) => item(
                     title: e.key,
