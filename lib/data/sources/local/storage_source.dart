@@ -5,16 +5,16 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 @preResolve
 @lazySingleton
-class NekotonSource {
+class StorageSource {
   late final Storage storage;
 
-  NekotonSource._();
+  StorageSource._();
 
   @factoryMethod
-  static Future<NekotonSource> create() async {
-    final nekotonSource = NekotonSource._();
-    await nekotonSource._initialize();
-    return nekotonSource;
+  static Future<StorageSource> create() async {
+    final instance = StorageSource._();
+    await instance._initialize();
+    return instance;
   }
 
   Future<void> _initialize() async {

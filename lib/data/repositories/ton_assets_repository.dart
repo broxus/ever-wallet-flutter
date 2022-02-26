@@ -1,150 +1,117 @@
+import 'dart:async';
+
+import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:rxdart/subjects.dart';
-import 'package:tuple/tuple.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:synchronized/synchronized.dart';
 
+import '../../logger.dart';
 import '../extensions.dart';
 import '../models/token_contract_asset.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/remote/rest_source.dart';
-import 'accounts_storage_repository.dart';
-import 'transport_repository.dart';
+import '../sources/remote/transport_source.dart';
 
 @preResolve
 @lazySingleton
 class TonAssetsRepository {
+  final TransportSource _transportSource;
   final HiveSource _hiveSource;
   final RestSource _restSource;
-  final TransportRepository _transportRepository;
-  final AccountsStorageRepository _accountsStorageRepository;
-  final _assetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
+  final _systemAssetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
+  final _customAssetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
+  final _lock = Lock();
 
   TonAssetsRepository._(
+    this._transportSource,
     this._hiveSource,
     this._restSource,
-    this._transportRepository,
-    this._accountsStorageRepository,
   );
 
   @factoryMethod
   static Future<TonAssetsRepository> create({
+    required TransportSource transportSource,
     required HiveSource hiveSource,
     required RestSource restSource,
-    required TransportRepository transportRepository,
-    required AccountsStorageRepository accountsStorageRepository,
   }) async {
-    final tonAssetsRepositoryImpl = TonAssetsRepository._(
+    final instance = TonAssetsRepository._(
+      transportSource,
       hiveSource,
       restSource,
-      transportRepository,
-      accountsStorageRepository,
     );
-    await tonAssetsRepositoryImpl._initialize();
-    return tonAssetsRepositoryImpl;
+    await instance._initialize();
+    return instance;
   }
 
-  Stream<List<TokenContractAsset>> get assetsStream => _assetsSubject.stream;
+  Stream<List<TokenContractAsset>> get systemAssetsStream => _systemAssetsSubject.stream;
 
-  List<TokenContractAsset> get assets => _assetsSubject.value;
+  List<TokenContractAsset> get systemAssets => _systemAssetsSubject.value;
 
-  Future<void> save(TokenContractAsset asset) async {
-    await _hiveSource.saveTokenContractAsset(asset);
+  Stream<List<TokenContractAsset>> get customAssetsStream => _customAssetsSubject.stream;
 
-    _assetsSubject.add([
-      ..._assetsSubject.value.where((e) => e.address != asset.address),
-      asset,
-    ]);
-  }
+  List<TokenContractAsset> get customAssets => _customAssetsSubject.value;
 
-  Future<void> remove(String address) async {
-    final assets = _assetsSubject.value.where((e) => e.address != address).toList();
-    _assetsSubject.add(assets);
+  Future<TokenContractAsset> getTokenContractAsset(String rootTokenContract) async {
+    var asset = systemAssets.firstWhereOrNull((e) => e.address == rootTokenContract) ??
+        customAssets.firstWhereOrNull((e) => e.address == rootTokenContract);
 
-    await _hiveSource.removeTokenContractAsset(address);
-  }
+    if (asset != null) return asset;
 
-  Future<void> clear() async {
-    _assetsSubject.add([]);
+    final transport = _transportSource.transport;
 
-    await _hiveSource.clearTokenContractAssets();
-  }
+    if (transport == null) throw Exception('Transport unavailable');
 
-  Future<void> refresh() async {
-    final manifest = await _restSource.getTonAssetsManifest();
-
-    for (final token in manifest.tokens) {
-      final asset = TokenContractAsset(
-        name: token.name,
-        chainId: token.chainId,
-        symbol: token.symbol,
-        decimals: token.decimals,
-        address: token.address,
-        logoURI: token.logoURI,
-        version: token.version,
-      );
-
-      await _hiveSource.saveTokenContractAsset(asset);
-
-      _assetsSubject.add([
-        ..._assetsSubject.value.where((e) => e.address != asset.address),
-        asset,
-      ]);
-    }
-  }
-
-  Future<void> _saveCustom({
-    required String address,
-    required String rootTokenContract,
-  }) async {
-    final tokenWallet = await TokenWallet.subscribe(
-      transport: _transportRepository.transport,
-      owner: address,
+    final tokenRootDetails = await getTokenRootDetails(
+      transport: transport,
       rootTokenContract: rootTokenContract,
     );
 
-    final asset = TokenContractAsset(
-      name: tokenWallet.symbol.fullName,
-      symbol: tokenWallet.symbol.name,
-      decimals: tokenWallet.symbol.decimals,
-      address: tokenWallet.symbol.rootTokenContract,
-      version: tokenWallet.version.toManifest(),
+    asset = TokenContractAsset(
+      name: tokenRootDetails.name,
+      symbol: tokenRootDetails.symbol,
+      decimals: tokenRootDetails.decimals,
+      address: rootTokenContract,
+      version: tokenRootDetails.version.toInt(),
     );
 
-    await tokenWallet.freePtr();
+    await _hiveSource.addCustomTokenContractAsset(asset);
 
-    await _hiveSource.saveTokenContractAsset(asset);
+    _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
 
-    _assetsSubject.add([
-      ..._assetsSubject.value.where((e) => e.address != asset.address),
-      asset,
-    ]);
+    return asset;
+  }
+
+  Future<void> clear() async => _hiveSource.clearCustomTokenContractAssets();
+
+  Future<void> _updateSystemTokenContractAssets() async {
+    final manifest = await _restSource.getTonAssetsManifest();
+
+    await _hiveSource.updateSystemTokenContractAssets(manifest.tokens);
+
+    _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
   }
 
   Future<void> _initialize() async {
-    final cached = _hiveSource.getTokenContractAssets();
+    _systemAssetsSubject.add(_hiveSource.systemTokenContractAssets);
+    _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
 
-    _assetsSubject.add(cached);
+    _updateSystemTokenContractAssets().onError((err, st) => logger.e(err, err, st));
 
-    await refresh();
+    systemAssetsStream.listen((event) => _lock.synchronized(() => _systemAssetsStreamListener(event)));
+  }
 
-    _accountsStorageRepository.accountsStream
-        .expand((e) => e)
-        .map(
-          (e) => e.additionalAssets.values
-              .map((e) => e.tokenWallets)
-              .expand((e) => e)
-              .map((el) => Tuple2(e.address, el.rootTokenContract)),
-        )
-        .expand((e) => e)
-        .listen((event) async {
-      final contains = assets.any((e) => e.address == event.item2);
+  Future<void> _systemAssetsStreamListener(List<TokenContractAsset> event) async {
+    try {
+      final duplicatedAssets = customAssets.where((e) => event.any((el) => e.address == el.address));
 
-      if (!contains) {
-        await _saveCustom(
-          address: event.item1,
-          rootTokenContract: event.item2,
-        );
+      for (final asset in duplicatedAssets) {
+        _hiveSource.removeCustomTokenContractAsset(asset.address);
+
+        _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
       }
-    });
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 }

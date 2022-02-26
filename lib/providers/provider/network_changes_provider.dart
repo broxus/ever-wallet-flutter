@@ -3,14 +3,18 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../injection.dart';
+import '../../../logger.dart';
 import '../../data/repositories/transport_repository.dart';
-import '../../logger.dart';
 
-final transportProvider = StreamProvider<ConnectionData>(
+final networkChangesProvider = StreamProvider<NetworkChangedEvent>(
   (ref) => getIt
       .get<TransportRepository>()
       .transportStream
       .whereType<Transport>()
-      .map((e) => e.connectionData)
+      .map(
+        (e) => NetworkChangedEvent(
+          selectedConnection: e.connectionData.name,
+        ),
+      )
       .doOnError((err, st) => logger.e(err, err, st)),
 );

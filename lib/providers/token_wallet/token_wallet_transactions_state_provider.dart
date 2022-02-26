@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../data/repositories/token_wallets_subscriptions_repository.dart';
 import '../../../injection.dart';
+import '../../data/repositories/token_wallets_repository.dart';
 import 'token_wallet_transactions_provider.dart';
 
 final tokenWalletTransactionsStateProvider = StateNotifierProvider.autoDispose.family<TokenWalletTransactionsNotifier,
@@ -44,17 +44,11 @@ class TokenWalletTransactionsNotifier extends StateNotifier<Tuple2<List<TokenWal
     if (prevTransactionId != null) {
       state = Tuple2([...state.item1], true);
 
-      final tokenWallet = await getIt
-          .get<TokenWalletsSubscriptionsRepository>()
-          .tokenWalletsStream
-          .expand((e) => e)
-          .firstWhere((e) => e.owner == owner && e.symbol.rootTokenContract == rootTokenContract)
-          .timeout(
-            const Duration(seconds: 60),
-            onTimeout: () => throw Exception(),
+      await getIt.get<TokenWalletsRepository>().preloadTransactions(
+            owner: owner,
+            rootTokenContract: rootTokenContract,
+            from: prevTransactionId,
           );
-
-      await tokenWallet.preloadTransactions(prevTransactionId);
     }
   }
 

@@ -11,9 +11,9 @@ class RestSource {
 
   String _getTonAssetsManifestRoute() => 'https://raw.githubusercontent.com/broxus/ton-assets/master/manifest.json';
 
-  Future<TonAssetsManifestDto> getTonAssetsManifest() async {
+  Future<TonAssetsManifest> getTonAssetsManifest() async {
     final response = await _dio.get<String>(_getTonAssetsManifestRoute());
     final json = jsonDecode(response.data!) as Map<String, dynamic>;
-    return TonAssetsManifestDto.fromJson(json);
+    return TonAssetsManifest.fromJson(json);
   }
 }

@@ -2,7 +2,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 const kDefaultWorkchain = 0;
 
-const kProviderVersion = '0.2.13';
+const kProviderVersion = '0.2.26';
 
 const kDefaultMessageExpiration = Expiration.timeout(value: 30);
 

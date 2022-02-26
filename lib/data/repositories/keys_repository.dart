@@ -6,39 +6,76 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:synchronized/synchronized.dart';
 
-import '../sources/local/nekoton_source.dart';
-import 'biometry_repository.dart';
+import '../../logger.dart';
+import '../sources/local/hive_source.dart';
+import '../sources/local/keystore_source.dart';
 
 @preResolve
 @lazySingleton
-class KeystoreRepository {
-  late final Keystore keystore;
-  final NekotonSource _nekotonSource;
-  final BiometryRepository _biometryRepository;
-  final _keysSubject = BehaviorSubject<List<KeyStoreEntry>>.seeded([]);
+class KeysRepository {
+  final KeystoreSource _keystoreSource;
+  final HiveSource _hiveSource;
+  final _labelsSubject = BehaviorSubject<Map<String, String>>.seeded({});
+  final _lock = Lock();
 
-  KeystoreRepository._(
-    this._nekotonSource,
-    this._biometryRepository,
+  KeysRepository._(
+    this._keystoreSource,
+    this._hiveSource,
   );
 
   @factoryMethod
-  static Future<KeystoreRepository> create({
-    required NekotonSource nekotonSource,
-    required BiometryRepository biometryRepository,
+  static Future<KeysRepository> create({
+    required KeystoreSource keystoreSource,
+    required HiveSource hiveSource,
   }) async {
-    final keystoreRepository = KeystoreRepository._(
-      nekotonSource,
-      biometryRepository,
+    final instance = KeysRepository._(
+      keystoreSource,
+      hiveSource,
     );
-    await keystoreRepository._initialize();
-    return keystoreRepository;
+    await instance._initialize();
+    return instance;
   }
 
-  Stream<List<KeyStoreEntry>> get keysStream => _keysSubject.stream.distinct((a, b) => listEquals(a, b));
+  Stream<List<KeyStoreEntry>> get keysStream => _keystoreSource.keysStream;
 
-  List<KeyStoreEntry> get keys => _keysSubject.value;
+  List<KeyStoreEntry> get keys => _keystoreSource.keys;
+
+  Stream<KeyStoreEntry?> get currentKeyStream => _keystoreSource.currentKeyStream;
+
+  KeyStoreEntry? get currentKey => _keystoreSource.currentKey;
+
+  Stream<Map<String, String>> get labelsStream =>
+      Rx.combineLatest2<Map<String, String>, Map<String, String>, Map<String, String>>(
+        _keystoreSource.keysStream.map((e) => {for (final v in e) v.publicKey: v.name}),
+        _labelsSubject.stream,
+        (a, b) => {...b, ...a},
+      ).distinct((a, b) => mapEquals(a, b));
+
+  Future<void> setCurrentKey(KeyStoreEntry? currentKey) async {
+    await _hiveSource.setCurrentPublicKey(currentKey?.publicKey);
+
+    _keystoreSource.currentKey = currentKey;
+  }
+
+  Future<void> setCustomPublicKeyLabel({
+    required String publicKey,
+    required String label,
+  }) async {
+    await _hiveSource.setPublicKeyLabel(
+      publicKey: publicKey,
+      label: label,
+    );
+
+    _labelsSubject.add(_hiveSource.publicKeysLabels);
+  }
+
+  Future<void> removeCustomPublicKeyLabel(String publicKey) async {
+    await _hiveSource.removePublicKeyLabel(publicKey);
+
+    _labelsSubject.add(_hiveSource.publicKeysLabels);
+  }
 
   Future<KeyStoreEntry> createKey({
     String? name,
@@ -71,10 +108,16 @@ class KeystoreRepository {
       );
     }
 
-    return _addKey(
-      createKeyInput: createKeyInput,
-      password: password,
-    );
+    final key = await _keystoreSource.addKey(createKeyInput);
+
+    if (_hiveSource.isBiometryEnabled) {
+      await _hiveSource.setKeyPassword(
+        publicKey: key.publicKey,
+        password: password,
+      );
+    }
+
+    return key;
   }
 
   Future<KeyStoreEntry> deriveKey({
@@ -82,7 +125,9 @@ class KeystoreRepository {
     required String publicKey,
     required String password,
   }) async {
-    final key = keys.firstWhere((e) => e.publicKey == publicKey);
+    final key = keys.firstWhereOrNull((e) => e.publicKey == publicKey);
+
+    if (key == null) throw Exception('Key is not found');
 
     if (key.isNotLegacy && key.accountId == 0) {
       final derivedKeys = keys.where((e) => e.masterKey == key.publicKey);
@@ -99,31 +144,19 @@ class KeystoreRepository {
         ),
       );
 
-      return _addKey(
-        createKeyInput: createKeyInput,
-        password: password,
-      );
+      final derivedKey = await _keystoreSource.addKey(createKeyInput);
+
+      if (_hiveSource.isBiometryEnabled) {
+        await _hiveSource.setKeyPassword(
+          publicKey: derivedKey.publicKey,
+          password: password,
+        );
+      }
+
+      return derivedKey;
     } else {
       throw Exception('Key is not derivable');
     }
-  }
-
-  Future<KeyStoreEntry> _addKey({
-    required CreateKeyInput createKeyInput,
-    required String password,
-  }) async {
-    final key = await keystore.addKey(createKeyInput);
-
-    _keysSubject.add(await keystore.entries);
-
-    if (_biometryRepository.biometryAvailability && _biometryRepository.biometryStatus) {
-      await _biometryRepository.setKeyPassword(
-        publicKey: key.publicKey,
-        password: password,
-      );
-    }
-
-    return key;
   }
 
   Future<KeyStoreEntry> changePassword({
@@ -133,9 +166,7 @@ class KeystoreRepository {
   }) async {
     final key = keys.firstWhereOrNull((e) => e.publicKey == publicKey);
 
-    if (key == null) {
-      throw Exception('Key is not found');
-    }
+    if (key == null) throw Exception('Key is not found');
 
     late final UpdateKeyInput updateKeyInput;
 
@@ -165,25 +196,25 @@ class KeystoreRepository {
       );
     }
 
-    final updatedKeyStoreEntry = await _updateKey(updateKeyInput);
+    final updatedKey = await _keystoreSource.updateKey(updateKeyInput);
 
-    await _biometryRepository.setKeyPassword(
-      publicKey: updatedKeyStoreEntry.publicKey,
-      password: newPassword,
-    );
+    if (_hiveSource.isBiometryEnabled) {
+      await _hiveSource.setKeyPassword(
+        publicKey: updatedKey.publicKey,
+        password: newPassword,
+      );
+    }
 
-    return updatedKeyStoreEntry;
+    return updatedKey;
   }
 
   Future<KeyStoreEntry> renameKey({
     required String publicKey,
     required String name,
-  }) {
+  }) async {
     final key = keys.firstWhereOrNull((e) => e.publicKey == publicKey);
 
-    if (key == null) {
-      throw Exception('Key is not found');
-    }
+    if (key == null) throw Exception('Key is not found');
 
     late final UpdateKeyInput updateKeyInput;
 
@@ -200,15 +231,9 @@ class KeystoreRepository {
       );
     }
 
-    return _updateKey(updateKeyInput);
-  }
+    final updatedKey = await _keystoreSource.updateKey(updateKeyInput);
 
-  Future<KeyStoreEntry> _updateKey(UpdateKeyInput updateKeyInput) async {
-    final key = await keystore.updateKey(updateKeyInput);
-
-    _keysSubject.add(await keystore.entries);
-
-    return key;
+    return updatedKey;
   }
 
   Future<List<String>> exportKey({
@@ -217,9 +242,7 @@ class KeystoreRepository {
   }) async {
     final key = keys.firstWhereOrNull((e) => e.publicKey == publicKey);
 
-    if (key == null) {
-      throw Exception('Key is not found');
-    }
+    if (key == null) throw Exception('Key is not found');
 
     late final ExportKeyInput exportKeyInput;
 
@@ -241,15 +264,19 @@ class KeystoreRepository {
       );
     }
 
-    final exportKeyOutput = await keystore.exportKey(exportKeyInput);
+    final exportKeyOutput = await _keystoreSource.exportKey(exportKeyInput);
+
+    late final List<String> phrase;
 
     if (exportKeyInput is EncryptedKeyPassword) {
-      return (exportKeyOutput as EncryptedKeyExportOutput).phrase.split(' ');
+      phrase = (exportKeyOutput as EncryptedKeyExportOutput).phrase.split(' ');
     } else if (exportKeyInput is DerivedKeyExportParams) {
-      return (exportKeyOutput as DerivedKeyExportOutput).phrase.split(' ');
+      phrase = (exportKeyOutput as DerivedKeyExportOutput).phrase.split(' ');
     } else {
       throw Exception('Unknown signer');
     }
+
+    return phrase;
   }
 
   Future<bool> checkKeyPassword({
@@ -258,9 +285,7 @@ class KeystoreRepository {
   }) {
     final key = keys.firstWhereOrNull((e) => e.publicKey == publicKey);
 
-    if (key == null) {
-      throw Exception('Key is not found');
-    }
+    if (key == null) throw Exception('Key is not found');
 
     late final SignInput signInput;
 
@@ -283,34 +308,60 @@ class KeystoreRepository {
       );
     }
 
-    return keystore.checkKeyPassword(signInput);
+    final isValid = _keystoreSource.checkKeyPassword(signInput);
+
+    return isValid;
   }
 
   Future<KeyStoreEntry?> removeKey(String publicKey) async {
-    final key = await keystore.removeKey(publicKey);
+    final key = await _keystoreSource.removeKey(publicKey);
 
-    _keysSubject.add(await keystore.entries);
-
-    final derivedKeys = _keysSubject.value.where((e) => e.masterKey == publicKey);
+    final derivedKeys = _keystoreSource.keys.where((e) => e.masterKey == publicKey);
 
     for (final key in derivedKeys) {
-      await keystore.removeKey(key.publicKey);
-
-      _keysSubject.add(await keystore.entries);
+      await _keystoreSource.removeKey(key.publicKey);
     }
 
     return key;
   }
 
   Future<void> clear() async {
-    await keystore.clear();
+    await _hiveSource.clearPublicKeysLabels();
 
-    _keysSubject.add(await keystore.entries);
+    _labelsSubject.add(_hiveSource.publicKeysLabels);
+
+    await _keystoreSource.clear();
   }
 
   Future<void> _initialize() async {
-    keystore = await Keystore.create(_nekotonSource.storage);
+    final currentPublicKey = _hiveSource.currentPublicKey;
 
-    _keysSubject.add(await keystore.entries);
+    final currentKey = _keystoreSource.keys.firstWhereOrNull((e) => e.publicKey == currentPublicKey);
+
+    if (currentKey != null) {
+      _keystoreSource.currentKey = currentKey;
+    } else {
+      await setCurrentKey(_keystoreSource.keys.firstOrNull);
+    }
+
+    _labelsSubject.add(_hiveSource.publicKeysLabels);
+
+    keysStream.listen((event) => _lock.synchronized(() => _keysStreamListener(event)));
+  }
+
+  Future<void> _keysStreamListener(List<KeyStoreEntry> event) async {
+    try {
+      if (currentKey == null || !event.contains(currentKey)) {
+        await setCurrentKey(_keystoreSource.keys.firstOrNull);
+      }
+
+      final duplicatedPublicKeys = _hiveSource.publicKeysLabels.keys.where((e) => event.any((el) => e == el.publicKey));
+
+      for (final duplicatedPublicKey in duplicatedPublicKeys) {
+        await removeCustomPublicKeyLabel(duplicatedPublicKey);
+      }
+    } catch (err, st) {
+      logger.e(err, err, st);
+    }
   }
 }

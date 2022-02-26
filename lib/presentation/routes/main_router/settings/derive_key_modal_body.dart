@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../injection.dart';
-import '../../../../data/repositories/keystore_repository.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../../logger.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_flushbar.dart';
@@ -28,7 +28,7 @@ class _DeriveKeyModalBodyState extends State<DeriveKeyModalBody> {
   Widget build(BuildContext context) => InputPasswordModalBody(
         onSubmit: (password) async {
           try {
-            await getIt.get<KeystoreRepository>().deriveKey(
+            await getIt.get<KeysRepository>().deriveKey(
                   name: widget.name,
                   publicKey: widget.publicKey,
                   password: password,

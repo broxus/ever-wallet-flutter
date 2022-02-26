@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../data/repositories/public_keys_labels_repository.dart';
+import '../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../design/widgets/unfocusing_gesture_detector.dart';
@@ -40,7 +40,7 @@ Future<void> showEditCustodianLabelDialog({
                 ),
                 PlatformDialogAction(
                   onPressed: () async {
-                    getIt.get<PublicKeysLabelsRepository>().save(
+                    getIt.get<KeysRepository>().setCustomPublicKeyLabel(
                           publicKey: publicKey,
                           label: controller.text,
                         );

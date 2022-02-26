@@ -77,6 +77,7 @@ class _CustomTokenLayoutState extends State<CustomTokenLayout> {
               if (!validateAddress(value)) {
                 return 'Invalid value';
               }
+              return null;
             },
             borderColor: Colors.transparent,
             errorBorderColor: Colors.transparent,

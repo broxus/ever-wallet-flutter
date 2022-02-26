@@ -9,8 +9,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
-import '../../../../data/repositories/current_key_repository.dart';
-import '../../../../data/repositories/keystore_repository.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../../providers/biometry/biometry_info_provider.dart';
 import '../../../../providers/key/current_key_provider.dart';
 import '../../../../providers/key/keys_provider.dart';
@@ -131,7 +130,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     onAdd: () {
                       context.router.push(const NewSeedRouterRoute());
                     },
-                    onSelect: (seed) => getIt.get<CurrentKeyRepository>().setCurrentKey(seed),
+                    onSelect: (seed) => getIt.get<KeysRepository>().setCurrentKey(seed),
                     showAddAction: true,
                   ),
               ],
@@ -152,7 +151,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     publicKey: currentKey.publicKey,
                                   );
 
-                              final phrase = await getIt.get<KeystoreRepository>().exportKey(
+                              final phrase = await getIt.get<KeysRepository>().exportKey(
                                     publicKey: currentKey.publicKey,
                                     password: password,
                                   );
@@ -220,7 +219,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         publicKey: currentKey.publicKey,
                                       );
 
-                                  await getIt.get<KeystoreRepository>().deriveKey(
+                                  await getIt.get<KeysRepository>().deriveKey(
                                         name: name.isNotEmpty ? name : null,
                                         publicKey: currentKey.publicKey,
                                         password: password,

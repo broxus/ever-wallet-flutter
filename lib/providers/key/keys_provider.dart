@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../../data/repositories/keystore_repository.dart';
 import '../../../injection.dart';
 import '../../../logger.dart';
+import '../../data/repositories/keys_repository.dart';
 
 final keysProvider = StreamProvider<Map<KeyStoreEntry, List<KeyStoreEntry>?>>(
-  (ref) => getIt.get<KeystoreRepository>().keysStream.map((e) {
+  (ref) => getIt.get<KeysRepository>().keysStream.map((e) {
     final map = <KeyStoreEntry, List<KeyStoreEntry>?>{};
 
     for (final key in e) {

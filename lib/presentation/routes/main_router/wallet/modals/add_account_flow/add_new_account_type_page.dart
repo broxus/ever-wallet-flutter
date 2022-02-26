@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../data/constants.dart';
-import '../../../../../../data/repositories/accounts_storage_repository.dart';
+import '../../../../../../data/extensions.dart';
+import '../../../../../../data/repositories/accounts_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../../providers/account/account_creation_options_provider.dart';
 import '../../../../../design/default_wallet_type.dart';
@@ -134,11 +134,10 @@ class _NewSelectWalletTypePageState extends ConsumerState<AddNewAccountTypePage>
       );
 
   Future<void> onPressed(WalletType value) async {
-    await getIt.get<AccountsStorageRepository>().addAccount(
+    await getIt.get<AccountsRepository>().addAccount(
           name: widget.name ?? value.describe(),
           publicKey: widget.publicKey,
           walletType: value,
-          workchain: kDefaultWorkchain,
         );
 
     if (!mounted) return;

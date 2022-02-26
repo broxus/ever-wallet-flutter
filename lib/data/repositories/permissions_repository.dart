@@ -6,87 +6,68 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../logger.dart';
+import '../sources/local/accounts_storage_source.dart';
 import '../sources/local/hive_source.dart';
-import 'accounts_storage_repository.dart';
-import 'approvals_repository.dart';
 
 @lazySingleton
 class PermissionsRepository {
-  final ApprovalsRepository _approvalsRepository;
+  final AccountsStorageSource _accountsStorageSource;
   final HiveSource _hiveSource;
-  final AccountsStorageRepository _accountsStorageRepository;
-  final _permissionsSubject = BehaviorSubject<Permissions>.seeded(const Permissions());
+  final _permissionsSubject = BehaviorSubject<Map<String, Permissions>>.seeded({});
+  final _lock = Lock();
 
   PermissionsRepository(
-    this._approvalsRepository,
+    this._accountsStorageSource,
     this._hiveSource,
-    this._accountsStorageRepository,
   ) {
-    final lock = Lock();
-    _accountsStorageRepository.accountsStream
+    _accountsStorageSource.accountsStream
         .skip(1)
-        .startWith(_accountsStorageRepository.accounts)
+        .startWith(_accountsStorageSource.accounts)
         .pairwise()
-        .listen((e) => lock.synchronized(() => _accountsStreamListener(e)));
+        .listen((e) => _lock.synchronized(() => _accountsStreamListener(e)));
   }
 
-  Stream<Permissions> get permissionsStream => _permissionsSubject.stream;
+  Stream<Map<String, Permissions>> get permissionsStream => _permissionsSubject.stream;
 
-  Future<Permissions> requestPermissions({
+  Map<String, Permissions> get permissions => _permissionsSubject.value;
+
+  Future<void> setPermissions({
     required String origin,
-    required List<Permission> permissions,
+    required Permissions permissions,
   }) async {
-    late Permissions requested;
+    await _hiveSource.setPermissions(
+      origin: origin,
+      permissions: permissions,
+    );
 
-    try {
-      requested = await checkPermissions(
-        origin: origin,
-        requiredPermissions: permissions,
-      );
-    } catch (err) {
-      requested = await _approvalsRepository.requestApprovalForPermissions(
-        origin: origin,
-        permissions: permissions,
-      );
-
-      await _hiveSource.setPermissions(
-        origin: origin,
-        permissions: requested,
-      );
-    }
-
-    _permissionsSubject.add(requested);
-
-    return requested;
+    _permissionsSubject.add(_hiveSource.permissions);
   }
 
-  Future<void> removeOrigin(String origin) async {
+  Future<void> deletePermissions(String origin) async {
     await _hiveSource.deletePermissions(origin);
 
-    _permissionsSubject.add(const Permissions());
+    _permissionsSubject.add(_hiveSource.permissions);
   }
 
-  Future<void> deletePermissionsForAccount(String address) => _hiveSource.deletePermissionsForAccount(address);
+  Future<void> deletePermissionsForAccount(String address) async {
+    await _hiveSource.deletePermissionsForAccount(address);
 
-  Permissions getPermissions(String origin) => _hiveSource.getPermissions(origin);
+    _permissionsSubject.add(_hiveSource.permissions);
+  }
 
   Future<Permissions> checkPermissions({
     required String origin,
     required List<Permission> requiredPermissions,
   }) async {
-    final permissions = getPermissions(origin);
+    final permissions = this.permissions[origin] ?? const Permissions();
 
     for (final requiredPermission in requiredPermissions) {
       switch (requiredPermission) {
-        case Permission.tonClient:
-          if (permissions.tonClient == null || permissions.tonClient == false) {
-            throw Exception('Not permitted');
-          }
+        case Permission.basic:
+          if (permissions.basic == null || permissions.basic == false) throw Exception('Not permitted');
           break;
         case Permission.accountInteraction:
-          if (permissions.accountInteraction == null) {
-            throw Exception('Not permitted');
-          }
+          if (permissions.accountInteraction == null) throw Exception('Not permitted');
           break;
       }
     }

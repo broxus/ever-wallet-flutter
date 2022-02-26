@@ -11,6 +11,8 @@ import '../models/approval_request.dart';
 class ApprovalsRepository {
   final _approvalsSubject = PublishSubject<ApprovalRequest>();
 
+  ApprovalsRepository();
+
   Stream<ApprovalRequest> get approvalsStream => _approvalsSubject.stream;
 
   Future<Permissions> requestApprovalForPermissions({

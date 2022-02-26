@@ -129,8 +129,8 @@ class _RequestPermissionsModalBodyState extends State<RequestPermissionsModalBod
 
     for (final permission in widget.permissions) {
       switch (permission) {
-        case Permission.tonClient:
-          permissions = permissions.copyWith(tonClient: true);
+        case Permission.basic:
+          permissions = permissions.copyWith(basic: true);
           break;
         case Permission.accountInteraction:
           permissions = permissions.copyWith(
@@ -148,4 +148,24 @@ class _RequestPermissionsModalBodyState extends State<RequestPermissionsModalBod
 
     Navigator.of(context).pop(permissions);
   }
+}
+
+extension on WalletType {
+  WalletContractType toWalletType() => when(
+        multisig: (multisigType) {
+          switch (multisigType) {
+            case MultisigType.safeMultisigWallet:
+              return WalletContractType.safeMultisigWallet;
+            case MultisigType.safeMultisigWallet24h:
+              return WalletContractType.safeMultisigWallet24h;
+            case MultisigType.setcodeMultisigWallet:
+              return WalletContractType.setcodeMultisigWallet;
+            case MultisigType.bridgeMultisigWallet:
+              return WalletContractType.bridgeMultisigWallet;
+            case MultisigType.surfWallet:
+              return WalletContractType.surfWallet;
+          }
+        },
+        walletV3: () => WalletContractType.walletV3,
+      );
 }

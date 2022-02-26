@@ -229,6 +229,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
             if (number < 1 || number > custodiansValue) {
               return 'Invalid value';
             }
+            return null;
           },
         ),
       );
@@ -286,6 +287,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
               if (value.length != 64) {
                 return 'Invalid value';
               }
+              return null;
             },
             maxLength: 64,
           ),

@@ -36,9 +36,7 @@ class _ApplicationBlocListenerState extends State<ApplicationBlocListener> with 
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      getIt.get<BiometryRepository>().checkBiometryAvailability();
-    }
+    if (state == AppLifecycleState.resumed) getIt.get<BiometryRepository>().checkBiometryAvailability();
   }
 
   @override

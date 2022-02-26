@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../../../../../../data/repositories/keystore_repository.dart';
+import '../../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../../injection.dart';
 import '../../../../../../design/form/field_state.dart';
 import '../../../../../../design/form/form_state.dart';
@@ -11,7 +11,7 @@ import '../../../../../../design/form/value_state.dart';
 part 'password_enter_page_notifier.freezed.dart';
 
 class PasswordEnterPageNotifier extends ChangeNotifier {
-  final _keystoreRepository = getIt.get<KeystoreRepository>();
+  final _keystoreRepository = getIt.get<KeysRepository>();
   final _passwordInputSubject = PublishSubject<String>();
   final String _publicKey;
   var _state = PasswordEnterPageFieldState.empty();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
-import '../../../../../data/repositories/keystore_repository.dart';
+import '../../../../../data/repositories/keys_repository.dart';
 import '../../../../../injection.dart';
 import '../../../../design/design.dart';
 
@@ -25,7 +25,7 @@ Future<void> showKeyRemovementDialog({
           ),
           PlatformDialogAction(
             onPressed: () {
-              getIt.get<KeystoreRepository>().removeKey(publicKey);
+              getIt.get<KeysRepository>().removeKey(publicKey);
 
               context.router.pop();
             },

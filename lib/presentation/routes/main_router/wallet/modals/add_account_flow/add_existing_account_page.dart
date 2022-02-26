@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../../data/repositories/current_key_repository.dart';
-import '../../../../../../data/repositories/external_accounts_repository.dart';
+import '../../../../../../data/repositories/accounts_repository.dart';
+import '../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../../logger.dart';
 import '../../../../../design/design.dart';
@@ -142,6 +142,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
           if (!validateAddress(value)) {
             return value;
           }
+          return null;
         },
       );
 
@@ -195,9 +196,9 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
     Navigator.of(widget.modalContext).pop();
 
     try {
-      final currentKey = getIt.get<CurrentKeyRepository>().currentKey;
+      final currentKey = getIt.get<KeysRepository>().currentKey;
 
-      await getIt.get<ExternalAccountsRepository>().addExternalAccount(
+      await getIt.get<AccountsRepository>().addExternalAccount(
             publicKey: currentKey!.publicKey,
             address: addressController.text,
             name: name,

@@ -228,6 +228,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
           if (!isNumeric(value) && !isFloat(value)) {
             return 'Invalid value';
           }
+          return null;
         },
       );
 
@@ -312,6 +313,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
           if (!validateAddress(value)) {
             return 'Invalid value';
           }
+          return null;
         },
       );
 

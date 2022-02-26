@@ -5,7 +5,7 @@ import 'package:validators/validators.dart';
 
 import '../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
-import '../../../../data/repositories/keystore_repository.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../../injection.dart';
 import '../../../../providers/biometry/biometry_info_provider.dart';
 import '../../../design/design.dart';
@@ -168,6 +168,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
           if (!isLength(value, 8)) {
             return value;
           }
+          return null;
         },
       );
 
@@ -191,6 +192,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
           if (passwordController.text != value) {
             return value;
           }
+          return null;
         },
       );
 
@@ -261,7 +263,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
     try {
       final password = passwordController.text;
 
-      await getIt.get<KeystoreRepository>().createKey(
+      await getIt.get<KeysRepository>().createKey(
             name: widget.seedName,
             phrase: widget.phrase,
             password: password,

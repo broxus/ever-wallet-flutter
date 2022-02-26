@@ -105,7 +105,7 @@ class ApprovalsListener extends StatelessWidget {
   }) async {
     final keys = reader(keysProvider).asData?.value ?? {};
     final currentKey = reader(currentKeyProvider).asData?.value;
-    final tonWalletInfo = reader(tonWalletInfoProvider(address)).asData?.value;
+    final tonWalletInfo = reader(tonWalletInfoProvider(sender)).asData?.value;
 
     var publicKeys = <String>[];
 

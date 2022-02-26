@@ -4,10 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../data/constants.dart';
-import '../../../data/repositories/token_wallets_subscriptions_repository.dart';
-import '../../../data/repositories/ton_wallets_subscriptions_repository.dart';
 import '../../../injection.dart';
+import '../../data/repositories/token_wallets_repository.dart';
+import '../../data/repositories/ton_wallets_repository.dart';
 
 final tokenWalletPrepareTransferProvider =
     StateNotifierProvider.autoDispose<TokenWalletPrepareTransferNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
@@ -31,50 +30,35 @@ class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final tokenWallet = await getIt
-          .get<TokenWalletsSubscriptionsRepository>()
-          .tokenWalletsStream
-          .expand((e) => e)
-          .firstWhere((e) => e.owner == owner && e.symbol.rootTokenContract == rootTokenContract)
-          .timeout(
-            const Duration(seconds: 60),
-            onTimeout: () => throw Exception(),
-          );
-
       final repackedDestination = repackAddress(destination);
 
-      final internalMessage = await tokenWallet.prepareTransfer(
-        destination: repackedDestination,
-        tokens: amount,
-        notifyReceiver: notifyReceiver,
-        payload: payload,
-      );
-
-      final tonWallet = await getIt
-          .get<TonWalletsSubscriptionsRepository>()
-          .tonWalletsStream
-          .expand((e) => e)
-          .firstWhere((e) => e.address == owner)
-          .timeout(
-            const Duration(seconds: 60),
-            onTimeout: () => throw Exception(),
+      final internalMessage = await getIt.get<TokenWalletsRepository>().prepareTransfer(
+            owner: owner,
+            rootTokenContract: rootTokenContract,
+            destination: repackedDestination,
+            tokens: amount,
+            notifyReceiver: notifyReceiver,
+            payload: payload,
           );
 
       final amountValue = int.parse(internalMessage.amount);
 
-      final message = await tonWallet.prepareTransfer(
-        publicKey: publicKey,
-        destination: internalMessage.destination,
-        amount: internalMessage.amount,
-        body: internalMessage.body,
-        isComment: false,
-        expiration: kDefaultMessageExpiration,
-      );
+      final message = await getIt.get<TonWalletsRepository>().prepareTransfer(
+            address: owner,
+            publicKey: publicKey,
+            destination: internalMessage.destination,
+            amount: internalMessage.amount,
+            body: internalMessage.body,
+          );
 
-      final fees = await tonWallet.estimateFees(message);
+      final fees = await getIt.get<TonWalletsRepository>().estimateFees(
+            address: owner,
+            message: message,
+          );
       final feesValue = int.parse(fees);
 
-      final balance = await tonWallet.contractState.then((v) => v.balance);
+      final balance =
+          await getIt.get<TonWalletsRepository>().getInfoStream(owner).first.then((v) => v.contractState.balance);
       final balanceValue = int.parse(balance);
 
       final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);

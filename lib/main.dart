@@ -40,7 +40,7 @@ Future<void> main() async {
 
     await configureDependencies();
 
-    nekotonErrorsStream.listen((e) => logger.e(e.item1, e.item1, e.item2));
+    setNekotonLogger(logger);
 
     runZonedGuarded(
       () => runApp(

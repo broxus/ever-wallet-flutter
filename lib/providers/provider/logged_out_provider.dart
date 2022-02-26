@@ -5,7 +5,7 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/keys_repository.dart';
 
-final keysPresenceProvider = StreamProvider<bool>(
+final loggedOutProvider = StreamProvider<void>(
   (ref) =>
-      getIt.get<KeysRepository>().keysStream.map((e) => e.isNotEmpty).doOnError((err, st) => logger.e(err, err, st)),
+      getIt.get<KeysRepository>().keysStream.where((e) => e.isEmpty).doOnError((err, st) => logger.e(err, err, st)),
 );

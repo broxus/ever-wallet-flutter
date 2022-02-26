@@ -11,8 +11,8 @@ import '../sources/local/local_auth_source.dart';
 class BiometryRepository {
   final HiveSource _hiveSource;
   final LocalAuthSource _localAuthSource;
-  final _availabilitySubject = BehaviorSubject<bool>();
-  final _statusSubject = BehaviorSubject<bool>();
+  final _availabilitySubject = BehaviorSubject<bool>.seeded(false);
+  final _statusSubject = BehaviorSubject<bool>.seeded(false);
 
   BiometryRepository._(
     this._hiveSource,
@@ -24,12 +24,12 @@ class BiometryRepository {
     required HiveSource hiveSource,
     required LocalAuthSource localAuthSource,
   }) async {
-    final biometryRepositoryImpl = BiometryRepository._(
+    final instance = BiometryRepository._(
       hiveSource,
       localAuthSource,
     );
-    await biometryRepositoryImpl._initialize();
-    return biometryRepositoryImpl;
+    await instance._initialize();
+    return instance;
   }
 
   Stream<bool> get biometryAvailabilityStream => _availabilitySubject.stream;
@@ -37,7 +37,7 @@ class BiometryRepository {
   bool get biometryAvailability => _availabilitySubject.value;
 
   Future<void> checkBiometryAvailability() async {
-    final isAvailable = await _localAuthSource.getIsBiometryAvailable();
+    final isAvailable = await _localAuthSource.isAvailable;
     _availabilitySubject.add(isAvailable);
   }
 
@@ -52,7 +52,7 @@ class BiometryRepository {
     final isAuthenticated = await authenticate(localizedReason);
 
     if (isAuthenticated) {
-      await _hiveSource.setBiometryStatus(isEnabled);
+      await _hiveSource.setIsBiometryEnabled(isEnabled);
       _statusSubject.add(isEnabled);
     }
   }
@@ -94,20 +94,14 @@ class BiometryRepository {
 
   Future<void> _initialize() async {
     _availabilitySubject.listen((value) async {
-      if (!value) {
-        _statusSubject.add(false);
-      }
+      if (!value) _statusSubject.add(false);
     });
+
     _statusSubject.listen((value) async {
-      if (!value) {
-        await _hiveSource.clearKeysPasswords();
-      }
+      if (!value) await _hiveSource.clearKeysPasswords();
     });
 
-    final isAvailable = await _localAuthSource.getIsBiometryAvailable();
-    final isEnabled = _hiveSource.getBiometryStatus();
-
-    _availabilitySubject.add(isAvailable);
-    _statusSubject.add(isEnabled);
+    _availabilitySubject.add(await _localAuthSource.isAvailable);
+    _statusSubject.add(_hiveSource.isBiometryEnabled);
   }
 }

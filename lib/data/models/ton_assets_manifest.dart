@@ -7,16 +7,16 @@ part 'ton_assets_manifest.freezed.dart';
 part 'ton_assets_manifest.g.dart';
 
 @freezed
-class TonAssetsManifestDto with _$TonAssetsManifestDto {
+class TonAssetsManifest with _$TonAssetsManifest {
   @JsonSerializable(explicitToJson: true)
-  const factory TonAssetsManifestDto({
+  const factory TonAssetsManifest({
     @JsonKey(name: '\$schema') required String schema,
     required String name,
     required TonAssetsManifestVersion version,
     required List<String> keywords,
     required String timestamp,
     required List<TokenContractAsset> tokens,
-  }) = _TonAssetsManifestDto;
+  }) = _TonAssetsManifest;
 
-  factory TonAssetsManifestDto.fromJson(Map<String, dynamic> json) => _$TonAssetsManifestDtoFromJson(json);
+  factory TonAssetsManifest.fromJson(Map<String, dynamic> json) => _$TonAssetsManifestFromJson(json);
 }

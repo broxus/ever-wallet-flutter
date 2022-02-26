@@ -4,13 +4,13 @@ import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../data/constants.dart';
-import '../../../data/repositories/accounts_storage_repository.dart';
 import '../../../injection.dart';
 import '../../../logger.dart';
+import '../../data/repositories/accounts_repository.dart';
 
 final accountCreationOptionsProvider = StreamProvider.family<Tuple2<List<WalletType>, List<WalletType>>, String>(
   (ref, publicKey) => getIt
-      .get<AccountsStorageRepository>()
+      .get<AccountsRepository>()
       .accountsStream
       .map((e) => e.where((e) => e.publicKey == publicKey))
       .map((e) => e.map((e) => e.tonWallet.contract))

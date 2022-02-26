@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../data/repositories/ton_wallets_subscriptions_repository.dart';
 import '../../../injection.dart';
+import '../../data/repositories/ton_wallets_repository.dart';
 import 'ton_wallet_transactions_provider.dart';
 
 final tonWalletTransactionsStateProvider = StateNotifierProvider.autoDispose
@@ -39,17 +39,10 @@ class TonWalletTransactionsNotifier extends StateNotifier<Tuple2<List<TonWalletT
     if (prevTransactionId != null) {
       state = Tuple2([...state.item1], true);
 
-      final tonWallet = await getIt
-          .get<TonWalletsSubscriptionsRepository>()
-          .tonWalletsStream
-          .expand((e) => e)
-          .firstWhere((e) => e.address == address)
-          .timeout(
-            const Duration(seconds: 60),
-            onTimeout: () => throw Exception(),
+      await getIt.get<TonWalletsRepository>().preloadTransactions(
+            address: address,
+            from: prevTransactionId,
           );
-
-      await tonWallet.preloadTransactions(prevTransactionId);
     }
   }
 

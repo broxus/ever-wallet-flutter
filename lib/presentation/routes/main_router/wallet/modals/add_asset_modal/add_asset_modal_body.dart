@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../data/models/token_contract_asset.dart';
-import '../../../../../../data/repositories/accounts_storage_repository.dart';
+import '../../../../../../data/repositories/accounts_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/widgets/crystal_flushbar.dart';
@@ -105,7 +105,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
   Future<void> onAssetsLayoutSave(List<TokenContractAsset> added, List<TokenContractAsset> removed) async {
     for (final asset in added) {
       try {
-        await getIt.get<AccountsStorageRepository>().addTokenWallet(
+        await getIt.get<AccountsRepository>().addTokenWallet(
               address: widget.address,
               rootTokenContract: asset.address,
             );
@@ -121,7 +121,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
 
     for (final asset in removed) {
       try {
-        await getIt.get<AccountsStorageRepository>().removeTokenWallet(
+        await getIt.get<AccountsRepository>().removeTokenWallet(
               address: widget.address,
               rootTokenContract: asset.address,
             );
@@ -138,7 +138,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
 
   Future<void> onCustomTokenLayoutSave(String address) async {
     try {
-      await getIt.get<AccountsStorageRepository>().addTokenWallet(
+      await getIt.get<AccountsRepository>().addTokenWallet(
             address: widget.address,
             rootTokenContract: address,
           );

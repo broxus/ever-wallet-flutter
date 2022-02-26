@@ -4,9 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../data/constants.dart';
-import '../../../data/repositories/ton_wallets_subscriptions_repository.dart';
 import '../../../injection.dart';
+import '../../data/repositories/ton_wallets_repository.dart';
 
 final tonWalletPrepareTransferProvider =
     StateNotifierProvider.autoDispose<TonWalletPrepareTransferNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
@@ -29,33 +28,26 @@ class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<U
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final tonWallet = await getIt
-          .get<TonWalletsSubscriptionsRepository>()
-          .tonWalletsStream
-          .expand((e) => e)
-          .firstWhere((e) => e.address == address)
-          .timeout(
-            const Duration(seconds: 60),
-            onTimeout: () => throw Exception(),
-          );
-
       final repackedDestination = repackAddress(destination);
 
       final amountValue = int.parse(amount);
 
-      final message = await tonWallet.prepareTransfer(
-        publicKey: publicKey,
-        destination: repackedDestination,
-        amount: amount,
-        body: body,
-        isComment: isComment,
-        expiration: kDefaultMessageExpiration,
-      );
+      final message = await getIt.get<TonWalletsRepository>().prepareTransfer(
+            address: address,
+            publicKey: publicKey,
+            destination: repackedDestination,
+            amount: amount,
+            body: body,
+          );
 
-      final fees = await tonWallet.estimateFees(message);
+      final fees = await getIt.get<TonWalletsRepository>().estimateFees(
+            address: address,
+            message: message,
+          );
       final feesValue = int.parse(fees);
 
-      final balance = await tonWallet.contractState.then((v) => v.balance);
+      final balance =
+          await getIt.get<TonWalletsRepository>().getInfoStream(address).first.then((v) => v.contractState.balance);
       final balanceValue = int.parse(balance);
 
       final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);

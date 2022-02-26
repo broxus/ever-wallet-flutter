@@ -32,11 +32,11 @@ class SelectionAssetHolder extends StatelessWidget {
   Widget icon() => asset.logoURI != null
       ? TokenAssetIcon(
           logoURI: asset.logoURI!,
-          version: tokenWalletVersionFromManifest(asset.version),
+          version: tokenWalletVersionFromInt(asset.version),
         )
       : TokenAddressGeneratedIcon(
           address: asset.address,
-          version: tokenWalletVersionFromManifest(asset.version),
+          version: tokenWalletVersionFromInt(asset.version),
         );
 
   Widget name() => MarqueeWidget(

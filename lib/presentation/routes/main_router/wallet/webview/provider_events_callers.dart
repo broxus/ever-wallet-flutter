@@ -8,12 +8,9 @@ import '../../../../../../../../logger.dart';
 
 Future<void> disconnectedCaller({
   required InAppWebViewController controller,
-  required Error event,
 }) async {
   try {
-    final jsonOutput = jsonEncode(event.toJson());
-
-    await controller.evaluateJavascript(source: "window.__dartNotifications.disconnected('$jsonOutput')");
+    await controller.evaluateJavascript(source: 'window.__dartNotifications.disconnected()');
   } catch (err, st) {
     logger.e(err, err, st);
   }
@@ -25,6 +22,8 @@ Future<void> transactionsFoundCaller({
 }) async {
   try {
     final jsonOutput = jsonEncode(event.toJson());
+
+    logger.d(event);
 
     await controller.evaluateJavascript(source: "window.__dartNotifications.transactionsFound('$jsonOutput')");
   } catch (err, st) {
@@ -39,6 +38,8 @@ Future<void> contractStateChangedCaller({
   try {
     final jsonOutput = jsonEncode(event.toJson());
 
+    logger.d(event);
+
     await controller.evaluateJavascript(source: "window.__dartNotifications.contractStateChanged('$jsonOutput')");
   } catch (err, st) {
     logger.e(err, err, st);
@@ -52,6 +53,8 @@ Future<void> networkChangedCaller({
   try {
     final jsonOutput = jsonEncode(event.toJson());
 
+    logger.d(event);
+
     await controller.evaluateJavascript(source: "window.__dartNotifications.networkChanged('$jsonOutput')");
   } catch (err, st) {
     logger.e(err, err, st);
@@ -63,7 +66,9 @@ Future<void> permissionsChangedCaller({
   required PermissionsChangedEvent event,
 }) async {
   try {
-    final jsonOutput = jsonEncode(event.toJson());
+    final jsonOutput = jsonEncode(event.toJson()).replaceAll('tonClient', 'basic');
+
+    logger.d(event);
 
     await controller.evaluateJavascript(source: "window.__dartNotifications.permissionsChanged('$jsonOutput')");
   } catch (err, st) {
@@ -73,7 +78,6 @@ Future<void> permissionsChangedCaller({
 
 Future<void> loggedOutCaller({
   required InAppWebViewController controller,
-  required Object event,
 }) async {
   try {
     await controller.evaluateJavascript(source: 'window.__dartNotifications.loggedOut()');

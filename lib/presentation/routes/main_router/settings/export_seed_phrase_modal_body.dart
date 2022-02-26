@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../injection.dart';
-import '../../../../data/repositories/keystore_repository.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../../logger.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_flushbar.dart';
@@ -35,7 +35,7 @@ class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
   Widget build(BuildContext context) => InputPasswordModalBody(
         onSubmit: (password) async {
           try {
-            final phrase = await getIt.get<KeystoreRepository>().exportKey(
+            final phrase = await getIt.get<KeysRepository>().exportKey(
                   publicKey: widget.publicKey,
                   password: password,
                 );

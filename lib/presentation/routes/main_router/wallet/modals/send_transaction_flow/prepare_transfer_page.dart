@@ -215,6 +215,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
           if (!isNumeric(value) && !isFloat(value)) {
             return 'Invalid value';
           }
+          return null;
         },
       );
 
@@ -259,6 +260,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
           if (!validateAddress(value)) {
             return 'Invalid value';
           }
+          return null;
         },
       );
 

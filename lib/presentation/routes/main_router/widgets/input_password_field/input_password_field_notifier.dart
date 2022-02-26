@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../../../../injection.dart';
-import '../../../../../data/repositories/keystore_repository.dart';
+import '../../../../../data/repositories/keys_repository.dart';
 import '../../../../design/form/field_state.dart';
 import '../../../../design/form/form_state.dart';
 import '../../../../design/form/value_state.dart';
@@ -11,7 +11,7 @@ import '../../../../design/form/value_state.dart';
 part 'input_password_field_notifier.freezed.dart';
 
 class InputPasswordFieldNotifier extends ChangeNotifier {
-  final _keystoreRepository = getIt.get<KeystoreRepository>();
+  final _keystoreRepository = getIt.get<KeysRepository>();
   final _passwordInputSubject = PublishSubject<String>();
   final String _publicKey;
   var _state = InputPasswordFieldState.empty();

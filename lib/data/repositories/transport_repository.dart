@@ -1,38 +1,44 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../constants.dart';
 import '../sources/local/hive_source.dart';
+import '../sources/remote/transport_source.dart';
 
 @preResolve
 @lazySingleton
 class TransportRepository {
+  final TransportSource _transportSource;
   final HiveSource _hiveSource;
-  final _transportSubject = BehaviorSubject<Transport>();
 
-  TransportRepository._(this._hiveSource);
+  TransportRepository._(
+    this._transportSource,
+    this._hiveSource,
+  );
 
   @factoryMethod
   static Future<TransportRepository> create({
+    required TransportSource transportSource,
     required HiveSource hiveSource,
   }) async {
-    final transportRepository = TransportRepository._(hiveSource);
-    await transportRepository._initialize();
-    return transportRepository;
+    final instance = TransportRepository._(
+      transportSource,
+      hiveSource,
+    );
+    await instance._initialize();
+    return instance;
   }
 
-  Stream<Transport> get transportStream => _transportSubject.stream;
+  Stream<Transport?> get transportStream => _transportSource.transportStream;
 
-  Transport get transport => _transportSubject.value;
+  Transport? get transport => _transportSource.transport;
 
   Future<void> updateTransport(ConnectionData connectionData) async {
-    final old = _transportSubject.valueOrNull;
+    final prevTransport = _transportSource.transport;
 
-    late Transport transport;
+    late final Transport transport;
 
     if (connectionData.type == TransportType.gql) {
       transport = await GqlTransport.create(connectionData);
@@ -42,18 +48,18 @@ class TransportRepository {
       throw Exception('Invalid connection type');
     }
 
-    _transportSubject.add(transport);
+    _transportSource.transport = transport;
 
     await _hiveSource.setCurrentConnection(connectionData.name);
 
-    await old?.freePtr();
+    await prevTransport?.freePtr();
   }
 
   Future<void> _initialize() async {
-    final currentConnectionName = _hiveSource.getCurrentConnection();
+    final currentConnectionName = _hiveSource.currentConnection;
 
-    final currentConnection = kNetworkPresets.firstWhereOrNull((e) => e.name == currentConnectionName);
-
-    await updateTransport(currentConnection ?? kNetworkPresets.first);
+    await updateTransport(
+      kNetworkPresets.firstWhere((e) => e.name == currentConnectionName, orElse: () => kNetworkPresets.first),
+    );
   }
 }

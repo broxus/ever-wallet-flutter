@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../../../injection.dart';
-import '../../../../data/repositories/keystore_repository.dart';
+import '../../../../data/repositories/keys_repository.dart';
 import '../../../../logger.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_flushbar.dart';
@@ -54,7 +54,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                         try {
                           context.router.navigatorKey.currentState?.pop();
 
-                          await getIt.get<KeystoreRepository>().renameKey(
+                          await getIt.get<KeysRepository>().renameKey(
                                 publicKey: widget.publicKey,
                                 name: value.text,
                               );

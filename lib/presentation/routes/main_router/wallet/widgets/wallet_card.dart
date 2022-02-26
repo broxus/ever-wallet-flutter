@@ -1,9 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../../data/extensions.dart';
 import '../../../../../providers/account/account_info_provider.dart';
 import '../../../../../providers/account/external_accounts_provider.dart';
 import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
