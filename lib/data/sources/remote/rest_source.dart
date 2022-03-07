@@ -9,10 +9,10 @@ import '../../models/ton_assets_manifest.dart';
 class RestSource {
   final Dio _dio = Dio();
 
-  String _getTonAssetsManifestRoute() => 'https://raw.githubusercontent.com/broxus/ton-assets/master/manifest.json';
+  String _tonAssetsManifestRoute() => 'https://raw.githubusercontent.com/broxus/ton-assets/master/manifest.json';
 
   Future<TonAssetsManifest> getTonAssetsManifest() async {
-    final response = await _dio.get<String>(_getTonAssetsManifestRoute());
+    final response = await _dio.get<String>(_tonAssetsManifestRoute());
     final json = jsonDecode(response.data!) as Map<String, dynamic>;
     return TonAssetsManifest.fromJson(json);
   }

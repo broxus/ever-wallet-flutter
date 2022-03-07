@@ -21,16 +21,17 @@ class AccountsStorageSource {
     required StorageSource storageSource,
   }) async {
     final instance = AccountsStorageSource._();
-    await instance._initialize(storageSource: storageSource);
+    await instance._initialize(
+      storageSource: storageSource,
+    );
     return instance;
   }
 
-  Stream<List<AssetsList>> get accountsStream => _accountsSubject.stream.distinct((a, b) => listEquals(a, b));
+  Stream<List<AssetsList>> get accountsStream => _accountsSubject.distinct((a, b) => listEquals(a, b));
 
   List<AssetsList> get accounts => _accountsSubject.value;
 
-  Stream<List<AssetsList>> get currentAccountsStream =>
-      _currentAccountsSubject.stream.distinct((a, b) => listEquals(a, b));
+  Stream<List<AssetsList>> get currentAccountsStream => _currentAccountsSubject.distinct((a, b) => listEquals(a, b));
 
   List<AssetsList> get currentAccounts => _currentAccountsSubject.value;
 

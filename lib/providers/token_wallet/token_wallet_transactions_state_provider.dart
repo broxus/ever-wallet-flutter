@@ -1,61 +1,67 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../injection.dart';
 import '../../data/repositories/token_wallets_repository.dart';
-import 'token_wallet_transactions_provider.dart';
+import '../../logger.dart';
 
 final tokenWalletTransactionsStateProvider = StateNotifierProvider.autoDispose.family<TokenWalletTransactionsNotifier,
-    Tuple2<List<TokenWalletTransactionWithData>, bool>, Tuple2<String, String>>((ref, params) {
-  final owner = params.item1;
-  final rootTokenContract = params.item2;
-
-  final notifier = TokenWalletTransactionsNotifier(ref.read, owner, rootTokenContract);
-
-  ref.onDispose(
-    ref.listen<AsyncValue<List<TokenWalletTransactionWithData>>>(
-      tokenWalletTransactionsProvider(params),
-      notifier.callback,
-      fireImmediately: true,
-    ),
-  );
-
-  return notifier;
-});
+    Tuple2<List<TokenWalletTransactionWithData>, bool>, Tuple2<String, String>>(
+  (ref, params) => TokenWalletTransactionsNotifier(owner: params.item1, rootTokenContract: params.item2),
+);
 
 class TokenWalletTransactionsNotifier extends StateNotifier<Tuple2<List<TokenWalletTransactionWithData>, bool>> {
-  final Reader read;
   final String owner;
   final String rootTokenContract;
+  late final StreamSubscription _transactionsStreamSubscription;
+  late final StreamSubscription _preloadStreamSubscription;
+  final _preloadSubject = PublishSubject<TransactionId?>();
 
-  TokenWalletTransactionsNotifier(
-    this.read,
-    this.owner,
-    this.rootTokenContract,
-  ) : super(const Tuple2([], false));
+  TokenWalletTransactionsNotifier({
+    required this.owner,
+    required this.rootTokenContract,
+  }) : super(const Tuple2([], false)) {
+    _transactionsStreamSubscription = getIt
+        .get<TokenWalletsRepository>()
+        .getTransactionsStream(owner: owner, rootTokenContract: rootTokenContract)
+        .listen((event) => _transactionsStreamListener(event));
 
-  Future<void> preload() async {
-    final prevTransactionId = state.item1.lastOrNull?.transaction.prevTransactionId;
+    _preloadStreamSubscription = _preloadSubject
+        .doOnData((e) {
+          if (e != null && !state.item2) state = Tuple2([...state.item1], true);
+        })
+        .debounce((e) => TimerStream(e, const Duration(milliseconds: 300)))
+        .listen((event) => _preloadStreamListener(event));
+  }
 
-    if (prevTransactionId != null) {
-      state = Tuple2([...state.item1], true);
+  @override
+  void dispose() {
+    _transactionsStreamSubscription.cancel();
+    _preloadStreamSubscription.cancel();
+    super.dispose();
+  }
+
+  void preload(TransactionId? from) => _preloadSubject.add(from);
+
+  void _transactionsStreamListener(List<TokenWalletTransactionWithData> event) => state = Tuple2(event, false);
+
+  Future<void> _preloadStreamListener(TransactionId? event) async {
+    try {
+      if (event == null) return;
 
       await getIt.get<TokenWalletsRepository>().preloadTransactions(
             owner: owner,
             rootTokenContract: rootTokenContract,
-            from: prevTransactionId,
+            from: event,
           );
+    } catch (err, st) {
+      logger.e(err, err, st);
+    } finally {
+      state = Tuple2([...state.item1], false);
     }
-  }
-
-  void callback(
-    AsyncValue<List<TokenWalletTransactionWithData>>? previous,
-    AsyncValue<List<TokenWalletTransactionWithData>> next,
-  ) {
-    state = Tuple2([...next.asData?.value ?? []], false);
   }
 }

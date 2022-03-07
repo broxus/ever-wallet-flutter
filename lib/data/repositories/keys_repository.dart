@@ -49,7 +49,7 @@ class KeysRepository {
   Stream<Map<String, String>> get labelsStream =>
       Rx.combineLatest2<Map<String, String>, Map<String, String>, Map<String, String>>(
         _keystoreSource.keysStream.map((e) => {for (final v in e) v.publicKey: v.name}),
-        _labelsSubject.stream,
+        _labelsSubject,
         (a, b) => {...b, ...a},
       ).distinct((a, b) => mapEquals(a, b));
 

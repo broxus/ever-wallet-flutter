@@ -5,44 +5,31 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../../../providers/key/keys_provider.dart';
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/explorer.dart';
 import '../../../../../design/transaction_time.dart';
-import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
 import '../../../../../design/widgets/modal_header.dart';
 import '../../../../../design/widgets/transaction_type_label.dart';
-import '../confirm_transaction_flow/start_confirm_transaction_flow.dart';
 
-class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
+class TonWalletMultisigTransactionInfoModalBody extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
-  final MultisigPendingTransaction? multisigPendingTransaction;
-  final String walletAddress;
-  final String walletPublicKey;
-  final WalletType walletType;
+  final String creator;
+  final List<String> confirmations;
   final List<String> custodians;
 
-  const TonWalletMultisigPendingTransactionInfoModalBody({
+  const TonWalletMultisigTransactionInfoModalBody({
     Key? key,
     required this.transactionWithData,
-    required this.multisigPendingTransaction,
-    required this.walletAddress,
-    required this.walletPublicKey,
-    required this.walletType,
+    required this.creator,
+    required this.confirmations,
     required this.custodians,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Consumer(
         builder: (context, ref, child) {
-          final keys = ref.watch(keysProvider).asData?.value ?? {};
-          final keysList = [
-            ...keys.keys,
-            ...keys.values.whereNotNull().expand((e) => e),
-          ];
-
           final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
 
           final msgSender = transactionWithData.transaction.inMessage.src;
@@ -227,32 +214,6 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
             orElse: () => null,
           );
 
-          final signsReceived = multisigPendingTransaction?.signsReceived;
-
-          final signsRequired = multisigPendingTransaction?.signsRequired;
-
-          final creator = multisigPendingTransaction?.creator;
-
-          final confirmations = multisigPendingTransaction?.confirmations;
-
-          final transactionId = multisigPendingTransaction?.id;
-
-          final localCustodians = keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
-
-          final initiatorKey = localCustodians.firstWhereOrNull((e) => e.publicKey == walletPublicKey);
-
-          final listOfKeys = [
-            if (initiatorKey != null) initiatorKey,
-            ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
-          ];
-
-          final nonConfirmedLocalCustodians =
-              listOfKeys.where((e) => confirmations?.every((el) => el != e.publicKey) ?? false);
-
-          final publicKeys = nonConfirmedLocalCustodians.map((e) => e.publicKey).toList();
-
-          final canConfirm = publicKeys.isNotEmpty;
-
           final sections = [
             section(
               [
@@ -345,24 +306,18 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
               ),
             section(
               [
-                if (signsReceived != null && signsRequired != null)
-                  signaturesItem(
-                    received: signsReceived,
-                    required: signsRequired,
-                  ),
-                if (confirmations != null)
-                  ...custodians.asMap().entries.map(
-                    (e) {
-                      final title = publicKeysLabels[e.value] ?? 'Custodian ${e.key + 1}';
+                ...custodians.asMap().entries.map(
+                  (e) {
+                    final title = publicKeysLabels[e.value] ?? 'Custodian ${e.key + 1}';
 
-                      return custodiansItem(
-                        label: title,
-                        publicKey: e.value,
-                        isCreator: e.value == creator,
-                        isSigned: confirmations.contains(e.value),
-                      );
-                    },
-                  ).toList(),
+                    return custodiansItem(
+                      label: title,
+                      publicKey: e.value,
+                      isCreator: e.value == creator,
+                      isSigned: confirmations.contains(e.value),
+                    );
+                  },
+                ).toList(),
               ],
             ),
           ];
@@ -378,8 +333,6 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                       text: 'Transaction information',
                     ),
                     const SizedBox(height: 16),
-                    label(),
-                    const SizedBox(height: 16),
                     Expanded(
                       child: SingleChildScrollView(
                         physics: const ClampingScrollPhysics(),
@@ -387,18 +340,6 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    if (canConfirm && transactionId != null && address != null && value != null) ...[
-                      confirmButton(
-                        context: context,
-                        address: walletAddress,
-                        publicKeys: publicKeys,
-                        transactionId: transactionId,
-                        destination: address,
-                        amount: value,
-                        comment: comment,
-                      ),
-                      const SizedBox(height: 16),
-                    ],
                     explorerButton(hash),
                   ],
                 ),
@@ -406,15 +347,6 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
             ),
           );
         },
-      );
-
-  Widget label() => Row(
-        children: const [
-          TransactionTypeLabel(
-            text: 'Waiting for confirmation',
-            color: CrystalColor.error,
-          ),
-        ],
       );
 
   Widget list(List<Widget> list) => ListView.separated(
@@ -506,15 +438,6 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
         subtitle: type,
       );
 
-  Widget signaturesItem({
-    required int received,
-    required int required,
-  }) =>
-      item(
-        title: 'Signatures',
-        subtitle: '$received of $required signatures collected',
-      );
-
   Widget custodiansItem({
     required String label,
     required String publicKey,
@@ -545,28 +468,6 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
             ],
           ],
         ),
-      );
-
-  Widget confirmButton({
-    required BuildContext context,
-    required String address,
-    required List<String> publicKeys,
-    required String transactionId,
-    required String destination,
-    required String amount,
-    String? comment,
-  }) =>
-      CustomElevatedButton(
-        onPressed: () => startConfirmTransactionFlow(
-          context: context,
-          address: address,
-          publicKeys: publicKeys,
-          transactionId: transactionId,
-          destination: destination,
-          amount: amount.fromTokens(),
-          comment: comment,
-        ),
-        text: 'Confirm transaction',
       );
 
   Widget explorerButton(String hash) => CustomOutlinedButton(

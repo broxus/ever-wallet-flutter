@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +9,6 @@ import 'package:tuple/tuple.dart';
 import 'package:validators/validators.dart';
 
 import '../../../../../../logger.dart';
-import '../../../../../../providers/key/keys_provider.dart';
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../design/design.dart';
@@ -157,20 +155,13 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
   Widget dropdownButton() => Consumer(
         builder: (context, ref, child) {
           final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
-          final keys = ref.watch(keysProvider).asData?.value ?? {};
-          final keysList = [
-            ...keys.keys,
-            ...keys.values.whereNotNull().expand((e) => e),
-          ];
 
           return ValueListenableBuilder<String>(
             valueListenable: publicKeyNotifier,
             builder: (context, value, child) => CustomDropdownButton<String>(
               items: widget.publicKeys.map(
                 (e) {
-                  final title = keysList.firstWhereOrNull((el) => el.publicKey == e)?.name ??
-                      publicKeysLabels[e] ??
-                      e.ellipsePublicKey();
+                  final title = publicKeysLabels[e] ?? e.ellipsePublicKey();
 
                   return Tuple2(
                     e,
@@ -305,7 +296,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
 
     if (focusNode.hasFocus) {
       focusNode.unfocus();
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
     }
 
     if (!mounted) return;
@@ -361,7 +352,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
     final publicKey = publicKeyNotifier.value;
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => SendInfoPage(
           modalContext: widget.modalContext,
           address: widget.address,

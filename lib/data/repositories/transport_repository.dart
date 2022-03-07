@@ -52,7 +52,7 @@ class TransportRepository {
 
     await _hiveSource.setCurrentConnection(connectionData.name);
 
-    await prevTransport?.freePtr();
+    prevTransport?.freePtr();
   }
 
   Future<void> _initialize() async {

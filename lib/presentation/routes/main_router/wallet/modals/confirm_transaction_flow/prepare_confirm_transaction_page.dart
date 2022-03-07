@@ -1,11 +1,9 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../../../logger.dart';
-import '../../../../../../providers/key/keys_provider.dart';
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../design/design.dart';
@@ -104,20 +102,13 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
   Widget dropdownButton() => Consumer(
         builder: (context, ref, child) {
           final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
-          final keys = ref.watch(keysProvider).asData?.value ?? {};
-          final keysList = [
-            ...keys.keys,
-            ...keys.values.whereNotNull().expand((e) => e),
-          ];
 
           return ValueListenableBuilder<String>(
             valueListenable: publicKeyNotifier,
             builder: (context, value, child) => CustomDropdownButton<String>(
               items: widget.publicKeys.map(
                 (e) {
-                  final title = keysList.firstWhereOrNull((el) => el.publicKey == e)?.name ??
-                      publicKeysLabels[e] ??
-                      e.ellipsePublicKey();
+                  final title = publicKeysLabels[e] ?? e.ellipsePublicKey();
 
                   return Tuple2(
                     e,
@@ -158,7 +149,7 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
       );
 
   void onPressed(String publicKey) => Navigator.of(context).push(
-        MaterialPageRoute(
+        MaterialPageRoute<void>(
           builder: (context) {
             try {
               final a = ConfirmTransactionInfoPage(

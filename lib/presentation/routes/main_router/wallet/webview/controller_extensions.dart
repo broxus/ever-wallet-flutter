@@ -70,7 +70,7 @@ extension InAppWebViewControllerX on InAppWebViewController {
     required URLRequest urlRequest,
     Uri? iosAllowingReadAccessTo,
   }) async {
-    final completer = Completer();
+    final completer = Completer<void>();
 
     late final StreamSubscription _errorsStreamSubscription;
 

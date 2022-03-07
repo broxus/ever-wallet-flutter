@@ -5,7 +5,8 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../injection.dart';
-import '../../../../../../providers/biometry/biometry_info_provider.dart';
+import '../../../../../../providers/biometry/biometry_availability_provider.dart';
+import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_prepare_transfer_provider.dart';
 import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/custom_back_button.dart';
@@ -168,9 +169,10 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendInfoPage> {
   }) async {
     String? password;
 
-    final info = await read(biometryInfoProvider.future);
+    final isEnabled = read(biometryStatusProvider).asData?.value ?? false;
+    final isAvailable = read(biometryAvailabilityProvider).asData?.value ?? false;
 
-    if (info.isAvailable && info.isEnabled) {
+    if (isAvailable && isEnabled) {
       password = await getPasswordFromBiometry(publicKey);
     }
 
@@ -184,7 +186,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendInfoPage> {
       );
     } else {
       Navigator.of(context).push(
-        MaterialPageRoute(
+        MaterialPageRoute<void>(
           builder: (context) => PasswordEnterPage(
             modalContext: widget.modalContext,
             publicKey: publicKey,

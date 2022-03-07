@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
-import '../../../../providers/biometry/biometry_info_provider.dart';
+import '../../../../providers/biometry/biometry_availability_provider.dart';
+import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../design/design.dart';
 import 'input_password_field/input_password_field.dart';
 
@@ -62,9 +63,10 @@ class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
               Consumer(
                 builder: (context, ref, child) => InputPasswordField(
                   onSubmit: (password) async {
-                    final info = await ref.read(biometryInfoProvider.future);
+                    final isEnabled = ref.read(biometryStatusProvider).asData?.value ?? false;
+                    final isAvailable = ref.read(biometryAvailabilityProvider).asData?.value ?? false;
 
-                    if (info.isEnabled && info.isEnabled) {
+                    if (isAvailable && isEnabled) {
                       await getIt.get<BiometryRepository>().setKeyPassword(
                             publicKey: widget.publicKey,
                             password: password,

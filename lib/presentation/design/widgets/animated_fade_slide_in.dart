@@ -25,7 +25,7 @@ class _AnimatedFadeSlideInState extends State<AnimatedFadeSlideIn> with SingleTi
   void initState() {
     super.initState();
     offset = widget.offset;
-    Future.delayed(widget.delay).then(
+    Future<void>.delayed(widget.delay).then(
       (value) => setState(
         () => offset = Offset.zero,
       ),

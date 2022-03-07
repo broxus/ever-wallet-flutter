@@ -1,55 +1,62 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../injection.dart';
 import '../../data/repositories/ton_wallets_repository.dart';
-import 'ton_wallet_transactions_provider.dart';
+import '../../logger.dart';
 
 final tonWalletTransactionsStateProvider = StateNotifierProvider.autoDispose
-    .family<TonWalletTransactionsNotifier, Tuple2<List<TonWalletTransactionWithData>, bool>, String>((ref, address) {
-  final notifier = TonWalletTransactionsNotifier(ref.read, address);
-
-  ref.onDispose(
-    ref.listen<AsyncValue<List<TonWalletTransactionWithData>>>(
-      tonWalletTransactionsProvider(address),
-      notifier.callback,
-      fireImmediately: true,
-    ),
-  );
-
-  return notifier;
-});
+    .family<TonWalletTransactionsNotifier, Tuple2<List<TonWalletTransactionWithData>, bool>, String>(
+  (ref, address) => TonWalletTransactionsNotifier(address),
+);
 
 class TonWalletTransactionsNotifier extends StateNotifier<Tuple2<List<TonWalletTransactionWithData>, bool>> {
-  final Reader read;
   final String address;
+  late final StreamSubscription _transactionsStreamSubscription;
+  late final StreamSubscription _preloadStreamSubscription;
+  final _preloadSubject = PublishSubject<TransactionId?>();
 
-  TonWalletTransactionsNotifier(
-    this.read,
-    this.address,
-  ) : super(const Tuple2([], false));
+  TonWalletTransactionsNotifier(this.address) : super(const Tuple2([], false)) {
+    _transactionsStreamSubscription = getIt
+        .get<TonWalletsRepository>()
+        .getTransactionsStream(address)
+        .listen((event) => _transactionsStreamListener(event));
 
-  Future<void> preload() async {
-    final prevTransactionId = state.item1.lastOrNull?.transaction.prevTransactionId;
+    _preloadStreamSubscription = _preloadSubject
+        .doOnData((e) {
+          if (e != null && !state.item2) state = Tuple2([...state.item1], true);
+        })
+        .debounce((e) => TimerStream(e, const Duration(milliseconds: 300)))
+        .listen((event) => _preloadStreamListener(event));
+  }
 
-    if (prevTransactionId != null) {
-      state = Tuple2([...state.item1], true);
+  @override
+  void dispose() {
+    _transactionsStreamSubscription.cancel();
+    _preloadStreamSubscription.cancel();
+    super.dispose();
+  }
+
+  void preload(TransactionId? from) => _preloadSubject.add(from);
+
+  void _transactionsStreamListener(List<TonWalletTransactionWithData> event) => state = Tuple2(event, false);
+
+  Future<void> _preloadStreamListener(TransactionId? event) async {
+    try {
+      if (event == null) return;
 
       await getIt.get<TonWalletsRepository>().preloadTransactions(
             address: address,
-            from: prevTransactionId,
+            from: event,
           );
+    } catch (err, st) {
+      logger.e(err, err, st);
+    } finally {
+      state = Tuple2([...state.item1], false);
     }
-  }
-
-  void callback(
-    AsyncValue<List<TonWalletTransactionWithData>>? previous,
-    AsyncValue<List<TonWalletTransactionWithData>> next,
-  ) {
-    state = Tuple2([...next.asData?.value ?? []], false);
   }
 }

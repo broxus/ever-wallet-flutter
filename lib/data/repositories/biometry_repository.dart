@@ -32,29 +32,27 @@ class BiometryRepository {
     return instance;
   }
 
-  Stream<bool> get biometryAvailabilityStream => _availabilitySubject.stream;
+  Stream<bool> get biometryAvailabilityStream => _availabilitySubject;
 
   bool get biometryAvailability => _availabilitySubject.value;
 
-  Future<void> checkBiometryAvailability() async {
-    final isAvailable = await _localAuthSource.isAvailable;
-    _availabilitySubject.add(isAvailable);
-  }
-
-  Stream<bool> get biometryStatusStream => _statusSubject.stream;
+  Stream<bool> get biometryStatusStream => _statusSubject;
 
   bool get biometryStatus => _statusSubject.value;
+
+  Future<void> checkBiometryAvailability() async => _availabilitySubject.add(await _localAuthSource.isAvailable);
 
   Future<void> setBiometryStatus({
     required String localizedReason,
     required bool isEnabled,
   }) async {
-    final isAuthenticated = await authenticate(localizedReason);
-
-    if (isAuthenticated) {
-      await _hiveSource.setIsBiometryEnabled(isEnabled);
-      _statusSubject.add(isEnabled);
+    if (isEnabled) {
+      final isAuthenticated = await authenticate(localizedReason);
+      if (!isAuthenticated) return;
     }
+
+    await _hiveSource.setIsBiometryEnabled(isEnabled);
+    _statusSubject.add(isEnabled);
   }
 
   Future<void> clear() async {
@@ -93,6 +91,9 @@ class BiometryRepository {
   }
 
   Future<void> _initialize() async {
+    _availabilitySubject.add(await _localAuthSource.isAvailable);
+    _statusSubject.add(_hiveSource.isBiometryEnabled);
+
     _availabilitySubject.listen((value) async {
       if (!value) _statusSubject.add(false);
     });
@@ -100,8 +101,5 @@ class BiometryRepository {
     _statusSubject.listen((value) async {
       if (!value) await _hiveSource.clearKeysPasswords();
     });
-
-    _availabilitySubject.add(await _localAuthSource.isAvailable);
-    _statusSubject.add(_hiveSource.isBiometryEnabled);
   }
 }

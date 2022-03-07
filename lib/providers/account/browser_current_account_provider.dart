@@ -4,38 +4,33 @@ import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import 'accounts_provider.dart';
+import '../../data/repositories/accounts_repository.dart';
+import '../../injection.dart';
 
-final browserCurrentAccountProvider =
-    StateNotifierProvider.autoDispose<BrowserCurrentAccountNotifier, AssetsList?>((ref) {
-  final notifier = BrowserCurrentAccountNotifier(ref.read);
-
-  ref.onDispose(
-    ref.listen<AsyncValue<List<AssetsList>>>(
-      accountsProvider,
-      notifier.callback,
-      fireImmediately: true,
-    ),
-  );
-
-  return notifier;
-});
+final browserCurrentAccountProvider = StateNotifierProvider.autoDispose<BrowserCurrentAccountNotifier, AssetsList?>(
+  (ref) => BrowserCurrentAccountNotifier(),
+);
 
 class BrowserCurrentAccountNotifier extends StateNotifier<AssetsList?> {
-  final Reader read;
+  late final StreamSubscription _streamSubscription;
 
-  BrowserCurrentAccountNotifier(this.read) : super(null);
-
-  Future<void> setCurrent(String? address) async {
-    final accounts = await read(accountsProvider.future);
-
-    state = accounts.firstWhereOrNull((e) => e.address == address);
+  BrowserCurrentAccountNotifier() : super(null) {
+    _streamSubscription =
+        getIt.get<AccountsRepository>().currentAccountsStream.listen((event) => _currentAccountsStreamListener(event));
   }
 
-  void callback(AsyncValue<List<AssetsList>>? previous, AsyncValue<List<AssetsList>> next) {
-    final accounts = next.asData?.value ?? [];
-    final currentAccount = accounts.firstWhereOrNull((e) => e.address == state?.address) ?? accounts.firstOrNull;
+  @override
+  void dispose() {
+    _streamSubscription.cancel();
+    super.dispose();
+  }
 
-    state = currentAccount;
+  Future<void> setCurrent(String? address) async =>
+      state = getIt.get<AccountsRepository>().currentAccounts.firstWhereOrNull((e) => e.address == address);
+
+  void _currentAccountsStreamListener(List<AssetsList> event) {
+    if (state == null || event.every((e) => e.address != state?.address)) {
+      state = event.firstOrNull;
+    }
   }
 }

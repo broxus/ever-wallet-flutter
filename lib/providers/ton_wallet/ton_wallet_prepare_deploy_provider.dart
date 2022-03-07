@@ -9,13 +9,19 @@ import '../../data/repositories/ton_wallets_repository.dart';
 
 final tonWalletPrepareDeployProvider =
     StateNotifierProvider.autoDispose<TonWalletPrepareDeployNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
-  (ref) => TonWalletPrepareDeployNotifier(ref.read),
+  (ref) => TonWalletPrepareDeployNotifier(),
 );
 
 class TonWalletPrepareDeployNotifier extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
-  final Reader read;
+  UnsignedMessage? _message;
 
-  TonWalletPrepareDeployNotifier(this.read) : super(const AsyncValue.loading());
+  TonWalletPrepareDeployNotifier() : super(const AsyncValue.loading());
+
+  @override
+  void dispose() {
+    _message?.freePtr();
+    super.dispose();
+  }
 
   Future<void> prepareDeploy({
     required String address,
@@ -37,6 +43,9 @@ class TonWalletPrepareDeployNotifier extends StateNotifier<AsyncValue<Tuple2<Uns
         message = await getIt.get<TonWalletsRepository>().prepareDeploy(address);
       }
 
+      _message?.freePtr();
+      _message = message;
+
       final fees = await getIt.get<TonWalletsRepository>().estimateFees(
             address: address,
             message: message,
@@ -49,11 +58,9 @@ class TonWalletPrepareDeployNotifier extends StateNotifier<AsyncValue<Tuple2<Uns
 
       final isPossibleToSendMessage = balanceValue > feesValue;
 
-      if (isPossibleToSendMessage) {
-        return Tuple2(message, fees);
-      } else {
-        throw Exception();
-      }
+      if (!isPossibleToSendMessage) throw Exception('Insufficient funds');
+
+      return Tuple2(message, fees);
     });
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -69,7 +68,7 @@ class TonWalletsRepository {
           return tonWalletInfo;
         },
       )
-      .whereType<TonWalletInfo?>()
+      .cast<TonWalletInfo?>()
       .startWith(_hiveSource.getTonWalletInfo(address))
       .whereType<TonWalletInfo>();
 
@@ -89,78 +88,67 @@ class TonWalletsRepository {
       .whereType<TonWallet>()
       .flatMap((v) => v.unconfirmedTransactionsStream);
 
-  Stream<List<TonWalletTransactionWithData>> getTransactionsStream(String address) => _tonWalletsSubject
-      .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
-      .whereType<TonWallet>()
-      .flatMap((v) => v.onTransactionsFoundStream)
-      .cast<OnTonWalletTransactionsFoundPayload?>()
-      .startWith(null)
-      .pairwise()
-      .asyncMap(
-        (e) async {
-          final prev = e.first;
-          final next = e.last;
+  Stream<List<TonWalletTransactionWithData>> getTransactionsStream(String address) {
+    var list = _hiveSource.getTonWalletTransactions(address) ?? [];
 
-          final transactions = [
-            ...prev?.transactions ?? <TonWalletTransactionWithData>[],
-            ...next?.transactions ?? <TonWalletTransactionWithData>[],
-          ]..sort((a, b) => a.transaction.compareTo(b.transaction));
+    return _tonWalletsSubject
+        .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
+        .whereType<TonWallet>()
+        .flatMap((v) => v.onTransactionsFoundStream)
+        .map((e) => e.transactions)
+        .startWith(list)
+        .asyncMap(
+      (e) async {
+        list = [
+          ...{
+            ...list,
+            ...e,
+          }
+        ]..sort((a, b) => a.transaction.compareTo(b.transaction));
 
-          await _hiveSource.saveTonWalletTransactions(
-            address: address,
-            transactions: transactions,
-          );
+        await _hiveSource.saveTonWalletTransactions(
+          address: address,
+          transactions: list,
+        );
 
-          return transactions;
-        },
-      )
-      .whereType<List<TonWalletTransactionWithData>?>()
-      .startWith(_hiveSource.getTonWalletTransactions(address))
-      .whereType<List<TonWalletTransactionWithData>>();
+        return list;
+      },
+    );
+  }
 
-  Stream<List<Tuple2<PendingTransaction, Transaction?>>> getSentMessagesStream(String address) => _tonWalletsSubject
-          .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
-          .whereType<TonWallet>()
-          .flatMap((v) => v.onMessageSentStream)
-          .cast<OnMessageSentPayload?>()
-          .startWith(null)
-          .pairwise()
-          .asyncMap(
-        (e) async {
-          final prev = e.first;
-          final next = e.last;
+  Stream<List<Tuple2<PendingTransaction, Transaction?>>> getSentMessagesStream(String address) {
+    var list = <Tuple2<PendingTransaction, Transaction?>>[];
 
-          final messages = [
-            if (prev != null) Tuple2(prev.pendingTransaction, prev.transaction),
-            if (next != null) Tuple2(next.pendingTransaction, next.transaction),
-          ].whereNotNull().toList()
-            ..sort((a, b) => a.item1.compareTo(b.item1));
+    return _tonWalletsSubject
+        .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
+        .whereType<TonWallet>()
+        .flatMap((v) => v.onMessageSentStream)
+        .map((e) => [Tuple2(e.pendingTransaction, e.transaction)])
+        .startWith(list)
+        .map(
+          (e) => list = [
+            ...list,
+            ...e,
+          ]..sort((a, b) => a.item1.compareTo(b.item1)),
+        );
+  }
 
-          return messages;
-        },
-      );
+  Stream<List<PendingTransaction>> getExpiredMessagesStream(String address) {
+    var list = <PendingTransaction>[];
 
-  Stream<List<PendingTransaction>> getExpiredMessagesStream(String address) => _tonWalletsSubject
-          .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
-          .whereType<TonWallet>()
-          .flatMap((v) => v.onMessageExpiredStream)
-          .cast<OnMessageExpiredPayload?>()
-          .startWith(null)
-          .pairwise()
-          .asyncMap(
-        (e) async {
-          final prev = e.first;
-          final next = e.last;
-
-          final transactions = [
-            prev?.pendingTransaction,
-            next?.pendingTransaction,
-          ].whereNotNull().toList()
-            ..sort((a, b) => a.compareTo(b));
-
-          return transactions;
-        },
-      );
+    return _tonWalletsSubject
+        .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
+        .whereType<TonWallet>()
+        .flatMap((v) => v.onMessageExpiredStream)
+        .map((e) => [e.pendingTransaction])
+        .startWith(list)
+        .map(
+          (e) => list = [
+            ...list,
+            ...e,
+          ]..sort((a, b) => a.compareTo(b)),
+        );
+  }
 
   Future<UnsignedMessage> prepareDeploy(String address) async {
     final tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
@@ -253,7 +241,7 @@ class TonWalletsRepository {
 
     if (tonWallet == null) throw Exception('Ton wallet not found');
 
-    final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).getSignInput(password);
+    final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
     final pendingTransaction = await tonWallet.send(
       keystore: _keystoreSource.keystore,
@@ -311,16 +299,16 @@ class TonWalletsRepository {
 
     _tonWalletsSubject.add(tonWallets);
 
-    await tonWallet.freePtr();
+    tonWallet.freePtr();
   }
 
-  Future<void> _clear() async {
+  void _clear() {
     final tonWallets = [..._tonWalletsSubject.value];
 
     _tonWalletsSubject.add([]);
 
     for (final tonWallet in tonWallets) {
-      await tonWallet.freePtr();
+      tonWallet.freePtr();
     }
   }
 
@@ -328,7 +316,7 @@ class TonWalletsRepository {
     try {
       final tonWallets = await Future.wait(_tonWalletsSubject.value.map((e) => e.address));
 
-      await _clear();
+      _clear();
 
       for (final tonWallet in tonWallets) {
         await _subscribe(tonWallet);

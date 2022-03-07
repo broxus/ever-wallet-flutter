@@ -9,13 +9,19 @@ import '../../data/repositories/ton_wallets_repository.dart';
 
 final tonWalletPrepareConfirmTransactionProvider = StateNotifierProvider.autoDispose<
     TonWalletPrepareConfirmTransactionNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
-  (ref) => TonWalletPrepareConfirmTransactionNotifier(ref.read),
+  (ref) => TonWalletPrepareConfirmTransactionNotifier(),
 );
 
 class TonWalletPrepareConfirmTransactionNotifier extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
-  final Reader read;
+  UnsignedMessage? _message;
 
-  TonWalletPrepareConfirmTransactionNotifier(this.read) : super(const AsyncValue.loading());
+  TonWalletPrepareConfirmTransactionNotifier() : super(const AsyncValue.loading());
+
+  @override
+  void dispose() {
+    _message?.freePtr();
+    super.dispose();
+  }
 
   Future<void> prepareConfirmTransaction({
     required String publicKey,
@@ -31,6 +37,9 @@ class TonWalletPrepareConfirmTransactionNotifier extends StateNotifier<AsyncValu
             transactionId: transactionId,
           );
 
+      _message?.freePtr();
+      _message = message;
+
       final fees = await getIt.get<TonWalletsRepository>().estimateFees(
             address: address,
             message: message,
@@ -43,11 +52,9 @@ class TonWalletPrepareConfirmTransactionNotifier extends StateNotifier<AsyncValu
 
       final isPossibleToSendMessage = balanceValue > feesValue;
 
-      if (isPossibleToSendMessage) {
-        return Tuple2(message, fees);
-      } else {
-        throw Exception();
-      }
+      if (!isPossibleToSendMessage) throw Exception('Insufficient funds');
+
+      return Tuple2(message, fees);
     });
   }
 }

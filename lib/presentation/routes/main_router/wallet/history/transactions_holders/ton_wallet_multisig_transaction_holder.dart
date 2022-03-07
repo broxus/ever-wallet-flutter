@@ -5,31 +5,26 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/transaction_time.dart';
 import '../../../../../design/widgets/ton_asset_icon.dart';
-import '../../../../../design/widgets/transaction_type_label.dart';
-import '../../modals/ton_wallet_multisig_expired_transaction_info/show_ton_wallet_multisig_expired_transaction_info.dart';
+import '../../modals/ton_wallet_multisig_transaction_info/show_ton_wallet_multisig_transaction_info.dart';
 import 'widgets/address_title.dart';
 import 'widgets/date_title.dart';
 import 'widgets/fees_title.dart';
 import 'widgets/icon_forward.dart';
 import 'widgets/value_title.dart';
 
-class TonWalletMultisigExpiredTransactionHolder extends StatelessWidget {
+class TonWalletMultisigTransactionHolder extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
   final String creator;
   final List<String> confirmations;
   final String walletAddress;
-  final String walletPublicKey;
-  final WalletType walletType;
   final List<String> custodians;
 
-  const TonWalletMultisigExpiredTransactionHolder({
+  const TonWalletMultisigTransactionHolder({
     Key? key,
     required this.transactionWithData,
     required this.creator,
     required this.confirmations,
     required this.walletAddress,
-    required this.walletPublicKey,
-    required this.walletType,
     required this.custodians,
   }) : super(key: key);
 
@@ -98,12 +93,11 @@ class TonWalletMultisigExpiredTransactionHolder extends StatelessWidget {
     final fees = transactionWithData.transaction.totalFees;
 
     return InkWell(
-      onTap: () => showTonWalletMultisigExpiredTransactionInfo(
+      onTap: () => showTonWalletMultisigTransactionInfo(
         context: context,
         transactionWithData: transactionWithData,
         creator: creator,
         confirmations: confirmations,
-        walletAddress: walletAddress,
         custodians: custodians,
       ),
       child: Padding(
@@ -139,12 +133,6 @@ class TonWalletMultisigExpiredTransactionHolder extends StatelessWidget {
                       DateTitle(date: date),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  const TransactionTypeLabel(
-                    text: 'Expired',
-                    color: CrystalColor.expired,
-                  ),
-                  const SizedBox(height: 4),
                 ],
               ),
             ),

@@ -303,14 +303,13 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
         controller: ModalScrollController.of(context),
         child: Consumer(
           builder: (context, ref, child) => PreloadTransactionsListener(
-            prevTransactionId: state.lastOrNull?.transaction.prevTransactionId,
-            onLoad: () => ref
+            onNotification: () => ref
                 .read(
                   tokenWalletTransactionsStateProvider(
                     Tuple2(widget.owner, widget.rootTokenContract),
                   ).notifier,
                 )
-                .preload(),
+                .preload(state.lastOrNull?.transaction.prevTransactionId),
             child: ListView.separated(
               controller: ModalScrollController.of(context),
               physics: const ClampingScrollPhysics(),

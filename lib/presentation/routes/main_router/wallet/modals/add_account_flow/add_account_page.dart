@@ -111,7 +111,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
     }
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => page,
       ),
     );

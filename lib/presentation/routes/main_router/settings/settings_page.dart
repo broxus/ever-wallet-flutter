@@ -10,7 +10,8 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
 import '../../../../data/repositories/keys_repository.dart';
-import '../../../../providers/biometry/biometry_info_provider.dart';
+import '../../../../providers/biometry/biometry_availability_provider.dart';
+import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../providers/key/current_key_provider.dart';
 import '../../../../providers/key/keys_provider.dart';
 import '../../../design/design.dart';
@@ -142,9 +143,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed.tr(),
                   onTap: keys.isNotEmpty && currentKey != null
                       ? () async {
-                          final info = await ref.read(biometryInfoProvider.future);
+                          final isEnabled = ref.watch(biometryStatusProvider).asData?.value ?? false;
+                          final isAvailable = ref.watch(biometryAvailabilityProvider).asData?.value ?? false;
 
-                          if (info.isAvailable && info.isEnabled) {
+                          if (isAvailable && isEnabled) {
                             try {
                               final password = await getIt.get<BiometryRepository>().getKeyPassword(
                                     localizedReason: 'Please authenticate to interact with wallet',
@@ -160,14 +162,14 @@ class _SettingsPageState extends State<SettingsPage> {
                             } catch (err) {
                               if (!mounted) return;
 
-                              showCrystalBottomSheet(
+                              showCrystalBottomSheet<void>(
                                 context,
                                 title: ExportSeedPhraseModalBody.title,
                                 body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
                               );
                             }
                           } else {
-                            showCrystalBottomSheet(
+                            showCrystalBottomSheet<void>(
                               context,
                               title: ExportSeedPhraseModalBody.title,
                               body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
@@ -188,7 +190,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 buildSectionAction(
                   title: LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
                   onTap: keys.isNotEmpty && currentKey != null
-                      ? () => showCrystalBottomSheet(
+                      ? () => showCrystalBottomSheet<void>(
                             context,
                             title:
                                 LocaleKeys.settings_screen_sections_current_seed_preferences_change_seed_password.tr(),
@@ -210,9 +212,10 @@ class _SettingsPageState extends State<SettingsPage> {
                             if (name != null) {
                               if (!mounted) return;
 
-                              final info = await ref.read(biometryInfoProvider.future);
+                              final isEnabled = ref.watch(biometryStatusProvider).asData?.value ?? false;
+                              final isAvailable = ref.watch(biometryAvailabilityProvider).asData?.value ?? false;
 
-                              if (info.isAvailable && info.isEnabled) {
+                              if (isAvailable && isEnabled) {
                                 try {
                                   final password = await getIt.get<BiometryRepository>().getKeyPassword(
                                         localizedReason: 'Please authenticate to interact with wallet',
@@ -227,7 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 } catch (err) {
                                   if (!mounted) return;
 
-                                  showCrystalBottomSheet(
+                                  showCrystalBottomSheet<void>(
                                     context,
                                     title: DeriveKeyModalBody.title,
                                     body: DeriveKeyModalBody(
@@ -237,7 +240,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   );
                                 }
                               } else {
-                                showCrystalBottomSheet(
+                                showCrystalBottomSheet<void>(
                                   context,
                                   title: DeriveKeyModalBody.title,
                                   body: DeriveKeyModalBody(
@@ -254,7 +257,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: LocaleKeys.settings_screen_sections_current_seed_preferences_rename_key.tr(),
                   onTap: keys.isNotEmpty && currentKey != null
                       ? () {
-                          showCrystalBottomSheet(
+                          showCrystalBottomSheet<void>(
                             context,
                             title: LocaleKeys.rename_key_modal_title.tr(),
                             body: RenameKeyModalBody(publicKey: currentKey.publicKey),
@@ -266,16 +269,16 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             Consumer(
               builder: (context, ref, child) {
-                final info = ref.watch(biometryInfoProvider).asData?.value;
+                final isAvailable = ref.watch(biometryAvailabilityProvider).asData?.value ?? false;
 
-                return (info?.isAvailable ?? false)
+                return isAvailable
                     ? buildSection(
                         title: LocaleKeys.settings_screen_sections_wallet_preferences_title.tr(),
                         children: [
                           buildSectionAction(
                             title: LocaleKeys.biometry_title.tr(),
                             onTap: () {
-                              showCrystalBottomSheet(
+                              showCrystalBottomSheet<void>(
                                 context,
                                 title: LocaleKeys.biometry_title.tr(),
                                 body: const BiometryModalBody(),
@@ -304,8 +307,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget buildSeedsList({
     KeyStoreEntry? selectedSeed,
     required Map<KeyStoreEntry, List<KeyStoreEntry>?> seeds,
-    required Function(KeyStoreEntry) onSelect,
-    required Function() onAdd,
+    required void Function(KeyStoreEntry) onSelect,
+    required void Function() onAdd,
     required bool showAddAction,
   }) {
     final children = <Widget>[];
@@ -367,7 +370,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget buildSeedItem({
     KeyStoreEntry? selectedSeed,
     required KeyStoreEntry seed,
-    required Function(KeyStoreEntry) onSelect,
+    required void Function(KeyStoreEntry) onSelect,
     bool isChild = false,
   }) {
     Widget? child;

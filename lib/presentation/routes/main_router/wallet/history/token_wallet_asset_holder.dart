@@ -46,11 +46,11 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
             icon: widget.logoURI != null
                 ? TokenAssetIcon(
                     logoURI: widget.logoURI!,
-                    version: tokenWalletInfo?.version ?? TokenWalletVersion.oldTip3v4,
+                    version: tokenWalletInfo?.version ?? TokenWalletVersion.tip3,
                   )
                 : TokenAddressGeneratedIcon(
                     address: widget.rootTokenContract,
-                    version: tokenWalletInfo?.version ?? TokenWalletVersion.oldTip3v4,
+                    version: tokenWalletInfo?.version ?? TokenWalletVersion.tip3,
                   ),
             onTap: tokenWalletInfo != null
                 ? () => showTokenAssetInfo(

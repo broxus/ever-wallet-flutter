@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -7,8 +6,8 @@ import 'package:tuple/tuple.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../injection.dart';
-import '../../../../../../providers/biometry/biometry_info_provider.dart';
-import '../../../../../../providers/key/keys_provider.dart';
+import '../../../../../../providers/biometry/biometry_availability_provider.dart';
+import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../design/extension.dart';
 import '../../../../../design/widgets/custom_dropdown_button.dart';
@@ -97,20 +96,13 @@ class _SendMessageModalBodyState extends State<SendMessageModalBody> {
   Widget dropdownButton() => Consumer(
         builder: (context, ref, child) {
           final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
-          final keys = ref.watch(keysProvider).asData?.value ?? {};
-          final keysList = [
-            ...keys.keys,
-            ...keys.values.whereNotNull().expand((e) => e),
-          ];
 
           return ValueListenableBuilder<String>(
             valueListenable: publicKeyNotifier,
             builder: (context, value, child) => CustomDropdownButton<String>(
               items: widget.publicKeys.map(
                 (e) {
-                  final title = keysList.firstWhereOrNull((el) => el.publicKey == e)?.name ??
-                      publicKeysLabels[e] ??
-                      e.ellipsePublicKey();
+                  final title = publicKeysLabels[e] ?? e.ellipsePublicKey();
 
                   return Tuple2(
                     e,
@@ -265,9 +257,10 @@ class _SendMessageModalBodyState extends State<SendMessageModalBody> {
 
     String? password;
 
-    final info = await read(biometryInfoProvider.future);
+    final isEnabled = read(biometryStatusProvider).asData?.value ?? false;
+    final isAvailable = read(biometryAvailabilityProvider).asData?.value ?? false;
 
-    if (info.isAvailable && info.isEnabled) {
+    if (isAvailable && isEnabled) {
       password = await getPasswordFromBiometry(publicKey);
     }
 
@@ -277,7 +270,7 @@ class _SendMessageModalBodyState extends State<SendMessageModalBody> {
       Navigator.of(widget.modalContext).pop(Tuple2(publicKey, password));
     } else {
       Navigator.of(context).push(
-        MaterialPageRoute(
+        MaterialPageRoute<void>(
           builder: (context) => PasswordEnterPage(
             modalContext: widget.modalContext,
             publicKey: publicKey,

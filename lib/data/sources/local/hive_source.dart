@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:collection/collection.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
@@ -44,9 +43,9 @@ class HiveSource {
 
   @factoryMethod
   static Future<HiveSource> create() async {
-    final hiveSource = HiveSource();
-    await hiveSource._initialize();
-    return hiveSource;
+    final instance = HiveSource();
+    await instance._initialize();
+    return instance;
   }
 
   List<TokenContractAsset> get systemTokenContractAssets => _systemTokenContractAssetsBox.values.toList();
@@ -77,42 +76,29 @@ class HiveSource {
     required String owner,
     required String rootTokenContract,
   }) =>
-      _tokenWalletInfosBox.values
-          .firstWhereOrNull((e) => e.owner == owner && e.symbol.rootTokenContract == rootTokenContract);
+      _tokenWalletInfosBox.get('${owner}_$rootTokenContract');
 
-  Future<void> saveTokenWalletInfo(TokenWalletInfo tokenWalletInfo) => _tokenWalletInfosBox.put(
-        tokenWalletInfo.owner.hashCode ^ tokenWalletInfo.symbol.rootTokenContract.hashCode,
-        tokenWalletInfo,
-      );
+  Future<void> saveTokenWalletInfo(TokenWalletInfo info) =>
+      _tokenWalletInfosBox.put('${info.owner}_${info.symbol.rootTokenContract}', info);
 
   Future<void> removeTokenWalletInfo({
     required String owner,
     required String rootTokenContract,
   }) =>
-      _tokenWalletInfosBox.delete(owner.hashCode ^ rootTokenContract.hashCode);
+      _tokenWalletInfosBox.delete('${owner}_$rootTokenContract');
 
   Future<void> clearTokenWalletInfos() => _tokenWalletInfosBox.clear();
 
   List<TonWalletTransactionWithData>? getTonWalletTransactions(String address) =>
-      _tonWalletTransactionsBox.get(address.hashCode)?.cast<TonWalletTransactionWithData>();
+      _tonWalletTransactionsBox.get(address)?.cast<TonWalletTransactionWithData>();
 
   Future<void> saveTonWalletTransactions({
     required String address,
     required List<TonWalletTransactionWithData> transactions,
-  }) async {
-    var list = _tonWalletTransactionsBox.get(address.hashCode)?.cast<TonWalletTransactionWithData>() ?? [];
+  }) =>
+      _tonWalletTransactionsBox.put(address, transactions.take(150).toList());
 
-    list = [
-      ...list,
-      ...transactions,
-    ]..sort((a, b) => a.transaction.compareTo(b.transaction));
-
-    list = list.take(250).toList();
-
-    await _tonWalletTransactionsBox.put(address.hashCode, list);
-  }
-
-  Future<void> removeTonWalletTransactions(String address) => _tonWalletTransactionsBox.delete(address.hashCode);
+  Future<void> removeTonWalletTransactions(String address) => _tonWalletTransactionsBox.delete(address);
 
   Future<void> clearTonWalletTransactions() => _tonWalletTransactionsBox.clear();
 
@@ -120,35 +106,20 @@ class HiveSource {
     required String owner,
     required String rootTokenContract,
   }) =>
-      _tokenWalletTransactionsBox
-          .get(owner.hashCode ^ rootTokenContract.hashCode)
-          ?.cast<TokenWalletTransactionWithData>();
+      _tokenWalletTransactionsBox.get('${owner}_$rootTokenContract')?.cast<TokenWalletTransactionWithData>();
 
   Future<void> saveTokenWalletTransactions({
     required String owner,
     required String rootTokenContract,
     required List<TokenWalletTransactionWithData> transactions,
-  }) async {
-    var list = _tokenWalletTransactionsBox
-            .get(owner.hashCode ^ rootTokenContract.hashCode)
-            ?.cast<TokenWalletTransactionWithData>() ??
-        [];
-
-    list = [
-      ...list,
-      ...transactions,
-    ]..sort((a, b) => a.transaction.compareTo(b.transaction));
-
-    list = list.take(250).toList();
-
-    await _tokenWalletTransactionsBox.put(owner.hashCode ^ rootTokenContract.hashCode, list);
-  }
+  }) =>
+      _tokenWalletTransactionsBox.put('${owner}_$rootTokenContract', transactions.take(150).toList());
 
   Future<void> removeTokenWalletTransactions({
     required String owner,
     required String rootTokenContract,
   }) =>
-      _tokenWalletTransactionsBox.delete(owner.hashCode ^ rootTokenContract.hashCode);
+      _tokenWalletTransactionsBox.delete('${owner}_$rootTokenContract');
 
   Future<void> clearTokenWalletTransactions() => _tokenWalletTransactionsBox.clear();
 
@@ -215,7 +186,7 @@ class HiveSource {
   }
 
   Map<String, List<String>> get externalAccounts =>
-      _externalAccountsBox.toMap().map((key, value) => MapEntry(key as String, value.cast<String>()));
+      _externalAccountsBox.toMap().map((k, v) => MapEntry(k as String, v.cast<String>()));
 
   Future<void> addExternalAccount({
     required String publicKey,
@@ -254,18 +225,22 @@ class HiveSource {
 
     _key = hiveAesCipherKey;
 
-    _keysPasswordsBox = await Hive.openBox<String>(
-      _keysPasswordsBoxName,
-      encryptionCipher: HiveAesCipher(_key),
-    );
-    _userPreferencesBox = await Hive.openBox<Object?>(_userPreferencesBoxName);
-    _systemTokenContractAssetsBox = await Hive.openBox<TokenContractAsset>(_systemTokenContractAssetsBoxName);
-    _customTokenContractAssetsBox = await Hive.openBox<TokenContractAsset>(_customTokenContractAssetsBoxName);
-    _tonWalletInfosBox = await Hive.openBox<TonWalletInfo>(_tonWalletInfosBoxName);
-    _tokenWalletInfosBox = await Hive.openBox<TokenWalletInfo>(_tokenWalletInfosBoxName);
-    _tonWalletTransactionsBox = await Hive.openBox<List>(_tonWalletTransactionsBoxName);
-    _tokenWalletTransactionsBox = await Hive.openBox<List>(_tokenWalletTransactionsBoxName);
-    _publicKeysLabelsBox = await Hive.openBox<String>(_publicKeysLabelsBoxName);
+    await Hive.deleteBoxFromDisk(_systemTokenContractAssetsBoxName);
+    await Hive.deleteBoxFromDisk(_customTokenContractAssetsBoxName);
+    await Hive.deleteBoxFromDisk(_tonWalletInfosBoxName);
+    await Hive.deleteBoxFromDisk(_tokenWalletInfosBoxName);
+    await Hive.deleteBoxFromDisk(_tonWalletTransactionsBoxName);
+    await Hive.deleteBoxFromDisk(_tokenWalletTransactionsBoxName);
+
+    _keysPasswordsBox = await Hive.openBox(_keysPasswordsBoxName, encryptionCipher: HiveAesCipher(_key));
+    _userPreferencesBox = await Hive.openBox(_userPreferencesBoxName);
+    _systemTokenContractAssetsBox = await Hive.openBox(_systemTokenContractAssetsBoxName);
+    _customTokenContractAssetsBox = await Hive.openBox(_customTokenContractAssetsBoxName);
+    _tonWalletInfosBox = await Hive.openBox(_tonWalletInfosBoxName);
+    _tokenWalletInfosBox = await Hive.openBox(_tokenWalletInfosBoxName);
+    _tonWalletTransactionsBox = await Hive.openBox(_tonWalletTransactionsBoxName);
+    _tokenWalletTransactionsBox = await Hive.openBox(_tokenWalletTransactionsBoxName);
+    _publicKeysLabelsBox = await Hive.openBox(_publicKeysLabelsBoxName);
     _preferencesBox = await Hive.openBox(_preferencesBoxName);
     _permissionsBox = await Hive.openBox(_permissionsBoxName);
     _externalAccountsBox = await Hive.openBox(_externalAccountsBoxName);

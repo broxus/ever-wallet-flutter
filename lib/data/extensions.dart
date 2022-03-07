@@ -18,7 +18,7 @@ TokenWalletVersion tokenWalletVersionFromInt(int version) {
     case 5:
       return TokenWalletVersion.tip3;
     default:
-      throw Exception();
+      throw Exception('Invalid token wallet version');
   }
 }
 
@@ -32,13 +32,15 @@ extension WalletTypeX on WalletType {
               return 2;
             case MultisigType.setcodeMultisigWallet:
               return 3;
-            case MultisigType.bridgeMultisigWallet:
+            case MultisigType.setcodeMultisigWallet24h:
               return 4;
-            case MultisigType.surfWallet:
+            case MultisigType.bridgeMultisigWallet:
               return 5;
+            case MultisigType.surfWallet:
+              return 6;
           }
         },
-        walletV3: () => 6,
+        walletV3: () => 7,
       );
 
   String describe() => when(
@@ -50,6 +52,8 @@ extension WalletTypeX on WalletType {
               return 'SafeMultisig24';
             case MultisigType.setcodeMultisigWallet:
               return 'SetcodeMultisig';
+            case MultisigType.setcodeMultisigWallet24h:
+              return 'SetcodeMultisig24';
             case MultisigType.bridgeMultisigWallet:
               return 'BridgeMultisig';
             case MultisigType.surfWallet:
@@ -70,7 +74,7 @@ extension ExistingWalletInfoX on ExistingWalletInfo {
 }
 
 extension KeyStoreEntryX on KeyStoreEntry {
-  SignInput getSignInput(String password) => isLegacy
+  SignInput signInput(String password) => isLegacy
       ? EncryptedKeyPassword(
           publicKey: publicKey,
           password: Password.explicit(
@@ -92,10 +96,10 @@ extension StringX on String {
   int toInt() {
     final parts = split('.');
 
-    if (parts.length != 3) throw Exception();
+    if (parts.length != 3) throw Exception('Invalid version format');
 
     for (final part in parts) {
-      if (int.parse(part) > 999) throw Exception();
+      if (int.parse(part) > 999) throw Exception('Invalid version format');
     }
 
     int multiplier = 1000000;

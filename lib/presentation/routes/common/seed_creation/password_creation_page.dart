@@ -7,7 +7,8 @@ import '../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
 import '../../../../data/repositories/keys_repository.dart';
 import '../../../../injection.dart';
-import '../../../../providers/biometry/biometry_info_provider.dart';
+import '../../../../providers/biometry/biometry_availability_provider.dart';
+import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../design/design.dart';
 import '../../../design/widgets/crystal_flushbar.dart';
 import '../../../design/widgets/crystal_subtitle.dart';
@@ -222,32 +223,30 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
 
   Widget biometryCheckbox() => Consumer(
         builder: (context, ref, child) {
-          final info = ref.watch(biometryInfoProvider);
+          final isEnabled = ref.watch(biometryStatusProvider).asData?.value ?? false;
+          final isAvailable = ref.watch(biometryAvailabilityProvider).asData?.value ?? false;
 
-          return info.maybeWhen(
-            data: (data) => !data.isAvailable
-                ? const SizedBox()
-                : Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          CustomCheckbox(
-                            value: data.isEnabled,
-                            onChanged: (value) => getIt.get<BiometryRepository>().setBiometryStatus(
-                                  localizedReason: 'Please authenticate to interact with wallet',
-                                  isEnabled: !data.isEnabled,
-                                ),
-                          ),
-                          Expanded(
-                            child: Text(LocaleKeys.biometry_checkbox.tr()),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-            orElse: () => const SizedBox(),
-          );
+          return !isAvailable
+              ? const SizedBox()
+              : Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        CustomCheckbox(
+                          value: isEnabled,
+                          onChanged: (value) => getIt.get<BiometryRepository>().setBiometryStatus(
+                                localizedReason: 'Please authenticate to interact with wallet',
+                                isEnabled: !isEnabled,
+                              ),
+                        ),
+                        Expanded(
+                          child: Text(LocaleKeys.biometry_checkbox.tr()),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
         },
       );
 

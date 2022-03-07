@@ -54,7 +54,7 @@ class AccountsRepository {
   List<AssetsList> get accounts => _accountsStorageSource.accounts;
 
   Stream<Map<String, List<String>>> get externalAccountsStream =>
-      _externalAccountsSubject.stream.distinct((a, b) => const DeepCollectionEquality().equals(a, b));
+      _externalAccountsSubject.distinct((a, b) => const DeepCollectionEquality().equals(a, b));
 
   Map<String, List<String>> get externalAccounts => _externalAccountsSubject.value;
 

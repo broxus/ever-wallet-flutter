@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/repositories/biometry_repository.dart';
 import '../../../../injection.dart';
-import '../../../../providers/biometry/biometry_info_provider.dart';
+import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../design/design.dart';
 
 class BiometryModalBody extends StatefulWidget {
@@ -42,13 +42,13 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
           const SizedBox(width: 16),
           Consumer(
             builder: (context, ref, child) {
-              final info = ref.watch(biometryInfoProvider).asData?.value;
+              final isEnabled = ref.watch(biometryStatusProvider).asData?.value ?? false;
 
               return PlatformSwitch(
-                value: info?.isEnabled ?? false,
+                value: isEnabled,
                 onChanged: (p0) => getIt.get<BiometryRepository>().setBiometryStatus(
                       localizedReason: 'Please authenticate to interact with wallet',
-                      isEnabled: !(info?.isEnabled ?? false),
+                      isEnabled: !isEnabled,
                     ),
               );
             },

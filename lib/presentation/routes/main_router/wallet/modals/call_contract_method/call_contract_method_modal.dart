@@ -5,7 +5,8 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../injection.dart';
-import '../../../../../../providers/biometry/biometry_info_provider.dart';
+import '../../../../../../providers/biometry/biometry_availability_provider.dart';
+import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../design/widgets/custom_elevated_button.dart';
 import '../../../../../design/widgets/custom_outlined_button.dart';
 import '../../../../../design/widgets/modal_header.dart';
@@ -119,9 +120,10 @@ class _CallContractMethodModalBodyState extends State<CallContractMethodModalBod
   }) async {
     String? password;
 
-    final info = await read(biometryInfoProvider.future);
+    final isEnabled = read(biometryStatusProvider).asData?.value ?? false;
+    final isAvailable = read(biometryAvailabilityProvider).asData?.value ?? false;
 
-    if (info.isAvailable && info.isEnabled) {
+    if (isAvailable && isEnabled) {
       password = await getPasswordFromBiometry(publicKey);
     }
 
@@ -131,7 +133,7 @@ class _CallContractMethodModalBodyState extends State<CallContractMethodModalBod
       Navigator.of(widget.modalContext).pop(password);
     } else {
       Navigator.of(context).push(
-        MaterialPageRoute(
+        MaterialPageRoute<void>(
           builder: (context) => PasswordEnterPage(
             modalContext: widget.modalContext,
             publicKey: publicKey,

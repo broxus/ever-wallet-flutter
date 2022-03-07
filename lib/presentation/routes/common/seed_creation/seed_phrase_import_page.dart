@@ -370,7 +370,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
     }
   }
 
-  void showErrorDialog(String text) => showPlatformDialog(
+  void showErrorDialog(String text) => showPlatformDialog<void>(
         context: context,
         builder: (context) => Theme(
           data: ThemeData(),

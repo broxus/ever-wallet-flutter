@@ -1,9 +1,7 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../../providers/key/keys_provider.dart';
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../design/design.dart';
@@ -30,16 +28,9 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
         builder: (context, ref, child) {
           final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
-          final keys = ref.watch(keysProvider).asData?.value ?? {};
-          final keysList = [
-            ...keys.keys,
-            ...keys.values.whereNotNull().expand((e) => e),
-          ];
 
           final custodians = tonWalletInfo?.custodians?.map((e) {
-                final title = keysList.firstWhereOrNull((el) => el.publicKey == e)?.name ??
-                    publicKeysLabels[e] ??
-                    e.ellipsePublicKey();
+                final title = publicKeysLabels[e] ?? e.ellipsePublicKey();
 
                 return Tuple2(title, e);
               }).toList() ??

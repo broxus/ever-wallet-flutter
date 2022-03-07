@@ -5,6 +5,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../design/design.dart';
 import '../../../../../design/explorer.dart';
 import '../../../../../design/transaction_time.dart';
@@ -14,23 +15,25 @@ import '../../../../../design/widgets/transaction_type_label.dart';
 
 class TonWalletMultisigExpiredTransactionInfoModalBody extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
+  final String creator;
+  final List<String> confirmations;
   final String walletAddress;
-  final String walletPublicKey;
-  final WalletType walletType;
   final List<String> custodians;
 
   const TonWalletMultisigExpiredTransactionInfoModalBody({
     Key? key,
     required this.transactionWithData,
+    required this.creator,
+    required this.confirmations,
     required this.walletAddress,
-    required this.walletPublicKey,
-    required this.walletType,
     required this.custodians,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Consumer(
         builder: (context, ref, child) {
+          final publicKeysLabels = ref.watch(publicKeysLabelsProvider).asData?.value ?? {};
+
           final msgSender = transactionWithData.transaction.inMessage.src;
 
           final dataSender = transactionWithData.data?.maybeWhen(
@@ -301,6 +304,22 @@ class TonWalletMultisigExpiredTransactionInfoModalBody extends StatelessWidget {
                       .toList(),
                 ],
               ),
+            section(
+              [
+                ...custodians.asMap().entries.map(
+                  (e) {
+                    final title = publicKeysLabels[e.value] ?? 'Custodian ${e.key + 1}';
+
+                    return custodiansItem(
+                      label: title,
+                      publicKey: e.value,
+                      isCreator: e.value == creator,
+                      isSigned: confirmations.contains(e.value),
+                    );
+                  },
+                ).toList(),
+              ],
+            ),
           ];
 
           return Material(
@@ -430,8 +449,50 @@ class TonWalletMultisigExpiredTransactionInfoModalBody extends StatelessWidget {
         subtitle: type,
       );
 
+  Widget custodiansItem({
+    required String label,
+    required String publicKey,
+    required bool isCreator,
+    required bool isSigned,
+  }) =>
+      item(
+        title: label,
+        subtitle: publicKey,
+        label: Row(
+          children: [
+            if (isSigned)
+              custodianLabel(
+                text: 'Signed',
+                color: CrystalColor.success,
+              )
+            else
+              custodianLabel(
+                text: 'Not signed',
+                color: CrystalColor.fontDark,
+              ),
+            if (isCreator) ...[
+              const SizedBox(width: 8),
+              custodianLabel(
+                text: 'Initiator',
+                color: CrystalColor.pending,
+              ),
+            ],
+          ],
+        ),
+      );
+
   Widget explorerButton(String hash) => CustomOutlinedButton(
         onPressed: () => launch(getTransactionExplorerLink(hash)),
         text: 'See in the explorer',
+      );
+
+  Widget custodianLabel({
+    required String text,
+    required Color color,
+  }) =>
+      TransactionTypeLabel(
+        text: text,
+        color: color,
+        borderRadius: BorderRadius.circular(4),
       );
 }

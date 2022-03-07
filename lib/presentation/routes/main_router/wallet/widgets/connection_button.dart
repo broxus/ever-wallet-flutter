@@ -5,7 +5,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../../data/constants.dart';
 import '../../../../../data/repositories/transport_repository.dart';
 import '../../../../../injection.dart';
-import '../../../../../providers/transport_provider.dart';
+import '../../../../../providers/common/transport_provider.dart';
 import '../../../../design/widgets/custom_popup_item.dart';
 import '../../../../design/widgets/custom_popup_menu.dart';
 
@@ -15,7 +15,7 @@ class ConnectionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Consumer(
         builder: (context, ref, child) {
-          final connectionData = ref.watch(transportProvider);
+          final connectionData = ref.watch(connectionDataProvider);
 
           return connectionData.maybeWhen(
             data: (data) => CustomPopupMenu(

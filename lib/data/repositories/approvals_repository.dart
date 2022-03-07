@@ -13,7 +13,7 @@ class ApprovalsRepository {
 
   ApprovalsRepository();
 
-  Stream<ApprovalRequest> get approvalsStream => _approvalsSubject.stream;
+  Stream<ApprovalRequest> get approvalsStream => _approvalsSubject;
 
   Future<Permissions> requestApprovalForPermissions({
     required String origin,

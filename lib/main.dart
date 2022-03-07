@@ -17,12 +17,12 @@ import 'presentation/application/application.dart';
 
 Future<void> main() async {
   try {
-    final rawReceivePort = RawReceivePort((pair) async {
-      final errorAndStackTrace = pair as List<dynamic>;
-      final exception = errorAndStackTrace.first as String;
-      final stack = StackTrace.fromString(errorAndStackTrace.last as String);
+    final rawReceivePort = RawReceivePort((dynamic pair) async {
+      final list = pair as List<dynamic>;
+      final err = list.first as String;
+      final st = StackTrace.fromString(list.last as String);
 
-      logger.e(exception, exception, stack);
+      logger.e(err, err, st);
     });
     Isolate.current.addErrorListener(rawReceivePort.sendPort);
 

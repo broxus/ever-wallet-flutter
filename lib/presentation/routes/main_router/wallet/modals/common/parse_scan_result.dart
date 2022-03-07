@@ -14,7 +14,7 @@ Future<Tuple3<String, String?, String?>> parseScanResult(String value) async {
   if (addressMatch != null) {
     address = addressMatch;
   } else {
-    throw Exception();
+    throw Exception('Invalid data');
   }
 
   final amountRegExp = RegExp(

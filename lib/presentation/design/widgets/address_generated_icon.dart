@@ -134,6 +134,6 @@ extension on String {
       return Color(int.parse('0x$hexColor'));
     }
 
-    throw Exception();
+    throw Exception('Invalid color format');
   }
 }

@@ -222,7 +222,7 @@ Future<dynamic> disconnectHandler({
 
     await getIt.get<PermissionsRepository>().deletePermissions(currentOrigin);
 
-    await getIt.get<GenericContractsRepository>().clear();
+    getIt.get<GenericContractsRepository>().clear();
 
     final jsonOutput = jsonEncode({});
 
@@ -546,7 +546,8 @@ Future<dynamic> requestPermissionsHandler({
   required List<dynamic> args,
 }) async {
   try {
-    final jsonInput = args.first as Map<String, dynamic>;
+    final jsonInput = jsonDecode(jsonEncode(args.first as Map<String, dynamic>).replaceAll('tonClient', 'basic'))
+        as Map<String, dynamic>;
 
     final input = RequestPermissionsInput.fromJson(jsonInput);
 
@@ -697,7 +698,7 @@ Future<dynamic> sendExternalMessageHandler({
             message: message,
           );
 
-      await message.freePtr();
+      message.freePtr();
 
       transaction = await getIt
           .get<TonWalletsRepository>()
@@ -795,7 +796,7 @@ Future<dynamic> sendMessageHandler({
           message: message,
         );
 
-    await message.freePtr();
+    message.freePtr();
 
     final transaction = await getIt
         .get<TonWalletsRepository>()
@@ -920,7 +921,7 @@ Future<dynamic> unsubscribeAllHandler({
   required List<dynamic> args,
 }) async {
   try {
-    await getIt.get<GenericContractsRepository>().clear();
+    getIt.get<GenericContractsRepository>().clear();
 
     final jsonOutput = jsonEncode({});
 

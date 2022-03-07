@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../providers/application_flow_provider.dart';
+import '../../../../../providers/common/application_flow_provider.dart';
 import '../../../../design/design.dart';
 
 Future<void> showLogoutDialog({

@@ -7,13 +7,11 @@ import '../../../injection.dart';
 import '../../data/repositories/ton_wallets_repository.dart';
 
 final tonWalletSendProvider = StateNotifierProvider.autoDispose<TonWalletSendNotifier, AsyncValue<PendingTransaction>>(
-  (ref) => TonWalletSendNotifier(ref.read),
+  (ref) => TonWalletSendNotifier(),
 );
 
 class TonWalletSendNotifier extends StateNotifier<AsyncValue<PendingTransaction>> {
-  final Reader read;
-
-  TonWalletSendNotifier(this.read) : super(const AsyncValue.loading());
+  TonWalletSendNotifier() : super(const AsyncValue.loading());
 
   Future<void> send({
     required String address,
@@ -31,7 +29,7 @@ class TonWalletSendNotifier extends StateNotifier<AsyncValue<PendingTransaction>
             message: message,
           );
 
-      await message.freePtr();
+      message.freePtr();
 
       return pendingTransaction;
     });

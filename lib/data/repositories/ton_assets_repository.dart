@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../logger.dart';
 import '../extensions.dart';
@@ -44,11 +45,11 @@ class TonAssetsRepository {
     return instance;
   }
 
-  Stream<List<TokenContractAsset>> get systemAssetsStream => _systemAssetsSubject.stream;
+  Stream<List<TokenContractAsset>> get systemAssetsStream => _systemAssetsSubject;
 
   List<TokenContractAsset> get systemAssets => _systemAssetsSubject.value;
 
-  Stream<List<TokenContractAsset>> get customAssetsStream => _customAssetsSubject.stream;
+  Stream<List<TokenContractAsset>> get customAssetsStream => _customAssetsSubject;
 
   List<TokenContractAsset> get customAssets => _customAssetsSubject.value;
 
@@ -89,21 +90,29 @@ class TonAssetsRepository {
 
     await _hiveSource.updateSystemTokenContractAssets(manifest.tokens);
 
-    _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
+    _systemAssetsSubject.add(_hiveSource.systemTokenContractAssets);
   }
 
   Future<void> _initialize() async {
+    Rx.combineLatest2<List<TokenContractAsset>, List<TokenContractAsset>,
+        Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>>(
+      systemAssetsStream,
+      customAssetsStream,
+      (a, b) => Tuple2(a, b),
+    ).listen((event) => _lock.synchronized(() => _systemAssetsStreamListener(event)));
+
     _systemAssetsSubject.add(_hiveSource.systemTokenContractAssets);
     _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
 
     _updateSystemTokenContractAssets().onError((err, st) => logger.e(err, err, st));
-
-    systemAssetsStream.listen((event) => _lock.synchronized(() => _systemAssetsStreamListener(event)));
   }
 
-  Future<void> _systemAssetsStreamListener(List<TokenContractAsset> event) async {
+  Future<void> _systemAssetsStreamListener(Tuple2<List<TokenContractAsset>, List<TokenContractAsset>> event) async {
     try {
-      final duplicatedAssets = customAssets.where((e) => event.any((el) => e.address == el.address));
+      final systemAssets = event.item1;
+      final customAssets = event.item2;
+
+      final duplicatedAssets = customAssets.where((e) => systemAssets.any((el) => e.address == el.address));
 
       for (final asset in duplicatedAssets) {
         _hiveSource.removeCustomTokenContractAsset(asset.address);

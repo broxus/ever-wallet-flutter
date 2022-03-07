@@ -6,7 +6,8 @@ import 'package:tuple/tuple.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../injection.dart';
-import '../../../../../../providers/biometry/biometry_info_provider.dart';
+import '../../../../../../providers/biometry/biometry_availability_provider.dart';
+import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/token_wallet/token_wallet_info_provider.dart';
 import '../../../../../../providers/token_wallet/token_wallet_prepare_transfer_provider.dart';
 import '../../../../../design/extension.dart';
@@ -200,9 +201,10 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
   }) async {
     String? password;
 
-    final info = await read(biometryInfoProvider.future);
+    final isEnabled = read(biometryStatusProvider).asData?.value ?? false;
+    final isAvailable = read(biometryAvailabilityProvider).asData?.value ?? false;
 
-    if (info.isAvailable && info.isEnabled) {
+    if (isAvailable && isEnabled) {
       password = await getPasswordFromBiometry(publicKey);
     }
 
@@ -216,7 +218,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
       );
     } else {
       Navigator.of(context).push(
-        MaterialPageRoute(
+        MaterialPageRoute<void>(
           builder: (context) => PasswordEnterPage(
             modalContext: widget.modalContext,
             publicKey: publicKey,

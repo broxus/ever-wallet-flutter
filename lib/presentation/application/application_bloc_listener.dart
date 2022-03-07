@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/application_flow_state.dart';
 import '../../data/repositories/biometry_repository.dart';
 import '../../injection.dart';
-import '../../providers/application_flow_provider.dart';
+import '../../providers/common/application_flow_provider.dart';
 import '../routes/router.gr.dart';
 
 class ApplicationBlocListener extends StatefulWidget {

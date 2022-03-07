@@ -41,7 +41,7 @@ class GenericContractsRepository {
       .then((v) => Map.fromEntries(v));
 
   Stream<Tuple3<String, List<Transaction>, TransactionsBatchInfo>> get transactionsStream =>
-      _genericContractsSubject.stream.expand((e) => e).flatMap(
+      _genericContractsSubject.expand((e) => e).flatMap(
             (v) => v.onTransactionsFoundStream.asyncMap(
               (e) async => Tuple3(
                 await v.address,
@@ -51,15 +51,14 @@ class GenericContractsRepository {
             ),
           );
 
-  Stream<Tuple2<String, ContractState>> get stateChangesStream =>
-      _genericContractsSubject.stream.expand((e) => e).flatMap(
-            (v) => v.onStateChangedStream.asyncMap(
-              (e) async => Tuple2(
-                await v.address,
-                e.newState,
-              ),
-            ),
-          );
+  Stream<Tuple2<String, ContractState>> get stateChangesStream => _genericContractsSubject.expand((e) => e).flatMap(
+        (v) => v.onStateChangedStream.asyncMap(
+          (e) async => Tuple2(
+            await v.address,
+            e.newState,
+          ),
+        ),
+      );
 
   Future<Transaction> executeTransactionLocally({
     required String address,
@@ -73,7 +72,7 @@ class GenericContractsRepository {
 
     if (genericContract == null) throw Exception('Generic contract not found');
 
-    final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).getSignInput(password);
+    final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
     final transaction = await genericContract.executeTransactionLocally(
       keystore: _keystoreSource.keystore,
@@ -96,7 +95,7 @@ class GenericContractsRepository {
 
     if (genericContract == null) throw Exception('Generic contract not found');
 
-    final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).getSignInput(password);
+    final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
     final pendingTransaction = await genericContract.send(
       keystore: _keystoreSource.keystore,
@@ -107,11 +106,11 @@ class GenericContractsRepository {
     return pendingTransaction;
   }
 
-  Future<GenericContract> subscribe(String address) => _subscribe(address);
+  Future<void> subscribe(String address) => _subscribe(address);
 
   Future<void> unsubscribe(String address) => _unsubscribe(address);
 
-  Future<void> clear() => _clear();
+  void clear() => _clear();
 
   Future<GenericContract> _subscribe(String address) async {
     var genericContract =
@@ -143,16 +142,16 @@ class GenericContractsRepository {
 
     _genericContractsSubject.add(genericContracts);
 
-    await genericContract.freePtr();
+    genericContract.freePtr();
   }
 
-  Future<void> _clear() async {
+  void _clear() {
     final genericContracts = [..._genericContractsSubject.value];
 
     _genericContractsSubject.add([]);
 
     for (final genericContract in genericContracts) {
-      await genericContract.freePtr();
+      genericContract.freePtr();
     }
   }
 
@@ -160,7 +159,7 @@ class GenericContractsRepository {
     try {
       final genericContracts = await Future.wait(_genericContractsSubject.value.map((e) => e.address));
 
-      await _clear();
+      _clear();
 
       for (final genericContract in genericContracts) {
         await _subscribe(genericContract);

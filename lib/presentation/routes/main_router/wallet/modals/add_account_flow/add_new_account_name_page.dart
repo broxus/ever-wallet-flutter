@@ -100,7 +100,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
     final name = controller.text.trim().isNotEmpty ? controller.text.trim() : null;
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => AddNewAccountTypePage(
           modalContext: widget.modalContext,
           publicKey: widget.publicKey,

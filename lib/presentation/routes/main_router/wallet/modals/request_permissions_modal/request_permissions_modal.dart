@@ -160,6 +160,8 @@ extension on WalletType {
               return WalletContractType.safeMultisigWallet24h;
             case MultisigType.setcodeMultisigWallet:
               return WalletContractType.setcodeMultisigWallet;
+            case MultisigType.setcodeMultisigWallet24h:
+              return WalletContractType.setcodeMultisigWallet24h;
             case MultisigType.bridgeMultisigWallet:
               return WalletContractType.bridgeMultisigWallet;
             case MultisigType.surfWallet:

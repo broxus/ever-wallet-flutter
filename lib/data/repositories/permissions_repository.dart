@@ -20,6 +20,8 @@ class PermissionsRepository {
     this._accountsStorageSource,
     this._hiveSource,
   ) {
+    _permissionsSubject.add(_hiveSource.permissions);
+
     _accountsStorageSource.accountsStream
         .skip(1)
         .startWith(_accountsStorageSource.accounts)
@@ -27,7 +29,7 @@ class PermissionsRepository {
         .listen((e) => _lock.synchronized(() => _accountsStreamListener(e)));
   }
 
-  Stream<Map<String, Permissions>> get permissionsStream => _permissionsSubject.stream;
+  Stream<Map<String, Permissions>> get permissionsStream => _permissionsSubject;
 
   Map<String, Permissions> get permissions => _permissionsSubject.value;
 
@@ -71,6 +73,8 @@ class PermissionsRepository {
           break;
       }
     }
+
+    _permissionsSubject.add(_hiveSource.permissions);
 
     return permissions;
   }

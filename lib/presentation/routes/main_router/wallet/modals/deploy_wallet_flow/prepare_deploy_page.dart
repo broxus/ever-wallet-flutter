@@ -387,7 +387,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
     int? reqConfirms,
   }) =>
       Navigator.of(context).push(
-        MaterialPageRoute(
+        MaterialPageRoute<void>(
           builder: (context) => DeploymentInfoPage(
             modalContext: widget.modalContext,
             address: widget.address,

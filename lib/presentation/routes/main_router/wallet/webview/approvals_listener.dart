@@ -9,9 +9,9 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../../data/models/approval_request.dart';
+import '../../../../../providers/common/approvals_provider.dart';
 import '../../../../../providers/key/current_key_provider.dart';
 import '../../../../../providers/key/keys_provider.dart';
-import '../../../../../providers/provider/approvals_provider.dart';
 import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../modals/call_contract_method/show_call_contract_method.dart';
 import '../modals/request_permissions_modal/show_preferences_modal.dart';

@@ -9,9 +9,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../data/repositories/generic_contracts_repository.dart';
-import '../../../../../data/repositories/permissions_repository.dart';
-import '../../../../../injection.dart';
 import '../../../../../providers/account/accounts_provider.dart';
 import '../../../../../providers/account/browser_current_account_provider.dart';
 import '../../../../../providers/provider/generic_contracts_state_changes_provider.dart';
@@ -124,19 +121,6 @@ class _WebviewPageState extends State<WebviewPage> {
               controller: controller!,
             );
           });
-
-          ref.listen<AssetsList?>(
-            browserCurrentAccountProvider,
-            (previous, next) async {
-              final currentOrigin = await controller?.getCurrentOrigin();
-
-              if (currentOrigin == null) return;
-
-              await getIt.get<PermissionsRepository>().deletePermissions(currentOrigin);
-
-              await getIt.get<GenericContractsRepository>().clear();
-            },
-          );
 
           final accounts = ref.watch(accountsProvider).asData?.value ?? [];
           final currentAccount = ref.watch(browserCurrentAccountProvider);

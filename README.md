@@ -16,7 +16,6 @@ EVER Wallet Flutter application. Manage Everscale wallets and access dApps direc
    Example: `HIVE_AES_CIPHER_KEY='4 8 15 16 23 42 ... 42 23 16 15 8 4'`
 
 5. Build commands  
-   `flutter build appbundle --release --no-tree-shake-icons --no-shrink`  
-   `flutter build apk --release --no-tree-shake-icons --no-shrink`  
-   `flutter build apk --release --no-tree-shake-icons --no-shrink --split-per-abi`  
-   `flutter build ios --release --no-tree-shake-icons --no-codesign`
+   `flutter build ios --release --bundle-sksl-path flutter_01.sksl.json`  
+   `flutter build apk --release --bundle-sksl-path flutter_02.sksl.json`  
+   `flutter build appbundle --release --bundle-sksl-path flutter_02.sksl.json`

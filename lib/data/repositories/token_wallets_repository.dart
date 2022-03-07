@@ -71,7 +71,7 @@ class TokenWalletsRepository {
               return tokenWalletInfo;
             },
           )
-          .whereType<TokenWalletInfo?>()
+          .cast<TokenWalletInfo?>()
           .startWith(
             _hiveSource.getTokenWalletInfo(
               owner: owner,
@@ -91,50 +91,48 @@ class TokenWalletsRepository {
             ),
           )
           .whereType<TokenWallet>()
-          .flatMap((v) => v.onBalanceChangedStream.map((e) => e.balance));
+          .flatMap((v) => v.onBalanceChangedStream)
+          .map((e) => e.balance);
 
   Stream<List<TokenWalletTransactionWithData>> getTransactionsStream({
     required String owner,
     required String rootTokenContract,
-  }) =>
-      _tokenWalletsSubject
-          .asyncMap(
-            (e) async => e.asyncFirstWhereOrNull(
-              (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
-            ),
-          )
-          .whereType<TokenWallet>()
-          .flatMap((v) => v.onTransactionsFoundStream)
-          .cast<OnTokenWalletTransactionsFoundPayload?>()
-          .startWith(null)
-          .pairwise()
-          .asyncMap(
-            (e) async {
-              final prev = e.first;
-              final next = e.last;
+  }) {
+    var list = _hiveSource.getTokenWalletTransactions(
+          owner: owner,
+          rootTokenContract: rootTokenContract,
+        ) ??
+        [];
 
-              final transactions = [
-                ...prev?.transactions ?? <TokenWalletTransactionWithData>[],
-                ...next?.transactions ?? <TokenWalletTransactionWithData>[],
-              ]..sort((a, b) => a.transaction.compareTo(b.transaction));
+    return _tokenWalletsSubject
+        .asyncMap(
+          (e) async => e.asyncFirstWhereOrNull(
+            (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
+          ),
+        )
+        .whereType<TokenWallet>()
+        .flatMap((v) => v.onTransactionsFoundStream)
+        .map((e) => e.transactions.where((e) => e.data != null).toList())
+        .startWith(list)
+        .asyncMap(
+      (e) async {
+        list = [
+          ...{
+            ...list,
+            ...e,
+          }
+        ]..sort((a, b) => a.transaction.compareTo(b.transaction));
 
-              await _hiveSource.saveTokenWalletTransactions(
-                owner: owner,
-                rootTokenContract: rootTokenContract,
-                transactions: transactions,
-              );
+        await _hiveSource.saveTokenWalletTransactions(
+          owner: owner,
+          rootTokenContract: rootTokenContract,
+          transactions: list,
+        );
 
-              return transactions;
-            },
-          )
-          .whereType<List<TokenWalletTransactionWithData>?>()
-          .startWith(
-            _hiveSource.getTokenWalletTransactions(
-              owner: owner,
-              rootTokenContract: rootTokenContract,
-            ),
-          )
-          .whereType<List<TokenWalletTransactionWithData>>();
+        return list;
+      },
+    );
+  }
 
   Future<InternalMessage> prepareTransfer({
     required String owner,
@@ -226,16 +224,16 @@ class TokenWalletsRepository {
 
     _tokenWalletsSubject.add(tokenWallets);
 
-    await tokenWallet.freePtr();
+    tokenWallet.freePtr();
   }
 
-  Future<void> _clear() async {
+  void _clear() {
     final tokenWallets = [..._tokenWalletsSubject.value];
 
     _tokenWalletsSubject.add([]);
 
     for (final tokenWallet in tokenWallets) {
-      await tokenWallet.freePtr();
+      tokenWallet.freePtr();
     }
   }
 
@@ -248,7 +246,7 @@ class TokenWalletsRepository {
         ),
       );
 
-      await _clear();
+      _clear();
 
       for (final tokenWallet in tokenWallets) {
         await _subscribe(

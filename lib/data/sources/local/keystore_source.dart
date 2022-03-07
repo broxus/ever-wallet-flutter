@@ -27,11 +27,11 @@ class KeystoreSource {
     return instance;
   }
 
-  Stream<List<KeyStoreEntry>> get keysStream => _keysSubject.stream.distinct((a, b) => listEquals(a, b));
+  Stream<List<KeyStoreEntry>> get keysStream => _keysSubject.distinct((a, b) => listEquals(a, b));
 
   List<KeyStoreEntry> get keys => _keysSubject.value;
 
-  Stream<KeyStoreEntry?> get currentKeyStream => _currentKeySubject.stream.distinct();
+  Stream<KeyStoreEntry?> get currentKeyStream => _currentKeySubject.distinct();
 
   KeyStoreEntry? get currentKey => _currentKeySubject.value;
 

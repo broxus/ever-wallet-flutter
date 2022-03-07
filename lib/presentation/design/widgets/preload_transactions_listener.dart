@@ -1,44 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-class PreloadTransactionsListener extends StatefulWidget {
+class PreloadTransactionsListener extends StatelessWidget {
   final Widget child;
-  final TransactionId? prevTransactionId;
-  final void Function() onLoad;
+  final void Function() onNotification;
 
   const PreloadTransactionsListener({
     Key? key,
     required this.child,
-    required this.prevTransactionId,
-    required this.onLoad,
+    required this.onNotification,
   }) : super(key: key);
-
-  @override
-  _PreloadTransactionsListenerState createState() => _PreloadTransactionsListenerState();
-}
-
-class _PreloadTransactionsListenerState extends State<PreloadTransactionsListener> {
-  TransactionId? lastPrevTransactionId;
 
   @override
   Widget build(BuildContext context) => NotificationListener<ScrollUpdateNotification>(
         onNotification: (ScrollUpdateNotification notification) {
-          if (widget.prevTransactionId == null) {
-            return false;
-          }
-
+          final isDown = notification.dragDetails?.primaryDelta?.sign == -1.0;
           final pixels = notification.metrics.pixels;
           final maxScrollExtent = notification.metrics.maxScrollExtent;
-          final prevTransactionId = widget.prevTransactionId;
+          final loadingZone = MediaQuery.of(context).size.longestSide / 3;
 
-          if (pixels > maxScrollExtent - MediaQuery.of(context).size.longestSide / 3 &&
-              prevTransactionId != lastPrevTransactionId) {
-            lastPrevTransactionId = prevTransactionId;
-            widget.onLoad();
-          }
+          if (isDown && pixels > maxScrollExtent - loadingZone) onNotification();
 
           return false;
         },
-        child: widget.child,
+        child: child,
       );
 }

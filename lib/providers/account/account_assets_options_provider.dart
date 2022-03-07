@@ -12,9 +12,8 @@ import '../../data/repositories/accounts_repository.dart';
 
 final accountAssetsOptionsProvider =
     StreamProvider.family<Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>, String>(
-  (ref, address) => Rx.combineLatest2<List<TokenWalletAsset>, List<TokenContractAsset>,
-      Tuple2<List<TokenWalletAsset>, List<TokenContractAsset>>>(
-    Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
+  (ref, address) {
+    final tokenWalletAssetsStream = Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
       getIt.get<AccountsRepository>().accountsStream.expand((e) => e).where((e) => e.address == address),
       getIt.get<TransportRepository>().transportStream.whereType<Transport>(),
       (a, b) => Tuple2(a, b),
@@ -24,25 +23,33 @@ final accountAssetsOptionsProvider =
           .map((e) => e.value.tokenWallets)
           .expand((e) => e)
           .toList(),
-    ),
-    Rx.combineLatest2<List<TokenContractAsset>, List<TokenContractAsset>, List<TokenContractAsset>>(
+    );
+
+    final tokenContractAssetsStream =
+        Rx.combineLatest2<List<TokenContractAsset>, List<TokenContractAsset>, List<TokenContractAsset>>(
       getIt.get<TonAssetsRepository>().systemAssetsStream,
       getIt.get<TonAssetsRepository>().customAssetsStream,
       (a, b) => [
         ...a,
-        ...b.where((e) => a.contains(e)),
+        ...b.where((e) => !a.contains(e)),
       ],
-    ),
-    (a, b) => Tuple2(a, b),
-  ).map((event) {
-    final added = event.item2.where((e) => event.item1.any((el) => el.rootTokenContract == e.address)).toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
-    final available = event.item2.where((e) => event.item1.every((el) => el.rootTokenContract != e.address)).toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
-
-    return Tuple2(
-      added,
-      available,
     );
-  }).doOnError((err, st) => logger.e(err, err, st)),
+
+    return Rx.combineLatest2<List<TokenWalletAsset>, List<TokenContractAsset>,
+        Tuple2<List<TokenWalletAsset>, List<TokenContractAsset>>>(
+      tokenWalletAssetsStream,
+      tokenContractAssetsStream,
+      (a, b) => Tuple2(a, b),
+    ).map((event) {
+      final added = event.item2.where((e) => event.item1.any((el) => el.rootTokenContract == e.address)).toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+      final available = event.item2.where((e) => event.item1.every((el) => el.rootTokenContract != e.address)).toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+
+      return Tuple2(
+        added,
+        available,
+      );
+    }).doOnError((err, st) => logger.e(err, err, st));
+  },
 );
