@@ -303,6 +303,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
         controller: ModalScrollController.of(context),
         child: Consumer(
           builder: (context, ref, child) => PreloadTransactionsListener(
+            scrollController: ModalScrollController.of(context)!,
             onNotification: () => ref
                 .read(
                   tokenWalletTransactionsStateProvider(

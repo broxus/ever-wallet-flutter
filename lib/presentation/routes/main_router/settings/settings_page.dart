@@ -143,8 +143,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: LocaleKeys.settings_screen_sections_current_seed_preferences_export_seed.tr(),
                   onTap: keys.isNotEmpty && currentKey != null
                       ? () async {
-                          final isEnabled = ref.watch(biometryStatusProvider).asData?.value ?? false;
-                          final isAvailable = ref.watch(biometryAvailabilityProvider).asData?.value ?? false;
+                          final isEnabled = await ref.read(biometryStatusProvider.future);
+                          final isAvailable = await ref.read(biometryAvailabilityProvider.future);
 
                           if (isAvailable && isEnabled) {
                             try {
@@ -212,8 +212,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             if (name != null) {
                               if (!mounted) return;
 
-                              final isEnabled = ref.watch(biometryStatusProvider).asData?.value ?? false;
-                              final isAvailable = ref.watch(biometryAvailabilityProvider).asData?.value ?? false;
+                              final isEnabled = await ref.read(biometryStatusProvider.future);
+                              final isAvailable = await ref.read(biometryAvailabilityProvider.future);
 
                               if (isAvailable && isEnabled) {
                                 try {

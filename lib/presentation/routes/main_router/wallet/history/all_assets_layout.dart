@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../data/extensions.dart';
 import '../../../../../providers/account/account_assets_provider.dart';
 import '../../../../design/design.dart';
 import 'token_wallet_asset_holder.dart';
@@ -42,6 +43,9 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
                       key: ValueKey(tokenContractAsset.address),
                       owner: tonWalletAsset.address,
                       rootTokenContract: tokenContractAsset.address,
+                      name: tokenContractAsset.name,
+                      decimals: tokenContractAsset.decimals,
+                      version: tokenWalletVersionFromInt(tokenContractAsset.version),
                       logoURI: tokenContractAsset.logoURI,
                     ),
                   )

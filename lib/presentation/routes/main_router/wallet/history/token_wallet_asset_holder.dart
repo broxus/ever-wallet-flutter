@@ -4,7 +4,6 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../../providers/token_wallet/token_wallet_info_provider.dart';
-import '../../../../design/constants.dart';
 import '../../../../design/widgets/token_address_generated_icon.dart';
 import '../../../../design/widgets/token_asset_icon.dart';
 import '../modals/token_asset_info/show_token_asset_info.dart';
@@ -13,12 +12,18 @@ import 'wallet_asset_holder.dart';
 class TokenWalletAssetHolder extends StatefulWidget {
   final String owner;
   final String rootTokenContract;
+  final String name;
+  final int decimals;
+  final TokenWalletVersion version;
   final String? logoURI;
 
   const TokenWalletAssetHolder({
     Key? key,
     required this.owner,
     required this.rootTokenContract,
+    required this.name,
+    required this.decimals,
+    required this.version,
     this.logoURI,
   }) : super(key: key);
 
@@ -40,26 +45,24 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
               ?.value;
 
           return WalletAssetHolder(
-            name: tokenWalletInfo != null ? tokenWalletInfo.symbol.name : '',
+            name: widget.name,
             balance: tokenWalletInfo != null ? tokenWalletInfo.balance : '0',
-            decimals: tokenWalletInfo != null ? tokenWalletInfo.symbol.decimals : kTonDecimals,
+            decimals: widget.decimals,
             icon: widget.logoURI != null
                 ? TokenAssetIcon(
                     logoURI: widget.logoURI!,
-                    version: tokenWalletInfo?.version ?? TokenWalletVersion.tip3,
+                    version: widget.version,
                   )
                 : TokenAddressGeneratedIcon(
                     address: widget.rootTokenContract,
-                    version: tokenWalletInfo?.version ?? TokenWalletVersion.tip3,
+                    version: widget.version,
                   ),
-            onTap: tokenWalletInfo != null
-                ? () => showTokenAssetInfo(
-                      context: context,
-                      owner: tokenWalletInfo.owner,
-                      rootTokenContract: widget.rootTokenContract,
-                      logoURI: widget.logoURI,
-                    )
-                : () {},
+            onTap: () => showTokenAssetInfo(
+              context: context,
+              owner: widget.owner,
+              rootTokenContract: widget.rootTokenContract,
+              logoURI: widget.logoURI,
+            ),
           );
         },
       );

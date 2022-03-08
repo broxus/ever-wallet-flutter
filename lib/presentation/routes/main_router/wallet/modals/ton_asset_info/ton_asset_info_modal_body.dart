@@ -291,6 +291,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       controller: ModalScrollController.of(context),
       child: Consumer(
         builder: (context, ref, child) => PreloadTransactionsListener(
+          scrollController: ModalScrollController.of(context)!,
           onNotification: () => ref
               .read(
                 tonWalletTransactionsStateProvider(widget.address).notifier,

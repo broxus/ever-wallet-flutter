@@ -225,13 +225,6 @@ class HiveSource {
 
     _key = hiveAesCipherKey;
 
-    await Hive.deleteBoxFromDisk(_systemTokenContractAssetsBoxName);
-    await Hive.deleteBoxFromDisk(_customTokenContractAssetsBoxName);
-    await Hive.deleteBoxFromDisk(_tonWalletInfosBoxName);
-    await Hive.deleteBoxFromDisk(_tokenWalletInfosBoxName);
-    await Hive.deleteBoxFromDisk(_tonWalletTransactionsBoxName);
-    await Hive.deleteBoxFromDisk(_tokenWalletTransactionsBoxName);
-
     _keysPasswordsBox = await Hive.openBox(_keysPasswordsBoxName, encryptionCipher: HiveAesCipher(_key));
     _userPreferencesBox = await Hive.openBox(_userPreferencesBoxName);
     _systemTokenContractAssetsBox = await Hive.openBox(_systemTokenContractAssetsBoxName);

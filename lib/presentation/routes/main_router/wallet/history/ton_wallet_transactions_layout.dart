@@ -81,6 +81,7 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
       child: all.isNotEmpty
           ? Consumer(
               builder: (context, ref, child) => PreloadTransactionsListener(
+                scrollController: widget.controller,
                 onNotification: () => ref
                     .read(tonWalletTransactionsStateProvider(widget.address).notifier)
                     .preload(transactionsState.lastOrNull?.transaction.prevTransactionId),

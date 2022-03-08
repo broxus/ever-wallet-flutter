@@ -63,8 +63,8 @@ class _InputPasswordModalBodyState extends State<InputPasswordModalBody> {
               Consumer(
                 builder: (context, ref, child) => InputPasswordField(
                   onSubmit: (password) async {
-                    final isEnabled = ref.read(biometryStatusProvider).asData?.value ?? false;
-                    final isAvailable = ref.read(biometryAvailabilityProvider).asData?.value ?? false;
+                    final isEnabled = await ref.read(biometryStatusProvider.future);
+                    final isAvailable = await ref.read(biometryAvailabilityProvider.future);
 
                     if (isAvailable && isEnabled) {
                       await getIt.get<BiometryRepository>().setKeyPassword(

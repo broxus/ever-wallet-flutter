@@ -120,8 +120,8 @@ class _CallContractMethodModalBodyState extends State<CallContractMethodModalBod
   }) async {
     String? password;
 
-    final isEnabled = read(biometryStatusProvider).asData?.value ?? false;
-    final isAvailable = read(biometryAvailabilityProvider).asData?.value ?? false;
+    final isEnabled = await read(biometryStatusProvider.future);
+    final isAvailable = await read(biometryAvailabilityProvider.future);
 
     if (isAvailable && isEnabled) {
       password = await getPasswordFromBiometry(publicKey);
