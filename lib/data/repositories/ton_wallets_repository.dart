@@ -50,7 +50,7 @@ class TonWalletsRepository {
   Stream<TonWalletInfo> getInfoStream(String address) => _tonWalletsSubject
       .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
       .whereType<TonWallet>()
-      .flatMap((v) => v.onStateChangedStream.map((e) => v))
+      .flatMap((v) => v.onStateChangedStream.cast<OnStateChangedPayload?>().startWith(null).map((e) => v))
       .asyncMap(
         (e) async {
           final tonWalletInfo = TonWalletInfo(
@@ -271,7 +271,11 @@ class TonWalletsRepository {
     await tonWallet.preloadTransactions(from);
   }
 
-  Future<TonWallet> _subscribe(String address) async {
+  Future<TonWallet> _subscribe({
+    required String address,
+    required String publicKey,
+    required WalletType walletType,
+  }) async {
     var tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
 
     if (tonWallet != null) return tonWallet;
@@ -280,9 +284,11 @@ class TonWalletsRepository {
 
     if (transport == null) throw Exception('Transport unavailable');
 
-    tonWallet = await TonWallet.subscribeByAddress(
+    tonWallet = await TonWallet.subscribe(
       transport: transport,
-      address: address,
+      workchain: kDefaultWorkchain,
+      publicKey: publicKey,
+      walletType: walletType,
     );
 
     _tonWalletsSubject.add([..._tonWalletsSubject.value, tonWallet]);
@@ -314,12 +320,18 @@ class TonWalletsRepository {
 
   Future<void> _transportStreamListener() async {
     try {
-      final tonWallets = await Future.wait(_tonWalletsSubject.value.map((e) => e.address));
+      final tonWallets = await Future.wait(
+        _tonWalletsSubject.value.map((e) async => Tuple3(await e.address, await e.publicKey, await e.walletType)),
+      );
 
       _clear();
 
       for (final tonWallet in tonWallets) {
-        await _subscribe(tonWallet);
+        await _subscribe(
+          address: tonWallet.item1,
+          publicKey: tonWallet.item2,
+          walletType: tonWallet.item3,
+        );
       }
     } catch (err, st) {
       logger.e(err, err, st);
@@ -340,7 +352,11 @@ class TonWalletsRepository {
         ..removeWhere((e) => currentTonWallets.any((el) => el.address == e.address));
 
       for (final addedTonWallet in addedTonWallets) {
-        await _subscribe(addedTonWallet.address);
+        await _subscribe(
+          address: addedTonWallet.address,
+          publicKey: addedTonWallet.publicKey,
+          walletType: addedTonWallet.contract,
+        );
       }
 
       for (final removedTonWallet in removedTonWallets) {
