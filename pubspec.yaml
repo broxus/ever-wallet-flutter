@@ -3,7 +3,7 @@ description: EVER Wallet
 
 publish_to: 'none'
 
-version: 1.0.9+72
+version: 1.0.9+73
 
 environment:
   sdk: '>=2.16.1 <3.0.0'
