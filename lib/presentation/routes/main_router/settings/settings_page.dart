@@ -169,6 +169,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               );
                             }
                           } else {
+                            if (!mounted) return;
+
                             showCrystalBottomSheet<void>(
                               context,
                               title: ExportSeedPhraseModalBody.title,
@@ -209,6 +211,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               body: const NameNewKeyModalBody(),
                             );
 
+                            await Future<void>.delayed(const Duration(seconds: 1));
+
                             if (name != null) {
                               if (!mounted) return;
 
@@ -240,6 +244,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                   );
                                 }
                               } else {
+                                if (!mounted) return;
+
                                 showCrystalBottomSheet<void>(
                                   context,
                                   title: DeriveKeyModalBody.title,
