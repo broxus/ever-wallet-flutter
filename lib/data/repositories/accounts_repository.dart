@@ -200,6 +200,8 @@ class AccountsRepository {
   }
 
   Future<void> _initialize() async {
+    _externalAccountsSubject.add(_hiveSource.externalAccounts);
+
     _keystoreSource.keysStream
         .skip(1)
         .startWith(_keystoreSource.keys)
