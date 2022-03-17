@@ -74,7 +74,7 @@ List<StatelessWidget> mapTonWalletTransactionsToWidgets({
               submit: (multisigSubmitTransaction) {
                 final submitTransactionId = multisigSubmitTransaction.transId;
 
-                return multisigPendingTransactions.every((e) => e.id != multisigSubmitTransaction.transId) &&
+                return multisigPendingTransactions.every((e) => e.id != submitTransactionId) &&
                     transactions
                         .where(
                           (e) =>
@@ -82,6 +82,8 @@ List<StatelessWidget> mapTonWalletTransactionsToWidgets({
                               e.data!.maybeWhen(
                                 walletInteraction: (info) => info.method.maybeWhen(
                                   multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                                    submit: (multisigSubmitTransaction) =>
+                                        multisigSubmitTransaction.transId == submitTransactionId,
                                     confirm: (multisigConfirmTransaction) =>
                                         multisigConfirmTransaction.transactionId == submitTransactionId,
                                     orElse: () => false,
@@ -219,7 +221,7 @@ List<StatelessWidget> mapTonWalletTransactionsToWidgets({
               submit: (multisigSubmitTransaction) {
                 final submitTransactionId = multisigSubmitTransaction.transId;
 
-                return multisigPendingTransactions.every((e) => e.id != multisigSubmitTransaction.transId) &&
+                return multisigPendingTransactions.every((e) => e.id != submitTransactionId) &&
                     transactions
                         .where(
                           (e) =>
@@ -227,6 +229,8 @@ List<StatelessWidget> mapTonWalletTransactionsToWidgets({
                               e.data!.maybeWhen(
                                 walletInteraction: (info) => info.method.maybeWhen(
                                   multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
+                                    submit: (multisigSubmitTransaction) =>
+                                        multisigSubmitTransaction.transId == submitTransactionId,
                                     confirm: (multisigConfirmTransaction) =>
                                         multisigConfirmTransaction.transactionId == submitTransactionId,
                                     orElse: () => false,
