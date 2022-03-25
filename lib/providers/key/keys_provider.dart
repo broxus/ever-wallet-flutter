@@ -7,7 +7,7 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/keys_repository.dart';
 
-final keysProvider = StreamProvider<Map<KeyStoreEntry, List<KeyStoreEntry>?>>(
+final keysProvider = StreamProvider.autoDispose<Map<KeyStoreEntry, List<KeyStoreEntry>?>>(
   (ref) => getIt.get<KeysRepository>().keysStream.map((e) {
     final map = <KeyStoreEntry, List<KeyStoreEntry>?>{};
 

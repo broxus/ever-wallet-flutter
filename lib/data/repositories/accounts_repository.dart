@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -79,9 +80,7 @@ class AccountsRepository {
     required String address,
     String? name,
   }) async {
-    final transport = _transportSource.transport;
-
-    if (transport == null) throw Exception('Transport unavailable');
+    final transport = await _transportSource.transport;
 
     final custodians = await getWalletCustodians(
       transport: transport,
@@ -92,7 +91,7 @@ class AccountsRepository {
 
     if (!isCustodian) throw Exception('Is not custodian');
 
-    AssetsList? account = accounts.firstWhereOrNull((e) => e.address == address);
+    var account = accounts.firstWhereOrNull((e) => e.address == address);
 
     if (account == null) {
       final existingWalletInfo = await getExistingWalletInfo(
@@ -159,9 +158,7 @@ class AccountsRepository {
     required String address,
     required String rootTokenContract,
   }) async {
-    final transport = _transportSource.transport;
-
-    if (transport == null) throw Exception('Transport unavailable');
+    final transport = await _transportSource.transport;
 
     await getTokenRootDetails(
       transport: transport,
@@ -181,9 +178,7 @@ class AccountsRepository {
     required String address,
     required String rootTokenContract,
   }) async {
-    final transport = _transportSource.transport;
-
-    if (transport == null) throw Exception('Transport unavailable');
+    final transport = await _transportSource.transport;
 
     final account = await _accountsStorageSource.removeTokenWallet(
       address: address,
@@ -233,7 +228,7 @@ class AccountsRepository {
 
         return list;
       },
-    ).listen((event) => _accountsStorageSource.currentAccounts = event);
+    ).distinct((a, b) => listEquals(a, b)).listen((event) => _accountsStorageSource.currentAccounts = event);
   }
 
   Future<void> _keysStreamListener(Iterable<List<KeyStoreEntry>> event) async {
@@ -245,28 +240,34 @@ class AccountsRepository {
       final removedKeys = [...prev]..removeWhere((e) => next.any((el) => el.publicKey == e.publicKey));
 
       for (final key in addedKeys) {
-        final transport = _transportSource.transport;
+        try {
+          final transport = await _transportSource.transport;
 
-        if (transport == null) throw Exception('Transport unavailable');
+          final wallets = await findExistingWallets(
+            transport: transport,
+            publicKey: key.publicKey,
+            workchainId: kDefaultWorkchain,
+          );
 
-        final wallets = await findExistingWallets(
-          transport: transport,
-          publicKey: key.publicKey,
-          workchainId: kDefaultWorkchain,
-        );
+          final activeWallets = wallets.where((e) => e.isActive);
 
-        final activeWallets = wallets.where((e) => e.isActive);
+          for (final activeWallet in activeWallets) {
+            final isExists = accounts.any((e) => e.address == activeWallet.address);
 
-        for (final activeWallet in activeWallets) {
-          final isExists = accounts.any((e) => e.address == activeWallet.address);
-
-          if (!isExists) {
-            await addAccount(
-              name: activeWallet.walletType.describe(),
-              publicKey: activeWallet.publicKey,
-              walletType: activeWallet.walletType,
-            );
+            if (!isExists) {
+              try {
+                await addAccount(
+                  name: activeWallet.walletType.describe(),
+                  publicKey: activeWallet.publicKey,
+                  walletType: activeWallet.walletType,
+                );
+              } catch (err, st) {
+                logger.e(err, err, st);
+              }
+            }
           }
+        } catch (err, st) {
+          logger.e(err, err, st);
         }
       }
 
@@ -274,7 +275,11 @@ class AccountsRepository {
         final accounts = this.accounts.where((e) => e.publicKey == key.publicKey);
 
         for (final account in accounts) {
-          await removeAccount(account.address);
+          try {
+            await removeAccount(account.address);
+          } catch (err, st) {
+            logger.e(err, err, st);
+          }
         }
       }
     } catch (err, st) {
@@ -298,10 +303,14 @@ class AccountsRepository {
             .where((e) => e.item2 == account.address);
 
         for (final externalAccount in externalAccounts) {
-          await removeExternalAccount(
-            publicKey: externalAccount.item1,
-            address: externalAccount.item2,
-          );
+          try {
+            await removeExternalAccount(
+              publicKey: externalAccount.item1,
+              address: externalAccount.item2,
+            );
+          } catch (err, st) {
+            logger.e(err, err, st);
+          }
         }
       }
     } catch (err, st) {

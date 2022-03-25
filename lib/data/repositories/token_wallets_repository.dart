@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -7,6 +8,7 @@ import 'package:synchronized/synchronized.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../logger.dart';
+import '../constants.dart';
 import '../extensions.dart';
 import '../models/token_wallet_info.dart';
 import '../sources/local/accounts_storage_source.dart';
@@ -26,15 +28,12 @@ class TokenWalletsRepository {
     this._transportSource,
     this._hiveSource,
   ) {
-    _transportSource.transportStream
-        .skip(1)
-        .whereType<Transport>()
-        .listen((event) => _lock.synchronized(() => _transportStreamListener()));
-
-    _accountsStorageSource.currentAccountsStream
-        .startWith(const [])
-        .pairwise()
-        .listen((event) => _lock.synchronized(() => _currentAccountsStreamListener(event)));
+    Rx.combineLatest3<List<AssetsList>, Transport, void, Tuple2<List<AssetsList>, Transport>>(
+      _accountsStorageSource.currentAccountsStream,
+      _transportSource.transportStream,
+      Stream<void>.periodic(kSubscriptionRefreshTimeout).startWith(null),
+      (a, b, c) => Tuple2(a, b),
+    ).listen((event) => _lock.synchronized(() => _currentAccountsStreamListener(event)));
 
     _accountsStorageSource.accountsStream
         .skip(1)
@@ -43,18 +42,45 @@ class TokenWalletsRepository {
         .listen((event) => _lock.synchronized(() => _accountsStreamListener(event)));
   }
 
-  Stream<TokenWalletInfo> getInfoStream({
+  Future<TokenWalletInfo> getInfo({
+    required String owner,
+    required String rootTokenContract,
+  }) async {
+    final tokenWallet = await _getTokenWallet(
+      owner: owner,
+      rootTokenContract: rootTokenContract,
+    );
+
+    final tokenWalletInfo = TokenWalletInfo(
+      owner: await tokenWallet.owner,
+      address: await tokenWallet.address,
+      symbol: await tokenWallet.symbol,
+      version: await tokenWallet.version,
+      balance: await tokenWallet.balance,
+      contractState: await tokenWallet.contractState,
+    );
+
+    await _hiveSource.saveTokenWalletInfo(
+      owner: owner,
+      rootTokenContract: rootTokenContract,
+      group: tokenWallet.transport.connectionData.group,
+      info: tokenWalletInfo,
+    );
+
+    return tokenWalletInfo;
+  }
+
+  Stream<TokenWalletInfo?> getInfoStream({
     required String owner,
     required String rootTokenContract,
   }) =>
       _tokenWalletsSubject
           .asyncMap(
-            (e) async => e.asyncFirstWhereOrNull(
+            (e) async => e.asyncFirstWhere(
               (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
             ),
           )
-          .whereType<TokenWallet>()
-          .flatMap((v) => v.onBalanceChangedStream.map((e) => v))
+          .flatMap((v) => v.balanceChangesStream.cast<String?>().startWith(null).map((e) => v))
           .asyncMap(
             (e) async {
               final tokenWalletInfo = TokenWalletInfo(
@@ -66,73 +92,62 @@ class TokenWalletsRepository {
                 contractState: await e.contractState,
               );
 
-              await _hiveSource.saveTokenWalletInfo(tokenWalletInfo);
+              await _hiveSource.saveTokenWalletInfo(
+                owner: owner,
+                rootTokenContract: rootTokenContract,
+                group: e.transport.connectionData.group,
+                info: tokenWalletInfo,
+              );
 
               return tokenWalletInfo;
             },
           )
           .cast<TokenWalletInfo?>()
-          .startWith(
-            _hiveSource.getTokenWalletInfo(
-              owner: owner,
-              rootTokenContract: rootTokenContract,
-            ),
-          )
-          .whereType<TokenWalletInfo>();
+          .onErrorReturn(null)
+          .distinct();
 
-  Stream<String> getBalanceChangesStream({
+  Stream<List<TokenWalletTransactionWithData>?> getTransactionsStream({
     required String owner,
     required String rootTokenContract,
   }) =>
       _tokenWalletsSubject
           .asyncMap(
-            (e) async => e.asyncFirstWhereOrNull(
+            (e) async => e.asyncFirstWhere(
               (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
             ),
           )
-          .whereType<TokenWallet>()
-          .flatMap((v) => v.onBalanceChangedStream)
-          .map((e) => e.balance);
+          .flatMap(
+            (v) => v.transactionsStream.map((e) => e.where((e) => e.data != null).toList()).asyncMap(
+              (e) async {
+                final group = v.transport.connectionData.group;
 
-  Stream<List<TokenWalletTransactionWithData>> getTransactionsStream({
-    required String owner,
-    required String rootTokenContract,
-  }) {
-    var list = _hiveSource.getTokenWalletTransactions(
-          owner: owner,
-          rootTokenContract: rootTokenContract,
-        ) ??
-        [];
+                final cached = _hiveSource.getTokenWalletTransactions(
+                  owner: owner,
+                  rootTokenContract: rootTokenContract,
+                  group: group,
+                );
 
-    return _tokenWalletsSubject
-        .asyncMap(
-          (e) async => e.asyncFirstWhereOrNull(
-            (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
-          ),
-        )
-        .whereType<TokenWallet>()
-        .flatMap((v) => v.onTransactionsFoundStream)
-        .map((e) => e.transactions.where((e) => e.data != null).toList())
-        .startWith(list)
-        .asyncMap(
-      (e) async {
-        list = [
-          ...{
-            ...list,
-            ...e,
-          }
-        ]..sort((a, b) => a.transaction.compareTo(b.transaction));
+                final list = [
+                  ...{
+                    if (cached != null) ...cached,
+                    ...e,
+                  }
+                ]..sort((a, b) => a.transaction.compareTo(b.transaction));
 
-        await _hiveSource.saveTokenWalletTransactions(
-          owner: owner,
-          rootTokenContract: rootTokenContract,
-          transactions: list,
-        );
+                await _hiveSource.saveTokenWalletTransactions(
+                  owner: owner,
+                  rootTokenContract: rootTokenContract,
+                  group: group,
+                  transactions: list,
+                );
 
-        return list;
-      },
-    );
-  }
+                return list;
+              },
+            ),
+          )
+          .cast<List<TokenWalletTransactionWithData>?>()
+          .onErrorReturn(null)
+          .distinct((a, b) => listEquals(a, b));
 
   Future<InternalMessage> prepareTransfer({
     required String owner,
@@ -142,11 +157,10 @@ class TokenWalletsRepository {
     required bool notifyReceiver,
     String? payload,
   }) async {
-    final tokenWallet = await _tokenWalletsSubject.value.asyncFirstWhereOrNull(
-      (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
+    final tokenWallet = await _getTokenWallet(
+      owner: owner,
+      rootTokenContract: rootTokenContract,
     );
-
-    if (tokenWallet == null) throw Exception('Token wallet not found');
 
     final internalMessage = await tokenWallet.prepareTransfer(
       destination: destination,
@@ -162,11 +176,10 @@ class TokenWalletsRepository {
     required String owner,
     required String rootTokenContract,
   }) async {
-    final tokenWallet = await _tokenWalletsSubject.value.asyncFirstWhereOrNull(
-      (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
+    final tokenWallet = await _getTokenWallet(
+      owner: owner,
+      rootTokenContract: rootTokenContract,
     );
-
-    if (tokenWallet == null) throw Exception('Token wallet not found');
 
     await tokenWallet.refresh();
   }
@@ -176,113 +189,39 @@ class TokenWalletsRepository {
     required String rootTokenContract,
     required TransactionId from,
   }) async {
-    final tokenWallet = await _tokenWalletsSubject.value.asyncFirstWhereOrNull(
-      (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
-    );
-
-    if (tokenWallet == null) throw Exception('Token wallet not found');
-
-    await tokenWallet.preloadTransactions(from);
-  }
-
-  Future<TokenWallet> _subscribe({
-    required String owner,
-    required String rootTokenContract,
-  }) async {
-    var tokenWallet = await _tokenWalletsSubject.value.asyncFirstWhereOrNull(
-      (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
-    );
-
-    if (tokenWallet != null) return tokenWallet;
-
-    final transport = _transportSource.transport;
-
-    if (transport == null) throw Exception('Transport unavailable');
-
-    tokenWallet = await TokenWallet.subscribe(
-      transport: transport,
+    final tokenWallet = await _getTokenWallet(
       owner: owner,
       rootTokenContract: rootTokenContract,
     );
 
-    _tokenWalletsSubject.add([..._tokenWalletsSubject.value, tokenWallet]);
-
-    return tokenWallet;
+    await tokenWallet.preloadTransactions(from);
   }
 
-  Future<void> _unsubscribe({
+  Future<TokenWallet> _getTokenWallet({
     required String owner,
     required String rootTokenContract,
-  }) async {
-    final tokenWallet = await _tokenWalletsSubject.value.asyncFirstWhereOrNull(
-      (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
-    );
+  }) =>
+      _tokenWalletsSubject
+          .asyncMap(
+            (e) async => e.asyncFirstWhereOrNull(
+              (e) async => await e.owner == owner && (await e.symbol).rootTokenContract == rootTokenContract,
+            ),
+          )
+          .whereType<TokenWallet>()
+          .first
+          .timeout(
+            kSubscriptionRefreshTimeout * 2,
+            onTimeout: () => throw Exception('Token wallet not found'),
+          );
 
-    if (tokenWallet == null) return;
-
-    final tokenWallets = _tokenWalletsSubject.value.where((e) => e != tokenWallet).toList();
-
-    _tokenWalletsSubject.add(tokenWallets);
-
-    tokenWallet.freePtr();
-  }
-
-  void _clear() {
-    final tokenWallets = [..._tokenWalletsSubject.value];
-
-    _tokenWalletsSubject.add([]);
-
-    for (final tokenWallet in tokenWallets) {
-      tokenWallet.freePtr();
-    }
-  }
-
-  Future<void> _transportStreamListener() async {
+  Future<void> _currentAccountsStreamListener(Tuple2<List<AssetsList>, Transport> event) async {
     try {
-      final tokenWallets = await _tokenWalletsSubject.value.asyncMap(
-        (e) async => Tuple2(
-          await e.owner,
-          (await e.symbol).rootTokenContract,
-        ),
-      );
-
-      _clear();
-
-      for (final tokenWallet in tokenWallets) {
-        await _subscribe(
-          owner: tokenWallet.item1,
-          rootTokenContract: tokenWallet.item2,
-        );
-      }
-    } catch (err, st) {
-      logger.e(err, err, st);
-    }
-  }
-
-  Future<void> _currentAccountsStreamListener(Iterable<List<AssetsList>> event) async {
-    try {
-      final prev = event.first;
-      final next = event.last;
-
-      final transport = _transportSource.transport;
-
-      if (transport == null) throw Exception('Transport unavailable');
+      final accounts = event.item1;
+      final transport = event.item2;
 
       final networkGroup = transport.connectionData.group;
 
-      final currentTokenWallets = next
-          .map(
-            (e) =>
-                e.additionalAssets[networkGroup]?.tokenWallets.map(
-                  (el) => Tuple2(
-                    e.tonWallet.address,
-                    el.rootTokenContract,
-                  ),
-                ) ??
-                [],
-          )
-          .expand((e) => e);
-      final previousTokenWallets = prev
+      final tokenWalletAssets = accounts
           .map(
             (e) =>
                 e.additionalAssets[networkGroup]?.tokenWallets.map(
@@ -295,23 +234,36 @@ class TokenWalletsRepository {
           )
           .expand((e) => e);
 
-      final addedTokenWallets = [...currentTokenWallets]
-        ..removeWhere((e) => previousTokenWallets.any((el) => el.item1 == e.item1 && el.item2 == e.item2));
-      final removedTokenWallets = [...previousTokenWallets]
-        ..removeWhere((e) => currentTokenWallets.any((el) => el.item1 == e.item1 && el.item2 == e.item2));
+      final tokenWalletsForUnsubscription = await _tokenWalletsSubject.value.asyncWhere(
+        (e) async =>
+            e.transport != transport ||
+            await tokenWalletAssets
+                .asyncEvery((el) async => el.item1 != await e.owner && el.item2 != (await e.symbol).rootTokenContract),
+      );
 
-      for (final addedTokenWallet in addedTokenWallets) {
-        await _subscribe(
-          owner: addedTokenWallet.item1,
-          rootTokenContract: addedTokenWallet.item2,
-        );
+      for (final tokenWalletForUnsubscription in tokenWalletsForUnsubscription) {
+        _tokenWalletsSubject.add(_tokenWalletsSubject.value.where((e) => e != tokenWalletForUnsubscription).toList());
+
+        tokenWalletForUnsubscription.freePtr();
       }
 
-      for (final removedTokenWallet in removedTokenWallets) {
-        await _unsubscribe(
-          owner: removedTokenWallet.item1,
-          rootTokenContract: removedTokenWallet.item2,
-        );
+      final tokenWalletAssetsForSubscription = await tokenWalletAssets.asyncWhere(
+        (e) async => _tokenWalletsSubject.value
+            .asyncEvery((el) async => await el.owner != e.item1 && (await el.symbol).rootTokenContract != e.item2),
+      );
+
+      for (final tokenWalletAssetForSubscription in tokenWalletAssetsForSubscription) {
+        try {
+          final tokenWallet = await TokenWallet.subscribe(
+            transport: transport,
+            owner: tokenWalletAssetForSubscription.item1,
+            rootTokenContract: tokenWalletAssetForSubscription.item2,
+          );
+
+          _tokenWalletsSubject.add([..._tokenWalletsSubject.value, tokenWallet]);
+        } catch (err, st) {
+          logger.e(err, err, st);
+        }
       }
     } catch (err, st) {
       logger.e(err, err, st);
@@ -323,9 +275,7 @@ class TokenWalletsRepository {
       final prev = event.first;
       final next = event.last;
 
-      final transport = _transportSource.transport;
-
-      if (transport == null) throw Exception('Transport unavailable');
+      final transport = await _transportSource.transport;
 
       final networkGroup = transport.connectionData.group;
 

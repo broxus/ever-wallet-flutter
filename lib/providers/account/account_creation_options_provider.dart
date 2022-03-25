@@ -8,7 +8,8 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/accounts_repository.dart';
 
-final accountCreationOptionsProvider = StreamProvider.family<Tuple2<List<WalletType>, List<WalletType>>, String>(
+final accountCreationOptionsProvider =
+    StreamProvider.autoDispose.family<Tuple2<List<WalletType>, List<WalletType>>, String>(
   (ref, publicKey) => getIt
       .get<AccountsRepository>()
       .accountsStream

@@ -14,6 +14,8 @@ class RestSource {
   Future<TonAssetsManifest> getTonAssetsManifest() async {
     final response = await _dio.get<String>(_tonAssetsManifestRoute());
     final json = jsonDecode(response.data!) as Map<String, dynamic>;
-    return TonAssetsManifest.fromJson(json);
+    final manifest = TonAssetsManifest.fromJson(json);
+
+    return manifest;
   }
 }

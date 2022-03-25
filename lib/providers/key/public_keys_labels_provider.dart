@@ -5,6 +5,6 @@ import '../../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/keys_repository.dart';
 
-final publicKeysLabelsProvider = StreamProvider<Map<String, String>>(
+final publicKeysLabelsProvider = StreamProvider.autoDispose<Map<String, String>>(
   (ref) => getIt.get<KeysRepository>().labelsStream.doOnError((err, st) => logger.e(err, err, st)),
 );

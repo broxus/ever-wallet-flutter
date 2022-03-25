@@ -1,5 +1,7 @@
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+const kSubscriptionRefreshTimeout = Duration(seconds: 10);
+
 const kDefaultWorkchain = 0;
 
 const kProviderVersion = '0.2.26';
@@ -10,6 +12,7 @@ const kAvailableWallets = [
   WalletType.multisig(multisigType: MultisigType.safeMultisigWallet),
   WalletType.multisig(multisigType: MultisigType.safeMultisigWallet24h),
   WalletType.multisig(multisigType: MultisigType.setcodeMultisigWallet),
+  WalletType.multisig(multisigType: MultisigType.setcodeMultisigWallet24h),
   WalletType.multisig(multisigType: MultisigType.bridgeMultisigWallet),
   WalletType.multisig(multisigType: MultisigType.surfWallet),
   WalletType.walletV3(),

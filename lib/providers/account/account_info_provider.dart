@@ -6,7 +6,7 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/accounts_repository.dart';
 
-final accountInfoProvider = StreamProvider.family<AssetsList, String>(
+final accountInfoProvider = StreamProvider.autoDispose.family<AssetsList, String>(
   (ref, address) => getIt
       .get<AccountsRepository>()
       .accountsStream

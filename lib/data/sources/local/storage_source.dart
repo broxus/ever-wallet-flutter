@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 
 @preResolve
 @lazySingleton
@@ -18,6 +19,8 @@ class StorageSource {
   }
 
   Future<void> _initialize() async {
-    storage = await Storage.create();
+    final dir = await getApplicationDocumentsDirectory();
+
+    storage = await Storage.create(dir);
   }
 }

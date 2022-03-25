@@ -47,7 +47,7 @@ class TokenWalletTransactionsNotifier extends StateNotifier<Tuple2<List<TokenWal
 
   void preload(TransactionId? from) => _preloadSubject.add(from);
 
-  void _transactionsStreamListener(List<TokenWalletTransactionWithData> event) => state = Tuple2(event, false);
+  void _transactionsStreamListener(List<TokenWalletTransactionWithData>? event) => state = Tuple2(event ?? [], false);
 
   Future<void> _preloadStreamListener(TransactionId? event) async {
     try {

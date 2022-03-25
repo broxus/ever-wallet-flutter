@@ -6,7 +6,8 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/ton_wallets_repository.dart';
 
-final tonWalletMultisigPendingTransactionsProvider = StreamProvider.family<List<MultisigPendingTransaction>, String>(
+final tonWalletMultisigPendingTransactionsProvider =
+    StreamProvider.autoDispose.family<List<MultisigPendingTransaction>?, String>(
   (ref, address) => getIt
       .get<TonWalletsRepository>()
       .getUnconfirmedTransactionsStream(address)

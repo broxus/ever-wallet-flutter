@@ -6,7 +6,7 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/keys_repository.dart';
 
-final keyInfoProvider = StreamProvider.family<KeyStoreEntry, String>(
+final keyInfoProvider = StreamProvider.autoDispose.family<KeyStoreEntry, String>(
   (ref, publicKey) => getIt
       .get<KeysRepository>()
       .keysStream

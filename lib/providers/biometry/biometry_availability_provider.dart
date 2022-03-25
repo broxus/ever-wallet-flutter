@@ -5,6 +5,6 @@ import '../../../data/repositories/biometry_repository.dart';
 import '../../../injection.dart';
 import '../../../logger.dart';
 
-final biometryAvailabilityProvider = StreamProvider<bool>(
-  (ref) => getIt.get<BiometryRepository>().biometryAvailabilityStream.doOnError((err, st) => logger.e(err, err, st)),
+final biometryAvailabilityProvider = StreamProvider.autoDispose<bool>(
+  (ref) => getIt.get<BiometryRepository>().availabilityStream.doOnError((err, st) => logger.e(err, err, st)),
 );

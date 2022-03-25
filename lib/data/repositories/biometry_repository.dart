@@ -32,23 +32,23 @@ class BiometryRepository {
     return instance;
   }
 
-  Stream<bool> get biometryAvailabilityStream => _availabilitySubject;
+  Stream<bool> get availabilityStream => _availabilitySubject.distinct();
 
-  bool get biometryAvailability => _availabilitySubject.value;
+  bool get availability => _availabilitySubject.value;
 
-  Stream<bool> get biometryStatusStream => _statusSubject;
+  Stream<bool> get statusStream => _statusSubject.distinct();
 
-  bool get biometryStatus => _statusSubject.value;
+  bool get status => _statusSubject.value;
 
-  Future<void> checkBiometryAvailability() async => _availabilitySubject.add(await _localAuthSource.isAvailable);
+  Future<void> checkAvailability() async => _availabilitySubject.add(await _localAuthSource.isAvailable);
 
-  Future<void> setBiometryStatus({
+  Future<void> setStatus({
     required String localizedReason,
     required bool isEnabled,
   }) async {
     if (isEnabled && !await _localAuthSource.authenticate(localizedReason)) return;
 
-    await _hiveSource.setIsBiometryEnabled(isEnabled);
+    await _hiveSource.setIsBiometryEnabled(isEnabled: isEnabled);
 
     _statusSubject.add(isEnabled);
   }
@@ -88,7 +88,7 @@ class BiometryRepository {
     _availabilitySubject.add(await _localAuthSource.isAvailable);
     _statusSubject.add(_hiveSource.isBiometryEnabled);
 
-    _availabilitySubject.where((e) => !e).listen((e) => _statusSubject.add(e));
-    _statusSubject.where((e) => !e).listen((e) => _hiveSource.clearKeysPasswords());
+    availabilityStream.where((e) => !e).listen((e) => _statusSubject.add(e));
+    statusStream.where((e) => !e).listen((e) => _hiveSource.clearKeysPasswords());
   }
 }

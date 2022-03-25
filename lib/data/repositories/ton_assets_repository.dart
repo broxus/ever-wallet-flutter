@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -45,11 +46,11 @@ class TonAssetsRepository {
     return instance;
   }
 
-  Stream<List<TokenContractAsset>> get systemAssetsStream => _systemAssetsSubject;
+  Stream<List<TokenContractAsset>> get systemAssetsStream => _systemAssetsSubject.distinct((a, b) => listEquals(a, b));
 
   List<TokenContractAsset> get systemAssets => _systemAssetsSubject.value;
 
-  Stream<List<TokenContractAsset>> get customAssetsStream => _customAssetsSubject;
+  Stream<List<TokenContractAsset>> get customAssetsStream => _customAssetsSubject.distinct((a, b) => listEquals(a, b));
 
   List<TokenContractAsset> get customAssets => _customAssetsSubject.value;
 
@@ -59,9 +60,7 @@ class TonAssetsRepository {
 
     if (asset != null) return asset;
 
-    final transport = _transportSource.transport;
-
-    if (transport == null) throw Exception('Transport unavailable');
+    final transport = await _transportSource.transport;
 
     final tokenRootDetails = await getTokenRootDetails(
       transport: transport,
@@ -95,11 +94,13 @@ class TonAssetsRepository {
 
   Future<void> _initialize() async {
     Rx.combineLatest2<List<TokenContractAsset>, List<TokenContractAsset>,
-        Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>>(
+            Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>>(
       systemAssetsStream,
       customAssetsStream,
       (a, b) => Tuple2(a, b),
-    ).listen((event) => _lock.synchronized(() => _systemAssetsStreamListener(event)));
+    )
+        .distinct((a, b) => listEquals(a.item1, b.item1) && listEquals(a.item2, b.item2))
+        .listen((event) => _lock.synchronized(() => _systemAssetsStreamListener(event)));
 
     _systemAssetsSubject.add(_hiveSource.systemTokenContractAssets);
     _customAssetsSubject.add(_hiveSource.customTokenContractAssets);

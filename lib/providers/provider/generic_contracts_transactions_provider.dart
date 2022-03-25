@@ -6,7 +6,7 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/generic_contracts_repository.dart';
 
-final genericContractsTransactionsProvider = StreamProvider<TransactionsFoundEvent>(
+final genericContractsTransactionsProvider = StreamProvider.autoDispose<TransactionsFoundEvent>(
   (ref) => getIt
       .get<GenericContractsRepository>()
       .transactionsStream

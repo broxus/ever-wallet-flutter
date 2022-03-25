@@ -1,1 +1,0 @@
-const kTonDecimals = 9;

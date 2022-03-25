@@ -6,6 +6,6 @@ import '../../../data/repositories/approvals_repository.dart';
 import '../../../injection.dart';
 import '../../../logger.dart';
 
-final approvalsProvider = StreamProvider<ApprovalRequest>(
+final approvalsProvider = StreamProvider.autoDispose<ApprovalRequest>(
   (ref) => getIt.get<ApprovalsRepository>().approvalsStream.doOnError((err, st) => logger.e(err, err, st)),
 );

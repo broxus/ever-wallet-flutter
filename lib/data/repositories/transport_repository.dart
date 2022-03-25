@@ -13,7 +13,7 @@ class TransportRepository {
   final TransportSource _transportSource;
   final HiveSource _hiveSource;
 
-  TransportRepository._(
+  const TransportRepository._(
     this._transportSource,
     this._hiveSource,
   );
@@ -31,12 +31,14 @@ class TransportRepository {
     return instance;
   }
 
-  Stream<Transport?> get transportStream => _transportSource.transportStream;
+  Stream<Transport> get transportStream => _transportSource.transportStream;
 
-  Transport? get transport => _transportSource.transport;
+  Future<Transport> get transport => _transportSource.transport;
 
   Future<void> updateTransport(ConnectionData connectionData) async {
-    final prevTransport = _transportSource.transport;
+    final prevTransport = await _transportSource.transport;
+
+    if (prevTransport.connectionData == connectionData) return;
 
     late final Transport transport;
 
@@ -48,18 +50,29 @@ class TransportRepository {
       throw Exception('Invalid connection type');
     }
 
-    _transportSource.transport = transport;
+    _transportSource.setTransport(transport);
 
     await _hiveSource.setCurrentConnection(connectionData.name);
 
-    prevTransport?.freePtr();
+    prevTransport.freePtr();
   }
 
   Future<void> _initialize() async {
-    final currentConnectionName = _hiveSource.currentConnection;
-
-    await updateTransport(
-      kNetworkPresets.firstWhere((e) => e.name == currentConnectionName, orElse: () => kNetworkPresets.first),
+    final currentConnection = kNetworkPresets.firstWhere(
+      (e) => e.name == _hiveSource.currentConnection,
+      orElse: () => kNetworkPresets.first,
     );
+
+    late final Transport transport;
+
+    if (currentConnection.type == TransportType.gql) {
+      transport = await GqlTransport.create(currentConnection);
+    } else if (currentConnection.type == TransportType.jrpc) {
+      transport = await JrpcTransport.create(currentConnection);
+    } else {
+      throw Exception('Invalid connection type');
+    }
+
+    _transportSource.setTransport(transport);
   }
 }

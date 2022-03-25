@@ -6,12 +6,11 @@ import 'package:rxdart/rxdart.dart';
 
 @lazySingleton
 class TransportSource {
-  final _transportSubject = BehaviorSubject<Transport?>.seeded(null);
+  final _transportSubject = BehaviorSubject<Transport>();
 
-  Stream<Transport?> get transportStream =>
-      _transportSubject.distinct((a, b) => a?.connectionData == b?.connectionData);
+  Stream<Transport> get transportStream => _transportSubject;
 
-  Transport? get transport => _transportSubject.value;
+  Future<Transport> get transport => _transportSubject.first;
 
-  set transport(Transport? transport) => _transportSubject.add(transport);
+  void setTransport(Transport transport) => _transportSubject.add(transport);
 }

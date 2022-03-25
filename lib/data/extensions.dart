@@ -7,18 +7,22 @@ extension TokenWalletVersionX on TokenWalletVersion {
         return 4;
       case TokenWalletVersion.tip3:
         return 5;
+      default:
+        throw Exception('Invalid token wallet version');
     }
   }
 }
 
-TokenWalletVersion tokenWalletVersionFromInt(int version) {
-  switch (version) {
-    case 4:
-      return TokenWalletVersion.oldTip3v4;
-    case 5:
-      return TokenWalletVersion.tip3;
-    default:
-      throw Exception('Invalid token wallet version');
+extension IntX on int {
+  TokenWalletVersion toTokenWalletVersion() {
+    switch (this) {
+      case 4:
+        return TokenWalletVersion.oldTip3v4;
+      case 5:
+        return TokenWalletVersion.tip3;
+      default:
+        throw Exception('Invalid token wallet version');
+    }
   }
 }
 
@@ -41,6 +45,7 @@ extension WalletTypeX on WalletType {
           }
         },
         walletV3: () => 7,
+        highloadWalletV2: () => 8,
       );
 
   String describe() => when(
@@ -61,6 +66,7 @@ extension WalletTypeX on WalletType {
           }
         },
         walletV3: () => 'WalletV3',
+        highloadWalletV2: () => 'HighloadWalletV2',
       );
 }
 
@@ -117,6 +123,14 @@ extension StringX on String {
 }
 
 extension IterableX<T> on Iterable<T> {
+  Future<T> asyncFirstWhere(Future<bool> Function(T element) test, {T Function()? orElse}) async {
+    for (final element in this) {
+      if (await test(element)) return element;
+    }
+    if (orElse != null) return orElse();
+    throw StateError('No element');
+  }
+
   Future<T?> asyncFirstWhereOrNull(Future<bool> Function(T element) test) async {
     for (final element in this) {
       if (await test(element)) return element;
@@ -124,5 +138,28 @@ extension IterableX<T> on Iterable<T> {
     return null;
   }
 
-  Future<Iterable<K>> asyncMap<K>(Future<K> Function(T e) toElement) => Future.wait<K>(map((e) => toElement(e)));
+  Future<Iterable<K>> asyncMap<K>(Future<K> Function(T element) toElement) => Future.wait<K>(map((e) => toElement(e)));
+
+  Future<Iterable<T>> asyncWhere(Future<bool> Function(T element) test) async => <T>[
+        for (final element in this)
+          if (await test(element)) element,
+      ];
+
+  Future<bool> asyncAny(Future<bool> Function(T element) test) async {
+    for (final element in this) {
+      if (await test(element)) return true;
+    }
+    return false;
+  }
+
+  Future<bool> asyncEvery(Future<bool> Function(T element) test) async {
+    for (final element in this) {
+      if (!(await test(element))) return false;
+    }
+    return true;
+  }
+}
+
+extension ExceptionX on Exception {
+  String toUiMessage() => toString().replaceAllMapped('Exception: ', (match) => '');
 }

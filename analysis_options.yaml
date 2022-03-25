@@ -2,10 +2,9 @@ include: package:lint/analysis_options.yaml
 
 linter:
   rules:
+    avoid_classes_with_only_static_members: false
     prefer_single_quotes: true
     prefer_relative_imports: true
-    avoid_positional_boolean_parameters: false
-    depend_on_referenced_packages: false
     always_use_package_imports: false
 
 analyzer:

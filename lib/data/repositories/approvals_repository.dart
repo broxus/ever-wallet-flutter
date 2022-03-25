@@ -15,7 +15,7 @@ class ApprovalsRepository {
 
   Stream<ApprovalRequest> get approvalsStream => _approvalsSubject;
 
-  Future<Permissions> requestApprovalForPermissions({
+  Future<Permissions> requestForPermissions({
     required String origin,
     required List<Permission> permissions,
   }) async {
@@ -32,7 +32,7 @@ class ApprovalsRepository {
     return completer.future;
   }
 
-  Future<Tuple2<String, String>> requestApprovalToSendMessage({
+  Future<Tuple2<String, String>> requestToSendMessage({
     required String origin,
     required String sender,
     required String recipient,
@@ -59,18 +59,18 @@ class ApprovalsRepository {
     return completer.future;
   }
 
-  Future<String> requestApprovalToCallContractMethod({
+  Future<String> requestToCallContractMethod({
     required String origin,
-    required String selectedPublicKey,
-    required String repackedRecipient,
+    required String publicKey,
+    required String recipient,
     required FunctionCall payload,
   }) async {
     final completer = Completer<String>();
 
     final request = ApprovalRequest.callContractMethod(
       origin: origin,
-      selectedPublicKey: selectedPublicKey,
-      repackedRecipient: repackedRecipient,
+      publicKey: publicKey,
+      recipient: recipient,
       payload: payload,
       completer: completer,
     );

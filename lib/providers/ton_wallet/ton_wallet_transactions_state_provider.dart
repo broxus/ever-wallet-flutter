@@ -43,7 +43,7 @@ class TonWalletTransactionsNotifier extends StateNotifier<Tuple2<List<TonWalletT
 
   void preload(TransactionId? from) => _preloadSubject.add(from);
 
-  void _transactionsStreamListener(List<TonWalletTransactionWithData> event) => state = Tuple2(event, false);
+  void _transactionsStreamListener(List<TonWalletTransactionWithData>? event) => state = Tuple2(event ?? [], false);
 
   Future<void> _preloadStreamListener(TransactionId? event) async {
     try {

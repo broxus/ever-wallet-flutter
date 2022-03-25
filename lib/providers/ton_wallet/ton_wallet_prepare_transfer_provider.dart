@@ -25,15 +25,16 @@ class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<U
 
   Future<void> prepareTransfer({
     required String address,
-    required String publicKey,
+    String? publicKey,
     required String destination,
     required String amount,
     String? body,
-    bool isComment = true,
   }) async {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
+      _message?.freePtr();
+
       final repackedDestination = repackAddress(destination);
 
       final amountValue = int.parse(amount);
@@ -46,7 +47,6 @@ class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<U
             body: body,
           );
 
-      _message?.freePtr();
       _message = message;
 
       final fees = await getIt.get<TonWalletsRepository>().estimateFees(
@@ -55,8 +55,7 @@ class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<U
           );
       final feesValue = int.parse(fees);
 
-      final balance =
-          await getIt.get<TonWalletsRepository>().getInfoStream(address).first.then((v) => v.contractState.balance);
+      final balance = await getIt.get<TonWalletsRepository>().getInfo(address).then((v) => v.contractState.balance);
       final balanceValue = int.parse(balance);
 
       final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);

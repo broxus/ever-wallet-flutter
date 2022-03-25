@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -30,15 +31,12 @@ class TonWalletsRepository {
     this._keystoreSource,
     this._hiveSource,
   ) {
-    _transportSource.transportStream
-        .skip(1)
-        .whereType<Transport>()
-        .listen((event) => _lock.synchronized(() => _transportStreamListener()));
-
-    _accountsStorageSource.currentAccountsStream
-        .startWith(const [])
-        .pairwise()
-        .listen((event) => _lock.synchronized(() => _currentAccountsStreamListener(event)));
+    Rx.combineLatest3<List<AssetsList>, Transport, void, Tuple2<List<AssetsList>, Transport>>(
+      _accountsStorageSource.currentAccountsStream,
+      _transportSource.transportStream,
+      Stream<void>.periodic(kSubscriptionRefreshTimeout).startWith(null),
+      (a, b, c) => Tuple2(a, b),
+    ).listen((event) => _lock.synchronized(() => _currentAccountsStreamListener(event)));
 
     _accountsStorageSource.accountsStream
         .skip(1)
@@ -47,10 +45,31 @@ class TonWalletsRepository {
         .listen((event) => _lock.synchronized(() => _accountsStreamListener(event)));
   }
 
-  Stream<TonWalletInfo> getInfoStream(String address) => _tonWalletsSubject
-      .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
-      .whereType<TonWallet>()
-      .flatMap((v) => v.onStateChangedStream.cast<OnStateChangedPayload?>().startWith(null).map((e) => v))
+  Future<TonWalletInfo> getInfo(String address) async {
+    final tonWallet = await _getTonWallet(address);
+
+    final tonWalletInfo = TonWalletInfo(
+      workchain: await tonWallet.workchain,
+      address: await tonWallet.address,
+      publicKey: await tonWallet.publicKey,
+      walletType: await tonWallet.walletType,
+      contractState: await tonWallet.contractState,
+      details: await tonWallet.details,
+      custodians: await tonWallet.custodians,
+    );
+
+    await _hiveSource.saveTonWalletInfo(
+      address: address,
+      group: tonWallet.transport.connectionData.group,
+      info: tonWalletInfo,
+    );
+
+    return tonWalletInfo;
+  }
+
+  Stream<TonWalletInfo?> getInfoStream(String address) => _tonWalletsSubject
+      .asyncMap((e) async => e.asyncFirstWhere((e) async => await e.address == address))
+      .flatMap((v) => v.stateChangesStream.cast<ContractState?>().startWith(null).map((e) => v))
       .asyncMap(
         (e) async {
           final tonWalletInfo = TonWalletInfo(
@@ -63,97 +82,82 @@ class TonWalletsRepository {
             custodians: await e.custodians,
           );
 
-          await _hiveSource.saveTonWalletInfo(tonWalletInfo);
+          await _hiveSource.saveTonWalletInfo(
+            address: address,
+            group: e.transport.connectionData.group,
+            info: tonWalletInfo,
+          );
 
           return tonWalletInfo;
         },
       )
       .cast<TonWalletInfo?>()
-      .startWith(_hiveSource.getTonWalletInfo(address))
-      .whereType<TonWalletInfo>();
+      .onErrorReturn(null)
+      .distinct();
 
-  Stream<ContractState> getStateChangesStream(String address) => _tonWalletsSubject
-      .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
-      .whereType<TonWallet>()
-      .flatMap((v) => v.onStateChangedStream)
-      .map((e) => e.newState);
+  Stream<List<TonWalletTransactionWithData>?> getTransactionsStream(String address) => _tonWalletsSubject
+      .asyncMap((e) async => e.asyncFirstWhere((e) async => await e.address == address))
+      .flatMap(
+        (v) => v.transactionsStream.asyncMap(
+          (e) async {
+            final group = v.transport.connectionData.group;
 
-  Stream<List<PendingTransaction>> getPendingTransactionsStream(String address) => _tonWalletsSubject
-      .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
-      .whereType<TonWallet>()
-      .flatMap((v) => v.pendingTransactionsStream);
+            final cached = _hiveSource.getTonWalletTransactions(
+              address: address,
+              group: group,
+            );
 
-  Stream<List<MultisigPendingTransaction>> getUnconfirmedTransactionsStream(String address) => _tonWalletsSubject
-      .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
-      .whereType<TonWallet>()
-      .flatMap((v) => v.unconfirmedTransactionsStream);
+            final list = [
+              ...{
+                if (cached != null) ...cached,
+                ...e,
+              }
+            ]..sort((a, b) => a.transaction.compareTo(b.transaction));
 
-  Stream<List<TonWalletTransactionWithData>> getTransactionsStream(String address) {
-    var list = _hiveSource.getTonWalletTransactions(address) ?? [];
+            await _hiveSource.saveTonWalletTransactions(
+              address: address,
+              group: group,
+              transactions: list,
+            );
 
-    return _tonWalletsSubject
-        .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
-        .whereType<TonWallet>()
-        .flatMap((v) => v.onTransactionsFoundStream)
-        .map((e) => e.transactions)
-        .startWith(list)
-        .asyncMap(
-      (e) async {
-        list = [
-          ...{
-            ...list,
-            ...e,
-          }
-        ]..sort((a, b) => a.transaction.compareTo(b.transaction));
+            return list;
+          },
+        ),
+      )
+      .cast<List<TonWalletTransactionWithData>?>()
+      .onErrorReturn(null)
+      .distinct((a, b) => listEquals(a, b));
 
-        await _hiveSource.saveTonWalletTransactions(
-          address: address,
-          transactions: list,
-        );
+  Stream<List<PendingTransaction>?> getPendingTransactionsStream(String address) => _tonWalletsSubject
+      .asyncMap((e) async => e.asyncFirstWhere((e) async => await e.address == address))
+      .flatMap((v) => v.pendingTransactionsStream)
+      .cast<List<PendingTransaction>?>()
+      .onErrorReturn(null)
+      .distinct((a, b) => listEquals(a, b));
 
-        return list;
-      },
-    );
-  }
+  Stream<List<MultisigPendingTransaction>?> getUnconfirmedTransactionsStream(String address) => _tonWalletsSubject
+      .asyncMap((e) async => e.asyncFirstWhere((e) async => await e.address == address))
+      .flatMap((v) => v.unconfirmedTransactionsStream)
+      .cast<List<MultisigPendingTransaction>?>()
+      .onErrorReturn(null)
+      .distinct((a, b) => listEquals(a, b));
 
-  Stream<List<Tuple2<PendingTransaction, Transaction?>>> getSentMessagesStream(String address) {
-    var list = <Tuple2<PendingTransaction, Transaction?>>[];
+  Stream<List<Tuple2<PendingTransaction, Transaction?>>?> getSentMessagesStream(String address) => _tonWalletsSubject
+      .asyncMap((e) async => e.asyncFirstWhere((e) async => await e.address == address))
+      .flatMap((v) => v.sentMessagesStream)
+      .cast<List<Tuple2<PendingTransaction, Transaction?>>?>()
+      .onErrorReturn(null)
+      .distinct((a, b) => listEquals(a, b));
 
-    return _tonWalletsSubject
-        .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
-        .whereType<TonWallet>()
-        .flatMap((v) => v.onMessageSentStream)
-        .map((e) => [Tuple2(e.pendingTransaction, e.transaction)])
-        .startWith(list)
-        .map(
-          (e) => list = [
-            ...list,
-            ...e,
-          ]..sort((a, b) => a.item1.compareTo(b.item1)),
-        );
-  }
-
-  Stream<List<PendingTransaction>> getExpiredMessagesStream(String address) {
-    var list = <PendingTransaction>[];
-
-    return _tonWalletsSubject
-        .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
-        .whereType<TonWallet>()
-        .flatMap((v) => v.onMessageExpiredStream)
-        .map((e) => [e.pendingTransaction])
-        .startWith(list)
-        .map(
-          (e) => list = [
-            ...list,
-            ...e,
-          ]..sort((a, b) => a.compareTo(b)),
-        );
-  }
+  Stream<List<PendingTransaction>?> getExpiredMessagesStream(String address) => _tonWalletsSubject
+      .asyncMap((e) async => e.asyncFirstWhere((e) async => await e.address == address))
+      .flatMap((v) => v.expiredMessagesStream)
+      .cast<List<PendingTransaction>?>()
+      .onErrorReturn(null)
+      .distinct((a, b) => listEquals(a, b));
 
   Future<UnsignedMessage> prepareDeploy(String address) async {
-    final tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (tonWallet == null) throw Exception('Ton wallet not found');
+    final tonWallet = await _getTonWallet(address);
 
     final message = await tonWallet.prepareDeploy(kDefaultMessageExpiration);
 
@@ -165,9 +169,7 @@ class TonWalletsRepository {
     required List<String> custodians,
     required int reqConfirms,
   }) async {
-    final tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (tonWallet == null) throw Exception('Ton wallet not found');
+    final tonWallet = await _getTonWallet(address);
 
     final message = await tonWallet.prepareDeployWithMultipleOwners(
       expiration: kDefaultMessageExpiration,
@@ -185,9 +187,7 @@ class TonWalletsRepository {
     required String amount,
     String? body,
   }) async {
-    final tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (tonWallet == null) throw Exception('Ton wallet not found');
+    final tonWallet = await _getTonWallet(address);
 
     final message = await tonWallet.prepareTransfer(
       publicKey: publicKey ?? await tonWallet.publicKey,
@@ -205,9 +205,7 @@ class TonWalletsRepository {
     required String publicKey,
     required String transactionId,
   }) async {
-    final tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (tonWallet == null) throw Exception('Ton wallet not found');
+    final tonWallet = await _getTonWallet(address);
 
     final message = await tonWallet.prepareConfirmTransaction(
       publicKey: publicKey,
@@ -222,9 +220,7 @@ class TonWalletsRepository {
     required String address,
     required UnsignedMessage message,
   }) async {
-    final tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (tonWallet == null) throw Exception('Ton wallet not found');
+    final tonWallet = await _getTonWallet(address);
 
     final fees = await tonWallet.estimateFees(message);
 
@@ -237,9 +233,7 @@ class TonWalletsRepository {
     required String password,
     required UnsignedMessage message,
   }) async {
-    final tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (tonWallet == null) throw Exception('Ton wallet not found');
+    final tonWallet = await _getTonWallet(address);
 
     final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
@@ -253,9 +247,7 @@ class TonWalletsRepository {
   }
 
   Future<void> refresh(String address) async {
-    final tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (tonWallet == null) throw Exception('Ton wallet not found');
+    final tonWallet = await _getTonWallet(address);
 
     await tonWallet.refresh();
   }
@@ -264,103 +256,55 @@ class TonWalletsRepository {
     required String address,
     required TransactionId from,
   }) async {
-    final tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (tonWallet == null) throw Exception('Ton wallet not found');
+    final tonWallet = await _getTonWallet(address);
 
     await tonWallet.preloadTransactions(from);
   }
 
-  Future<TonWallet> _subscribe({
-    required String address,
-    required String publicKey,
-    required WalletType walletType,
-  }) async {
-    var tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (tonWallet != null) return tonWallet;
-
-    final transport = _transportSource.transport;
-
-    if (transport == null) throw Exception('Transport unavailable');
-
-    tonWallet = await TonWallet.subscribe(
-      transport: transport,
-      workchain: kDefaultWorkchain,
-      publicKey: publicKey,
-      walletType: walletType,
-    );
-
-    _tonWalletsSubject.add([..._tonWalletsSubject.value, tonWallet]);
-
-    return tonWallet;
-  }
-
-  Future<void> _unsubscribe(String address) async {
-    final tonWallet = await _tonWalletsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (tonWallet == null) return;
-
-    final tonWallets = _tonWalletsSubject.value.where((e) => e != tonWallet).toList();
-
-    _tonWalletsSubject.add(tonWallets);
-
-    tonWallet.freePtr();
-  }
-
-  void _clear() {
-    final tonWallets = [..._tonWalletsSubject.value];
-
-    _tonWalletsSubject.add([]);
-
-    for (final tonWallet in tonWallets) {
-      tonWallet.freePtr();
-    }
-  }
-
-  Future<void> _transportStreamListener() async {
-    try {
-      final tonWallets = await Future.wait(
-        _tonWalletsSubject.value.map((e) async => Tuple3(await e.address, await e.publicKey, await e.walletType)),
+  Future<TonWallet> _getTonWallet(String address) => _tonWalletsSubject
+      .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
+      .whereType<TonWallet>()
+      .first
+      .timeout(
+        kSubscriptionRefreshTimeout * 2,
+        onTimeout: () => throw Exception('Ton wallet not found'),
       );
 
-      _clear();
-
-      for (final tonWallet in tonWallets) {
-        await _subscribe(
-          address: tonWallet.item1,
-          publicKey: tonWallet.item2,
-          walletType: tonWallet.item3,
-        );
-      }
-    } catch (err, st) {
-      logger.e(err, err, st);
-    }
-  }
-
-  Future<void> _currentAccountsStreamListener(Iterable<List<AssetsList>> event) async {
+  Future<void> _currentAccountsStreamListener(Tuple2<List<AssetsList>, Transport> event) async {
     try {
-      final prev = event.first;
-      final next = event.last;
+      final accounts = event.item1;
+      final transport = event.item2;
 
-      final currentTonWallets = next.map((e) => e.tonWallet);
-      final previousTonWallets = prev.map((e) => e.tonWallet);
+      final tonWalletAssets = accounts.map((e) => e.tonWallet);
 
-      final addedTonWallets = [...currentTonWallets]
-        ..removeWhere((e) => previousTonWallets.any((el) => el.address == e.address));
-      final removedTonWallets = [...previousTonWallets]
-        ..removeWhere((e) => currentTonWallets.any((el) => el.address == e.address));
+      final tonWalletsForUnsubscription = await _tonWalletsSubject.value.asyncWhere(
+        (e) async =>
+            e.transport != transport || await tonWalletAssets.asyncEvery((el) async => el.address != await e.address),
+      );
 
-      for (final addedTonWallet in addedTonWallets) {
-        await _subscribe(
-          address: addedTonWallet.address,
-          publicKey: addedTonWallet.publicKey,
-          walletType: addedTonWallet.contract,
-        );
+      for (final tonWalletForUnsubscription in tonWalletsForUnsubscription) {
+        _tonWalletsSubject.add(_tonWalletsSubject.value.where((e) => e != tonWalletForUnsubscription).toList());
+
+        tonWalletForUnsubscription.freePtr();
       }
 
-      for (final removedTonWallet in removedTonWallets) {
-        await _unsubscribe(removedTonWallet.address);
+      final tonWalletAssetsForSubscription = await tonWalletAssets.asyncWhere(
+        (e) async => _tonWalletsSubject.value.asyncEvery((el) async => await el.address != e.address),
+      );
+
+      for (final tonWalletAssetForSubscription in tonWalletAssetsForSubscription) {
+        try {
+          final tonWallet = await TonWallet.subscribe(
+            transport: transport,
+            workchain: kDefaultWorkchain,
+            publicKey: tonWalletAssetForSubscription.publicKey,
+            walletType: tonWalletAssetForSubscription.contract,
+          );
+
+          _tonWalletsSubject.add([..._tonWalletsSubject.value, tonWallet]);
+        } catch (err, st) {
+          logger.e(err, err, st);
+        }
       }
     } catch (err, st) {
       logger.e(err, err, st);

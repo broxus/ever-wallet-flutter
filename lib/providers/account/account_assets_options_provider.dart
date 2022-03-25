@@ -11,7 +11,7 @@ import '../../../logger.dart';
 import '../../data/repositories/accounts_repository.dart';
 
 final accountAssetsOptionsProvider =
-    StreamProvider.family<Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>, String>(
+    StreamProvider.autoDispose.family<Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>, String>(
   (ref, address) {
     final tokenWalletAssetsStream = Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
       getIt.get<AccountsRepository>().accountsStream.expand((e) => e).where((e) => e.address == address),
@@ -41,10 +41,8 @@ final accountAssetsOptionsProvider =
       tokenContractAssetsStream,
       (a, b) => Tuple2(a, b),
     ).map((event) {
-      final added = event.item2.where((e) => event.item1.any((el) => el.rootTokenContract == e.address)).toList()
-        ..sort((a, b) => a.name.compareTo(b.name));
-      final available = event.item2.where((e) => event.item1.every((el) => el.rootTokenContract != e.address)).toList()
-        ..sort((a, b) => a.name.compareTo(b.name));
+      final added = event.item2.where((e) => event.item1.any((el) => el.rootTokenContract == e.address)).toList();
+      final available = event.item2.where((e) => event.item1.every((el) => el.rootTokenContract != e.address)).toList();
 
       return Tuple2(
         added,

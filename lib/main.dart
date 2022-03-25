@@ -1,56 +1,47 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:isolate';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import 'injection.dart';
 import 'logger.dart';
-import 'presentation/application/application.dart';
+import 'presentation/application.dart';
 
-Future<void> main() async {
-  try {
-    final rawReceivePort = RawReceivePort((dynamic pair) async {
-      final list = pair as List<dynamic>;
-      final err = list.first as String;
-      final st = StackTrace.fromString(list.last as String);
+Future<void> main() async => runZonedGuarded<Future<void>>(
+      () async {
+        Isolate.current.addErrorListener(
+          RawReceivePort((dynamic pair) async {
+            final list = pair as List<dynamic>;
+            final err = list.first as String;
+            final st = StackTrace.fromString(list.last as String);
 
-      logger.e(err, err, st);
-    });
-    Isolate.current.addErrorListener(rawReceivePort.sendPort);
+            logger.e('Current isolate error', err, st);
+          }).sendPort,
+        );
 
-    loadNekotonLibrary();
+        FlutterError.onError = (FlutterErrorDetails details) => logger.e(
+              details.library,
+              details.exception,
+              details.stack,
+            );
 
-    await dotenv.load();
+        await dotenv.load();
 
-    WidgetsFlutterBinding.ensureInitialized();
-    await EasyLocalization.ensureInitialized();
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+        NekotonFlutter.initialize(logger);
 
-    if (Platform.isAndroid) {
-      await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
-    }
+        WidgetsFlutterBinding.ensureInitialized();
 
-    await configureDependencies();
+        await EasyLocalization.ensureInitialized();
 
-    setNekotonLogger(logger);
+        await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-    runZonedGuarded(
-      () => runApp(
-        const ProviderScope(
-          child: Application(),
-        ),
-      ),
-      FirebaseCrashlytics.instance.recordError,
+        await configureDependencies();
+
+        runApp(const Application());
+      },
+      (err, st) => logger.e('Zoned error', err, st),
     );
-  } catch (err, st) {
-    logger.e(err, err, st);
-  }
-}

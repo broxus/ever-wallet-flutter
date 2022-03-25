@@ -11,7 +11,8 @@ import '../../../logger.dart';
 import '../../data/extensions.dart';
 import '../../data/repositories/accounts_repository.dart';
 
-final accountAssetsProvider = StreamProvider.family<Tuple2<TonWalletAsset, List<TokenContractAsset>>, String>(
+final accountAssetsProvider =
+    StreamProvider.autoDispose.family<Tuple2<TonWalletAsset, List<TokenContractAsset>>, String>(
   (ref, address) {
     final tokenContractAssetsStream =
         Rx.combineLatest2<List<TokenContractAsset>, List<TokenContractAsset>, List<TokenContractAsset>>(

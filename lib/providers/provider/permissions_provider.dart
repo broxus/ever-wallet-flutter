@@ -7,7 +7,7 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/permissions_repository.dart';
 
-final permissionsProvider = StreamProvider<List<Tuple2<String, PermissionsChangedEvent>>>(
+final permissionsProvider = StreamProvider.autoDispose<List<Tuple2<String, PermissionsChangedEvent>>>(
   (ref) => getIt
       .get<PermissionsRepository>()
       .permissionsStream

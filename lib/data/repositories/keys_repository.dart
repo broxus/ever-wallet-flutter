@@ -59,24 +59,6 @@ class KeysRepository {
     _keystoreSource.currentKey = currentKey;
   }
 
-  Future<void> setCustomPublicKeyLabel({
-    required String publicKey,
-    required String label,
-  }) async {
-    await _hiveSource.setPublicKeyLabel(
-      publicKey: publicKey,
-      label: label,
-    );
-
-    _labelsSubject.add(_hiveSource.publicKeysLabels);
-  }
-
-  Future<void> removeCustomPublicKeyLabel(String publicKey) async {
-    await _hiveSource.removePublicKeyLabel(publicKey);
-
-    _labelsSubject.add(_hiveSource.publicKeysLabels);
-  }
-
   Future<KeyStoreEntry> createKey({
     String? name,
     required List<String> phrase,
@@ -208,13 +190,22 @@ class KeysRepository {
     return updatedKey;
   }
 
-  Future<KeyStoreEntry> renameKey({
+  Future<void> renameKey({
     required String publicKey,
     required String name,
   }) async {
     final key = keys.firstWhereOrNull((e) => e.publicKey == publicKey);
 
-    if (key == null) throw Exception('Key is not found');
+    if (key == null) {
+      await _hiveSource.setPublicKeyLabel(
+        publicKey: publicKey,
+        label: name,
+      );
+
+      _labelsSubject.add(_hiveSource.publicKeysLabels);
+
+      return;
+    }
 
     late final UpdateKeyInput updateKeyInput;
 
@@ -231,9 +222,7 @@ class KeysRepository {
       );
     }
 
-    final updatedKey = await _keystoreSource.updateKey(updateKeyInput);
-
-    return updatedKey;
+    await _keystoreSource.updateKey(updateKeyInput);
   }
 
   Future<List<String>> exportKey({
@@ -282,7 +271,7 @@ class KeysRepository {
   Future<bool> checkKeyPassword({
     required String publicKey,
     required String password,
-  }) {
+  }) async {
     final key = keys.firstWhereOrNull((e) => e.publicKey == publicKey);
 
     if (key == null) throw Exception('Key is not found');
@@ -308,7 +297,7 @@ class KeysRepository {
       );
     }
 
-    final isValid = _keystoreSource.checkKeyPassword(signInput);
+    final isValid = await _keystoreSource.checkKeyPassword(signInput);
 
     return isValid;
   }
@@ -358,7 +347,9 @@ class KeysRepository {
       final duplicatedPublicKeys = _hiveSource.publicKeysLabels.keys.where((e) => event.any((el) => e == el.publicKey));
 
       for (final duplicatedPublicKey in duplicatedPublicKeys) {
-        await removeCustomPublicKeyLabel(duplicatedPublicKey);
+        await _hiveSource.removePublicKeyLabel(duplicatedPublicKey);
+
+        _labelsSubject.add(_hiveSource.publicKeysLabels);
       }
     } catch (err, st) {
       logger.e(err, err, st);

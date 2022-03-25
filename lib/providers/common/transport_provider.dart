@@ -6,7 +6,7 @@ import '../../../../injection.dart';
 import '../../../data/repositories/transport_repository.dart';
 import '../../../logger.dart';
 
-final connectionDataProvider = StreamProvider<ConnectionData>(
+final connectionDataProvider = StreamProvider.autoDispose<ConnectionData>(
   (ref) => getIt
       .get<TransportRepository>()
       .transportStream

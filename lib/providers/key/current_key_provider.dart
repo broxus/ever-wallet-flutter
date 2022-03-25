@@ -6,6 +6,6 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/keys_repository.dart';
 
-final currentKeyProvider = StreamProvider<KeyStoreEntry?>(
+final currentKeyProvider = StreamProvider.autoDispose<KeyStoreEntry?>(
   (ref) => getIt.get<KeysRepository>().currentKeyStream.doOnError((err, st) => logger.e(err, err, st)),
 );

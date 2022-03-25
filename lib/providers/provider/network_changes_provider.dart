@@ -6,7 +6,7 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/transport_repository.dart';
 
-final networkChangesProvider = StreamProvider<NetworkChangedEvent>(
+final networkChangesProvider = StreamProvider.autoDispose<NetworkChangedEvent>(
   (ref) => getIt
       .get<TransportRepository>()
       .transportStream

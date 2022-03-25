@@ -6,7 +6,7 @@ import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/ton_wallets_repository.dart';
 
-final tonWalletExpiredTransactionsProvider = StreamProvider.family<List<PendingTransaction>, String>(
+final tonWalletExpiredTransactionsProvider = StreamProvider.autoDispose.family<List<PendingTransaction>?, String>(
   (ref, address) => getIt
       .get<TonWalletsRepository>()
       .getExpiredMessagesStream(address)

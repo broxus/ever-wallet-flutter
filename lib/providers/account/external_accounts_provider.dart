@@ -7,7 +7,7 @@ import '../../../logger.dart';
 import '../../data/repositories/accounts_repository.dart';
 import '../../data/repositories/keys_repository.dart';
 
-final externalAccountsProvider = StreamProvider<List<String>>(
+final externalAccountsProvider = StreamProvider.autoDispose<List<String>>(
   (ref) => Rx.combineLatest2<KeyStoreEntry?, Map<String, List<String>>, List<String>>(
     getIt.get<KeysRepository>().currentKeyStream,
     getIt.get<AccountsRepository>().externalAccountsStream,

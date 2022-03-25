@@ -27,8 +27,8 @@ class ApprovalRequest with _$ApprovalRequest {
 
   const factory ApprovalRequest.callContractMethod({
     required String origin,
-    required String selectedPublicKey,
-    required String repackedRecipient,
+    required String publicKey,
+    required String recipient,
     required FunctionCall payload,
     required Completer<String> completer,
   }) = _CallContractMethod;

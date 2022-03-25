@@ -7,6 +7,7 @@ import 'package:synchronized/synchronized.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../logger.dart';
+import '../constants.dart';
 import '../extensions.dart';
 import '../sources/local/keystore_source.dart';
 import '../sources/remote/transport_source.dart';
@@ -15,6 +16,7 @@ import '../sources/remote/transport_source.dart';
 class GenericContractsRepository {
   final TransportSource _transportSource;
   final KeystoreSource _keystoreSource;
+  final _currentContractSubscriptionsSubject = BehaviorSubject<List<String>>.seeded([]);
   final _genericContractsSubject = BehaviorSubject<List<GenericContract>>.seeded([]);
   final _lock = Lock();
 
@@ -22,23 +24,18 @@ class GenericContractsRepository {
     this._transportSource,
     this._keystoreSource,
   ) {
-    _transportSource.transportStream
-        .skip(1)
-        .whereType<Transport>()
-        .listen((event) => _lock.synchronized(() => _transportStreamListener()));
+    Rx.combineLatest3<List<String>, Transport, void, Tuple2<List<String>, Transport>>(
+      _currentContractSubscriptionsSubject,
+      _transportSource.transportStream,
+      Stream<void>.periodic(kSubscriptionRefreshTimeout).startWith(null),
+      (a, b, c) => Tuple2(a, b),
+    ).listen((event) => _lock.synchronized(() => _currentContractSubscriptionsStreamListener(event)));
   }
 
-  Future<Map<String, ContractUpdatesSubscription>> get subscriptions => _genericContractsSubject.value
-      .asyncMap(
-        (e) async => MapEntry(
-          await e.address,
-          const ContractUpdatesSubscription(
-            state: true,
-            transactions: true,
-          ),
-        ),
-      )
-      .then((v) => Map.fromEntries(v));
+  Map<String, ContractUpdatesSubscription> get subscriptions => {
+        for (final e in _currentContractSubscriptionsSubject.value)
+          e: const ContractUpdatesSubscription(state: true, transactions: true)
+      };
 
   Stream<Tuple3<String, List<Transaction>, TransactionsBatchInfo>> get transactionsStream =>
       _genericContractsSubject.expand((e) => e).flatMap(
@@ -67,10 +64,7 @@ class GenericContractsRepository {
     required UnsignedMessage message,
     required TransactionExecutionOptions options,
   }) async {
-    final genericContract =
-        await _genericContractsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (genericContract == null) throw Exception('Generic contract not found');
+    final genericContract = await _getGenericContract(address);
 
     final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
@@ -90,10 +84,7 @@ class GenericContractsRepository {
     required String password,
     required UnsignedMessage message,
   }) async {
-    final genericContract =
-        await _genericContractsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (genericContract == null) throw Exception('Generic contract not found');
+    final genericContract = await _getGenericContract(address);
 
     final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
@@ -106,63 +97,59 @@ class GenericContractsRepository {
     return pendingTransaction;
   }
 
-  Future<void> subscribe(String address) => _subscribe(address);
+  void subscribe(String address) => _currentContractSubscriptionsSubject.add([
+        ...{
+          ..._currentContractSubscriptionsSubject.value.where((e) => e != address).toList(),
+          address,
+        }
+      ]);
 
-  Future<void> unsubscribe(String address) => _unsubscribe(address);
+  void unsubscribe(String address) => _currentContractSubscriptionsSubject
+      .add(_currentContractSubscriptionsSubject.value.where((e) => e != address).toList());
 
-  void clear() => _clear();
+  void clear() => _currentContractSubscriptionsSubject.add([]);
 
-  Future<GenericContract> _subscribe(String address) async {
-    var genericContract =
-        await _genericContractsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
+  Future<GenericContract> _getGenericContract(String address) => _genericContractsSubject
+      .asyncMap((e) async => e.asyncFirstWhereOrNull((e) async => await e.address == address))
+      .whereType<GenericContract>()
+      .first
+      .timeout(
+        kSubscriptionRefreshTimeout * 2,
+        onTimeout: () => throw Exception('Generic contract not found'),
+      );
 
-    if (genericContract != null) return genericContract;
-
-    final transport = _transportSource.transport;
-
-    if (transport == null) throw Exception('Transport unavailable');
-
-    genericContract = await GenericContract.subscribe(
-      transport: transport,
-      address: address,
-    );
-
-    _genericContractsSubject.add([..._genericContractsSubject.value, genericContract]);
-
-    return genericContract;
-  }
-
-  Future<void> _unsubscribe(String address) async {
-    final genericContract =
-        await _genericContractsSubject.value.asyncFirstWhereOrNull((e) async => await e.address == address);
-
-    if (genericContract == null) return;
-
-    final genericContracts = _genericContractsSubject.value.where((e) => e != genericContract).toList();
-
-    _genericContractsSubject.add(genericContracts);
-
-    genericContract.freePtr();
-  }
-
-  void _clear() {
-    final genericContracts = [..._genericContractsSubject.value];
-
-    _genericContractsSubject.add([]);
-
-    for (final genericContract in genericContracts) {
-      genericContract.freePtr();
-    }
-  }
-
-  Future<void> _transportStreamListener() async {
+  Future<void> _currentContractSubscriptionsStreamListener(Tuple2<List<String>, Transport> event) async {
     try {
-      final genericContracts = await Future.wait(_genericContractsSubject.value.map((e) => e.address));
+      final contractSubscriptions = event.item1;
+      final transport = event.item2;
 
-      _clear();
+      final genericContractsForUnsubscription = await _genericContractsSubject.value.asyncWhere(
+        (e) async =>
+            e.transport != transport || await contractSubscriptions.asyncEvery((el) async => el != await e.address),
+      );
 
-      for (final genericContract in genericContracts) {
-        await _subscribe(genericContract);
+      for (final genericContractForUnsubscription in genericContractsForUnsubscription) {
+        _genericContractsSubject
+            .add(_genericContractsSubject.value.where((e) => e != genericContractForUnsubscription).toList());
+
+        genericContractForUnsubscription.freePtr();
+      }
+
+      final contractSubscriptionsForSubscription = await contractSubscriptions.asyncWhere(
+        (e) async => _genericContractsSubject.value.asyncEvery((el) async => await el.address != e),
+      );
+
+      for (final contractSubscriptionForSubscription in contractSubscriptionsForSubscription) {
+        try {
+          final genericContract = await GenericContract.subscribe(
+            transport: transport,
+            address: contractSubscriptionForSubscription,
+          );
+
+          _genericContractsSubject.add([..._genericContractsSubject.value, genericContract]);
+        } catch (err, st) {
+          logger.e(err, err, st);
+        }
       }
     } catch (err, st) {
       logger.e(err, err, st);
