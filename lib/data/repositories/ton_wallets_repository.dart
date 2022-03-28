@@ -279,7 +279,7 @@ class TonWalletsRepository {
 
       final tonWalletsForUnsubscription = await _tonWalletsSubject.value.asyncWhere(
         (e) async =>
-            e.transport != transport || await tonWalletAssets.asyncEvery((el) async => el.address != await e.address),
+            e.transport != transport || !await tonWalletAssets.asyncAny((el) async => el.address == await e.address),
       );
 
       for (final tonWalletForUnsubscription in tonWalletsForUnsubscription) {
@@ -289,7 +289,7 @@ class TonWalletsRepository {
       }
 
       final tonWalletAssetsForSubscription = await tonWalletAssets.asyncWhere(
-        (e) async => _tonWalletsSubject.value.asyncEvery((el) async => await el.address != e.address),
+        (e) async => !await _tonWalletsSubject.value.asyncAny((el) async => await el.address == e.address),
       );
 
       for (final tonWalletAssetForSubscription in tonWalletAssetsForSubscription) {

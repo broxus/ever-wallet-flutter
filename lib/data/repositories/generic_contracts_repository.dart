@@ -125,7 +125,7 @@ class GenericContractsRepository {
 
       final genericContractsForUnsubscription = await _genericContractsSubject.value.asyncWhere(
         (e) async =>
-            e.transport != transport || await contractSubscriptions.asyncEvery((el) async => el != await e.address),
+            e.transport != transport || !await contractSubscriptions.asyncAny((el) async => el == await e.address),
       );
 
       for (final genericContractForUnsubscription in genericContractsForUnsubscription) {
@@ -136,7 +136,7 @@ class GenericContractsRepository {
       }
 
       final contractSubscriptionsForSubscription = await contractSubscriptions.asyncWhere(
-        (e) async => _genericContractsSubject.value.asyncEvery((el) async => await el.address != e),
+        (e) async => !await _genericContractsSubject.value.asyncAny((el) async => await el.address == e),
       );
 
       for (final contractSubscriptionForSubscription in contractSubscriptionsForSubscription) {

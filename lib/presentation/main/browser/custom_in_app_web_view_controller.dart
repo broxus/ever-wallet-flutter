@@ -5,6 +5,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:rxdart/subjects.dart';
 
 import '../../../logger.dart';
+import 'utils.dart';
 
 class CustomInAppWebViewController {
   final InAppWebViewController controller;
@@ -90,7 +91,7 @@ class CustomInAppWebViewController {
           );
           return;
         } catch (_) {
-          parsedUrl = Uri.parse('https://www.google.com/search?q=$url');
+          parsedUrl = Uri.parse(getDuckDuckGoSearchLink(url));
 
           await controller.loadUrl(
             urlRequest: URLRequest(url: parsedUrl),

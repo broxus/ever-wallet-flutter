@@ -237,8 +237,8 @@ class TokenWalletsRepository {
       final tokenWalletsForUnsubscription = await _tokenWalletsSubject.value.asyncWhere(
         (e) async =>
             e.transport != transport ||
-            await tokenWalletAssets
-                .asyncEvery((el) async => el.item1 != await e.owner && el.item2 != (await e.symbol).rootTokenContract),
+            !await tokenWalletAssets
+                .asyncAny((el) async => el.item1 == await e.owner && el.item2 == (await e.symbol).rootTokenContract),
       );
 
       for (final tokenWalletForUnsubscription in tokenWalletsForUnsubscription) {
@@ -248,8 +248,8 @@ class TokenWalletsRepository {
       }
 
       final tokenWalletAssetsForSubscription = await tokenWalletAssets.asyncWhere(
-        (e) async => _tokenWalletsSubject.value
-            .asyncEvery((el) async => await el.owner != e.item1 && (await el.symbol).rootTokenContract != e.item2),
+        (e) async => !await _tokenWalletsSubject.value
+            .asyncAny((el) async => await el.owner == e.item1 && (await el.symbol).rootTokenContract == e.item2),
       );
 
       for (final tokenWalletAssetForSubscription in tokenWalletAssetsForSubscription) {
