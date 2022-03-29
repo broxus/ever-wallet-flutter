@@ -117,7 +117,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
 
   Widget amount() => SectionedCardSection(
         title: 'Amount',
-        subtitle: '${widget.amount.toTokens().removeZeroes()} EVER',
+        subtitle: '${widget.amount.toTokens().removeZeroes().formatValue()} EVER',
       );
 
   Widget fee() => Consumer(

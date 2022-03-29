@@ -470,7 +470,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
           publicKeys: publicKeys,
           transactionId: transactionId,
           destination: destination,
-          amount: amount.fromTokens(),
+          amount: amount,
           comment: comment,
         ),
         text: 'Confirm transaction',
