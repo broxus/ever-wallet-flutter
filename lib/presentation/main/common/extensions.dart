@@ -91,8 +91,8 @@ extension WalletInteractionInfoX on WalletInteractionInfo {
 
     return {
       if (recipient != null) LocaleKeys.recipient.tr(): recipient!,
-      if (knownPayload != null) ...{
-        LocaleKeys.known_payload.tr(): knownPayloadData!.item1,
+      if (knownPayloadData != null) ...{
+        LocaleKeys.known_payload.tr(): knownPayloadData.item1,
         ...knownPayloadData.item2,
       },
       LocaleKeys.method.tr(): methodData.item1,
