@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/repositories/search_history_repository.dart';
@@ -8,10 +9,10 @@ import '../../../../generated/assets.gen.dart';
 import '../../../../injection.dart';
 import '../../../../providers/common/search_history_provider.dart';
 import '../../../common/widgets/custom_icon_button.dart';
-import '../custom_in_app_web_view_controller.dart';
+import '../extensions.dart';
 
 class BrowserHistory extends StatelessWidget {
-  final Completer<CustomInAppWebViewController> controller;
+  final Completer<InAppWebViewController> controller;
   final FocusNode urlFocusNode;
 
   const BrowserHistory({
@@ -61,7 +62,7 @@ class BrowserHistory extends StatelessWidget {
 
             urlFocusNode.unfocus();
 
-            controller.future.then((v) => v.parseAndLoadUrl(entry));
+            controller.future.then((v) => v.tryLoadUrl(entry));
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(

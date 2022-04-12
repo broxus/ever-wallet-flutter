@@ -10,7 +10,6 @@ final networkChangesProvider = StreamProvider.autoDispose<NetworkChangedEvent>(
   (ref) => getIt
       .get<TransportRepository>()
       .transportStream
-      .whereType<Transport>()
       .map(
         (e) => NetworkChangedEvent(
           selectedConnection: e.connectionData.name,

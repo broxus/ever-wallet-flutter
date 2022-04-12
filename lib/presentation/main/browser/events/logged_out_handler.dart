@@ -1,12 +1,15 @@
 import 'dart:async';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
 import '../../../../../../../../logger.dart';
-import '../custom_in_app_web_view_controller.dart';
 
 Future<void> loggedOutHandler({
-  required CustomInAppWebViewController controller,
+  required InAppWebViewController controller,
 }) async {
   try {
+    logger.d('LoggedOutEvent');
+
     await controller.evaluateJavascript(source: 'window.__dartNotifications.loggedOut()');
   } catch (err, st) {
     logger.e(err, err, st);

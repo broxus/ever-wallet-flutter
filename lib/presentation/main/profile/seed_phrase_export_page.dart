@@ -65,7 +65,7 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.seed_phrase_save_screen_title.tr(),
+        text: LocaleKeys.save_seed_phrase.tr(),
       );
 
   Widget words() => Row(
@@ -126,7 +126,7 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
 
   Widget copyButton() => CustomOutlinedButton(
         onPressed: onPressed,
-        text: LocaleKeys.seed_phrase_save_screen_action_copy.tr(),
+        text: LocaleKeys.copy_words.tr(),
       );
 
   Future<void> onPressed() async {
@@ -136,7 +136,7 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
 
     showCrystalFlushbar(
       context,
-      message: LocaleKeys.seed_phrase_save_screen_message_copied.tr(),
+      message: LocaleKeys.copied.tr(),
     );
   }
 }

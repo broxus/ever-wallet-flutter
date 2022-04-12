@@ -8,7 +8,8 @@ part 'bookmark.g.dart';
 class Bookmark with _$Bookmark {
   @HiveType(typeId: 3)
   const factory Bookmark({
-    @HiveField(0) required String name,
-    @HiveField(1) required String url,
+    @HiveField(0) required int id,
+    @HiveField(1) required String name,
+    @HiveField(2) required String url,
   }) = _Bookmark;
 }

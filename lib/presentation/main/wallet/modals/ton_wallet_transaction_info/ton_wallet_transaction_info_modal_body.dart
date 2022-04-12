@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../../generated/codegen_loader.g.dart';
+import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/utils.dart';
 import '../../../../common/widgets/custom_outlined_button.dart';
 import '../../../../common/widgets/modal_header.dart';
 import '../../../common/extensions.dart';
+import '../utils.dart';
 
 class TonWalletTransactionInfoModalBody extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
@@ -89,7 +92,7 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
         section(
           [
             item(
-              title: 'Comment',
+              title: LocaleKeys.comment.tr(),
               subtitle: comment,
             ),
           ],
@@ -97,7 +100,7 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       if (dePoolOnRoundComplete != null)
         section(
           [
-            typeItem('DePool on round complete'),
+            typeItem(LocaleKeys.de_pool_on_round_complete.tr()),
             ...dePoolOnRoundComplete.entries
                 .map(
                   (e) => item(
@@ -111,7 +114,7 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       if (dePoolReceiveAnswer != null)
         section(
           [
-            typeItem('DePool receive answer'),
+            typeItem(LocaleKeys.de_pool_receive_answer.tr()),
             ...dePoolReceiveAnswer.entries
                 .map(
                   (e) => item(
@@ -125,7 +128,7 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       if (tokenWalletDeployed != null)
         section(
           [
-            typeItem('Token wallet deployed'),
+            typeItem(LocaleKeys.token_wallet_deployed.tr()),
             ...tokenWalletDeployed.entries
                 .map(
                   (e) => item(
@@ -139,7 +142,7 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       if (walletInteraction != null)
         section(
           [
-            typeItem('Wallet interaction'),
+            typeItem(LocaleKeys.wallet_interaction.tr()),
             ...walletInteraction.entries
                 .map(
                   (e) => item(
@@ -159,8 +162,8 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              const ModalHeader(
-                text: 'Transaction information',
+              ModalHeader(
+                text: LocaleKeys.transaction_information.tr(),
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -221,8 +224,8 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       );
 
   Widget dateItem(DateTime date) => item(
-        title: 'Date and time',
-        subtitle: DateFormat('dd.MM.yyyy, H:mm').format(date),
+        title: LocaleKeys.date_and_time.tr(),
+        subtitle: transactionTimeFormat.format(date),
       );
 
   Widget addressItem({
@@ -230,12 +233,12 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
     required String address,
   }) =>
       item(
-        title: isOutgoing ? 'Recipient' : 'Sender',
+        title: isOutgoing ? LocaleKeys.recipient.tr() : LocaleKeys.sender.tr(),
         subtitle: address,
       );
 
   Widget hashItem(String hash) => item(
-        title: 'Hash (ID)',
+        title: LocaleKeys.hash_id.tr(),
         subtitle: hash,
       );
 
@@ -244,22 +247,22 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
     required String value,
   }) =>
       item(
-        title: 'Amount',
-        subtitle: '${isOutgoing ? '-' : ''}$value EVER',
+        title: LocaleKeys.amount.tr(),
+        subtitle: '${isOutgoing ? '-' : ''}$value $kEverTicker',
       );
 
   Widget feeItem(String fees) => item(
-        title: 'Blockchain fee',
-        subtitle: '$fees EVER',
+        title: LocaleKeys.blockchain_fee.tr(),
+        subtitle: '$fees $kEverTicker',
       );
 
   Widget typeItem(String type) => item(
-        title: 'Type',
+        title: LocaleKeys.type.tr(),
         subtitle: type,
       );
 
   Widget explorerButton(String hash) => CustomOutlinedButton(
         onPressed: () => launch(transactionExplorerLink(hash)),
-        text: 'See in the explorer',
+        text: LocaleKeys.see_in_the_explorer.tr(),
       );
 }

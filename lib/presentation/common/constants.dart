@@ -9,3 +9,9 @@ const kDefaultCheckingWordsAmount = 4;
 const kTonDecimals = 9;
 
 const kNonBreakingHyphen = '\u2011';
+
+const kEverTicker = 'EVER';
+
+const kWeverTicker = 'WEVER';
+
+const kEverNetworkName = 'Everscale';

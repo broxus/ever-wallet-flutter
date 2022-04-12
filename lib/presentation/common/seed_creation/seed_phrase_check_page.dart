@@ -107,7 +107,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.seed_phrase_check_screen_title.tr(),
+        text: LocaleKeys.check_seed_phrase.tr(),
       );
 
   Widget list() => Form(
@@ -133,7 +133,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
         autocorrect: false,
         enableSuggestions: false,
         textInputAction: index != kDefaultCheckingWordsAmount - 1 ? TextInputAction.next : TextInputAction.done,
-        hintText: 'Word...',
+        hintText: '${LocaleKeys.word.tr()}...',
         prefixIcon: TextFieldIndexIcon(
           index: words.keys.elementAt(index),
         ),
@@ -175,7 +175,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
     if (value == widget.phrase[words.entries.elementAt(index).key]) {
       return null;
     } else {
-      return LocaleKeys.seed_phrase_check_screen_validation_errors_incorrect_word.tr();
+      return LocaleKeys.incorrect_word.tr();
     }
   }
 
@@ -241,7 +241,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
                 seedName: widget.seedName,
               ),
             ),
-            text: LocaleKeys.actions_confirm.tr(),
+            text: LocaleKeys.confirm.tr(),
           ),
         ),
       );

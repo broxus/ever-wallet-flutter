@@ -12,6 +12,7 @@ import '../../../../data/repositories/bookmarks_repository.dart';
 import '../../../../data/repositories/keys_repository.dart';
 import '../../../../data/repositories/search_history_repository.dart';
 import '../../../../data/repositories/sites_meta_data_repository.dart';
+import '../../../../data/repositories/token_currencies_repository.dart';
 import '../../../../data/repositories/ton_assets_repository.dart';
 import '../../../../generated/codegen_loader.g.dart';
 import '../../../../injection.dart';
@@ -24,14 +25,14 @@ Future<void> showLogoutDialog({
       barrierDismissible: true,
       builder: (BuildContext context) => Consumer(
         builder: (context, ref, child) => PlatformAlertDialog(
-          title: Text(LocaleKeys.settings_screen_sections_logout_confirmation.tr()),
+          title: Text(LocaleKeys.logout_confirmation.tr()),
           actions: [
             PlatformDialogAction(
               onPressed: context.router.pop,
               cupertino: (_, __) => CupertinoDialogActionData(
                 isDefaultAction: true,
               ),
-              child: Text(LocaleKeys.actions_cancel.tr()),
+              child: Text(LocaleKeys.cancel.tr()),
             ),
             PlatformDialogAction(
               onPressed: () async {
@@ -42,12 +43,13 @@ Future<void> showLogoutDialog({
                 await getIt.get<BookmarksRepository>().clear();
                 await getIt.get<SearchHistoryRepository>().clear();
                 await getIt.get<SitesMetaDataRepository>().clear();
+                await getIt.get<TokenCurrenciesRepository>().clear();
                 context.router.pop();
               },
               cupertino: (_, __) => CupertinoDialogActionData(
                 isDestructiveAction: true,
               ),
-              child: Text(LocaleKeys.settings_screen_sections_logout_action.tr()),
+              child: Text(LocaleKeys.logout.tr()),
             ),
           ],
         ),

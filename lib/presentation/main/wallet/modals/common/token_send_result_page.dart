@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -7,6 +8,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_send_provider.dart';
 import '../../../../../data/extensions.dart';
 import '../../../../../generated/assets.gen.dart';
+import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/widgets/crystal_title.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
 
@@ -126,7 +128,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendResultPage> {
           error: (err, st) => onPressed,
           loading: () => null,
         ),
-        text: 'Ok',
+        text: LocaleKeys.ok.tr(),
       );
 
   void onPressed() => Navigator.of(widget.modalContext).pop();

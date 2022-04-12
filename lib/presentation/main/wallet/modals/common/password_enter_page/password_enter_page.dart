@@ -1,9 +1,11 @@
 import 'package:change_notifier_builder/change_notifier_builder.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../../injection.dart';
+import '../../../../../../generated/codegen_loader.g.dart';
 import '../../../../../common/theme.dart';
 import '../../../../../common/widgets/crystal_subtitle.dart';
 import '../../../../../common/widgets/custom_back_button.dart';
@@ -53,9 +55,9 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
             leading: const CustomBackButton(),
-            title: const Text(
-              'Enter password',
-              style: TextStyle(
+            title: Text(
+              LocaleKeys.enter_password.tr(),
+              style: const TextStyle(
                 color: Colors.black,
               ),
             ),
@@ -98,8 +100,8 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
         ),
       );
 
-  Widget subtitle() => const CrystalSubtitle(
-        text: 'Enter your password to continue.',
+  Widget subtitle() => CrystalSubtitle(
+        text: LocaleKeys.enter_password_to_continue.tr(),
       );
 
   Widget passwordField() => ChangeNotifierBuilder<PasswordEnterPageNotifier>(
@@ -111,7 +113,7 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
           enableSuggestions: false,
           obscureText: true,
           errorText: notifier?.state.passwordState.errorText,
-          hintText: 'Enter password...',
+          hintText: '${LocaleKeys.enter_password.tr()}...',
           suffixIcon: TextFieldClearButton(
             controller: controller,
           ),
@@ -144,7 +146,7 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
         builder: (context, notifier, child) => CustomElevatedButton(
           onPressed:
               notifier?.state.formState.isValid ?? false ? () => onPressed(notifier!.state.passwordState.value) : null,
-          text: 'Submit',
+          text: LocaleKeys.submit.tr(),
         ),
       );
 

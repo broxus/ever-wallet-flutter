@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
@@ -7,6 +8,7 @@ import 'package:tuple/tuple.dart';
 import '../../../injection.dart';
 import '../../data/repositories/token_wallets_repository.dart';
 import '../../data/repositories/ton_wallets_repository.dart';
+import '../../generated/codegen_loader.g.dart';
 
 final tokenWalletPrepareTransferProvider =
     StateNotifierProvider.autoDispose<TokenWalletPrepareTransferNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
@@ -72,7 +74,7 @@ class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2
 
       final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);
 
-      if (!isPossibleToSendMessage) throw Exception('Insufficient funds');
+      if (!isPossibleToSendMessage) throw Exception(LocaleKeys.insufficient_funds.tr());
 
       return Tuple2(message, fees);
     });

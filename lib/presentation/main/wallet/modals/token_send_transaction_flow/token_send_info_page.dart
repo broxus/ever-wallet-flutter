@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -11,6 +12,8 @@ import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/token_wallet/token_wallet_info_provider.dart';
 import '../../../../../../providers/token_wallet/token_wallet_prepare_transfer_provider.dart';
 import '../../../../../data/extensions.dart';
+import '../../../../../generated/codegen_loader.g.dart';
+import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/custom_back_button.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
@@ -65,9 +68,9 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           leading: const CustomBackButton(),
-          title: const Text(
-            'Confirm transaction',
-            style: TextStyle(
+          title: Text(
+            LocaleKeys.confirm_transaction.tr(),
+            style: const TextStyle(
               color: Colors.black,
             ),
           ),
@@ -117,7 +120,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
       );
 
   Widget recipient() => SectionedCardSection(
-        title: 'Recipient',
+        title: LocaleKeys.recipient.tr(),
         subtitle: widget.destination,
         isSelectable: true,
       );
@@ -137,7 +140,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
               ?.value;
 
           return SectionedCardSection(
-            title: 'Amount',
+            title: LocaleKeys.amount.tr(),
             subtitle: tokenWalletInfo != null
                 ? '${widget.amount.toTokens(tokenWalletInfo.symbol.decimals).removeZeroes()} ${tokenWalletInfo.symbol.name}'
                 : null,
@@ -150,7 +153,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
           final result = ref.watch(tokenWalletPrepareTransferProvider);
 
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} EVER',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} $kEverTicker',
             error: (err, st) => (err as Exception).toUiMessage(),
             loading: () => null,
           );
@@ -161,7 +164,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
           );
 
           return SectionedCardSection(
-            title: 'Blockchain fee',
+            title: LocaleKeys.blockchain_fee.tr(),
             subtitle: subtitle,
             hasError: hasError,
           );
@@ -169,13 +172,13 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
       );
 
   Widget comment() => SectionedCardSection(
-        title: 'Comment',
+        title: LocaleKeys.comment.tr(),
         subtitle: widget.comment,
       );
 
   Widget notifyReceiver() => SectionedCardSection(
-        title: 'Notify receiver',
-        subtitle: widget.notifyReceiver ? 'Yes' : 'No',
+        title: LocaleKeys.notify_receiver.tr(),
+        subtitle: widget.notifyReceiver ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
       );
 
   Widget submitButton() => Consumer(
@@ -190,7 +193,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
                       publicKey: widget.publicKey,
                     )
                 : null,
-            text: 'Send',
+            text: LocaleKeys.send.tr(),
           );
         },
       );
@@ -237,7 +240,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
   Future<String?> getPasswordFromBiometry(String ownerPublicKey) async {
     try {
       final password = await getIt.get<BiometryRepository>().getKeyPassword(
-            localizedReason: 'Please authenticate to interact with wallet',
+            localizedReason: LocaleKeys.authentication_reason.tr(),
             publicKey: ownerPublicKey,
           );
 
@@ -261,8 +264,8 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
             message: message,
             publicKey: publicKey,
             password: password,
-            sendingText: 'Message is sending...',
-            successText: 'Message has been sent successfully',
+            sendingText: LocaleKeys.message_sending.tr(),
+            successText: LocaleKeys.message_sent.tr(),
           ),
         ),
         (_) => false,

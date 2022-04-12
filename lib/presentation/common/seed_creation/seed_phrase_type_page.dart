@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../generated/codegen_loader.g.dart';
 import '../widgets/crystal_title.dart';
 import '../widgets/custom_back_button.dart';
 import '../widgets/custom_elevated_button.dart';
@@ -46,14 +48,14 @@ class SeedPhraseTypePage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     seedButton(
-                      title: 'Regular seed',
-                      subtitle: 'The seed phrase contains 12 words',
+                      title: LocaleKeys.regular_seed.tr(),
+                      subtitle: LocaleKeys.regular_seed_description.tr(),
                       mnemonicType: const MnemonicType.labs(id: 0),
                     ),
                     const SizedBox(height: 16),
                     seedButton(
-                      title: 'Legacy seed',
-                      subtitle: 'The seed phrase contains 24 words',
+                      title: LocaleKeys.legacy_seed.tr(),
+                      subtitle: LocaleKeys.legacy_seed_description.tr(),
                       mnemonicType: const MnemonicType.legacy(),
                     ),
                   ],
@@ -64,8 +66,8 @@ class SeedPhraseTypePage extends StatelessWidget {
         ),
       );
 
-  Widget title() => const CrystalTitle(
-        text: 'Please select the type of seed phrase',
+  Widget title() => CrystalTitle(
+        text: LocaleKeys.seed_phrase_type_description.tr(),
       );
 
   Widget seedButton({
@@ -99,7 +101,7 @@ class SeedPhraseTypePage extends StatelessWidget {
             const SizedBox(height: 16),
             CustomElevatedButton(
               onPressed: () => onSelected(mnemonicType),
-              text: 'Select',
+              text: LocaleKeys.select.tr(),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -7,7 +8,9 @@ import 'package:tuple/tuple.dart';
 
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../data/extensions.dart';
+import '../../../../generated/codegen_loader.g.dart';
 import '../../../../providers/ton_wallet/ton_wallet_prepare_transfer_provider.dart';
+import '../../../common/constants.dart';
 import '../../../common/extensions.dart';
 import '../../../common/widgets/custom_dropdown_button.dart';
 import '../../../common/widgets/custom_elevated_button.dart';
@@ -57,42 +60,56 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
     );
     ref.read(tonWalletPrepareTransferProvider.notifier).prepareTransfer(
           address: widget.sender,
+          publicKey: widget.publicKeys.firstOrNull,
           destination: widget.recipient,
           amount: widget.amount,
         );
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                ModalHeader(
-                  text: 'Send message',
-                  onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
-                ),
+  Widget build(BuildContext context) {
+    ref.listen<String?>(selectedPublicKeyProvider, (previous, next) {
+      if (next != null) {
+        ref.read(tonWalletPrepareTransferProvider.notifier).prepareTransfer(
+              address: widget.sender,
+              publicKey: next,
+              destination: widget.recipient,
+              amount: widget.amount,
+            );
+      }
+    });
+
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              ModalHeader(
+                text: LocaleKeys.send_message.tr(),
+                onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
+              ),
+              const SizedBox(height: 16),
+              if (widget.publicKeys.length > 1) ...[
+                dropdownButton(),
                 const SizedBox(height: 16),
-                if (widget.publicKeys.length > 1) ...[
-                  dropdownButton(),
-                  const SizedBox(height: 16),
-                ],
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: ModalScrollController.of(context),
-                    physics: const ClampingScrollPhysics(),
-                    child: card(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                buttons(),
               ],
-            ),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: ModalScrollController.of(context),
+                  physics: const ClampingScrollPhysics(),
+                  child: card(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              buttons(),
+            ],
           ),
         ),
-      );
+      ),
+    );
+  }
 
   Widget dropdownButton() => Consumer(
         builder: (context, ref, child) {
@@ -127,32 +144,32 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
       );
 
   Widget origin() => SectionedCardSection(
-        title: 'Origin',
+        title: LocaleKeys.origin.tr(),
         subtitle: widget.origin,
         isSelectable: true,
       );
 
   Widget address() => SectionedCardSection(
-        title: 'Account address',
+        title: LocaleKeys.account_address.tr(),
         subtitle: widget.sender,
         isSelectable: true,
       );
 
   Widget publicKey() => SectionedCardSection(
-        title: 'Account public key',
+        title: LocaleKeys.account_public_key.tr(),
         subtitle: widget.publicKeys.first,
         isSelectable: true,
       );
 
   Widget recipient() => SectionedCardSection(
-        title: 'Recipient address',
+        title: LocaleKeys.recipient_address.tr(),
         subtitle: widget.recipient,
         isSelectable: true,
       );
 
   Widget amount() => SectionedCardSection(
-        title: 'Amount',
-        subtitle: '${widget.amount.toTokens().removeZeroes()} EVER',
+        title: LocaleKeys.amount.tr(),
+        subtitle: '${widget.amount.toTokens().removeZeroes()} $kEverTicker',
         isSelectable: true,
       );
 
@@ -161,7 +178,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
           final result = ref.watch(tonWalletPrepareTransferProvider);
 
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} EVER',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} $kEverTicker',
             error: (err, st) => (err as Exception).toUiMessage(),
             loading: () => null,
           );
@@ -172,7 +189,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
           );
 
           return SectionedCardSection(
-            title: 'Blockchain fee',
+            title: LocaleKeys.blockchain_fee.tr(),
             subtitle: subtitle,
             hasError: hasError,
           );
@@ -180,8 +197,8 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
       );
 
   Widget bounce() => SectionedCardSection(
-        title: 'Bounce',
-        subtitle: widget.bounce ? 'Yes' : 'No',
+        title: LocaleKeys.bounce.tr(),
+        subtitle: widget.bounce ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
         isSelectable: true,
       );
 
@@ -195,7 +212,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
     }
 
     final list = {
-      'Known payload': knownPayload.item1,
+      LocaleKeys.known_payload.tr(): knownPayload.item1,
       ...knownPayload.item2,
     };
 
@@ -225,7 +242,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
 
   Widget rejectButton() => CustomOutlinedButton(
         onPressed: () => Navigator.of(widget.modalContext).pop(),
-        text: 'Reject',
+        text: LocaleKeys.reject.tr(),
       );
 
   Widget submitButton() => Consumer(
@@ -237,7 +254,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
             onPressed: selectedPublicKey != null && result?.item1 != null && result?.item2 != null
                 ? () => onSubmitPressed(selectedPublicKey)
                 : null,
-            text: 'Send',
+            text: LocaleKeys.send.tr(),
           );
         },
       );

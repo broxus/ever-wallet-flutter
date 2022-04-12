@@ -33,7 +33,7 @@ class WalletBody extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      LocaleKeys.wallet_screen_title.tr(),
+                      LocaleKeys.wallet.tr(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 30,

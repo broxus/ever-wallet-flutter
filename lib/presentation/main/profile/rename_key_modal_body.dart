@@ -47,7 +47,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
               controller: controller,
               autofocus: true,
               formatters: [LengthLimitingTextInputFormatter(50)],
-              hintText: LocaleKeys.new_seed_name_hint.tr(),
+              hintText: LocaleKeys.name.tr(),
             ),
             const SizedBox(height: 24),
             ValueListenableBuilder<TextEditingValue>(
@@ -68,7 +68,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
 
                           await showCrystalFlushbar(
                             context,
-                            message: LocaleKeys.rename_key_modal_message_success.tr(),
+                            message: LocaleKeys.seed_phrase_renamed.tr(),
                           );
                         } catch (err, st) {
                           logger.e(err, err, st);
@@ -81,7 +81,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                           );
                         }
                       },
-                text: LocaleKeys.rename_key_modal_actions_rename.tr(),
+                text: LocaleKeys.rename.tr(),
               ),
             )
           ],

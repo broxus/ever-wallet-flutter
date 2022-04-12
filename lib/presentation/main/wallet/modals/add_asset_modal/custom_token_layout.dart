@@ -62,11 +62,11 @@ class _CustomTokenLayoutState extends State<CustomTokenLayout> {
             color: Colors.grey.withOpacity(0.15),
           ),
           child: CustomTextFormField(
-            name: 'address',
+            name: LocaleKeys.address.tr(),
             controller: controller,
             autocorrect: false,
             enableSuggestions: false,
-            hintText: LocaleKeys.add_assets_modal_create_layout_contract_hint.tr(),
+            hintText: LocaleKeys.root_token_contract.tr(),
             suffixIcon: TextFieldClearButton(controller: controller),
             inputFormatters: [
               FilteringTextInputFormatter.deny(RegExp(r'\s')),
@@ -77,7 +77,7 @@ class _CustomTokenLayoutState extends State<CustomTokenLayout> {
               }
 
               if (!validateAddress(value)) {
-                return 'Invalid value';
+                return LocaleKeys.invalid_value.tr();
               }
               return null;
             },
@@ -98,7 +98,7 @@ class _CustomTokenLayoutState extends State<CustomTokenLayout> {
               context.router.pop();
               widget.onSave(address);
             },
-            text: LocaleKeys.actions_proceed.tr(),
+            text: LocaleKeys.proceed.tr(),
           ),
         ),
       );

@@ -89,11 +89,11 @@ class _AssetsLayoutState extends State<AssetsLayout> {
           color: Colors.grey.withOpacity(0.15),
         ),
         child: CustomTextFormField(
-          name: 'search',
+          name: LocaleKeys.search.tr(),
           controller: controller,
           autocorrect: false,
           enableSuggestions: false,
-          hintText: LocaleKeys.add_assets_modal_search_layout_hint.tr(),
+          hintText: LocaleKeys.enter_asset_name.tr(),
           suffixIcon: TextFieldClearButton(controller: controller),
           onChanged: (value) {
             final text = value?.toLowerCase().trim() ?? '';
@@ -155,7 +155,7 @@ class _AssetsLayoutState extends State<AssetsLayout> {
                   );
                 }
               : null,
-          text: LocaleKeys.actions_save.tr(),
+          text: LocaleKeys.save.tr(),
         ),
       );
 }

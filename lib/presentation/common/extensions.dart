@@ -2,28 +2,6 @@ import 'dart:math';
 
 import 'constants.dart';
 
-extension FloorValue on String {
-  String floorValue() {
-    final dot = indexOf('.');
-
-    if (dot != -1) {
-      if (length - dot > 2) {
-        final firstPart = substring(0, dot);
-        final secondPart = substring(dot, dot + 3);
-
-        return firstPart + secondPart;
-      } else {
-        final firstPart = substring(0, dot);
-        final secondPart = substring(dot, length).padRight(3, '0');
-
-        return firstPart + secondPart;
-      }
-    } else {
-      return this;
-    }
-  }
-}
-
 extension RemoveZeroes on String {
   String removeZeroes() {
     final dot = indexOf('.');
@@ -82,7 +60,7 @@ extension TokensConvert on String {
     return '$leadStr.$trailStr';
   }
 
-  String fromTokens([int decimals = kTonDecimals]) {
+  String toNanoTokens([int decimals = kTonDecimals]) {
     final radix = BigInt.from(pow(10, decimals));
 
     final dot = indexOf('.');
@@ -110,4 +88,15 @@ extension TokensConvert on String {
 
 extension ToDateTime on int {
   DateTime toDateTime() => DateTime.fromMillisecondsSinceEpoch(this * Duration.millisecondsPerSecond);
+}
+
+extension TruncateDoubles on double {
+  double truncateToDecimalPlaces(int fractionalDigits) =>
+      (this *
+              pow(
+                10,
+                fractionalDigits,
+              ))
+          .truncate() /
+      pow(10, fractionalDigits);
 }

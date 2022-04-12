@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,7 @@ import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../../providers/token_wallet/token_wallet_info_provider.dart';
 import '../../../../../data/extensions.dart';
 import '../../../../../generated/assets.gen.dart';
+import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/crystal_flushbar.dart';
@@ -96,7 +98,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
               Column(
                 children: [
                   ModalHeader(
-                    text: 'Send your funds',
+                    text: LocaleKeys.send_funds.tr(),
                     onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                   ),
                   const SizedBox(height: 16),
@@ -191,7 +193,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
       );
 
   Widget amount() => CustomTextFormField(
-        name: 'amount',
+        name: LocaleKeys.amount.tr(),
         controller: amountController,
         focusNode: amountFocusNode,
         keyboardType: const TextInputType.numberWithOptions(
@@ -201,7 +203,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         textInputAction: TextInputAction.next,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: 'Amount...',
+        hintText: '${LocaleKeys.amount.tr()}...',
         onSubmitted: (value) => destinationFocusNode.requestFocus(),
         suffixIcon: Row(
           mainAxisSize: MainAxisSize.min,
@@ -220,7 +222,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
           }
 
           if (!isNumeric(value) && !isFloat(value)) {
-            return 'Invalid value';
+            return LocaleKeys.invalid_value.tr();
           }
           return null;
         },
@@ -246,11 +248,11 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
 
               Form.of(context)?.validate();
             },
-            icon: const SizedBox(
+            icon: SizedBox(
               width: 64,
               child: Text(
-                'Max',
-                style: TextStyle(
+                LocaleKeys.max.tr(),
+                style: const TextStyle(
                   color: CrystalColor.accent,
                 ),
               ),
@@ -271,7 +273,12 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
               ?.value;
 
           return Text(
-            'Your balance: ${tokenWalletInfo?.balance.toTokens(tokenWalletInfo.symbol.decimals).removeZeroes() ?? '0'} ${tokenWalletInfo?.symbol.name}',
+            LocaleKeys.balance.tr(
+              args: [
+                tokenWalletInfo?.balance.toTokens(tokenWalletInfo.symbol.decimals).removeZeroes() ?? '0',
+                tokenWalletInfo?.symbol.name ?? '',
+              ],
+            ),
             style: const TextStyle(
               color: Colors.black54,
             ),
@@ -280,13 +287,13 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
       );
 
   Widget destination() => CustomTextFormField(
-        name: 'destination',
+        name: LocaleKeys.destination.tr(),
         controller: destinationController,
         focusNode: destinationFocusNode,
         textInputAction: TextInputAction.next,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: 'Receiver address...',
+        hintText: '${LocaleKeys.receiver_address.tr()}...',
         suffixIcon: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -305,7 +312,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
           }
 
           if (!validateAddress(value)) {
-            return 'Invalid value';
+            return LocaleKeys.invalid_value.tr();
           }
           return null;
         },
@@ -383,12 +390,12 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
   }
 
   Widget comment() => CustomTextFormField(
-        name: 'Comment',
+        name: LocaleKeys.comment.tr(),
         controller: commentController,
         focusNode: commentFocusNode,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: 'Comment...',
+        hintText: '${LocaleKeys.comment.tr()}...',
         suffixIcon: TextFieldClearButton(controller: commentController),
       );
 
@@ -401,8 +408,8 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
               onChanged: (value) => notifyReceiverNotifier.value = value ?? false,
             ),
           ),
-          const Expanded(
-            child: Text('Notify receiver'),
+          Expanded(
+            child: Text(LocaleKeys.notify_receiver.tr()),
           ),
         ],
       );
@@ -422,7 +429,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
             valueListenable: formValidityNotifier,
             builder: (context, value, child) => CustomElevatedButton(
               onPressed: value && tokenWalletInfo != null ? () => onPressed(tokenWalletInfo.symbol.decimals) : null,
-              text: 'Next',
+              text: LocaleKeys.next.tr(),
             ),
           );
         },
@@ -430,7 +437,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
 
   void onPressed(int decimals) {
     final destination = destinationController.text;
-    final amount = amountController.text.fromTokens(decimals);
+    final amount = amountController.text.toNanoTokens(decimals);
     final notifyReceiver = notifyReceiverNotifier.value;
     final comment = commentController.text.isNotEmpty ? commentController.text : null;
     final publicKey = publicKeyNotifier.value;

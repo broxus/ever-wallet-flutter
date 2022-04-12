@@ -1,33 +1,37 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../data/repositories/keys_repository.dart';
 import '../../../data/repositories/ton_wallets_repository.dart';
+import '../../../generated/codegen_loader.g.dart';
 import '../../../injection.dart';
 
 Future<List<String>> getLocalCustodiansPublicKeys(String address) async {
-  final keys = getIt.get<KeysRepository>().keys;
-  final currentKey = getIt.get<KeysRepository>().currentKey;
   final tonWalletInfo = await getIt.get<TonWalletsRepository>().getInfo(address);
-
-  if (currentKey == null) throw Exception('No current key');
 
   final requiresSeparateDeploy = tonWalletInfo.details.requiresSeparateDeploy;
   final isDeployed = tonWalletInfo.contractState.isDeployed;
 
-  if (requiresSeparateDeploy && !isDeployed) throw Exception('Wallet is not deployed');
+  if (requiresSeparateDeploy && !isDeployed) throw Exception(LocaleKeys.wallet_not_deployed.tr());
 
-  final custodians = tonWalletInfo.custodians ?? [];
+  if (!requiresSeparateDeploy) return [tonWalletInfo.publicKey];
+
+  final custodians = tonWalletInfo.custodians!;
+
+  final keys = getIt.get<KeysRepository>().keys;
 
   final localCustodians = keys.where((e) => custodians.any((el) => el == e.publicKey)).toList();
 
-  final initiatorKey = localCustodians.firstWhereOrNull((e) => e.publicKey == currentKey.publicKey);
+  final currentKey = getIt.get<KeysRepository>().currentKey;
+
+  final initiatorKey = localCustodians.firstWhereOrNull((e) => e == currentKey);
 
   final list = [
     if (initiatorKey != null) initiatorKey,
-    ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
-  ];
+    ...localCustodians.where((e) => e != initiatorKey),
+  ].map((e) => e.publicKey).toList();
 
-  return list.map((e) => e.publicKey).toList();
+  return list;
 }

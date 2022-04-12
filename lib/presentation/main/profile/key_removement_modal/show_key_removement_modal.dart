@@ -15,15 +15,15 @@ Future<void> showKeyRemovementDialog({
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) => PlatformAlertDialog(
-        title: Text(LocaleKeys.remove_seed_modal_title.tr()),
-        content: Text(LocaleKeys.remove_seed_modal_description.tr()),
+        title: Text(LocaleKeys.remove_key.tr()),
+        content: Text(LocaleKeys.remove_key_confirmation.tr()),
         actions: [
           PlatformDialogAction(
             onPressed: () => context.router.pop(),
             cupertino: (_, __) => CupertinoDialogActionData(
               isDefaultAction: true,
             ),
-            child: const Text('Cancel'),
+            child: Text(LocaleKeys.cancel.tr()),
           ),
           PlatformDialogAction(
             onPressed: () {
@@ -34,7 +34,7 @@ Future<void> showKeyRemovementDialog({
             cupertino: (_, __) => CupertinoDialogActionData(
               isDestructiveAction: true,
             ),
-            child: const Text('OK'),
+            child: Text(LocaleKeys.ok.tr()),
           ),
         ],
       ),

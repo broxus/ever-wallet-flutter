@@ -99,7 +99,7 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
                 ),
               ),
             )
-          : placeholder(LocaleKeys.wallet_history_modal_placeholder_transactions_empty.tr()),
+          : placeholder(LocaleKeys.transactions_empty.tr()),
     );
   }
 

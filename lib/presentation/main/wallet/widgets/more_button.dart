@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +7,7 @@ import '../../../../../data/repositories/keys_repository.dart';
 import '../../../../../injection.dart';
 import '../../../../../providers/account/external_accounts_provider.dart';
 import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/theme.dart';
 import '../../../common/widgets/custom_popup_item.dart';
 import '../../../common/widgets/custom_popup_menu.dart';
@@ -113,11 +115,11 @@ extension on _Actions {
   String describe() {
     switch (this) {
       case _Actions.preferences:
-        return 'Preferences';
+        return LocaleKeys.preferences.tr();
       case _Actions.custodians:
-        return 'Custodians';
+        return LocaleKeys.custodians.tr();
       case _Actions.removeAccount:
-        return 'Remove account';
+        return LocaleKeys.remove_account.tr();
     }
   }
 }

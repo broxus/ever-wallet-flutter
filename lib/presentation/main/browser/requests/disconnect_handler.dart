@@ -1,18 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
 import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/generic_contracts_repository.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../injection.dart';
-import '../custom_in_app_web_view_controller.dart';
+import '../extensions.dart';
 
 Future<dynamic> disconnectHandler({
-  required CustomInAppWebViewController controller,
+  required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
-    final currentOrigin = await controller.controller.getUrl().then((v) => v?.authority);
+    logger.d('DisconnectRequest', args);
+
+    final currentOrigin = await controller.getOrigin();
 
     if (currentOrigin == null) throw Exception();
 

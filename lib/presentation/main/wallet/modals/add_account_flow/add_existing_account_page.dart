@@ -56,9 +56,9 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
             leading: const CustomBackButton(),
-            title: const Text(
-              'Add existing account',
-              style: TextStyle(
+            title: Text(
+              LocaleKeys.add_existing_account.tr(),
+              style: const TextStyle(
                 color: Colors.black,
               ),
             ),
@@ -92,8 +92,8 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
         ),
       );
 
-  Widget subtitle() => const CrystalSubtitle(
-        text: 'You can add only those addresses where your public key is a custodian.',
+  Widget subtitle() => CrystalSubtitle(
+        text: LocaleKeys.add_existing_account_description.tr(),
       );
 
   Widget form() => Form(
@@ -115,7 +115,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
     String? text;
 
     if (!validateAddress(addressController.text)) {
-      text = 'Invalid address';
+      text = LocaleKeys.invalid_address.tr();
     }
 
     if (addressController.text.isEmpty && nameController.text.isEmpty) {
@@ -126,13 +126,13 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
   }
 
   Widget addressField() => CustomTextFormField(
-        name: 'address',
+        name: LocaleKeys.address.tr(),
         controller: addressController,
         focusNode: addressFocusNode,
         autocorrect: false,
         enableSuggestions: false,
         textInputAction: TextInputAction.next,
-        hintText: 'Address...',
+        hintText: '${LocaleKeys.address.tr()}...',
         suffixIcon: TextFieldClearButton(
           controller: addressController,
         ),
@@ -150,12 +150,12 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
       );
 
   Widget nameField() => CustomTextFormField(
-        name: 'name',
+        name: LocaleKeys.name.tr(),
         controller: nameController,
         focusNode: nameFocusNode,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: 'Name...',
+        hintText: '${LocaleKeys.name.tr()}...',
         suffixIcon: TextFieldClearButton(
           controller: nameController,
         ),
@@ -189,7 +189,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value != null ? null : onPressed,
-          text: LocaleKeys.actions_confirm.tr(),
+          text: LocaleKeys.confirm.tr(),
         ),
       );
 

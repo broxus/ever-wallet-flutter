@@ -1,4 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:tuple/tuple.dart';
+
+import '../../../../../generated/codegen_loader.g.dart';
 
 Future<Tuple3<String, String?, String?>> parseScanResult(String value) async {
   String? address;
@@ -14,7 +17,7 @@ Future<Tuple3<String, String?, String?>> parseScanResult(String value) async {
   if (addressMatch != null) {
     address = addressMatch;
   } else {
-    throw Exception('Invalid data');
+    throw Exception(LocaleKeys.invalid_data.tr());
   }
 
   final amountRegExp = RegExp(

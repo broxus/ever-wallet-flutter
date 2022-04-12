@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/ton_asset_icon.dart';
 import '../../modals/ton_wallet_transaction_info/show_ton_wallet_transaction_info.dart';
@@ -105,7 +106,7 @@ class TonWalletTransactionHolder extends StatelessWidget {
                       Expanded(
                         child: ValueTitle(
                           value: value.toTokens().removeZeroes().formatValue(),
-                          currency: 'EVER',
+                          currency: kEverTicker,
                           isOutgoing: isOutgoing,
                         ),
                       ),

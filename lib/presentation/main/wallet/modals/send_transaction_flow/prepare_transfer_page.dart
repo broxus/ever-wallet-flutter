@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,8 @@ import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../data/extensions.dart';
 import '../../../../../generated/assets.gen.dart';
+import '../../../../../generated/codegen_loader.g.dart';
+import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/crystal_flushbar.dart';
@@ -91,7 +94,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
               Column(
                 children: [
                   ModalHeader(
-                    text: 'Send your funds',
+                    text: LocaleKeys.send_funds.tr(),
                     onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                   ),
                   const SizedBox(height: 16),
@@ -184,7 +187,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
       );
 
   Widget amount() => CustomTextFormField(
-        name: 'amount',
+        name: LocaleKeys.amount.tr(),
         controller: amountController,
         focusNode: amountFocusNode,
         keyboardType: const TextInputType.numberWithOptions(
@@ -194,7 +197,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         textInputAction: TextInputAction.next,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: 'Amount...',
+        hintText: '${LocaleKeys.amount.tr()}...',
         suffixIcon: TextFieldClearButton(controller: amountController),
         onSubmitted: (value) => destinationFocusNode.requestFocus(),
         inputFormatters: [
@@ -207,7 +210,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
           }
 
           if (!isNumeric(value) && !isFloat(value)) {
-            return 'Invalid value';
+            return LocaleKeys.invalid_value.tr();
           }
           return null;
         },
@@ -218,7 +221,12 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
           return Text(
-            'Your balance: ${tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0'} EVER',
+            LocaleKeys.balance.tr(
+              args: [
+                tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0',
+                kEverTicker,
+              ],
+            ),
             style: const TextStyle(
               color: Colors.black54,
             ),
@@ -227,13 +235,13 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
       );
 
   Widget destination() => CustomTextFormField(
-        name: 'destination',
+        name: LocaleKeys.destination.tr(),
         controller: destinationController,
         focusNode: destinationFocusNode,
         textInputAction: TextInputAction.next,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: 'Receiver address...',
+        hintText: '${LocaleKeys.receiver_address.tr()}...',
         suffixIcon: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -252,7 +260,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
           }
 
           if (!validateAddress(value)) {
-            return 'Invalid value';
+            return LocaleKeys.invalid_value.tr();
           }
           return null;
         },
@@ -331,12 +339,12 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
   }
 
   Widget comment() => CustomTextFormField(
-        name: 'Comment',
+        name: LocaleKeys.comment.tr(),
         controller: commentController,
         focusNode: commentFocusNode,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: 'Comment...',
+        hintText: '${LocaleKeys.comment.tr()}...',
         suffixIcon: TextFieldClearButton(controller: commentController),
       );
 
@@ -344,13 +352,13 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value ? onPressed : null,
-          text: 'Next',
+          text: LocaleKeys.next.tr(),
         ),
       );
 
   void onPressed() {
     final destination = destinationController.text;
-    final amount = amountController.text.fromTokens();
+    final amount = amountController.text.toNanoTokens();
     final comment = commentController.text.isNotEmpty ? commentController.text : null;
     final publicKey = publicKeyNotifier.value;
 

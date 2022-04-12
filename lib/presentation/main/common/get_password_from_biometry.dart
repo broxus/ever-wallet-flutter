@@ -1,5 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
+
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../injection.dart';
+import '../../../generated/codegen_loader.g.dart';
 
 Future<String?> getPasswordFromBiometry(String publicKey) async {
   final isEnabled = getIt.get<BiometryRepository>().status;
@@ -9,7 +12,7 @@ Future<String?> getPasswordFromBiometry(String publicKey) async {
 
   try {
     return await getIt.get<BiometryRepository>().getKeyPassword(
-          localizedReason: 'Please authenticate to interact with wallet',
+          localizedReason: LocaleKeys.authentication_reason.tr(),
           publicKey: publicKey,
         );
   } catch (err) {

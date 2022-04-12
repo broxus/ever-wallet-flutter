@@ -33,7 +33,7 @@ class ProfileActions extends StatelessWidget {
               context: context,
               address: address,
             ),
-            title: LocaleKeys.wallet_screen_actions_add_asset.tr(),
+            title: LocaleKeys.add_asset.tr(),
             icon: const OverflowBox(
               maxHeight: 30,
               maxWidth: 30,
@@ -57,7 +57,7 @@ class ProfileActions extends StatelessWidget {
                           address: value.address,
                         )
                     : null,
-                title: LocaleKeys.actions_receive.tr(),
+                title: LocaleKeys.receive.tr(),
                 icon: Assets.images.iconReceive.svg(
                   color: CrystalColor.secondary,
                 ),
@@ -71,11 +71,25 @@ class ProfileActions extends StatelessWidget {
               final tonWalletInfo = ref.watch(tonWalletInfoProvider(address)).asData?.value;
 
               if (currentKey != null && tonWalletInfo != null) {
-                final publicKey = currentKey.publicKey;
                 final requiresSeparateDeploy = tonWalletInfo.details.requiresSeparateDeploy;
+
+                if (!requiresSeparateDeploy) {
+                  return WalletButton(
+                    onTap: () => startSendTransactionFlow(
+                      context: context,
+                      address: address,
+                      publicKeys: [tonWalletInfo.publicKey],
+                    ),
+                    title: LocaleKeys.send.tr(),
+                    icon: Assets.images.iconSend.svg(
+                      color: CrystalColor.secondary,
+                    ),
+                  );
+                }
+
                 final isDeployed = tonWalletInfo.contractState.isDeployed;
 
-                if (!requiresSeparateDeploy || isDeployed) {
+                if (isDeployed) {
                   final keysList = [
                     ...keys.keys,
                     ...keys.values.whereNotNull().expand((e) => e),
@@ -102,7 +116,7 @@ class ProfileActions extends StatelessWidget {
                               publicKeys: publicKeys,
                             )
                         : null,
-                    title: LocaleKeys.actions_send.tr(),
+                    title: LocaleKeys.send.tr(),
                     icon: Assets.images.iconSend.svg(
                       color: CrystalColor.secondary,
                     ),
@@ -112,9 +126,9 @@ class ProfileActions extends StatelessWidget {
                     onTap: () => startDeployWalletFlow(
                       context: context,
                       address: address,
-                      publicKey: publicKey,
+                      publicKey: tonWalletInfo.publicKey,
                     ),
-                    title: LocaleKeys.actions_deploy.tr(),
+                    title: LocaleKeys.deploy.tr(),
                     icon: Assets.images.iconDeploy.svg(
                       color: CrystalColor.secondary,
                     ),
@@ -122,8 +136,7 @@ class ProfileActions extends StatelessWidget {
                 }
               } else {
                 return WalletButton(
-                  onTap: () {},
-                  title: LocaleKeys.actions_send.tr(),
+                  title: LocaleKeys.send.tr(),
                   icon: Assets.images.iconSend.svg(
                     color: CrystalColor.secondary,
                   ),

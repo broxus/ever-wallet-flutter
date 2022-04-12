@@ -36,7 +36,7 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
         children: [
           Expanded(
             child: Text(
-              LocaleKeys.biometry_checkbox.tr(),
+              LocaleKeys.enable_biometry.tr(),
               style: const TextStyle(
                 color: CrystalColor.fontDark,
               ),
@@ -50,7 +50,7 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
               return PlatformSwitch(
                 value: isEnabled,
                 onChanged: (value) => getIt.get<BiometryRepository>().setStatus(
-                      localizedReason: 'Please authenticate to interact with wallet',
+                      localizedReason: LocaleKeys.authentication_reason.tr(),
                       isEnabled: !isEnabled,
                     ),
               );

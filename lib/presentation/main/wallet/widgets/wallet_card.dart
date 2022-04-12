@@ -10,6 +10,7 @@ import '../../../../../providers/account/external_accounts_provider.dart';
 import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../generated/assets.gen.dart';
 import '../../../../generated/codegen_loader.g.dart';
+import '../../../../providers/common/account_overall_balance_provider.dart';
 import '../../../common/extensions.dart';
 import '../../../common/theme.dart';
 import '../../../common/widgets/animated_appearance.dart';
@@ -138,12 +139,12 @@ class WalletCard extends StatelessWidget {
 
                 return tonWalletInfo != null
                     ? namedField(
-                        name: LocaleKeys.fields_public_key.tr(),
+                        name: LocaleKeys.public_key.tr(),
                         value: tonWalletInfo.publicKey,
                         ellipsedValue: tonWalletInfo.publicKey.ellipsePublicKey(),
                       )
                     : namedField(
-                        name: LocaleKeys.fields_public_key.tr(),
+                        name: LocaleKeys.public_key.tr(),
                       );
               },
             ),
@@ -153,12 +154,12 @@ class WalletCard extends StatelessWidget {
 
                 return tonWalletInfo != null
                     ? namedField(
-                        name: LocaleKeys.fields_address.tr(),
+                        name: LocaleKeys.address.tr(),
                         value: tonWalletInfo.address,
                         ellipsedValue: tonWalletInfo.address.ellipseAddress(),
                       )
                     : namedField(
-                        name: LocaleKeys.fields_address.tr(),
+                        name: LocaleKeys.address.tr(),
                       );
               },
             ),
@@ -168,12 +169,12 @@ class WalletCard extends StatelessWidget {
 
                 return tonWalletInfo != null
                     ? namedField(
-                        name: LocaleKeys.fields_type.tr(),
+                        name: LocaleKeys.type.tr(),
                         value: tonWalletInfo.walletType.describe(),
                         isSelectable: false,
                       )
                     : namedField(
-                        name: LocaleKeys.fields_type.tr(),
+                        name: LocaleKeys.type.tr(),
                         isSelectable: false,
                       );
               },
@@ -189,12 +190,14 @@ class WalletCard extends StatelessWidget {
             const Spacer(flex: 2),
             Consumer(
               builder: (context, ref, child) {
-                final tonWalletInfo = ref.watch(tonWalletInfoProvider(address)).asData?.value;
+                final balanceUsdt = ref.watch(accountOverallBalanceProvider(address)).asData?.value;
 
-                return tonWalletInfo != null
+                return balanceUsdt != null
                     ? Padding(
                         padding: const EdgeInsets.only(bottom: 24),
-                        child: balance(tonWalletInfo.contractState.balance),
+                        child: balance(
+                          balanceUsdt.truncateToDecimalPlaces(4).toStringAsFixed(4).removeZeroes().formatValue(),
+                        ),
                       )
                     : const SizedBox();
               },
@@ -208,9 +211,9 @@ class WalletCard extends StatelessWidget {
         children: [
           Assets.images.iconMultisig.svg(),
           const SizedBox(width: 8),
-          const Text(
-            'External account',
-            style: TextStyle(color: Colors.white),
+          Text(
+            LocaleKeys.external_account.tr(),
+            style: const TextStyle(color: Colors.white),
           ),
         ],
       );
@@ -263,32 +266,30 @@ class WalletCard extends StatelessWidget {
       );
 
   Widget balance(String balance) {
-    final formattedString = balance.toTokens().floorValue().removeZeroes().formatValue();
+    final parts = balance.split('.');
 
     return AutoSizeText.rich(
       TextSpan(
-        text: formattedString.contains('.')
-            ? formattedString.substring(0, formattedString.indexOf('.'))
-            : formattedString,
+        text: '\$${parts.first}',
         style: const TextStyle(
           color: Colors.white,
           fontSize: 24,
           letterSpacing: 0.75,
           fontWeight: FontWeight.bold,
         ),
-        children: [
-          TextSpan(
-            text: formattedString.contains('.')
-                ? "${formattedString.substring(formattedString.indexOf('.'), formattedString.length)} EVER"
-                : ' EVER',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              letterSpacing: 0.75,
-              fontWeight: FontWeight.normal,
-            ),
-          )
-        ],
+        children: parts.length != 1
+            ? [
+                TextSpan(
+                  text: '.${parts.last}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    letterSpacing: 0.75,
+                    fontWeight: FontWeight.normal,
+                  ),
+                )
+              ]
+            : null,
       ),
       maxLines: 1,
       minFontSize: 10,

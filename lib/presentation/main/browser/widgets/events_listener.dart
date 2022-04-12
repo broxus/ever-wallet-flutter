@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
@@ -11,15 +12,15 @@ import '../../../../providers/provider/generic_contracts_transactions_provider.d
 import '../../../../providers/provider/logged_out_provider.dart';
 import '../../../../providers/provider/network_changes_provider.dart';
 import '../../../../providers/provider/permissions_provider.dart';
-import '../custom_in_app_web_view_controller.dart';
 import '../events/contract_state_changed_handler.dart';
 import '../events/logged_out_handler.dart';
 import '../events/network_changed_handler.dart';
 import '../events/permissions_changed_handler.dart';
 import '../events/transactions_found_handler.dart';
+import '../extensions.dart';
 
-class EventsListener extends StatelessWidget {
-  final Completer<CustomInAppWebViewController> controller;
+class EventsListener extends StatefulWidget {
+  final Completer<InAppWebViewController> controller;
   final Widget child;
 
   const EventsListener({
@@ -29,13 +30,20 @@ class EventsListener extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<EventsListener> createState() => _EventsListenerState();
+}
+
+class _EventsListenerState extends State<EventsListener> {
+  PermissionsChangedEvent? prevPermissionsChangedEvent;
+
+  @override
   Widget build(BuildContext context) => Consumer(
         builder: (context, ref, child) {
           ref.listen<AsyncValue<TransactionsFoundEvent>>(
             genericContractsTransactionsProvider,
             (previous, next) => next.whenData(
               (value) async => transactionsFoundHandler(
-                controller: await controller.future,
+                controller: await widget.controller.future,
                 event: value,
               ),
             ),
@@ -45,7 +53,7 @@ class EventsListener extends StatelessWidget {
             genericContractsStateChangesProvider,
             (previous, next) => next.whenData(
               (value) async => contractStateChangedHandler(
-                controller: await controller.future,
+                controller: await widget.controller.future,
                 event: value,
               ),
             ),
@@ -55,7 +63,7 @@ class EventsListener extends StatelessWidget {
             networkChangesProvider,
             (previous, next) => next.whenData(
               (value) async => networkChangedHandler(
-                controller: await controller.future,
+                controller: await widget.controller.future,
                 event: value,
               ),
             ),
@@ -64,13 +72,15 @@ class EventsListener extends StatelessWidget {
           ref.listen<AsyncValue<List<Tuple2<String, PermissionsChangedEvent>>>>(
             permissionsProvider,
             (previous, next) async => next.whenData((value) async {
-              final controller = await this.controller.future;
+              final controller = await widget.controller.future;
 
-              final currentOrigin = await controller.controller.getUrl().then((v) => v?.authority);
+              final currentOrigin = await controller.getOrigin();
 
               final event = value.firstWhereOrNull((e) => e.item1 == currentOrigin)?.item2;
 
-              if (event == null) return;
+              if (event == null || event == prevPermissionsChangedEvent) return;
+
+              prevPermissionsChangedEvent = event;
 
               permissionsChangedHandler(
                 controller: controller,
@@ -82,12 +92,12 @@ class EventsListener extends StatelessWidget {
           ref.listen<void>(
             loggedOutProvider,
             (previous, next) async => loggedOutHandler(
-              controller: await controller.future,
+              controller: await widget.controller.future,
             ),
           );
 
           return child!;
         },
-        child: child,
+        child: widget.child,
       );
 }

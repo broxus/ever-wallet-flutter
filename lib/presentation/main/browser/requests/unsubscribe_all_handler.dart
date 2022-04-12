@@ -1,16 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
 import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/generic_contracts_repository.dart';
 import '../../../../../injection.dart';
-import '../custom_in_app_web_view_controller.dart';
 
 Future<dynamic> unsubscribeAllHandler({
-  required CustomInAppWebViewController controller,
+  required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
+    logger.d('UnsubscribeAllRequest', args);
+
     getIt.get<GenericContractsRepository>().clear();
 
     final jsonOutput = jsonEncode({});

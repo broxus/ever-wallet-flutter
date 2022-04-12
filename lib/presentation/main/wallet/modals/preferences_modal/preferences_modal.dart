@@ -54,8 +54,8 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const ModalHeader(
-                  text: 'Preferences',
+                ModalHeader(
+                  text: LocaleKeys.preferences.tr(),
                 ),
                 const SizedBox(height: 16),
                 field(),
@@ -72,11 +72,11 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
   Widget card() => AddressCard(address: widget.address);
 
   Widget field() => CustomTextFormField(
-        name: 'name',
+        name: LocaleKeys.name.tr(),
         controller: controller,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: 'Name...',
+        hintText: '${LocaleKeys.name.tr()}...',
         suffixIcon: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -95,7 +95,7 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
 
                   showCrystalFlushbar(
                     context,
-                    message: LocaleKeys.preferences_modal_message_renamed.tr(),
+                    message: LocaleKeys.wallet_renamed.tr(),
                   );
                 } catch (err, st) {
                   logger.e(err, err, st);
@@ -119,6 +119,6 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
 
   Widget explorerButton() => CustomOutlinedButton(
         onPressed: () => launch(accountExplorerLink(widget.address)),
-        text: 'See in the explorer',
+        text: LocaleKeys.see_in_the_explorer.tr(),
       );
 }

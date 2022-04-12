@@ -4,6 +4,8 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../../providers/token_wallet/token_wallet_info_provider.dart';
+import '../../../../providers/common/token_currency_provider.dart';
+import '../../../common/extensions.dart';
 import '../../../common/widgets/token_address_generated_icon.dart';
 import '../../../common/widgets/token_asset_icon.dart';
 import '../modals/token_asset_info/show_token_asset_info.dart';
@@ -12,7 +14,7 @@ import 'wallet_asset_holder.dart';
 class TokenWalletAssetHolder extends StatefulWidget {
   final String owner;
   final String rootTokenContract;
-  final String name;
+  final String symbol;
   final int decimals;
   final TokenWalletVersion version;
   final String? logoURI;
@@ -21,7 +23,7 @@ class TokenWalletAssetHolder extends StatefulWidget {
     Key? key,
     required this.owner,
     required this.rootTokenContract,
-    required this.name,
+    required this.symbol,
     required this.decimals,
     required this.version,
     this.logoURI,
@@ -43,11 +45,9 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
               )
               .asData
               ?.value;
+          final currency = ref.watch(tokenCurrencyProvider(widget.symbol)).asData?.value;
 
           return WalletAssetHolder(
-            name: widget.name,
-            balance: tokenWalletInfo != null ? tokenWalletInfo.balance : '0',
-            decimals: widget.decimals,
             icon: widget.logoURI != null
                 ? TokenAssetIcon(
                     logoURI: widget.logoURI!,
@@ -57,12 +57,20 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
                     address: widget.rootTokenContract,
                     version: widget.version,
                   ),
-            onTap: () => showTokenAssetInfo(
-              context: context,
-              owner: widget.owner,
-              rootTokenContract: widget.rootTokenContract,
-              logoURI: widget.logoURI,
-            ),
+            balance: tokenWalletInfo != null
+                ? '${tokenWalletInfo.balance.toTokens(widget.decimals).removeZeroes().formatValue()} ${widget.symbol}'
+                : '0 ${widget.symbol}',
+            balanceUsdt: currency != null && tokenWalletInfo != null
+                ? '\$${(double.parse(tokenWalletInfo.balance.toTokens(widget.decimals)) * double.parse(currency.price)).truncateToDecimalPlaces(4).toStringAsFixed(4).removeZeroes().formatValue()}'
+                : '\$0',
+            onTap: tokenWalletInfo != null
+                ? () => showTokenAssetInfo(
+                      context: context,
+                      owner: widget.owner,
+                      rootTokenContract: widget.rootTokenContract,
+                      logoURI: widget.logoURI,
+                    )
+                : () {},
           );
         },
       );

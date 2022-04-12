@@ -1,28 +1,24 @@
 import 'package:flutter/material.dart';
 
-import '../../../common/extensions.dart';
 import '../../../common/theme.dart';
 
 class WalletAssetHolder extends StatelessWidget {
-  final String name;
-  final String balance;
-  final int decimals;
   final Widget icon;
+  final String balance;
+  final String balanceUsdt;
   final VoidCallback onTap;
 
   const WalletAssetHolder({
     Key? key,
-    required this.name,
-    required this.balance,
-    required this.decimals,
     required this.icon,
+    required this.balance,
+    required this.balanceUsdt,
     required this.onTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Material(
-        type: MaterialType.card,
-        color: CrystalColor.primary,
+        color: Colors.white,
         child: InkWell(
           onTap: onTap,
           child: Padding(
@@ -32,57 +28,49 @@ class WalletAssetHolder extends StatelessWidget {
             ),
             child: Row(
               children: [
-                SizedBox.square(
-                  dimension: 36,
-                  child: icon,
-                ),
+                leading(),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        height: 24,
-                        child: Text(
-                          balance.toTokens(decimals).removeZeroes().formatValue(),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            letterSpacing: 0.5,
-                            fontWeight: FontWeight.w700,
-                            color: CrystalColor.fontDark,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      SizedBox(
-                        height: 20,
-                        child: Text(
-                          name,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            letterSpacing: 0.75,
-                            color: CrystalColor.fontSecondaryDark,
-                          ),
-                        ),
-                      ),
+                      title(),
+                      const SizedBox(height: 4),
+                      subtitle(),
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: Center(
-                    child: Icon(
-                      Icons.arrow_forward_ios,
-                      color: CrystalColor.icon,
-                      size: 14,
-                    ),
-                  ),
-                )
+                arrow()
               ],
             ),
           ),
         ),
+      );
+
+  Widget leading() => icon;
+
+  Widget title() => Text(
+        balance,
+        style: const TextStyle(
+          fontSize: 18,
+          letterSpacing: 0.5,
+          fontWeight: FontWeight.w700,
+          color: CrystalColor.fontDark,
+        ),
+      );
+
+  Widget subtitle() => Text(
+        balanceUsdt,
+        style: const TextStyle(
+          fontSize: 14,
+          letterSpacing: 0.75,
+          color: CrystalColor.fontSecondaryDark,
+        ),
+      );
+
+  Widget arrow() => const Icon(
+        Icons.arrow_forward_ios,
+        color: CrystalColor.icon,
+        size: 14,
       );
 }

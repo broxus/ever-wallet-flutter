@@ -7,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../../providers/key/keys_provider.dart';
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
+import '../../../../../generated/codegen_loader.g.dart';
+import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/utils.dart';
@@ -16,6 +18,7 @@ import '../../../../common/widgets/modal_header.dart';
 import '../../../../common/widgets/transaction_type_label.dart';
 import '../../../common/extensions.dart';
 import '../confirm_transaction_flow/start_confirm_transaction_flow.dart';
+import '../utils.dart';
 
 class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
   final TonWalletTransactionWithData transactionWithData;
@@ -189,7 +192,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
               section(
                 [
                   item(
-                    title: 'Comment',
+                    title: LocaleKeys.comment.tr(),
                     subtitle: comment,
                   ),
                 ],
@@ -197,7 +200,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
             if (dePoolOnRoundComplete != null)
               section(
                 [
-                  typeItem('DePool on round complete'),
+                  typeItem(LocaleKeys.de_pool_on_round_complete.tr()),
                   ...dePoolOnRoundComplete.entries
                       .map(
                         (e) => item(
@@ -211,7 +214,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
             if (dePoolReceiveAnswer != null)
               section(
                 [
-                  typeItem('DePool receive answer'),
+                  typeItem(LocaleKeys.de_pool_receive_answer.tr()),
                   ...dePoolReceiveAnswer.entries
                       .map(
                         (e) => item(
@@ -225,7 +228,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
             if (tokenWalletDeployed != null)
               section(
                 [
-                  typeItem('Token wallet deployed'),
+                  typeItem(LocaleKeys.token_wallet_deployed.tr()),
                   ...tokenWalletDeployed.entries
                       .map(
                         (e) => item(
@@ -239,7 +242,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
             if (walletInteraction != null)
               section(
                 [
-                  typeItem('Wallet interaction'),
+                  typeItem(LocaleKeys.wallet_interaction.tr()),
                   ...walletInteraction.entries
                       .map(
                         (e) => item(
@@ -260,7 +263,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                 if (confirmations != null)
                   ...custodians.asMap().entries.map(
                     (e) {
-                      final title = publicKeysLabels[e.value] ?? 'Custodian ${e.key + 1}';
+                      final title = publicKeysLabels[e.value] ?? LocaleKeys.custodian_n.tr(args: ['${e.key + 1}']);
 
                       return custodiansItem(
                         label: title,
@@ -281,8 +284,8 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    const ModalHeader(
-                      text: 'Transaction information',
+                    ModalHeader(
+                      text: LocaleKeys.transaction_information.tr(),
                     ),
                     const SizedBox(height: 16),
                     label(),
@@ -316,9 +319,9 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
       );
 
   Widget label() => Row(
-        children: const [
+        children: [
           TransactionTypeLabel(
-            text: 'Waiting for confirmation',
+            text: LocaleKeys.waiting_for_confirmation.tr(),
             color: CrystalColor.error,
           ),
         ],
@@ -376,8 +379,8 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
       );
 
   Widget dateItem(DateTime date) => item(
-        title: 'Date and time',
-        subtitle: DateFormat('dd.MM.yyyy, H:mm').format(date),
+        title: LocaleKeys.date_and_time.tr(),
+        subtitle: transactionTimeFormat.format(date),
       );
 
   Widget addressItem({
@@ -385,12 +388,12 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
     required String address,
   }) =>
       item(
-        title: isOutgoing ? 'Recipient' : 'Sender',
+        title: isOutgoing ? LocaleKeys.recipient.tr() : LocaleKeys.sender.tr(),
         subtitle: address,
       );
 
   Widget hashItem(String hash) => item(
-        title: 'Hash (ID)',
+        title: LocaleKeys.hash_id.tr(),
         subtitle: hash,
       );
 
@@ -399,17 +402,17 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
     required String value,
   }) =>
       item(
-        title: 'Amount',
-        subtitle: '${isOutgoing ? '-' : ''}$value EVER',
+        title: LocaleKeys.amount.tr(),
+        subtitle: '${isOutgoing ? '-' : ''}$value $kEverTicker',
       );
 
   Widget feeItem(String fees) => item(
-        title: 'Blockchain fee',
-        subtitle: '$fees EVER',
+        title: LocaleKeys.blockchain_fee.tr(),
+        subtitle: '$fees $kEverTicker',
       );
 
   Widget typeItem(String type) => item(
-        title: 'Type',
+        title: LocaleKeys.type.tr(),
         subtitle: type,
       );
 
@@ -418,8 +421,8 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
     required int required,
   }) =>
       item(
-        title: 'Signatures',
-        subtitle: '$received of $required signatures collected',
+        title: LocaleKeys.signatures.tr(),
+        subtitle: LocaleKeys.n_of_k_signatures_collected.tr(args: ['$received', '$required']),
       );
 
   Widget custodiansItem({
@@ -435,18 +438,18 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
           children: [
             if (isSigned)
               custodianLabel(
-                text: 'Signed',
+                text: LocaleKeys.signed.tr(),
                 color: CrystalColor.success,
               )
             else
               custodianLabel(
-                text: 'Not signed',
+                text: LocaleKeys.not_signed.tr(),
                 color: CrystalColor.fontDark,
               ),
             if (isCreator) ...[
               const SizedBox(width: 8),
               custodianLabel(
-                text: 'Initiator',
+                text: LocaleKeys.initiator.tr(),
                 color: CrystalColor.pending,
               ),
             ],
@@ -473,12 +476,12 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
           amount: amount,
           comment: comment,
         ),
-        text: 'Confirm transaction',
+        text: LocaleKeys.confirm_transaction.tr(),
       );
 
   Widget explorerButton(String hash) => CustomOutlinedButton(
         onPressed: () => launch(transactionExplorerLink(hash)),
-        text: 'See in the explorer',
+        text: LocaleKeys.see_in_the_explorer.tr(),
       );
 
   Widget custodianLabel({

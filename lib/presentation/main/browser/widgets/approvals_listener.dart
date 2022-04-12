@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -11,6 +12,7 @@ import '../../../../../../data/models/approval_request.dart';
 import '../../../../../../providers/common/approvals_provider.dart';
 import '../../../../data/repositories/accounts_repository.dart';
 import '../../../../data/repositories/keys_repository.dart';
+import '../../../../generated/codegen_loader.g.dart';
 import '../../../../injection.dart';
 import '../../common/get_local_custodians_public_keys.dart';
 import '../call_contract_method_modal/show_call_contract_method_modal.dart';
@@ -101,14 +103,14 @@ class ApprovalsListener extends StatelessWidget {
       if (accounts.isEmpty) {
         final currentKey = getIt.get<KeysRepository>().currentKey;
 
-        if (currentKey == null) throw Exception('No current key');
+        if (currentKey == null) throw Exception(LocaleKeys.no_current_key.tr());
 
         showAddAccountDialog(
           context: context,
           publicKey: currentKey.publicKey,
         );
 
-        throw Exception('No accounts');
+        throw Exception(LocaleKeys.no_accounts.tr());
       }
 
       final result = await showRequestPermissionsModal(
@@ -120,7 +122,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result != null) {
         completer.complete(result);
       } else {
-        throw Exception('Not granted');
+        throw Exception(LocaleKeys.not_granted.tr());
       }
     } catch (err, st) {
       completer.completeError(err, st);
@@ -156,7 +158,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result != null) {
         completer.complete(result);
       } else {
-        throw Exception('No password');
+        throw Exception(LocaleKeys.no_password.tr());
       }
     } catch (err, st) {
       completer.completeError(err, st);
@@ -183,7 +185,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result != null) {
         completer.complete(result);
       } else {
-        throw Exception('No password');
+        throw Exception(LocaleKeys.no_password.tr());
       }
     } catch (err, st) {
       completer.completeError(err, st);

@@ -98,7 +98,7 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.welcome_policy_screen_title.tr(),
+        text: LocaleKeys.sign_policy.tr(),
       );
 
   Widget image() => Align(
@@ -124,11 +124,11 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
   Widget text() => Expanded(
         child: Text.rich(
           TextSpan(
-            text: LocaleKeys.welcome_policy_screen_description_common.tr(),
+            text: LocaleKeys.policy_description_common.tr(),
             children: [
               const TextSpan(text: ' '),
               TextSpan(
-                text: LocaleKeys.welcome_policy_screen_description_link.tr(),
+                text: LocaleKeys.policy_description_link.tr(),
                 style: const TextStyle(
                   decoration: TextDecoration.underline,
                   fontWeight: FontWeight.w500,
@@ -137,7 +137,7 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
               ),
               const TextSpan(text: ' '),
               TextSpan(
-                text: LocaleKeys.welcome_policy_screen_description_application.tr(),
+                text: LocaleKeys.policy_description_application.tr(),
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ],
@@ -149,7 +149,7 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
         valueListenable: policyCheckNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value ? widget.onPressed : null,
-          text: LocaleKeys.actions_submit.tr(),
+          text: LocaleKeys.submit.tr(),
         ),
       );
 

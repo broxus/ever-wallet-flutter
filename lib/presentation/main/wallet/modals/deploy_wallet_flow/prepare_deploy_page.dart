@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -7,6 +8,7 @@ import 'package:tuple/tuple.dart';
 import 'package:validators/validators.dart';
 
 import '../../../../../generated/assets.gen.dart';
+import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/custom_dropdown_button.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
@@ -87,7 +89,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
               Column(
                 children: [
                   ModalHeader(
-                    text: 'Select wallet type to create',
+                    text: LocaleKeys.select_wallet_type.tr(),
                     onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                   ),
                   const SizedBox(height: 16),
@@ -147,11 +149,11 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        fieldHeader('Any transaction requires the confirmation of:'),
+                        fieldHeader(LocaleKeys.transaction_required_confirms.tr()),
                         const SizedBox(height: 8),
                         countField(),
                         const SizedBox(height: 16),
-                        sectionTitle('Custodians'),
+                        sectionTitle(LocaleKeys.custodians.tr()),
                         const SizedBox(height: 16),
                         list(),
                         addButton(),
@@ -194,18 +196,18 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
   Widget countField() => ValueListenableBuilder<int>(
         valueListenable: custodiansNotifier,
         builder: (context, custodiansValue, child) => CustomTextFormField(
-          name: 'count',
+          name: LocaleKeys.count.tr(),
           controller: countController,
           focusNode: countFocusNode,
           keyboardType: const TextInputType.numberWithOptions(signed: true),
           textInputAction: TextInputAction.next,
           autocorrect: false,
           enableSuggestions: false,
-          hintText: 'Enter number...',
+          hintText: '${LocaleKeys.enter_number.tr()}...',
           suffixIcon: Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'out of $custodiansValue custodians',
+              LocaleKeys.out_of_n_custodians.tr(args: ['$custodiansValue']),
               style: const TextStyle(
                 color: Colors.black,
               ),
@@ -224,11 +226,11 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
             final number = int.tryParse(value);
 
             if (number == null) {
-              return 'Invalid value';
+              return LocaleKeys.invalid_value.tr();
             }
 
             if (number < 1 || number > custodiansValue) {
-              return 'Invalid value';
+              return LocaleKeys.invalid_value.tr();
             }
             return null;
           },
@@ -256,16 +258,16 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          fieldHeader('Public key of Custodian ${index + 1}'),
+          fieldHeader(LocaleKeys.public_key_of_custodian_n.tr(args: ['${index + 1}'])),
           const SizedBox(height: 8),
           CustomTextFormField(
-            name: 'custodian_${index + 1}',
+            name: LocaleKeys.custodian_n.tr(args: ['${index + 1}']),
             controller: controllers[index],
             focusNode: focusNodes[index],
             textInputAction: index != custodians - 1 ? TextInputAction.next : TextInputAction.done,
             autocorrect: false,
             enableSuggestions: false,
-            hintText: 'Enter public key...',
+            hintText: '${LocaleKeys.enter_public_key.tr()}...',
             suffixIcon: suffixIcons(index),
             onSubmitted: (value) {
               if (index != custodians - 1) {
@@ -282,11 +284,11 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
               }
 
               if (!isAlphanumeric(value)) {
-                return 'Invalid value';
+                return LocaleKeys.invalid_value.tr();
               }
 
               if (value.length != 64) {
-                return 'Invalid value';
+                return LocaleKeys.invalid_value.tr();
               }
               return null;
             },
@@ -333,7 +335,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
                   const SizedBox(height: 16),
                   CustomTextButton(
                     onPressed: addCustodian,
-                    text: '+ Add one more public key',
+                    text: LocaleKeys.add_public_key.tr(),
                     style: const TextStyle(
                       color: CrystalColor.accent,
                     ),
@@ -373,12 +375,12 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
                             );
                           }
                         : null,
-                    text: 'Next',
+                    text: LocaleKeys.next.tr(),
                   ),
                 )
               : CustomElevatedButton(
                   onPressed: onPressed,
-                  text: 'Next',
+                  text: LocaleKeys.next.tr(),
                 ),
         ),
       );
@@ -409,9 +411,9 @@ extension on _WalletCreationOptions {
   String describe() {
     switch (this) {
       case _WalletCreationOptions.standard:
-        return 'Standard wallet';
+        return LocaleKeys.standard_wallet.tr();
       case _WalletCreationOptions.multisignature:
-        return 'Multisignature wallet';
+        return LocaleKeys.multisignature_wallet.tr();
     }
   }
 }

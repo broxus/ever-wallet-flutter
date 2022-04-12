@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../common/theme.dart';
 import '../../common/widgets/unfocusing_gesture_detector.dart';
 import 'browser_page_logic.dart';
-import 'custom_in_app_web_view_controller.dart';
 import 'widgets/approvals_listener.dart';
 import 'widgets/browser_app_bar.dart';
 import 'widgets/browser_history.dart';
@@ -23,7 +23,7 @@ class BrowserPage extends StatefulWidget {
 }
 
 class _BrowserPageState extends State<BrowserPage> {
-  final controller = Completer<CustomInAppWebViewController>();
+  final controller = Completer<InAppWebViewController>();
   final urlController = TextEditingController();
   final urlFocusNode = FocusNode();
 
@@ -35,7 +35,6 @@ class _BrowserPageState extends State<BrowserPage> {
 
   @override
   void dispose() {
-    controller.future.then((v) => v.dispose());
     urlController.dispose();
     urlFocusNode.removeListener(urlFocusNodeListener);
     super.dispose();
@@ -54,27 +53,18 @@ class _BrowserPageState extends State<BrowserPage> {
         child: ApprovalsListener(
           child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle.dark,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-              child: Scaffold(
-                resizeToAvoidBottomInset: false,
-                backgroundColor: CrystalColor.iosBackground,
-                body: SafeArea(
-                  bottom: false,
-                  child: MediaQuery.removePadding(
-                    context: context,
-                    removeBottom: true,
-                    removeTop: true,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        appBar(),
-                        Expanded(
-                          child: body(),
-                        ),
-                      ],
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              backgroundColor: CrystalColor.iosBackground,
+              body: SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    appBar(),
+                    Expanded(
+                      child: body(),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),

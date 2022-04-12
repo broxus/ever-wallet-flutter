@@ -107,11 +107,11 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.password_creation_screen_creation_title.tr(),
+        text: LocaleKeys.create_password.tr(),
       );
 
   Widget subtitle() => CrystalSubtitle(
-        text: LocaleKeys.password_creation_screen_creation_description.tr(),
+        text: LocaleKeys.create_password_description.tr(),
       );
 
   Widget fields() => Form(
@@ -140,9 +140,9 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
     }
 
     if (!isLength(passwordController.text, 8)) {
-      text = 'Password must be at least 8 symbols';
+      text = LocaleKeys.password_length.tr();
     } else if (repeatController.text.isNotEmpty && passwordController.text != repeatController.text) {
-      text = 'Passwords must match';
+      text = LocaleKeys.passwords_match.tr();
     }
 
     if (passwordController.text.isEmpty && repeatController.text.isEmpty) {
@@ -153,14 +153,14 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
   }
 
   Widget passwordField() => CustomTextFormField(
-        name: 'password',
+        name: LocaleKeys.password.tr(),
         controller: passwordController,
         focusNode: passwordFocusNode,
         autocorrect: false,
         enableSuggestions: false,
         obscureText: true,
         textInputAction: TextInputAction.next,
-        hintText: LocaleKeys.password_creation_screen_password_hint.tr(),
+        hintText: LocaleKeys.your_password.tr(),
         suffixIcon: TextFieldClearButton(
           controller: passwordController,
         ),
@@ -178,14 +178,14 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
       );
 
   Widget repeatField() => CustomTextFormField(
-        name: 'repeat',
+        name: LocaleKeys.repeat.tr(),
         controller: repeatController,
         focusNode: repeatFocusNode,
         autocorrect: false,
         enableSuggestions: false,
         obscureText: true,
         textInputAction: TextInputAction.done,
-        hintText: LocaleKeys.password_creation_screen_password_confirmation.tr(),
+        hintText: LocaleKeys.confirm_password.tr(),
         suffixIcon: TextFieldClearButton(
           controller: repeatController,
         ),
@@ -240,12 +240,12 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
                         CustomCheckbox(
                           value: isEnabled,
                           onChanged: (value) => getIt.get<BiometryRepository>().setStatus(
-                                localizedReason: 'Please authenticate to interact with wallet',
+                                localizedReason: LocaleKeys.authentication_reason.tr(),
                                 isEnabled: !isEnabled,
                               ),
                         ),
                         Expanded(
-                          child: Text(LocaleKeys.biometry_checkbox.tr()),
+                          child: Text(LocaleKeys.enable_biometry.tr()),
                         ),
                       ],
                     ),
@@ -258,7 +258,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value != null ? null : onSubmitButtonPressed,
-          text: LocaleKeys.actions_confirm.tr(),
+          text: LocaleKeys.confirm.tr(),
         ),
       );
 

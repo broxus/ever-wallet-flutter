@@ -1,10 +1,13 @@
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../generated/codegen_loader.g.dart';
 import '../../../../providers/account/accounts_provider.dart';
 import '../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../common/constants.dart';
 import '../../../common/extensions.dart';
 import '../../../common/widgets/address_generated_icon.dart';
 import '../../../common/widgets/custom_elevated_button.dart';
@@ -50,7 +53,7 @@ class _RequestPermissionsModalState extends ConsumerState<RequestPermissionsPage
             child: Column(
               children: [
                 ModalHeader(
-                  text: 'Select account',
+                  text: LocaleKeys.select_account.tr(),
                   onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                 ),
                 const SizedBox(height: 16),
@@ -142,7 +145,7 @@ class _RequestPermissionsModalState extends ConsumerState<RequestPermissionsPage
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(account.address)).whenOrNull(data: (data) => data);
 
           return Text(
-            '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes().formatValue() ?? '0'} EVER',
+            '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes().formatValue() ?? '0'} $kEverTicker',
             style: const TextStyle(
               fontSize: 14,
               color: Colors.grey,
@@ -166,7 +169,7 @@ class _RequestPermissionsModalState extends ConsumerState<RequestPermissionsPage
 
   Widget rejectButton() => CustomOutlinedButton(
         onPressed: () => Navigator.of(widget.modalContext).pop(),
-        text: 'Cancel',
+        text: LocaleKeys.cancel.tr(),
       );
 
   Widget submitButton() => Consumer(
@@ -175,7 +178,7 @@ class _RequestPermissionsModalState extends ConsumerState<RequestPermissionsPage
 
           return CustomElevatedButton(
             onPressed: selectedAccount != null ? () => onSubmitPressed(selectedAccount) : null,
-            text: 'Select',
+            text: LocaleKeys.select.tr(),
           );
         },
       );

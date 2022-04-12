@@ -184,7 +184,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
 
           final receiveButton = WalletActionButton(
             icon: Assets.images.iconReceive,
-            title: LocaleKeys.actions_receive.tr(),
+            title: LocaleKeys.receive.tr(),
             onPressed: () => showReceiveModal(
               context: context,
               address: owner,
@@ -214,7 +214,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
 
             actionButton = WalletActionButton(
               icon: Assets.images.iconSend,
-              title: LocaleKeys.actions_send.tr(),
+              title: LocaleKeys.send.tr(),
               onPressed: publicKeys.isNotEmpty
                   ? () => startTokenSendTransactionFlow(
                         context: context,
@@ -275,7 +275,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
         child: Row(
           children: [
             Text(
-              LocaleKeys.fields_history.tr(),
+              LocaleKeys.history.tr(),
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -284,7 +284,7 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
             const Spacer(),
             if (state.isEmpty)
               Text(
-                LocaleKeys.wallet_history_modal_placeholder_transactions_empty.tr(),
+                LocaleKeys.transactions_empty.tr(),
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.black45,

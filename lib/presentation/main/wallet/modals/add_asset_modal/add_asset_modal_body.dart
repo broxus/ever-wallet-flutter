@@ -47,7 +47,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: ModalHeader(
-                  text: LocaleKeys.add_assets_modal_title.tr(),
+                  text: LocaleKeys.select_new_assets.tr(),
                 ),
               ),
               tabs(),
@@ -73,8 +73,8 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
           TabBar(
             controller: tabController,
             tabs: [
-              Text(LocaleKeys.add_assets_modal_search_layout_tab.tr()),
-              Text(LocaleKeys.add_assets_modal_create_layout_tab.tr()),
+              Text(LocaleKeys.search.tr()),
+              Text(LocaleKeys.custom_token.tr()),
             ],
             labelStyle: const TextStyle(fontSize: 16, letterSpacing: 0.25),
             unselectedLabelColor: CrystalColor.fontSecondaryDark,
@@ -148,7 +148,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
     } catch (err) {
       if (!mounted) return;
 
-      showErrorCrystalFlushbar(context, message: 'Invalid root token contract');
+      showErrorCrystalFlushbar(context, message: LocaleKeys.invalid_root_token_contract.tr());
     }
   }
 }

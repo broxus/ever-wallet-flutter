@@ -1,7 +1,10 @@
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../../generated/codegen_loader.g.dart';
+import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/ton_asset_icon.dart';
@@ -132,7 +135,7 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
                       Expanded(
                         child: ValueTitle(
                           value: value.toTokens().removeZeroes().formatValue(),
-                          currency: 'EVER',
+                          currency: kEverTicker,
                           isOutgoing: isOutgoing,
                         ),
                       ),
@@ -151,8 +154,8 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  const TransactionTypeLabel(
-                    text: 'Waiting for confirmation',
+                  TransactionTypeLabel(
+                    text: LocaleKeys.waiting_for_confirmation.tr(),
                     color: CrystalColor.error,
                   ),
                   const SizedBox(height: 4),

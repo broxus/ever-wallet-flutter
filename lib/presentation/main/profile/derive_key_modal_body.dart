@@ -22,7 +22,7 @@ class DeriveKeyModalBody extends StatefulWidget {
     required this.name,
   }) : super(key: key);
 
-  static String get title => LocaleKeys.derive_key_modal_title.tr();
+  static String get title => LocaleKeys.derive_enter_password.tr();
 
   @override
   _DeriveKeyModalBodyState createState() => _DeriveKeyModalBodyState();

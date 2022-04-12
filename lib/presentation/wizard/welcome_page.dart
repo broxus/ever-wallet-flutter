@@ -70,11 +70,11 @@ class WelcomePage extends StatelessWidget {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.welcome_screen_title.tr(),
+        text: LocaleKeys.welcome_title.tr(),
       );
 
   Widget subtitle() => CrystalSubtitle(
-        text: LocaleKeys.welcome_screen_subtitle.tr(),
+        text: LocaleKeys.welcome_subtitle.tr(),
       );
 
   Widget image() => Align(
@@ -96,7 +96,7 @@ class WelcomePage extends StatelessWidget {
             ),
           ),
         ),
-        text: LocaleKeys.welcome_screen_action_create.tr(),
+        text: LocaleKeys.create_new_wallet.tr(),
       );
 
   Widget signInButton(BuildContext context) => CustomOutlinedButton(
@@ -118,6 +118,6 @@ class WelcomePage extends StatelessWidget {
             ),
           ),
         ),
-        text: LocaleKeys.welcome_screen_action_sign_in.tr(),
+        text: LocaleKeys.sign_in.tr(),
       );
 }

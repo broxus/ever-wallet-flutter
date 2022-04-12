@@ -103,7 +103,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
   Widget pasteButton() => ActionButton(
         key: const ValueKey(_ButtonState.paste),
         onPressed: onPasteButtonPressed,
-        text: LocaleKeys.actions_paste.tr(),
+        text: LocaleKeys.paste.tr(),
       );
 
   Future<void> onPasteButtonPressed() async {
@@ -127,7 +127,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
 
       showErrorCrystalFlushbar(
         context,
-        message: 'Incorrect words format',
+        message: LocaleKeys.incorrect_words_format.tr(),
         flushbarPosition: FlushbarPosition.BOTTOM,
         margin: const EdgeInsets.only(bottom: 12),
       );
@@ -156,7 +156,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
           formValidityNotifier.value = false;
           buttonStateNotifier.value = _ButtonState.paste;
         },
-        text: LocaleKeys.actions_clear.tr(),
+        text: LocaleKeys.clear.tr(),
       );
 
   Widget body() => SafeArea(
@@ -192,7 +192,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.seed_phrase_import_screen_title.tr(),
+        text: LocaleKeys.enter_seed_phrase.tr(),
       );
 
   Widget list() {
@@ -243,7 +243,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         autocorrect: false,
         enableSuggestions: false,
         textInputAction: index != wordsLength - 1 ? TextInputAction.next : TextInputAction.done,
-        hintText: 'Word...',
+        hintText: '${LocaleKeys.word.tr()}...',
         prefixIcon: TextFieldIndexIcon(
           index: index,
         ),
@@ -285,7 +285,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
     if (getHints(value).isNotEmpty) {
       return null;
     } else {
-      return LocaleKeys.seed_phrase_check_screen_validation_errors_incorrect_word.tr();
+      return LocaleKeys.incorrect_word.tr();
     }
   }
 
@@ -347,7 +347,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value ? onSubmitButtonPressed : null,
-          text: LocaleKeys.actions_confirm.tr(),
+          text: LocaleKeys.confirm.tr(),
         ),
       );
 
@@ -377,12 +377,12 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         builder: (context) => Theme(
           data: ThemeData(),
           child: PlatformAlertDialog(
-            title: const Text('Error'),
+            title: Text(LocaleKeys.error.tr()),
             content: Text(text),
             actions: <Widget>[
               PlatformDialogAction(
                 onPressed: () => context.router.navigatorKey.currentState?.pop(),
-                child: const Text('Ok'),
+                child: Text(LocaleKeys.ok.tr()),
               ),
             ],
           ),

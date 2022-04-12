@@ -1,4 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../../../generated/codegen_loader.g.dart';
 
 class ConfirmsTitle extends StatelessWidget {
   final int signsReceived;
@@ -12,7 +15,7 @@ class ConfirmsTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        'Signed $signsReceived of $signsRequired',
+        LocaleKeys.signed_n_of_k.tr(args: ['$signsReceived', '$signsRequired']),
         style: const TextStyle(
           color: Colors.black45,
         ),

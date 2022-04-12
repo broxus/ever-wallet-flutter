@@ -79,15 +79,15 @@ class _MainRouterPageState extends State<MainRouterPage> {
             items: [
               item(
                 image: Assets.images.wallet,
-                label: LocaleKeys.wallet_screen_title.tr(),
+                label: LocaleKeys.wallet.tr(),
               ),
               item(
                 image: Assets.images.browser,
-                label: LocaleKeys.browser_title.tr(),
+                label: LocaleKeys.browser.tr(),
               ),
               item(
                 image: Assets.images.profile,
-                label: 'Profile',
+                label: LocaleKeys.profile.tr(),
               ),
             ],
           ),

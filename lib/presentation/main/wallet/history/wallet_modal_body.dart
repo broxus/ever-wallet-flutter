@@ -26,8 +26,8 @@ class WalletModalBody extends StatefulWidget {
 
 class _WalletModalBodyState extends State<WalletModalBody> {
   final tabs = [
-    LocaleKeys.wallet_history_modal_tabs_assets,
-    LocaleKeys.wallet_history_modal_tabs_transactions,
+    LocaleKeys.assets,
+    LocaleKeys.transactions,
   ].map((e) => Text(e.tr())).toList();
 
   @override

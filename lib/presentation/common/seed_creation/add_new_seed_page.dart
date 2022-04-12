@@ -75,8 +75,8 @@ class _AddNewSeedPageState extends State<AddNewSeedPage> {
         ),
       );
 
-  Widget title() => const CrystalTitle(
-        text: 'Create new seed or add existing',
+  Widget title() => CrystalTitle(
+        text: LocaleKeys.add_new_seed_phrase_description.tr(),
       );
 
   Widget dropdownButton() => ValueListenableBuilder<_CreationActions>(
@@ -111,7 +111,7 @@ class _AddNewSeedPageState extends State<AddNewSeedPage> {
             },
           ),
         ),
-        text: 'Next',
+        text: LocaleKeys.next.tr(),
       );
 }
 
@@ -125,11 +125,11 @@ extension on _CreationActions {
   String describe() {
     switch (this) {
       case _CreationActions.create:
-        return LocaleKeys.new_seed_name_actions_create.tr();
+        return LocaleKeys.create_seed.tr();
       case _CreationActions.import:
-        return LocaleKeys.new_seed_name_actions_import.tr();
+        return LocaleKeys.import_seed.tr();
       case _CreationActions.importLegacy:
-        return LocaleKeys.new_seed_name_actions_import_legacy.tr();
+        return LocaleKeys.import_legacy_seed.tr();
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
+import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/widgets/unfocusing_gesture_detector.dart';
 
 Future<void> showEditCustodianLabelDialog({
@@ -24,19 +26,19 @@ Future<void> showEditCustodianLabelDialog({
 
           return UnfocusingGestureDetector(
             child: PlatformAlertDialog(
-              title: const Text("Custodian's label"),
+              title: Text(LocaleKeys.custodian_label.tr()),
               content: Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: PlatformTextField(
                   controller: controller,
                   autocorrect: false,
-                  hintText: 'Enter name...',
+                  hintText: '${LocaleKeys.enter_name.tr()}...',
                 ),
               ),
               actions: [
                 PlatformDialogAction(
                   onPressed: () => context.router.pop(),
-                  child: const Text('Cancel'),
+                  child: Text(LocaleKeys.cancel.tr()),
                 ),
                 PlatformDialogAction(
                   onPressed: () async {
@@ -54,7 +56,7 @@ Future<void> showEditCustodianLabelDialog({
                   cupertino: (_, __) => CupertinoDialogActionData(
                     isDefaultAction: true,
                   ),
-                  child: const Text('OK'),
+                  child: Text(LocaleKeys.ok.tr()),
                 ),
               ],
             ),

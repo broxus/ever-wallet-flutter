@@ -4,13 +4,13 @@ import 'package:shimmer/shimmer.dart';
 import '../theme.dart';
 
 class CrystalShimmer extends StatelessWidget {
-  final double height;
-  final double width;
+  final double? height;
+  final double? width;
 
   const CrystalShimmer({
     Key? key,
-    required this.height,
-    required this.width,
+    this.height,
+    this.width,
   }) : super(key: key);
 
   @override
@@ -22,7 +22,6 @@ class CrystalShimmer extends StatelessWidget {
           width: width,
           decoration: const BoxDecoration(
             color: CrystalColor.whitelight,
-            borderRadius: BorderRadius.zero,
           ),
         ),
       );

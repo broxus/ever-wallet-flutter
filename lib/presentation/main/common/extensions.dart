@@ -1,38 +1,41 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../generated/codegen_loader.g.dart';
+import '../../common/constants.dart';
 import '../../common/extensions.dart';
 
 extension KnownPayloadX on KnownPayload {
   Tuple2<String, Map<String, String>>? toRepresentableData() => when(
         comment: (value) => value.isNotEmpty
             ? Tuple2(
-                'Comment',
+                LocaleKeys.comment.tr(),
                 {
-                  'Comment': value,
+                  LocaleKeys.comment.tr(): value,
                 },
               )
             : null,
         tokenOutgoingTransfer: (tokenOutgoingTransfer) => Tuple2(
-          'Token outgoing transfer',
+          LocaleKeys.token_incoming_transfer.tr(),
           {
             ...tokenOutgoingTransfer.to.when(
               ownerWallet: (address) => {
-                'Owner wallet': address,
+                LocaleKeys.owner_wallet.tr(): address,
               },
               tokenWallet: (address) => {
-                'Token wallet': address,
+                LocaleKeys.token_wallet.tr(): address,
               },
             ),
-            'Tokens': tokenOutgoingTransfer.tokens,
+            LocaleKeys.tokens.tr(): tokenOutgoingTransfer.tokens,
           },
         ),
         tokenSwapBack: (tokenSwapBack) => Tuple2(
-          'Token swap back',
+          LocaleKeys.token_swap_back.tr(),
           {
-            'Tokens': tokenSwapBack.tokens,
-            'Callback address': tokenSwapBack.callbackAddress,
-            'Callback payload': tokenSwapBack.callbackPayload,
+            LocaleKeys.tokens.tr(): tokenSwapBack.tokens,
+            LocaleKeys.callback_address.tr(): tokenSwapBack.callbackAddress,
+            LocaleKeys.callback_payload.tr(): tokenSwapBack.callbackPayload,
           },
         ),
       );
@@ -40,38 +43,41 @@ extension KnownPayloadX on KnownPayload {
 
 extension WalletInteractionMethodX on WalletInteractionMethod {
   Tuple2<String, Map<String, String>> toRepresentableData() => when(
-        walletV3Transfer: () => const Tuple2(
-          'WalletV3 transfer',
+        walletV3Transfer: () => Tuple2(
+          LocaleKeys.wallet_v3_transfer.tr(),
           <String, String>{},
         ),
         multisig: (multisigTransaction) => multisigTransaction.when(
           send: (multisigSendTransaction) => Tuple2(
-            'Multisig send transaction',
+            LocaleKeys.multisig_send_transaction.tr(),
             {
-              'Destination': multisigSendTransaction.dest,
-              'Value': '${multisigSendTransaction.value.toTokens().removeZeroes().formatValue()} EVER',
-              'Bounce': multisigSendTransaction.bounce ? 'Yes' : 'No',
-              'Flags': multisigSendTransaction.flags.toString(),
-              'Payload': multisigSendTransaction.payload,
+              LocaleKeys.destination.tr(): multisigSendTransaction.dest,
+              LocaleKeys.value.tr():
+                  '${multisigSendTransaction.value.toTokens().removeZeroes().formatValue()} $kEverTicker',
+              LocaleKeys.bounce.tr(): multisigSendTransaction.bounce ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
+              LocaleKeys.flags.tr(): multisigSendTransaction.flags.toString(),
+              LocaleKeys.payload.tr(): multisigSendTransaction.payload,
             },
           ),
           submit: (multisigSubmitTransaction) => Tuple2(
-            'Multisig submit transaction',
+            LocaleKeys.multisig_submit_transaction.tr(),
             {
-              'Custodian': multisigSubmitTransaction.custodian,
-              'Destination': multisigSubmitTransaction.dest,
-              'Value': '${multisigSubmitTransaction.value.toTokens().removeZeroes().formatValue()} EVER',
-              'Bounce': multisigSubmitTransaction.bounce ? 'Yes' : 'No',
-              'All balance': multisigSubmitTransaction.allBalance ? 'Yes' : 'No',
-              'Payload': multisigSubmitTransaction.payload,
-              'Transaction ID': multisigSubmitTransaction.transId,
+              LocaleKeys.custodian.tr(): multisigSubmitTransaction.custodian,
+              LocaleKeys.destination.tr(): multisigSubmitTransaction.dest,
+              LocaleKeys.value.tr():
+                  '${multisigSubmitTransaction.value.toTokens().removeZeroes().formatValue()} $kEverTicker',
+              LocaleKeys.bounce.tr(): multisigSubmitTransaction.bounce ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
+              LocaleKeys.all_balance.tr():
+                  multisigSubmitTransaction.allBalance ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
+              LocaleKeys.payload.tr(): multisigSubmitTransaction.payload,
+              LocaleKeys.transaction_id.tr(): multisigSubmitTransaction.transId,
             },
           ),
           confirm: (multisigConfirmTransaction) => Tuple2(
-            'Multisig confirm transaction',
+            LocaleKeys.multisig_confirm_transaction.tr(),
             {
-              'Custodian': multisigConfirmTransaction.custodian,
-              'Transaction ID': multisigConfirmTransaction.transactionId,
+              LocaleKeys.custodian.tr(): multisigConfirmTransaction.custodian,
+              LocaleKeys.transaction_id.tr(): multisigConfirmTransaction.transactionId,
             },
           ),
         ),
@@ -84,12 +90,12 @@ extension WalletInteractionInfoX on WalletInteractionInfo {
     final methodData = method.toRepresentableData();
 
     return {
-      if (recipient != null) 'Recipient': recipient!,
+      if (recipient != null) LocaleKeys.recipient.tr(): recipient!,
       if (knownPayload != null) ...{
-        'Known payload': knownPayloadData!.item1,
+        LocaleKeys.known_payload.tr(): knownPayloadData!.item1,
         ...knownPayloadData.item2,
       },
-      'Method': methodData.item1,
+      LocaleKeys.method.tr(): methodData.item1,
       ...methodData.item2,
     };
   }
@@ -97,25 +103,25 @@ extension WalletInteractionInfoX on WalletInteractionInfo {
 
 extension TokenWalletDeployedNotificationX on TokenWalletDeployedNotification {
   Map<String, String> toRepresentableData() => {
-        'Root token contract': rootTokenContract,
+        LocaleKeys.root_token_contract.tr(): rootTokenContract,
       };
 }
 
 extension DePoolReceiveAnswerNotificationX on DePoolReceiveAnswerNotification {
   Map<String, String> toRepresentableData() => {
-        'Error code': errorCode.toString(),
-        'Comment': comment,
+        LocaleKeys.error_code.tr(): '$errorCode',
+        LocaleKeys.comment.tr(): comment,
       };
 }
 
 extension DePoolOnRoundCompleteNotificationX on DePoolOnRoundCompleteNotification {
   Map<String, String> toRepresentableData() => {
-        'Round ID': roundId,
-        'Reward': '${reward.toTokens().removeZeroes().formatValue()} EVER',
-        'Ordinary stake': '${ordinaryStake.toTokens().removeZeroes().formatValue()} EVER',
-        'Vesting stake': '${vestingStake.toTokens().removeZeroes().formatValue()} EVER',
-        'Lock stake': '${lockStake.toTokens().removeZeroes().formatValue()} EVER',
-        'Reinvest': reinvest ? 'Yes' : 'No',
-        'Reason': reason.toString(),
+        LocaleKeys.round_id.tr(): roundId,
+        LocaleKeys.reward.tr(): '${reward.toTokens().removeZeroes().formatValue()} $kEverTicker',
+        LocaleKeys.ordinary_stake.tr(): '${ordinaryStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
+        LocaleKeys.vesting_stake.tr(): '${vestingStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
+        LocaleKeys.lock_stake.tr(): '${lockStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
+        LocaleKeys.reinvest.tr(): reinvest ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
+        LocaleKeys.reason.tr(): reason.toString(),
       };
 }

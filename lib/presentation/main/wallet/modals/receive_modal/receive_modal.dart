@@ -32,8 +32,8 @@ class _ReceiveModalBodyState extends State<ReceiveModalBody> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const ModalHeader(
-                  text: 'Your address to receive funds',
+                ModalHeader(
+                  text: LocaleKeys.address_receive_funds.tr(),
                 ),
                 const SizedBox(height: 16),
                 card(),
@@ -51,7 +51,7 @@ class _ReceiveModalBodyState extends State<ReceiveModalBody> {
 
   Widget copyButton() => CustomElevatedButton(
         onPressed: onCopyPressed,
-        text: 'Copy address',
+        text: LocaleKeys.copy_address.tr(),
       );
 
   Future<void> onCopyPressed() async {
@@ -61,17 +61,17 @@ class _ReceiveModalBodyState extends State<ReceiveModalBody> {
 
     showCrystalFlushbar(
       context,
-      message: LocaleKeys.receive_wallet_modal_message_copied.tr(),
+      message: LocaleKeys.copied.tr(),
     );
   }
 
   Widget shareButton() => CustomOutlinedButton(
         onPressed: onSharePressed,
-        text: 'Share',
+        text: LocaleKeys.share.tr(),
       );
 
   Future<void> onSharePressed() => Share.share(
-        LocaleKeys.receive_wallet_modal_message_share.tr(
+        LocaleKeys.share_wallet_address.tr(
           args: [widget.address],
         ),
       );

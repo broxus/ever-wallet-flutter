@@ -7,6 +7,7 @@ import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../models/bookmark.dart';
+import '../../models/currency.dart';
 import '../../models/site_meta_data.dart';
 import '../../models/token_contract_asset.dart';
 import '../../models/token_wallet_info.dart';
@@ -27,9 +28,10 @@ class HiveSource {
   static const _preferencesBoxName = 'nekoton_preferences';
   static const _permissionsBoxName = 'nekoton_permissions_v1';
   static const _externalAccountsBoxName = 'nekoton_external_accounts';
-  static const _bookmarksBoxName = 'bookmarks_box_v1';
+  static const _bookmarksBoxName = 'bookmarks_box_v2';
   static const _searchHistoryBoxName = 'search_history_v1';
   static const _siteMetaDataBoxName = 'site_meta_data_v1';
+  static const _currenciesBoxName = 'currencies_v1';
   static const _biometryStatusKey = 'biometry_status';
   static const _currentPublicKeyKey = 'current_public_key';
   static const _currentConnectionKey = 'current_connection';
@@ -48,7 +50,8 @@ class HiveSource {
   late final Box<List> _externalAccountsBox;
   late final Box<Bookmark> _bookmarksBox;
   late final Box<String> _searchHistoryBox;
-  late final Box<SiteMetaData> _siteMetaDataBox;
+  late final Box<SiteMetaData> _sitesMetaDataBox;
+  late final Box<Currency> _currenciesBox;
 
   @factoryMethod
   static Future<HiveSource> create() async {
@@ -266,13 +269,9 @@ class HiveSource {
 
   List<Bookmark> get bookmarks => _bookmarksBox.values.toList();
 
-  Future<void> addBookmark({
-    required String url,
-    required Bookmark bookmark,
-  }) =>
-      _bookmarksBox.put(url, bookmark);
+  Future<void> putBookmark(Bookmark bookmark) => _bookmarksBox.put(bookmark.id, bookmark);
 
-  Future<void> removeBookmark(String url) => _bookmarksBox.delete(url);
+  Future<void> deleteBookmark(int id) => _bookmarksBox.delete(id);
 
   Future<void> clearBookmarks() => _bookmarksBox.clear();
 
@@ -307,17 +306,25 @@ class HiveSource {
 
   Future<void> clearSearchHistory() => _searchHistoryBox.clear();
 
-  SiteMetaData? getSiteMetaData(String url) => _siteMetaDataBox.get(url);
+  SiteMetaData? getSiteMetaData(String url) => _sitesMetaDataBox.get(url);
 
   Future<void> cacheSiteMetaData({
     required String url,
     required SiteMetaData metaData,
   }) =>
-      _siteMetaDataBox.put(url, metaData);
+      _sitesMetaDataBox.put(url, metaData);
 
-  Future<void> removeSiteMetaData(String url) => _siteMetaDataBox.delete(url);
+  Future<void> clearSitesMetaData() => _sitesMetaDataBox.clear();
 
-  Future<void> clearSitesMetaData() => _siteMetaDataBox.clear();
+  List<Currency> get currencies => _currenciesBox.values.toList();
+
+  Future<void> saveCurrency({
+    required String address,
+    required Currency currency,
+  }) =>
+      _currenciesBox.put(address, currency);
+
+  Future<void> clearCurrencies() => _currenciesBox.clear();
 
   Future<void> _initialize() async {
     final hiveAesCipherKeyList = dotenv.env['HIVE_AES_CIPHER_KEY']?.split(' ').map((e) => int.parse(e)).toList();
@@ -389,7 +396,8 @@ class HiveSource {
       ..registerAdapter(TokenWalletAssetAdapter())
       ..registerAdapter(DePoolAssetAdapter())
       ..registerAdapter(BookmarkAdapter())
-      ..registerAdapter(SiteMetaDataAdapter());
+      ..registerAdapter(SiteMetaDataAdapter())
+      ..registerAdapter(CurrencyAdapter());
 
     _keysPasswordsBox = await Hive.openBox(_keysPasswordsBoxName, encryptionCipher: HiveAesCipher(_key));
     _userPreferencesBox = await Hive.openBox(_userPreferencesBoxName);
@@ -405,6 +413,7 @@ class HiveSource {
     _externalAccountsBox = await Hive.openBox(_externalAccountsBoxName);
     _bookmarksBox = await Hive.openBox(_bookmarksBoxName);
     _searchHistoryBox = await Hive.openBox(_searchHistoryBoxName);
-    _siteMetaDataBox = await Hive.openBox(_siteMetaDataBoxName);
+    _sitesMetaDataBox = await Hive.openBox(_siteMetaDataBoxName);
+    _currenciesBox = await Hive.openBox(_currenciesBoxName);
   }
 }

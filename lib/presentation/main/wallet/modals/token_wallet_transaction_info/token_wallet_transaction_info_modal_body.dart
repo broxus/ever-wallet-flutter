@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../../generated/codegen_loader.g.dart';
+import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/utils.dart';
 import '../../../../common/widgets/custom_outlined_button.dart';
 import '../../../../common/widgets/modal_header.dart';
+import '../utils.dart';
 
 class TokenWalletTransactionInfoModalBody extends StatelessWidget {
   final TokenWalletTransactionWithData transactionWithData;
@@ -62,12 +65,12 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     final hash = transactionWithData.transaction.id.hash;
 
     final type = transactionWithData.data!.when(
-      incomingTransfer: (tokenIncomingTransfer) => 'Token incoming transfer',
-      outgoingTransfer: (tokenOutgoingTransfer) => 'Token outgoing transfer',
-      swapBack: (tokenSwapBack) => 'Swap back',
-      accept: (value) => 'Accept',
-      transferBounced: (value) => 'Transfer bounced',
-      swapBackBounced: (value) => 'Swap back bounced',
+      incomingTransfer: (tokenIncomingTransfer) => LocaleKeys.token_incoming_transfer.tr(),
+      outgoingTransfer: (tokenOutgoingTransfer) => LocaleKeys.token_outgoing_transfer.tr(),
+      swapBack: (tokenSwapBack) => LocaleKeys.swap_back.tr(),
+      accept: (value) => LocaleKeys.accept.tr(),
+      transferBounced: (value) => LocaleKeys.transfer_bounced.tr(),
+      swapBackBounced: (value) => LocaleKeys.swap_back_bounced.tr(),
     );
 
     final sections = [
@@ -106,8 +109,8 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              const ModalHeader(
-                text: 'Transaction information',
+              ModalHeader(
+                text: LocaleKeys.transaction_information.tr(),
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -168,8 +171,8 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
       );
 
   Widget dateItem(DateTime date) => item(
-        title: 'Date and time',
-        subtitle: DateFormat('dd.MM.yyyy, H:mm').format(date),
+        title: LocaleKeys.date_and_time.tr(),
+        subtitle: transactionTimeFormat.format(date),
       );
 
   Widget addressItem({
@@ -177,12 +180,12 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     required String address,
   }) =>
       item(
-        title: isOutgoing ? 'Recipient' : 'Sender',
+        title: isOutgoing ? LocaleKeys.recipient.tr() : LocaleKeys.sender.tr(),
         subtitle: address,
       );
 
   Widget hashItem(String hash) => item(
-        title: 'Hash (ID)',
+        title: LocaleKeys.hash_id.tr(),
         subtitle: hash,
       );
 
@@ -191,22 +194,22 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     required String value,
   }) =>
       item(
-        title: 'Amount',
+        title: LocaleKeys.amount.tr(),
         subtitle: '${isOutgoing ? '-' : ''}$value $currency',
       );
 
   Widget feeItem(String fees) => item(
-        title: 'Blockchain fee',
-        subtitle: '$fees EVER',
+        title: LocaleKeys.blockchain_fee.tr(),
+        subtitle: '$fees $kEverTicker',
       );
 
   Widget typeItem(String type) => item(
-        title: 'Type',
+        title: LocaleKeys.type.tr(),
         subtitle: type,
       );
 
   Widget explorerButton(String hash) => CustomOutlinedButton(
         onPressed: () => launch(transactionExplorerLink(hash)),
-        text: 'See in the explorer',
+        text: LocaleKeys.see_in_the_explorer.tr(),
       );
 }

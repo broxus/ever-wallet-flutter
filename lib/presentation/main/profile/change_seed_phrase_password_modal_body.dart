@@ -55,9 +55,9 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
           String? text;
 
           if (incorrectPasswordNotifier.value) {
-            text = 'Incorrect password';
+            text = LocaleKeys.incorrect_password.tr();
           } else if (newPasswordController.text.isNotEmpty && !isLength(newPasswordController.text, 8)) {
-            text = 'Password must be at least 8 symbols';
+            text = LocaleKeys.password_length.tr();
           }
 
           validationNotifier.value = text;
@@ -70,7 +70,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
             buildTextField(
               controller: oldPasswordController,
               autofocus: true,
-              hint: LocaleKeys.change_seed_password_modal_hints_old.tr(),
+              hint: LocaleKeys.old_password.tr(),
               inputAction: TextInputAction.next,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -87,7 +87,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
             buildTextField(
               controller: newPasswordController,
               autofocus: false,
-              hint: LocaleKeys.change_seed_password_modal_hints_new.tr(),
+              hint: LocaleKeys.new_password.tr(),
               inputAction: TextInputAction.done,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -129,7 +129,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
                       await showCrystalFlushbar(
                         context,
-                        message: LocaleKeys.change_seed_password_modal_messages_success.tr(),
+                        message: LocaleKeys.password_changed.tr(),
                       );
                     } catch (err, st) {
                       logger.e(err, err, st);
@@ -151,15 +151,15 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
                   String? text;
 
                   if (incorrectPasswordNotifier.value) {
-                    text = 'Incorrect password';
+                    text = LocaleKeys.incorrect_password.tr();
                   } else if (newPasswordController.text.isNotEmpty && !isLength(newPasswordController.text, 8)) {
-                    text = 'Password must be at least 8 symbols';
+                    text = LocaleKeys.password_length.tr();
                   }
 
                   validationNotifier.value = text;
                 }
               },
-              text: LocaleKeys.change_seed_password_modal_actions_submit.tr(),
+              text: LocaleKeys.submit.tr(),
             ),
           ],
         ),

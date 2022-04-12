@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
+import '../../../generated/codegen_loader.g.dart';
 import '../theme.dart';
 import 'animated_visibility.dart';
 import 'crystal_flushbar.dart';
@@ -60,7 +62,7 @@ class _WalletCardSelectableFieldState extends State<WalletCardSelectableField> {
 
                 showCrystalFlushbar(
                   context,
-                  message: 'Copied!',
+                  message: LocaleKeys.copied.tr(),
                 );
               },
               child: Padding(
@@ -69,7 +71,7 @@ class _WalletCardSelectableFieldState extends State<WalletCardSelectableField> {
                   vertical: 6,
                 ),
                 child: Text(
-                  'Copy',
+                  LocaleKeys.copy.tr(),
                   style: TextStyle(
                     letterSpacing: 0.75,
                     color: CrystalColor.secondary.withOpacity(

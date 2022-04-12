@@ -31,7 +31,5 @@ class SitesMetaDataRepository {
     yield siteMetaData;
   }
 
-  Future<void> removeSiteMetaData(String url) => _hiveSource.removeSiteMetaData(url);
-
   Future<void> clear() => _hiveSource.clearSitesMetaData();
 }

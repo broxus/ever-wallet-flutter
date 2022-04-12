@@ -74,9 +74,9 @@ class _ApplicationState extends State<Application> with WidgetsBindingObserver {
                     title: applicationTitle,
                     theme: materialTheme(context),
                     debugShowCheckedModeBanner: false,
+                    localizationsDelegates: context.localizationDelegates,
                     supportedLocales: context.supportedLocales,
                     locale: context.locale,
-                    localizationsDelegates: context.localizationDelegates,
                     routerDelegate: appRouter.delegate(),
                     routeInformationParser: appRouter.defaultRouteParser(),
                     builder: (context, child) => CupertinoTheme(

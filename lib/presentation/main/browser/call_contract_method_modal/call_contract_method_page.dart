@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/widgets/custom_elevated_button.dart';
 import '../../../common/widgets/custom_outlined_button.dart';
 import '../../../common/widgets/modal_header.dart';
@@ -40,7 +42,7 @@ class _CallContractMethodPageState extends State<CallContractMethodPage> {
             child: Column(
               children: [
                 ModalHeader(
-                  text: 'Call contract method',
+                  text: LocaleKeys.call_contract_method.tr(),
                   onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                 ),
                 const SizedBox(height: 16),
@@ -67,19 +69,19 @@ class _CallContractMethodPageState extends State<CallContractMethodPage> {
       );
 
   Widget origin() => SectionedCardSection(
-        title: 'Origin',
+        title: LocaleKeys.origin.tr(),
         subtitle: widget.origin,
         isSelectable: true,
       );
 
   Widget publicKey() => SectionedCardSection(
-        title: 'Account public key',
+        title: LocaleKeys.account_public_key.tr(),
         subtitle: widget.publicKey,
         isSelectable: true,
       );
 
   Widget recipient() => SectionedCardSection(
-        title: 'Recipient address',
+        title: LocaleKeys.recipient_address.tr(),
         subtitle: widget.recipient,
         isSelectable: true,
       );
@@ -99,13 +101,13 @@ class _CallContractMethodPageState extends State<CallContractMethodPage> {
 
   Widget rejectButton() => CustomOutlinedButton(
         onPressed: () => Navigator.of(widget.modalContext).pop(),
-        text: 'Reject',
+        text: LocaleKeys.reject.tr(),
       );
 
   Widget submitButton() => Consumer(
         builder: (context, ref, child) => CustomElevatedButton(
           onPressed: () => onSubmitPressed(widget.publicKey),
-          text: 'Call',
+          text: LocaleKeys.call.tr(),
         ),
       );
 

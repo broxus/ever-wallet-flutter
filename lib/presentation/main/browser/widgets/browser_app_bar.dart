@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:validators/validators.dart';
 
+import '../../../../data/repositories/bookmarks_repository.dart';
 import '../../../../data/repositories/search_history_repository.dart';
 import '../../../../generated/codegen_loader.g.dart';
 import '../../../../injection.dart';
@@ -15,13 +18,13 @@ import '../../../common/widgets/custom_popup_menu.dart';
 import '../../../common/widgets/custom_text_form_field.dart';
 import '../../../common/widgets/suffix_loader_icon.dart';
 import '../../../common/widgets/text_field_clear_button.dart';
+import '../add_bookmark_dialog/show_add_bookmark_dialog.dart';
 import '../browser_page_logic.dart';
-import '../custom_in_app_web_view_controller.dart';
-import '../show_add_bookmark_dialog.dart';
+import '../extensions.dart';
 import 'browser_icon_button.dart';
 
 class BrowserAppBar extends StatefulWidget {
-  final Completer<CustomInAppWebViewController> controller;
+  final Completer<InAppWebViewController> controller;
   final TextEditingController urlController;
   final FocusNode urlFocusNode;
 
@@ -39,7 +42,7 @@ class BrowserAppBar extends StatefulWidget {
 class _BrowserAppBarState extends State<BrowserAppBar> {
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
             leading(),
@@ -102,17 +105,17 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
               }
 
               return CustomTextFormField(
-                name: 'url',
+                name: LocaleKeys.url.tr(),
                 controller: widget.urlController,
                 focusNode: widget.urlFocusNode,
                 autocorrect: false,
-                hintText: 'Search or enter website name',
+                hintText: LocaleKeys.address_field_placeholder.tr(),
                 onSubmitted: (value) {
-                  if (value == null) return;
+                  if (value == null || value.trim().isEmpty) return;
 
                   getIt.get<SearchHistoryRepository>().addSearchHistoryEntry(value);
 
-                  widget.controller.future.then((v) => v.parseAndLoadUrl(value));
+                  widget.controller.future.then((v) => v.tryLoadUrl(value));
                 },
                 suffixIcon: suffixIcon,
               );
@@ -138,21 +141,29 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
         icon: PlatformIcons(context).home,
       );
 
-  Widget menu() => CustomPopupMenu(
-        items: [
-          reload(),
-          share(),
-          addBookmark(),
-        ],
-        icon: Icon(
-          PlatformIcons(context).ellipsis,
-          color: CrystalColor.accent,
-        ),
+  Widget menu() => Consumer(
+        builder: (context, ref, child) {
+          final url = ref.watch(urlProvider);
+
+          return CustomPopupMenu(
+            items: [
+              reload(),
+              if (isURL(url.toString())) ...[
+                share(),
+                addBookmark(),
+              ]
+            ],
+            icon: Icon(
+              PlatformIcons(context).ellipsis,
+              color: CrystalColor.accent,
+            ),
+          );
+        },
       );
 
   CustomPopupItem reload() => CustomPopupItem(
         title: Text(
-          LocaleKeys.browser_reload.tr(),
+          LocaleKeys.reload.tr(),
           style: const TextStyle(fontSize: 16),
         ),
         onTap: () => widget.controller.future.then((v) => v.reload()),
@@ -160,7 +171,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
 
   CustomPopupItem share() => CustomPopupItem(
         title: Text(
-          LocaleKeys.browser_share.tr(),
+          LocaleKeys.share.tr(),
           style: const TextStyle(fontSize: 16),
         ),
         onTap: () async {
@@ -174,17 +185,25 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
 
   CustomPopupItem addBookmark() => CustomPopupItem(
         title: Text(
-          LocaleKeys.browser_add_bookmark.tr(),
+          LocaleKeys.add_bookmark.tr(),
           style: const TextStyle(fontSize: 16),
         ),
         onTap: () async {
           final url = await widget.controller.future.then((v) => v.getUrl());
 
-          if (url == null) return;
-
           showAddBookmarkDialog(
             context: context,
-            url: url,
+            title: LocaleKeys.add_bookmark.tr(),
+            name: url?.authority,
+            url: url?.toString(),
+            onSubmit: ({
+              required String name,
+              required String url,
+            }) =>
+                getIt.get<BookmarksRepository>().addBookmark(
+                      name: name,
+                      url: url,
+                    ),
           );
         },
       );

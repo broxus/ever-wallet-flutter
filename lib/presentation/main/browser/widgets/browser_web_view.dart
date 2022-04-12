@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../logger.dart';
+import '../../../common/theme.dart';
 import '../browser_page_logic.dart';
-import '../custom_in_app_web_view_controller.dart';
+import '../extensions.dart';
 import '../requests/code_to_tvc_handler.dart';
 import '../requests/decode_event_handler.dart';
 import '../requests/decode_input_handler.dart';
@@ -35,9 +37,10 @@ import '../requests/subscribe_handler.dart';
 import '../requests/unpack_from_cell_handler.dart';
 import '../requests/unsubscribe_all_handler.dart';
 import '../requests/unsubscribe_handler.dart';
+import '../utils.dart';
 
 class BrowserWebView extends StatefulWidget {
-  final Completer<CustomInAppWebViewController> controller;
+  final Completer<InAppWebViewController> controller;
   final TextEditingController urlController;
 
   const BrowserWebView({
@@ -58,37 +61,44 @@ class _BrowserWebViewState extends State<BrowserWebView> {
   @override
   Widget build(BuildContext context) => Consumer(
         builder: (context, ref, child) => ref.watch(mainScriptProvider).maybeWhen(
-              data: (data) => InAppWebView(
-                initialUrlRequest: URLRequest(url: Uri.parse('about:blank')),
-                initialOptions: InAppWebViewGroupOptions(
-                  crossPlatform: InAppWebViewOptions(
-                    useShouldOverrideUrlLoading: true,
-                    mediaPlaybackRequiresUserGesture: false,
-                    transparentBackground: true,
-                  ),
-                  android: AndroidInAppWebViewOptions(
-                    useHybridComposition: true,
-                  ),
-                  ios: IOSInAppWebViewOptions(
-                    allowsInlineMediaPlayback: true,
-                  ),
+              data: (data) => DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: CrystalColor.background,
                 ),
-                initialUserScripts: UnmodifiableListView<UserScript>([
-                  UserScript(
-                    source: data,
-                    injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                child: InAppWebView(
+                  initialUrlRequest: URLRequest(url: Uri.parse('about:blank')),
+                  initialOptions: InAppWebViewGroupOptions(
+                    crossPlatform: InAppWebViewOptions(
+                      useShouldOverrideUrlLoading: true,
+                      mediaPlaybackRequiresUserGesture: false,
+                      transparentBackground: true,
+                    ),
+                    android: AndroidInAppWebViewOptions(
+                      disableDefaultErrorPage: true,
+                      useHybridComposition: true,
+                    ),
+                    ios: IOSInAppWebViewOptions(
+                      allowsInlineMediaPlayback: true,
+                    ),
                   ),
-                ]),
-                pullToRefreshController: pullToRefreshController,
-                onWebViewCreated: onWebViewCreated,
-                onLoadStart: onLoadStart,
-                onLoadStop: (controller, url) => onLoadStop(ref.read, controller, url),
-                onLoadError: onLoadError,
-                onLoadHttpError: onLoadHttpError,
-                onProgressChanged: (controller, progress) => onProgressChanged(ref.read, controller, progress),
-                onUpdateVisitedHistory: onUpdateVisitedHistory,
-                androidOnPermissionRequest: androidOnPermissionRequest,
-                shouldOverrideUrlLoading: shouldOverrideUrlLoading,
+                  initialUserScripts: UnmodifiableListView<UserScript>([
+                    UserScript(
+                      source: data,
+                      injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                    ),
+                  ]),
+                  pullToRefreshController: pullToRefreshController,
+                  onWebViewCreated: onWebViewCreated,
+                  onLoadStart: onLoadStart,
+                  onLoadStop: (controller, url) => onLoadStop(ref.read, controller, url),
+                  onLoadError: onLoadError,
+                  onLoadHttpError: onLoadError,
+                  onProgressChanged: (controller, progress) => onProgressChanged(ref.read, controller, progress),
+                  onUpdateVisitedHistory: onUpdateVisitedHistory,
+                  androidOnPermissionRequest: androidOnPermissionRequest,
+                  shouldOverrideUrlLoading: shouldOverrideUrlLoading,
+                  onConsoleMessage: onConsoleMessage,
+                ),
               ),
               orElse: () => Center(
                 child: PlatformCircularProgressIndicator(),
@@ -97,129 +107,127 @@ class _BrowserWebViewState extends State<BrowserWebView> {
       );
 
   void onWebViewCreated(InAppWebViewController controller) {
-    final customController = CustomInAppWebViewController(controller);
-
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'requestPermissions',
-      callback: (args) => requestPermissionsHandler(controller: customController, args: args),
+      callback: (args) => requestPermissionsHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'disconnect',
-      callback: (args) => disconnectHandler(controller: customController, args: args),
+      callback: (args) => disconnectHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'subscribe',
-      callback: (args) => subscribeHandler(controller: customController, args: args),
+      callback: (args) => subscribeHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'unsubscribe',
-      callback: (args) => unsubscribeHandler(controller: customController, args: args),
+      callback: (args) => unsubscribeHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'unsubscribeAll',
-      callback: (args) => unsubscribeAllHandler(controller: customController, args: args),
+      callback: (args) => unsubscribeAllHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'getProviderState',
-      callback: (args) => getProviderStateHandler(controller: customController, args: args),
+      callback: (args) => getProviderStateHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'getFullContractState',
-      callback: (args) => getFullContractStateHandler(controller: customController, args: args),
+      callback: (args) => getFullContractStateHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'getTransactions',
-      callback: (args) => getTransactionsHandler(controller: customController, args: args),
+      callback: (args) => getTransactionsHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'runLocal',
-      callback: (args) => runLocalHandler(controller: customController, args: args),
+      callback: (args) => runLocalHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'getExpectedAddress',
-      callback: (args) => getExpectedAddressHandler(controller: customController, args: args),
+      callback: (args) => getExpectedAddressHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'packIntoCell',
-      callback: (args) => packIntoCellHandler(controller: customController, args: args),
+      callback: (args) => packIntoCellHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'unpackFromCell',
-      callback: (args) => unpackFromCellHandler(controller: customController, args: args),
+      callback: (args) => unpackFromCellHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'extractPublicKey',
-      callback: (args) => extractPublicKeyHandler(controller: customController, args: args),
+      callback: (args) => extractPublicKeyHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'codeToTvc',
-      callback: (args) => codeToTvcHandler(controller: customController, args: args),
+      callback: (args) => codeToTvcHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'splitTvc',
-      callback: (args) => splitTvcHandler(controller: customController, args: args),
+      callback: (args) => splitTvcHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'encodeInternalInput',
-      callback: (args) => encodeInternalInputHandler(controller: customController, args: args),
+      callback: (args) => encodeInternalInputHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'decodeInput',
-      callback: (args) => decodeInputHandler(controller: customController, args: args),
+      callback: (args) => decodeInputHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'decodeEvent',
-      callback: (args) => decodeEventHandler(controller: customController, args: args),
+      callback: (args) => decodeEventHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'decodeOutput',
-      callback: (args) => decodeOutputHandler(controller: customController, args: args),
+      callback: (args) => decodeOutputHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'decodeTransaction',
-      callback: (args) => decodeTransactionHandler(controller: customController, args: args),
+      callback: (args) => decodeTransactionHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'decodeTransactionEvents',
-      callback: (args) => decodeTransactionEventsHandler(controller: customController, args: args),
+      callback: (args) => decodeTransactionEventsHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'estimateFees',
-      callback: (args) => estimateFeesHandler(controller: customController, args: args),
+      callback: (args) => estimateFeesHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'sendMessage',
-      callback: (args) => sendMessageHandler(controller: customController, args: args),
+      callback: (args) => sendMessageHandler(controller: controller, args: args),
     );
 
-    customController.addJavaScriptHandler(
+    controller.addJavaScriptHandler(
       handlerName: 'sendExternalMessage',
-      callback: (args) => sendExternalMessageHandler(controller: customController, args: args),
+      callback: (args) => sendExternalMessageHandler(controller: controller, args: args),
     );
 
-    widget.controller.complete(customController);
+    widget.controller.complete(controller);
   }
 
   void onLoadStart(
@@ -233,39 +241,31 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     InAppWebViewController controller,
     Uri? url,
   ) async {
-    widget.controller.future.then((v) => v.onLoaded(url));
-
     pullToRefreshController.endRefreshing();
 
     read(urlProvider.notifier).state = url;
 
-    read(backButtonEnabledProvider.notifier).state = await widget.controller.future.then((v) => v.canGoBack()) ?? false;
-    read(forwardButtonEnabledProvider.notifier).state =
-        await widget.controller.future.then((v) => v.canGoForward()) ?? false;
+    read(backButtonEnabledProvider.notifier).state = await controller.canGoBack();
+    read(forwardButtonEnabledProvider.notifier).state = await controller.canGoForward();
 
     updateUrlControllerValue(url);
   }
 
-  void onLoadError(
+  Future<void> onLoadError(
     InAppWebViewController controller,
     Uri? url,
     int code,
     String message,
-  ) {
-    logger.e(message);
-    widget.controller.future.then((v) => v.onError(url, code, message));
-    pullToRefreshController.endRefreshing();
-  }
+  ) async {
+    if (Platform.isIOS && code == -999) return;
 
-  void onLoadHttpError(
-    InAppWebViewController controller,
-    Uri? url,
-    int statusCode,
-    String description,
-  ) {
-    logger.e(description);
-    widget.controller.future.then((v) => v.onError(url, statusCode, description));
-    pullToRefreshController.endRefreshing();
+    final errorUrl = url ?? Uri.parse('about:blank');
+
+    controller.loadData(
+      data: getErrorPage(url: errorUrl, message: message),
+      baseUrl: errorUrl,
+      androidHistoryUrl: errorUrl,
+    );
   }
 
   void onProgressChanged(
@@ -312,6 +312,12 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     }
 
     return NavigationActionPolicy.ALLOW;
+  }
+
+  void onConsoleMessage(InAppWebViewController controller, ConsoleMessage message) {
+    if (message.message == 'JavaScript execution returned a result of an unsupported type') return;
+
+    logger.d(message.message, message.message);
   }
 
   void updateUrlControllerValue(Uri? url) {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
@@ -10,18 +11,20 @@ import '../../../../../data/repositories/approvals_repository.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../data/repositories/ton_wallets_repository.dart';
 import '../../../../../injection.dart';
-import '../custom_in_app_web_view_controller.dart';
+import '../extensions.dart';
 
 Future<dynamic> sendMessageHandler({
-  required CustomInAppWebViewController controller,
+  required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
+    logger.d('SendMessageRequest', args);
+
     final jsonInput = args.first as Map<String, dynamic>;
 
     final input = SendMessageInput.fromJson(jsonInput);
 
-    final currentOrigin = await controller.controller.getUrl().then((v) => v?.authority);
+    final currentOrigin = await controller.getOrigin();
 
     if (currentOrigin == null) throw Exception();
 

@@ -16,6 +16,7 @@ import '../../../../../../providers/ton_wallet/ton_wallet_pending_transactions_p
 import '../../../../../../providers/ton_wallet/ton_wallet_transactions_state_provider.dart';
 import '../../../../../generated/assets.gen.dart';
 import '../../../../../generated/codegen_loader.g.dart';
+import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/custom_close_button.dart';
@@ -98,7 +99,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget balanceText(String balance) => Text(
-        '${balance.toTokens().removeZeroes().formatValue()} EVER',
+        '${balance.toTokens().removeZeroes().formatValue()} $kEverTicker',
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w700,
@@ -106,7 +107,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget nameText() => const Text(
-        'Everscale',
+        kEverNetworkName,
         style: TextStyle(
           fontSize: 16,
         ),
@@ -119,7 +120,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
 
           final receiveButton = WalletActionButton(
             icon: Assets.images.iconReceive,
-            title: LocaleKeys.actions_receive.tr(),
+            title: LocaleKeys.receive.tr(),
             onPressed: () => showReceiveModal(
               context: context,
               address: widget.address,
@@ -153,7 +154,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
 
               actionButton = WalletActionButton(
                 icon: Assets.images.iconSend,
-                title: LocaleKeys.actions_send.tr(),
+                title: LocaleKeys.send.tr(),
                 onPressed: publicKeys.isNotEmpty
                     ? () => startSendTransactionFlow(
                           context: context,
@@ -165,7 +166,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
             } else {
               actionButton = WalletActionButton(
                 icon: Assets.images.iconDeploy,
-                title: LocaleKeys.actions_deploy.tr(),
+                title: LocaleKeys.deploy.tr(),
                 onPressed: () => startDeployWalletFlow(
                   context: context,
                   address: widget.address,
@@ -247,7 +248,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         child: Row(
           children: [
             Text(
-              LocaleKeys.fields_history.tr(),
+              LocaleKeys.history.tr(),
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -259,7 +260,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                 expiredTransactionsState.isEmpty &&
                 multisigPendingTransactionsState.isEmpty)
               Text(
-                LocaleKeys.wallet_history_modal_placeholder_transactions_empty.tr(),
+                LocaleKeys.transactions_empty.tr(),
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.black45,

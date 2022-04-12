@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
+import '../../../generated/codegen_loader.g.dart';
 import 'animated_visibility.dart';
 import 'crystal_flushbar.dart';
 
@@ -57,17 +59,17 @@ class _SelectableFieldState extends State<SelectableField> {
 
                 showCrystalFlushbar(
                   context,
-                  message: 'Copied!',
+                  message: LocaleKeys.copied.tr(),
                 );
               },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
                 ),
                 child: Text(
-                  'Copy',
-                  style: TextStyle(
+                  LocaleKeys.copy.tr(),
+                  style: const TextStyle(
                     letterSpacing: 0.75,
                   ),
                 ),

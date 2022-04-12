@@ -2,11 +2,15 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 const kSubscriptionRefreshTimeout = Duration(seconds: 10);
 
+const kCurrenciesRefreshTimeout = Duration(seconds: 60);
+
+const kAddressForEverCurrency = '0:a49cd4e158a9a15555e624759e2e4e766d22600b7800d891e46f9291f044a93d';
+
 const kDefaultWorkchain = 0;
 
 const kProviderVersion = '0.2.26';
 
-const kDefaultMessageExpiration = Expiration.timeout(value: 30);
+const kDefaultMessageExpiration = Expiration.timeout(value: 60);
 
 const kAvailableWallets = [
   WalletType.multisig(multisigType: MultisigType.safeMultisigWallet),

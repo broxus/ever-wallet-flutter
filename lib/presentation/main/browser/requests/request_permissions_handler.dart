@@ -1,25 +1,29 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/approvals_repository.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../injection.dart';
-import '../custom_in_app_web_view_controller.dart';
+import '../events/permissions_changed_handler.dart';
+import '../extensions.dart';
 
 Future<dynamic> requestPermissionsHandler({
-  required CustomInAppWebViewController controller,
+  required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
+    logger.d('RequestPermissionsRequest', args);
+
     final jsonInput = jsonDecode(jsonEncode(args.first as Map<String, dynamic>).replaceAll('tonClient', 'basic'))
         as Map<String, dynamic>;
 
     final input = RequestPermissionsInput.fromJson(jsonInput);
 
-    final currentOrigin = await controller.controller.getUrl().then((v) => v?.authority);
+    final currentOrigin = await controller.getOrigin();
 
     if (currentOrigin == null) throw Exception();
 
@@ -41,6 +45,13 @@ Future<dynamic> requestPermissionsHandler({
             permissions: requested,
           );
     }
+
+    final event = PermissionsChangedEvent(permissions: requested);
+
+    await permissionsChangedHandler(
+      controller: controller,
+      event: event,
+    );
 
     final output = requested;
 

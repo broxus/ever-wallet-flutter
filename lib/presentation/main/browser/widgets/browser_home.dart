@@ -1,21 +1,25 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/models/bookmark.dart';
 import '../../../../data/repositories/bookmarks_repository.dart';
-import '../../../../generated/assets.gen.dart';
+import '../../../../generated/codegen_loader.g.dart';
 import '../../../../injection.dart';
 import '../../../../providers/common/bookmarks_provider.dart';
 import '../../../../providers/common/site_meta_data_provider.dart';
 import '../../../common/theme.dart';
 import '../../../common/widgets/custom_icon_button.dart';
-import '../custom_in_app_web_view_controller.dart';
+import '../add_bookmark_dialog/show_add_bookmark_dialog.dart';
+import '../extensions.dart';
 import '../show_confirm_remove_bookmark_dialog.dart';
 
 class BrowserHome extends StatefulWidget {
-  final Completer<CustomInAppWebViewController> controller;
+  final Completer<InAppWebViewController> controller;
 
   const BrowserHome({
     Key? key,
@@ -40,11 +44,11 @@ class _BrowserHomeState extends State<BrowserHome> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(32, 32, 32, 16),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 32, 32, 16),
                   child: Text(
-                    'Favorites',
-                    style: TextStyle(
+                    LocaleKeys.favorites.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 30,
                       letterSpacing: 0.25,
@@ -70,14 +74,21 @@ class _BrowserHomeState extends State<BrowserHome> {
         ),
       );
 
-  Widget placeholder() => const Center(
-        child: Text(
-          'There will be your favorites',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            letterSpacing: 0.25,
-          ),
+  Widget placeholder() => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            addButton(),
+            const SizedBox(height: 16),
+            Text(
+              LocaleKeys.favorites_placeholder.tr(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                letterSpacing: 0.25,
+              ),
+            ),
+          ],
         ),
       );
 
@@ -93,8 +104,42 @@ class _BrowserHomeState extends State<BrowserHome> {
               for (final e in bookmarks.map((e) => tile(key: ValueKey(e), bookmark: e)).toList()) ...[
                 e,
                 const SizedBox(height: 16),
-              ]
+              ],
+              addButton(),
+              const SizedBox(height: 16),
             ],
+          ),
+        ),
+      );
+
+  Widget addButton() => Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(50),
+        child: InkWell(
+          onTap: () => showAddBookmarkDialog(
+            context: context,
+            title: LocaleKeys.add_bookmark.tr(),
+            onSubmit: ({
+              required String name,
+              required String url,
+            }) =>
+                getIt.get<BookmarksRepository>().addBookmark(
+                      name: name,
+                      url: url,
+                    ),
+          ),
+          borderRadius: BorderRadius.circular(50),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.1),
+            ),
+            child: Icon(
+              PlatformIcons(context).add,
+              size: 36,
+              color: Colors.white,
+            ),
           ),
         ),
       );
@@ -111,7 +156,7 @@ class _BrowserHomeState extends State<BrowserHome> {
           return Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => widget.controller.future.then((v) => v.parseAndLoadUrl(bookmark.url)),
+              onTap: () => widget.controller.future.then((v) => v.tryLoadUrl(bookmark.url)),
               child: card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -131,14 +176,38 @@ class _BrowserHomeState extends State<BrowserHome> {
                             ),
                           ),
                           CustomIconButton(
+                            onPressed: () async => showAddBookmarkDialog(
+                              context: context,
+                              title: LocaleKeys.edit_bookmark.tr(),
+                              name: bookmark.name,
+                              url: bookmark.url,
+                              onSubmit: ({
+                                required String name,
+                                required String url,
+                              }) =>
+                                  getIt.get<BookmarksRepository>().editBookmark(
+                                        id: bookmark.id,
+                                        newName: name,
+                                        newUrl: url,
+                                      ),
+                            ),
+                            icon: Icon(
+                              PlatformIcons(context).edit,
+                              color: Colors.white,
+                            ),
+                          ),
+                          CustomIconButton(
                             onPressed: () async {
                               final result = await showConfirmRemoveBookmarkDialog(context: context);
 
                               if (!(result ?? false)) return;
 
-                              getIt.get<BookmarksRepository>().removeBookmark(bookmark.url);
+                              getIt.get<BookmarksRepository>().deleteBookmark(bookmark.id);
                             },
-                            icon: Assets.images.iconCross.svg(),
+                            icon: Icon(
+                              PlatformIcons(context).clear,
+                              color: Colors.white,
+                            ),
                           ),
                         ],
                       ),
@@ -172,12 +241,6 @@ class _BrowserHomeState extends State<BrowserHome> {
                         ),
                         const SizedBox(height: 8),
                       ],
-                      if (meta?.image != null)
-                        Image.network(
-                          meta!.image!,
-                          height: 150,
-                          errorBuilder: (context, exception, stackTrace) => const SizedBox(),
-                        ),
                     ],
                   ),
                 ),

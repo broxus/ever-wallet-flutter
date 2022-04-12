@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../../../../generated/assets.gen.dart';
+import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
 import '../../../../common/widgets/modal_header.dart';
 import '../../../../common/widgets/selectable_button.dart';
@@ -40,7 +42,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
             child: Column(
               children: [
                 ModalHeader(
-                  text: 'Add account',
+                  text: LocaleKeys.add_account.tr(),
                   onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                 ),
                 const SizedBox(height: 16),
@@ -88,7 +90,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
         valueListenable: optionNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: () => onPressed(value),
-          text: 'Next',
+          text: LocaleKeys.next.tr(),
         ),
       );
 
@@ -127,9 +129,9 @@ extension on _Options {
   String describe() {
     switch (this) {
       case _Options.createNew:
-        return 'Create new account';
+        return LocaleKeys.create_new_account.tr();
       case _Options.addExisting:
-        return 'Add an existing account';
+        return LocaleKeys.add_existing_account.tr();
     }
   }
 }

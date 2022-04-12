@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
+import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/widgets/crystal_subtitle.dart';
 import '../../../../common/widgets/custom_back_button.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
@@ -38,9 +40,9 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
             leading: const CustomBackButton(),
-            title: const Text(
-              'New account name',
-              style: TextStyle(
+            title: Text(
+              LocaleKeys.new_account_name.tr(),
+              style: const TextStyle(
                 color: Colors.black,
               ),
             ),
@@ -75,17 +77,16 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
         ),
       );
 
-  Widget subtitle() => const CrystalSubtitle(
-        text:
-            'You will get a new account based on the selected public key. To create an address with a new public key, use Manage seeds & accounts.',
+  Widget subtitle() => CrystalSubtitle(
+        text: LocaleKeys.new_account_description.tr(),
       );
 
   Widget field() => CustomTextFormField(
-        name: 'name',
+        name: LocaleKeys.name.tr(),
         controller: controller,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: 'Name...',
+        hintText: '${LocaleKeys.name.tr()}...',
         suffixIcon: TextFieldClearButton(
           controller: controller,
         ),
@@ -93,7 +94,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
 
   Widget submitButton() => CustomElevatedButton(
         onPressed: onPressed,
-        text: 'Next',
+        text: LocaleKeys.next.tr(),
       );
 
   Future<void> onPressed() async {

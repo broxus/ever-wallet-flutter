@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:string_extensions/string_extensions.dart';
 
+import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/widgets/custom_back_button.dart';
 import '../../../common/widgets/custom_elevated_button.dart';
 import '../../../common/widgets/sectioned_card.dart';
@@ -34,9 +36,9 @@ class _GrantPermissionsPageState extends State<GrantPermissionsPage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           leading: const CustomBackButton(),
-          title: const Text(
-            'Grant permissions',
-            style: TextStyle(
+          title: Text(
+            LocaleKeys.grant_permissions.tr(),
+            style: const TextStyle(
               color: Colors.black,
             ),
           ),
@@ -72,32 +74,32 @@ class _GrantPermissionsPageState extends State<GrantPermissionsPage> {
       );
 
   Widget origin() => SectionedCardSection(
-        title: 'Origin',
+        title: LocaleKeys.origin.tr(),
         subtitle: widget.origin,
         isSelectable: true,
       );
 
   Widget permissions() => SectionedCardSection(
-        title: 'Requested permissions',
+        title: LocaleKeys.requested_permissions.tr(),
         subtitle: widget.permissions.map((e) => describeEnum(e).capitalize).join(', '),
         isSelectable: true,
       );
 
   Widget address() => SectionedCardSection(
-        title: 'Account address',
+        title: LocaleKeys.account_address.tr(),
         subtitle: widget.account.address,
         isSelectable: true,
       );
 
   Widget publicKey() => SectionedCardSection(
-        title: 'Account public key',
+        title: LocaleKeys.account_public_key.tr(),
         subtitle: widget.account.publicKey,
         isSelectable: true,
       );
 
   Widget submitButton() => CustomElevatedButton(
         onPressed: () => onSubmitPressed(),
-        text: 'Allow',
+        text: LocaleKeys.allow.tr(),
       );
 
   void onSubmitPressed() {

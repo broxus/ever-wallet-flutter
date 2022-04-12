@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -11,6 +12,8 @@ import '../../../../../../providers/biometry/biometry_availability_provider.dart
 import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_prepare_confirm_transaction_provider.dart';
 import '../../../../../data/extensions.dart';
+import '../../../../../generated/codegen_loader.g.dart';
+import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/custom_back_button.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
@@ -59,9 +62,9 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           leading: const CustomBackButton(),
-          title: const Text(
-            'Confirm transaction',
-            style: TextStyle(
+          title: Text(
+            LocaleKeys.confirm_transaction.tr(),
+            style: const TextStyle(
               color: Colors.black,
             ),
           ),
@@ -110,14 +113,14 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
       );
 
   Widget recipient() => SectionedCardSection(
-        title: 'Recipient',
+        title: LocaleKeys.recipient.tr(),
         subtitle: widget.destination,
         isSelectable: true,
       );
 
   Widget amount() => SectionedCardSection(
-        title: 'Amount',
-        subtitle: '${widget.amount.toTokens().removeZeroes().formatValue()} EVER',
+        title: LocaleKeys.amount.tr(),
+        subtitle: '${widget.amount.toTokens().removeZeroes().formatValue()} $kEverTicker',
       );
 
   Widget fee() => Consumer(
@@ -125,7 +128,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
           final result = ref.watch(tonWalletPrepareConfirmTransactionProvider);
 
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} EVER',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} $kEverTicker',
             error: (err, st) => (err as Exception).toUiMessage(),
             loading: () => null,
           );
@@ -136,7 +139,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
           );
 
           return SectionedCardSection(
-            title: 'Blockchain fee',
+            title: LocaleKeys.blockchain_fee.tr(),
             subtitle: subtitle,
             hasError: hasError,
           );
@@ -144,7 +147,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
       );
 
   Widget comment() => SectionedCardSection(
-        title: 'Comment',
+        title: LocaleKeys.comment.tr(),
         subtitle: widget.comment,
       );
 
@@ -160,7 +163,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
                       publicKey: widget.publicKey,
                     )
                 : null,
-            text: 'Send',
+            text: LocaleKeys.send.tr(),
           );
         },
       );
@@ -205,7 +208,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
   Future<String?> getPasswordFromBiometry(String publicKey) async {
     try {
       final password = await getIt.get<BiometryRepository>().getKeyPassword(
-            localizedReason: 'Please authenticate to interact with wallet',
+            localizedReason: LocaleKeys.authentication_reason.tr(),
             publicKey: publicKey,
           );
 
@@ -227,8 +230,8 @@ class _NewSelectWalletTypePageState extends ConsumerState<ConfirmTransactionInfo
             message: message,
             publicKey: widget.publicKey,
             password: password,
-            sendingText: 'Message is sending...',
-            successText: 'Message has been sent successfully',
+            sendingText: LocaleKeys.message_sending.tr(),
+            successText: LocaleKeys.message_sent.tr(),
           ),
         ),
         (_) => false,

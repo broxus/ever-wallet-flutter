@@ -1,23 +1,26 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../injection.dart';
-import '../custom_in_app_web_view_controller.dart';
+import '../extensions.dart';
 
 Future<dynamic> codeToTvcHandler({
-  required CustomInAppWebViewController controller,
+  required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
+    logger.d('CodeToTvcRequest', args);
+
     final jsonInput = args.first as Map<String, dynamic>;
 
     final input = CodeToTvcInput.fromJson(jsonInput);
 
-    final currentOrigin = await controller.getUrl().then((v) => v?.authority);
+    final currentOrigin = await controller.getOrigin();
 
     if (currentOrigin == null) throw Exception();
 

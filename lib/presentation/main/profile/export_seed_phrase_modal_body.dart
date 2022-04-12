@@ -21,7 +21,7 @@ class ExportSeedPhraseModalBody extends StatefulWidget {
     required this.publicKey,
   }) : super(key: key);
 
-  static String get title => LocaleKeys.export_seed_modal_title.tr();
+  static String get title => LocaleKeys.export_enter_password.tr();
 
   @override
   _ExportSeedPhraseModalBodyState createState() => _ExportSeedPhraseModalBodyState();

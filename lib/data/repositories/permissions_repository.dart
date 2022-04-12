@@ -74,8 +74,6 @@ class PermissionsRepository {
       }
     }
 
-    _permissionsSubject.add(_hiveSource.permissions);
-
     return permissions;
   }
 

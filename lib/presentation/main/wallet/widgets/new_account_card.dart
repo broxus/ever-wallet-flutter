@@ -70,7 +70,7 @@ class NewAccountCard extends StatelessWidget {
           _getAddButton(context),
           const Spacer(),
           Text(
-            LocaleKeys.wallet_screen_add_account_title.tr(),
+            LocaleKeys.add_account.tr(),
             style: style.copyWith(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -79,7 +79,7 @@ class NewAccountCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 4, 78, 24),
             child: Text(
-              LocaleKeys.wallet_screen_add_account_description.tr(),
+              LocaleKeys.add_account_description.tr(),
               style: style.copyWith(
                 fontWeight: FontWeight.w500,
                 fontSize: 14,

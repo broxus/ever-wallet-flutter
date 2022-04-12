@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -10,6 +11,8 @@ import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_prepare_deploy_provider.dart';
 import '../../../../../data/extensions.dart';
+import '../../../../../generated/codegen_loader.g.dart';
+import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/crystal_subtitle.dart';
 import '../../../../common/widgets/custom_back_button.dart';
@@ -55,9 +58,9 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           leading: const CustomBackButton(),
-          title: const Text(
-            'Deploy wallet',
-            style: TextStyle(
+          title: Text(
+            LocaleKeys.deploy_wallet.tr(),
+            style: const TextStyle(
               color: Colors.black,
             ),
           ),
@@ -98,8 +101,8 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
         ),
       );
 
-  Widget subtitle() => const CrystalSubtitle(
-        text: 'Funds will be debited from your balance to deploy.',
+  Widget subtitle() => CrystalSubtitle(
+        text: LocaleKeys.funds_to_deploy.tr(),
       );
 
   Widget card() => SectionedCard(
@@ -116,8 +119,8 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
           return SectionedCardSection(
-            title: 'AssetsList balance',
-            subtitle: '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes()} EVER',
+            title: LocaleKeys.account_balance.tr(),
+            subtitle: '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes()} $kEverTicker',
           );
         },
       );
@@ -127,7 +130,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
           final result = ref.watch(tonWalletPrepareDeployProvider);
 
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} EVER',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} $kEverTicker',
             error: (err, st) => (err as Exception).toUiMessage(),
             loading: () => null,
           );
@@ -138,7 +141,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
           );
 
           return SectionedCardSection(
-            title: 'Blockchain fee',
+            title: LocaleKeys.blockchain_fee.tr(),
             subtitle: subtitle,
             hasError: hasError,
           );
@@ -150,7 +153,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
       .entries
       .map(
         (e) => SectionedCardSection(
-          title: 'Custodian ${e.key + 1}',
+          title: LocaleKeys.custodian_n.tr(args: ['${e.key + 1}']),
           subtitle: e.value,
           isSelectable: true,
         ),
@@ -158,8 +161,8 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
       .toList();
 
   Widget reqConfirms() => SectionedCardSection(
-        title: 'Required confirms',
-        subtitle: '${widget.reqConfirms!.toString()} of ${widget.custodians!.length}',
+        title: LocaleKeys.required_confirms.tr(),
+        subtitle: LocaleKeys.n_of_k.tr(args: [(widget.reqConfirms!.toString()), '${widget.custodians!.length}']),
       );
 
   Widget submitButton() => Consumer(
@@ -174,7 +177,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
                       publicKey: widget.publicKey,
                     )
                 : null,
-            text: 'Deploy',
+            text: LocaleKeys.deploy.tr(),
           );
         },
       );
@@ -221,7 +224,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
   Future<String?> getPasswordFromBiometry(String publicKey) async {
     try {
       final password = await getIt.get<BiometryRepository>().getKeyPassword(
-            localizedReason: 'Please authenticate to interact with wallet',
+            localizedReason: LocaleKeys.authentication_reason.tr(),
             publicKey: publicKey,
           );
 
@@ -244,8 +247,8 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
             message: message,
             publicKey: publicKey,
             password: password,
-            sendingText: 'Deploying...',
-            successText: 'Wallet has been deployed successfully',
+            sendingText: '${LocaleKeys.deploying.tr()}...',
+            successText: LocaleKeys.wallet_deployed.tr(),
           ),
         ),
         (_) => false,

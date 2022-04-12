@@ -75,7 +75,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.seed_phrase_save_screen_title.tr(),
+        text: LocaleKeys.save_seed_phrase.tr(),
       );
 
   Widget words() => Row(
@@ -140,7 +140,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
         offset: const Offset(0, 1),
         child: CustomElevatedButton(
           onPressed: onSubmitButtonPressed,
-          text: LocaleKeys.seed_phrase_save_screen_action_confirm.tr(),
+          text: LocaleKeys.confirm_seed_saved.tr(),
         ),
       );
 
@@ -153,7 +153,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
 
   Widget copyButton() => CustomOutlinedButton(
         onPressed: onCopyButtonPressed,
-        text: LocaleKeys.seed_phrase_save_screen_action_copy.tr(),
+        text: LocaleKeys.copy_words.tr(),
       );
 
   Future<void> onCopyButtonPressed() async {
@@ -163,7 +163,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
 
     showCrystalFlushbar(
       context,
-      message: LocaleKeys.seed_phrase_save_screen_message_copied.tr(),
+      message: LocaleKeys.copied.tr(),
     );
   }
 }
