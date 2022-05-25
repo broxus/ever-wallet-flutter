@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -7,32 +6,31 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../injection.dart';
+import '../../../../data/constants.dart';
 import '../extensions.dart';
+import 'models/get_expected_address_input.dart';
+import 'models/get_expected_address_output.dart';
 
-Future<dynamic> getExpectedAddressHandler({
+Future<Map<String, dynamic>> getExpectedAddressHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('GetExpectedAddressRequest', args);
+    logger.d('getExpectedAddress', args);
 
     final jsonInput = args.first as Map<String, dynamic>;
-
     final input = GetExpectedAddressInput.fromJson(jsonInput);
 
-    final currentOrigin = await controller.getOrigin();
+    final origin = await controller.getOrigin();
 
-    if (currentOrigin == null) throw Exception();
+    final existingPermissions = getIt.get<PermissionsRepository>().permissions[origin];
 
-    await getIt.get<PermissionsRepository>().checkPermissions(
-      origin: currentOrigin,
-      requiredPermissions: [Permission.basic],
-    );
+    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
     final address = getExpectedAddress(
       tvc: input.tvc,
       contractAbi: input.abi,
-      workchainId: input.workchain,
+      workchainId: input.workchain ?? kDefaultWorkchain,
       publicKey: input.publicKey,
       initData: input.initParams,
     );
@@ -41,10 +39,11 @@ Future<dynamic> getExpectedAddressHandler({
       address: address,
     );
 
-    final jsonOutput = jsonEncode(output.toJson());
+    final jsonOutput = output.toJson();
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e('getExpectedAddress', err, st);
+    rethrow;
   }
 }

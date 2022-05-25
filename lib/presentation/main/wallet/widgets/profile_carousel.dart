@@ -51,7 +51,7 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.loading != oldWidget.loading || oldWidget.accounts.length != widget.accounts.length) {
-      SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         final currentPage = pageController.page?.round() ?? 0;
         widget.onPageChanged?.call(currentPage);
         widget.onPageSelected?.call(currentPage);
@@ -68,7 +68,7 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
     );
     pageController.addListener(pageListener);
     if (widget.onPageSelected != null || widget.onPageChanged != null) {
-      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         widget.onPageChanged?.call(pageController.initialPage);
         widget.onPageSelected?.call(pageController.initialPage);
       });

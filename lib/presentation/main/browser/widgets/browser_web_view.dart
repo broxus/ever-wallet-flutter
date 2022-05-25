@@ -7,36 +7,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../logger.dart';
 import '../../../common/theme.dart';
 import '../browser_page_logic.dart';
 import '../extensions.dart';
+import '../requests/add_asset_handler.dart';
+import '../requests/change_account_handler.dart';
 import '../requests/code_to_tvc_handler.dart';
 import '../requests/decode_event_handler.dart';
 import '../requests/decode_input_handler.dart';
 import '../requests/decode_output_handler.dart';
 import '../requests/decode_transaction_events_handler.dart';
 import '../requests/decode_transaction_handler.dart';
+import '../requests/decrypt_data_handler.dart';
 import '../requests/disconnect_handler.dart';
 import '../requests/encode_internal_input_handler.dart';
+import '../requests/encrypt_data_handler.dart';
 import '../requests/estimate_fees_handler.dart';
 import '../requests/extract_public_key_handler.dart';
+import '../requests/get_accounts_by_code_hash_handler.dart';
+import '../requests/get_boc_hash_handler.dart';
 import '../requests/get_expected_address_handler.dart';
 import '../requests/get_full_contract_state_handler.dart';
 import '../requests/get_provider_state_handler.dart';
+import '../requests/get_transaction_handler.dart';
 import '../requests/get_transactions_handler.dart';
 import '../requests/pack_into_cell_handler.dart';
 import '../requests/request_permissions_handler.dart';
 import '../requests/run_local_handler.dart';
 import '../requests/send_external_message_handler.dart';
 import '../requests/send_message_handler.dart';
+import '../requests/send_unsigned_external_message_handler.dart';
+import '../requests/sign_data_handler.dart';
+import '../requests/sign_data_raw_handler.dart';
 import '../requests/split_tvc_handler.dart';
 import '../requests/subscribe_handler.dart';
 import '../requests/unpack_from_cell_handler.dart';
 import '../requests/unsubscribe_all_handler.dart';
 import '../requests/unsubscribe_handler.dart';
+import '../requests/verify_signature_handler.dart';
 import '../utils.dart';
 
 class BrowserWebView extends StatefulWidget {
@@ -113,6 +124,11 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     );
 
     controller.addJavaScriptHandler(
+      handlerName: 'changeAccount',
+      callback: (args) => changeAccountHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
       handlerName: 'disconnect',
       callback: (args) => disconnectHandler(controller: controller, args: args),
     );
@@ -143,8 +159,18 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     );
 
     controller.addJavaScriptHandler(
+      handlerName: 'getAccountsByCodeHash',
+      callback: (args) => getAccountsByCodeHashHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
       handlerName: 'getTransactions',
       callback: (args) => getTransactionsHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'getTransaction',
+      callback: (args) => getTransactionHandler(controller: controller, args: args),
     );
 
     controller.addJavaScriptHandler(
@@ -155,6 +181,11 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     controller.addJavaScriptHandler(
       handlerName: 'getExpectedAddress',
       callback: (args) => getExpectedAddressHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'getBocHash',
+      callback: (args) => getBocHashHandler(controller: controller, args: args),
     );
 
     controller.addJavaScriptHandler(
@@ -213,6 +244,41 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     );
 
     controller.addJavaScriptHandler(
+      handlerName: 'verifySignature',
+      callback: (args) => verifySignatureHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'sendUnsignedExternalMessage',
+      callback: (args) => sendUnsignedExternalMessageHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'addAsset',
+      callback: (args) => addAssetHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'signData',
+      callback: (args) => signDataHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'signDataRaw',
+      callback: (args) => signDataRawHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'encryptData',
+      callback: (args) => encryptDataHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'decryptData',
+      callback: (args) => decryptDataHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
       handlerName: 'estimateFees',
       callback: (args) => estimateFeesHandler(controller: controller, args: args),
     );
@@ -264,7 +330,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     controller.loadData(
       data: getErrorPage(url: errorUrl, message: message),
       baseUrl: errorUrl,
-      androidHistoryUrl: errorUrl,
+      historyUrl: errorUrl,
     );
   }
 
@@ -304,8 +370,8 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     if (!['http', 'https', 'file', 'chrome', 'data', 'javascript', 'about'].contains(uri.scheme)) {
       final url = uri.toString();
 
-      if (await canLaunch(url)) {
-        await launch(url);
+      if (await canLaunchUrlString(url)) {
+        await launchUrlString(url);
 
         return NavigationActionPolicy.CANCEL;
       }

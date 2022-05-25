@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -8,26 +7,23 @@ import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../injection.dart';
 import '../extensions.dart';
+import 'models/decode_input_input.dart';
 
-Future<dynamic> decodeInputHandler({
+Future<Map<String, dynamic>?> decodeInputHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('DecodeInputRequest', args);
+    logger.d('decodeInput', args);
 
     final jsonInput = args.first as Map<String, dynamic>;
-
     final input = DecodeInputInput.fromJson(jsonInput);
 
-    final currentOrigin = await controller.getOrigin();
+    final origin = await controller.getOrigin();
 
-    if (currentOrigin == null) throw Exception();
+    final existingPermissions = getIt.get<PermissionsRepository>().permissions[origin];
 
-    await getIt.get<PermissionsRepository>().checkPermissions(
-      origin: currentOrigin,
-      requiredPermissions: [Permission.basic],
-    );
+    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
     final output = decodeInput(
       messageBody: input.body,
@@ -36,10 +32,11 @@ Future<dynamic> decodeInputHandler({
       internal: input.internal,
     );
 
-    final jsonOutput = jsonEncode(output?.toJson());
+    final jsonOutput = output?.toJson();
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e('decodeInput', err, st);
+    rethrow;
   }
 }

@@ -26,17 +26,19 @@ class _WalletCardSelectableFieldState extends State<WalletCardSelectableField> {
   bool isOpen = false;
 
   @override
-  Widget build(BuildContext context) => PortalEntry(
+  Widget build(BuildContext context) => PortalTarget(
         visible: isOpen,
-        portal: GestureDetector(
+        portalFollower: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => setState(() => isOpen = false),
         ),
-        child: PortalEntry(
+        child: PortalTarget(
           visible: isOpen,
-          portalAnchor: Alignment.bottomCenter,
-          childAnchor: Alignment.topCenter,
-          portal: label(),
+          anchor: const Aligned(
+            follower: Alignment.bottomCenter,
+            target: Alignment.topCenter,
+          ),
+          portalFollower: label(),
           child: child(),
         ),
       );

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -9,6 +10,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../logger.dart';
+import '../extensions.dart';
 import '../sources/local/hive_source.dart';
 import '../sources/local/keystore_source.dart';
 
@@ -268,38 +270,90 @@ class KeysRepository {
     return phrase;
   }
 
+  Future<List<EncryptedData>> encrypt({
+    required String data,
+    required List<String> publicKeys,
+    required EncryptionAlgorithm algorithm,
+    required String publicKey,
+    required String password,
+  }) {
+    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+
+    return _keystoreSource.encrypt(
+      data: data,
+      publicKeys: publicKeys,
+      algorithm: algorithm,
+      input: input,
+    );
+  }
+
+  Future<String> decrypt({
+    required EncryptedData data,
+    required String publicKey,
+    required String password,
+  }) {
+    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+
+    return _keystoreSource.decrypt(
+      data: data,
+      input: input,
+    );
+  }
+
+  Future<String> sign({
+    required String data,
+    required String publicKey,
+    required String password,
+  }) {
+    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+
+    return _keystoreSource.sign(
+      data: data,
+      input: input,
+    );
+  }
+
+  Future<SignedData> signData({
+    required String data,
+    required String publicKey,
+    required String password,
+  }) {
+    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+
+    return _keystoreSource.signData(
+      data: data,
+      input: input,
+    );
+  }
+
+  Future<SignedDataRaw> signDataRaw({
+    required String data,
+    required String publicKey,
+    required String password,
+  }) {
+    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+
+    return _keystoreSource.signDataRaw(
+      data: data,
+      input: input,
+    );
+  }
+
   Future<bool> checkKeyPassword({
     required String publicKey,
     required String password,
   }) async {
-    final key = keys.firstWhereOrNull((e) => e.publicKey == publicKey);
+    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
-    if (key == null) throw Exception('Key is not found');
+    try {
+      final data = base64.encode(List.generate(kSignatureLength, (_) => 0));
 
-    late final SignInput signInput;
+      await _keystoreSource.sign(data: data, input: input);
 
-    if (key.isLegacy) {
-      signInput = EncryptedKeyPassword(
-        publicKey: key.publicKey,
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
-        ),
-      );
-    } else {
-      signInput = DerivedKeySignParams.byAccountId(
-        masterKey: key.masterKey,
-        accountId: key.accountId,
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
-        ),
-      );
+      return true;
+    } catch (_) {
+      return false;
     }
-
-    final isValid = await _keystoreSource.checkKeyPassword(signInput);
-
-    return isValid;
   }
 
   Future<KeyStoreEntry?> removeKey(String publicKey) async {
@@ -307,9 +361,7 @@ class KeysRepository {
 
     final derivedKeys = _keystoreSource.keys.where((e) => e.masterKey == publicKey);
 
-    for (final key in derivedKeys) {
-      await _keystoreSource.removeKey(key.publicKey);
-    }
+    await _keystoreSource.removeKeys(derivedKeys.map((e) => e.publicKey).toList());
 
     return key;
   }

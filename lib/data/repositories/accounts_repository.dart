@@ -69,10 +69,12 @@ class AccountsRepository {
     required WalletType walletType,
   }) =>
       _accountsStorageSource.addAccount(
-        name: name,
-        publicKey: publicKey,
-        walletType: walletType,
-        workchain: kDefaultWorkchain,
+        AccountToAdd(
+          name: name,
+          publicKey: publicKey,
+          contract: walletType,
+          workchain: kDefaultWorkchain,
+        ),
       );
 
   Future<AssetsList> addExternalAccount({
@@ -121,7 +123,7 @@ class AccountsRepository {
     required String name,
   }) =>
       _accountsStorageSource.renameAccount(
-        address: address,
+        account: address,
         name: name,
       );
 
@@ -166,7 +168,7 @@ class AccountsRepository {
     );
 
     final account = await _accountsStorageSource.addTokenWallet(
-      address: address,
+      account: address,
       rootTokenContract: rootTokenContract,
       networkGroup: transport.connectionData.group,
     );
@@ -181,7 +183,7 @@ class AccountsRepository {
     final transport = await _transportSource.transport;
 
     final account = await _accountsStorageSource.removeTokenWallet(
-      address: address,
+      account: address,
       rootTokenContract: rootTokenContract,
       networkGroup: transport.connectionData.group,
     );
@@ -247,6 +249,7 @@ class AccountsRepository {
             transport: transport,
             publicKey: key.publicKey,
             workchainId: kDefaultWorkchain,
+            walletTypes: kAvailableWallets,
           );
 
           final activeWallets = wallets.where((e) => e.isActive);

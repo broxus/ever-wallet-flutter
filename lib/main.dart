@@ -11,7 +11,7 @@ import 'injection.dart';
 import 'logger.dart';
 import 'presentation/application.dart';
 
-Future<void> main() async => runZonedGuarded<Future<void>>(
+Future<void> main(List<String> args) async => runZonedGuarded<Future<void>>(
       () async {
         Isolate.current.addErrorListener(
           RawReceivePort((dynamic pair) async {

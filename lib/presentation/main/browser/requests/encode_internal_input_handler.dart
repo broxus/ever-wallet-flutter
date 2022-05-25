@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -8,26 +7,24 @@ import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../injection.dart';
 import '../extensions.dart';
+import 'models/encode_internal_input_input.dart';
+import 'models/encode_internal_input_output.dart';
 
-Future<dynamic> encodeInternalInputHandler({
+Future<Map<String, dynamic>> encodeInternalInputHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('EncodeInternalInputRequest', args);
+    logger.d('encodeInternalInput', args);
 
     final jsonInput = args.first as Map<String, dynamic>;
-
     final input = EncodeInternalInputInput.fromJson(jsonInput);
 
-    final currentOrigin = await controller.getOrigin();
+    final origin = await controller.getOrigin();
 
-    if (currentOrigin == null) throw Exception();
+    final existingPermissions = getIt.get<PermissionsRepository>().permissions[origin];
 
-    await getIt.get<PermissionsRepository>().checkPermissions(
-      origin: currentOrigin,
-      requiredPermissions: [Permission.basic],
-    );
+    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
     final boc = encodeInternalInput(
       contractAbi: input.abi,
@@ -39,10 +36,11 @@ Future<dynamic> encodeInternalInputHandler({
       boc: boc,
     );
 
-    final jsonOutput = jsonEncode(output.toJson());
+    final jsonOutput = output.toJson();
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e('encodeInternalInput', err, st);
+    rethrow;
   }
 }

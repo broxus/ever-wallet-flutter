@@ -22,7 +22,7 @@ class _AnimatedVisibilityState extends State<AnimatedVisibility> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (mounted) {
         setState(() => appear = widget.visible);
       }

@@ -40,7 +40,7 @@ class _AnimatedAppearanceState extends State<AnimatedAppearance> {
   void initState() {
     super.initState();
     if (widget.showing) {
-      WidgetsBinding.instance!.addPostFrameCallback(
+      WidgetsBinding.instance.addPostFrameCallback(
         (_) => Future.delayed(
           widget.delay,
           () {

@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:validators/validators.dart';
 
-import '../../../../../../injection.dart';
-import '../../../../data/repositories/bookmarks_repository.dart';
 import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/widgets/unfocusing_gesture_detector.dart';
 

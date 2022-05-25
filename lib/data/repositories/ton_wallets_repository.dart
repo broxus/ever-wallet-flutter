@@ -13,14 +13,12 @@ import '../extensions.dart';
 import '../models/ton_wallet_info.dart';
 import '../sources/local/accounts_storage_source.dart';
 import '../sources/local/hive_source.dart';
-import '../sources/local/keystore_source.dart';
 import '../sources/remote/transport_source.dart';
 
 @lazySingleton
 class TonWalletsRepository {
   final AccountsStorageSource _accountsStorageSource;
   final TransportSource _transportSource;
-  final KeystoreSource _keystoreSource;
   final HiveSource _hiveSource;
   final _tonWalletsSubject = BehaviorSubject<List<TonWallet>>.seeded([]);
   final _lock = Lock();
@@ -28,7 +26,6 @@ class TonWalletsRepository {
   TonWalletsRepository(
     this._accountsStorageSource,
     this._transportSource,
-    this._keystoreSource,
     this._hiveSource,
   ) {
     Rx.combineLatest3<List<AssetsList>, Transport, void, Tuple2<List<AssetsList>, Transport>>(
@@ -159,9 +156,9 @@ class TonWalletsRepository {
   Future<UnsignedMessage> prepareDeploy(String address) async {
     final tonWallet = await _getTonWallet(address);
 
-    final message = await tonWallet.prepareDeploy(kDefaultMessageExpiration);
+    final unsignedMessage = await tonWallet.prepareDeploy(kDefaultMessageExpiration);
 
-    return message;
+    return unsignedMessage;
   }
 
   Future<UnsignedMessage> prepareDeployWithMultipleOwners({
@@ -171,13 +168,13 @@ class TonWalletsRepository {
   }) async {
     final tonWallet = await _getTonWallet(address);
 
-    final message = await tonWallet.prepareDeployWithMultipleOwners(
+    final unsignedMessage = await tonWallet.prepareDeployWithMultipleOwners(
       expiration: kDefaultMessageExpiration,
       custodians: custodians,
       reqConfirms: reqConfirms,
     );
 
-    return message;
+    return unsignedMessage;
   }
 
   Future<UnsignedMessage> prepareTransfer({
@@ -189,15 +186,19 @@ class TonWalletsRepository {
   }) async {
     final tonWallet = await _getTonWallet(address);
 
-    final message = await tonWallet.prepareTransfer(
+    final contractState = await tonWallet.transport.getContractState(address);
+
+    final unsignedMessage = await tonWallet.prepareTransfer(
+      contractState: contractState,
       publicKey: publicKey ?? await tonWallet.publicKey,
       destination: destination,
       amount: amount,
       body: body,
+      bounce: kMessageBounce,
       expiration: kDefaultMessageExpiration,
     );
 
-    return message;
+    return unsignedMessage;
   }
 
   Future<UnsignedMessage> prepareConfirmTransaction({
@@ -207,41 +208,36 @@ class TonWalletsRepository {
   }) async {
     final tonWallet = await _getTonWallet(address);
 
-    final message = await tonWallet.prepareConfirmTransaction(
+    final contractState = await tonWallet.transport.getContractState(address);
+
+    final unsignedMessage = await tonWallet.prepareConfirmTransaction(
+      contractState: contractState,
       publicKey: publicKey,
       transactionId: transactionId,
       expiration: kDefaultMessageExpiration,
     );
 
-    return message;
+    return unsignedMessage;
   }
 
   Future<String> estimateFees({
     required String address,
-    required UnsignedMessage message,
+    required SignedMessage signedMessage,
   }) async {
     final tonWallet = await _getTonWallet(address);
 
-    final fees = await tonWallet.estimateFees(message);
+    final fees = await tonWallet.estimateFees(signedMessage);
 
     return fees;
   }
 
   Future<PendingTransaction> send({
     required String address,
-    required String publicKey,
-    required String password,
-    required UnsignedMessage message,
+    required SignedMessage signedMessage,
   }) async {
     final tonWallet = await _getTonWallet(address);
 
-    final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
-
-    final pendingTransaction = await tonWallet.send(
-      keystore: _keystoreSource.keystore,
-      message: message,
-      signInput: signInput,
-    );
+    final pendingTransaction = await tonWallet.send(signedMessage);
 
     return pendingTransaction;
   }
@@ -298,7 +294,7 @@ class TonWalletsRepository {
             transport: transport,
             workchain: kDefaultWorkchain,
             publicKey: tonWalletAssetForSubscription.publicKey,
-            walletType: tonWalletAssetForSubscription.contract,
+            contract: tonWalletAssetForSubscription.contract,
           );
 
           _tonWalletsSubject.add([..._tonWalletsSubject.value, tonWallet]);

@@ -1,47 +1,44 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../data/repositories/transport_repository.dart';
 import '../../../../../injection.dart';
 import '../extensions.dart';
+import 'models/get_full_contract_state_input.dart';
+import 'models/get_full_contract_state_output.dart';
 
-Future<dynamic> getFullContractStateHandler({
+Future<Map<String, dynamic>> getFullContractStateHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('GetFullContractStateRequest', args);
+    logger.d('getFullContractState', args);
 
     final jsonInput = args.first as Map<String, dynamic>;
-
     final input = GetFullContractStateInput.fromJson(jsonInput);
 
-    final currentOrigin = await controller.getOrigin();
+    final origin = await controller.getOrigin();
 
-    if (currentOrigin == null) throw Exception();
+    final existingPermissions = getIt.get<PermissionsRepository>().permissions[origin];
+
+    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
     final transport = await getIt.get<TransportRepository>().transport;
 
-    await getIt.get<PermissionsRepository>().checkPermissions(
-      origin: currentOrigin,
-      requiredPermissions: [Permission.basic],
-    );
-
-    final state = await transport.getFullAccountState(address: input.address);
+    final fullContractState = await transport.getFullContractState(input.address);
 
     final output = GetFullContractStateOutput(
-      state: state,
+      state: fullContractState,
     );
 
-    final jsonOutput = jsonEncode(output.toJson());
+    final jsonOutput = output.toJson();
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e('getFullContractState', err, st);
+    rethrow;
   }
 }

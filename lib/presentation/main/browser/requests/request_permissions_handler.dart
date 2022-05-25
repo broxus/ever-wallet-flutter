@@ -2,63 +2,81 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/approvals_repository.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../injection.dart';
+import '../../../../data/models/permission.dart';
+import '../../../../data/models/permissions.dart';
+import '../events/models/permissions_changed_event.dart';
 import '../events/permissions_changed_handler.dart';
 import '../extensions.dart';
+import 'models/request_permissions_input.dart';
 
-Future<dynamic> requestPermissionsHandler({
+Future<Map<String, dynamic>> requestPermissionsHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('RequestPermissionsRequest', args);
+    logger.d('requestPermissions', args);
 
-    final jsonInput = jsonDecode(jsonEncode(args.first as Map<String, dynamic>).replaceAll('tonClient', 'basic'))
-        as Map<String, dynamic>;
+    final jsonInput = args.first as Map<String, dynamic>;
+    final fixedJsonInput = jsonDecode(jsonEncode(jsonInput).replaceAll('tonClient', 'basic')) as Map<String, dynamic>;
+    final input = RequestPermissionsInput.fromJson(fixedJsonInput);
 
-    final input = RequestPermissionsInput.fromJson(jsonInput);
+    final origin = await controller.getOrigin();
 
-    final currentOrigin = await controller.getOrigin();
+    final requiredPermissions = input.permissions;
+    final existingPermissions = getIt.get<PermissionsRepository>().permissions[origin];
 
-    if (currentOrigin == null) throw Exception();
+    Permissions permissions;
 
-    late Permissions requested;
+    if (existingPermissions != null) {
+      final newPermissions = [
+        if (requiredPermissions.contains(Permission.basic) && existingPermissions.basic == null) Permission.basic,
+        if (requiredPermissions.contains(Permission.accountInteraction) &&
+            existingPermissions.accountInteraction == null)
+          Permission.accountInteraction,
+      ];
 
-    try {
-      requested = await getIt.get<PermissionsRepository>().checkPermissions(
-            origin: currentOrigin,
-            requiredPermissions: input.permissions,
-          );
-    } catch (_) {
-      requested = await getIt.get<ApprovalsRepository>().requestForPermissions(
-            origin: currentOrigin,
-            permissions: input.permissions,
+      if (newPermissions.isNotEmpty) {
+        permissions = await getIt.get<ApprovalsRepository>().requestPermissions(
+              origin: origin,
+              permissions: newPermissions,
+            );
+
+        await getIt.get<PermissionsRepository>().setPermissions(
+              origin: origin,
+              permissions: permissions,
+            );
+      } else {
+        permissions = existingPermissions;
+      }
+    } else {
+      permissions = await getIt.get<ApprovalsRepository>().requestPermissions(
+            origin: origin,
+            permissions: requiredPermissions,
           );
 
       await getIt.get<PermissionsRepository>().setPermissions(
-            origin: currentOrigin,
-            permissions: requested,
+            origin: origin,
+            permissions: permissions,
           );
     }
 
-    final event = PermissionsChangedEvent(permissions: requested);
+    final event = PermissionsChangedEvent(permissions: permissions);
 
     await permissionsChangedHandler(
       controller: controller,
       event: event,
     );
 
-    final output = requested;
-
-    final jsonOutput = jsonEncode(output.toJson());
+    final jsonOutput = permissions.toJson();
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e('requestPermissions', err, st);
+    rethrow;
   }
 }

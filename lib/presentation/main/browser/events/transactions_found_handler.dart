@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../logger.dart';
+import 'models/transactions_found_event.dart';
 
 Future<void> transactionsFoundHandler({
   required InAppWebViewController controller,

@@ -318,7 +318,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
 
       custodiansNotifier.value -= 1;
 
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.dispose();
         focusNode.dispose();
         onFormChanged();

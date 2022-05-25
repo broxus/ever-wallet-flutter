@@ -9,36 +9,33 @@ import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../data/repositories/ton_wallets_repository.dart';
 import '../../../../../injection.dart';
 import '../extensions.dart';
+import 'models/estimate_fees_input.dart';
+import 'models/estimate_fees_output.dart';
 
-Future<dynamic> estimateFeesHandler({
+Future<Map<String, dynamic>> estimateFeesHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('EstimateFeesRequest', args);
+    logger.d('estimateFees', args);
 
     final jsonInput = args.first as Map<String, dynamic>;
-
     final input = EstimateFeesInput.fromJson(jsonInput);
 
-    final currentOrigin = await controller.getOrigin();
+    final origin = await controller.getOrigin();
 
-    if (currentOrigin == null) throw Exception();
+    final existingPermissions = getIt.get<PermissionsRepository>().permissions[origin];
 
-    await getIt.get<PermissionsRepository>().checkPermissions(
-      origin: currentOrigin,
-      requiredPermissions: [Permission.accountInteraction],
-    );
+    if (existingPermissions?.accountInteraction == null) throw Exception('Account interaction not permitted');
 
-    final permissions = getIt.get<PermissionsRepository>().permissions[currentOrigin] ?? const Permissions();
-    final allowedAccount = permissions.accountInteraction;
+    if (existingPermissions?.accountInteraction?.address != input.sender) {
+      throw Exception('Specified sender is not allowed');
+    }
 
-    if (allowedAccount?.address != input.sender) throw Exception();
-
-    final selectedAddress = allowedAccount!.address;
     final repackedRecipient = repackAddress(input.recipient);
 
     String? body;
+
     if (input.payload != null) {
       body = encodeInternalInput(
         contractAbi: input.payload!.abi,
@@ -48,25 +45,36 @@ Future<dynamic> estimateFeesHandler({
     }
 
     final unsignedMessage = await getIt.get<TonWalletsRepository>().prepareTransfer(
-          address: selectedAddress,
+          address: input.sender,
           destination: repackedRecipient,
           amount: input.amount,
           body: body,
         );
 
-    final fees = await getIt.get<TonWalletsRepository>().estimateFees(
-          address: selectedAddress,
-          message: unsignedMessage,
-        );
+    try {
+      final signature = base64.encode(List.generate(kSignatureLength, (_) => 0));
 
-    final output = EstimateFeesOutput(
-      fees: fees,
-    );
+      await unsignedMessage.refreshTimeout();
 
-    final jsonOutput = jsonEncode(output.toJson());
+      final signedMessage = await unsignedMessage.sign(signature);
 
-    return jsonOutput;
+      final fees = await getIt.get<TonWalletsRepository>().estimateFees(
+            address: input.sender,
+            signedMessage: signedMessage,
+          );
+
+      final output = EstimateFeesOutput(
+        fees: fees,
+      );
+
+      final jsonOutput = output.toJson();
+
+      return jsonOutput;
+    } finally {
+      unsignedMessage.freePtr();
+    }
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e('estimateFees', err, st);
+    rethrow;
   }
 }

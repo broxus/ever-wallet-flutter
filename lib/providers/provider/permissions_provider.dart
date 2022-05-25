@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/permissions_repository.dart';
+import '../../presentation/main/browser/events/models/permissions_changed_event.dart';
 
 final permissionsProvider = StreamProvider.autoDispose<List<Tuple2<String, PermissionsChangedEvent>>>(
   (ref) => getIt

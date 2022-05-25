@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -8,29 +7,27 @@ import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/generic_contracts_repository.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../injection.dart';
+import '../../../../data/models/contract_updates_subscription.dart';
 import '../extensions.dart';
+import 'models/subscribe_input.dart';
 
-Future<dynamic> subscribeHandler({
+Future<Map<String, dynamic>> subscribeHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('SubscribeRequest', args);
+    logger.d('subscribe', args);
 
     final jsonInput = args.first as Map<String, dynamic>;
-
     final input = SubscribeInput.fromJson(jsonInput);
 
-    final currentOrigin = await controller.getOrigin();
+    final origin = await controller.getOrigin();
 
-    if (currentOrigin == null) throw Exception();
+    final existingPermissions = getIt.get<PermissionsRepository>().permissions[origin];
 
-    await getIt.get<PermissionsRepository>().checkPermissions(
-      origin: currentOrigin,
-      requiredPermissions: [Permission.basic],
-    );
+    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
-    if (!validateAddress(input.address)) throw Exception();
+    if (!validateAddress(input.address)) throw Exception('Invalid address');
 
     getIt.get<GenericContractsRepository>().subscribe(input.address);
 
@@ -39,10 +36,11 @@ Future<dynamic> subscribeHandler({
       transactions: true,
     );
 
-    final jsonOutput = jsonEncode(output.toJson());
+    final jsonOutput = output.toJson();
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e('subscribe', err, st);
+    rethrow;
   }
 }

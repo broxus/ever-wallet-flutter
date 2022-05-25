@@ -6,6 +6,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../logger.dart';
+import '../models/permissions.dart';
 import '../sources/local/accounts_storage_source.dart';
 import '../sources/local/hive_source.dart';
 
@@ -45,8 +46,8 @@ class PermissionsRepository {
     _permissionsSubject.add(_hiveSource.permissions);
   }
 
-  Future<void> deletePermissions(String origin) async {
-    await _hiveSource.deletePermissions(origin);
+  Future<void> deletePermissionsForOrigin(String origin) async {
+    await _hiveSource.deletePermissionsForOrigin(origin);
 
     _permissionsSubject.add(_hiveSource.permissions);
   }
@@ -55,26 +56,6 @@ class PermissionsRepository {
     await _hiveSource.deletePermissionsForAccount(address);
 
     _permissionsSubject.add(_hiveSource.permissions);
-  }
-
-  Future<Permissions> checkPermissions({
-    required String origin,
-    required List<Permission> requiredPermissions,
-  }) async {
-    final permissions = this.permissions[origin] ?? const Permissions();
-
-    for (final requiredPermission in requiredPermissions) {
-      switch (requiredPermission) {
-        case Permission.basic:
-          if (permissions.basic == null || permissions.basic == false) throw Exception('Not permitted');
-          break;
-        case Permission.accountInteraction:
-          if (permissions.accountInteraction == null) throw Exception('Not permitted');
-          break;
-      }
-    }
-
-    return permissions;
   }
 
   Future<void> _accountsStreamListener(Iterable<List<AssetsList>> event) async {

@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 @preResolve
 @lazySingleton
 class StorageSource {
-  late final Storage storage;
+  late final Storage _storage;
 
   StorageSource._();
 
@@ -18,9 +18,9 @@ class StorageSource {
     return instance;
   }
 
-  Future<void> _initialize() async {
-    final dir = await getApplicationDocumentsDirectory();
+  Storage get storage => _storage;
 
-    storage = await Storage.create(dir);
+  Future<void> _initialize() async {
+    _storage = await Storage.create(await getApplicationDocumentsDirectory());
   }
 }

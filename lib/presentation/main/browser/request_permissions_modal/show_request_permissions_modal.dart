@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../data/models/permission.dart';
+import '../../../../data/models/permissions.dart';
 import '../../../common/widgets/show_platform_modal_bottom_sheet.dart';
 import 'request_permissions_modal.dart';
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,13 +16,13 @@ final tonWalletPrepareTransferProvider =
 );
 
 class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
-  UnsignedMessage? _message;
+  UnsignedMessage? _unsignedMessage;
 
   TonWalletPrepareTransferNotifier() : super(const AsyncValue.loading());
 
   @override
   void dispose() {
-    _message?.freePtr();
+    _unsignedMessage?.freePtr();
     super.dispose();
   }
 
@@ -35,13 +36,13 @@ class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<U
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      _message?.freePtr();
+      _unsignedMessage?.freePtr();
 
       final repackedDestination = repackAddress(destination);
 
       final amountValue = int.parse(amount);
 
-      final message = await getIt.get<TonWalletsRepository>().prepareTransfer(
+      final unsignedMessage = await getIt.get<TonWalletsRepository>().prepareTransfer(
             address: address,
             publicKey: publicKey,
             destination: repackedDestination,
@@ -49,11 +50,17 @@ class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<U
             body: body,
           );
 
-      _message = message;
+      _unsignedMessage = unsignedMessage;
+
+      await unsignedMessage.refreshTimeout();
+
+      final signature = base64.encode(List.generate(kSignatureLength, (_) => 0));
+
+      final signedMessage = await unsignedMessage.sign(signature);
 
       final fees = await getIt.get<TonWalletsRepository>().estimateFees(
             address: address,
-            message: message,
+            signedMessage: signedMessage,
           );
       final feesValue = int.parse(fees);
 
@@ -64,7 +71,7 @@ class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<U
 
       if (!isPossibleToSendMessage) throw Exception(LocaleKeys.insufficient_funds.tr());
 
-      return Tuple2(message, fees);
+      return Tuple2(unsignedMessage, fees);
     });
   }
 }

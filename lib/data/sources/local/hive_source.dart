@@ -6,12 +6,15 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../models/account_interaction.dart';
 import '../../models/bookmark.dart';
 import '../../models/currency.dart';
+import '../../models/permissions.dart';
 import '../../models/site_meta_data.dart';
 import '../../models/token_contract_asset.dart';
 import '../../models/token_wallet_info.dart';
 import '../../models/ton_wallet_info.dart';
+import '../../models/wallet_contract_type.dart';
 
 @preResolve
 @lazySingleton
@@ -224,7 +227,7 @@ class HiveSource {
   }) =>
       _permissionsBox.put(origin, permissions);
 
-  Future<void> deletePermissions(String origin) => _permissionsBox.delete(origin);
+  Future<void> deletePermissionsForOrigin(String origin) => _permissionsBox.delete(origin);
 
   Future<void> deletePermissionsForAccount(String address) async {
     final origins = permissions.entries.where((e) => e.value.accountInteraction?.address == address).map((e) => e.key);

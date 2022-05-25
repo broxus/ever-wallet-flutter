@@ -89,7 +89,7 @@ class _WalletScaffoldState extends State<WalletScaffold> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     SchedulerBinding.instance
-                        ?.addPostFrameCallback((timeStamp) => _calculateModalHeight(constraints.maxHeight - 80));
+                        .addPostFrameCallback((timeStamp) => _calculateModalHeight(constraints.maxHeight - 80));
                     return const SizedBox.shrink();
                   },
                 ),

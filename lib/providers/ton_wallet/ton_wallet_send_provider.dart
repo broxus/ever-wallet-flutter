@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../injection.dart';
+import '../../data/repositories/keys_repository.dart';
 import '../../data/repositories/ton_wallets_repository.dart';
 
 final tonWalletSendProvider = StateNotifierProvider.autoDispose<TonWalletSendNotifier, AsyncValue<PendingTransaction>>(
@@ -15,23 +16,35 @@ class TonWalletSendNotifier extends StateNotifier<AsyncValue<PendingTransaction>
 
   Future<void> send({
     required String address,
-    required UnsignedMessage message,
+    required UnsignedMessage unsignedMessage,
     required String publicKey,
     required String password,
   }) async {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final pendingTransaction = await getIt.get<TonWalletsRepository>().send(
-            address: address,
-            publicKey: publicKey,
-            password: password,
-            message: message,
-          );
+      try {
+        await unsignedMessage.refreshTimeout();
 
-      message.freePtr();
+        final hash = await unsignedMessage.hash;
 
-      return pendingTransaction;
+        final signature = await getIt.get<KeysRepository>().sign(
+              data: hash,
+              publicKey: publicKey,
+              password: password,
+            );
+
+        final signedMessage = await unsignedMessage.sign(signature);
+
+        final pendingTransaction = await getIt.get<TonWalletsRepository>().send(
+              address: address,
+              signedMessage: signedMessage,
+            );
+
+        return pendingTransaction;
+      } finally {
+        unsignedMessage.freePtr();
+      }
     });
   }
 }

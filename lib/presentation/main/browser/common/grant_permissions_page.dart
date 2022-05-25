@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:string_extensions/string_extensions.dart';
 
+import '../../../../data/models/account_interaction.dart';
+import '../../../../data/models/permission.dart';
+import '../../../../data/models/permissions.dart';
+import '../../../../data/models/wallet_contract_type.dart';
 import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/widgets/custom_back_button.dart';
 import '../../../common/widgets/custom_elevated_button.dart';

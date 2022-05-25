@@ -55,7 +55,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
       (_) => ref.read(selectedPublicKeyProvider.notifier).state = widget.publicKeys.firstOrNull,
     );
     ref.read(tonWalletPrepareTransferProvider.notifier).prepareTransfer(

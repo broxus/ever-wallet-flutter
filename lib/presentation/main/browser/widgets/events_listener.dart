@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../providers/provider/generic_contracts_state_changes_provider.dart';
@@ -14,6 +13,10 @@ import '../../../../providers/provider/network_changes_provider.dart';
 import '../../../../providers/provider/permissions_provider.dart';
 import '../events/contract_state_changed_handler.dart';
 import '../events/logged_out_handler.dart';
+import '../events/models/contract_state_changed_event.dart';
+import '../events/models/network_changed_event.dart';
+import '../events/models/permissions_changed_event.dart';
+import '../events/models/transactions_found_event.dart';
 import '../events/network_changed_handler.dart';
 import '../events/permissions_changed_handler.dart';
 import '../events/transactions_found_handler.dart';

@@ -66,17 +66,19 @@ class _CustomPopupMenuState extends State<CustomPopupMenu> {
           ],
         );
 
-    return PortalEntry(
+    return PortalTarget(
       visible: isOpen,
-      portal: GestureDetector(
+      portalFollower: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => setState(() => isOpen = false),
       ),
-      child: PortalEntry(
+      child: PortalTarget(
         visible: isOpen,
-        portalAnchor: widget.portalAnchor,
-        childAnchor: widget.childAnchor,
-        portal: menu(list),
+        anchor: Aligned(
+          follower: widget.portalAnchor,
+          target: widget.childAnchor,
+        ),
+        portalFollower: menu(list),
         child: child(),
       ),
     );

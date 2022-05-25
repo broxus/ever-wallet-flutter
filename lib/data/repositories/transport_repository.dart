@@ -40,15 +40,7 @@ class TransportRepository {
 
     if (prevTransport.connectionData == connectionData) return;
 
-    late final Transport transport;
-
-    if (connectionData.type == TransportType.gql) {
-      transport = await GqlTransport.create(connectionData);
-    } else if (connectionData.type == TransportType.jrpc) {
-      transport = await JrpcTransport.create(connectionData);
-    } else {
-      throw Exception('Invalid connection type');
-    }
+    final transport = await _create(connectionData);
 
     _transportSource.setTransport(transport);
 
@@ -57,21 +49,23 @@ class TransportRepository {
     prevTransport.freePtr();
   }
 
+  Future<Transport> _create(ConnectionData connectionData) async {
+    if (connectionData.type == TransportType.gql) {
+      return GqlTransport.create(connectionData);
+    } else if (connectionData.type == TransportType.jrpc) {
+      return JrpcTransport.create(connectionData);
+    } else {
+      throw Exception('Invalid connection type');
+    }
+  }
+
   Future<void> _initialize() async {
     final currentConnection = kNetworkPresets.firstWhere(
       (e) => e.name == _hiveSource.currentConnection,
       orElse: () => kNetworkPresets.first,
     );
 
-    late final Transport transport;
-
-    if (currentConnection.type == TransportType.gql) {
-      transport = await GqlTransport.create(currentConnection);
-    } else if (currentConnection.type == TransportType.jrpc) {
-      transport = await JrpcTransport.create(currentConnection);
-    } else {
-      throw Exception('Invalid connection type');
-    }
+    final transport = await _create(currentConnection);
 
     _transportSource.setTransport(transport);
   }

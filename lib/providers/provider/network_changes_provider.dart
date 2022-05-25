@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/transport_repository.dart';
+import '../../presentation/main/browser/events/models/network_changed_event.dart';
 
 final networkChangesProvider = StreamProvider.autoDispose<NetworkChangedEvent>(
   (ref) => getIt

@@ -25,7 +25,6 @@ Future<void> showCrystalFlushbar(
     flushbarPosition: flushbarPosition,
     backgroundColor: CrystalColor.primary,
     borderColor: CrystalColor.border,
-    borderWidth: 1,
     margin: const EdgeInsets.symmetric(horizontal: 16) + (margin ?? EdgeInsets.zero),
     duration: const Duration(seconds: 2),
   )..show(context);
@@ -51,7 +50,6 @@ Future<void> showErrorCrystalFlushbar(
     flushbarPosition: flushbarPosition,
     backgroundColor: CrystalColor.primary,
     borderColor: CrystalColor.border,
-    borderWidth: 1,
     margin: const EdgeInsets.symmetric(horizontal: 16) + (margin ?? EdgeInsets.zero),
     duration: const Duration(seconds: 2),
   )..show(context);

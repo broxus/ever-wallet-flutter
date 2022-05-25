@@ -7,7 +7,15 @@ import 'package:validators/validators.dart';
 import 'utils.dart';
 
 extension InAppWebViewControllerX on InAppWebViewController {
-  Future<String?> getOrigin() => getUrl().then((v) => v?.authority);
+  Future<String> getOrigin() async {
+    final url = await getUrl();
+
+    if (url == null) throw Exception('No origin available');
+
+    final origin = url.authority;
+
+    return origin;
+  }
 
   Future<void> goHome() => loadUrl(urlRequest: URLRequest(url: Uri.parse('about:blank')));
 

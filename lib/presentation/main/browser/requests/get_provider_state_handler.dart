@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../../../../../logger.dart';
 import '../../../../../data/constants.dart';
@@ -11,18 +9,19 @@ import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../data/repositories/transport_repository.dart';
 import '../../../../../injection.dart';
 import '../../../../data/extensions.dart';
+import '../../../../data/models/permission.dart';
+import '../../../../data/models/permissions.dart';
 import '../extensions.dart';
+import 'models/get_provider_state_output.dart';
 
-Future<dynamic> getProviderStateHandler({
+Future<Map<String, dynamic>> getProviderStateHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('GetProviderStateRequest', args);
+    logger.d('getProviderState', args);
 
-    final currentOrigin = await controller.getOrigin();
-
-    if (currentOrigin == null) throw Exception();
+    final origin = await controller.getOrigin();
 
     final transport = await getIt.get<TransportRepository>().transport;
 
@@ -30,7 +29,7 @@ Future<dynamic> getProviderStateHandler({
     final numericVersion = kProviderVersion.toInt();
     final selectedConnection = transport.connectionData.name;
     const supportedPermissions = Permission.values;
-    final permissions = getIt.get<PermissionsRepository>().permissions[currentOrigin] ?? const Permissions();
+    final permissions = getIt.get<PermissionsRepository>().permissions[origin] ?? const Permissions();
     final subscriptions = getIt.get<GenericContractsRepository>().subscriptions;
 
     final output = GetProviderStateOutput(
@@ -42,10 +41,11 @@ Future<dynamic> getProviderStateHandler({
       subscriptions: subscriptions,
     );
 
-    final jsonOutput = jsonEncode(output.toJson());
+    final jsonOutput = output.toJson();
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e('getProviderState', err, st);
+    rethrow;
   }
 }

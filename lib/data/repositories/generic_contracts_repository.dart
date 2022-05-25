@@ -9,21 +9,17 @@ import 'package:tuple/tuple.dart';
 import '../../logger.dart';
 import '../constants.dart';
 import '../extensions.dart';
-import '../sources/local/keystore_source.dart';
+import '../models/contract_updates_subscription.dart';
 import '../sources/remote/transport_source.dart';
 
 @lazySingleton
 class GenericContractsRepository {
   final TransportSource _transportSource;
-  final KeystoreSource _keystoreSource;
   final _currentContractSubscriptionsSubject = BehaviorSubject<List<String>>.seeded([]);
   final _genericContractsSubject = BehaviorSubject<List<GenericContract>>.seeded([]);
   final _lock = Lock();
 
-  GenericContractsRepository(
-    this._transportSource,
-    this._keystoreSource,
-  ) {
+  GenericContractsRepository(this._transportSource) {
     Rx.combineLatest3<List<String>, Transport, void, Tuple2<List<String>, Transport>>(
       _currentContractSubscriptionsSubject,
       _transportSource.transportStream,
@@ -59,19 +55,13 @@ class GenericContractsRepository {
 
   Future<Transaction> executeTransactionLocally({
     required String address,
-    required String publicKey,
-    required String password,
-    required UnsignedMessage message,
+    required SignedMessage signedMessage,
     required TransactionExecutionOptions options,
   }) async {
     final genericContract = await _getGenericContract(address);
 
-    final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
-
     final transaction = await genericContract.executeTransactionLocally(
-      keystore: _keystoreSource.keystore,
-      message: message,
-      signInput: signInput,
+      signedMessage: signedMessage,
       options: options,
     );
 
@@ -80,19 +70,11 @@ class GenericContractsRepository {
 
   Future<PendingTransaction> send({
     required String address,
-    required String publicKey,
-    required String password,
-    required UnsignedMessage message,
+    required SignedMessage signedMessage,
   }) async {
     final genericContract = await _getGenericContract(address);
 
-    final signInput = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
-
-    final pendingTransaction = await genericContract.send(
-      keystore: _keystoreSource.keystore,
-      message: message,
-      signInput: signInput,
-    );
+    final pendingTransaction = await genericContract.send(signedMessage);
 
     return pendingTransaction;
   }

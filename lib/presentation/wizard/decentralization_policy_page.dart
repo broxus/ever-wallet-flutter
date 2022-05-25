@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../generated/assets.gen.dart';
 import '../../generated/codegen_loader.g.dart';
@@ -153,5 +153,5 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
         ),
       );
 
-  void onLinkTap() => launch(decentralizationPolicyLink());
+  void onLinkTap() => launchUrlString(decentralizationPolicyLink());
 }

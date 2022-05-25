@@ -8,9 +8,13 @@ const kAddressForEverCurrency = '0:a49cd4e158a9a15555e624759e2e4e766d22600b7800d
 
 const kDefaultWorkchain = 0;
 
-const kProviderVersion = '0.2.26';
+const kProviderVersion = '0.2.31';
 
-const kDefaultMessageExpiration = Expiration.timeout(value: 60);
+const kMessageBounce = false;
+
+const kDefaultMessageExpiration = Expiration.timeout(value: kDefaultMessageTimeout);
+
+const kDefaultMessageTimeout = 60;
 
 const kAvailableWallets = [
   WalletType.multisig(multisigType: MultisigType.safeMultisigWallet),

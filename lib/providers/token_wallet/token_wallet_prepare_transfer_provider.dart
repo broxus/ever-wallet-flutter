@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,13 +17,13 @@ final tokenWalletPrepareTransferProvider =
 );
 
 class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
-  UnsignedMessage? _message;
+  UnsignedMessage? _unsignedMessage;
 
   TokenWalletPrepareTransferNotifier() : super(const AsyncValue.loading());
 
   @override
   void dispose() {
-    _message?.freePtr();
+    _unsignedMessage?.freePtr();
     super.dispose();
   }
 
@@ -38,7 +39,7 @@ class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      _message?.freePtr();
+      _unsignedMessage?.freePtr();
 
       final repackedDestination = repackAddress(destination);
 
@@ -53,7 +54,7 @@ class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2
 
       final amountValue = int.parse(internalMessage.amount);
 
-      final message = await getIt.get<TonWalletsRepository>().prepareTransfer(
+      final unsignedMessage = await getIt.get<TonWalletsRepository>().prepareTransfer(
             address: owner,
             publicKey: publicKey,
             destination: internalMessage.destination,
@@ -61,11 +62,17 @@ class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2
             body: internalMessage.body,
           );
 
-      _message = message;
+      _unsignedMessage = unsignedMessage;
+
+      await unsignedMessage.refreshTimeout();
+
+      final signature = base64.encode(List.generate(kSignatureLength, (_) => 0));
+
+      final signedMessage = await unsignedMessage.sign(signature);
 
       final fees = await getIt.get<TonWalletsRepository>().estimateFees(
             address: owner,
-            message: message,
+            signedMessage: signedMessage,
           );
       final feesValue = int.parse(fees);
 
@@ -76,7 +83,7 @@ class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2
 
       if (!isPossibleToSendMessage) throw Exception(LocaleKeys.insufficient_funds.tr());
 
-      return Tuple2(message, fees);
+      return Tuple2(unsignedMessage, fees);
     });
   }
 }

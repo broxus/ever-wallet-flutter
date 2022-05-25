@@ -42,7 +42,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendResultPage> {
     super.initState();
     ref.read(tonWalletSendProvider.notifier).send(
           address: widget.address,
-          message: widget.message,
+          unsignedMessage: widget.message,
           publicKey: widget.publicKey,
           password: widget.password,
         );

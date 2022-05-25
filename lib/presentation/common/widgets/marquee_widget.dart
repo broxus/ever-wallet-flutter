@@ -27,7 +27,7 @@ class _MarqueeWidgetState extends State<MarqueeWidget> {
   void initState() {
     super.initState();
     scrollController = ScrollController();
-    WidgetsBinding.instance?.addPostFrameCallback(scroll);
+    WidgetsBinding.instance.addPostFrameCallback(scroll);
   }
 
   @override

@@ -37,79 +37,91 @@ class AccountsStorageSource {
 
   set currentAccounts(List<AssetsList> accounts) => _currentAccountsSubject.add(accounts);
 
-  Future<AssetsList> addAccount({
-    required String name,
-    required String publicKey,
-    required WalletType walletType,
-    required int workchain,
-  }) async {
-    final account = await _accountsStorage.addAccount(
-      name: name,
-      publicKey: publicKey,
-      walletType: walletType,
-      workchain: workchain,
-    );
+  Future<AssetsList> addAccount(AccountToAdd newAccount) async {
+    final account = await _accountsStorage.addAccount(newAccount);
 
     _accountsSubject.add(await _accountsStorage.accounts);
 
     return account;
+  }
+
+  Future<List<AssetsList>> addAccounts(List<AccountToAdd> newAccounts) async {
+    final accounts = await _accountsStorage.addAccounts(newAccounts);
+
+    _accountsSubject.add(await _accountsStorage.accounts);
+
+    return accounts;
   }
 
   Future<AssetsList> renameAccount({
-    required String address,
+    required String account,
     required String name,
   }) async {
-    final account = await _accountsStorage.renameAccount(
-      address: address,
+    final renamedAccount = await _accountsStorage.renameAccount(
+      account: account,
       name: name,
     );
 
     _accountsSubject.add(await _accountsStorage.accounts);
 
-    return account;
-  }
-
-  Future<AssetsList?> removeAccount(String address) async {
-    final account = await _accountsStorage.removeAccount(address);
-
-    _accountsSubject.add(await _accountsStorage.accounts);
-
-    return account;
+    return renamedAccount;
   }
 
   Future<AssetsList> addTokenWallet({
-    required String address,
-    required String rootTokenContract,
+    required String account,
     required String networkGroup,
+    required String rootTokenContract,
   }) async {
-    final account = await _accountsStorage.addTokenWallet(
-      address: address,
+    final updatedAccount = await _accountsStorage.addTokenWallet(
+      account: account,
       rootTokenContract: rootTokenContract,
       networkGroup: networkGroup,
     );
 
     _accountsSubject.add(await _accountsStorage.accounts);
 
-    return account;
+    return updatedAccount;
   }
 
   Future<AssetsList> removeTokenWallet({
-    required String address,
-    required String rootTokenContract,
+    required String account,
     required String networkGroup,
+    required String rootTokenContract,
   }) async {
-    final account = await _accountsStorage.removeTokenWallet(
-      address: address,
+    final updatedAccount = await _accountsStorage.removeTokenWallet(
+      account: account,
       rootTokenContract: rootTokenContract,
       networkGroup: networkGroup,
     );
 
     _accountsSubject.add(await _accountsStorage.accounts);
 
-    return account;
+    return updatedAccount;
+  }
+
+  Future<AssetsList?> removeAccount(String account) async {
+    final removedAccount = await _accountsStorage.removeAccount(account);
+
+    _accountsSubject.add(await _accountsStorage.accounts);
+
+    return removedAccount;
+  }
+
+  Future<List<AssetsList>> removeAccounts(List<String> accounts) async {
+    final removedAccounts = await _accountsStorage.removeAccounts(accounts);
+
+    _accountsSubject.add(await _accountsStorage.accounts);
+
+    return removedAccounts;
   }
 
   Future<void> clear() async {
+    await _accountsStorage.clear();
+
+    _accountsSubject.add(await _accountsStorage.accounts);
+  }
+
+  Future<void> reload() async {
     await _accountsStorage.clear();
 
     _accountsSubject.add(await _accountsStorage.accounts);

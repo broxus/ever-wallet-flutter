@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../../../providers/key/keys_provider.dart';
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
@@ -480,7 +480,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
       );
 
   Widget explorerButton(String hash) => CustomOutlinedButton(
-        onPressed: () => launch(transactionExplorerLink(hash)),
+        onPressed: () => launchUrlString(transactionExplorerLink(hash)),
         text: LocaleKeys.see_in_the_explorer.tr(),
       );
 

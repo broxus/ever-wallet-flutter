@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../injection.dart';
 import '../../../logger.dart';
 import '../../data/repositories/generic_contracts_repository.dart';
+import '../../presentation/main/browser/events/models/transactions_found_event.dart';
 
 final genericContractsTransactionsProvider = StreamProvider.autoDispose<TransactionsFoundEvent>(
   (ref) => getIt

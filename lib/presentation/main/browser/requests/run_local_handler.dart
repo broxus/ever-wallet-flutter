@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -9,50 +8,47 @@ import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../data/repositories/transport_repository.dart';
 import '../../../../../injection.dart';
 import '../extensions.dart';
+import 'models/run_local_input.dart';
 
-Future<dynamic> runLocalHandler({
+Future<Map<String, dynamic>> runLocalHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('RunLocalRequest', args);
+    logger.d('runLocal', args);
 
     final jsonInput = args.first as Map<String, dynamic>;
-
     final input = RunLocalInput.fromJson(jsonInput);
 
-    final currentOrigin = await controller.getOrigin();
+    final origin = await controller.getOrigin();
 
-    if (currentOrigin == null) throw Exception();
+    final existingPermissions = getIt.get<PermissionsRepository>().permissions[origin];
+
+    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
     final transport = await getIt.get<TransportRepository>().transport;
 
-    await getIt.get<PermissionsRepository>().checkPermissions(
-      origin: currentOrigin,
-      requiredPermissions: [Permission.basic],
-    );
+    final contractState = input.cachedState ?? await transport.getFullContractState(input.address);
 
-    FullContractState? contractState = input.cachedState;
+    if (contractState == null) throw Exception('Account not found');
 
-    if (input.cachedState == null) {
-      contractState = await transport.getFullAccountState(address: input.address);
+    if (!contractState.isDeployed || contractState.lastTransactionId == null) {
+      throw Exception('Account is not deployed');
     }
 
-    if (contractState == null) throw Exception();
-
-    if (!contractState.isDeployed) throw Exception();
-
-    final output = runLocal(
+    final executionOutput = runLocal(
       accountStuffBoc: contractState.boc,
       contractAbi: input.functionCall.abi,
       method: input.functionCall.method,
       input: input.functionCall.params,
+      responsible: input.responsible ?? false,
     );
 
-    final jsonOutput = jsonEncode(output.toJson());
+    final jsonOutput = executionOutput.toJson();
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e('runLocal', err, st);
+    rethrow;
   }
 }

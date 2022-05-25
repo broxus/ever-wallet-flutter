@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../data/models/permission.dart';
 import '../../../../generated/codegen_loader.g.dart';
 import '../../../../providers/account/accounts_provider.dart';
 import '../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
@@ -14,7 +15,7 @@ import '../../../common/widgets/custom_elevated_button.dart';
 import '../../../common/widgets/custom_outlined_button.dart';
 import '../../../common/widgets/custom_radio.dart';
 import '../../../common/widgets/modal_header.dart';
-import 'grant_permissions_page.dart';
+import '../common/grant_permissions_page.dart';
 import 'request_permissions_modal_logic.dart.dart';
 
 class RequestPermissionsPage extends ConsumerStatefulWidget {
@@ -38,7 +39,7 @@ class _RequestPermissionsModalState extends ConsumerState<RequestPermissionsPage
   void initState() {
     super.initState();
     ref.read(accountsProvider).whenData(
-          (value) => WidgetsBinding.instance?.addPostFrameCallback(
+          (value) => WidgetsBinding.instance.addPostFrameCallback(
             (_) => ref.read(selectedAccountProvider.notifier).state = value.firstOrNull,
           ),
         );

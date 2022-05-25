@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../../../data/repositories/accounts_repository.dart';
 import '../../../../../../injection.dart';
@@ -118,7 +118,7 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
       );
 
   Widget explorerButton() => CustomOutlinedButton(
-        onPressed: () => launch(accountExplorerLink(widget.address)),
+        onPressed: () => launchUrlString(accountExplorerLink(widget.address)),
         text: LocaleKeys.see_in_the_explorer.tr(),
       );
 }
