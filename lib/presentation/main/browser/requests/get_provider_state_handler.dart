@@ -27,7 +27,7 @@ Future<Map<String, dynamic>> getProviderStateHandler({
 
     const version = kProviderVersion;
     final numericVersion = kProviderVersion.toInt();
-    final selectedConnection = transport.connectionData.name;
+    final selectedConnection = transport.connectionData.group;
     const supportedPermissions = Permission.values;
     final permissions = getIt.get<PermissionsRepository>().permissions[origin] ?? const Permissions();
     final subscriptions = getIt.get<GenericContractsRepository>().subscriptions;
