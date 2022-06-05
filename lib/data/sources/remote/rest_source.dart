@@ -12,7 +12,7 @@ class RestSource {
 
   String _tonAssetsManifestRoute() => 'https://raw.githubusercontent.com/broxus/ton-assets/master/manifest.json';
 
-  String _currenciesRoute(String address) => 'https://ton-swap-indexer.broxus.com/v1/currencies/$address';
+  String _currenciesRoute(String address) => 'https://api.flatqube.io/v1/currencies/$address';
 
   Future<TonAssetsManifest> getTonAssetsManifest() async {
     final response = await _dio.get<String>(_tonAssetsManifestRoute());
