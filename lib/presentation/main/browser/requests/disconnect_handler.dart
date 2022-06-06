@@ -6,6 +6,9 @@ import '../../../../../../../../logger.dart';
 import '../../../../../data/repositories/generic_contracts_repository.dart';
 import '../../../../../data/repositories/permissions_repository.dart';
 import '../../../../../injection.dart';
+import '../../../../data/models/permissions.dart';
+import '../events/models/permissions_changed_event.dart';
+import '../events/permissions_changed_handler.dart';
 import '../extensions.dart';
 
 Future<Map<String, dynamic>> disconnectHandler({
@@ -19,6 +22,13 @@ Future<Map<String, dynamic>> disconnectHandler({
 
     await getIt.get<PermissionsRepository>().deletePermissionsForOrigin(origin);
     getIt.get<GenericContractsRepository>().clear();
+
+    const event = PermissionsChangedEvent(permissions: Permissions());
+
+    await permissionsChangedHandler(
+      controller: controller,
+      event: event,
+    );
 
     final jsonOutput = <String, dynamic>{};
 
