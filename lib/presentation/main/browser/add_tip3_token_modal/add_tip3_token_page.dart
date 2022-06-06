@@ -1,10 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/widgets/custom_elevated_button.dart';
 import '../../../common/widgets/custom_outlined_button.dart';
 import '../../../common/widgets/modal_header.dart';
@@ -39,7 +38,7 @@ class _RequestPermissionsModalState extends ConsumerState<AddTip3TokenPage> {
             child: Column(
               children: [
                 ModalHeader(
-                  text: LocaleKeys.add_asset.tr(),
+                  text: AppLocalizations.of(context)!.add_asset,
                   onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                 ),
                 const SizedBox(height: 16),
@@ -71,49 +70,49 @@ class _RequestPermissionsModalState extends ConsumerState<AddTip3TokenPage> {
       );
 
   Widget origin() => SectionedCardSection(
-        title: LocaleKeys.origin.tr(),
+        title: AppLocalizations.of(context)!.origin,
         subtitle: widget.origin,
         isSelectable: true,
       );
 
   Widget account() => SectionedCardSection(
-        title: LocaleKeys.account.tr(),
+        title: AppLocalizations.of(context)!.account,
         subtitle: widget.account,
         isSelectable: true,
       );
 
   Widget version() => SectionedCardSection(
-        title: LocaleKeys.version.tr(),
+        title: AppLocalizations.of(context)!.version,
         subtitle: describeEnum(widget.details.version),
         isSelectable: true,
       );
 
   Widget name() => SectionedCardSection(
-        title: LocaleKeys.name.tr(),
+        title: AppLocalizations.of(context)!.name,
         subtitle: widget.details.name,
         isSelectable: true,
       );
 
   Widget symbol() => SectionedCardSection(
-        title: LocaleKeys.symbol.tr(),
+        title: AppLocalizations.of(context)!.symbol,
         subtitle: widget.details.symbol,
         isSelectable: true,
       );
 
   Widget decimals() => SectionedCardSection(
-        title: LocaleKeys.decimals.tr(),
+        title: AppLocalizations.of(context)!.decimals,
         subtitle: widget.details.decimals.toString(),
         isSelectable: true,
       );
 
   Widget ownerAddress() => SectionedCardSection(
-        title: LocaleKeys.owner_address.tr(),
+        title: AppLocalizations.of(context)!.owner_address,
         subtitle: widget.details.ownerAddress,
         isSelectable: true,
       );
 
   Widget totalSupply() => SectionedCardSection(
-        title: LocaleKeys.total_supply.tr(),
+        title: AppLocalizations.of(context)!.total_supply,
         subtitle: widget.details.totalSupply,
         isSelectable: true,
       );
@@ -133,11 +132,11 @@ class _RequestPermissionsModalState extends ConsumerState<AddTip3TokenPage> {
 
   Widget rejectButton() => CustomOutlinedButton(
         onPressed: () => Navigator.of(widget.modalContext).pop(),
-        text: LocaleKeys.reject.tr(),
+        text: AppLocalizations.of(context)!.reject,
       );
 
   Widget submitButton() => CustomElevatedButton(
         onPressed: () => Navigator.of(widget.modalContext).pop(true),
-        text: LocaleKeys.submit.tr(),
+        text: AppLocalizations.of(context)!.submit,
       );
 }

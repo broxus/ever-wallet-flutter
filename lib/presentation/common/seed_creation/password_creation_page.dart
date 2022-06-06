@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:validators/validators.dart';
 
@@ -12,7 +12,6 @@ import '../../../../injection.dart';
 import '../../../../providers/biometry/biometry_availability_provider.dart';
 import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../data/extensions.dart';
-import '../../../generated/codegen_loader.g.dart';
 import '../../router.gr.dart';
 import '../theme.dart';
 import '../widgets/crystal_flushbar.dart';
@@ -107,11 +106,11 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.create_password.tr(),
+        text: AppLocalizations.of(context)!.create_password,
       );
 
   Widget subtitle() => CrystalSubtitle(
-        text: LocaleKeys.create_password_description.tr(),
+        text: AppLocalizations.of(context)!.create_password_description,
       );
 
   Widget fields() => Form(
@@ -140,9 +139,9 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
     }
 
     if (!isLength(passwordController.text, 8)) {
-      text = LocaleKeys.password_length.tr();
+      text = AppLocalizations.of(context)!.password_length;
     } else if (repeatController.text.isNotEmpty && passwordController.text != repeatController.text) {
-      text = LocaleKeys.passwords_match.tr();
+      text = AppLocalizations.of(context)!.passwords_match;
     }
 
     if (passwordController.text.isEmpty && repeatController.text.isEmpty) {
@@ -153,14 +152,14 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
   }
 
   Widget passwordField() => CustomTextFormField(
-        name: LocaleKeys.password.tr(),
+        name: AppLocalizations.of(context)!.password,
         controller: passwordController,
         focusNode: passwordFocusNode,
         autocorrect: false,
         enableSuggestions: false,
         obscureText: true,
         textInputAction: TextInputAction.next,
-        hintText: LocaleKeys.your_password.tr(),
+        hintText: AppLocalizations.of(context)!.your_password,
         suffixIcon: TextFieldClearButton(
           controller: passwordController,
         ),
@@ -178,14 +177,14 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
       );
 
   Widget repeatField() => CustomTextFormField(
-        name: LocaleKeys.repeat.tr(),
+        name: AppLocalizations.of(context)!.repeat,
         controller: repeatController,
         focusNode: repeatFocusNode,
         autocorrect: false,
         enableSuggestions: false,
         obscureText: true,
         textInputAction: TextInputAction.done,
-        hintText: LocaleKeys.confirm_password.tr(),
+        hintText: AppLocalizations.of(context)!.confirm_password,
         suffixIcon: TextFieldClearButton(
           controller: repeatController,
         ),
@@ -240,12 +239,12 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
                         CustomCheckbox(
                           value: isEnabled,
                           onChanged: (value) => getIt.get<BiometryRepository>().setStatus(
-                                localizedReason: LocaleKeys.authentication_reason.tr(),
+                                localizedReason: AppLocalizations.of(context)!.authentication_reason,
                                 isEnabled: !isEnabled,
                               ),
                         ),
                         Expanded(
-                          child: Text(LocaleKeys.enable_biometry.tr()),
+                          child: Text(AppLocalizations.of(context)!.enable_biometry),
                         ),
                       ],
                     ),
@@ -258,7 +257,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value != null ? null : onSubmitButtonPressed,
-          text: LocaleKeys.confirm.tr(),
+          text: AppLocalizations.of(context)!.confirm,
         ),
       );
 

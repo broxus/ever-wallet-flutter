@@ -1,13 +1,12 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:validators/validators.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../../data/repositories/keys_repository.dart';
 import '../../../../../injection.dart';
 import '../../../../data/repositories/keys_repository.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../logger.dart';
 import '../../../data/extensions.dart';
 import '../../common/theme.dart';
@@ -55,9 +54,9 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
           String? text;
 
           if (incorrectPasswordNotifier.value) {
-            text = LocaleKeys.incorrect_password.tr();
+            text = AppLocalizations.of(context)!.incorrect_password;
           } else if (newPasswordController.text.isNotEmpty && !isLength(newPasswordController.text, 8)) {
-            text = LocaleKeys.password_length.tr();
+            text = AppLocalizations.of(context)!.password_length;
           }
 
           validationNotifier.value = text;
@@ -70,7 +69,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
             buildTextField(
               controller: oldPasswordController,
               autofocus: true,
-              hint: LocaleKeys.old_password.tr(),
+              hint: AppLocalizations.of(context)!.old_password,
               inputAction: TextInputAction.next,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -87,7 +86,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
             buildTextField(
               controller: newPasswordController,
               autofocus: false,
-              hint: LocaleKeys.new_password.tr(),
+              hint: AppLocalizations.of(context)!.new_password,
               inputAction: TextInputAction.done,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -129,7 +128,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
                       await showCrystalFlushbar(
                         context,
-                        message: LocaleKeys.password_changed.tr(),
+                        message: AppLocalizations.of(context)!.password_changed,
                       );
                     } catch (err, st) {
                       logger.e(err, err, st);
@@ -151,15 +150,15 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
                   String? text;
 
                   if (incorrectPasswordNotifier.value) {
-                    text = LocaleKeys.incorrect_password.tr();
+                    text = AppLocalizations.of(context)!.incorrect_password;
                   } else if (newPasswordController.text.isNotEmpty && !isLength(newPasswordController.text, 8)) {
-                    text = LocaleKeys.password_length.tr();
+                    text = AppLocalizations.of(context)!.password_length;
                   }
 
                   validationNotifier.value = text;
                 }
               },
-              text: LocaleKeys.submit.tr(),
+              text: AppLocalizations.of(context)!.submit,
             ),
           ],
         ),

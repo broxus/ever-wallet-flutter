@@ -1,9 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/widgets/address_card.dart';
 import '../../../../common/widgets/crystal_flushbar.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
@@ -33,7 +32,7 @@ class _ReceiveModalBodyState extends State<ReceiveModalBody> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ModalHeader(
-                  text: LocaleKeys.address_receive_funds.tr(),
+                  text: AppLocalizations.of(context)!.address_receive_funds,
                 ),
                 const SizedBox(height: 16),
                 card(),
@@ -51,7 +50,7 @@ class _ReceiveModalBodyState extends State<ReceiveModalBody> {
 
   Widget copyButton() => CustomElevatedButton(
         onPressed: onCopyPressed,
-        text: LocaleKeys.copy_address.tr(),
+        text: AppLocalizations.of(context)!.copy_address,
       );
 
   Future<void> onCopyPressed() async {
@@ -61,18 +60,14 @@ class _ReceiveModalBodyState extends State<ReceiveModalBody> {
 
     showCrystalFlushbar(
       context,
-      message: LocaleKeys.copied.tr(),
+      message: AppLocalizations.of(context)!.copied,
     );
   }
 
   Widget shareButton() => CustomOutlinedButton(
         onPressed: onSharePressed,
-        text: LocaleKeys.share.tr(),
+        text: AppLocalizations.of(context)!.share,
       );
 
-  Future<void> onSharePressed() => Share.share(
-        LocaleKeys.share_wallet_address.tr(
-          args: [widget.address],
-        ),
-      );
+  Future<void> onSharePressed() => Share.share(AppLocalizations.of(context)!.share_wallet_address(widget.address));
 }

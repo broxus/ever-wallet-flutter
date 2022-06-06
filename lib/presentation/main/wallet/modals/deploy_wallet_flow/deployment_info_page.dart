@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -11,7 +11,6 @@ import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_prepare_deploy_provider.dart';
 import '../../../../../data/extensions.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/crystal_subtitle.dart';
@@ -59,7 +58,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
         appBar: AppBar(
           leading: const CustomBackButton(),
           title: Text(
-            LocaleKeys.deploy_wallet.tr(),
+            AppLocalizations.of(context)!.deploy_wallet,
             style: const TextStyle(
               color: Colors.black,
             ),
@@ -102,7 +101,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
       );
 
   Widget subtitle() => CrystalSubtitle(
-        text: LocaleKeys.funds_to_deploy.tr(),
+        text: AppLocalizations.of(context)!.funds_to_deploy,
       );
 
   Widget card() => SectionedCard(
@@ -119,7 +118,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
           return SectionedCardSection(
-            title: LocaleKeys.account_balance.tr(),
+            title: AppLocalizations.of(context)!.account_balance,
             subtitle: '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes()} $kEverTicker',
           );
         },
@@ -141,7 +140,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
           );
 
           return SectionedCardSection(
-            title: LocaleKeys.blockchain_fee.tr(),
+            title: AppLocalizations.of(context)!.blockchain_fee,
             subtitle: subtitle,
             hasError: hasError,
           );
@@ -153,7 +152,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
       .entries
       .map(
         (e) => SectionedCardSection(
-          title: LocaleKeys.custodian_n.tr(args: ['${e.key + 1}']),
+          title: AppLocalizations.of(context)!.custodian_n('${e.key + 1}'),
           subtitle: e.value,
           isSelectable: true,
         ),
@@ -161,8 +160,11 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
       .toList();
 
   Widget reqConfirms() => SectionedCardSection(
-        title: LocaleKeys.required_confirms.tr(),
-        subtitle: LocaleKeys.n_of_k.tr(args: [(widget.reqConfirms!.toString()), '${widget.custodians!.length}']),
+        title: AppLocalizations.of(context)!.required_confirms,
+        subtitle: AppLocalizations.of(context)!.n_of_k(
+          widget.reqConfirms!.toString(),
+          '${widget.custodians!.length}',
+        ),
       );
 
   Widget submitButton() => Consumer(
@@ -177,7 +179,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
                       publicKey: widget.publicKey,
                     )
                 : null,
-            text: LocaleKeys.deploy.tr(),
+            text: AppLocalizations.of(context)!.deploy,
           );
         },
       );
@@ -224,7 +226,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
   Future<String?> getPasswordFromBiometry(String publicKey) async {
     try {
       final password = await getIt.get<BiometryRepository>().getKeyPassword(
-            localizedReason: LocaleKeys.authentication_reason.tr(),
+            localizedReason: AppLocalizations.of(context)!.authentication_reason,
             publicKey: publicKey,
           );
 
@@ -247,8 +249,8 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
             message: message,
             publicKey: publicKey,
             password: password,
-            sendingText: '${LocaleKeys.deploying.tr()}...',
-            successText: LocaleKeys.wallet_deployed.tr(),
+            sendingText: '${AppLocalizations.of(context)!.deploying}...',
+            successText: AppLocalizations.of(context)!.wallet_deployed,
           ),
         ),
         (_) => false,

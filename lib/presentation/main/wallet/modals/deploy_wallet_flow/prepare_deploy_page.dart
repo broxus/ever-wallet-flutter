@@ -1,14 +1,13 @@
 import 'dart:async';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:tuple/tuple.dart';
 import 'package:validators/validators.dart';
 
 import '../../../../../generated/assets.gen.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/custom_dropdown_button.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
@@ -89,7 +88,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
               Column(
                 children: [
                   ModalHeader(
-                    text: LocaleKeys.select_wallet_type.tr(),
+                    text: AppLocalizations.of(context)!.select_wallet_type,
                     onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                   ),
                   const SizedBox(height: 16),
@@ -127,7 +126,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
   Widget dropdownButton() => ValueListenableBuilder<_WalletCreationOptions>(
         valueListenable: optionNotifier,
         builder: (context, value, child) => CustomDropdownButton<_WalletCreationOptions>(
-          items: _WalletCreationOptions.values.map((e) => Tuple2(e, e.describe())).toList(),
+          items: _WalletCreationOptions.values.map((e) => Tuple2(e, e.describe(context))).toList(),
           value: value,
           onChanged: (value) {
             if (value != null) {
@@ -149,11 +148,11 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        fieldHeader(LocaleKeys.transaction_required_confirms.tr()),
+                        fieldHeader(AppLocalizations.of(context)!.transaction_required_confirms),
                         const SizedBox(height: 8),
                         countField(),
                         const SizedBox(height: 16),
-                        sectionTitle(LocaleKeys.custodians.tr()),
+                        sectionTitle(AppLocalizations.of(context)!.custodians),
                         const SizedBox(height: 16),
                         list(),
                         addButton(),
@@ -196,18 +195,18 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
   Widget countField() => ValueListenableBuilder<int>(
         valueListenable: custodiansNotifier,
         builder: (context, custodiansValue, child) => CustomTextFormField(
-          name: LocaleKeys.count.tr(),
+          name: AppLocalizations.of(context)!.count,
           controller: countController,
           focusNode: countFocusNode,
           keyboardType: const TextInputType.numberWithOptions(signed: true),
           textInputAction: TextInputAction.next,
           autocorrect: false,
           enableSuggestions: false,
-          hintText: '${LocaleKeys.enter_number.tr()}...',
+          hintText: '${AppLocalizations.of(context)!.enter_number}...',
           suffixIcon: Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              LocaleKeys.out_of_n_custodians.tr(args: ['$custodiansValue']),
+              AppLocalizations.of(context)!.out_of_n_custodians('$custodiansValue'),
               style: const TextStyle(
                 color: Colors.black,
               ),
@@ -226,11 +225,11 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
             final number = int.tryParse(value);
 
             if (number == null) {
-              return LocaleKeys.invalid_value.tr();
+              return AppLocalizations.of(context)!.invalid_value;
             }
 
             if (number < 1 || number > custodiansValue) {
-              return LocaleKeys.invalid_value.tr();
+              return AppLocalizations.of(context)!.invalid_value;
             }
             return null;
           },
@@ -258,16 +257,16 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          fieldHeader(LocaleKeys.public_key_of_custodian_n.tr(args: ['${index + 1}'])),
+          fieldHeader(AppLocalizations.of(context)!.public_key_of_custodian_n('${index + 1}')),
           const SizedBox(height: 8),
           CustomTextFormField(
-            name: LocaleKeys.custodian_n.tr(args: ['${index + 1}']),
+            name: AppLocalizations.of(context)!.custodian_n('${index + 1}'),
             controller: controllers[index],
             focusNode: focusNodes[index],
             textInputAction: index != custodians - 1 ? TextInputAction.next : TextInputAction.done,
             autocorrect: false,
             enableSuggestions: false,
-            hintText: '${LocaleKeys.enter_public_key.tr()}...',
+            hintText: '${AppLocalizations.of(context)!.enter_public_key}...',
             suffixIcon: suffixIcons(index),
             onSubmitted: (value) {
               if (index != custodians - 1) {
@@ -284,11 +283,11 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
               }
 
               if (!isAlphanumeric(value)) {
-                return LocaleKeys.invalid_value.tr();
+                return AppLocalizations.of(context)!.invalid_value;
               }
 
               if (value.length != 64) {
-                return LocaleKeys.invalid_value.tr();
+                return AppLocalizations.of(context)!.invalid_value;
               }
               return null;
             },
@@ -335,7 +334,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
                   const SizedBox(height: 16),
                   CustomTextButton(
                     onPressed: addCustodian,
-                    text: LocaleKeys.add_public_key.tr(),
+                    text: AppLocalizations.of(context)!.add_public_key,
                     style: const TextStyle(
                       color: CrystalColor.accent,
                     ),
@@ -375,12 +374,12 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
                             );
                           }
                         : null,
-                    text: LocaleKeys.next.tr(),
+                    text: AppLocalizations.of(context)!.next,
                   ),
                 )
               : CustomElevatedButton(
                   onPressed: onPressed,
-                  text: LocaleKeys.next.tr(),
+                  text: AppLocalizations.of(context)!.next,
                 ),
         ),
       );
@@ -408,12 +407,12 @@ enum _WalletCreationOptions {
 }
 
 extension on _WalletCreationOptions {
-  String describe() {
+  String describe(BuildContext context) {
     switch (this) {
       case _WalletCreationOptions.standard:
-        return LocaleKeys.standard_wallet.tr();
+        return AppLocalizations.of(context)!.standard_wallet;
       case _WalletCreationOptions.multisignature:
-        return LocaleKeys.multisignature_wallet.tr();
+        return AppLocalizations.of(context)!.multisignature_wallet;
     }
   }
 }

@@ -1,9 +1,8 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
@@ -155,7 +154,7 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   TransactionTypeLabel(
-                    text: LocaleKeys.waiting_for_confirmation.tr(),
+                    text: AppLocalizations.of(context)!.waiting_for_confirmation,
                     color: CrystalColor.error,
                   ),
                   const SizedBox(height: 4),

@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -10,7 +10,6 @@ import '../../../../../../providers/biometry/biometry_availability_provider.dart
 import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_prepare_transfer_provider.dart';
 import '../../../../../data/extensions.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/custom_back_button.dart';
@@ -61,7 +60,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendInfoPage> {
         appBar: AppBar(
           leading: const CustomBackButton(),
           title: Text(
-            LocaleKeys.confirm_transaction.tr(),
+            AppLocalizations.of(context)!.confirm_transaction,
             style: const TextStyle(
               color: Colors.black,
             ),
@@ -111,13 +110,13 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendInfoPage> {
       );
 
   Widget recipient() => SectionedCardSection(
-        title: LocaleKeys.recipient.tr(),
+        title: AppLocalizations.of(context)!.recipient,
         subtitle: widget.destination,
         isSelectable: true,
       );
 
   Widget amount() => SectionedCardSection(
-        title: LocaleKeys.amount.tr(),
+        title: AppLocalizations.of(context)!.amount,
         subtitle: '${widget.amount.toTokens().removeZeroes()} $kEverTicker',
       );
 
@@ -137,7 +136,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendInfoPage> {
           );
 
           return SectionedCardSection(
-            title: LocaleKeys.blockchain_fee.tr(),
+            title: AppLocalizations.of(context)!.blockchain_fee,
             subtitle: subtitle,
             hasError: hasError,
           );
@@ -145,7 +144,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendInfoPage> {
       );
 
   Widget comment() => SectionedCardSection(
-        title: LocaleKeys.comment.tr(),
+        title: AppLocalizations.of(context)!.comment,
         subtitle: widget.comment,
       );
 
@@ -161,7 +160,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendInfoPage> {
                       publicKey: widget.publicKey,
                     )
                 : null,
-            text: LocaleKeys.send.tr(),
+            text: AppLocalizations.of(context)!.send,
           );
         },
       );
@@ -208,7 +207,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendInfoPage> {
   Future<String?> getPasswordFromBiometry(String publicKey) async {
     try {
       final password = await getIt.get<BiometryRepository>().getKeyPassword(
-            localizedReason: LocaleKeys.authentication_reason.tr(),
+            localizedReason: AppLocalizations.of(context)!.authentication_reason,
             publicKey: publicKey,
           );
 
@@ -231,8 +230,8 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendInfoPage> {
             message: message,
             publicKey: publicKey,
             password: password,
-            sendingText: LocaleKeys.message_sending.tr(),
-            successText: LocaleKeys.message_sent.tr(),
+            sendingText: AppLocalizations.of(context)!.message_sending,
+            successText: AppLocalizations.of(context)!.message_sent,
           ),
         ),
         (_) => false,

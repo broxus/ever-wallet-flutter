@@ -1,8 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/widgets/crystal_subtitle.dart';
 import '../../../../common/widgets/custom_back_button.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
@@ -41,7 +40,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
           appBar: AppBar(
             leading: const CustomBackButton(),
             title: Text(
-              LocaleKeys.new_account_name.tr(),
+              AppLocalizations.of(context)!.new_account_name,
               style: const TextStyle(
                 color: Colors.black,
               ),
@@ -78,15 +77,15 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
       );
 
   Widget subtitle() => CrystalSubtitle(
-        text: LocaleKeys.new_account_description.tr(),
+        text: AppLocalizations.of(context)!.new_account_description,
       );
 
   Widget field() => CustomTextFormField(
-        name: LocaleKeys.name.tr(),
+        name: AppLocalizations.of(context)!.name,
         controller: controller,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: '${LocaleKeys.name.tr()}...',
+        hintText: '${AppLocalizations.of(context)!.name}...',
         suffixIcon: TextFieldClearButton(
           controller: controller,
         ),
@@ -94,7 +93,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
 
   Widget submitButton() => CustomElevatedButton(
         onPressed: onPressed,
-        text: LocaleKeys.next.tr(),
+        text: AppLocalizations.of(context)!.next,
       );
 
   Future<void> onPressed() async {

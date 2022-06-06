@@ -1,11 +1,10 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/custom_popup_item.dart';
@@ -49,7 +48,7 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
                   child: Column(
                     children: [
                       ModalHeader(
-                        text: LocaleKeys.custodians.tr(),
+                        text: AppLocalizations.of(context)!.custodians,
                       ),
                       const SizedBox(height: 16),
                       Expanded(
@@ -73,7 +72,7 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
         itemBuilder: (context, index) => custodians
             .map(
               (e) => item(
-                title: e.item1 ?? LocaleKeys.custodian_n.tr(args: ['${index + 1}']),
+                title: e.item1 ?? AppLocalizations.of(context)!.custodian_n('${index + 1}'),
                 publicKey: e.item2,
               ),
             )
@@ -108,7 +107,7 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
         items: [
           CustomPopupItem(
             title: Text(
-              LocaleKeys.edit.tr(),
+              AppLocalizations.of(context)!.edit,
               style: const TextStyle(fontSize: 16),
             ),
             onTap: () => showEditCustodianLabelDialog(

@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
@@ -8,7 +8,6 @@ import '../../../../../../data/extensions.dart';
 import '../../../../../../data/repositories/accounts_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../../providers/account/account_creation_options_provider.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/custom_back_button.dart';
@@ -55,7 +54,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<AddNewAccountTypePage>
           appBar: AppBar(
             leading: const CustomBackButton(),
             title: Text(
-              LocaleKeys.new_account_type.tr(),
+              AppLocalizations.of(context)!.new_account_type,
               style: const TextStyle(
                 color: Colors.black,
               ),
@@ -131,7 +130,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<AddNewAccountTypePage>
         valueListenable: optionNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value != null ? () => onPressed(value) : null,
-          text: LocaleKeys.confirm.tr(),
+          text: AppLocalizations.of(context)!.confirm,
         ),
       );
 

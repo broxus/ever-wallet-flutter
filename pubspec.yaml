@@ -15,21 +15,25 @@ dependencies:
   auto_route: ^4.0.1
   auto_size_text: ^3.0.0
   back_button_interceptor: ^6.0.0
+  bloc: ^8.0.3
   change_notifier_builder: ^1.1.2
   collection: ^1.16.0
+  country_icons: ^2.0.2
   cupertino_icons: ^1.0.4
   dio: ^4.0.6
   dropdown_button2: ^1.5.2
   duration: ^3.0.11
-  easy_localization: ^3.0.1
   expand_tap_area: ^1.1.0
   fading_edge_scrollview: ^2.0.1
   flutter:
     sdk: flutter
+  flutter_bloc: ^8.0.1
   flutter_dotenv: ^5.0.2
   flutter_form_builder: ^7.2.1
   flutter_inappwebview: ^5.4.3+7
   flutter_link_previewer: ^2.6.6
+  flutter_localizations:
+    sdk: flutter
   flutter_platform_widgets: ^1.20.0
   flutter_portal: ^1.1.0
   flutter_riverpod: ^1.0.4
@@ -102,12 +106,13 @@ flutter_gen:
 flutter:
   uses-material-design: true
 
+  generate: true
+
   assets:
     - .env
     - assets/fonts/
     - assets/images/
     - assets/animations/
-    - assets/localizations/
 
   fonts:
     - family: PT

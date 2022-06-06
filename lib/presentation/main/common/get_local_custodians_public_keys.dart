@@ -1,20 +1,23 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../data/repositories/keys_repository.dart';
 import '../../../data/repositories/ton_wallets_repository.dart';
-import '../../../generated/codegen_loader.g.dart';
 import '../../../injection.dart';
 
-Future<List<String>> getLocalCustodiansPublicKeys(String address) async {
+Future<List<String>> getLocalCustodiansPublicKeys({
+  required BuildContext context,
+  required String address,
+}) async {
   final tonWalletInfo = await getIt.get<TonWalletsRepository>().getInfo(address);
 
   final requiresSeparateDeploy = tonWalletInfo.details.requiresSeparateDeploy;
   final isDeployed = tonWalletInfo.contractState.isDeployed;
 
-  if (requiresSeparateDeploy && !isDeployed) throw Exception(LocaleKeys.wallet_not_deployed.tr());
+  if (requiresSeparateDeploy && !isDeployed) throw Exception(AppLocalizations.of(context)!.wallet_not_deployed);
 
   if (!requiresSeparateDeploy) return [tonWalletInfo.publicKey];
 

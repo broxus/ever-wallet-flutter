@@ -1,9 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/widgets/custom_elevated_button.dart';
 import '../../../common/widgets/custom_outlined_button.dart';
 import '../../../common/widgets/modal_header.dart';
@@ -40,7 +39,7 @@ class _SendMessageModalState extends ConsumerState<SignDataPage> {
             child: Column(
               children: [
                 ModalHeader(
-                  text: LocaleKeys.sign_data.tr(),
+                  text: AppLocalizations.of(context)!.sign_data,
                   onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                 ),
                 const SizedBox(height: 16),
@@ -68,19 +67,19 @@ class _SendMessageModalState extends ConsumerState<SignDataPage> {
       );
 
   Widget origin() => SectionedCardSection(
-        title: LocaleKeys.origin.tr(),
+        title: AppLocalizations.of(context)!.origin,
         subtitle: widget.origin,
         isSelectable: true,
       );
 
   Widget publicKey() => SectionedCardSection(
-        title: LocaleKeys.public_key.tr(),
+        title: AppLocalizations.of(context)!.public_key,
         subtitle: widget.publicKey,
         isSelectable: true,
       );
 
   Widget data() => SectionedCardSection(
-        title: LocaleKeys.data.tr(),
+        title: AppLocalizations.of(context)!.data,
         subtitle: widget.data,
         isSelectable: true,
       );
@@ -100,20 +99,23 @@ class _SendMessageModalState extends ConsumerState<SignDataPage> {
 
   Widget rejectButton() => CustomOutlinedButton(
         onPressed: () => Navigator.of(widget.modalContext).pop(),
-        text: LocaleKeys.reject.tr(),
+        text: AppLocalizations.of(context)!.reject,
       );
 
   Widget submitButton() => Consumer(
         builder: (context, ref, child) {
           return CustomElevatedButton(
             onPressed: () => onSubmitPressed(widget.publicKey),
-            text: LocaleKeys.submit.tr(),
+            text: AppLocalizations.of(context)!.submit,
           );
         },
       );
 
   Future<void> onSubmitPressed(String selectedPublicKey) async {
-    final password = await getPasswordFromBiometry(selectedPublicKey);
+    final password = await getPasswordFromBiometry(
+      context: context,
+      publicKey: selectedPublicKey,
+    );
 
     if (!mounted) return;
 

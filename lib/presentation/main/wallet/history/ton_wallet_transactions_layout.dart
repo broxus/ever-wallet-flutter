@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -11,7 +11,6 @@ import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../providers/ton_wallet/ton_wallet_multisig_pending_transactions_provider.dart';
 import '../../../../../providers/ton_wallet/ton_wallet_pending_transactions_provider.dart';
 import '../../../../../providers/ton_wallet/ton_wallet_transactions_state_provider.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/theme.dart';
 import '../../../common/widgets/preload_transactions_listener.dart';
 import '../map_ton_wallet_transactions_to_widgets.dart';
@@ -99,7 +98,7 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
                 ),
               ),
             )
-          : placeholder(LocaleKeys.transactions_empty.tr()),
+          : placeholder(AppLocalizations.of(context)!.transactions_empty),
     );
   }
 

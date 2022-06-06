@@ -1,6 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -9,7 +9,6 @@ import '../../../../../providers/account/account_info_provider.dart';
 import '../../../../../providers/account/external_accounts_provider.dart';
 import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../generated/assets.gen.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../providers/common/account_overall_balance_provider.dart';
 import '../../../common/extensions.dart';
 import '../../../common/theme.dart';
@@ -139,12 +138,12 @@ class WalletCard extends StatelessWidget {
 
                 return tonWalletInfo != null
                     ? namedField(
-                        name: LocaleKeys.public_key.tr(),
+                        name: AppLocalizations.of(context)!.public_key,
                         value: tonWalletInfo.publicKey,
                         ellipsedValue: tonWalletInfo.publicKey.ellipsePublicKey(),
                       )
                     : namedField(
-                        name: LocaleKeys.public_key.tr(),
+                        name: AppLocalizations.of(context)!.public_key,
                       );
               },
             ),
@@ -154,12 +153,12 @@ class WalletCard extends StatelessWidget {
 
                 return tonWalletInfo != null
                     ? namedField(
-                        name: LocaleKeys.address.tr(),
+                        name: AppLocalizations.of(context)!.address,
                         value: tonWalletInfo.address,
                         ellipsedValue: tonWalletInfo.address.ellipseAddress(),
                       )
                     : namedField(
-                        name: LocaleKeys.address.tr(),
+                        name: AppLocalizations.of(context)!.address,
                       );
               },
             ),
@@ -169,12 +168,12 @@ class WalletCard extends StatelessWidget {
 
                 return tonWalletInfo != null
                     ? namedField(
-                        name: LocaleKeys.type.tr(),
+                        name: AppLocalizations.of(context)!.type,
                         value: tonWalletInfo.walletType.describe(),
                         isSelectable: false,
                       )
                     : namedField(
-                        name: LocaleKeys.type.tr(),
+                        name: AppLocalizations.of(context)!.type,
                         isSelectable: false,
                       );
               },
@@ -184,7 +183,7 @@ class WalletCard extends StatelessWidget {
               builder: (context, ref, child) {
                 final externalAccounts = ref.watch(externalAccountsProvider).asData?.value ?? [];
 
-                return externalAccounts.any((e) => e == address) ? externalAccountLabel() : const SizedBox();
+                return externalAccounts.any((e) => e == address) ? externalAccountLabel(context) : const SizedBox();
               },
             ),
             const Spacer(flex: 2),
@@ -206,13 +205,13 @@ class WalletCard extends StatelessWidget {
         ),
       );
 
-  Widget externalAccountLabel() => Row(
+  Widget externalAccountLabel(BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Assets.images.iconMultisig.svg(),
           const SizedBox(width: 8),
           Text(
-            LocaleKeys.external_account.tr(),
+            AppLocalizations.of(context)!.external_account,
             style: const TextStyle(color: Colors.white),
           ),
         ],

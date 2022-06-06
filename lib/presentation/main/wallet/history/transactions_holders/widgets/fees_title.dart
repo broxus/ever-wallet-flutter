@@ -1,7 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../../../../generated/codegen_loader.g.dart';
 import '../../../../../common/constants.dart';
 
 class FeesTitle extends StatelessWidget {
@@ -14,7 +13,7 @@ class FeesTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        LocaleKeys.fees_a_t.tr(args: [fees, kEverTicker]),
+        AppLocalizations.of(context)!.fees_a_t(fees, kEverTicker),
         style: const TextStyle(
           color: Colors.black45,
         ),

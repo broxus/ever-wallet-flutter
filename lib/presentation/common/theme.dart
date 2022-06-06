@@ -5,8 +5,6 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../../generated/fonts.gen.dart';
 
-const applicationTitle = 'EVER Wallet';
-
 ThemeData materialTheme(BuildContext context) => ThemeData(
       brightness: Brightness.light,
       primaryColor: CrystalColor.accent,

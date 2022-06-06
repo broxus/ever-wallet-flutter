@@ -1,10 +1,13 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../injection.dart';
-import '../../../generated/codegen_loader.g.dart';
 
-Future<String?> getPasswordFromBiometry(String publicKey) async {
+Future<String?> getPasswordFromBiometry({
+  required BuildContext context,
+  required String publicKey,
+}) async {
   final isEnabled = getIt.get<BiometryRepository>().status;
   final isAvailable = getIt.get<BiometryRepository>().availability;
 
@@ -12,7 +15,7 @@ Future<String?> getPasswordFromBiometry(String publicKey) async {
 
   try {
     return await getIt.get<BiometryRepository>().getKeyPassword(
-          localizedReason: LocaleKeys.authentication_reason.tr(),
+          localizedReason: AppLocalizations.of(context)!.authentication_reason,
           publicKey: publicKey,
         );
   } catch (err) {

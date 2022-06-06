@@ -1,13 +1,12 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../../data/repositories/keys_repository.dart';
 import '../../../../../injection.dart';
 import '../../../../data/repositories/keys_repository.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../logger.dart';
 import '../../../data/extensions.dart';
 import '../../common/widgets/crystal_flushbar.dart';
@@ -47,7 +46,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
               controller: controller,
               autofocus: true,
               formatters: [LengthLimitingTextInputFormatter(50)],
-              hintText: LocaleKeys.name.tr(),
+              hintText: AppLocalizations.of(context)!.name,
             ),
             const SizedBox(height: 24),
             ValueListenableBuilder<TextEditingValue>(
@@ -68,7 +67,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
 
                           await showCrystalFlushbar(
                             context,
-                            message: LocaleKeys.seed_phrase_renamed.tr(),
+                            message: AppLocalizations.of(context)!.seed_phrase_renamed,
                           );
                         } catch (err, st) {
                           logger.e(err, err, st);
@@ -81,7 +80,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                           );
                         }
                       },
-                text: LocaleKeys.rename.tr(),
+                text: AppLocalizations.of(context)!.rename,
               ),
             )
           ],

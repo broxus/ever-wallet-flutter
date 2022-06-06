@@ -1,9 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../../../../generated/assets.gen.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
 import '../../../../common/widgets/modal_header.dart';
 import '../../../../common/widgets/selectable_button.dart';
@@ -42,7 +41,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
             child: Column(
               children: [
                 ModalHeader(
-                  text: LocaleKeys.add_account.tr(),
+                  text: AppLocalizations.of(context)!.add_account,
                   onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                 ),
                 const SizedBox(height: 16),
@@ -68,7 +67,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
             Expanded(
               child: SelectableButton(
                 icon: Assets.images.iconCreate,
-                text: _Options.createNew.describe(),
+                text: _Options.createNew.describe(context),
                 onPressed: () => optionNotifier.value = _Options.createNew,
                 isSelected: value == _Options.createNew,
               ),
@@ -77,7 +76,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
             Expanded(
               child: SelectableButton(
                 icon: Assets.images.iconAdd,
-                text: _Options.addExisting.describe(),
+                text: _Options.addExisting.describe(context),
                 onPressed: () => optionNotifier.value = _Options.addExisting,
                 isSelected: value == _Options.addExisting,
               ),
@@ -90,7 +89,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
         valueListenable: optionNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: () => onPressed(value),
-          text: LocaleKeys.next.tr(),
+          text: AppLocalizations.of(context)!.next,
         ),
       );
 
@@ -126,12 +125,12 @@ enum _Options {
 }
 
 extension on _Options {
-  String describe() {
+  String describe(BuildContext context) {
     switch (this) {
       case _Options.createNew:
-        return LocaleKeys.create_new_account.tr();
+        return AppLocalizations.of(context)!.create_new_account;
       case _Options.addExisting:
-        return LocaleKeys.add_existing_account.tr();
+        return AppLocalizations.of(context)!.add_existing_account;
     }
   }
 }

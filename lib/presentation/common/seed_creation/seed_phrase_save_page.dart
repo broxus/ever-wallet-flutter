@@ -1,10 +1,9 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../generated/codegen_loader.g.dart';
 import '../../router.gr.dart';
 import '../constants.dart';
 import '../widgets/animated_fade_slide_in.dart';
@@ -75,7 +74,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.save_seed_phrase.tr(),
+        text: AppLocalizations.of(context)!.save_seed_phrase,
       );
 
   Widget words() => Row(
@@ -140,7 +139,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
         offset: const Offset(0, 1),
         child: CustomElevatedButton(
           onPressed: onSubmitButtonPressed,
-          text: LocaleKeys.confirm_seed_saved.tr(),
+          text: AppLocalizations.of(context)!.confirm_seed_saved,
         ),
       );
 
@@ -153,7 +152,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
 
   Widget copyButton() => CustomOutlinedButton(
         onPressed: onCopyButtonPressed,
-        text: LocaleKeys.copy_words.tr(),
+        text: AppLocalizations.of(context)!.copy_words,
       );
 
   Future<void> onCopyButtonPressed() async {
@@ -163,7 +162,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
 
     showCrystalFlushbar(
       context,
-      message: LocaleKeys.copied.tr(),
+      message: AppLocalizations.of(context)!.copied,
     );
   }
 }

@@ -1,9 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../providers/key/current_key_provider.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/theme.dart';
 import '../modals/add_account_flow/start_add_account_flow.dart';
 
@@ -70,7 +69,7 @@ class NewAccountCard extends StatelessWidget {
           _getAddButton(context),
           const Spacer(),
           Text(
-            LocaleKeys.add_account.tr(),
+            AppLocalizations.of(context)!.add_account,
             style: style.copyWith(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -79,7 +78,7 @@ class NewAccountCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 4, 78, 24),
             child: Text(
-              LocaleKeys.add_account_description.tr(),
+              AppLocalizations.of(context)!.add_account_description,
               style: style.copyWith(
                 fontWeight: FontWeight.w500,
                 fontSize: 14,

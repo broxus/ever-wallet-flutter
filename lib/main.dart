@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -34,8 +33,6 @@ Future<void> main(List<String> args) async => runZonedGuarded<Future<void>>(
         NekotonFlutter.initialize(logger);
 
         WidgetsFlutterBinding.ensureInitialized();
-
-        await EasyLocalization.ensureInitialized();
 
         await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 

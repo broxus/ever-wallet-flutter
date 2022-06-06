@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -14,7 +14,6 @@ import '../../../../../data/repositories/keys_repository.dart';
 import '../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
 import '../../../../data/repositories/keys_repository.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../providers/biometry/biometry_availability_provider.dart';
 import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../providers/key/current_key_provider.dart';
@@ -27,6 +26,7 @@ import 'change_seed_phrase_password_modal_body.dart';
 import 'derive_key_modal_body.dart';
 import 'export_seed_phrase_modal_body.dart';
 import 'key_removement_modal/show_key_removement_modal.dart';
+import 'language_modal_body.dart';
 import 'logout_modal/show_logout_modal.dart';
 import 'name_new_key_modal_body.dart';
 import 'rename_key_modal_body.dart';
@@ -84,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget buildTitle() => Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
         child: Text(
-          LocaleKeys.profile.tr(),
+          AppLocalizations.of(context)!.profile,
           style: const TextStyle(
             fontSize: 30,
             color: CrystalColor.fontDark,
@@ -127,7 +127,7 @@ class _ProfilePageState extends State<ProfilePage> {
         builder: (context, ref, child) => Column(
           children: [
             buildSection(
-              title: LocaleKeys.seeds.tr(),
+              title: AppLocalizations.of(context)!.seeds,
               children: [
                 if (keys.isNotEmpty)
                   buildSeedsList(
@@ -142,10 +142,10 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
             buildSection(
-              title: LocaleKeys.current_seed_preferences.tr(),
+              title: AppLocalizations.of(context)!.current_seed_preferences,
               children: [
                 buildSectionAction(
-                  title: LocaleKeys.export_seed.tr(),
+                  title: AppLocalizations.of(context)!.export_seed,
                   onTap: keys.isNotEmpty && currentKey != null
                       ? () async {
                           final isEnabled = await ref.read(biometryStatusProvider.future);
@@ -154,7 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           if (isAvailable && isEnabled) {
                             try {
                               final password = await getIt.get<BiometryRepository>().getKeyPassword(
-                                    localizedReason: LocaleKeys.authentication_reason.tr(),
+                                    localizedReason: AppLocalizations.of(context)!.authentication_reason,
                                     publicKey: currentKey.publicKey,
                                   );
 
@@ -169,7 +169,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                               showCrystalBottomSheet<void>(
                                 context,
-                                title: ExportSeedPhraseModalBody.title,
+                                title: ExportSeedPhraseModalBody.title(context),
                                 body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
                               );
                             }
@@ -178,7 +178,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                             showCrystalBottomSheet<void>(
                               context,
-                              title: ExportSeedPhraseModalBody.title,
+                              title: ExportSeedPhraseModalBody.title(context),
                               body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
                             );
                           }
@@ -186,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       : null,
                 ),
                 buildSectionAction(
-                  title: LocaleKeys.remove_seed.tr(),
+                  title: AppLocalizations.of(context)!.remove_seed,
                   onTap: keys.isNotEmpty && currentKey != null
                       ? () => showKeyRemovementDialog(
                             context: context,
@@ -195,23 +195,23 @@ class _ProfilePageState extends State<ProfilePage> {
                       : null,
                 ),
                 buildSectionAction(
-                  title: LocaleKeys.change_seed_password.tr(),
+                  title: AppLocalizations.of(context)!.change_seed_password,
                   onTap: keys.isNotEmpty && currentKey != null
                       ? () => showCrystalBottomSheet<void>(
                             context,
-                            title: LocaleKeys.change_seed_password.tr(),
+                            title: AppLocalizations.of(context)!.change_seed_password,
                             body: ChangeSeedPhrasePasswordModalBody(publicKey: currentKey.publicKey),
                           )
                       : null,
                 ),
                 if (currentKey != null && currentKey.isNotLegacy && currentKey.isMaster)
                   buildSectionAction(
-                    title: LocaleKeys.derive_key.tr(),
+                    title: AppLocalizations.of(context)!.derive_key,
                     onTap: keys.isNotEmpty
                         ? () async {
                             final name = await showCrystalBottomSheet<String?>(
                               context,
-                              title: NameNewKeyModalBody.title,
+                              title: NameNewKeyModalBody.title(context),
                               body: const NameNewKeyModalBody(),
                             );
 
@@ -226,7 +226,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               if (isAvailable && isEnabled) {
                                 try {
                                   final password = await getIt.get<BiometryRepository>().getKeyPassword(
-                                        localizedReason: LocaleKeys.authentication_reason.tr(),
+                                        localizedReason: AppLocalizations.of(context)!.authentication_reason,
                                         publicKey: currentKey.publicKey,
                                       );
 
@@ -240,7 +240,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                                   showCrystalBottomSheet<void>(
                                     context,
-                                    title: DeriveKeyModalBody.title,
+                                    title: DeriveKeyModalBody.title(context),
                                     body: DeriveKeyModalBody(
                                       publicKey: currentKey.publicKey,
                                       name: name.isNotEmpty ? name : null,
@@ -252,7 +252,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                                 showCrystalBottomSheet<void>(
                                   context,
-                                  title: DeriveKeyModalBody.title,
+                                  title: DeriveKeyModalBody.title(context),
                                   body: DeriveKeyModalBody(
                                     publicKey: currentKey.publicKey,
                                     name: name.isNotEmpty ? name : null,
@@ -264,12 +264,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         : null,
                   ),
                 buildSectionAction(
-                  title: LocaleKeys.rename_key.tr(),
+                  title: AppLocalizations.of(context)!.rename_key,
                   onTap: keys.isNotEmpty && currentKey != null
                       ? () {
                           showCrystalBottomSheet<void>(
                             context,
-                            title: LocaleKeys.enter_new_name.tr(),
+                            title: AppLocalizations.of(context)!.enter_new_name,
                             body: RenameKeyModalBody(publicKey: currentKey.publicKey),
                           );
                         }
@@ -277,34 +277,44 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ],
             ),
-            Consumer(
-              builder: (context, ref, child) {
-                final isAvailable = ref.watch(biometryAvailabilityProvider).asData?.value ?? false;
+            buildSection(
+              title: AppLocalizations.of(context)!.wallet_preferences,
+              children: [
+                Consumer(
+                  builder: (context, ref, child) {
+                    final isAvailable = ref.watch(biometryAvailabilityProvider).asData?.value ?? false;
 
-                return isAvailable
-                    ? buildSection(
-                        title: LocaleKeys.wallet_preferences.tr(),
-                        children: [
-                          buildSectionAction(
-                            title: LocaleKeys.biometry.tr(),
+                    return isAvailable
+                        ? buildSectionAction(
+                            title: AppLocalizations.of(context)!.biometry,
                             onTap: () {
                               showCrystalBottomSheet<void>(
                                 context,
-                                title: LocaleKeys.biometry.tr(),
+                                title: AppLocalizations.of(context)!.biometry,
                                 body: const BiometryModalBody(),
                               );
                             },
-                          ),
-                        ],
-                      )
-                    : const SizedBox();
-              },
+                          )
+                        : const SizedBox();
+                  },
+                ),
+                buildSectionAction(
+                  title: AppLocalizations.of(context)!.language,
+                  onTap: () {
+                    showCrystalBottomSheet<void>(
+                      context,
+                      title: AppLocalizations.of(context)!.language,
+                      body: const LanguageModalBody(),
+                    );
+                  },
+                ),
+              ],
             ),
             buildSection(
               children: [
                 buildSectionAction(
                   isDestructive: true,
-                  title: LocaleKeys.logout.tr(),
+                  title: AppLocalizations.of(context)!.logout,
                   onTap: () => showLogoutDialog(context: context),
                 ),
               ],
@@ -357,7 +367,7 @@ class _ProfilePageState extends State<ProfilePage> {
       child = buildSectionActionWithIcon(
         onTap: onAdd,
         color: CrystalColor.accent,
-        title: LocaleKeys.add_seed.tr(),
+        title: AppLocalizations.of(context)!.add_seed,
         icon: const Icon(
           CupertinoIcons.add,
           size: 20,
@@ -567,7 +577,7 @@ class _ProfilePageState extends State<ProfilePage> {
               final buildNumber = snapshot.data?.buildNumber;
 
               return Text(
-                LocaleKeys.version_v_b.tr(args: ['$version', '$buildNumber']),
+                AppLocalizations.of(context)!.version_v_b('$version', '$buildNumber'),
                 style: const TextStyle(
                   fontSize: 12,
                   color: CrystalColor.fontSecondaryDark,

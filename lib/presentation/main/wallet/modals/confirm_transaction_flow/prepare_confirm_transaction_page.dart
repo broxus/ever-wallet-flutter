@@ -1,12 +1,11 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/custom_dropdown_button.dart';
@@ -65,7 +64,7 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
                 Column(
                   children: [
                     ModalHeader(
-                      text: LocaleKeys.confirm_transaction.tr(),
+                      text: AppLocalizations.of(context)!.confirm_transaction,
                       onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                     ),
                     const SizedBox(height: 16),
@@ -134,11 +133,9 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
           return Text(
-            LocaleKeys.balance.tr(
-              args: [
-                tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0',
-                kEverTicker,
-              ],
+            AppLocalizations.of(context)!.balance(
+              tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0',
+              kEverTicker,
             ),
             style: const TextStyle(
               color: Colors.black54,
@@ -151,7 +148,7 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
         valueListenable: publicKeyNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: () => onPressed(value),
-          text: LocaleKeys.next.tr(),
+          text: AppLocalizations.of(context)!.next,
         ),
       );
 

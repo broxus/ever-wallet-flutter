@@ -1,10 +1,9 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../generated/codegen_loader.g.dart';
 import '../../router.gr.dart';
 import '../widgets/crystal_title.dart';
 import '../widgets/custom_back_button.dart';
@@ -76,13 +75,13 @@ class _AddNewSeedPageState extends State<AddNewSeedPage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.add_new_seed_phrase_description.tr(),
+        text: AppLocalizations.of(context)!.add_new_seed_phrase_description,
       );
 
   Widget dropdownButton() => ValueListenableBuilder<_CreationActions>(
         valueListenable: optionNotifier,
         builder: (context, value, child) => CustomDropdownButton<_CreationActions>(
-          items: _CreationActions.values.map((e) => Tuple2(e, e.describe())).toList(),
+          items: _CreationActions.values.map((e) => Tuple2(e, e.describe(context))).toList(),
           value: value,
           onChanged: (value) {
             if (value != null) {
@@ -111,7 +110,7 @@ class _AddNewSeedPageState extends State<AddNewSeedPage> {
             },
           ),
         ),
-        text: LocaleKeys.next.tr(),
+        text: AppLocalizations.of(context)!.next,
       );
 }
 
@@ -122,14 +121,14 @@ enum _CreationActions {
 }
 
 extension on _CreationActions {
-  String describe() {
+  String describe(BuildContext context) {
     switch (this) {
       case _CreationActions.create:
-        return LocaleKeys.create_seed.tr();
+        return AppLocalizations.of(context)!.create_seed;
       case _CreationActions.import:
-        return LocaleKeys.import_seed.tr();
+        return AppLocalizations.of(context)!.import_seed;
       case _CreationActions.importLegacy:
-        return LocaleKeys.import_legacy_seed.tr();
+        return AppLocalizations.of(context)!.import_legacy_seed;
     }
   }
 }

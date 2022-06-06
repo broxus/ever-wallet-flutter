@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../data/repositories/accounts_repository.dart';
@@ -7,7 +7,6 @@ import '../../../../../data/repositories/keys_repository.dart';
 import '../../../../../injection.dart';
 import '../../../../../providers/account/external_accounts_provider.dart';
 import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/theme.dart';
 import '../../../common/widgets/custom_popup_item.dart';
 import '../../../common/widgets/custom_popup_menu.dart';
@@ -39,7 +38,7 @@ class MoreButton extends StatelessWidget {
                 .map(
                   (e) => CustomPopupItem(
                     title: Text(
-                      e.describe(),
+                      e.describe(context),
                       style: const TextStyle(fontSize: 16),
                     ),
                     onTap: () => onSelected(context: context, read: ref.read, value: e),
@@ -112,14 +111,14 @@ enum _Actions {
 }
 
 extension on _Actions {
-  String describe() {
+  String describe(BuildContext context) {
     switch (this) {
       case _Actions.preferences:
-        return LocaleKeys.preferences.tr();
+        return AppLocalizations.of(context)!.preferences;
       case _Actions.custodians:
-        return LocaleKeys.custodians.tr();
+        return AppLocalizations.of(context)!.custodians;
       case _Actions.removeAccount:
-        return LocaleKeys.remove_account.tr();
+        return AppLocalizations.of(context)!.remove_account;
     }
   }
 }

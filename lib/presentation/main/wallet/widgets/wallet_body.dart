@@ -1,10 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../providers/account/accounts_provider.dart';
 import '../../../../../providers/account/current_account_provider.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/widgets/animated_appearance.dart';
 import '../../../common/widgets/sliding_panel.dart';
 import 'connection_button.dart';
@@ -33,7 +32,7 @@ class WalletBody extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      LocaleKeys.wallet.tr(),
+                      AppLocalizations.of(context)!.wallet,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 30,

@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -15,7 +15,6 @@ import '../../../../../../providers/ton_wallet/ton_wallet_multisig_pending_trans
 import '../../../../../../providers/ton_wallet/ton_wallet_pending_transactions_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_transactions_state_provider.dart';
 import '../../../../../generated/assets.gen.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
@@ -120,7 +119,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
 
           final receiveButton = WalletActionButton(
             icon: Assets.images.iconReceive,
-            title: LocaleKeys.receive.tr(),
+            title: AppLocalizations.of(context)!.receive,
             onPressed: () => showReceiveModal(
               context: context,
               address: widget.address,
@@ -154,7 +153,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
 
               actionButton = WalletActionButton(
                 icon: Assets.images.iconSend,
-                title: LocaleKeys.send.tr(),
+                title: AppLocalizations.of(context)!.send,
                 onPressed: publicKeys.isNotEmpty
                     ? () => startSendTransactionFlow(
                           context: context,
@@ -166,7 +165,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
             } else {
               actionButton = WalletActionButton(
                 icon: Assets.images.iconDeploy,
-                title: LocaleKeys.deploy.tr(),
+                title: AppLocalizations.of(context)!.deploy,
                 onPressed: () => startDeployWalletFlow(
                   context: context,
                   address: widget.address,
@@ -248,7 +247,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         child: Row(
           children: [
             Text(
-              LocaleKeys.history.tr(),
+              AppLocalizations.of(context)!.history,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -260,7 +259,7 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                 expiredTransactionsState.isEmpty &&
                 multisigPendingTransactionsState.isEmpty)
               Text(
-                LocaleKeys.transactions_empty.tr(),
+                AppLocalizations.of(context)!.transactions_empty,
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.black45,

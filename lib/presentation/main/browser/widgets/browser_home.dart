@@ -1,14 +1,13 @@
 import 'dart:async';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/models/bookmark.dart';
 import '../../../../data/repositories/bookmarks_repository.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../injection.dart';
 import '../../../../providers/common/bookmarks_provider.dart';
 import '../../../../providers/common/site_meta_data_provider.dart';
@@ -47,7 +46,7 @@ class _BrowserHomeState extends State<BrowserHome> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(32, 32, 32, 16),
                   child: Text(
-                    LocaleKeys.favorites.tr(),
+                    AppLocalizations.of(context)!.favorites,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 30,
@@ -81,7 +80,7 @@ class _BrowserHomeState extends State<BrowserHome> {
             addButton(),
             const SizedBox(height: 16),
             Text(
-              LocaleKeys.favorites_placeholder.tr(),
+              AppLocalizations.of(context)!.favorites_placeholder,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -118,7 +117,7 @@ class _BrowserHomeState extends State<BrowserHome> {
         child: InkWell(
           onTap: () => showAddBookmarkDialog(
             context: context,
-            title: LocaleKeys.add_bookmark.tr(),
+            title: AppLocalizations.of(context)!.add_bookmark,
             onSubmit: ({
               required String name,
               required String url,
@@ -178,7 +177,7 @@ class _BrowserHomeState extends State<BrowserHome> {
                           CustomIconButton(
                             onPressed: () async => showAddBookmarkDialog(
                               context: context,
-                              title: LocaleKeys.edit_bookmark.tr(),
+                              title: AppLocalizations.of(context)!.edit_bookmark,
                               name: bookmark.name,
                               url: bookmark.url,
                               onSubmit: ({

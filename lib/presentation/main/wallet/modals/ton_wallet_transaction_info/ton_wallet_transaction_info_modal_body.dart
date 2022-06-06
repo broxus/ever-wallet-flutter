@@ -1,10 +1,9 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/utils.dart';
@@ -47,52 +46,63 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
     );
 
     final dePoolOnRoundComplete = transactionWithData.data?.maybeWhen(
-      dePoolOnRoundComplete: (notification) => notification.toRepresentableData(),
+      dePoolOnRoundComplete: (notification) => notification.toRepresentableData(context),
       orElse: () => null,
     );
 
     final dePoolReceiveAnswer = transactionWithData.data?.maybeWhen(
-      dePoolReceiveAnswer: (notification) => notification.toRepresentableData(),
+      dePoolReceiveAnswer: (notification) => notification.toRepresentableData(context),
       orElse: () => null,
     );
 
     final tokenWalletDeployed = transactionWithData.data?.maybeWhen(
-      tokenWalletDeployed: (notification) => notification.toRepresentableData(),
+      tokenWalletDeployed: (notification) => notification.toRepresentableData(context),
       orElse: () => null,
     );
 
     final walletInteraction = transactionWithData.data?.maybeWhen(
-      walletInteraction: (info) => info.toRepresentableData(),
+      walletInteraction: (info) => info.toRepresentableData(context),
       orElse: () => null,
     );
 
     final sections = [
       section(
         [
-          dateItem(date),
+          dateItem(
+            context: context,
+            date: date,
+          ),
           if (address != null) ...[
             addressItem(
+              context: context,
               isOutgoing: isOutgoing,
               address: address,
             ),
           ],
-          hashItem(hash),
+          hashItem(
+            context: context,
+            hash: hash,
+          ),
         ],
       ),
       section(
         [
           amountItem(
+            context: context,
             isOutgoing: isOutgoing,
             value: value.toTokens().removeZeroes().formatValue(),
           ),
-          feeItem(fees.toTokens().removeZeroes().formatValue()),
+          feeItem(
+            context: context,
+            fees: fees.toTokens().removeZeroes().formatValue(),
+          ),
         ],
       ),
       if (comment != null && comment.isNotEmpty)
         section(
           [
             item(
-              title: LocaleKeys.comment.tr(),
+              title: AppLocalizations.of(context)!.comment,
               subtitle: comment,
             ),
           ],
@@ -100,7 +110,10 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       if (dePoolOnRoundComplete != null)
         section(
           [
-            typeItem(LocaleKeys.de_pool_on_round_complete.tr()),
+            typeItem(
+              context: context,
+              type: AppLocalizations.of(context)!.de_pool_on_round_complete,
+            ),
             ...dePoolOnRoundComplete.entries
                 .map(
                   (e) => item(
@@ -114,7 +127,10 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       if (dePoolReceiveAnswer != null)
         section(
           [
-            typeItem(LocaleKeys.de_pool_receive_answer.tr()),
+            typeItem(
+              context: context,
+              type: AppLocalizations.of(context)!.de_pool_receive_answer,
+            ),
             ...dePoolReceiveAnswer.entries
                 .map(
                   (e) => item(
@@ -128,7 +144,10 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       if (tokenWalletDeployed != null)
         section(
           [
-            typeItem(LocaleKeys.token_wallet_deployed.tr()),
+            typeItem(
+              context: context,
+              type: AppLocalizations.of(context)!.token_wallet_deployed,
+            ),
             ...tokenWalletDeployed.entries
                 .map(
                   (e) => item(
@@ -142,7 +161,10 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
       if (walletInteraction != null)
         section(
           [
-            typeItem(LocaleKeys.wallet_interaction.tr()),
+            typeItem(
+              context: context,
+              type: AppLocalizations.of(context)!.wallet_interaction,
+            ),
             ...walletInteraction.entries
                 .map(
                   (e) => item(
@@ -163,7 +185,7 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
           child: Column(
             children: [
               ModalHeader(
-                text: LocaleKeys.transaction_information.tr(),
+                text: AppLocalizations.of(context)!.transaction_information,
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -173,7 +195,10 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              explorerButton(hash),
+              explorerButton(
+                context: context,
+                hash: hash,
+              ),
             ],
           ),
         ),
@@ -223,46 +248,68 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
         ],
       );
 
-  Widget dateItem(DateTime date) => item(
-        title: LocaleKeys.date_and_time.tr(),
+  Widget dateItem({
+    required BuildContext context,
+    required DateTime date,
+  }) =>
+      item(
+        title: AppLocalizations.of(context)!.date_and_time,
         subtitle: transactionTimeFormat.format(date),
       );
 
   Widget addressItem({
+    required BuildContext context,
     required bool isOutgoing,
     required String address,
   }) =>
       item(
-        title: isOutgoing ? LocaleKeys.recipient.tr() : LocaleKeys.sender.tr(),
+        title: isOutgoing ? AppLocalizations.of(context)!.recipient : AppLocalizations.of(context)!.sender,
         subtitle: address,
       );
 
-  Widget hashItem(String hash) => item(
-        title: LocaleKeys.hash_id.tr(),
+  Widget hashItem({
+    required BuildContext context,
+    required String hash,
+  }) =>
+      item(
+        title: AppLocalizations.of(context)!.hash_id,
         subtitle: hash,
       );
 
   Widget amountItem({
+    required BuildContext context,
     required bool isOutgoing,
     required String value,
   }) =>
       item(
-        title: LocaleKeys.amount.tr(),
+        title: AppLocalizations.of(context)!.amount,
         subtitle: '${isOutgoing ? '-' : ''}$value $kEverTicker',
       );
 
-  Widget feeItem(String fees) => item(
-        title: LocaleKeys.blockchain_fee.tr(),
+  Widget feeItem({
+    required BuildContext context,
+    required String fees,
+  }) =>
+      item(
+        title: AppLocalizations.of(context)!.blockchain_fee,
         subtitle: '$fees $kEverTicker',
       );
 
-  Widget typeItem(String type) => item(
-        title: LocaleKeys.type.tr(),
+  Widget typeItem({
+    required BuildContext context,
+    required String type,
+  }) =>
+      item(
+        title: AppLocalizations.of(context)!.type,
         subtitle: type,
       );
 
-  Widget explorerButton(String hash) => CustomOutlinedButton(
+  Widget explorerButton({
+    required BuildContext context,
+    required String hash,
+  }) =>
+      CustomOutlinedButton(
         onPressed: () => launchUrlString(transactionExplorerLink(hash)),
-        text: LocaleKeys.see_in_the_explorer.tr(),
+        text: AppLocalizations.of(context)!.see_in_the_explorer,
       );
 }

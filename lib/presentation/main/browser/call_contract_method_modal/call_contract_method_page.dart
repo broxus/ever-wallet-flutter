@@ -1,9 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/widgets/custom_elevated_button.dart';
 import '../../../common/widgets/custom_outlined_button.dart';
 import '../../../common/widgets/modal_header.dart';
@@ -42,7 +41,7 @@ class _CallContractMethodPageState extends State<CallContractMethodPage> {
             child: Column(
               children: [
                 ModalHeader(
-                  text: LocaleKeys.call_contract_method.tr(),
+                  text: AppLocalizations.of(context)!.call_contract_method,
                   onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                 ),
                 const SizedBox(height: 16),
@@ -69,19 +68,19 @@ class _CallContractMethodPageState extends State<CallContractMethodPage> {
       );
 
   Widget origin() => SectionedCardSection(
-        title: LocaleKeys.origin.tr(),
+        title: AppLocalizations.of(context)!.origin,
         subtitle: widget.origin,
         isSelectable: true,
       );
 
   Widget publicKey() => SectionedCardSection(
-        title: LocaleKeys.account_public_key.tr(),
+        title: AppLocalizations.of(context)!.account_public_key,
         subtitle: widget.publicKey,
         isSelectable: true,
       );
 
   Widget recipient() => SectionedCardSection(
-        title: LocaleKeys.recipient_address.tr(),
+        title: AppLocalizations.of(context)!.recipient_address,
         subtitle: widget.recipient,
         isSelectable: true,
       );
@@ -101,18 +100,18 @@ class _CallContractMethodPageState extends State<CallContractMethodPage> {
 
   Widget rejectButton() => CustomOutlinedButton(
         onPressed: () => Navigator.of(widget.modalContext).pop(),
-        text: LocaleKeys.reject.tr(),
+        text: AppLocalizations.of(context)!.reject,
       );
 
   Widget submitButton() => Consumer(
         builder: (context, ref, child) => CustomElevatedButton(
           onPressed: () => onSubmitPressed(widget.publicKey),
-          text: LocaleKeys.call.tr(),
+          text: AppLocalizations.of(context)!.call,
         ),
       );
 
   Future<void> onSubmitPressed(String publicKey) async {
-    final password = await getPasswordFromBiometry(publicKey);
+    final password = await getPasswordFromBiometry(context: context, publicKey: publicKey);
 
     if (!mounted) return;
 

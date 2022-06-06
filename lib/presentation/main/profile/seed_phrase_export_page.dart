@@ -1,8 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../../generated/codegen_loader.g.dart';
 import '../../common/widgets/crystal_flushbar.dart';
 import '../../common/widgets/crystal_title.dart';
 import '../../common/widgets/custom_back_button.dart';
@@ -65,7 +64,7 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.save_seed_phrase.tr(),
+        text: AppLocalizations.of(context)!.save_seed_phrase,
       );
 
   Widget words() => Row(
@@ -126,7 +125,7 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
 
   Widget copyButton() => CustomOutlinedButton(
         onPressed: onPressed,
-        text: LocaleKeys.copy_words.tr(),
+        text: AppLocalizations.of(context)!.copy_words,
       );
 
   Future<void> onPressed() async {
@@ -136,7 +135,7 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
 
     showCrystalFlushbar(
       context,
-      message: LocaleKeys.copied.tr(),
+      message: AppLocalizations.of(context)!.copied,
     );
   }
 }

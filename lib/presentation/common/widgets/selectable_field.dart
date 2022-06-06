@@ -1,9 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
-import '../../../generated/codegen_loader.g.dart';
 import 'animated_visibility.dart';
 import 'crystal_flushbar.dart';
 
@@ -61,7 +60,7 @@ class _SelectableFieldState extends State<SelectableField> {
 
                 showCrystalFlushbar(
                   context,
-                  message: LocaleKeys.copied.tr(),
+                  message: AppLocalizations.of(context)!.copied,
                 );
               },
               child: Padding(
@@ -70,7 +69,7 @@ class _SelectableFieldState extends State<SelectableField> {
                   vertical: 8,
                 ),
                 child: Text(
-                  LocaleKeys.copy.tr(),
+                  AppLocalizations.of(context)!.copy,
                   style: const TextStyle(
                     letterSpacing: 0.75,
                   ),

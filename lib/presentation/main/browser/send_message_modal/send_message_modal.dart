@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -8,7 +8,6 @@ import 'package:tuple/tuple.dart';
 
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../data/extensions.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../providers/ton_wallet/ton_wallet_prepare_transfer_provider.dart';
 import '../../../common/constants.dart';
 import '../../../common/extensions.dart';
@@ -87,7 +86,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
           child: Column(
             children: [
               ModalHeader(
-                text: LocaleKeys.send_message.tr(),
+                text: AppLocalizations.of(context)!.send_message,
                 onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
               ),
               const SizedBox(height: 16),
@@ -144,31 +143,31 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
       );
 
   Widget origin() => SectionedCardSection(
-        title: LocaleKeys.origin.tr(),
+        title: AppLocalizations.of(context)!.origin,
         subtitle: widget.origin,
         isSelectable: true,
       );
 
   Widget address() => SectionedCardSection(
-        title: LocaleKeys.account_address.tr(),
+        title: AppLocalizations.of(context)!.account_address,
         subtitle: widget.sender,
         isSelectable: true,
       );
 
   Widget publicKey() => SectionedCardSection(
-        title: LocaleKeys.account_public_key.tr(),
+        title: AppLocalizations.of(context)!.account_public_key,
         subtitle: widget.publicKeys.first,
         isSelectable: true,
       );
 
   Widget recipient() => SectionedCardSection(
-        title: LocaleKeys.recipient_address.tr(),
+        title: AppLocalizations.of(context)!.recipient_address,
         subtitle: widget.recipient,
         isSelectable: true,
       );
 
   Widget amount() => SectionedCardSection(
-        title: LocaleKeys.amount.tr(),
+        title: AppLocalizations.of(context)!.amount,
         subtitle: '${widget.amount.toTokens().removeZeroes()} $kEverTicker',
         isSelectable: true,
       );
@@ -189,7 +188,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
           );
 
           return SectionedCardSection(
-            title: LocaleKeys.blockchain_fee.tr(),
+            title: AppLocalizations.of(context)!.blockchain_fee,
             subtitle: subtitle,
             hasError: hasError,
           );
@@ -197,13 +196,13 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
       );
 
   Widget bounce() => SectionedCardSection(
-        title: LocaleKeys.bounce.tr(),
-        subtitle: widget.bounce ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
+        title: AppLocalizations.of(context)!.bounce,
+        subtitle: widget.bounce ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no,
         isSelectable: true,
       );
 
   List<Widget> knownPayload() {
-    final knownPayload = widget.knownPayload?.toRepresentableData();
+    final knownPayload = widget.knownPayload?.toRepresentableData(context);
 
     if (knownPayload == null) {
       return [
@@ -212,7 +211,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
     }
 
     final list = {
-      LocaleKeys.known_payload.tr(): knownPayload.item1,
+      AppLocalizations.of(context)!.known_payload: knownPayload.item1,
       ...knownPayload.item2,
     };
 
@@ -242,7 +241,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
 
   Widget rejectButton() => CustomOutlinedButton(
         onPressed: () => Navigator.of(widget.modalContext).pop(),
-        text: LocaleKeys.reject.tr(),
+        text: AppLocalizations.of(context)!.reject,
       );
 
   Widget submitButton() => Consumer(
@@ -254,13 +253,16 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
             onPressed: selectedPublicKey != null && result?.item1 != null && result?.item2 != null
                 ? () => onSubmitPressed(selectedPublicKey)
                 : null,
-            text: LocaleKeys.send.tr(),
+            text: AppLocalizations.of(context)!.send,
           );
         },
       );
 
   Future<void> onSubmitPressed(String selectedPublicKey) async {
-    final password = await getPasswordFromBiometry(selectedPublicKey);
+    final password = await getPasswordFromBiometry(
+      context: context,
+      publicKey: selectedPublicKey,
+    );
 
     if (!mounted) return;
 

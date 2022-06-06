@@ -1,8 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../generated/codegen_loader.g.dart';
 import '../widgets/crystal_title.dart';
 import '../widgets/custom_back_button.dart';
 import '../widgets/custom_elevated_button.dart';
@@ -76,13 +75,13 @@ class _SeedNamePageState extends State<SeedNamePage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.seed_phrase_name_description.tr(),
+        text: AppLocalizations.of(context)!.seed_phrase_name_description,
       );
 
   Widget field() => CustomTextFormField(
-        name: LocaleKeys.name.tr(),
+        name: AppLocalizations.of(context)!.name,
         controller: controller,
-        hintText: '${LocaleKeys.enter_name.tr()}...',
+        hintText: '${AppLocalizations.of(context)!.enter_name}...',
         suffixIcon: TextFieldClearButton(
           controller: controller,
         ),
@@ -90,6 +89,6 @@ class _SeedNamePageState extends State<SeedNamePage> {
 
   Widget submitButton() => CustomElevatedButton(
         onPressed: () => widget.onSubmit(controller.text.trim().isNotEmpty ? controller.text.trim() : null),
-        text: LocaleKeys.submit.tr(),
+        text: AppLocalizations.of(context)!.submit,
       );
 }

@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../generated/codegen_loader.g.dart';
 import '../../router.gr.dart';
 import '../constants.dart';
 import '../utils.dart';
@@ -107,7 +106,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.check_seed_phrase.tr(),
+        text: AppLocalizations.of(context)!.check_seed_phrase,
       );
 
   Widget list() => Form(
@@ -133,7 +132,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
         autocorrect: false,
         enableSuggestions: false,
         textInputAction: index != kDefaultCheckingWordsAmount - 1 ? TextInputAction.next : TextInputAction.done,
-        hintText: '${LocaleKeys.word.tr()}...',
+        hintText: '${AppLocalizations.of(context)!.word}...',
         prefixIcon: TextFieldIndexIcon(
           index: words.keys.elementAt(index),
         ),
@@ -175,7 +174,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
     if (value == widget.phrase[words.entries.elementAt(index).key]) {
       return null;
     } else {
-      return LocaleKeys.incorrect_word.tr();
+      return AppLocalizations.of(context)!.incorrect_word;
     }
   }
 
@@ -241,7 +240,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
                 seedName: widget.seedName,
               ),
             ),
-            text: LocaleKeys.confirm.tr(),
+            text: AppLocalizations.of(context)!.confirm,
           ),
         ),
       );

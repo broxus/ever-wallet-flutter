@@ -1,13 +1,12 @@
 import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
-import '../../../generated/codegen_loader.g.dart';
 import '../wallet/modals/add_account_flow/start_add_account_flow.dart';
 
 Future<void> showAddAccountDialog({
@@ -18,12 +17,12 @@ Future<void> showAddAccountDialog({
       context: context,
       barrierDismissible: true,
       builder: (context) => PlatformAlertDialog(
-        title: Text(LocaleKeys.add_account.tr()),
-        content: Text(LocaleKeys.browser_add_account_description.tr()),
+        title: Text(AppLocalizations.of(context)!.add_account),
+        content: Text(AppLocalizations.of(context)!.browser_add_account_description),
         actions: [
           PlatformDialogAction(
             onPressed: () => context.router.pop(),
-            child: Text(LocaleKeys.cancel.tr()),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           PlatformDialogAction(
             onPressed: () async {
@@ -37,7 +36,7 @@ Future<void> showAddAccountDialog({
             cupertino: (_, __) => CupertinoDialogActionData(
               isDefaultAction: true,
             ),
-            child: Text(LocaleKeys.add_account.tr()),
+            child: Text(AppLocalizations.of(context)!.add_account),
           ),
         ],
       ),
