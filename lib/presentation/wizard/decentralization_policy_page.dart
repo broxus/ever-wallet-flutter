@@ -123,12 +123,36 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
   Widget text() => Expanded(
         child: Text.rich(
           TextSpan(
-            text: AppLocalizations.of(context)!.policy_description,
-            style: const TextStyle(
-              decoration: TextDecoration.underline,
-              fontWeight: FontWeight.w500,
-            ),
-            recognizer: tapGestureRecognizer,
+            children: [
+              TextSpan(
+                text: AppLocalizations.of(context)!.policy_description,
+              ),
+              const TextSpan(
+                text: ' ',
+              ),
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: AppLocalizations.of(context)!.link,
+                    recognizer: tapGestureRecognizer,
+                  ),
+                  WidgetSpan(
+                    child: GestureDetector(
+                      onTap: onLinkTap,
+                      child: Icon(
+                        Icons.link,
+                        size: Theme.of(context).textTheme.bodyText1?.fontSize,
+                        color: Theme.of(context).textTheme.bodyText1?.color,
+                      ),
+                    ),
+                  ),
+                ],
+                style: const TextStyle(
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
       );

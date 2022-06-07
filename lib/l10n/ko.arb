@@ -311,5 +311,6 @@
     "add_new_seed_phrase_description": "새 시드 만들기 또는 기존 시드 추가",
     "insufficient_funds": "이 계정 잔액이 충분치 않습니다",
     "invalid_data": "잘못된 데이터",
-    "language": "언어"
+    "language": "언어",
+    "link": "링크"
 }

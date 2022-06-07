@@ -37,7 +37,10 @@ class _LanguageModalBodyState extends State<LanguageModalBody> {
 
   Widget item(Locale locale) => ListTile(
         title: Text(list[locale.languageCode]!.name),
-        onTap: () => context.read<LocaleCubit>().setLocale(locale),
+        onTap: () {
+          context.read<LocaleCubit>().setLocale(locale);
+          Navigator.of(context).pop();
+        },
         trailing: SizedBox.square(
           dimension: 48,
           child: SvgPicture.asset('icons/flags/svg/${list[locale.languageCode]!.icon}.svg', package: 'country_icons'),

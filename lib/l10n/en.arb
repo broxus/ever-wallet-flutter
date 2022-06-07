@@ -311,5 +311,6 @@
     "add_new_seed_phrase_description": "Create new seed or add existing",
     "insufficient_funds": "Insufficient funds",
     "invalid_data": "Invalid data",
-    "language": "Language"
+    "language": "Language",
+    "link": "Link"
 }
