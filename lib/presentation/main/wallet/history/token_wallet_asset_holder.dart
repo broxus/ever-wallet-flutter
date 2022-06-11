@@ -45,7 +45,7 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
               )
               .asData
               ?.value;
-          final currency = ref.watch(tokenCurrencyProvider(widget.symbol)).asData?.value;
+          final currency = ref.watch(tokenCurrencyProvider(widget.rootTokenContract)).asData?.value;
 
           return WalletAssetHolder(
             icon: widget.logoURI != null
