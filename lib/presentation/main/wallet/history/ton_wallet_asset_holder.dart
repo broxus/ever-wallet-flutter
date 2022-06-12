@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../../data/constants.dart';
 import '../../../../generated/assets.gen.dart';
 import '../../../../providers/common/token_currency_provider.dart';
 import '../../../common/constants.dart';
@@ -26,7 +27,7 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
   Widget build(BuildContext context) => Consumer(
         builder: (context, ref, child) {
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
-          final currency = ref.watch(tokenCurrencyProvider(kWeverTicker)).asData?.value;
+          final currency = ref.watch(tokenCurrencyProvider(kAddressForEverCurrency)).asData?.value;
 
           return WalletAssetHolder(
             icon: Assets.images.ever.svg(
