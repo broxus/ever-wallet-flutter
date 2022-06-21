@@ -120,6 +120,14 @@ class TonAssetsRepository {
 
         _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
       }
+
+      final oldAssets = customAssets.where((e) => e.version.toTokenWalletVersion() == TokenWalletVersion.oldTip3v4);
+
+      for (final asset in oldAssets) {
+        _hiveSource.removeCustomTokenContractAsset(asset.address);
+
+        _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
+      }
     } catch (err, st) {
       logger.e(err, err, st);
     }

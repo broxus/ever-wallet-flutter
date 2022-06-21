@@ -1,11 +1,10 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../injection.dart';
 import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../common/theme.dart';
@@ -36,7 +35,7 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
         children: [
           Expanded(
             child: Text(
-              LocaleKeys.enable_biometry.tr(),
+              AppLocalizations.of(context)!.enable_biometry,
               style: const TextStyle(
                 color: CrystalColor.fontDark,
               ),
@@ -50,7 +49,7 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
               return PlatformSwitch(
                 value: isEnabled,
                 onChanged: (value) => getIt.get<BiometryRepository>().setStatus(
-                      localizedReason: LocaleKeys.authentication_reason.tr(),
+                      localizedReason: AppLocalizations.of(context)!.authentication_reason,
                       isEnabled: !isEnabled,
                     ),
               );

@@ -1,11 +1,10 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:validators/validators.dart';
 
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/widgets/unfocusing_gesture_detector.dart';
 
 class AddBookmarkDialog extends StatefulWidget {
@@ -57,7 +56,7 @@ class _AddBookmarkDialogState extends State<AddBookmarkDialog> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  LocaleKeys.name.tr(),
+                  AppLocalizations.of(context)!.name,
                   style: const TextStyle(
                     fontSize: 16,
                   ),
@@ -66,12 +65,12 @@ class _AddBookmarkDialogState extends State<AddBookmarkDialog> {
                 PlatformTextField(
                   controller: nameController,
                   autocorrect: false,
-                  hintText: '${LocaleKeys.enter_name.tr()}...',
+                  hintText: '${AppLocalizations.of(context)!.enter_name}...',
                   textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  LocaleKeys.url.tr(),
+                  AppLocalizations.of(context)!.url,
                   style: const TextStyle(
                     fontSize: 16,
                   ),
@@ -80,7 +79,7 @@ class _AddBookmarkDialogState extends State<AddBookmarkDialog> {
                 PlatformTextField(
                   controller: urlController,
                   autocorrect: false,
-                  hintText: '${LocaleKeys.enter_url.tr()}...',
+                  hintText: '${AppLocalizations.of(context)!.enter_url}...',
                 ),
               ],
             ),
@@ -88,7 +87,7 @@ class _AddBookmarkDialogState extends State<AddBookmarkDialog> {
           actions: [
             PlatformDialogAction(
               onPressed: () => context.router.pop(),
-              child: Text(LocaleKeys.cancel.tr()),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             ValueListenableBuilder<TextEditingValue>(
               valueListenable: nameController,
@@ -108,7 +107,7 @@ class _AddBookmarkDialogState extends State<AddBookmarkDialog> {
                   cupertino: (_, __) => CupertinoDialogActionData(
                     isDefaultAction: true,
                   ),
-                  child: Text(LocaleKeys.ok.tr()),
+                  child: Text(AppLocalizations.of(context)!.ok),
                 ),
               ),
             ),

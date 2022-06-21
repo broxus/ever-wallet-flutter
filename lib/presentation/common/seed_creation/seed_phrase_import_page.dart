@@ -2,13 +2,12 @@ import 'dart:async';
 
 import 'package:another_flushbar/flushbar.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../generated/codegen_loader.g.dart';
 import '../../router.gr.dart';
 import '../widgets/action_button.dart';
 import '../widgets/crystal_flushbar.dart';
@@ -103,7 +102,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
   Widget pasteButton() => ActionButton(
         key: const ValueKey(_ButtonState.paste),
         onPressed: onPasteButtonPressed,
-        text: LocaleKeys.paste.tr(),
+        text: AppLocalizations.of(context)!.paste,
       );
 
   Future<void> onPasteButtonPressed() async {
@@ -127,7 +126,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
 
       showErrorCrystalFlushbar(
         context,
-        message: LocaleKeys.incorrect_words_format.tr(),
+        message: AppLocalizations.of(context)!.incorrect_words_format,
         flushbarPosition: FlushbarPosition.BOTTOM,
         margin: const EdgeInsets.only(bottom: 12),
       );
@@ -156,7 +155,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
           formValidityNotifier.value = false;
           buttonStateNotifier.value = _ButtonState.paste;
         },
-        text: LocaleKeys.clear.tr(),
+        text: AppLocalizations.of(context)!.clear,
       );
 
   Widget body() => SafeArea(
@@ -192,7 +191,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.enter_seed_phrase.tr(),
+        text: AppLocalizations.of(context)!.enter_seed_phrase,
       );
 
   Widget list() {
@@ -243,7 +242,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         autocorrect: false,
         enableSuggestions: false,
         textInputAction: index != wordsLength - 1 ? TextInputAction.next : TextInputAction.done,
-        hintText: '${LocaleKeys.word.tr()}...',
+        hintText: '${AppLocalizations.of(context)!.word}...',
         prefixIcon: TextFieldIndexIcon(
           index: index,
         ),
@@ -285,7 +284,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
     if (getHints(value).isNotEmpty) {
       return null;
     } else {
-      return LocaleKeys.incorrect_word.tr();
+      return AppLocalizations.of(context)!.incorrect_word;
     }
   }
 
@@ -347,7 +346,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value ? onSubmitButtonPressed : null,
-          text: LocaleKeys.confirm.tr(),
+          text: AppLocalizations.of(context)!.confirm,
         ),
       );
 
@@ -377,12 +376,12 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         builder: (context) => Theme(
           data: ThemeData(),
           child: PlatformAlertDialog(
-            title: Text(LocaleKeys.error.tr()),
+            title: Text(AppLocalizations.of(context)!.error),
             content: Text(text),
             actions: <Widget>[
               PlatformDialogAction(
                 onPressed: () => context.router.navigatorKey.currentState?.pop(),
-                child: Text(LocaleKeys.ok.tr()),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),

@@ -1,11 +1,10 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../generated/assets.gen.dart';
-import '../../generated/codegen_loader.g.dart';
 import '../common/theme.dart';
 import '../common/utils.dart';
 import '../common/widgets/crystal_title.dart';
@@ -98,7 +97,7 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
       );
 
   Widget title() => CrystalTitle(
-        text: LocaleKeys.sign_policy.tr(),
+        text: AppLocalizations.of(context)!.sign_policy,
       );
 
   Widget image() => Align(
@@ -124,21 +123,34 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
   Widget text() => Expanded(
         child: Text.rich(
           TextSpan(
-            text: LocaleKeys.policy_description_common.tr(),
             children: [
-              const TextSpan(text: ' '),
               TextSpan(
-                text: LocaleKeys.policy_description_link.tr(),
+                text: AppLocalizations.of(context)!.policy_description,
+              ),
+              const TextSpan(
+                text: ' ',
+              ),
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: AppLocalizations.of(context)!.link,
+                    recognizer: tapGestureRecognizer,
+                  ),
+                  WidgetSpan(
+                    child: GestureDetector(
+                      onTap: onLinkTap,
+                      child: Icon(
+                        Icons.link,
+                        size: Theme.of(context).textTheme.bodyText1?.fontSize,
+                        color: Theme.of(context).textTheme.bodyText1?.color,
+                      ),
+                    ),
+                  ),
+                ],
                 style: const TextStyle(
                   decoration: TextDecoration.underline,
                   fontWeight: FontWeight.w500,
                 ),
-                recognizer: tapGestureRecognizer,
-              ),
-              const TextSpan(text: ' '),
-              TextSpan(
-                text: LocaleKeys.policy_description_application.tr(),
-                style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ],
           ),
@@ -149,7 +161,7 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
         valueListenable: policyCheckNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value ? widget.onPressed : null,
-          text: LocaleKeys.submit.tr(),
+          text: AppLocalizations.of(context)!.submit,
         ),
       );
 

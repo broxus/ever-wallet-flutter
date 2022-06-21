@@ -1,9 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../generated/codegen_loader.g.dart';
 import '../widgets/crystal_title.dart';
 import '../widgets/custom_back_button.dart';
 import '../widgets/custom_elevated_button.dart';
@@ -23,11 +22,11 @@ class SeedPhraseTypePage extends StatelessWidget {
           appBar: AppBar(
             leading: const CustomBackButton(),
           ),
-          body: body(),
+          body: body(context),
         ),
       );
 
-  Widget body() => SafeArea(
+  Widget body(BuildContext context) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16) - const EdgeInsets.only(top: 16),
           child: Stack(
@@ -38,7 +37,7 @@ class SeedPhraseTypePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 8),
-                    title(),
+                    title(context),
                   ],
                 ),
               ),
@@ -48,14 +47,16 @@ class SeedPhraseTypePage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     seedButton(
-                      title: LocaleKeys.regular_seed.tr(),
-                      subtitle: LocaleKeys.regular_seed_description.tr(),
+                      context: context,
+                      title: AppLocalizations.of(context)!.regular_seed,
+                      subtitle: AppLocalizations.of(context)!.regular_seed_description,
                       mnemonicType: const MnemonicType.labs(id: 0),
                     ),
                     const SizedBox(height: 16),
                     seedButton(
-                      title: LocaleKeys.legacy_seed.tr(),
-                      subtitle: LocaleKeys.legacy_seed_description.tr(),
+                      context: context,
+                      title: AppLocalizations.of(context)!.legacy_seed,
+                      subtitle: AppLocalizations.of(context)!.legacy_seed_description,
                       mnemonicType: const MnemonicType.legacy(),
                     ),
                   ],
@@ -66,11 +67,12 @@ class SeedPhraseTypePage extends StatelessWidget {
         ),
       );
 
-  Widget title() => CrystalTitle(
-        text: LocaleKeys.seed_phrase_type_description.tr(),
+  Widget title(BuildContext context) => CrystalTitle(
+        text: AppLocalizations.of(context)!.seed_phrase_type_description,
       );
 
   Widget seedButton({
+    required BuildContext context,
     required String title,
     required String subtitle,
     required MnemonicType mnemonicType,
@@ -101,7 +103,7 @@ class SeedPhraseTypePage extends StatelessWidget {
             const SizedBox(height: 16),
             CustomElevatedButton(
               onPressed: () => onSelected(mnemonicType),
-              text: LocaleKeys.select.tr(),
+              text: AppLocalizations.of(context)!.select,
             ),
           ],
         ),

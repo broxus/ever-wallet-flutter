@@ -1,11 +1,10 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../data/models/permission.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../providers/account/accounts_provider.dart';
 import '../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../common/constants.dart';
@@ -54,7 +53,7 @@ class _RequestPermissionsModalState extends ConsumerState<ChangeAccountPage> {
             child: Column(
               children: [
                 ModalHeader(
-                  text: LocaleKeys.change_account.tr(),
+                  text: AppLocalizations.of(context)!.change_account,
                   onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
                 ),
                 const SizedBox(height: 16),
@@ -170,7 +169,7 @@ class _RequestPermissionsModalState extends ConsumerState<ChangeAccountPage> {
 
   Widget rejectButton() => CustomOutlinedButton(
         onPressed: () => Navigator.of(widget.modalContext).pop(),
-        text: LocaleKeys.cancel.tr(),
+        text: AppLocalizations.of(context)!.cancel,
       );
 
   Widget submitButton() => Consumer(
@@ -179,7 +178,7 @@ class _RequestPermissionsModalState extends ConsumerState<ChangeAccountPage> {
 
           return CustomElevatedButton(
             onPressed: selectedAccount != null ? () => onSubmitPressed(selectedAccount) : null,
-            text: LocaleKeys.select.tr(),
+            text: AppLocalizations.of(context)!.select,
           );
         },
       );

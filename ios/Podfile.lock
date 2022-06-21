@@ -28,8 +28,6 @@ PODS:
     - MTBBarcodeScanner
   - share_plus (0.0.1):
     - Flutter
-  - shared_preferences_ios (0.0.1):
-    - Flutter
   - url_launcher_ios (0.0.1):
     - Flutter
 
@@ -45,7 +43,6 @@ DEPENDENCIES:
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
-  - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
@@ -76,8 +73,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/qr_code_scanner/ios"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
-  shared_preferences_ios:
-    :path: ".symlinks/plugins/shared_preferences_ios/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
@@ -95,7 +90,6 @@ SPEC CHECKSUMS:
   permission_handler_apple: d21b38e1a4b2e041c63af9568f9165e114e507a6
   qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
-  shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
   url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
 
 PODFILE CHECKSUM: 28874c547c24781a74d8ad24df0c6e189da74b5b

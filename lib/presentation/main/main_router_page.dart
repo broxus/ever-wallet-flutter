@@ -1,13 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../logger.dart';
 import '../../generated/assets.gen.dart';
-import '../../generated/codegen_loader.g.dart';
 import '../../generated/fonts.gen.dart';
 import '../common/theme.dart';
 import '../router.gr.dart';
@@ -79,15 +78,15 @@ class _MainRouterPageState extends State<MainRouterPage> {
             items: [
               item(
                 image: Assets.images.wallet,
-                label: LocaleKeys.wallet.tr(),
+                label: AppLocalizations.of(context)!.wallet,
               ),
               item(
                 image: Assets.images.browser,
-                label: LocaleKeys.browser.tr(),
+                label: AppLocalizations.of(context)!.browser,
               ),
               item(
                 image: Assets.images.profile,
-                label: LocaleKeys.profile.tr(),
+                label: AppLocalizations.of(context)!.profile,
               ),
             ],
           ),

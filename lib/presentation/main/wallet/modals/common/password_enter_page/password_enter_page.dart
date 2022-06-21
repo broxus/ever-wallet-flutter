@@ -1,11 +1,10 @@
 import 'package:change_notifier_builder/change_notifier_builder.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../../../../../../data/repositories/biometry_repository.dart';
 import '../../../../../../../injection.dart';
-import '../../../../../../generated/codegen_loader.g.dart';
 import '../../../../../common/theme.dart';
 import '../../../../../common/widgets/crystal_subtitle.dart';
 import '../../../../../common/widgets/custom_back_button.dart';
@@ -56,7 +55,7 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
           appBar: AppBar(
             leading: const CustomBackButton(),
             title: Text(
-              LocaleKeys.enter_password.tr(),
+              AppLocalizations.of(context)!.enter_password,
               style: const TextStyle(
                 color: Colors.black,
               ),
@@ -101,7 +100,7 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
       );
 
   Widget subtitle() => CrystalSubtitle(
-        text: LocaleKeys.enter_password_to_continue.tr(),
+        text: AppLocalizations.of(context)!.enter_password_to_continue,
       );
 
   Widget passwordField() => ChangeNotifierBuilder<PasswordEnterPageNotifier>(
@@ -113,7 +112,7 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
           enableSuggestions: false,
           obscureText: true,
           errorText: notifier?.state.passwordState.errorText,
-          hintText: '${LocaleKeys.enter_password.tr()}...',
+          hintText: '${AppLocalizations.of(context)!.enter_password}...',
           suffixIcon: TextFieldClearButton(
             controller: controller,
           ),
@@ -146,7 +145,7 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
         builder: (context, notifier, child) => CustomElevatedButton(
           onPressed:
               notifier?.state.formState.isValid ?? false ? () => onPressed(notifier!.state.passwordState.value) : null,
-          text: LocaleKeys.submit.tr(),
+          text: AppLocalizations.of(context)!.submit,
         ),
       );
 

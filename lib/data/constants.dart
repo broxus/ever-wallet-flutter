@@ -32,7 +32,7 @@ const kNetworkPresets = <ConnectionData>[
     group: 'mainnet',
     type: TransportType.jrpc,
     endpoints: [
-      'https://extension-api.broxus.com/rpc',
+      'https://jrpc.everwallet.net/rpc',
     ],
     timeout: 60000,
     local: false,
@@ -42,9 +42,11 @@ const kNetworkPresets = <ConnectionData>[
     group: 'mainnet',
     type: TransportType.gql,
     endpoints: [
-      'https://main.ton.dev/',
-      'https://main2.ton.dev/',
-      'https://main3.ton.dev/',
+      'https://eri01.main.everos.dev',
+      'https://gra01.main.everos.dev',
+      'https://gra02.main.everos.dev',
+      'https://lim01.main.everos.dev',
+      'https://rbx01.main.everos.dev',
     ],
     timeout: 60000,
     local: false,
@@ -54,7 +56,9 @@ const kNetworkPresets = <ConnectionData>[
     group: 'testnet',
     type: TransportType.gql,
     endpoints: [
-      'https://net.ton.dev/',
+      'https://eri01.net.everos.dev',
+      'https://rbx01.net.everos.dev',
+      'https://gra01.net.everos.dev',
     ],
     timeout: 60000,
     local: false,
@@ -64,7 +68,17 @@ const kNetworkPresets = <ConnectionData>[
     group: 'fld',
     type: TransportType.gql,
     endpoints: [
-      'https://gql.custler.net/',
+      'https://gql.custler.net',
+    ],
+    timeout: 60000,
+    local: false,
+  ),
+  ConnectionData(
+    name: 'Local node',
+    group: 'localnet',
+    type: TransportType.gql,
+    endpoints: [
+      'https://127.0.0.1',
     ],
     timeout: 60000,
     local: false,

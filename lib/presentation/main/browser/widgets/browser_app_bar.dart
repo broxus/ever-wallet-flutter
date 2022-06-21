@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +10,6 @@ import 'package:validators/validators.dart';
 
 import '../../../../data/repositories/bookmarks_repository.dart';
 import '../../../../data/repositories/search_history_repository.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../injection.dart';
 import '../../../common/theme.dart';
 import '../../../common/widgets/custom_popup_item.dart';
@@ -105,11 +104,11 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
               }
 
               return CustomTextFormField(
-                name: LocaleKeys.url.tr(),
+                name: AppLocalizations.of(context)!.url,
                 controller: widget.urlController,
                 focusNode: widget.urlFocusNode,
                 autocorrect: false,
-                hintText: LocaleKeys.address_field_placeholder.tr(),
+                hintText: AppLocalizations.of(context)!.address_field_placeholder,
                 onSubmitted: (value) {
                   if (value == null || value.trim().isEmpty) return;
 
@@ -163,7 +162,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
 
   CustomPopupItem reload() => CustomPopupItem(
         title: Text(
-          LocaleKeys.reload.tr(),
+          AppLocalizations.of(context)!.reload,
           style: const TextStyle(fontSize: 16),
         ),
         onTap: () => widget.controller.future.then((v) => v.reload()),
@@ -171,7 +170,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
 
   CustomPopupItem share() => CustomPopupItem(
         title: Text(
-          LocaleKeys.share.tr(),
+          AppLocalizations.of(context)!.share,
           style: const TextStyle(fontSize: 16),
         ),
         onTap: () async {
@@ -185,7 +184,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
 
   CustomPopupItem addBookmark() => CustomPopupItem(
         title: Text(
-          LocaleKeys.add_bookmark.tr(),
+          AppLocalizations.of(context)!.add_bookmark,
           style: const TextStyle(fontSize: 16),
         ),
         onTap: () async {
@@ -193,7 +192,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
 
           showAddBookmarkDialog(
             context: context,
-            title: LocaleKeys.add_bookmark.tr(),
+            title: AppLocalizations.of(context)!.add_bookmark,
             name: url?.authority,
             url: url?.toString(),
             onSubmit: ({

@@ -1,9 +1,8 @@
 import 'package:change_notifier_builder/change_notifier_builder.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/theme.dart';
 import '../../../common/widgets/custom_elevated_button.dart';
 import '../../../common/widgets/custom_text_form_field.dart';
@@ -72,7 +71,7 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
           enableSuggestions: false,
           obscureText: true,
           errorText: notifier?.state.passwordState.errorText,
-          hintText: '${LocaleKeys.enter_password.tr()}...',
+          hintText: '${AppLocalizations.of(context)!.enter_password}...',
           suffixIcon: TextFieldClearButton(
             controller: controller,
           ),
@@ -105,7 +104,7 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
         builder: (context, notifier, child) => CustomElevatedButton(
           onPressed:
               notifier?.state.formState.isValid ?? false ? () => onPressed(notifier!.state.passwordState.value) : null,
-          text: LocaleKeys.submit.tr(),
+          text: AppLocalizations.of(context)!.submit,
         ),
       );
 

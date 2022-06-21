@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
@@ -14,7 +14,6 @@ import '../../../../data/models/permission.dart';
 import '../../../../data/models/permissions.dart';
 import '../../../../data/repositories/accounts_repository.dart';
 import '../../../../data/repositories/keys_repository.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../injection.dart';
 import '../../common/get_local_custodians_public_keys.dart';
 import '../add_tip3_token_modal/show_add_tip3_token_modal.dart';
@@ -173,14 +172,14 @@ class ApprovalsListener extends StatelessWidget {
       if (accounts.isEmpty) {
         final currentKey = getIt.get<KeysRepository>().currentKey;
 
-        if (currentKey == null) throw Exception(LocaleKeys.no_current_key.tr());
+        if (currentKey == null) throw Exception(AppLocalizations.of(context)!.no_current_key);
 
         showAddAccountDialog(
           context: context,
           publicKey: currentKey.publicKey,
         );
 
-        throw Exception(LocaleKeys.no_accounts.tr());
+        throw Exception(AppLocalizations.of(context)!.no_accounts);
       }
 
       final result = await showRequestPermissionsModal(
@@ -192,7 +191,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result != null) {
         completer.complete(result);
       } else {
-        throw Exception(LocaleKeys.not_granted.tr());
+        throw Exception(AppLocalizations.of(context)!.not_granted);
       }
     } catch (err, st) {
       completer.completeError(err, st);
@@ -211,14 +210,14 @@ class ApprovalsListener extends StatelessWidget {
       if (accounts.isEmpty) {
         final currentKey = getIt.get<KeysRepository>().currentKey;
 
-        if (currentKey == null) throw Exception(LocaleKeys.no_current_key.tr());
+        if (currentKey == null) throw Exception(AppLocalizations.of(context)!.no_current_key);
 
         showAddAccountDialog(
           context: context,
           publicKey: currentKey.publicKey,
         );
 
-        throw Exception(LocaleKeys.no_accounts.tr());
+        throw Exception(AppLocalizations.of(context)!.no_accounts);
       }
 
       final result = await showChangeAccountModal(
@@ -230,7 +229,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result != null) {
         completer.complete(result);
       } else {
-        throw Exception(LocaleKeys.not_granted.tr());
+        throw Exception(AppLocalizations.of(context)!.not_granted);
       }
     } catch (err, st) {
       completer.completeError(err, st);
@@ -255,7 +254,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result == true) {
         completer.complete();
       } else {
-        throw Exception(LocaleKeys.not_granted.tr());
+        throw Exception(AppLocalizations.of(context)!.not_granted);
       }
     } catch (err, st) {
       completer.completeError(err, st);
@@ -280,7 +279,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result != null) {
         completer.complete(result);
       } else {
-        throw Exception(LocaleKeys.no_password.tr());
+        throw Exception(AppLocalizations.of(context)!.no_password);
       }
     } catch (err, st) {
       completer.completeError(err, st);
@@ -305,7 +304,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result != null) {
         completer.complete(result);
       } else {
-        throw Exception(LocaleKeys.no_password.tr());
+        throw Exception(AppLocalizations.of(context)!.no_password);
       }
     } catch (err, st) {
       completer.completeError(err, st);
@@ -330,7 +329,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result != null) {
         completer.complete(result);
       } else {
-        throw Exception(LocaleKeys.no_password.tr());
+        throw Exception(AppLocalizations.of(context)!.no_password);
       }
     } catch (err, st) {
       completer.completeError(err, st);
@@ -357,7 +356,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result != null) {
         completer.complete(result);
       } else {
-        throw Exception(LocaleKeys.no_password.tr());
+        throw Exception(AppLocalizations.of(context)!.no_password);
       }
     } catch (err, st) {
       completer.completeError(err, st);
@@ -376,7 +375,10 @@ class ApprovalsListener extends StatelessWidget {
     required Completer<Tuple2<String, String>> completer,
   }) async {
     try {
-      final publicKeys = await getLocalCustodiansPublicKeys(sender);
+      final publicKeys = await getLocalCustodiansPublicKeys(
+        context: context,
+        address: sender,
+      );
 
       final result = await showSendMessageModal(
         context: context,
@@ -393,7 +395,7 @@ class ApprovalsListener extends StatelessWidget {
       if (result != null) {
         completer.complete(result);
       } else {
-        throw Exception(LocaleKeys.no_password.tr());
+        throw Exception(AppLocalizations.of(context)!.no_password);
       }
     } catch (err, st) {
       completer.completeError(err, st);

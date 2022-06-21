@@ -1,83 +1,87 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../generated/codegen_loader.g.dart';
 import '../../common/constants.dart';
 import '../../common/extensions.dart';
 
 extension KnownPayloadX on KnownPayload {
-  Tuple2<String, Map<String, String>>? toRepresentableData() => when(
+  Tuple2<String, Map<String, String>>? toRepresentableData(BuildContext context) => when(
         comment: (value) => value.isNotEmpty
             ? Tuple2(
-                LocaleKeys.comment.tr(),
+                AppLocalizations.of(context)!.comment,
                 {
-                  LocaleKeys.comment.tr(): value,
+                  AppLocalizations.of(context)!.comment: value,
                 },
               )
             : null,
         tokenOutgoingTransfer: (tokenOutgoingTransfer) => Tuple2(
-          LocaleKeys.token_incoming_transfer.tr(),
+          AppLocalizations.of(context)!.token_incoming_transfer,
           {
             ...tokenOutgoingTransfer.to.when(
               ownerWallet: (address) => {
-                LocaleKeys.owner_wallet.tr(): address,
+                AppLocalizations.of(context)!.owner_wallet: address,
               },
               tokenWallet: (address) => {
-                LocaleKeys.token_wallet.tr(): address,
+                AppLocalizations.of(context)!.token_wallet: address,
               },
             ),
-            LocaleKeys.tokens.tr(): tokenOutgoingTransfer.tokens,
+            AppLocalizations.of(context)!.tokens: tokenOutgoingTransfer.tokens,
           },
         ),
         tokenSwapBack: (tokenSwapBack) => Tuple2(
-          LocaleKeys.token_swap_back.tr(),
+          AppLocalizations.of(context)!.token_swap_back,
           {
-            LocaleKeys.tokens.tr(): tokenSwapBack.tokens,
-            LocaleKeys.callback_address.tr(): tokenSwapBack.callbackAddress,
-            LocaleKeys.callback_payload.tr(): tokenSwapBack.callbackPayload,
+            AppLocalizations.of(context)!.tokens: tokenSwapBack.tokens,
+            AppLocalizations.of(context)!.callback_address: tokenSwapBack.callbackAddress,
+            AppLocalizations.of(context)!.callback_payload: tokenSwapBack.callbackPayload,
           },
         ),
       );
 }
 
 extension WalletInteractionMethodX on WalletInteractionMethod {
-  Tuple2<String, Map<String, String>> toRepresentableData() => when(
+  Tuple2<String, Map<String, String>> toRepresentableData(BuildContext context) => when(
         walletV3Transfer: () => Tuple2(
-          LocaleKeys.wallet_v3_transfer.tr(),
+          AppLocalizations.of(context)!.wallet_v3_transfer,
           <String, String>{},
         ),
         multisig: (multisigTransaction) => multisigTransaction.when(
           send: (multisigSendTransaction) => Tuple2(
-            LocaleKeys.multisig_send_transaction.tr(),
+            AppLocalizations.of(context)!.multisig_send_transaction,
             {
-              LocaleKeys.destination.tr(): multisigSendTransaction.dest,
-              LocaleKeys.value.tr():
+              AppLocalizations.of(context)!.destination: multisigSendTransaction.dest,
+              AppLocalizations.of(context)!.value:
                   '${multisigSendTransaction.value.toTokens().removeZeroes().formatValue()} $kEverTicker',
-              LocaleKeys.bounce.tr(): multisigSendTransaction.bounce ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
-              LocaleKeys.flags.tr(): multisigSendTransaction.flags.toString(),
-              LocaleKeys.payload.tr(): multisigSendTransaction.payload,
+              AppLocalizations.of(context)!.bounce:
+                  multisigSendTransaction.bounce ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no,
+              AppLocalizations.of(context)!.flags: multisigSendTransaction.flags.toString(),
+              AppLocalizations.of(context)!.payload: multisigSendTransaction.payload,
             },
           ),
           submit: (multisigSubmitTransaction) => Tuple2(
-            LocaleKeys.multisig_submit_transaction.tr(),
+            AppLocalizations.of(context)!.multisig_submit_transaction,
             {
-              LocaleKeys.custodian.tr(): multisigSubmitTransaction.custodian,
-              LocaleKeys.destination.tr(): multisigSubmitTransaction.dest,
-              LocaleKeys.value.tr():
+              AppLocalizations.of(context)!.custodian: multisigSubmitTransaction.custodian,
+              AppLocalizations.of(context)!.destination: multisigSubmitTransaction.dest,
+              AppLocalizations.of(context)!.value:
                   '${multisigSubmitTransaction.value.toTokens().removeZeroes().formatValue()} $kEverTicker',
-              LocaleKeys.bounce.tr(): multisigSubmitTransaction.bounce ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
-              LocaleKeys.all_balance.tr():
-                  multisigSubmitTransaction.allBalance ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
-              LocaleKeys.payload.tr(): multisigSubmitTransaction.payload,
-              LocaleKeys.transaction_id.tr(): multisigSubmitTransaction.transId,
+              AppLocalizations.of(context)!.bounce: multisigSubmitTransaction.bounce
+                  ? AppLocalizations.of(context)!.yes
+                  : AppLocalizations.of(context)!.no,
+              AppLocalizations.of(context)!.all_balance: multisigSubmitTransaction.allBalance
+                  ? AppLocalizations.of(context)!.yes
+                  : AppLocalizations.of(context)!.no,
+              AppLocalizations.of(context)!.payload: multisigSubmitTransaction.payload,
+              AppLocalizations.of(context)!.transaction_id: multisigSubmitTransaction.transId,
             },
           ),
           confirm: (multisigConfirmTransaction) => Tuple2(
-            LocaleKeys.multisig_confirm_transaction.tr(),
+            AppLocalizations.of(context)!.multisig_confirm_transaction,
             {
-              LocaleKeys.custodian.tr(): multisigConfirmTransaction.custodian,
-              LocaleKeys.transaction_id.tr(): multisigConfirmTransaction.transactionId,
+              AppLocalizations.of(context)!.custodian: multisigConfirmTransaction.custodian,
+              AppLocalizations.of(context)!.transaction_id: multisigConfirmTransaction.transactionId,
             },
           ),
         ),
@@ -85,43 +89,46 @@ extension WalletInteractionMethodX on WalletInteractionMethod {
 }
 
 extension WalletInteractionInfoX on WalletInteractionInfo {
-  Map<String, String> toRepresentableData() {
-    final knownPayloadData = knownPayload?.toRepresentableData();
-    final methodData = method.toRepresentableData();
+  Map<String, String> toRepresentableData(BuildContext context) {
+    final knownPayloadData = knownPayload?.toRepresentableData(context);
+    final methodData = method.toRepresentableData(context);
 
     return {
-      if (recipient != null) LocaleKeys.recipient.tr(): recipient!,
+      if (recipient != null) AppLocalizations.of(context)!.recipient: recipient!,
       if (knownPayloadData != null) ...{
-        LocaleKeys.known_payload.tr(): knownPayloadData.item1,
+        AppLocalizations.of(context)!.known_payload: knownPayloadData.item1,
         ...knownPayloadData.item2,
       },
-      LocaleKeys.method.tr(): methodData.item1,
+      AppLocalizations.of(context)!.method: methodData.item1,
       ...methodData.item2,
     };
   }
 }
 
 extension TokenWalletDeployedNotificationX on TokenWalletDeployedNotification {
-  Map<String, String> toRepresentableData() => {
-        LocaleKeys.root_token_contract.tr(): rootTokenContract,
+  Map<String, String> toRepresentableData(BuildContext context) => {
+        AppLocalizations.of(context)!.root_token_contract: rootTokenContract,
       };
 }
 
 extension DePoolReceiveAnswerNotificationX on DePoolReceiveAnswerNotification {
-  Map<String, String> toRepresentableData() => {
-        LocaleKeys.error_code.tr(): '$errorCode',
-        LocaleKeys.comment.tr(): comment,
+  Map<String, String> toRepresentableData(BuildContext context) => {
+        AppLocalizations.of(context)!.error_code: '$errorCode',
+        AppLocalizations.of(context)!.comment: comment,
       };
 }
 
 extension DePoolOnRoundCompleteNotificationX on DePoolOnRoundCompleteNotification {
-  Map<String, String> toRepresentableData() => {
-        LocaleKeys.round_id.tr(): roundId,
-        LocaleKeys.reward.tr(): '${reward.toTokens().removeZeroes().formatValue()} $kEverTicker',
-        LocaleKeys.ordinary_stake.tr(): '${ordinaryStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
-        LocaleKeys.vesting_stake.tr(): '${vestingStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
-        LocaleKeys.lock_stake.tr(): '${lockStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
-        LocaleKeys.reinvest.tr(): reinvest ? LocaleKeys.yes.tr() : LocaleKeys.no.tr(),
-        LocaleKeys.reason.tr(): reason.toString(),
+  Map<String, String> toRepresentableData(BuildContext context) => {
+        AppLocalizations.of(context)!.round_id: roundId,
+        AppLocalizations.of(context)!.reward: '${reward.toTokens().removeZeroes().formatValue()} $kEverTicker',
+        AppLocalizations.of(context)!.ordinary_stake:
+            '${ordinaryStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
+        AppLocalizations.of(context)!.vesting_stake:
+            '${vestingStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
+        AppLocalizations.of(context)!.lock_stake: '${lockStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
+        AppLocalizations.of(context)!.reinvest:
+            reinvest ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no,
+        AppLocalizations.of(context)!.reason: reason.toString(),
       };
 }

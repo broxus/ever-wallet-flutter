@@ -1,14 +1,13 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/widgets/unfocusing_gesture_detector.dart';
 
 Future<void> showEditCustodianLabelDialog({
@@ -26,19 +25,19 @@ Future<void> showEditCustodianLabelDialog({
 
           return UnfocusingGestureDetector(
             child: PlatformAlertDialog(
-              title: Text(LocaleKeys.custodian_label.tr()),
+              title: Text(AppLocalizations.of(context)!.custodian_label),
               content: Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: PlatformTextField(
                   controller: controller,
                   autocorrect: false,
-                  hintText: '${LocaleKeys.enter_name.tr()}...',
+                  hintText: '${AppLocalizations.of(context)!.enter_name}...',
                 ),
               ),
               actions: [
                 PlatformDialogAction(
                   onPressed: () => context.router.pop(),
-                  child: Text(LocaleKeys.cancel.tr()),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 PlatformDialogAction(
                   onPressed: () async {
@@ -56,7 +55,7 @@ Future<void> showEditCustodianLabelDialog({
                   cupertino: (_, __) => CupertinoDialogActionData(
                     isDefaultAction: true,
                   ),
-                  child: Text(LocaleKeys.ok.tr()),
+                  child: Text(AppLocalizations.of(context)!.ok),
                 ),
               ],
             ),

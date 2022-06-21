@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
@@ -8,7 +8,6 @@ import '../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../../logger.dart';
 import '../../../../../data/extensions.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/crystal_flushbar.dart';
 import '../../../../common/widgets/crystal_subtitle.dart';
@@ -57,7 +56,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
           appBar: AppBar(
             leading: const CustomBackButton(),
             title: Text(
-              LocaleKeys.add_existing_account.tr(),
+              AppLocalizations.of(context)!.add_existing_account,
               style: const TextStyle(
                 color: Colors.black,
               ),
@@ -93,7 +92,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
       );
 
   Widget subtitle() => CrystalSubtitle(
-        text: LocaleKeys.add_existing_account_description.tr(),
+        text: AppLocalizations.of(context)!.add_existing_account_description,
       );
 
   Widget form() => Form(
@@ -115,7 +114,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
     String? text;
 
     if (!validateAddress(addressController.text)) {
-      text = LocaleKeys.invalid_address.tr();
+      text = AppLocalizations.of(context)!.invalid_address;
     }
 
     if (addressController.text.isEmpty && nameController.text.isEmpty) {
@@ -126,13 +125,13 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
   }
 
   Widget addressField() => CustomTextFormField(
-        name: LocaleKeys.address.tr(),
+        name: AppLocalizations.of(context)!.address,
         controller: addressController,
         focusNode: addressFocusNode,
         autocorrect: false,
         enableSuggestions: false,
         textInputAction: TextInputAction.next,
-        hintText: '${LocaleKeys.address.tr()}...',
+        hintText: '${AppLocalizations.of(context)!.address}...',
         suffixIcon: TextFieldClearButton(
           controller: addressController,
         ),
@@ -150,12 +149,12 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
       );
 
   Widget nameField() => CustomTextFormField(
-        name: LocaleKeys.name.tr(),
+        name: AppLocalizations.of(context)!.name,
         controller: nameController,
         focusNode: nameFocusNode,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: '${LocaleKeys.name.tr()}...',
+        hintText: '${AppLocalizations.of(context)!.name}...',
         suffixIcon: TextFieldClearButton(
           controller: nameController,
         ),
@@ -189,7 +188,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
         valueListenable: formValidityNotifier,
         builder: (context, value, child) => CustomElevatedButton(
           onPressed: value != null ? null : onPressed,
-          text: LocaleKeys.confirm.tr(),
+          text: AppLocalizations.of(context)!.confirm,
         ),
       );
 

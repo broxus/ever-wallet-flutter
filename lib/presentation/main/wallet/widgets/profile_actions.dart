@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../providers/account/account_info_provider.dart';
@@ -8,7 +8,6 @@ import '../../../../../providers/key/current_key_provider.dart';
 import '../../../../../providers/key/keys_provider.dart';
 import '../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../generated/assets.gen.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/theme.dart';
 import '../modals/add_asset_modal/show_add_asset_modal.dart';
 import '../modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
@@ -33,7 +32,7 @@ class ProfileActions extends StatelessWidget {
               context: context,
               address: address,
             ),
-            title: LocaleKeys.add_asset.tr(),
+            title: AppLocalizations.of(context)!.add_asset,
             icon: const OverflowBox(
               maxHeight: 30,
               maxWidth: 30,
@@ -57,7 +56,7 @@ class ProfileActions extends StatelessWidget {
                           address: value.address,
                         )
                     : null,
-                title: LocaleKeys.receive.tr(),
+                title: AppLocalizations.of(context)!.receive,
                 icon: Assets.images.iconReceive.svg(
                   color: CrystalColor.secondary,
                 ),
@@ -80,7 +79,7 @@ class ProfileActions extends StatelessWidget {
                       address: address,
                       publicKeys: [tonWalletInfo.publicKey],
                     ),
-                    title: LocaleKeys.send.tr(),
+                    title: AppLocalizations.of(context)!.send,
                     icon: Assets.images.iconSend.svg(
                       color: CrystalColor.secondary,
                     ),
@@ -116,7 +115,7 @@ class ProfileActions extends StatelessWidget {
                               publicKeys: publicKeys,
                             )
                         : null,
-                    title: LocaleKeys.send.tr(),
+                    title: AppLocalizations.of(context)!.send,
                     icon: Assets.images.iconSend.svg(
                       color: CrystalColor.secondary,
                     ),
@@ -128,7 +127,7 @@ class ProfileActions extends StatelessWidget {
                       address: address,
                       publicKey: tonWalletInfo.publicKey,
                     ),
-                    title: LocaleKeys.deploy.tr(),
+                    title: AppLocalizations.of(context)!.deploy,
                     icon: Assets.images.iconDeploy.svg(
                       color: CrystalColor.secondary,
                     ),
@@ -136,7 +135,7 @@ class ProfileActions extends StatelessWidget {
                 }
               } else {
                 return WalletButton(
-                  title: LocaleKeys.send.tr(),
+                  title: AppLocalizations.of(context)!.send,
                   icon: Assets.images.iconSend.svg(
                     color: CrystalColor.secondary,
                   ),

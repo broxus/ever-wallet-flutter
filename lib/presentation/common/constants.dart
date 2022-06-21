@@ -12,6 +12,4 @@ const kNonBreakingHyphen = '\u2011';
 
 const kEverTicker = 'EVER';
 
-const kWeverTicker = 'WEVER';
-
 const kEverNetworkName = 'Everscale';

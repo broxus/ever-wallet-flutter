@@ -1,11 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../../injection.dart';
-import '../../../../../../generated/codegen_loader.g.dart';
 import '../../../../../common/form/field_state.dart';
 import '../../../../../common/form/form_state.dart';
 import '../../../../../common/form/value_state.dart';
@@ -59,7 +57,7 @@ class PasswordEnterPageNotifier extends ChangeNotifier {
         : FieldState(
             valueState: ValueState.invalid,
             value: value,
-            errorText: LocaleKeys.invalid_password.tr(),
+            errorText: 'Invalid password',
           );
   }
 }

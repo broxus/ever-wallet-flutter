@@ -1,6 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:string_extensions/string_extensions.dart';
 
@@ -8,7 +8,6 @@ import '../../../../data/models/account_interaction.dart';
 import '../../../../data/models/permission.dart';
 import '../../../../data/models/permissions.dart';
 import '../../../../data/models/wallet_contract_type.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../common/widgets/custom_back_button.dart';
 import '../../../common/widgets/custom_elevated_button.dart';
 import '../../../common/widgets/sectioned_card.dart';
@@ -41,7 +40,7 @@ class _GrantPermissionsPageState extends State<GrantPermissionsPage> {
         appBar: AppBar(
           leading: const CustomBackButton(),
           title: Text(
-            LocaleKeys.grant_permissions.tr(),
+            AppLocalizations.of(context)!.grant_permissions,
             style: const TextStyle(
               color: Colors.black,
             ),
@@ -78,32 +77,32 @@ class _GrantPermissionsPageState extends State<GrantPermissionsPage> {
       );
 
   Widget origin() => SectionedCardSection(
-        title: LocaleKeys.origin.tr(),
+        title: AppLocalizations.of(context)!.origin,
         subtitle: widget.origin,
         isSelectable: true,
       );
 
   Widget permissions() => SectionedCardSection(
-        title: LocaleKeys.requested_permissions.tr(),
+        title: AppLocalizations.of(context)!.requested_permissions,
         subtitle: widget.permissions.map((e) => describeEnum(e).capitalize).join(', '),
         isSelectable: true,
       );
 
   Widget address() => SectionedCardSection(
-        title: LocaleKeys.account_address.tr(),
+        title: AppLocalizations.of(context)!.account_address,
         subtitle: widget.account.address,
         isSelectable: true,
       );
 
   Widget publicKey() => SectionedCardSection(
-        title: LocaleKeys.account_public_key.tr(),
+        title: AppLocalizations.of(context)!.account_public_key,
         subtitle: widget.account.publicKey,
         isSelectable: true,
       );
 
   Widget submitButton() => CustomElevatedButton(
         onPressed: () => onSubmitPressed(),
-        text: LocaleKeys.allow.tr(),
+        text: AppLocalizations.of(context)!.allow,
       );
 
   void onSubmitPressed() {

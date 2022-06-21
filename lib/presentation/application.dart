@@ -1,12 +1,14 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/repositories/biometry_repository.dart';
 import '../injection.dart';
 import '../providers/key/keys_presence_provider.dart';
+import 'bloc/locale_cubit.dart';
 import 'common/theme.dart';
 import 'router.gr.dart';
 
@@ -38,13 +40,8 @@ class _ApplicationState extends State<Application> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context) => EasyLocalization(
-        path: 'assets/localizations',
-        supportedLocales: const [
-          Locale('en'),
-        ],
-        fallbackLocale: const Locale('en'),
-        useOnlyLangCode: true,
+  Widget build(BuildContext context) => BlocProvider(
+        create: (context) => getIt.get<LocaleCubit>(),
         child: ProviderScope(
           child: Portal(
             child: ColoredBox(
@@ -55,28 +52,33 @@ class _ApplicationState extends State<Application> with WidgetsBindingObserver {
                     keysPresenceProvider,
                     (previous, next) {
                       next.whenData((value) {
-                        if (value) {
-                          appRouter.root.pushAndPopUntil(
-                            const MainRouterRoute(),
-                            predicate: (route) => false,
-                          );
-                        } else {
-                          appRouter.root.pushAndPopUntil(
-                            const WizardRouterRoute(),
-                            predicate: (route) => false,
-                          );
-                        }
+                        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                          if (value) {
+                            appRouter.root.pushAndPopUntil(
+                              const MainRouterRoute(),
+                              predicate: (route) => false,
+                            );
+                          } else {
+                            appRouter.root.pushAndPopUntil(
+                              const WizardRouterRoute(),
+                              predicate: (route) => false,
+                            );
+                          }
+                        });
                       });
                     },
                   );
 
-                  return MaterialApp.router(
-                    title: applicationTitle,
-                    theme: materialTheme(context),
+                  return child!;
+                },
+                child: BlocBuilder<LocaleCubit, Locale?>(
+                  builder: (context, state) => MaterialApp.router(
                     debugShowCheckedModeBanner: false,
-                    localizationsDelegates: context.localizationDelegates,
-                    supportedLocales: context.supportedLocales,
-                    locale: context.locale,
+                    onGenerateTitle: (context) => AppLocalizations.of(context)!.application_title,
+                    locale: state,
+                    localizationsDelegates: AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    theme: materialTheme(context),
                     routerDelegate: appRouter.delegate(),
                     routeInformationParser: appRouter.defaultRouteParser(),
                     builder: (context, child) => CupertinoTheme(
@@ -86,11 +88,32 @@ class _ApplicationState extends State<Application> with WidgetsBindingObserver {
                         child: child!,
                       ),
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             ),
           ),
         ),
       );
+}
+
+const list = {
+  'en': LocaleDescription(
+    name: 'English',
+    icon: 'us',
+  ),
+  'ko': LocaleDescription(
+    name: 'Korean',
+    icon: 'kr',
+  ),
+};
+
+class LocaleDescription {
+  final String name;
+  final String icon;
+
+  const LocaleDescription({
+    required this.name,
+    required this.icon,
+  });
 }

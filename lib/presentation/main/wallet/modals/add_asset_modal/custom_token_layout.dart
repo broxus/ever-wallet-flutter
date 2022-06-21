@@ -1,10 +1,9 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/widgets/animated_offstage.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
 import '../../../../common/widgets/custom_text_form_field.dart';
@@ -62,11 +61,11 @@ class _CustomTokenLayoutState extends State<CustomTokenLayout> {
             color: Colors.grey.withOpacity(0.15),
           ),
           child: CustomTextFormField(
-            name: LocaleKeys.address.tr(),
+            name: AppLocalizations.of(context)!.address,
             controller: controller,
             autocorrect: false,
             enableSuggestions: false,
-            hintText: LocaleKeys.root_token_contract.tr(),
+            hintText: AppLocalizations.of(context)!.root_token_contract,
             suffixIcon: TextFieldClearButton(controller: controller),
             inputFormatters: [
               FilteringTextInputFormatter.deny(RegExp(r'\s')),
@@ -77,7 +76,7 @@ class _CustomTokenLayoutState extends State<CustomTokenLayout> {
               }
 
               if (!validateAddress(value)) {
-                return LocaleKeys.invalid_value.tr();
+                return AppLocalizations.of(context)!.invalid_value;
               }
               return null;
             },
@@ -98,7 +97,7 @@ class _CustomTokenLayoutState extends State<CustomTokenLayout> {
               context.router.pop();
               widget.onSave(address);
             },
-            text: LocaleKeys.proceed.tr(),
+            text: AppLocalizations.of(context)!.proceed,
           ),
         ),
       );

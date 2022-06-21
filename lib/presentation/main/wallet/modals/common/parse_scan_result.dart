@@ -1,9 +1,11 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../../generated/codegen_loader.g.dart';
-
-Future<Tuple3<String, String?, String?>> parseScanResult(String value) async {
+Future<Tuple3<String, String?, String?>> parseScanResult({
+  required BuildContext context,
+  required String value,
+}) async {
   String? address;
   String? amount;
   String? comment;
@@ -17,7 +19,7 @@ Future<Tuple3<String, String?, String?>> parseScanResult(String value) async {
   if (addressMatch != null) {
     address = addressMatch;
   } else {
-    throw Exception(LocaleKeys.invalid_data.tr());
+    throw Exception(AppLocalizations.of(context)!.invalid_data);
   }
 
   final amountRegExp = RegExp(

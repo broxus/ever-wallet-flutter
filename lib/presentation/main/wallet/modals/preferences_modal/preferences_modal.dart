@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -8,7 +8,6 @@ import '../../../../../../injection.dart';
 import '../../../../../../logger.dart';
 import '../../../../../../providers/account/account_info_provider.dart';
 import '../../../../../data/extensions.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/utils.dart';
 import '../../../../common/widgets/address_card.dart';
@@ -55,7 +54,7 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
               mainAxisSize: MainAxisSize.min,
               children: [
                 ModalHeader(
-                  text: LocaleKeys.preferences.tr(),
+                  text: AppLocalizations.of(context)!.preferences,
                 ),
                 const SizedBox(height: 16),
                 field(),
@@ -72,11 +71,11 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
   Widget card() => AddressCard(address: widget.address);
 
   Widget field() => CustomTextFormField(
-        name: LocaleKeys.name.tr(),
+        name: AppLocalizations.of(context)!.name,
         controller: controller,
         autocorrect: false,
         enableSuggestions: false,
-        hintText: '${LocaleKeys.name.tr()}...',
+        hintText: '${AppLocalizations.of(context)!.name}...',
         suffixIcon: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -95,7 +94,7 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
 
                   showCrystalFlushbar(
                     context,
-                    message: LocaleKeys.wallet_renamed.tr(),
+                    message: AppLocalizations.of(context)!.wallet_renamed,
                   );
                 } catch (err, st) {
                   logger.e(err, err, st);
@@ -119,6 +118,6 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
 
   Widget explorerButton() => CustomOutlinedButton(
         onPressed: () => launchUrlString(accountExplorerLink(widget.address)),
-        text: LocaleKeys.see_in_the_explorer.tr(),
+        text: AppLocalizations.of(context)!.see_in_the_explorer,
       );
 }

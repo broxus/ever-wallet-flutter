@@ -1,12 +1,11 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../data/models/token_contract_asset.dart';
 import '../../../../../../providers/account/account_assets_options_provider.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/widgets/custom_elevated_button.dart';
 import '../../../../common/widgets/custom_text_form_field.dart';
 import '../../../../common/widgets/text_field_clear_button.dart';
@@ -89,11 +88,11 @@ class _AssetsLayoutState extends State<AssetsLayout> {
           color: Colors.grey.withOpacity(0.15),
         ),
         child: CustomTextFormField(
-          name: LocaleKeys.search.tr(),
+          name: AppLocalizations.of(context)!.search,
           controller: controller,
           autocorrect: false,
           enableSuggestions: false,
-          hintText: LocaleKeys.enter_asset_name.tr(),
+          hintText: AppLocalizations.of(context)!.enter_asset_name,
           suffixIcon: TextFieldClearButton(controller: controller),
           onChanged: (value) {
             final text = value?.toLowerCase().trim() ?? '';
@@ -155,7 +154,7 @@ class _AssetsLayoutState extends State<AssetsLayout> {
                   );
                 }
               : null,
-          text: LocaleKeys.save.tr(),
+          text: AppLocalizations.of(context)!.save,
         ),
       );
 }

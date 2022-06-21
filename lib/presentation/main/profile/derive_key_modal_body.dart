@@ -1,12 +1,11 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../../data/repositories/keys_repository.dart';
 import '../../../../../injection.dart';
 import '../../../../data/repositories/keys_repository.dart';
-import '../../../../generated/codegen_loader.g.dart';
 import '../../../../logger.dart';
 import '../../../data/extensions.dart';
 import '../../common/widgets/crystal_flushbar.dart';
@@ -22,7 +21,7 @@ class DeriveKeyModalBody extends StatefulWidget {
     required this.name,
   }) : super(key: key);
 
-  static String get title => LocaleKeys.derive_enter_password.tr();
+  static String title(BuildContext context) => AppLocalizations.of(context)!.derive_enter_password;
 
   @override
   _DeriveKeyModalBodyState createState() => _DeriveKeyModalBodyState();

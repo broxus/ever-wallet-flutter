@@ -38,6 +38,7 @@ class HiveSource {
   static const _biometryStatusKey = 'biometry_status';
   static const _currentPublicKeyKey = 'current_public_key';
   static const _currentConnectionKey = 'current_connection';
+  static const _localeKey = 'locale';
   late final Uint8List _key;
   late final Box<String> _keysPasswordsBox;
   late final Box<Object?> _userPreferencesBox;
@@ -173,6 +174,10 @@ class HiveSource {
   }
 
   Future<void> clearTokenWalletTransactions() => _tokenWalletTransactionsBox.clear();
+
+  String? get locale => _userPreferencesBox.get(_localeKey) as String?;
+
+  Future<void> setLocale(String locale) => _userPreferencesBox.put(_localeKey, locale);
 
   bool get isBiometryEnabled => (_userPreferencesBox.get(_biometryStatusKey, defaultValue: false) as bool?)!;
 

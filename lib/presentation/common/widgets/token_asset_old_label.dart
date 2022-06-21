@@ -1,7 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../generated/codegen_loader.g.dart';
 import '../theme.dart';
 
 class TokenAssetOldLabel extends StatelessWidget {
@@ -20,7 +19,7 @@ class TokenAssetOldLabel extends StatelessWidget {
           vertical: 2,
         ),
         child: Text(
-          LocaleKeys.old.tr(),
+          AppLocalizations.of(context)!.old,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 10,

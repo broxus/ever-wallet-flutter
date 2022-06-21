@@ -1,11 +1,10 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../../../../data/models/token_contract_asset.dart';
 import '../../../../../../data/repositories/accounts_repository.dart';
 import '../../../../../../injection.dart';
 import '../../../../../data/extensions.dart';
-import '../../../../../generated/codegen_loader.g.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/crystal_flushbar.dart';
 import '../../../../common/widgets/keep_alive.dart';
@@ -47,7 +46,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: ModalHeader(
-                  text: LocaleKeys.select_new_assets.tr(),
+                  text: AppLocalizations.of(context)!.select_new_assets,
                 ),
               ),
               tabs(),
@@ -73,8 +72,8 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
           TabBar(
             controller: tabController,
             tabs: [
-              Text(LocaleKeys.search.tr()),
-              Text(LocaleKeys.custom_token.tr()),
+              Text(AppLocalizations.of(context)!.search),
+              Text(AppLocalizations.of(context)!.custom_token),
             ],
             labelStyle: const TextStyle(fontSize: 16, letterSpacing: 0.25),
             unselectedLabelColor: CrystalColor.fontSecondaryDark,
@@ -148,7 +147,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
     } catch (err) {
       if (!mounted) return;
 
-      showErrorCrystalFlushbar(context, message: LocaleKeys.invalid_root_token_contract.tr());
+      showErrorCrystalFlushbar(context, message: AppLocalizations.of(context)!.invalid_root_token_contract);
     }
   }
 }

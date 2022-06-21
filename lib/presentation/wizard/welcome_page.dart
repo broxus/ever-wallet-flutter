@@ -1,11 +1,10 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../generated/assets.gen.dart';
-import '../../generated/codegen_loader.g.dart';
 import '../common/theme.dart';
 import '../common/widgets/crystal_subtitle.dart';
 import '../common/widgets/crystal_title.dart';
@@ -45,9 +44,9 @@ class WelcomePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 48),
-                    title(),
+                    title(context),
                     const SizedBox(height: 16),
-                    subtitle(),
+                    subtitle(context),
                     const SizedBox(height: 72),
                     image(),
                   ],
@@ -69,12 +68,12 @@ class WelcomePage extends StatelessWidget {
         ),
       );
 
-  Widget title() => CrystalTitle(
-        text: LocaleKeys.welcome_title.tr(),
+  Widget title(BuildContext context) => CrystalTitle(
+        text: AppLocalizations.of(context)!.welcome_title,
       );
 
-  Widget subtitle() => CrystalSubtitle(
-        text: LocaleKeys.welcome_subtitle.tr(),
+  Widget subtitle(BuildContext context) => CrystalSubtitle(
+        text: AppLocalizations.of(context)!.welcome_subtitle,
       );
 
   Widget image() => Align(
@@ -96,7 +95,7 @@ class WelcomePage extends StatelessWidget {
             ),
           ),
         ),
-        text: LocaleKeys.create_new_wallet.tr(),
+        text: AppLocalizations.of(context)!.create_new_wallet,
       );
 
   Widget signInButton(BuildContext context) => CustomOutlinedButton(
@@ -118,6 +117,6 @@ class WelcomePage extends StatelessWidget {
             ),
           ),
         ),
-        text: LocaleKeys.sign_in.tr(),
+        text: AppLocalizations.of(context)!.sign_in,
       );
 }
