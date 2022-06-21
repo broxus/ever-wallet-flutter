@@ -106,6 +106,10 @@ const list = {
     name: 'Korean',
     icon: 'kr',
   ),
+  'ja': LocaleDescription(
+    name: 'Japanese',
+    icon: 'jp',
+  ),
 };
 
 class LocaleDescription {
