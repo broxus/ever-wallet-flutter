@@ -1,34 +1,27 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../../generated/fonts.gen.dart';
+import '../util/theme_styles.dart';
 
-ThemeData materialTheme(BuildContext context) => ThemeData(
-      brightness: Brightness.light,
-      primaryColor: CrystalColor.accent,
-      fontFamily: FontFamily.pt,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(
-          color: CrystalColor.accent,
-        ),
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-      ),
-      splashColor: isCupertino(context) ? Colors.transparent : null,
-      scaffoldBackgroundColor: Colors.white,
-    );
-
-CupertinoThemeData cupertinoTheme(BuildContext context) => const CupertinoThemeData(
-      brightness: Brightness.light,
-      primaryColor: CrystalColor.accent,
-      textTheme: CupertinoTextThemeData(
-        primaryColor: CrystalColor.accent,
-      ),
-      scaffoldBackgroundColor: Colors.white,
-    );
+ThemeData materialTheme(BuildContext context, Brightness brightness) {
+  final palette = brightness == Brightness.dark ? darkStyle : lightStyle;
+  return ThemeData(
+    brightness: brightness,
+    extensions: [palette],
+    primaryColor: palette.colors.primaryBackgroundColor,
+    fontFamily: FontFamily.pt,
+    appBarTheme: AppBarTheme(
+      backgroundColor: palette.colors.primaryBackgroundColor,
+      elevation: 0,
+      iconTheme: IconThemeData(color: palette.colors.iconPrimaryButtonColor),
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
+    ),
+    splashColor: isCupertino(context) ? Colors.transparent : null,
+    scaffoldBackgroundColor: palette.colors.primaryBackgroundColor,
+  );
+}
 
 abstract class CrystalColor {
   static const primary = Color(0xFFFFFFFF);
