@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../util/extensions/iterable_extensions.dart';
 
@@ -18,23 +18,48 @@ class SlidingBlockChains extends StatefulWidget {
 class _SlidingBlockChainsState extends State<SlidingBlockChains> {
   late Timer timer;
   final controllers = List.generate(3, (_) => ScrollController());
-  final images = <List<Color>>[];
+  final images = <List<String>>[
+    [
+      'layer1/btc.svg',
+      'layer1/eth.svg',
+      'layer1/usdt.svg',
+      'layer1/DOGE.svg',
+      'layer1/dot.svg',
+      'layer1/MATIC.svg',
+      'layer1/dai.svg',
+      'layer1/QUBE.svg',
+      'layer1/EVER.svg',
+      'layer1/bridge.svg',
+    ],
+    [
+      'layer2/usdc.svg',
+      'layer2/AVAX.svg',
+      'layer2/xrp.svg',
+      'layer2/bnb.svg',
+      'layer2/ADA.svg',
+      'layer2/SOL.svg',
+      'layer2/SHIB.svg',
+      'layer2/LUNA.svg',
+      'layer2/NEAR.svg',
+      'layer2/CRO.svg',
+    ],
+    [
+      'layer3/atom.svg',
+      'layer3/ltc.svg',
+      'layer3/trx.svg',
+      'layer3/xlm.svg',
+      'layer3/link.svg',
+      'layer3/mana.svg',
+      'layer3/FTM.svg',
+      'layer3/HBAR.svg',
+      'layer3/AXS.svg',
+      'layer3/AAVE.svg',
+    ],
+  ];
 
   @override
   void initState() {
     super.initState();
-
-    /// TODO: replace colors with images
-    images.addAll(
-      List.generate(
-        3,
-        (index) => List.generate(
-          10,
-          (index) => Colors.primaries[Random().nextInt(Colors.primaries.length)],
-        ),
-      ),
-    );
-
     timer = Timer.periodic(const Duration(milliseconds: 30), (timer) => _scrollLists());
   }
 
@@ -61,6 +86,7 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
                     (c, listIndex) => SizedBox(
                       height: partSize,
                       child: ListView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
                         controller: c,
                         reverse: listIndex.isOdd,
                         scrollDirection: Axis.horizontal,
@@ -84,10 +110,12 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
 
   Widget _generateItem(int listIndex, int index, double size) {
     return Container(
+      key: ValueKey('OnboardingImage_${images[listIndex][index]}'),
       margin: const EdgeInsets.only(right: 16),
       width: size,
       height: size,
-      decoration: BoxDecoration(color: images[listIndex][index], shape: BoxShape.circle),
+      decoration: const BoxDecoration(shape: BoxShape.circle),
+      child: SvgPicture.asset('assets/images/onboarding/${images[listIndex][index]}'),
     );
   }
 }

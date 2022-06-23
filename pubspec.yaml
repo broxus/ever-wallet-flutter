@@ -115,6 +115,9 @@ flutter:
     - .env
     - assets/fonts/
     - assets/images/
+    - assets/images/onboarding/layer1/
+    - assets/images/onboarding/layer2/
+    - assets/images/onboarding/layer3/
     - assets/animations/
 
   fonts:
