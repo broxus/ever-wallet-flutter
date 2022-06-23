@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../util/theme_styles.dart';
+import '../../../util/extensions/context_extensions.dart';
 
 const kPrimaryButtonHeight = 40.0;
 
@@ -46,12 +46,12 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = Theme.of(context).extension<ThemeStyle>()!;
+    final palette = context.themeStyle;
 
     final textStyle = style ??
         (isOpacity ? palette.styles.secondaryButtonStyle : palette.styles.primaryButtonStyle);
     final bgColor = backgroundColor ??
-        (isOpacity ? palette.colors.primaryButtonColor : palette.colors.secondaryButtonColor);
+        (isOpacity ? palette.colors.secondaryButtonColor : palette.colors.primaryButtonColor);
 
     Widget _child;
     if (child == null) {
@@ -85,7 +85,7 @@ class PrimaryButton extends StatelessWidget {
           child: InkWell(
             focusNode: focusNode,
             customBorder: RoundedRectangleBorder(
-              borderRadius: radius ?? BorderRadius.circular(10.0),
+              borderRadius: radius ?? BorderRadius.zero,
             ),
             highlightColor: presstateColor,
             splashColor: splashColor,
