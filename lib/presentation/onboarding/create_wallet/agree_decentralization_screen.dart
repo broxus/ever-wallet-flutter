@@ -6,8 +6,9 @@ import '../../common/general/default_appbar.dart';
 import '../../common/general/field/checkbox_input_field.dart';
 import '../../util/extensions/context_extensions.dart';
 import '../widgets/onboarding_background.dart';
+import 'save_seed_phrase_screen.dart';
 
-class AgreeDecentralizationRoute extends MaterialPageRoute {
+class AgreeDecentralizationRoute extends MaterialPageRoute<void> {
   AgreeDecentralizationRoute() : super(builder: (_) => const AgreeDecentralizationScreen());
 }
 
@@ -33,31 +34,28 @@ class AgreeDecentralizationScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: const DefaultAppBar(),
-        body: SafeArea(
-          minimum: const EdgeInsets.only(bottom: 16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Spacer(),
-                Text(localization.sign_policy, style: themeStyle.styles.fullScreenStyle),
-                const SizedBox(height: 40),
-                CheckboxInputField(
-                  text: Text(
-                    localization.policy_description,
-                    style: themeStyle.styles.captionStyle,
-                  ),
-                  value: false,
-                  onChanged: (v) {},
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Spacer(),
+              Text(localization.sign_policy, style: themeStyle.styles.fullScreenStyle),
+              const SizedBox(height: 40),
+              CheckboxInputField(
+                text: Text(
+                  localization.policy_description,
+                  style: themeStyle.styles.captionStyle,
                 ),
-                const SizedBox(height: 40),
-                PrimaryButton(
-                  text: localization.submit,
-                  onPressed: () {},
-                ),
-              ],
-            ),
+                value: false,
+                onChanged: (v) {},
+              ),
+              const SizedBox(height: 40),
+              PrimaryButton(
+                text: localization.submit,
+                onPressed: () => Navigator.of(context).push(SaveSeedPhraseRoute()),
+              ),
+            ],
           ),
         ),
       ),

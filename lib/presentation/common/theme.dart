@@ -16,7 +16,13 @@ ThemeData materialTheme(BuildContext context, Brightness brightness) {
       backgroundColor: palette.colors.primaryBackgroundColor,
       elevation: 0,
       iconTheme: IconThemeData(color: palette.colors.iconPrimaryButtonColor),
-      systemOverlayStyle: SystemUiOverlayStyle.dark,
+      systemOverlayStyle:
+          brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: palette.colors.primaryTextColor,
+      selectionColor: palette.colors.activeInputColor,
+      selectionHandleColor: palette.colors.activeInputColor,
     ),
     splashColor: isCupertino(context) ? Colors.transparent : null,
     scaffoldBackgroundColor: palette.colors.primaryBackgroundColor,

@@ -72,6 +72,7 @@ class _ApplicationState extends State<Application> with WidgetsBindingObserver {
                 },
                 child: BlocBuilder<LocaleCubit, Locale?>(
                   builder: (context, state) => MaterialApp.router(
+                    scrollBehavior: NoGlowBehavior(),
                     debugShowCheckedModeBanner: false,
                     onGenerateTitle: (context) => AppLocalizations.of(context)!.application_title,
                     locale: state,
@@ -115,4 +116,14 @@ class LocaleDescription {
     required this.name,
     required this.icon,
   });
+}
+
+class NoGlowBehavior extends ScrollBehavior {
+  @override
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) => const BouncingScrollPhysics();
 }

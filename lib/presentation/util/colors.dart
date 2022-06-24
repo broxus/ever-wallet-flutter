@@ -22,6 +22,8 @@ class ColorsPalette {
     required this.inactiveInputColor,
     required this.primaryPressStateColor,
     required this.secondaryPressStateColor,
+    required this.errorTextColor,
+    required this.errorInputColor,
   });
 
   /// Colors for backgrounds
@@ -57,6 +59,10 @@ class ColorsPalette {
   /// Color when pressing button
   final Color primaryPressStateColor;
   final Color secondaryPressStateColor;
+
+  /// Errors
+  final Color errorTextColor;
+  final Color errorInputColor;
 }
 
 /// Color design system
@@ -76,5 +82,6 @@ class ColorsRes {
   static const grey = Color(0xFF96A1A7);
   static const greyOpacity = Color(0xE0F8F8FB);
   static const greyBlue = Color(0xFF838699);
-  static const redDark = Color(0xFFD70000);
+  static const redDark = Color(0xFF9A325C);
+  static const redLight = Color(0xFFEB4361);
 }
