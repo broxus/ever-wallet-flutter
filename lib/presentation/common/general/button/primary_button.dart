@@ -15,7 +15,7 @@ class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     this.text,
     this.onPressed,
-    this.isOpacity = false,
+    this.isTransparent = false,
     this.icon,
     Key? key,
     this.style,
@@ -26,13 +26,12 @@ class PrimaryButton extends StatelessWidget {
     this.height = kPrimaryButtonHeight,
     this.padding,
     this.presstateColor,
-    this.splashColor,
   }) : super(key: key);
 
   final String? text;
   final VoidCallback? onPressed;
   final TextStyle? style;
-  final bool isOpacity;
+  final bool isTransparent;
   final Widget? icon;
 
   final Widget? child;
@@ -42,16 +41,19 @@ class PrimaryButton extends StatelessWidget {
   final EdgeInsets? padding;
   final Color? backgroundColor;
   final Color? presstateColor;
-  final Color? splashColor;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.themeStyle;
 
     final textStyle = style ??
-        (isOpacity ? palette.styles.secondaryButtonStyle : palette.styles.primaryButtonStyle);
+        (isTransparent ? palette.styles.secondaryButtonStyle : palette.styles.primaryButtonStyle);
     final bgColor = backgroundColor ??
-        (isOpacity ? palette.colors.secondaryButtonColor : palette.colors.primaryButtonColor);
+        (isTransparent ? palette.colors.secondaryButtonColor : palette.colors.primaryButtonColor);
+    final pressColor = presstateColor ??
+        (isTransparent
+            ? palette.colors.secondaryPressStateColor
+            : palette.colors.primaryPressStateColor);
 
     Widget _child;
     if (child == null) {
@@ -87,8 +89,7 @@ class PrimaryButton extends StatelessWidget {
             customBorder: RoundedRectangleBorder(
               borderRadius: radius ?? BorderRadius.zero,
             ),
-            highlightColor: presstateColor,
-            splashColor: splashColor,
+            splashColor: pressColor,
             onTap: onPressed,
             child: Center(child: _child),
           ),

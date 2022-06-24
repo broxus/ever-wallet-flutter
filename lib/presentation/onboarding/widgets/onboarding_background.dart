@@ -5,8 +5,13 @@ import 'package:flutter/material.dart';
 class OnboardingBackground extends StatelessWidget {
   final Widget child;
 
+  /// Allow add more elements to screen.
+  /// Widgets must be wrapped in Positioned for better positioning
+  final List<Widget>? otherPositioned;
+
   const OnboardingBackground({
     required this.child,
+    this.otherPositioned,
     Key? key,
   }) : super(key: key);
 
@@ -15,6 +20,7 @@ class OnboardingBackground extends StatelessWidget {
     return Stack(
       children: [
         const Positioned.fill(child: OnboardingGradient()),
+        ...?otherPositioned,
         Positioned.fill(child: child),
       ],
     );

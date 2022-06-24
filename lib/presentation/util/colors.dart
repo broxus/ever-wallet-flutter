@@ -18,6 +18,10 @@ class ColorsPalette {
     required this.textSecondaryTextButtonColor,
     required this.iconPrimaryButtonColor,
     required this.iconSecondaryButtonColor,
+    required this.activeInputColor,
+    required this.inactiveInputColor,
+    required this.primaryPressStateColor,
+    required this.secondaryPressStateColor,
   });
 
   /// Colors for backgrounds
@@ -44,8 +48,15 @@ class ColorsPalette {
 
   /// Colors for all icon based button
   final Color iconPrimaryButtonColor;
-
   final Color iconSecondaryButtonColor;
+
+  /// Colors for inputs, checkboxes
+  final Color activeInputColor;
+  final Color inactiveInputColor;
+
+  /// Color when pressing button
+  final Color primaryPressStateColor;
+  final Color secondaryPressStateColor;
 }
 
 /// Color design system
@@ -54,8 +65,10 @@ class ColorsRes {
 
   static const darkBlue = Color(0xFF0088CC);
   static const lightBlue = Color(0xFFC5E4F3);
+  static const lightBlueOpacity = Color(0xA3C5E4F3);
   static const white = Colors.white;
   static const whiteOpacity = Color(0x8FFFFFFF);
+  static const whiteOpacityLight = Color(0x66FFFFFF);
   static const black = Color(0xFF060C32);
   static const text = Color(0xFF050A2E);
   static const buttonOpacity = Color(0x29C5E4F3);

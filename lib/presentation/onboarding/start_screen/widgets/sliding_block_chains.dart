@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../util/extensions/iterable_extensions.dart';
 
@@ -16,7 +17,7 @@ class SlidingBlockChains extends StatefulWidget {
 }
 
 class _SlidingBlockChainsState extends State<SlidingBlockChains> {
-  late Timer timer;
+  Timer? timer;
   final controllers = List.generate(3, (_) => ScrollController());
   final images = <List<String>>[
     [
@@ -60,49 +61,68 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
   @override
   void initState() {
     super.initState();
-    timer = Timer.periodic(const Duration(milliseconds: 30), (timer) => _scrollLists());
+    _initTimer();
   }
 
   @override
   void dispose() {
-    timer.cancel();
+    timer?.cancel();
     super.dispose();
+  }
+
+  void _initTimer() =>
+      timer = Timer.periodic(const Duration(milliseconds: 30), (timer) => _scrollLists());
+
+  void _stopTimer() {
+    timer?.cancel();
+    timer = null;
   }
 
   void _scrollLists() => controllers.forEach((c) => c.jumpTo(c.offset + 1));
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 300),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final partSize = (constraints.maxHeight - _paddingBetweenRows * 2) / 3;
+    return VisibilityDetector(
+      key: const Key('SlidingBlockChains'),
+      onVisibilityChanged: (info) {
+        final isVisible = info.visibleBounds != Rect.zero;
+        if (isVisible && timer == null) {
+          _initTimer();
+        } else if (!isVisible) {
+          _stopTimer();
+        }
+      },
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 300),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final partSize = (constraints.maxHeight - _paddingBetweenRows * 2) / 3;
 
-            return Column(
-              children: controllers
-                  .mapIndex(
-                    (c, listIndex) => SizedBox(
-                      height: partSize,
-                      child: ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        controller: c,
-                        reverse: listIndex.isOdd,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (_, index) {
-                          return _generateItem(
-                            listIndex,
-                            index % images[listIndex].length,
-                            partSize,
-                          );
-                        },
+              return Column(
+                children: controllers
+                    .mapIndex(
+                      (c, listIndex) => SizedBox(
+                        height: partSize,
+                        child: ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          controller: c,
+                          reverse: listIndex.isOdd,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (_, index) {
+                            return _generateItem(
+                              listIndex,
+                              index % images[listIndex].length,
+                              partSize,
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  )
-                  .separated(const SizedBox(height: _paddingBetweenRows)),
-            );
-          },
+                    )
+                    .separated(const SizedBox(height: _paddingBetweenRows)),
+              );
+            },
+          ),
         ),
       ),
     );

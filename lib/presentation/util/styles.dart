@@ -6,6 +6,7 @@ import '../../generated/fonts.gen.dart';
 class StylesPalette {
   const StylesPalette({
     required this.basicStyle,
+    required this.basicBoldStyle,
     required this.captionStyle,
     required this.appbarStyle,
     required this.header2Style,
@@ -16,6 +17,7 @@ class StylesPalette {
 
   /// Basic texts
   final TextStyle basicStyle;
+  final TextStyle basicBoldStyle;
   final TextStyle captionStyle;
 
   /// Headers

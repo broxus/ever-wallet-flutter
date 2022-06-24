@@ -4,6 +4,7 @@ import '../../../generated/assets.gen.dart';
 import '../../common/general/button/primary_button.dart';
 import '../../util/extensions/context_extensions.dart';
 import '../widgets/onboarding_background.dart';
+import 'agree_decentralization.dart';
 import 'widgets/sliding_block_chains.dart';
 
 /// Entry point in the app if user not authenticated
@@ -41,22 +42,23 @@ class StartScreen extends StatelessWidget {
                     const SizedBox(height: 48),
                     PrimaryButton(
                       text: context.localization.create_new_wallet,
-                      onPressed: () {},
+                      onPressed: () => Navigator.of(context).push(AgreeDecentralizationRoute()),
                     ),
                     const SizedBox(height: 12),
                     PrimaryButton(
                       text: context.localization.sign_in,
                       onPressed: () {},
-                      isOpacity: true,
+                      isTransparent: true,
                     ),
                     const SizedBox(height: 12),
                     PrimaryButton(
                       text: 'Ledger',
                       // TODO: change icon
-                      icon:
-                          Assets.images.iconQr.svg(color: style.styles.secondaryButtonStyle.color),
+                      icon: Assets.images.iconQr.svg(
+                        color: style.styles.secondaryButtonStyle.color,
+                      ),
                       onPressed: () {},
-                      isOpacity: true,
+                      isTransparent: true,
                     ),
                   ],
                 ),
