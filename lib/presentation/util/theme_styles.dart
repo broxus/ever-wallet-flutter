@@ -24,7 +24,7 @@ final darkStyle = ThemeStyle(
     primaryPressStateColor: ColorsRes.whiteOpacity,
     secondaryPressStateColor: ColorsRes.greyOpacity,
     errorTextColor: ColorsRes.redLight,
-    errorInputColor: ColorsRes.redDark,
+    errorInputColor: ColorsRes.redLight,
   ),
   styles: StylesPalette(
     primaryButtonStyle: StylesRes.buttonText.copyWith(color: ColorsRes.text),
@@ -63,7 +63,7 @@ final lightStyle = ThemeStyle(
     primaryPressStateColor: ColorsRes.whiteOpacity,
     secondaryPressStateColor: ColorsRes.greyOpacity,
     errorTextColor: ColorsRes.redLight,
-    errorInputColor: ColorsRes.redDark,
+    errorInputColor: ColorsRes.redLight,
   ),
   styles: StylesPalette(
     primaryButtonStyle: StylesRes.buttonText.copyWith(color: ColorsRes.text),

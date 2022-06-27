@@ -94,7 +94,7 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
       },
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 300),
+          constraints: const BoxConstraints(maxHeight: 200),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final partSize = (constraints.maxHeight - _paddingBetweenRows * 2) / 3;

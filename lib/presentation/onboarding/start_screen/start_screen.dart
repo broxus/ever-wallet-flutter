@@ -17,15 +17,16 @@ class StartScreen extends StatelessWidget {
     final style = context.themeStyle;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: OnboardingBackground(
         child: SafeArea(
           minimum: const EdgeInsets.only(bottom: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 80),
+              const SizedBox(height: 40),
               const Expanded(child: SlidingBlockChains()),
-              const SizedBox(height: 80),
+              const SizedBox(height: 40),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(

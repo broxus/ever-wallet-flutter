@@ -10,7 +10,7 @@ class BorderedInput extends StatefulWidget {
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final bool autofocus;
-  final String? hint;
+  final String? label;
 
   /// Callback to add button to clear field
   final VoidCallback? onClearField;
@@ -21,13 +21,15 @@ class BorderedInput extends StatefulWidget {
   final TextInputType? textInputType;
   final ValueChanged<String>? onChanged;
   final TextInputAction? textInputAction;
+  final FormFieldValidator<String>? validator;
+  final ValueChanged<String>? onSubmitted;
 
   const BorderedInput({
     Key? key,
     this.controller,
     this.focusNode,
     this.autofocus = false,
-    this.hint,
+    this.label,
     this.onClearField,
     this.needClearButton = true,
     this.prefix,
@@ -35,6 +37,8 @@ class BorderedInput extends StatefulWidget {
     this.textInputType,
     this.onChanged,
     this.textInputAction,
+    this.validator,
+    this.onSubmitted,
   }) : super(key: key);
 
   @override
@@ -71,6 +75,7 @@ class _BorderedInputState extends State<BorderedInput> {
   }
 
   void _handleInput() {
+    if (!mounted) return;
     setState(() {
       final inputText = _controller.text;
       isEmpty = inputText.isEmpty;
@@ -84,44 +89,75 @@ class _BorderedInputState extends State<BorderedInput> {
   Widget build(BuildContext context) {
     final themeStyle = context.themeStyle;
 
-    return SizedBox(
-      height: _inputHeight,
-      child: TextFormField(
-        style: themeStyle.styles.basicStyle,
-        controller: _controller,
-        focusNode: widget.focusNode,
-        keyboardType: widget.textInputType,
-        onChanged: widget.onChanged,
-        textInputAction: widget.textInputAction ?? TextInputAction.next,
-        cursorWidth: 1,
-        decoration: InputDecoration(
-          contentPadding: EdgeInsets.zero,
-          suffixIcon: _buildSuffixIcon(),
-          prefixIconConstraints: const BoxConstraints(
-            minHeight: _inputHeight,
-            minWidth: 35,
-          ),
-          prefixIcon: widget.prefix,
-          border: OutlineInputBorder(
-            gapPadding: 1,
-            borderSide: BorderSide(
-              color: themeStyle.colors.inactiveInputColor,
+    return FormField<String>(
+      validator: widget.validator,
+      initialValue: _controller.text,
+      builder: (state) {
+        final errorStyle = themeStyle.styles.captionStyle;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: _inputHeight,
+              child: TextField(
+                style: themeStyle.styles.basicStyle,
+                controller: _controller,
+                focusNode: widget.focusNode,
+                keyboardType: widget.textInputType,
+                onChanged: widget.onChanged,
+                textInputAction: widget.textInputAction ?? TextInputAction.next,
+                cursorWidth: 1,
+                onSubmitted: widget.onSubmitted,
+                decoration: InputDecoration(
+                  errorText: state.hasError ? '' : null,
+                  errorStyle: const TextStyle(fontSize: 0, height: 0),
+                  labelText: widget.label,
+                  labelStyle: themeStyle.styles.basicStyle,
+                  contentPadding: EdgeInsets.zero,
+                  suffixIcon: _buildSuffixIcon(),
+                  prefixIconConstraints: const BoxConstraints(
+                    minHeight: _inputHeight,
+                    minWidth: 35,
+                  ),
+                  prefixIcon: widget.prefix,
+                  border: OutlineInputBorder(
+                    gapPadding: 1,
+                    borderSide: BorderSide(
+                      color: themeStyle.colors.inactiveInputColor,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    gapPadding: 1,
+                    borderSide: BorderSide(
+                      color: themeStyle.colors.activeInputColor,
+                    ),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    gapPadding: 1,
+                    borderSide: BorderSide(
+                      color: themeStyle.colors.errorInputColor,
+                    ),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    gapPadding: 1,
+                    borderSide: BorderSide(
+                      color: themeStyle.colors.errorInputColor,
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            gapPadding: 1,
-            borderSide: BorderSide(
-              color: themeStyle.colors.activeInputColor,
-            ),
-          ),
-          errorBorder: OutlineInputBorder(
-            gapPadding: 1,
-            borderSide: BorderSide(
-              color: themeStyle.colors.errorInputColor,
-            ),
-          ),
-        ),
-      ),
+            if (state.hasError)
+              Text(
+                state.errorText!,
+                style: errorStyle.copyWith(color: themeStyle.colors.errorTextColor),
+              )
+            else
+              SizedBox(height: errorStyle.fontSize! * errorStyle.height!),
+          ],
+        );
+      },
     );
   }
 
