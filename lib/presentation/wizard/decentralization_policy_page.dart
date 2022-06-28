@@ -165,5 +165,5 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
         ),
       );
 
-  void onLinkTap() => launchUrlString(decentralizationPolicyLink());
+  void onLinkTap() => launchUrlString(decentralizationPolicyLink);
 }

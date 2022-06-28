@@ -23,7 +23,7 @@ Map<int, String> generateCheckingMap(List<String> phrase) {
   return map;
 }
 
-String decentralizationPolicyLink() => 'https://l1.broxus.com/everscale/wallet/terms';
+const String decentralizationPolicyLink = 'https://l1.broxus.com/everscale/wallet/terms';
 
 String accountExplorerLink(String address) => 'https://everscan.io/accounts/$address';
 

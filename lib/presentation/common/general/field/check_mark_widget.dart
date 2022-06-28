@@ -27,9 +27,8 @@ class CheckMarkWidget extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(
           color: color ??
-              // TODO: change color for error
               (hasError
-                  ? colors.primaryBackgroundColor
+                  ? colors.errorInputColor
                   : isChecked
                       ? colors.activeInputColor
                       : colors.inactiveInputColor),

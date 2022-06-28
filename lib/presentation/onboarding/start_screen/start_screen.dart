@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../generated/assets.gen.dart';
 import '../../common/general/button/primary_button.dart';
 import '../../util/extensions/context_extensions.dart';
-import '../create_wallet/agree_decentralization_screen.dart';
-import '../sign_with_phrase/enter_seed_phrase_screen.dart';
+import '../general_screens/agree_decentralization_screen.dart';
 import '../widgets/onboarding_background.dart';
 import 'widgets/sliding_block_chains.dart';
 
@@ -44,12 +43,14 @@ class StartScreen extends StatelessWidget {
                     const SizedBox(height: 48),
                     PrimaryButton(
                       text: context.localization.create_new_wallet,
-                      onPressed: () => Navigator.of(context).push(AgreeDecentralizationRoute()),
+                      onPressed: () => Navigator.of(context)
+                          .push(AgreeDecentralizationRoute(AuthType.createNewWallet)),
                     ),
                     const SizedBox(height: 12),
                     PrimaryButton(
                       text: context.localization.sign_in,
-                      onPressed: () => Navigator.of(context).push(EnterSeedPhraseRoute()),
+                      onPressed: () => Navigator.of(context)
+                          .push(AgreeDecentralizationRoute(AuthType.signWithSeedPhrase)),
                       isTransparent: true,
                     ),
                     const SizedBox(height: 12),

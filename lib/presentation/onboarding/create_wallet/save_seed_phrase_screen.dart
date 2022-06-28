@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../common/constants.dart';
 import '../../common/general/button/primary_button.dart';
 import '../../common/general/default_appbar.dart';
 import '../../util/extensions/context_extensions.dart';
@@ -8,32 +10,26 @@ import '../../util/theme_styles.dart';
 import '../widgets/onboarding_background.dart';
 
 class SaveSeedPhraseRoute extends MaterialPageRoute<void> {
-  SaveSeedPhraseRoute() : super(builder: (_) => const SaveSeedPhraseScreen());
+  SaveSeedPhraseRoute(String phraseName)
+      : super(
+          builder: (_) => SaveSeedPhraseScreen(phraseName: phraseName),
+        );
 }
 
 /// !!! Here displays only 12 words
 class SaveSeedPhraseScreen extends StatefulWidget {
-  const SaveSeedPhraseScreen({Key? key}) : super(key: key);
+  final String phraseName;
+
+  const SaveSeedPhraseScreen({Key? key, required this.phraseName}) : super(key: key);
 
   @override
   State<SaveSeedPhraseScreen> createState() => _SaveSeedPhraseScreenState();
 }
 
 class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
-  final words = [
-    'accept',
-    'terms',
-    'save',
-    'confirm',
-    'phrase',
-    'decentralization',
-    'lucky',
-    'good',
-    'pencil',
-    'accept',
-    'terms',
-    'save',
-  ];
+  final key = generateKey(kDefaultMnemonicType);
+
+  List<String> get words => key.words;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +41,7 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
         backgroundColor: Colors.transparent,
         appBar: const DefaultAppBar(),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -89,7 +85,9 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
               const SizedBox(height: 12),
               PrimaryButton(
                 text: localization.confirm_seed_saved,
-                onPressed: () {},
+                onPressed: () {
+                  // TODO: go to check phrase screen
+                },
               ),
             ],
           ),

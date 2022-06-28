@@ -7,6 +7,7 @@ const _inputHeight = 46.0;
 const _openKeyboardDuration = Duration(milliseconds: 20);
 
 class BorderedInput extends StatefulWidget {
+  final double? height;
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final bool autofocus;
@@ -21,6 +22,8 @@ class BorderedInput extends StatefulWidget {
   final TextInputType? textInputType;
   final ValueChanged<String>? onChanged;
   final TextInputAction? textInputAction;
+
+  /// To display only error border return empty string
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onSubmitted;
 
@@ -39,6 +42,7 @@ class BorderedInput extends StatefulWidget {
     this.textInputAction,
     this.validator,
     this.onSubmitted,
+    this.height,
   }) : super(key: key);
 
   @override
@@ -99,7 +103,7 @@ class _BorderedInputState extends State<BorderedInput> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: _inputHeight,
+              height: widget.height ?? _inputHeight,
               child: TextField(
                 style: themeStyle.styles.basicStyle,
                 controller: _controller,
@@ -148,7 +152,7 @@ class _BorderedInputState extends State<BorderedInput> {
                 ),
               ),
             ),
-            if (state.hasError)
+            if (state.hasError && state.errorText!.isNotEmpty)
               Text(
                 state.errorText!,
                 style: errorStyle.copyWith(color: themeStyle.colors.errorTextColor),
