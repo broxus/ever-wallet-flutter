@@ -27,6 +27,8 @@ class BorderedInput extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onSubmitted;
 
+  final bool obscureText;
+
   const BorderedInput({
     Key? key,
     this.controller,
@@ -43,6 +45,7 @@ class BorderedInput extends StatefulWidget {
     this.validator,
     this.onSubmitted,
     this.height,
+    this.obscureText = false,
   }) : super(key: key);
 
   @override
@@ -113,6 +116,7 @@ class _BorderedInputState extends State<BorderedInput> {
                 textInputAction: widget.textInputAction ?? TextInputAction.next,
                 cursorWidth: 1,
                 onSubmitted: widget.onSubmitted,
+                obscureText: widget.obscureText,
                 decoration: InputDecoration(
                   errorText: state.hasError ? '' : null,
                   errorStyle: const TextStyle(fontSize: 0, height: 0),
@@ -120,11 +124,10 @@ class _BorderedInputState extends State<BorderedInput> {
                   labelStyle: themeStyle.styles.basicStyle,
                   contentPadding: EdgeInsets.zero,
                   suffixIcon: _buildSuffixIcon(),
-                  prefixIconConstraints: const BoxConstraints(
-                    minHeight: _inputHeight,
-                    minWidth: 35,
-                  ),
-                  prefixIcon: widget.prefix,
+                  prefixIconConstraints: widget.prefix == null
+                      ? const BoxConstraints(maxHeight: 0, maxWidth: 16)
+                      : const BoxConstraints(minHeight: _inputHeight, minWidth: 35),
+                  prefixIcon: widget.prefix ?? const SizedBox(width: 16),
                   border: OutlineInputBorder(
                     gapPadding: 1,
                     borderSide: BorderSide(

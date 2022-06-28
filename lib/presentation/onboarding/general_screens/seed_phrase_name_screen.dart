@@ -38,30 +38,35 @@ class _SeedPhraseNameScreenState extends State<SeedPhraseNameScreen> {
     final localization = context.localization;
 
     return OnboardingBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: const DefaultAppBar(),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Text(localization.enter_name, style: themeStyle.styles.appbarStyle),
-              const SizedBox(height: 16),
-              Form(
-                key: formKey,
-                child: BorderedInput(
-                  controller: nameController,
-                  textInputAction: TextInputAction.done,
-                  validator: (v) => nameController.text.isEmpty ? '' : null,
-                  onSubmitted: (_) => _goNextAction(),
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: const DefaultAppBar(),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(localization.enter_name, style: themeStyle.styles.appbarStyle),
+                const SizedBox(height: 32),
+                Form(
+                  key: formKey,
+                  child: BorderedInput(
+                    controller: nameController,
+                    label: localization.enter_name,
+                    textInputAction: TextInputAction.done,
+                    validator: (v) => nameController.text.isEmpty ? '' : null,
+                    onSubmitted: (_) => _goNextAction(),
+                  ),
                 ),
-              ),
-              const Spacer(),
-              PrimaryButton(
-                text: localization.submit,
-                onPressed: _goNextAction,
-              ),
-            ],
+                const Spacer(),
+                PrimaryButton(
+                  text: localization.submit,
+                  onPressed: _goNextAction,
+                ),
+              ],
+            ),
           ),
         ),
       ),

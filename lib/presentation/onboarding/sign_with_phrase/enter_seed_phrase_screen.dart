@@ -77,7 +77,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
                                 selectedValue: value,
                                 onChanged: (v) {
                                   formKey.currentState?.reset();
-                                  setState(() => value = v);
+                                  valuesNotifier.value = v;
                                 },
                                 builder: (_, v, isActive) {
                                   return Padding(
@@ -157,7 +157,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
     ThemeStyle themeStyle,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 8),
       child: BorderedInput(
         key: Key('SeedPhrase_$index'),
         controller: controller,
@@ -168,8 +168,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
           if (controller.text.isNotEmpty) {
             return null;
           }
-          // TODO: change word
-          return 'Enter word';
+          return '';
         },
         onSubmitted: (_) {
           if (index == valuesNotifier.value) {

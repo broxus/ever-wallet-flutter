@@ -34,7 +34,13 @@ class CheckMarkWidget extends StatelessWidget {
                       : colors.inactiveInputColor),
         ),
       ),
-      child: isChecked ? Icon(Icons.check, color: colors.activeInputColor) : null,
+      child: isChecked
+          ? Icon(
+              Icons.check,
+              color: colors.activeInputColor,
+              size: size - 2,
+            )
+          : null,
     );
   }
 }

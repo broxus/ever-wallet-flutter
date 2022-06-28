@@ -66,6 +66,7 @@ class _AgreeDecentralizationScreenState extends State<AgreeDecentralizationScree
                   valueListenable: agreeNotifier,
                   builder: (_, agreed, __) {
                     return CheckboxInputField(
+                      needValidation: true,
                       text: Text.rich(
                         TextSpan(
                           children: [
@@ -76,10 +77,23 @@ class _AgreeDecentralizationScreenState extends State<AgreeDecentralizationScree
                             WidgetSpan(
                               child: GestureDetector(
                                 onTap: onLinkTap,
-                                child: Icon(
-                                  Icons.link,
-                                  size: Theme.of(context).textTheme.bodyText1?.fontSize,
-                                  color: Theme.of(context).textTheme.bodyText1?.color,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      localization.link,
+                                      style: themeStyle.styles.captionStyle.copyWith(
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Icon(
+                                      Icons.link,
+                                      color: themeStyle.styles.captionStyle.color,
+                                      size: themeStyle.styles.captionStyle.fontSize! + 5,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -87,7 +101,10 @@ class _AgreeDecentralizationScreenState extends State<AgreeDecentralizationScree
                         ),
                       ),
                       value: agreed,
-                      onChanged: (v) => agreeNotifier.value = v,
+                      onChanged: (v) {
+                        formKey.currentState?.reset();
+                        agreeNotifier.value = v;
+                      },
                     );
                   },
                 ),

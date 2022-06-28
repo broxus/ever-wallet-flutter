@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../common/constants.dart';
@@ -79,7 +80,10 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
               ),
               PrimaryButton(
                 text: localization.copy_words,
-                onPressed: () {},
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: words.join(' ')));
+                  // TODO: show snackbar
+                },
                 isTransparent: true,
               ),
               const SizedBox(height: 12),
