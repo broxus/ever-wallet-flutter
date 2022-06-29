@@ -61,8 +61,7 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   bool get _hasActions => actions?.isNotEmpty ?? false;
 
-  bool get _showLeadingClose =>
-      (closeType == CloseType.leading || closeType == CloseType.multi) && !_hasActions;
+  bool get _showLeadingClose => closeType == CloseType.leading || closeType == CloseType.multi;
 
   bool get _showActionsClose => closeType == CloseType.actions || closeType == CloseType.multi;
 
@@ -77,28 +76,24 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
           leading != null || _showLeadingClose ? kMinLeadingButtonWidth : kMinInteractiveDimension,
       leading: leading ??
           (_showLeadingClose
-              ? Center(
-                  child: TextPrimaryButton(
-                    radius: BorderRadius.circular(6),
-                    height: kAppBarButtonSize,
-                    onPressed: onClosePressed ?? () => Navigator.of(context).maybePop(),
-                    child: Padding(
-                      padding: kAppBarButtonPadding,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.arrow_back_ios,
-                            color: themeStyle.colors.primaryButtonColor,
-                            size: 20,
-                          ),
-                          Text(
-                            // TODO: change text
-                            'Back',
-                            style: themeStyle.styles.basicBoldStyle,
-                          ),
-                        ],
-                      ),
+              ? TextPrimaryButton.appBar(
+                  onPressed: onClosePressed ?? () => Navigator.of(context).maybePop(),
+                  child: Padding(
+                    padding: kAppBarButtonPadding,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.arrow_back_ios,
+                          color: themeStyle.colors.primaryButtonColor,
+                          size: 20,
+                        ),
+                        Text(
+                          // TODO: change text
+                          'Back',
+                          style: themeStyle.styles.basicBoldStyle,
+                        ),
+                      ],
                     ),
                   ),
                 )

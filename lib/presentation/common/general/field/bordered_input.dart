@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../generated/assets.gen.dart';
 import '../../../util/extensions/context_extensions.dart';
 
-const _inputHeight = 46.0;
+const kBorderedInputHeight = 46.0;
 const _openKeyboardDuration = Duration(milliseconds: 20);
 
 class BorderedInput extends StatefulWidget {
@@ -106,7 +106,7 @@ class _BorderedInputState extends State<BorderedInput> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: widget.height ?? _inputHeight,
+              height: widget.height ?? kBorderedInputHeight,
               child: TextField(
                 style: themeStyle.styles.basicStyle,
                 controller: _controller,
@@ -126,7 +126,7 @@ class _BorderedInputState extends State<BorderedInput> {
                   suffixIcon: _buildSuffixIcon(),
                   prefixIconConstraints: widget.prefix == null
                       ? const BoxConstraints(maxHeight: 0, maxWidth: 16)
-                      : const BoxConstraints(minHeight: _inputHeight, minWidth: 35),
+                      : const BoxConstraints(minHeight: kBorderedInputHeight, minWidth: 35),
                   prefixIcon: widget.prefix ?? const SizedBox(width: 16),
                   border: OutlineInputBorder(
                     gapPadding: 1,

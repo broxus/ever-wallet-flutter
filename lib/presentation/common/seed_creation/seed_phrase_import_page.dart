@@ -242,7 +242,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
         autocorrect: false,
         enableSuggestions: false,
         textInputAction: index != wordsLength - 1 ? TextInputAction.next : TextInputAction.done,
-        hintText: '${AppLocalizations.of(context)!.word}...',
+        labelText: '${AppLocalizations.of(context)!.word}...',
         prefixIcon: TextFieldIndexIcon(
           index: index,
         ),
@@ -302,7 +302,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
     formKey.currentState?.validate();
   }
 
-  FutureOr<Iterable<Object?>> suggestionsCallback({
+  FutureOr<Iterable<String>> suggestionsCallback({
     required String pattern,
     required int index,
   }) {

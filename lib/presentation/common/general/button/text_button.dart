@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../util/extensions/context_extensions.dart';
+import '../default_appbar.dart';
 import 'primary_button.dart';
 
 class TextPrimaryButton extends StatelessWidget {
@@ -16,8 +17,32 @@ class TextPrimaryButton extends StatelessWidget {
     this.height = kPrimaryButtonHeight,
     this.padding,
     this.pressStateColor,
-    this.isLoading = false,
   }) : super(key: key);
+
+  factory TextPrimaryButton.appBar({
+    required VoidCallback onPressed,
+    String? text,
+    TextStyle? style,
+    Widget? child,
+    FocusNode? focusNode,
+    Color backgroundColor = Colors.transparent,
+    EdgeInsets? padding,
+    Color? pressStateColor,
+    Key? key,
+  }) =>
+      TextPrimaryButton(
+        onPressed: onPressed,
+        key: key,
+        radius: BorderRadius.circular(10),
+        style: style,
+        padding: padding,
+        height: kAppBarButtonSize,
+        text: text,
+        backgroundColor: backgroundColor,
+        focusNode: focusNode,
+        pressStateColor: pressStateColor,
+        child: child,
+      );
 
   final String? text;
   final TextStyle? style;
@@ -29,23 +54,24 @@ class TextPrimaryButton extends StatelessWidget {
   final EdgeInsets? padding;
   final Color backgroundColor;
   final Color? pressStateColor;
-  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.themeStyle.colors;
 
-    return PrimaryButton(
-      onPressed: onPressed,
-      text: text,
-      style: style,
-      focusNode: focusNode,
-      radius: radius,
-      backgroundColor: backgroundColor,
-      height: height,
-      padding: padding,
-      presstateColor: pressStateColor ?? colors.primaryPressStateColor,
-      child: child,
+    return Center(
+      child: PrimaryButton(
+        onPressed: onPressed,
+        text: text,
+        style: style,
+        focusNode: focusNode,
+        radius: radius,
+        backgroundColor: backgroundColor,
+        height: height,
+        padding: padding,
+        presstateColor: pressStateColor ?? colors.primaryPressStateColor,
+        child: child,
+      ),
     );
   }
 }

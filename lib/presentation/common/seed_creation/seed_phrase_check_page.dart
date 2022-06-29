@@ -132,7 +132,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
         autocorrect: false,
         enableSuggestions: false,
         textInputAction: index != kDefaultCheckingWordsAmount - 1 ? TextInputAction.next : TextInputAction.done,
-        hintText: '${AppLocalizations.of(context)!.word}...',
+        labelText: '${AppLocalizations.of(context)!.word}...',
         prefixIcon: TextFieldIndexIcon(
           index: words.keys.elementAt(index),
         ),
@@ -190,7 +190,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
     formKey.currentState?.validate();
   }
 
-  FutureOr<Iterable<Object?>> suggestionsCallback({
+  FutureOr<Iterable<String>> suggestionsCallback({
     required String pattern,
     required int index,
   }) {
