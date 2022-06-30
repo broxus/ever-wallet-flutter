@@ -42,7 +42,7 @@ class _DeriveKeyModalBodyState extends State<DeriveKeyModalBody> {
           } catch (err, st) {
             logger.e(err, err, st);
 
-            await showCrystalFlushbar(
+            await showFlushbar(
               context,
               message: (err as Exception).toUiMessage(),
             );

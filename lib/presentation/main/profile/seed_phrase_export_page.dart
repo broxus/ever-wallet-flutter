@@ -133,7 +133,7 @@ class _SeedPhraseExportPageState extends State<SeedPhraseExportPage> {
 
     if (!mounted) return;
 
-    showCrystalFlushbar(
+    showFlushbar(
       context,
       message: AppLocalizations.of(context)!.copied,
     );

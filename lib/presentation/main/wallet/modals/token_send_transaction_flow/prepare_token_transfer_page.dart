@@ -378,7 +378,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
 
         if (!mounted) return;
 
-        await showErrorCrystalFlushbar(
+        await showErrorFlushbar(
           context,
           message: (err as Exception).toUiMessage(),
         );

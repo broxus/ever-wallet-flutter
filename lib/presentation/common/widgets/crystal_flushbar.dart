@@ -1,56 +1,56 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
+import '../../util/extensions/context_extensions.dart';
+
+export 'package:another_flushbar/flushbar.dart';
+
+const kFlushbarDisplayDuration = Duration(seconds: 2);
 
 Flushbar? _previousFlushbar;
 
-Future<void> showCrystalFlushbar(
+Future<void> showFlushbar(
   BuildContext context, {
   required String message,
   FlushbarPosition flushbarPosition = FlushbarPosition.TOP,
-  EdgeInsets? margin,
+  EdgeInsets margin = const EdgeInsets.symmetric(vertical: 8),
 }) async {
   _previousFlushbar?.dismiss();
+
+  final theme = context.themeStyle;
 
   _previousFlushbar = Flushbar(
     messageText: Text(
       message,
-      style: const TextStyle(
-        color: CrystalColor.chipText,
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-      ),
+      style: theme.styles.basicStyle,
     ),
     flushbarPosition: flushbarPosition,
-    backgroundColor: CrystalColor.primary,
-    borderColor: CrystalColor.border,
-    margin: const EdgeInsets.symmetric(horizontal: 16) + (margin ?? EdgeInsets.zero),
-    duration: const Duration(seconds: 2),
+    borderRadius: BorderRadius.circular(10),
+    backgroundColor: theme.colors.primaryBackgroundColor,
+    margin: const EdgeInsets.symmetric(horizontal: 16) + margin,
+    duration: kFlushbarDisplayDuration,
   )..show(context);
 }
 
-Future<void> showErrorCrystalFlushbar(
+Future<void> showErrorFlushbar(
   BuildContext context, {
   required String message,
   FlushbarPosition flushbarPosition = FlushbarPosition.TOP,
-  EdgeInsets? margin,
+  EdgeInsets margin = const EdgeInsets.symmetric(vertical: 16),
 }) async {
   _previousFlushbar?.dismiss();
+
+  final theme = context.themeStyle;
 
   _previousFlushbar = Flushbar(
     messageText: Text(
       message,
-      style: const TextStyle(
-        color: CrystalColor.error,
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-      ),
+      style: theme.styles.basicStyle.copyWith(color: theme.colors.errorTextColor),
     ),
+    borderRadius: BorderRadius.circular(10),
     flushbarPosition: flushbarPosition,
-    backgroundColor: CrystalColor.primary,
-    borderColor: CrystalColor.border,
-    margin: const EdgeInsets.symmetric(horizontal: 16) + (margin ?? EdgeInsets.zero),
-    duration: const Duration(seconds: 2),
+    backgroundColor: theme.colors.primaryBackgroundColor,
+    margin: const EdgeInsets.symmetric(horizontal: 16) + margin,
+    duration: kFlushbarDisplayDuration,
   )..show(context);
 }

@@ -58,7 +58,7 @@ class _SelectableFieldState extends State<SelectableField> {
 
                 if (!mounted) return;
 
-                showCrystalFlushbar(
+                showFlushbar(
                   context,
                   message: AppLocalizations.of(context)!.copied,
                 );

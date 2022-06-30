@@ -58,7 +58,7 @@ class _ReceiveModalBodyState extends State<ReceiveModalBody> {
 
     if (!mounted) return;
 
-    showCrystalFlushbar(
+    showFlushbar(
       context,
       message: AppLocalizations.of(context)!.copied,
     );

@@ -7,6 +7,7 @@ import '../../common/general/button/primary_button.dart';
 import '../../common/general/button/text_button.dart';
 import '../../common/general/default_appbar.dart';
 import '../../common/general/field/seed_phrase_input.dart';
+import '../../common/widgets/crystal_flushbar.dart';
 import '../../util/extensions/context_extensions.dart';
 import '../../util/extensions/iterable_extensions.dart';
 import '../../util/theme_styles.dart';
@@ -251,13 +252,10 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
 
       formKey.currentState?.reset();
 
-      // TODO: show snackbar
-      // showErrorCrystalFlushbar(
-      //   context,
-      //   message: AppLocalizations.of(context)!.incorrect_words_format,
-      //   flushbarPosition: FlushbarPosition.BOTTOM,
-      //   margin: const EdgeInsets.only(bottom: 12),
-      // );
+      showErrorFlushbar(
+        context,
+        message: context.localization.incorrect_words_format,
+      );
       return;
     }
 

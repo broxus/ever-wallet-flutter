@@ -65,7 +65,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
 
                           if (!mounted) return;
 
-                          await showCrystalFlushbar(
+                          await showFlushbar(
                             context,
                             message: AppLocalizations.of(context)!.seed_phrase_renamed,
                           );
@@ -74,7 +74,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
 
                           if (!mounted) return;
 
-                          await showErrorCrystalFlushbar(
+                          await showErrorFlushbar(
                             context,
                             message: (err as Exception).toUiMessage(),
                           );

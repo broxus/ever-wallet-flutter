@@ -126,7 +126,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
                       if (!mounted) return;
 
-                      await showCrystalFlushbar(
+                      await showFlushbar(
                         context,
                         message: AppLocalizations.of(context)!.password_changed,
                       );
@@ -137,7 +137,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
                       if (!mounted) return;
 
-                      await showErrorCrystalFlushbar(
+                      await showErrorFlushbar(
                         context,
                         message: (err as Exception).toUiMessage(),
                       );

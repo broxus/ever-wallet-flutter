@@ -124,7 +124,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
     if (words.isEmpty) {
       if (!mounted) return;
 
-      showErrorCrystalFlushbar(
+      showErrorFlushbar(
         context,
         message: AppLocalizations.of(context)!.incorrect_words_format,
         flushbarPosition: FlushbarPosition.BOTTOM,

@@ -61,7 +61,7 @@ class _WalletCardSelectableFieldState extends State<WalletCardSelectableField> {
 
                 if (!mounted) return;
 
-                showCrystalFlushbar(
+                showFlushbar(
                   context,
                   message: AppLocalizations.of(context)!.copied,
                 );

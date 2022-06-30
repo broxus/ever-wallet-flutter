@@ -114,7 +114,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
       } catch (err) {
         if (!mounted) return;
 
-        showErrorCrystalFlushbar(
+        showErrorFlushbar(
           context,
           message: (err as Exception).toUiMessage(),
         );
@@ -130,7 +130,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
       } catch (err) {
         if (!mounted) return;
 
-        showErrorCrystalFlushbar(
+        showErrorFlushbar(
           context,
           message: (err as Exception).toUiMessage(),
         );
@@ -147,7 +147,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
     } catch (err) {
       if (!mounted) return;
 
-      showErrorCrystalFlushbar(context, message: AppLocalizations.of(context)!.invalid_root_token_contract);
+      showErrorFlushbar(context, message: AppLocalizations.of(context)!.invalid_root_token_contract);
     }
   }
 }

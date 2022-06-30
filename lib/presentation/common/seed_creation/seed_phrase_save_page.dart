@@ -160,7 +160,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
 
     if (!mounted) return;
 
-    showCrystalFlushbar(
+    showFlushbar(
       context,
       message: AppLocalizations.of(context)!.copied,
     );

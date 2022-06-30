@@ -49,7 +49,7 @@ class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
           } catch (err, st) {
             logger.e(err, err, st);
 
-            await showCrystalFlushbar(
+            await showFlushbar(
               context,
               message: (err as Exception).toUiMessage(),
             );

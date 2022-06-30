@@ -275,7 +275,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
         context.router.navigate(const ProfileRouterRoute());
       }
     } catch (err) {
-      showErrorCrystalFlushbar(
+      showErrorFlushbar(
         context,
         message: (err as Exception).toUiMessage(),
       );

@@ -5,6 +5,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../common/constants.dart';
 import '../../common/general/button/primary_button.dart';
 import '../../common/general/default_appbar.dart';
+import '../../common/widgets/crystal_flushbar.dart';
 import '../../util/extensions/context_extensions.dart';
 import '../../util/extensions/iterable_extensions.dart';
 import '../../util/theme_styles.dart';
@@ -82,7 +83,7 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
                 text: localization.copy_words,
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: words.join(' ')));
-                  // TODO: show snackbar
+                  showFlushbar(context, message: localization.copied);
                 },
                 isTransparent: true,
               ),

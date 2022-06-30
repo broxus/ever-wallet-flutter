@@ -327,7 +327,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
 
         if (!mounted) return;
 
-        await showErrorCrystalFlushbar(
+        await showErrorFlushbar(
           context,
           message: (err as Exception).toUiMessage(),
         );

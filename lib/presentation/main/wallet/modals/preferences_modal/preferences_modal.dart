@@ -92,7 +92,7 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
 
                   if (!mounted) return;
 
-                  showCrystalFlushbar(
+                  showFlushbar(
                     context,
                     message: AppLocalizations.of(context)!.wallet_renamed,
                   );
@@ -101,7 +101,7 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
 
                   if (!mounted) return;
 
-                  showErrorCrystalFlushbar(
+                  showErrorFlushbar(
                     context,
                     message: (err as Exception).toUiMessage(),
                   );

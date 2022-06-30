@@ -210,7 +210,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
 
       if (!mounted) return;
 
-      showErrorCrystalFlushbar(
+      showErrorFlushbar(
         widget.modalContext,
         message: (err as Exception).toUiMessage(),
       );
