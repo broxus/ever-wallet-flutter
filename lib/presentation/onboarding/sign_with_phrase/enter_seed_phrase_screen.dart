@@ -6,6 +6,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import '../../common/general/button/primary_button.dart';
 import '../../common/general/button/text_button.dart';
 import '../../common/general/default_appbar.dart';
+import '../../common/general/dialog/default_dialog_controller.dart';
 import '../../common/general/field/seed_phrase_input.dart';
 import '../../common/widgets/crystal_flushbar.dart';
 import '../../util/extensions/context_extensions.dart';
@@ -217,8 +218,13 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
           mnemonicType: mnemonicType,
         );
         Navigator.of(context).push(CreatePasswordRoute(phrase, widget.phraseName));
-      } on Object catch (_) {
-        /// TODO: display dialog error
+      } on Object catch (e) {
+        DefaultDialogController.showAlertDialog<void>(
+          context: context,
+          title: e.toString(),
+          onAgreeClicked: (ctx) => Navigator.of(ctx).pop(),
+          onDisagreeClicked: (ctx) => Navigator.of(ctx).pop(),
+        );
       }
     }
   }
