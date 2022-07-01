@@ -10,6 +10,7 @@ import '../../util/extensions/context_extensions.dart';
 import '../../util/extensions/iterable_extensions.dart';
 import '../../util/theme_styles.dart';
 import '../widgets/onboarding_background.dart';
+import 'check_seed_phrase_screen/check_seed_phase_screen.dart';
 
 class SaveSeedPhraseRoute extends MaterialPageRoute<void> {
   SaveSeedPhraseRoute(String phraseName)
@@ -90,9 +91,9 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
               const SizedBox(height: 12),
               PrimaryButton(
                 text: localization.confirm_seed_saved,
-                onPressed: () {
-                  // TODO: go to check phrase screen
-                },
+                onPressed: () => Navigator.of(context).push(
+                  CheckSeedPhraseRoute(words, widget.phraseName),
+                ),
               ),
             ],
           ),
