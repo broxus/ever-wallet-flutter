@@ -47,6 +47,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
       (c) => c.addListener(() {
         final hasText = controllers.any((controller) => controller.text.isNotEmpty);
         isClearButtonState.value = hasText;
+        _checkDebugPhraseGenerating();
       }),
     );
   }
@@ -272,5 +273,22 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
       );
     });
     formKey.currentState?.validate();
+  }
+
+  void _checkDebugPhraseGenerating() {
+    if (controllers.any((e) => e.text == 'speakfriendandenter')) {
+      final key = generateKey(
+        valuesNotifier.value == values.last
+            ? const MnemonicType.legacy()
+            : const MnemonicType.labs(id: 0),
+      );
+
+      for (var i = 0; i < controllers.take(valuesNotifier.value).length; i++) {
+        final text = key.words[i];
+        controllers[i].text = text;
+        controllers[i].selection = TextSelection.fromPosition(TextPosition(offset: text.length));
+      }
+      formKey.currentState?.validate();
+    }
   }
 }
