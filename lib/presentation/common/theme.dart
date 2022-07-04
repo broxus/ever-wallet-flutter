@@ -12,23 +12,16 @@ ThemeData materialTheme(BuildContext context, Brightness brightness) {
   return ThemeData(
     brightness: brightness,
     extensions: [palette],
-    primaryColor: CrystalColor.accent,
-    // primaryColor: palette.colors.primaryBackgroundColor,
+    primaryColor: palette.colors.primaryBackgroundColor,
     fontFamily: FontFamily.pt,
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
+      // backgroundColor: palette.colors.primaryBackgroundColor,
       elevation: 0,
-      iconTheme: const IconThemeData(color: CrystalColor.accent),
+      iconTheme: IconThemeData(color: palette.colors.iconPrimaryButtonColor),
       systemOverlayStyle:
           brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     ),
-    // appBarTheme: AppBarTheme(
-    //   backgroundColor: palette.colors.primaryBackgroundColor,
-    //   elevation: 0,
-    //   iconTheme: IconThemeData(color: palette.colors.iconPrimaryButtonColor),
-    //   systemOverlayStyle:
-    //       brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
-    // ),
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: palette.colors.primaryTextColor,
       selectionColor: palette.colors.activeInputColor,

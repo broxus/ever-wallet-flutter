@@ -134,6 +134,12 @@ class _BorderedInputState extends State<BorderedInput> {
                       color: themeStyle.colors.inactiveInputColor,
                     ),
                   ),
+                  enabledBorder: OutlineInputBorder(
+                    gapPadding: 1,
+                    borderSide: BorderSide(
+                      color: themeStyle.colors.inactiveInputColor,
+                    ),
+                  ),
                   focusedBorder: OutlineInputBorder(
                     gapPadding: 1,
                     borderSide: BorderSide(
