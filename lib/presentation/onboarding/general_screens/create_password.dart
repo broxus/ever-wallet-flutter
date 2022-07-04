@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/repositories/keys_repository.dart';
+import '../../../injection.dart';
 import '../../common/general/button/primary_button.dart';
 import '../../common/general/default_appbar.dart';
 import '../../common/general/field/bordered_input.dart';
+import '../../main/wallet/wallet_page.dart';
 import '../../util/extensions/context_extensions.dart';
 import '../widgets/onboarding_background.dart';
 
@@ -87,7 +90,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                     focusNode: confirmFocus,
                     label: localization.confirm_password,
                     textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _nextAction(),
+                    onSubmitted: (_) => _nextAction(Navigator.of(context)),
                     validator: (_) {
                       if (confirmController.text == passwordController.text) {
                         return null;
@@ -100,7 +103,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                   const Spacer(),
                   PrimaryButton(
                     text: localization.next,
-                    onPressed: _nextAction,
+                    onPressed: () => _nextAction(Navigator.of(context)),
                   ),
                 ],
               ),
@@ -111,9 +114,18 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
     );
   }
 
-  void _nextAction() {
+  Future<void> _nextAction(NavigatorState navigator) async {
     if (formKey.currentState?.validate() ?? false) {
-      // TODO: do action
+      await getIt.get<KeysRepository>().createKey(
+            name: widget.seedName,
+            phrase: widget.phrase,
+            password: passwordController.text,
+          );
+
+      navigator.popUntil((route) => route.isFirst);
+      navigator.push(
+        MaterialPageRoute<void>(builder: (_) => WalletPage()),
+      );
     }
   }
 }

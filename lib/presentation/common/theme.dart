@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -5,29 +6,49 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import '../../generated/fonts.gen.dart';
 import '../util/theme_styles.dart';
 
+/// TODO: replace all comments after rewriting ui
 ThemeData materialTheme(BuildContext context, Brightness brightness) {
   final palette = brightness == Brightness.dark ? darkStyle : lightStyle;
   return ThemeData(
     brightness: brightness,
     extensions: [palette],
-    primaryColor: palette.colors.primaryBackgroundColor,
+    primaryColor: CrystalColor.accent,
+    // primaryColor: palette.colors.primaryBackgroundColor,
     fontFamily: FontFamily.pt,
     appBarTheme: AppBarTheme(
-      backgroundColor: palette.colors.primaryBackgroundColor,
+      backgroundColor: Colors.transparent,
       elevation: 0,
-      iconTheme: IconThemeData(color: palette.colors.iconPrimaryButtonColor),
+      iconTheme: const IconThemeData(color: CrystalColor.accent),
       systemOverlayStyle:
           brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     ),
+    // appBarTheme: AppBarTheme(
+    //   backgroundColor: palette.colors.primaryBackgroundColor,
+    //   elevation: 0,
+    //   iconTheme: IconThemeData(color: palette.colors.iconPrimaryButtonColor),
+    //   systemOverlayStyle:
+    //       brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+    // ),
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: palette.colors.primaryTextColor,
       selectionColor: palette.colors.activeInputColor,
       selectionHandleColor: palette.colors.activeInputColor,
     ),
     splashColor: isCupertino(context) ? Colors.transparent : null,
-    scaffoldBackgroundColor: palette.colors.primaryBackgroundColor,
+    scaffoldBackgroundColor: Colors.white,
+    // scaffoldBackgroundColor: palette.colors.primaryBackgroundColor,
   );
 }
+
+/// TODO: remove after rewriting all UI
+CupertinoThemeData cupertinoTheme(BuildContext context) => const CupertinoThemeData(
+      brightness: Brightness.light,
+      primaryColor: CrystalColor.accent,
+      textTheme: CupertinoTextThemeData(
+        primaryColor: CrystalColor.accent,
+      ),
+      scaffoldBackgroundColor: Colors.white,
+    );
 
 abstract class CrystalColor {
   static const primary = Color(0xFFFFFFFF);

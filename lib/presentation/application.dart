@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -79,14 +80,18 @@ class _ApplicationState extends State<Application> with WidgetsBindingObserver {
                     localizationsDelegates: AppLocalizations.localizationsDelegates,
                     supportedLocales: AppLocalizations.supportedLocales,
                     // TODO: change after adding ability to change theme
-                    themeMode: ThemeMode.dark,
+                    themeMode: ThemeMode.light,
                     theme: materialTheme(context, Brightness.light),
                     darkTheme: materialTheme(context, Brightness.dark),
                     routerDelegate: appRouter.delegate(),
                     routeInformationParser: appRouter.defaultRouteParser(),
-                    builder: (context, child) => MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                      child: child!,
+                    // TODO: remove CupertinoTheme after rewriting all UI
+                    builder: (context, child) => CupertinoTheme(
+                      data: cupertinoTheme(context),
+                      child: MediaQuery(
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                        child: child!,
+                      ),
                     ),
                   ),
                 ),

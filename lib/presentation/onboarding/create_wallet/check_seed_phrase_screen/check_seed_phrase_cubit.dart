@@ -66,6 +66,11 @@ class CheckSeedPhraseCubit extends Cubit<CheckSeedPhraseCubitState> {
         }
         availableAnswers.add(dictionary[number]);
       }
+      // to be sure it is shuffled
+      availableAnswers
+        ..shuffle()
+        ..shuffle()
+        ..shuffle();
 
       questionsList.add(
         CheckSeedPhraseQuestion(
