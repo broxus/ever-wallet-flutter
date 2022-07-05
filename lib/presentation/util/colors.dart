@@ -76,10 +76,12 @@ class ColorsRes {
   static const whiteOpacity = Color(0x8FFFFFFF);
   static const whiteOpacityLight = Color(0x66FFFFFF);
   static const black = Color(0xFF060C32);
+  static const modalBarrier = Color.fromRGBO(0, 0, 0, 0.5);
   static const text = Color(0xFF050A2E);
   static const buttonOpacity = Color(0x29C5E4F3);
   static const greenOpacity = Color(0x524AB44A);
   static const grey = Color(0xFF96A1A7);
+  static const greyLight = Color(0xFFEBEDEE);
   static const greyOpacity = Color(0xE0F8F8FB);
   static const greyBlue = Color(0xFF838699);
   static const redDark = Color(0xFF9A325C);

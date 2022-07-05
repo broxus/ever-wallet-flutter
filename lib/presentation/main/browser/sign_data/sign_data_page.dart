@@ -104,7 +104,7 @@ class _SendMessageModalState extends ConsumerState<SignDataPage> {
 
   Widget submitButton() => Consumer(
         builder: (context, ref, child) {
-          return CustomElevatedButton(
+          return PrimaryElevatedButton(
             onPressed: () => onSubmitPressed(widget.publicKey),
             text: AppLocalizations.of(context)!.submit,
           );

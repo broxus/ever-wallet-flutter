@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../../data/repositories/keys_repository.dart';
@@ -19,8 +18,6 @@ class ExportSeedPhraseModalBody extends StatefulWidget {
     Key? key,
     required this.publicKey,
   }) : super(key: key);
-
-  static String title(BuildContext context) => AppLocalizations.of(context)!.export_enter_password;
 
   @override
   _ExportSeedPhraseModalBodyState createState() => _ExportSeedPhraseModalBodyState();

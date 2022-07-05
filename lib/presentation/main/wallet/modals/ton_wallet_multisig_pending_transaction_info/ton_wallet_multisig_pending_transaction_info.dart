@@ -512,7 +512,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
     required String amount,
     String? comment,
   }) =>
-      CustomElevatedButton(
+      PrimaryElevatedButton(
         onPressed: () => startConfirmTransactionFlow(
           context: context,
           address: address,

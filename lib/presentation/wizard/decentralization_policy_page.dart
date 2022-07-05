@@ -159,7 +159,7 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
 
   Widget submitButton() => ValueListenableBuilder<bool>(
         valueListenable: policyCheckNotifier,
-        builder: (context, value, child) => CustomElevatedButton(
+        builder: (context, value, child) => PrimaryElevatedButton(
           onPressed: value ? widget.onPressed : null,
           text: AppLocalizations.of(context)!.submit,
         ),

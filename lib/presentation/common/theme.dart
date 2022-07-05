@@ -83,7 +83,7 @@ abstract class CrystalColor {
   static const border = Color(0xFFDDE1E2);
   static const divider = Color(0xFFEBEDEE);
   static const shadow = Color.fromRGBO(43, 51, 56, 0.08);
-  static const modalBackground = Color.fromRGBO(0, 0, 0, 0.4);
+  static const modalBackground = Color.fromRGBO(0, 0, 0, 0.5);
   static const navigationBarBackground = Color.fromRGBO(249, 249, 249, 0.96);
 
   static const icon = Color(0xFFCED3D6);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../util/extensions/context_extensions.dart';
-import '../default_appbar.dart';
+import '../onboarding_appbar.dart';
 import 'primary_button.dart';
 
 class TextPrimaryButton extends StatelessWidget {
@@ -17,6 +17,7 @@ class TextPrimaryButton extends StatelessWidget {
     this.height = kPrimaryButtonHeight,
     this.padding,
     this.pressStateColor,
+    this.fillWidth = true,
   }) : super(key: key);
 
   factory TextPrimaryButton.appBar({
@@ -28,6 +29,7 @@ class TextPrimaryButton extends StatelessWidget {
     Color backgroundColor = Colors.transparent,
     EdgeInsets? padding,
     Color? pressStateColor,
+    bool fillWidth = false,
     Key? key,
   }) =>
       TextPrimaryButton(
@@ -41,6 +43,7 @@ class TextPrimaryButton extends StatelessWidget {
         backgroundColor: backgroundColor,
         focusNode: focusNode,
         pressStateColor: pressStateColor,
+        fillWidth: fillWidth,
         child: child,
       );
 
@@ -54,24 +57,27 @@ class TextPrimaryButton extends StatelessWidget {
   final EdgeInsets? padding;
   final Color backgroundColor;
   final Color? pressStateColor;
+  final bool fillWidth;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.themeStyle.colors;
-
-    return Center(
-      child: PrimaryButton(
-        onPressed: onPressed,
-        text: text,
-        style: style,
-        focusNode: focusNode,
-        radius: radius,
-        backgroundColor: backgroundColor,
-        height: height,
-        padding: padding,
-        presstateColor: pressStateColor ?? colors.primaryPressStateColor,
-        child: child,
-      ),
+    final button = PrimaryButton(
+      onPressed: onPressed,
+      text: text,
+      style: style,
+      focusNode: focusNode,
+      radius: radius,
+      backgroundColor: backgroundColor,
+      height: height,
+      padding: padding,
+      presstateColor: pressStateColor ?? colors.primaryPressStateColor,
+      fillWidth: fillWidth,
+      child: child,
     );
+    if (fillWidth) {
+      return Center(child: button);
+    }
+    return button;
   }
 }

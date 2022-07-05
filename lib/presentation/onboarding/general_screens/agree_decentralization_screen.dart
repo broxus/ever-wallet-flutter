@@ -3,7 +3,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../generated/assets.gen.dart';
 import '../../common/general/button/primary_button.dart';
-import '../../common/general/default_appbar.dart';
+import '../../common/general/onboarding_appbar.dart';
 import '../../common/general/field/checkbox_input_field.dart';
 import '../../common/utils.dart';
 import '../../util/extensions/context_extensions.dart';
@@ -51,7 +51,7 @@ class _AgreeDecentralizationScreenState extends State<AgreeDecentralizationScree
       ],
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: const DefaultAppBar(),
+        appBar: const OnboardingAppBar(),
         body: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

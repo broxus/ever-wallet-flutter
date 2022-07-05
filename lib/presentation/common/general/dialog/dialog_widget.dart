@@ -1,6 +1,7 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../../../util/extensions/context_extensions.dart';
+import '../button/text_button.dart';
 
 /// alert dialog that checks platform itself
 class PlatformAlertDialog extends StatelessWidget {
@@ -30,16 +31,48 @@ class PlatformAlertDialog extends StatelessWidget {
 
     // return platform == TargetPlatform.iOS
     //     ? _buildCupertinoDialog(context)
-    return _buildCupertinoDialog(context);
+    return _buildMaterialDialog(context);
   }
 
-  Widget _buildCupertinoDialog(BuildContext context) {
+  // Widget _buildCupertinoDialog(BuildContext context) {
+  //   final themeStyle = context.themeStyle;
+  //   final localization = context.localization;
+  //   final alertText = this.alertText;
+  //   final contentText = this.contentText;
+  //
+  //   return CupertinoAlertDialog(
+  //     title: titleWidget ??
+  //         (alertText == null ? null : Text(alertText, style: themeStyle.styles.basicStyle)),
+  //     content: contentWidget ??
+  //         (contentText != null ? Text(contentText, style: themeStyle.styles.basicStyle) : null),
+  //     actions: <Widget>[
+  //       if (onDisagreeClicked != null)
+  //         CupertinoDialogAction(
+  //           onPressed: onDisagreeClicked,
+  //           child: Text(
+  //             cancelText ?? localization.cancel,
+  //             style: themeStyle.styles.secondaryButtonStyle,
+  //           ),
+  //         ),
+  //       CupertinoDialogAction(
+  //         onPressed: onAgreeClicked,
+  //         child: Text(
+  //           okText ?? localization.ok,
+  //           style: themeStyle.styles.secondaryButtonStyle,
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  Widget _buildMaterialDialog(BuildContext context) {
     final themeStyle = context.themeStyle;
     final localization = context.localization;
     final alertText = this.alertText;
     final contentText = this.contentText;
 
-    return CupertinoAlertDialog(
+    return AlertDialog(
+      backgroundColor: themeStyle.colors.primaryBackgroundColor,
       title: titleWidget ??
           (alertText == null
               ? null
@@ -49,57 +82,22 @@ class PlatformAlertDialog extends StatelessWidget {
                 )),
       content: contentWidget ??
           (contentText != null ? Text(contentText, style: themeStyle.styles.basicStyle) : null),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+      ),
       actions: <Widget>[
         if (onDisagreeClicked != null)
-          CupertinoDialogAction(
+          TextPrimaryButton(
             onPressed: onDisagreeClicked,
-            child: Text(
-              cancelText ?? localization.cancel,
-              style: themeStyle.styles.secondaryButtonStyle,
-            ),
+            style: themeStyle.styles.basicStyle,
+            text: cancelText ?? localization.cancel,
           ),
-        CupertinoDialogAction(
+        TextPrimaryButton(
           onPressed: onAgreeClicked,
-          child: Text(
-            okText ?? localization.ok,
-            style: themeStyle.styles.secondaryButtonStyle,
-          ),
-        ),
+          style: themeStyle.styles.basicStyle,
+          text: okText ?? localization.ok,
+        )
       ],
     );
   }
-
-// Widget _buildMaterialDialog(BuildContext context) {
-//   final themeStyle = context.themeStyle;
-//   final localization = context.localization;
-//   final alertText = this.alertText;
-//   final contentText = this.contentText;
-//
-//   return AlertDialog(
-//     backgroundColor: themeStyle.colors.primaryBackgroundColor,
-//     title: titleWidget ??
-//         (alertText == null
-//             ? null
-//             : Text(
-//                 alertText,
-//                 style: themeStyle.styles.basicStyle,
-//               )),
-//     content: contentWidget ??
-//         (contentText != null ? Text(contentText, style: themeStyle.styles.basicStyle) : null),
-//     shape: const RoundedRectangleBorder(
-//       borderRadius: BorderRadius.all(Radius.circular(16.0)),
-//     ),
-//     actions: <Widget>[
-//       if (onDisagreeClicked != null)
-//         TextPrimaryButton(
-//           onPressed: onDisagreeClicked,
-//           child: Text(cancelText ?? localization.cancel),
-//         ),
-//       TextPrimaryButton(
-//         onPressed: onAgreeClicked,
-//         child: Text(okText ?? localization.ok),
-//       )
-//     ],
-//   );
-// }
 }

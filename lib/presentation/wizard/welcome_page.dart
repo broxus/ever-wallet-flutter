@@ -81,7 +81,7 @@ class WelcomePage extends StatelessWidget {
         child: Assets.images.welcomeImage.svg(),
       );
 
-  Widget createNewButton(BuildContext context) => CustomElevatedButton(
+  Widget createNewButton(BuildContext context) => PrimaryElevatedButton(
         onPressed: () => context.router.push(
           DecentralizationPolicyRoute(
             onPressed: () => context.router.push(

@@ -144,7 +144,7 @@ class _AssetsLayoutState extends State<AssetsLayout> {
   }) =>
       ValueListenableBuilder<List<TokenContractAsset>>(
         valueListenable: selectedNotifier,
-        builder: (context, value, child) => CustomElevatedButton(
+        builder: (context, value, child) => PrimaryElevatedButton(
           onPressed: !listEquals(value, added)
               ? () {
                   context.router.pop();

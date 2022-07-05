@@ -128,7 +128,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<AddNewAccountTypePage>
 
   Widget submitButton() => ValueListenableBuilder<WalletType?>(
         valueListenable: optionNotifier,
-        builder: (context, value, child) => CustomElevatedButton(
+        builder: (context, value, child) => PrimaryElevatedButton(
           onPressed: value != null ? () => onPressed(value) : null,
           text: AppLocalizations.of(context)!.confirm,
         ),

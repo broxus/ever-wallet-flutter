@@ -100,7 +100,7 @@ class _GrantPermissionsPageState extends State<GrantPermissionsPage> {
         isSelectable: true,
       );
 
-  Widget submitButton() => CustomElevatedButton(
+  Widget submitButton() => PrimaryElevatedButton(
         onPressed: () => onSubmitPressed(),
         text: AppLocalizations.of(context)!.allow,
       );

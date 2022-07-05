@@ -233,7 +233,7 @@ class _SeedPhraseCheckPageState extends State<SeedPhraseCheckPage> {
         builder: (context, value, child) => AnimatedOffstage(
           duration: const Duration(milliseconds: 300),
           offstage: value,
-          child: CustomElevatedButton(
+          child: PrimaryElevatedButton(
             onPressed: () => context.router.push(
               PasswordCreationRoute(
                 phrase: widget.phrase,

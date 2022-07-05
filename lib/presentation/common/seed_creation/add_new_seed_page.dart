@@ -91,7 +91,7 @@ class _AddNewSeedPageState extends State<AddNewSeedPage> {
         ),
       );
 
-  Widget submitButton() => CustomElevatedButton(
+  Widget submitButton() => PrimaryElevatedButton(
         onPressed: () => context.router.push(
           SeedNameRoute(
             onSubmit: (String? name) {

@@ -5,7 +5,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../common/general/button/primary_button.dart';
 import '../../common/general/button/text_button.dart';
-import '../../common/general/default_appbar.dart';
+import '../../common/general/onboarding_appbar.dart';
 import '../../common/general/dialog/default_dialog_controller.dart';
 import '../../common/general/field/seed_phrase_input.dart';
 import '../../common/widgets/crystal_flushbar.dart';
@@ -71,7 +71,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor: Colors.transparent,
-          appBar: DefaultAppBar(
+          appBar: OnboardingAppBar(
             actions: [
               ValueListenableBuilder<bool>(
                 valueListenable: isClearButtonState,

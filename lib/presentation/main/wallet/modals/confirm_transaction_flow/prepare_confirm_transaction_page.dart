@@ -146,7 +146,7 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
 
   Widget submitButton() => ValueListenableBuilder<String>(
         valueListenable: publicKeyNotifier,
-        builder: (context, value, child) => CustomElevatedButton(
+        builder: (context, value, child) => PrimaryElevatedButton(
           onPressed: () => onPressed(value),
           text: AppLocalizations.of(context)!.next,
         ),

@@ -184,7 +184,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
         builder: (context, ref, child) {
           final result = ref.watch(tokenWalletPrepareTransferProvider).asData?.value;
 
-          return CustomElevatedButton(
+          return PrimaryElevatedButton(
             onPressed: result?.item1 != null && result?.item2 != null
                 ? () => onPressed(
                       read: ref.read,

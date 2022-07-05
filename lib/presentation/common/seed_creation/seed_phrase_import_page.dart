@@ -343,7 +343,7 @@ class _SeedPhraseImportPageState extends State<SeedPhraseImportPage> {
 
   Widget submitButton() => ValueListenableBuilder<bool>(
         valueListenable: formValidityNotifier,
-        builder: (context, value, child) => CustomElevatedButton(
+        builder: (context, value, child) => PrimaryElevatedButton(
           onPressed: value ? onSubmitButtonPressed : null,
           text: AppLocalizations.of(context)!.confirm,
         ),

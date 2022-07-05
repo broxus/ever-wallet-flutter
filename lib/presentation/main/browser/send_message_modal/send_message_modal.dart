@@ -249,7 +249,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
           final selectedPublicKey = ref.watch(selectedPublicKeyProvider);
           final result = ref.watch(tonWalletPrepareTransferProvider).asData?.value;
 
-          return CustomElevatedButton(
+          return PrimaryElevatedButton(
             onPressed: selectedPublicKey != null && result?.item1 != null && result?.item2 != null
                 ? () => onSubmitPressed(selectedPublicKey)
                 : null,

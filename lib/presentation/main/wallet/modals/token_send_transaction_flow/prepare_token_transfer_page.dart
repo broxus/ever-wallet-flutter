@@ -424,7 +424,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
 
           return ValueListenableBuilder<bool>(
             valueListenable: formValidityNotifier,
-            builder: (context, value, child) => CustomElevatedButton(
+            builder: (context, value, child) => PrimaryElevatedButton(
               onPressed: value && tokenWalletInfo != null ? () => onPressed(tokenWalletInfo.symbol.decimals) : null,
               text: AppLocalizations.of(context)!.next,
             ),

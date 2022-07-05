@@ -135,7 +135,7 @@ class _RequestPermissionsModalState extends ConsumerState<AddTip3TokenPage> {
         text: AppLocalizations.of(context)!.reject,
       );
 
-  Widget submitButton() => CustomElevatedButton(
+  Widget submitButton() => PrimaryElevatedButton(
         onPressed: () => Navigator.of(widget.modalContext).pop(true),
         text: AppLocalizations.of(context)!.submit,
       );

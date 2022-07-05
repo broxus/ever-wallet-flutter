@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../common/general/button/primary_button.dart';
-import '../../common/general/default_appbar.dart';
+import '../../common/general/onboarding_appbar.dart';
 import '../../common/general/field/bordered_input.dart';
 import '../../util/extensions/context_extensions.dart';
 import '../create_wallet/save_seed_phrase_screen.dart';
@@ -42,7 +42,7 @@ class _SeedPhraseNameScreenState extends State<SeedPhraseNameScreen> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: const DefaultAppBar(),
+          appBar: const OnboardingAppBar(),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(

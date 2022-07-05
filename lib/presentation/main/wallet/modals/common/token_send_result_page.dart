@@ -121,7 +121,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendResultPage> {
         height: 180,
       );
 
-  Widget submitButton(AsyncValue<PendingTransaction> value) => CustomElevatedButton(
+  Widget submitButton(AsyncValue<PendingTransaction> value) => PrimaryElevatedButton(
         onPressed: value.when(
           data: (data) => onPressed,
           error: (err, st) => onPressed,

@@ -36,8 +36,11 @@ final darkStyle = ThemeStyle(
       fontWeight: FontWeight.w700,
     ),
     header2Style: StylesRes.header2Text.copyWith(color: ColorsRes.white),
+    header3Style: StylesRes.header3Text.copyWith(color: ColorsRes.text),
+    sheetHeaderStyle: StylesRes.sheetHeaderText.copyWith(color: ColorsRes.text),
     captionStyle: StylesRes.captionText.copyWith(color: ColorsRes.lightBlue),
     fullScreenStyle: StylesRes.fullscreenText.copyWith(color: ColorsRes.white),
+    sectionCaption: StylesRes.sectionText.copyWith(color: ColorsRes.grey),
   ),
 );
 
@@ -75,8 +78,11 @@ final lightStyle = ThemeStyle(
       fontWeight: FontWeight.w700,
     ),
     header2Style: StylesRes.header2Text.copyWith(color: ColorsRes.white),
+    header3Style: StylesRes.header3Text.copyWith(color: ColorsRes.text),
+    sheetHeaderStyle: StylesRes.sheetHeaderText.copyWith(color: ColorsRes.text),
     captionStyle: StylesRes.captionText.copyWith(color: ColorsRes.lightBlue),
     fullScreenStyle: StylesRes.fullscreenText.copyWith(color: ColorsRes.white),
+    sectionCaption: StylesRes.sectionText.copyWith(color: ColorsRes.grey),
   ),
 );
 

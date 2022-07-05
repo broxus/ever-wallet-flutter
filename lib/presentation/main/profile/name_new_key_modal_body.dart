@@ -39,7 +39,7 @@ class NameNewKeyModalBodyState extends State<NameNewKeyModalBody> {
               hintText: AppLocalizations.of(context)!.name,
             ),
             const SizedBox(height: 24),
-            CustomElevatedButton(
+            PrimaryElevatedButton(
               onPressed: () {
                 context.router.pop<String>(nameController.text);
               },

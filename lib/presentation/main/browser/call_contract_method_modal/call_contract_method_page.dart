@@ -104,7 +104,7 @@ class _CallContractMethodPageState extends State<CallContractMethodPage> {
       );
 
   Widget submitButton() => Consumer(
-        builder: (context, ref, child) => CustomElevatedButton(
+        builder: (context, ref, child) => PrimaryElevatedButton(
           onPressed: () => onSubmitPressed(widget.publicKey),
           text: AppLocalizations.of(context)!.call,
         ),

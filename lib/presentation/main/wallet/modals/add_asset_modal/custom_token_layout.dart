@@ -91,7 +91,7 @@ class _CustomTokenLayoutState extends State<CustomTokenLayout> {
         builder: (context, value, child) => AnimatedOffstage(
           duration: const Duration(milliseconds: 300),
           offstage: value,
-          child: CustomElevatedButton(
+          child: PrimaryElevatedButton(
             onPressed: () {
               final address = controller.text;
               context.router.pop();

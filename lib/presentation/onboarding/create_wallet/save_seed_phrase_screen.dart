@@ -4,7 +4,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../common/constants.dart';
 import '../../common/general/button/primary_button.dart';
-import '../../common/general/default_appbar.dart';
+import '../../common/general/onboarding_appbar.dart';
 import '../../common/widgets/crystal_flushbar.dart';
 import '../../util/extensions/context_extensions.dart';
 import '../../util/extensions/iterable_extensions.dart';
@@ -42,7 +42,7 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
     return OnboardingBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: const DefaultAppBar(),
+        appBar: const OnboardingAppBar(),
         body: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

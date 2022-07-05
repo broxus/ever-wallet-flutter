@@ -25,6 +25,7 @@ class PrimaryButton extends StatelessWidget {
     this.backgroundColor,
     this.height = kPrimaryButtonHeight,
     this.padding,
+    this.fillWidth = true,
     this.presstateColor,
   }) : super(key: key);
 
@@ -41,6 +42,7 @@ class PrimaryButton extends StatelessWidget {
   final EdgeInsets? padding;
   final Color? backgroundColor;
   final Color? presstateColor;
+  final bool fillWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +93,7 @@ class PrimaryButton extends StatelessWidget {
             ),
             splashColor: pressColor,
             onTap: onPressed,
-            child: Center(child: _child),
+            child: fillWidth ? Center(child: _child) : _child,
           ),
         ),
       ),

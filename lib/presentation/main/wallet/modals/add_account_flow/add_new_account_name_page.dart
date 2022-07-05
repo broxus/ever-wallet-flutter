@@ -91,7 +91,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
         ),
       );
 
-  Widget submitButton() => CustomElevatedButton(
+  Widget submitButton() => PrimaryElevatedButton(
         onPressed: onPressed,
         text: AppLocalizations.of(context)!.next,
       );

@@ -101,7 +101,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
             ),
             buildValidationText(),
             const SizedBox(height: 24),
-            CustomElevatedButton(
+            PrimaryElevatedButton(
               onPressed: () async {
                 final oldPassword = oldPasswordController.text.trim();
 

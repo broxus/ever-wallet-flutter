@@ -142,7 +142,7 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
 
   Widget nextButton() => ChangeNotifierBuilder<PasswordEnterPageNotifier>(
         notifier: notifier,
-        builder: (context, notifier, child) => CustomElevatedButton(
+        builder: (context, notifier, child) => PrimaryElevatedButton(
           onPressed:
               notifier?.state.formState.isValid ?? false ? () => onPressed(notifier!.state.passwordState.value) : null,
           text: AppLocalizations.of(context)!.submit,

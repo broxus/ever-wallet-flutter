@@ -1,12 +1,11 @@
 import 'package:change_notifier_builder/change_notifier_builder.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../common/theme.dart';
+import '../../../common/general/field/bordered_input.dart';
 import '../../../common/widgets/custom_elevated_button.dart';
-import '../../../common/widgets/custom_text_form_field.dart';
-import '../../../common/widgets/text_field_clear_button.dart';
+import '../../../util/colors.dart';
+import '../../../util/extensions/context_extensions.dart';
 import 'input_password_field_notifier.dart';
 
 class InputPasswordField extends StatefulWidget {
@@ -54,9 +53,7 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             passwordField(),
-            const SizedBox(
-              height: 24,
-            ),
+            const SizedBox(height: 24),
             submitButton(),
           ],
         ),
@@ -64,18 +61,17 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
 
   Widget passwordField() => ChangeNotifierBuilder<InputPasswordFieldNotifier>(
         notifier: notifier,
-        builder: (context, notifier, child) => CustomTextFormFieldWithDecoration(
-          controller: controller,
-          autofocus: true,
-          autocorrect: false,
-          enableSuggestions: false,
-          obscureText: true,
-          errorText: notifier?.state.passwordState.errorText,
-          hintText: '${AppLocalizations.of(context)!.enter_password}...',
-          suffixIcon: TextFieldClearButton(
+        builder: (context, notifier, child) {
+          final themeStyle = context.themeStyle;
+          return BorderedInput(
             controller: controller,
-          ),
-        ),
+            autofocus: true,
+            obscureText: true,
+            textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+            errorText: notifier?.state.passwordState.errorText,
+            label: '${context.localization.enter_password}...',
+          );
+        },
       );
 
   Widget validationText() => ChangeNotifierBuilder<InputPasswordFieldNotifier>(
@@ -87,11 +83,8 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
                   const SizedBox(height: 16),
                   Text(
                     notifier!.state.formState.errorText!,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: CrystalColor.error,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 0.25,
+                    style: context.themeStyle.styles.captionStyle.copyWith(
+                      color: context.themeStyle.colors.errorTextColor,
                     ),
                   ),
                 ],
@@ -101,10 +94,11 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
 
   Widget submitButton() => ChangeNotifierBuilder<InputPasswordFieldNotifier>(
         notifier: notifier,
-        builder: (context, notifier, child) => CustomElevatedButton(
-          onPressed:
-              notifier?.state.formState.isValid ?? false ? () => onPressed(notifier!.state.passwordState.value) : null,
-          text: AppLocalizations.of(context)!.submit,
+        builder: (context, notifier, child) => PrimaryElevatedButton(
+          onPressed: notifier?.state.formState.isValid ?? false
+              ? () => onPressed(notifier!.state.passwordState.value)
+              : null,
+          text: context.localization.submit,
         ),
       );
 

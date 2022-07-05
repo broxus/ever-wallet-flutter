@@ -137,7 +137,7 @@ class _SeedPhraseSavePageState extends State<SeedPhraseSavePage> {
         duration: const Duration(milliseconds: 300),
         delay: const Duration(seconds: 1),
         offset: const Offset(0, 1),
-        child: CustomElevatedButton(
+        child: PrimaryElevatedButton(
           onPressed: onSubmitButtonPressed,
           text: AppLocalizations.of(context)!.confirm_seed_saved,
         ),

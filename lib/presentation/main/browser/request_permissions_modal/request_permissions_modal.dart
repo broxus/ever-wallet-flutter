@@ -176,7 +176,7 @@ class _RequestPermissionsModalState extends ConsumerState<RequestPermissionsPage
         builder: (context, ref, child) {
           final selectedAccount = ref.watch(selectedAccountProvider);
 
-          return CustomElevatedButton(
+          return PrimaryElevatedButton(
             onPressed: selectedAccount != null ? () => onSubmitPressed(selectedAccount) : null,
             text: AppLocalizations.of(context)!.select,
           );

@@ -48,7 +48,7 @@ class _ReceiveModalBodyState extends State<ReceiveModalBody> {
 
   Widget card() => AddressCard(address: widget.address);
 
-  Widget copyButton() => CustomElevatedButton(
+  Widget copyButton() => PrimaryElevatedButton(
         onPressed: onCopyPressed,
         text: AppLocalizations.of(context)!.copy_address,
       );

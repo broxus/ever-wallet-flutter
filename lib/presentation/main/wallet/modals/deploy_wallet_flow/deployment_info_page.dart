@@ -171,7 +171,7 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
         builder: (context, ref, child) {
           final result = ref.watch(tonWalletPrepareDeployProvider).asData?.value;
 
-          return CustomElevatedButton(
+          return PrimaryElevatedButton(
             onPressed: result?.item1 != null && result?.item2 != null
                 ? () => onPressed(
                       read: ref.read,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../data/repositories/keys_repository.dart';
 import '../../../injection.dart';
 import '../../common/general/button/primary_button.dart';
-import '../../common/general/default_appbar.dart';
+import '../../common/general/onboarding_appbar.dart';
 import '../../common/general/field/bordered_input.dart';
 import '../../main/wallet/wallet_page.dart';
 import '../../util/extensions/context_extensions.dart';
@@ -53,7 +53,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: const DefaultAppBar(),
+          appBar: const OnboardingAppBar(),
           body: Padding(
             padding: const EdgeInsets.all(16),
             child: Form(

@@ -51,7 +51,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
             const SizedBox(height: 24),
             ValueListenableBuilder<TextEditingValue>(
               valueListenable: controller,
-              builder: (_, value, __) => CustomElevatedButton(
+              builder: (_, value, __) => PrimaryElevatedButton(
                 onPressed: value.text.isEmpty
                     ? null
                     : () async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../generated/assets.gen.dart';
+import '../../../util/colors.dart';
 import '../../../util/extensions/context_extensions.dart';
 
 const kBorderedInputHeight = 46.0;
@@ -28,6 +29,8 @@ class BorderedInput extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
 
   final bool obscureText;
+  final String? errorText;
+  final TextStyle? textStyle;
 
   const BorderedInput({
     Key? key,
@@ -46,6 +49,8 @@ class BorderedInput extends StatefulWidget {
     this.onSubmitted,
     this.height,
     this.obscureText = false,
+    this.errorText,
+    this.textStyle,
   }) : super(key: key);
 
   @override
@@ -108,7 +113,7 @@ class _BorderedInputState extends State<BorderedInput> {
             SizedBox(
               height: widget.height ?? kBorderedInputHeight,
               child: TextField(
-                style: themeStyle.styles.basicStyle,
+                style: widget.textStyle ?? themeStyle.styles.basicStyle,
                 controller: _controller,
                 focusNode: widget.focusNode,
                 keyboardType: widget.textInputType,
@@ -121,7 +126,7 @@ class _BorderedInputState extends State<BorderedInput> {
                   errorText: state.hasError ? '' : null,
                   errorStyle: const TextStyle(fontSize: 0, height: 0),
                   labelText: widget.label,
-                  labelStyle: themeStyle.styles.basicStyle,
+                  labelStyle: widget.textStyle ?? themeStyle.styles.basicStyle,
                   contentPadding: EdgeInsets.zero,
                   suffixIcon: _buildSuffixIcon(),
                   prefixIconConstraints: widget.prefix == null
@@ -134,11 +139,9 @@ class _BorderedInputState extends State<BorderedInput> {
                       color: themeStyle.colors.inactiveInputColor,
                     ),
                   ),
-                  enabledBorder: OutlineInputBorder(
+                  enabledBorder: const OutlineInputBorder(
                     gapPadding: 1,
-                    borderSide: BorderSide(
-                      color: themeStyle.colors.inactiveInputColor,
-                    ),
+                    borderSide: BorderSide(color: ColorsRes.greyLight),
                   ),
                   focusedBorder: OutlineInputBorder(
                     gapPadding: 1,
@@ -161,9 +164,9 @@ class _BorderedInputState extends State<BorderedInput> {
                 ),
               ),
             ),
-            if (state.hasError && state.errorText!.isNotEmpty)
+            if (state.hasError && state.errorText!.isNotEmpty || widget.errorText != null)
               Text(
-                state.errorText!,
+                widget.errorText ?? state.errorText!,
                 style: errorStyle.copyWith(color: themeStyle.colors.errorTextColor),
               )
             else

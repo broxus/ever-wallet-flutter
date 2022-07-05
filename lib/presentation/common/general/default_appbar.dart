@@ -2,44 +2,32 @@ import 'package:flutter/material.dart';
 
 import '../../util/extensions/context_extensions.dart';
 import 'button/text_button.dart';
+import 'default_divider.dart';
+import 'onboarding_appbar.dart';
 
-/// Type of closing screen
-enum CloseType {
-  /// top left arrow button
-  leading,
-
-  /// top right cross button
-  actions,
-
-  /// leading + actions
-  multi,
-
-  /// without close buttons
-  none,
-}
-
-const kMinLeadingButtonWidth = 80.0;
-const kAppBarButtonSize = 32.0;
-const kAppBarButtonPadding = EdgeInsets.symmetric(vertical: 4);
-
-/// Стандартный аппбар со стрелкой назад
+/// Default appbar for authorized zone.
+/// When you use that appbar, title should be displayed in other part of UI
 class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   const DefaultAppBar({
-    this.title,
     this.onClosePressed,
     this.onActionsClosePressed,
     this.actions,
     this.leading,
     this.closeType = CloseType.leading,
     this.backgroundColor = Colors.transparent,
-    this.centerTitle = false,
     Key? key,
+    this.backText,
+    this.needDivider = true,
+    this.backColor,
   }) : super(key: key);
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
-  final Widget? title;
+  /// Color of back arrow and text
+  final Color? backColor;
+
+  final String? backText;
 
   /// Action when closing with [CloseType.leading] or [CloseType.multi]
   final VoidCallback? onClosePressed;
@@ -56,8 +44,7 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   final CloseType closeType;
 
   final Color? backgroundColor;
-
-  final bool centerTitle;
+  final bool needDivider;
 
   bool get _hasActions => actions?.isNotEmpty ?? false;
 
@@ -68,54 +55,82 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final themeStyle = context.themeStyle;
+    final mq = MediaQuery.of(context);
 
-    return AppBar(
-      title: title,
-      centerTitle: centerTitle,
-      leadingWidth:
-          leading != null || _showLeadingClose ? kMinLeadingButtonWidth : kMinInteractiveDimension,
-      leading: leading ??
-          (_showLeadingClose
-              ? TextPrimaryButton.appBar(
-                  onPressed: onClosePressed ?? () => Navigator.of(context).maybePop(),
-                  child: Padding(
-                    padding: kAppBarButtonPadding,
+    return Material(
+      color: backgroundColor,
+      borderRadius: BorderRadius.zero,
+      child: Container(
+        margin: EdgeInsets.only(top: mq.padding.top + 5),
+        height: preferredSize.height,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: leading ??
+                        (_showLeadingClose
+                            ? TextPrimaryButton.appBar(
+                                onPressed: onClosePressed ?? () => Navigator.of(context).maybePop(),
+                                child: Padding(
+                                  padding: kAppBarButtonPadding,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.arrow_back_ios,
+                                        color: backColor ??
+                                            themeStyle.colors.textPrimaryTextButtonColor,
+                                        size: 20,
+                                      ),
+                                      if (backText != null)
+                                        Text(
+                                          backText!,
+                                          style: themeStyle.styles.basicStyle.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: backColor ??
+                                                themeStyle.colors.textPrimaryTextButtonColor,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : const SizedBox(width: kAppBarButtonSize)),
+                  ),
+                  Flexible(
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.arrow_back_ios,
-                          color: themeStyle.colors.primaryButtonColor,
-                          size: 20,
-                        ),
-                        Text(
-                          // TODO: change text
-                          'Back',
-                          style: themeStyle.styles.basicBoldStyle,
-                        ),
-                      ],
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: _hasActions
+                          ? actions!
+                          : [
+                              if (_showActionsClose)
+                                TextPrimaryButton(
+                                  onPressed: onActionsClosePressed ??
+                                      onClosePressed ??
+                                      () => Navigator.of(context).maybePop(),
+                                  padding: kAppBarButtonPadding,
+                                  child: Icon(
+                                    Icons.close,
+                                    color: themeStyle.colors.primaryButtonColor,
+                                  ),
+                                )
+                              else
+                                const SizedBox(width: kAppBarButtonSize)
+                            ],
                     ),
                   ),
-                )
-              : const SizedBox(width: kAppBarButtonSize)),
-      backgroundColor: backgroundColor,
-      elevation: 0.0,
-      titleSpacing: 0.0,
-      actions: _hasActions
-          ? actions
-          : [
-              if (_showActionsClose)
-                TextPrimaryButton(
-                  onPressed: onActionsClosePressed ??
-                      onClosePressed ??
-                      () => Navigator.of(context).maybePop(),
-                  padding: kAppBarButtonPadding,
-                  child: Icon(Icons.close, color: themeStyle.colors.primaryButtonColor),
-                )
-              else
-                const SizedBox(width: kAppBarButtonSize)
-            ],
-      automaticallyImplyLeading: false,
+                ],
+              ),
+            ),
+            const SizedBox(height: 6),
+            if (needDivider) const DefaultDivider(),
+          ],
+        ),
+      ),
     );
   }
 }

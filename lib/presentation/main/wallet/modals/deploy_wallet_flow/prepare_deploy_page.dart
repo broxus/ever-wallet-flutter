@@ -362,7 +362,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
           child: value == _WalletCreationOptions.multisignature
               ? ValueListenableBuilder<bool>(
                   valueListenable: formValidityNotifier,
-                  builder: (context, value, child) => CustomElevatedButton(
+                  builder: (context, value, child) => PrimaryElevatedButton(
                     onPressed: value
                         ? () {
                             final custodians = controllers.map((e) => e.text).toList();
@@ -377,7 +377,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
                     text: AppLocalizations.of(context)!.next,
                   ),
                 )
-              : CustomElevatedButton(
+              : PrimaryElevatedButton(
                   onPressed: onPressed,
                   text: AppLocalizations.of(context)!.next,
                 ),

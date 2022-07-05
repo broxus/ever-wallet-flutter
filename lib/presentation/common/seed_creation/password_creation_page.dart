@@ -255,7 +255,7 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
 
   Widget submitButton() => ValueListenableBuilder<String?>(
         valueListenable: formValidityNotifier,
-        builder: (context, value, child) => CustomElevatedButton(
+        builder: (context, value, child) => PrimaryElevatedButton(
           onPressed: value != null ? null : onSubmitButtonPressed,
           text: AppLocalizations.of(context)!.confirm,
         ),

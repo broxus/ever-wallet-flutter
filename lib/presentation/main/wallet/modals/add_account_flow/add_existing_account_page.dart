@@ -186,7 +186,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
 
   Widget submitButton() => ValueListenableBuilder<String?>(
         valueListenable: formValidityNotifier,
-        builder: (context, value, child) => CustomElevatedButton(
+        builder: (context, value, child) => PrimaryElevatedButton(
           onPressed: value != null ? null : onPressed,
           text: AppLocalizations.of(context)!.confirm,
         ),

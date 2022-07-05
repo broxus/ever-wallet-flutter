@@ -347,7 +347,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
 
   Widget submitButton() => ValueListenableBuilder<bool>(
         valueListenable: formValidityNotifier,
-        builder: (context, value, child) => CustomElevatedButton(
+        builder: (context, value, child) => PrimaryElevatedButton(
           onPressed: value ? onPressed : null,
           text: AppLocalizations.of(context)!.next,
         ),

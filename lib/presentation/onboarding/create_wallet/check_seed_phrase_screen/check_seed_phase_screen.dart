@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../common/general/button/primary_button.dart';
-import '../../../common/general/default_appbar.dart';
+import '../../../common/general/onboarding_appbar.dart';
 import '../../../util/colors.dart';
 import '../../../util/extensions/context_extensions.dart';
 import '../../general_screens/create_password.dart';
@@ -48,7 +48,7 @@ class _CheckSeedPhraseScreenState extends State<CheckSeedPhraseScreen> {
     return OnboardingBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: const DefaultAppBar(),
+        appBar: const OnboardingAppBar(),
         body: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

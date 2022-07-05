@@ -87,7 +87,7 @@ class _SeedNamePageState extends State<SeedNamePage> {
         ),
       );
 
-  Widget submitButton() => CustomElevatedButton(
+  Widget submitButton() => PrimaryElevatedButton(
         onPressed: () => widget.onSubmit(controller.text.trim().isNotEmpty ? controller.text.trim() : null),
         text: AppLocalizations.of(context)!.submit,
       );

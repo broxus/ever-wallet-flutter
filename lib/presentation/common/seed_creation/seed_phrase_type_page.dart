@@ -101,7 +101,7 @@ class SeedPhraseTypePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            CustomElevatedButton(
+            PrimaryElevatedButton(
               onPressed: () => onSelected(mnemonicType),
               text: AppLocalizations.of(context)!.select,
             ),

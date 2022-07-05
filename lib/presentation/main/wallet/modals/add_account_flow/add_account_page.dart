@@ -87,7 +87,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
 
   Widget submitButton() => ValueListenableBuilder<_Options>(
         valueListenable: optionNotifier,
-        builder: (context, value, child) => CustomElevatedButton(
+        builder: (context, value, child) => PrimaryElevatedButton(
           onPressed: () => onPressed(value),
           text: AppLocalizations.of(context)!.next,
         ),
