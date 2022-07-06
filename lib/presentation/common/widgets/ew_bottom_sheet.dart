@@ -3,7 +3,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../util/colors.dart';
 import '../../util/extensions/context_extensions.dart';
-import '../general/button/push_state_ink_widget.dart';
+import '../general/button/primary_icon_button.dart';
 
 Future<T?> showEWBottomSheet<T>(
   BuildContext context, {
@@ -87,20 +87,9 @@ Future<T?> showEWBottomSheet<T>(
 
 Widget _getCloseButton() => Builder(
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(8),
-          child: Material(
-            color: Colors.transparent,
-            child: PushStateInkWidget(
-              pressStateColor: ColorsRes.greyOpacity,
-              borderRadius: BorderRadius.circular(90),
-              onPressed: Navigator.of(context).maybePop,
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(Icons.close, color: ColorsRes.grey, size: 20),
-              ),
-            ),
-          ),
+        return PrimaryIconButton(
+          onPressed: Navigator.of(context).maybePop,
+          icon: const Icon(Icons.close, color: ColorsRes.grey, size: 20),
         );
       },
     );

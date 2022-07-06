@@ -98,7 +98,7 @@ class _InputPasswordFieldState extends State<InputPasswordField> {
           onPressed: notifier?.state.formState.isValid ?? false
               ? () => onPressed(notifier!.state.passwordState.value)
               : null,
-          text: context.localization.submit,
+          text: context.localization.confirm,
         ),
       );
 

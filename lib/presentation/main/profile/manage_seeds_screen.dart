@@ -1,9 +1,30 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../data/repositories/keys_repository.dart';
+import '../../../injection.dart';
+import '../../../providers/key/current_key_provider.dart';
+import '../../../providers/key/keys_provider.dart';
+import '../../common/general/button/menu_dropdown.dart';
+import '../../common/general/button/push_state_ink_widget.dart';
 import '../../common/general/default_appbar.dart';
 import '../../common/general/default_divider.dart';
+import '../../common/general/default_list_tile.dart';
+import '../../common/seed_creation/add_new_seed_page.dart';
+import '../../common/widgets/ew_bottom_sheet.dart';
+import '../../util/auth_utils.dart';
 import '../../util/colors.dart';
 import '../../util/extensions/context_extensions.dart';
+import '../../util/extensions/iterable_extensions.dart';
+import '../../util/theme_styles.dart';
+import 'change_seed_phrase_password_modal_body.dart';
+import 'export_seed_phrase_modal_body.dart';
+import 'key_removement_modal/show_key_removement_modal.dart';
+import 'rename_key_modal_body.dart';
+import 'seed_phrase_export_page.dart';
 
 class ManageSeedsRoute extends MaterialPageRoute<void> {
   ManageSeedsRoute() : super(builder: (_) => const ManageSeedsScreen());
@@ -28,6 +49,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
       ),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
@@ -37,11 +59,184 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
                 style: themeStyle.styles.header3Style,
               ),
             ),
-            Text('Seed phrases', style: themeStyle.styles.sectionCaption),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text('Seed phrases', style: themeStyle.styles.sectionCaption),
+            ),
             const DefaultDivider(),
+            Consumer(
+              builder: (context, ref, child) {
+                final keys = ref.watch(keysProvider).asData?.value ?? {};
+                final currentKey = ref.watch(currentKeyProvider).asData?.value;
+
+                return _buildSeedItems(
+                  context.themeStyle,
+                  context.localization,
+                  keys,
+                  currentKey,
+                );
+              },
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSeedItems(
+    ThemeStyle themeStyle,
+    AppLocalizations localization,
+    Map<KeyStoreEntry, List<KeyStoreEntry>?> keys,
+    KeyStoreEntry? currentKey,
+  ) {
+    final seedsList = keys.keys
+        .map(
+          (e) => _seedItem(
+            themeStyle,
+            localization,
+            e,
+            keys[e],
+            e.publicKey == currentKey?.publicKey,
+          ),
+        )
+        .separated(const DefaultDivider(bothIndent: 16));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...seedsList,
+        if (seedsList.isNotEmpty) const DefaultDivider(bothIndent: 16),
+        PushStateInkWidget(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const AddNewSeedPage()),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 46,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              // TODO: replace text
+              '+ Add new seed phrase ',
+              style: themeStyle.styles.basicStyle.copyWith(
+                color: ColorsRes.darkBlue,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _seedItem(
+    ThemeStyle themeStyle,
+    AppLocalizations localization,
+    KeyStoreEntry seed,
+    List<KeyStoreEntry>? children,
+    bool isSelected,
+  ) {
+    return EWListTile(
+      leading: Container(
+        width: 32,
+        height: 32,
+        decoration: const BoxDecoration(
+          color: ColorsRes.darkBlue,
+          shape: BoxShape.circle,
+        ),
+      ),
+      titleText: seed.name,
+      // TODO: replace text and counting
+      subtitleText: '${children?.length ?? 0} public keys',
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isSelected)
+            Icon(
+              CupertinoIcons.checkmark_alt,
+              color: themeStyle.colors.primaryButtonTextColor,
+              size: 20,
+            ),
+          _seedDropdown(themeStyle, localization, seed),
+        ],
+      ),
+    );
+  }
+
+  Widget _seedDropdown(
+    ThemeStyle themeStyle,
+    AppLocalizations localization,
+    KeyStoreEntry seed,
+  ) {
+    return Consumer(
+      builder: (context, ref, child) {
+        return MenuDropdown(
+          items: [
+            MenuDropdownData(
+              // TODO: replace text
+              title: 'Use this seed',
+              onTap: () => getIt.get<KeysRepository>().setCurrentKey(seed),
+            ),
+            MenuDropdownData(
+              title: localization.rename,
+              onTap: () {
+                showEWBottomSheet<void>(
+                  context,
+                  title: localization.enter_new_name,
+                  body: RenameKeyModalBody(publicKey: seed.publicKey),
+                );
+              },
+            ),
+            MenuDropdownData(
+              // TODO: replace text
+              title: 'Export',
+              onTap: () => AuthUtils.askPasswordBeforeExport(
+                ref: ref,
+                context: context,
+                seed: seed,
+                goExport: (phrase) {
+                  if (!mounted) return;
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => SeedPhraseExportPage(phrase: phrase),
+                    ),
+                  );
+                },
+                enterPassword: (seed) {
+                  if (!mounted) return;
+
+                  showEWBottomSheet<void>(
+                    context,
+                    title: context.localization.export_enter_password,
+                    body: ExportSeedPhraseModalBody(publicKey: seed.publicKey),
+                  );
+                },
+              ),
+            ),
+            MenuDropdownData(
+              // TODO: replace text
+              title: 'Change password',
+              onTap: () => showEWBottomSheet<void>(
+                context,
+                title: localization.change_seed_password,
+                body: ChangeSeedPhrasePasswordModalBody(publicKey: seed.publicKey),
+              ),
+            ),
+            MenuDropdownData(
+              // TODO: replace text
+              title: 'Delete',
+              onTap: () => showKeyRemovementDialog(
+                context: context,
+                publicKey: seed.publicKey,
+              ),
+              textStyle: themeStyle.styles.basicStyle.copyWith(
+                color: themeStyle.colors.errorTextColor,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

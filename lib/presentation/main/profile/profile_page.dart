@@ -1,4 +1,3 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,27 +11,21 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../../../injection.dart';
 import '../../../../../data/repositories/keys_repository.dart';
 import '../../../../../injection.dart';
-import '../../../../data/repositories/biometry_repository.dart';
 import '../../../../data/repositories/keys_repository.dart';
 import '../../../../providers/biometry/biometry_availability_provider.dart';
-import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../providers/key/current_key_provider.dart';
 import '../../../../providers/key/keys_provider.dart';
 import '../../common/general/default_divider.dart';
 import '../../common/theme.dart';
 import '../../common/widgets/ew_bottom_sheet.dart';
-import '../../router.gr.dart';
+import '../../util/auth_utils.dart';
 import '../../util/extensions/context_extensions.dart';
 import 'biometry_modal_body.dart';
-import 'change_seed_phrase_password_modal_body.dart';
-import 'derive_key_modal_body.dart';
 import 'export_seed_phrase_modal_body.dart';
-import 'key_removement_modal/show_key_removement_modal.dart';
 import 'language_modal_body.dart';
 import 'logout_modal/show_logout_modal.dart';
 import 'manage_seeds_screen.dart';
-import 'name_new_key_modal_body.dart';
-import 'rename_key_modal_body.dart';
+import 'seed_phrase_export_page.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -110,42 +103,28 @@ class _ProfilePageState extends State<ProfilePage> {
                 buildSectionAction(
                   title: AppLocalizations.of(context)!.export_seed,
                   onTap: keys.isNotEmpty && currentKey != null
-                      ? () async {
-                          final isEnabled = await ref.read(biometryStatusProvider.future);
-                          final isAvailable = await ref.read(biometryAvailabilityProvider.future);
-
-                          if (isAvailable && isEnabled) {
-                            try {
-                              final password = await getIt.get<BiometryRepository>().getKeyPassword(
-                                    localizedReason: context.localization.authentication_reason,
-                                    publicKey: currentKey.publicKey,
-                                  );
-
-                              final phrase = await getIt.get<KeysRepository>().exportKey(
-                                    publicKey: currentKey.publicKey,
-                                    password: password,
-                                  );
-
-                              context.router.navigate(SeedPhraseExportRoute(phrase: phrase));
-                            } catch (err) {
+                      ? () => AuthUtils.askPasswordBeforeExport(
+                            ref: ref,
+                            context: context,
+                            seed: currentKey,
+                            goExport: (phrase) {
+                              if (!mounted) return;
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => SeedPhraseExportPage(phrase: phrase),
+                                ),
+                              );
+                            },
+                            enterPassword: (seed) {
                               if (!mounted) return;
 
                               showEWBottomSheet<void>(
                                 context,
                                 title: context.localization.export_enter_password,
-                                body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
+                                body: ExportSeedPhraseModalBody(publicKey: seed.publicKey),
                               );
-                            }
-                          } else {
-                            if (!mounted) return;
-
-                            showEWBottomSheet<void>(
-                              context,
-                              title: context.localization.export_enter_password,
-                              body: ExportSeedPhraseModalBody(publicKey: currentKey.publicKey),
-                            );
-                          }
-                        }
+                            },
+                          )
                       : null,
                 ),
                 buildSection(
@@ -163,26 +142,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                   ],
                 ),
-                // buildSectionAction(
-                //   title: AppLocalizations.of(context)!.remove_seed,
-                //   onTap: keys.isNotEmpty && currentKey != null
-                //       ? () => showKeyRemovementDialog(
-                //             context: context,
-                //             publicKey: currentKey.publicKey,
-                //           )
-                //       : null,
-                // ),
-                // buildSectionAction(
-                //   title: AppLocalizations.of(context)!.change_seed_password,
-                //   onTap: keys.isNotEmpty && currentKey != null
-                //       ? () => showCrystalBottomSheet<void>(
-                //             context,
-                //             title: AppLocalizations.of(context)!.change_seed_password,
-                //             body:
-                //                 ChangeSeedPhrasePasswordModalBody(publicKey: currentKey.publicKey),
-                //           )
-                //       : null,
-                // ),
                 // if (currentKey != null && currentKey.isNotLegacy && currentKey.isMaster)
                 // buildSectionAction(
                 //   title: AppLocalizations.of(context)!.derive_key,
@@ -242,18 +201,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 //               );
                 //             }
                 //           }
-                //         }
-                //       : null,
-                // ),
-                // buildSectionAction(
-                //   title: AppLocalizations.of(context)!.rename_key,
-                //   onTap: keys.isNotEmpty && currentKey != null
-                //       ? () {
-                //           showCrystalBottomSheet<void>(
-                //             context,
-                //             title: AppLocalizations.of(context)!.enter_new_name,
-                //             body: RenameKeyModalBody(publicKey: currentKey.publicKey),
-                //           );
                 //         }
                 //       : null,
                 // ),

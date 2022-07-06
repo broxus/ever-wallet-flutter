@@ -4,7 +4,7 @@ import 'package:tuple/tuple.dart';
 
 class CustomDropdownButton<T> extends StatelessWidget {
   final List<Tuple2<T, String>> items;
-  final T value;
+  final T? value;
   final void Function(T?) onChanged;
 
   const CustomDropdownButton({

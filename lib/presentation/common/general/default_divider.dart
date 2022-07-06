@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 
 class DefaultDivider extends StatelessWidget {
-  const DefaultDivider({Key? key}) : super(key: key);
+  final double bothIndent;
+
+  const DefaultDivider({Key? key, this.bothIndent = 0}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Divider(thickness: 1, height: 1);
+    return Divider(
+      thickness: 1,
+      height: 1,
+      indent: bothIndent,
+      endIndent: bothIndent,
+    );
   }
 }

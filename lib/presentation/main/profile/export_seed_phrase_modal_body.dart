@@ -1,4 +1,3 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../injection.dart';
@@ -8,8 +7,8 @@ import '../../../../data/repositories/keys_repository.dart';
 import '../../../../logger.dart';
 import '../../../data/extensions.dart';
 import '../../common/widgets/crystal_flushbar.dart';
-import '../../router.gr.dart';
 import '../common/input_password_modal_body.dart';
+import 'seed_phrase_export_page.dart';
 
 class ExportSeedPhraseModalBody extends StatefulWidget {
   final String publicKey;
@@ -41,8 +40,11 @@ class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
                   password: password,
                 );
 
-            context.router.navigatorKey.currentState?.pop();
-            context.topRoute.router.navigate(SeedPhraseExportRoute(phrase: phrase));
+            if (!mounted) return;
+            final navigator = Navigator.of(context);
+            navigator.pushReplacement(
+              MaterialPageRoute<void>(builder: (_) => SeedPhraseExportPage(phrase: phrase)),
+            );
           } catch (err, st) {
             logger.e(err, err, st);
 

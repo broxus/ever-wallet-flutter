@@ -41,6 +41,7 @@ final darkStyle = ThemeStyle(
     captionStyle: StylesRes.captionText.copyWith(color: ColorsRes.lightBlue),
     fullScreenStyle: StylesRes.fullscreenText.copyWith(color: ColorsRes.white),
     sectionCaption: StylesRes.sectionText.copyWith(color: ColorsRes.grey),
+    subtitleStyle: StylesRes.subtitleStyle.copyWith(color: ColorsRes.grey),
   ),
 );
 
@@ -83,6 +84,7 @@ final lightStyle = ThemeStyle(
     captionStyle: StylesRes.captionText.copyWith(color: ColorsRes.lightBlue),
     fullScreenStyle: StylesRes.fullscreenText.copyWith(color: ColorsRes.white),
     sectionCaption: StylesRes.sectionText.copyWith(color: ColorsRes.grey),
+    subtitleStyle: StylesRes.subtitleStyle.copyWith(color: ColorsRes.grey),
   ),
 );
 

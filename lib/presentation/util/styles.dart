@@ -16,6 +16,7 @@ class StylesPalette {
     required this.primaryButtonStyle,
     required this.secondaryButtonStyle,
     required this.sectionCaption,
+    required this.subtitleStyle,
   });
 
   /// Basic texts
@@ -23,6 +24,7 @@ class StylesPalette {
   final TextStyle basicBoldStyle;
   final TextStyle captionStyle;
   final TextStyle sectionCaption;
+  final TextStyle subtitleStyle;
 
   /// Headers
   final TextStyle appbarStyle;
@@ -53,6 +55,14 @@ class StylesRes {
     fontSize: 14,
     height: 1.42,
     letterSpacing: 0.75,
+    fontWeight: FontWeight.w400,
+    fontFamily: FontFamily.pt,
+  );
+
+  static const subtitleStyle = TextStyle(
+    fontSize: 12,
+    height: 1.66,
+    letterSpacing: 0.25,
     fontWeight: FontWeight.w400,
     fontFamily: FontFamily.pt,
   );

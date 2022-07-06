@@ -21,7 +21,7 @@ class PushStateInkWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final presState = pressStateColor ?? context.themeStyle.colors.primaryPressStateColor;
+    final presState = pressStateColor ?? context.themeStyle.colors.secondaryPressStateColor;
 
     assert(debugCheckHasMaterial(context));
 

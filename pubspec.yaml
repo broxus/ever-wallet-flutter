@@ -21,7 +21,8 @@ dependencies:
   country_icons: ^2.0.2
   cupertino_icons: ^1.0.4
   dio: ^4.0.6
-  dropdown_button2: ^1.5.2
+  dropdown_button2:
+    git: https://github.com/Alex-A4/dropdown_button2.git
   duration: ^3.0.11
   expand_tap_area: ^1.1.0
   fading_edge_scrollview: ^2.0.1
