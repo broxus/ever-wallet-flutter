@@ -10,7 +10,7 @@ import 'package:validators/validators.dart';
 import '../../../../../generated/assets.gen.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/custom_dropdown_button.dart';
-import '../../../../common/widgets/custom_elevated_button.dart';
+import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/custom_text_button.dart';
 import '../../../../common/widgets/custom_text_form_field.dart';
 import '../../../../common/widgets/modal_header.dart';

@@ -9,7 +9,7 @@ import '../../../../../../providers/ton_wallet/ton_wallet_send_provider.dart';
 import '../../../../../data/extensions.dart';
 import '../../../../../generated/assets.gen.dart';
 import '../../../../common/widgets/crystal_title.dart';
-import '../../../../common/widgets/custom_elevated_button.dart';
+import '../../../../common/general/button/primary_elevated_button.dart';
 
 class SendResultPage extends ConsumerStatefulWidget {
   final BuildContext modalContext;

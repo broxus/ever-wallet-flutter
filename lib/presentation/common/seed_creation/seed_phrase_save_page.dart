@@ -10,7 +10,7 @@ import '../widgets/animated_fade_slide_in.dart';
 import '../widgets/crystal_flushbar.dart';
 import '../widgets/crystal_title.dart';
 import '../widgets/custom_back_button.dart';
-import '../widgets/custom_elevated_button.dart';
+import '../general/button/primary_elevated_button.dart';
 import '../widgets/custom_outlined_button.dart';
 
 class SeedPhraseSavePage extends StatefulWidget {

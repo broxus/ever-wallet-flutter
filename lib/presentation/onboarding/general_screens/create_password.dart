@@ -52,6 +52,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
           backgroundColor: Colors.transparent,
           appBar: const OnboardingAppBar(),
           body: Padding(

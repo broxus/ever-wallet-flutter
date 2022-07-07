@@ -1,6 +1,4 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../../data/repositories/keys_repository.dart';
@@ -21,8 +19,6 @@ class DeriveKeyModalBody extends StatefulWidget {
     required this.name,
   }) : super(key: key);
 
-  static String title(BuildContext context) => AppLocalizations.of(context)!.derive_enter_password;
-
   @override
   _DeriveKeyModalBodyState createState() => _DeriveKeyModalBodyState();
 }
@@ -38,7 +34,8 @@ class _DeriveKeyModalBodyState extends State<DeriveKeyModalBody> {
                   password: password,
                 );
 
-            context.router.navigatorKey.currentState?.pop();
+            if (!mounted) return;
+            Navigator.of(context).pop();
           } catch (err, st) {
             logger.e(err, err, st);
 

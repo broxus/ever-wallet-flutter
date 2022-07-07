@@ -10,7 +10,7 @@ import '../common/utils.dart';
 import '../common/widgets/crystal_title.dart';
 import '../common/widgets/custom_back_button.dart';
 import '../common/widgets/custom_checkbox.dart';
-import '../common/widgets/custom_elevated_button.dart';
+import '../common/general/button/primary_elevated_button.dart';
 
 class DecentralizationPolicyPage extends StatefulWidget {
   final void Function() onPressed;

@@ -19,7 +19,7 @@ import '../widgets/crystal_subtitle.dart';
 import '../widgets/crystal_title.dart';
 import '../widgets/custom_back_button.dart';
 import '../widgets/custom_checkbox.dart';
-import '../widgets/custom_elevated_button.dart';
+import '../general/button/primary_elevated_button.dart';
 import '../widgets/custom_text_form_field.dart';
 import '../widgets/text_field_clear_button.dart';
 import '../widgets/unfocusing_gesture_detector.dart';

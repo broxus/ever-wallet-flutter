@@ -1,16 +1,14 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../common/widgets/crystal_text_form_field.dart';
-import '../../common/widgets/custom_elevated_button.dart';
+import '../../common/general/button/primary_elevated_button.dart';
+import '../../common/general/field/bordered_input.dart';
+import '../../util/colors.dart';
+import '../../util/extensions/context_extensions.dart';
 
 class NameNewKeyModalBody extends StatefulWidget {
   const NameNewKeyModalBody({
     Key? key,
   }) : super(key: key);
-
-  static String title(BuildContext context) => AppLocalizations.of(context)!.name_new_key;
 
   @override
   NameNewKeyModalBodyState createState() => NameNewKeyModalBodyState();
@@ -26,26 +24,30 @@ class NameNewKeyModalBodyState extends State<NameNewKeyModalBody> {
   }
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-        minimum: const EdgeInsets.only(bottom: 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 24),
-            CrystalTextFormField(
-              controller: nameController,
-              autofocus: true,
-              hintText: AppLocalizations.of(context)!.name,
-            ),
-            const SizedBox(height: 24),
-            PrimaryElevatedButton(
-              onPressed: () {
-                context.router.pop<String>(nameController.text);
-              },
-              text: AppLocalizations.of(context)!.submit,
-            ),
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    final localization = context.localization;
+    final themeStyle = context.themeStyle;
+
+    return SafeArea(
+      minimum: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          BorderedInput(
+            textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+            controller: nameController,
+            autofocus: true,
+            label: localization.name,
+          ),
+          const SizedBox(height: 24),
+          PrimaryElevatedButton(
+            onPressed: () => Navigator.of(context).pop(nameController.text),
+            text: localization.submit,
+          ),
+        ],
+      ),
+    );
+  }
 }

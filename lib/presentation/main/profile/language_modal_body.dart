@@ -5,6 +5,9 @@ import 'package:flutter_svg/svg.dart';
 
 import '../../application.dart';
 import '../../bloc/locale_cubit.dart';
+import '../../common/general/default_list_tile.dart';
+import '../../util/colors.dart';
+import '../../util/extensions/context_extensions.dart';
 
 class LanguageModalBody extends StatefulWidget {
   const LanguageModalBody({Key? key}) : super(key: key);
@@ -35,15 +38,23 @@ class _LanguageModalBodyState extends State<LanguageModalBody> {
         shrinkWrap: true,
       );
 
-  Widget item(Locale locale) => ListTile(
-        title: Text(list[locale.languageCode]!.name),
-        onTap: () {
-          context.read<LocaleCubit>().setLocale(locale);
-          Navigator.of(context).pop();
-        },
-        trailing: SizedBox.square(
-          dimension: 48,
-          child: SvgPicture.asset('icons/flags/svg/${list[locale.languageCode]!.icon}.svg', package: 'country_icons'),
+  Widget item(Locale locale) {
+    return EWListTile(
+      titleWidget: Text(
+        list[locale.languageCode]!.name,
+        style: context.themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+      ),
+      onPressed: () {
+        context.read<LocaleCubit>().setLocale(locale);
+        Navigator.of(context).pop();
+      },
+      trailing: SizedBox.square(
+        dimension: 48,
+        child: SvgPicture.asset(
+          'icons/flags/svg/${list[locale.languageCode]!.icon}.svg',
+          package: 'country_icons',
         ),
-      );
+      ),
+    );
+  }
 }

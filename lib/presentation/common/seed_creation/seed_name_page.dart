@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../widgets/crystal_title.dart';
 import '../widgets/custom_back_button.dart';
-import '../widgets/custom_elevated_button.dart';
+import '../general/button/primary_elevated_button.dart';
 import '../widgets/custom_text_form_field.dart';
 import '../widgets/text_field_clear_button.dart';
 import '../widgets/unfocusing_gesture_detector.dart';

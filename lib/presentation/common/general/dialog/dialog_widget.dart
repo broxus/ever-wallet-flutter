@@ -85,14 +85,17 @@ class PlatformAlertDialog extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(16.0)),
       ),
+      actionsOverflowAlignment: OverflowBarAlignment.center,
       actions: <Widget>[
         if (onDisagreeClicked != null)
           TextPrimaryButton(
+            fillWidth: false,
             onPressed: onDisagreeClicked,
             style: themeStyle.styles.basicStyle,
             text: cancelText ?? localization.cancel,
           ),
         TextPrimaryButton(
+          fillWidth: false,
           onPressed: onAgreeClicked,
           style: themeStyle.styles.basicStyle,
           text: okText ?? localization.ok,

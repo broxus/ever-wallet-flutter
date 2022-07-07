@@ -12,7 +12,7 @@ import '../../../../providers/ton_wallet/ton_wallet_prepare_transfer_provider.da
 import '../../../common/constants.dart';
 import '../../../common/extensions.dart';
 import '../../../common/widgets/custom_dropdown_button.dart';
-import '../../../common/widgets/custom_elevated_button.dart';
+import '../../../common/general/button/primary_elevated_button.dart';
 import '../../../common/widgets/custom_outlined_button.dart';
 import '../../../common/widgets/modal_header.dart';
 import '../../../common/widgets/sectioned_card.dart';

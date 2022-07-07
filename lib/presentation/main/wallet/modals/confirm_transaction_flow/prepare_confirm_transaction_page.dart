@@ -9,7 +9,7 @@ import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/custom_dropdown_button.dart';
-import '../../../../common/widgets/custom_elevated_button.dart';
+import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/modal_header.dart';
 import 'confirm_transaction_info_page.dart';
 

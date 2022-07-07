@@ -19,7 +19,7 @@ import '../../../../common/theme.dart';
 import '../../../../common/widgets/crystal_flushbar.dart';
 import '../../../../common/widgets/custom_checkbox.dart';
 import '../../../../common/widgets/custom_dropdown_button.dart';
-import '../../../../common/widgets/custom_elevated_button.dart';
+import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/custom_text_form_field.dart';
 import '../../../../common/widgets/modal_header.dart';
 import '../../../../common/widgets/text_field_clear_button.dart';

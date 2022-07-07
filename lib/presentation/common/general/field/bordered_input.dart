@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../generated/assets.gen.dart';
 import '../../../util/colors.dart';
@@ -31,6 +32,9 @@ class BorderedInput extends StatefulWidget {
   final bool obscureText;
   final String? errorText;
   final TextStyle? textStyle;
+  final List<TextInputFormatter>? formatters;
+  final Color? cursorColor;
+  final AutovalidateMode? autovalidateMode;
 
   const BorderedInput({
     Key? key,
@@ -51,6 +55,9 @@ class BorderedInput extends StatefulWidget {
     this.obscureText = false,
     this.errorText,
     this.textStyle,
+    this.formatters,
+    this.cursorColor,
+    this.autovalidateMode,
   }) : super(key: key);
 
   @override
@@ -104,6 +111,7 @@ class _BorderedInputState extends State<BorderedInput> {
     return FormField<String>(
       validator: widget.validator,
       initialValue: _controller.text,
+      autovalidateMode: widget.autovalidateMode,
       builder: (state) {
         final errorStyle = themeStyle.styles.captionStyle;
 
@@ -120,8 +128,10 @@ class _BorderedInputState extends State<BorderedInput> {
                 onChanged: widget.onChanged,
                 textInputAction: widget.textInputAction ?? TextInputAction.next,
                 cursorWidth: 1,
+                cursorColor: widget.cursorColor,
                 onSubmitted: widget.onSubmitted,
                 obscureText: widget.obscureText,
+                inputFormatters: widget.formatters,
                 decoration: InputDecoration(
                   errorText: state.hasError ? '' : null,
                   errorStyle: const TextStyle(fontSize: 0, height: 0),

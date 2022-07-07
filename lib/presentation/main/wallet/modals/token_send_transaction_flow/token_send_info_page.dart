@@ -15,7 +15,7 @@ import '../../../../../data/extensions.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/custom_back_button.dart';
-import '../../../../common/widgets/custom_elevated_button.dart';
+import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/sectioned_card.dart';
 import '../../../../common/widgets/sectioned_card_section.dart';
 import '../common/password_enter_page/password_enter_page.dart';

@@ -4,27 +4,28 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-import '../../../data/repositories/keys_repository.dart';
-import '../../../injection.dart';
-import '../../../providers/key/current_key_provider.dart';
-import '../../../providers/key/keys_provider.dart';
-import '../../common/general/button/menu_dropdown.dart';
-import '../../common/general/button/push_state_ink_widget.dart';
-import '../../common/general/default_appbar.dart';
-import '../../common/general/default_divider.dart';
-import '../../common/general/default_list_tile.dart';
-import '../../common/seed_creation/add_new_seed_page.dart';
-import '../../common/widgets/ew_bottom_sheet.dart';
-import '../../util/auth_utils.dart';
-import '../../util/colors.dart';
-import '../../util/extensions/context_extensions.dart';
-import '../../util/extensions/iterable_extensions.dart';
-import '../../util/theme_styles.dart';
-import 'change_seed_phrase_password_modal_body.dart';
-import 'export_seed_phrase_modal_body.dart';
-import 'key_removement_modal/show_key_removement_modal.dart';
-import 'rename_key_modal_body.dart';
-import 'seed_phrase_export_page.dart';
+import '../../../../data/repositories/keys_repository.dart';
+import '../../../../generated/assets.gen.dart';
+import '../../../../injection.dart';
+import '../../../../providers/key/current_key_provider.dart';
+import '../../../../providers/key/keys_provider.dart';
+import '../../../common/general/button/menu_dropdown.dart';
+import '../../../common/general/button/push_state_ink_widget.dart';
+import '../../../common/general/default_appbar.dart';
+import '../../../common/general/default_divider.dart';
+import '../../../common/general/default_list_tile.dart';
+import '../../../common/seed_creation/add_new_seed_page.dart';
+import '../../../common/widgets/ew_bottom_sheet.dart';
+import '../../../util/auth_utils.dart';
+import '../../../util/colors.dart';
+import '../../../util/extensions/context_extensions.dart';
+import '../../../util/extensions/iterable_extensions.dart';
+import '../../../util/theme_styles.dart';
+import 'manage_seed_actions/change_seed_phrase_password_modal_body.dart';
+import 'manage_seed_actions/export_seed_phrase_modal_body.dart';
+import 'manage_seed_actions/rename_key_modal_body.dart';
+import 'manage_seed_actions/seed_phrase_export_sheet.dart';
+import 'manage_seed_actions/show_key_removement_modal.dart';
 
 class ManageSeedsRoute extends MaterialPageRoute<void> {
   ManageSeedsRoute() : super(builder: (_) => const ManageSeedsScreen());
@@ -138,14 +139,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
     bool isSelected,
   ) {
     return EWListTile(
-      leading: Container(
-        width: 32,
-        height: 32,
-        decoration: const BoxDecoration(
-          color: ColorsRes.darkBlue,
-          shape: BoxShape.circle,
-        ),
-      ),
+      leading: Assets.images.seed.svg(width: 32, height: 32),
       titleText: seed.name,
       // TODO: replace text and counting
       subtitleText: '${children?.length ?? 0} public keys',
@@ -197,10 +191,10 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
                 seed: seed,
                 goExport: (phrase) {
                   if (!mounted) return;
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => SeedPhraseExportPage(phrase: phrase),
-                    ),
+                  showEWBottomSheet<void>(
+                    context,
+                    title: context.localization.save_seed_phrase,
+                    body: SeedPhraseExportSheet(phrase: phrase),
                   );
                 },
                 enterPassword: (seed) {
@@ -226,9 +220,9 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
             MenuDropdownData(
               // TODO: replace text
               title: 'Delete',
-              onTap: () => showKeyRemovementDialog(
+              onTap: () => showSeedDeleteSheet(
                 context: context,
-                publicKey: seed.publicKey,
+                seed: seed,
               ),
               textStyle: themeStyle.styles.basicStyle.copyWith(
                 color: themeStyle.colors.errorTextColor,

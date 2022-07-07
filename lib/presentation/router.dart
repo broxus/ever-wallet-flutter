@@ -11,7 +11,7 @@ import 'loading/loading_page.dart';
 import 'main/browser/browser_page.dart';
 import 'main/main_router_page.dart';
 import 'main/profile/profile_page.dart';
-import 'main/profile/seed_phrase_export_page.dart';
+import 'main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
 import 'main/wallet/wallet_page.dart';
 import 'wizard/decentralization_policy_page.dart';
 import 'wizard/welcome_page.dart';
@@ -56,7 +56,7 @@ import 'wizard/welcome_page.dart';
                 AdaptiveRoute(page: PasswordCreationPage),
               ],
             ),
-            AdaptiveRoute(page: SeedPhraseExportPage),
+            AdaptiveRoute(page: SeedPhraseExportSheet),
           ],
         ),
       ],

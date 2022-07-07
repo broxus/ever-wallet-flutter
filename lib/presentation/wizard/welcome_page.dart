@@ -8,7 +8,7 @@ import '../../generated/assets.gen.dart';
 import '../common/theme.dart';
 import '../common/widgets/crystal_subtitle.dart';
 import '../common/widgets/crystal_title.dart';
-import '../common/widgets/custom_elevated_button.dart';
+import '../common/general/button/primary_elevated_button.dart';
 import '../common/widgets/custom_outlined_button.dart';
 import '../router.gr.dart';
 

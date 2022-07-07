@@ -8,7 +8,7 @@ import '../../router.gr.dart';
 import '../widgets/crystal_title.dart';
 import '../widgets/custom_back_button.dart';
 import '../widgets/custom_dropdown_button.dart';
-import '../widgets/custom_elevated_button.dart';
+import '../general/button/primary_elevated_button.dart';
 
 class AddNewSeedPage extends StatefulWidget {
   const AddNewSeedPage({

@@ -3,7 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../../../../generated/assets.gen.dart';
-import '../../../../common/widgets/custom_elevated_button.dart';
+import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/modal_header.dart';
 import '../../../../common/widgets/selectable_button.dart';
 import 'add_existing_account_page.dart';

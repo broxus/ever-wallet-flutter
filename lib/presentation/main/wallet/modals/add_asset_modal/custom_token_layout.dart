@@ -5,7 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../common/widgets/animated_offstage.dart';
-import '../../../../common/widgets/custom_elevated_button.dart';
+import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/custom_text_form_field.dart';
 import '../../../../common/widgets/text_field_clear_button.dart';
 import '../../../../common/widgets/unfocusing_gesture_detector.dart';

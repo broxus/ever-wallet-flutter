@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../injection.dart';
-import '../../../../../data/repositories/keys_repository.dart';
-import '../../../../../injection.dart';
-import '../../../../data/repositories/keys_repository.dart';
-import '../../../../logger.dart';
-import '../../../data/extensions.dart';
-import '../../common/widgets/crystal_flushbar.dart';
-import '../common/input_password_modal_body.dart';
-import 'seed_phrase_export_page.dart';
+import '../../../../../../../../injection.dart';
+import '../../../../../../../data/repositories/keys_repository.dart';
+import '../../../../../../../injection.dart';
+import '../../../../../../data/repositories/keys_repository.dart';
+import '../../../../../../logger.dart';
+import '../../../../../data/extensions.dart';
+import '../../../../common/widgets/crystal_flushbar.dart';
+import '../../../../common/widgets/ew_bottom_sheet.dart';
+import '../../../../util/extensions/context_extensions.dart';
+import '../../../common/input_password_modal_body.dart';
+import 'seed_phrase_export_sheet.dart';
 
 class ExportSeedPhraseModalBody extends StatefulWidget {
   final String publicKey;
@@ -42,8 +44,11 @@ class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
 
             if (!mounted) return;
             final navigator = Navigator.of(context);
-            navigator.pushReplacement(
-              MaterialPageRoute<void>(builder: (_) => SeedPhraseExportPage(phrase: phrase)),
+            navigator.pop();
+            showEWBottomSheet<void>(
+              context,
+              title: context.localization.save_seed_phrase,
+              body: SeedPhraseExportSheet(phrase: phrase),
             );
           } catch (err, st) {
             logger.e(err, err, st);

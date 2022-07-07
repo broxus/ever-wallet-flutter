@@ -11,7 +11,7 @@ import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/utils.dart';
-import '../../../../common/widgets/custom_elevated_button.dart';
+import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/custom_outlined_button.dart';
 import '../../../../common/widgets/modal_header.dart';
 import '../../../../common/widgets/transaction_type_label.dart';

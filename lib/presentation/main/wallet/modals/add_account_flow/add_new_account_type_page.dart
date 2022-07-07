@@ -11,7 +11,7 @@ import '../../../../../../providers/account/account_creation_options_provider.da
 import '../../../../common/constants.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/custom_back_button.dart';
-import '../../../../common/widgets/custom_elevated_button.dart';
+import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/unfocusing_gesture_detector.dart';
 
 class AddNewAccountTypePage extends ConsumerStatefulWidget {

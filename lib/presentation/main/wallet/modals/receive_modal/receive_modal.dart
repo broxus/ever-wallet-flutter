@@ -5,7 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../common/widgets/address_card.dart';
 import '../../../../common/widgets/crystal_flushbar.dart';
-import '../../../../common/widgets/custom_elevated_button.dart';
+import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/custom_outlined_button.dart';
 import '../../../../common/widgets/modal_header.dart';
 

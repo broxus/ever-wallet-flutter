@@ -9,7 +9,7 @@ import '../../../../data/models/permission.dart';
 import '../../../../data/models/permissions.dart';
 import '../../../../data/models/wallet_contract_type.dart';
 import '../../../common/widgets/custom_back_button.dart';
-import '../../../common/widgets/custom_elevated_button.dart';
+import '../../../common/general/button/primary_elevated_button.dart';
 import '../../../common/widgets/sectioned_card.dart';
 import '../../../common/widgets/sectioned_card_section.dart';
 

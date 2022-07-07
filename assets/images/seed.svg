@@ -1,0 +1,19 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<radialGradient id="paint0_radial_8800_21931" cx="0" cy="0" r="1" gradientTransform="translate(26.5 28.5) rotate(-79.0771) scale(29.0259 14.513)">
+<stop stop-color="#C5E4F3"/>
+<stop offset="1" stop-color="#C5E4F3" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="paint1_radial_8800_21931" cx="0" cy="0" r="1" gradientTransform="translate(5.5 6.5) rotate(102.171) scale(26.0864 13.0432)">
+<stop stop-color="#F7612A"/>
+<stop offset="1" stop-color="#F6612A" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<path d="M0 16C0 7.16344 7.16348 0 16 0V0C24.8366 0 32.0001 7.16344 32.0001 16V16C32.0001 24.8366 24.8366 32 16 32V32C7.16348 32 0 24.8366 0 16V16Z" fill="#050B2E"/>
+<path d="M0 16C0 7.16344 7.16348 0 16 0V0C24.8366 0 32.0001 7.16344 32.0001 16V16C32.0001 24.8366 24.8366 32 16 32V32C7.16348 32 0 24.8366 0 16V16Z" fill="url(#paint0_radial_8800_21931)" fill-opacity="0.32"/>
+<path d="M0 16C0 7.16344 7.16348 0 16 0V0C24.8366 0 32.0001 7.16344 32.0001 16V16C32.0001 24.8366 24.8366 32 16 32V32C7.16348 32 0 24.8366 0 16V16Z" fill="url(#paint1_radial_8800_21931)" fill-opacity="0.16"/>
+<rect x="6.10059" y="16" width="6" height="6" transform="rotate(-45 6.10059 16)" fill="#C5E4F3"/>
+<rect x="12.4649" y="21.6567" width="5" height="5" transform="rotate(-45 12.4649 21.6567)" stroke="#C5E4F3"/>
+<rect x="11.7578" y="10.3433" width="6" height="6" transform="rotate(-45 11.7578 10.3433)" fill="#C5E4F3"/>
+<rect x="17.4141" y="16" width="6" height="6" transform="rotate(-45 17.4141 16)" fill="#C5E4F3"/>
+</svg>

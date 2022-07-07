@@ -5,7 +5,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../widgets/crystal_title.dart';
 import '../widgets/custom_back_button.dart';
-import '../widgets/custom_elevated_button.dart';
+import '../general/button/primary_elevated_button.dart';
 
 class SeedPhraseTypePage extends StatelessWidget {
   final void Function(MnemonicType mnemonicType) onSelected;

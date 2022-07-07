@@ -93,7 +93,12 @@ class PrimaryButton extends StatelessWidget {
             ),
             splashColor: pressColor,
             onTap: onPressed,
-            child: fillWidth ? Center(child: _child) : _child,
+            child: fillWidth
+                ? Center(child: _child)
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [_child],
+                  ),
           ),
         ),
       ),

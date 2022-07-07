@@ -1,0 +1,25 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<clipPath id="clip0_8805_22595">
+<rect width="32" height="32" rx="16" fill="white"/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip0_8805_22595)">
+<circle cx="2.66656" cy="2.66656" r="6.22222" fill="#BE74E2"/>
+<circle cx="2.66656" cy="11.5557" r="6.22222" fill="#B839E6"/>
+<ellipse cx="2.66656" cy="20.4444" rx="6.22222" ry="6.22222" fill="#BF70E6"/>
+<ellipse cx="2.66656" cy="29.3336" rx="6.22222" ry="6.22222" fill="#D5FDE4"/>
+<circle cx="11.5552" cy="2.66656" r="6.22222" fill="#B145E7"/>
+<circle cx="11.5552" cy="11.5557" r="6.22222" fill="#B951E2"/>
+<ellipse cx="11.5552" cy="20.4444" rx="6.22222" ry="6.22222" fill="#BB99E6"/>
+<ellipse cx="11.5552" cy="29.3336" rx="6.22222" ry="6.22222" fill="#C495DF"/>
+<ellipse cx="20.4449" cy="2.66656" rx="6.22222" ry="6.22222" fill="#CDF8E4"/>
+<ellipse cx="20.4449" cy="11.5557" rx="6.22222" ry="6.22222" fill="#B72CE7"/>
+<circle cx="20.4449" cy="20.4444" r="6.22222" fill="#D1DEE4"/>
+<ellipse cx="20.4449" cy="29.3336" rx="6.22222" ry="6.22222" fill="#B82EE2"/>
+<ellipse cx="29.3336" cy="2.66656" rx="6.22222" ry="6.22222" fill="#BC71E8"/>
+<ellipse cx="29.3336" cy="11.5557" rx="6.22222" ry="6.22222" fill="#B32AE4"/>
+<ellipse cx="29.3336" cy="20.4444" rx="6.22222" ry="6.22222" fill="#B637DF"/>
+<circle cx="29.3336" cy="29.3336" r="6.22222" fill="#C4C5EB"/>
+</g>
+</svg>
