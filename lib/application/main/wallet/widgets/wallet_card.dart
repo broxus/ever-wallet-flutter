@@ -192,8 +192,6 @@ class WalletCard extends StatelessWidget {
                       orElse: () => null,
                     );
 
-                print('ASASSSDSADASD ${context.watch<AsyncValue<TonWalletInfo?>>()}');
-
                 return tonWalletInfo != null
                     ? namedField(
                         name: AppLocalizations.of(context)!.address,
