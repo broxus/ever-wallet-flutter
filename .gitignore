@@ -51,3 +51,4 @@ app.*.map.json
 *.env
 GoogleService-Info.plist
 google-services.json
+pubspec.lock
