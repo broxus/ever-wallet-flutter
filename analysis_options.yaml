@@ -3,9 +3,9 @@ include: package:lint/analysis_options.yaml
 linter:
   rules:
     avoid_classes_with_only_static_members: false
+    avoid_positional_boolean_parameters: false
     prefer_single_quotes: true
-    prefer_relative_imports: true
-    always_use_package_imports: false
+    always_use_package_imports: true
 
 analyzer:
   language:
@@ -16,6 +16,7 @@ analyzer:
     - lib/**.gr.dart
     - lib/**.freezed.dart
     - lib/**.config.dart
+    - lib/**.ffigen.dart
   errors:
     missing_return: error
     missing_required_param: error

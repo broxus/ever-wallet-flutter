@@ -1,12 +1,9 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
+import 'package:ever_wallet/data/models/site_meta_data.dart';
+import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:simple_link_preview/simple_link_preview.dart';
 
-import '../models/site_meta_data.dart';
-import '../sources/local/hive_source.dart';
-
-@lazySingleton
 class SitesMetaDataRepository {
   final HiveSource _hiveSource;
 

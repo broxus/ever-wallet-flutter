@@ -1,43 +1,49 @@
 import 'dart:async';
 
+import 'package:ever_wallet/data/constants.dart';
+import 'package:ever_wallet/data/models/currency.dart';
+import 'package:ever_wallet/data/sources/local/current_accounts_source.dart';
+import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
+import 'package:ever_wallet/data/sources/remote/http_source.dart';
+import 'package:ever_wallet/logger.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../logger.dart';
-import '../constants.dart';
-import '../models/currency.dart';
-import '../sources/local/accounts_storage_source.dart';
-import '../sources/local/hive_source.dart';
-import '../sources/remote/rest_source.dart';
-
-@lazySingleton
 class TokenCurrenciesRepository {
-  final AccountsStorageSource _accountsStorageSource;
+  final CurrentAccountsSource _currentAccountsSource;
   final HiveSource _hiveSource;
-  final RestSource _restSource;
+  final HttpSource _httpSource;
   final _tokenCurrenciesSubject = BehaviorSubject<List<Currency>>.seeded([]);
+  late final StreamSubscription _currentAccountsStreamSubscription;
 
   TokenCurrenciesRepository(
-    this._accountsStorageSource,
+    this._currentAccountsSource,
     this._hiveSource,
-    this._restSource,
+    this._httpSource,
   ) {
     _tokenCurrenciesSubject.add(_hiveSource.currencies);
 
-    Rx.combineLatest2<List<AssetsList>, void, List<AssetsList>>(
-      _accountsStorageSource.currentAccountsStream,
+    _currentAccountsStreamSubscription =
+        Rx.combineLatest2<List<AssetsList>, void, List<AssetsList>>(
+      _currentAccountsSource.currentAccountsStream,
       Stream<void>.periodic(kCurrenciesRefreshTimeout).startWith(null),
       (a, b) => a,
     ).listen((event) => _currentAccountsStreamListener(event));
   }
 
-  Stream<List<Currency>> get currenciesStream => _tokenCurrenciesSubject.distinct((a, b) => listEquals(a, b));
+  Stream<List<Currency>> get currenciesStream =>
+      _tokenCurrenciesSubject.distinct((a, b) => listEquals(a, b));
 
   List<Currency> get currencies => _tokenCurrenciesSubject.value;
 
   Future<void> clear() => _hiveSource.clearCurrencies();
+
+  Future<void> dispose() async {
+    await _currentAccountsStreamSubscription.cancel();
+
+    await _tokenCurrenciesSubject.close();
+  }
 
   Future<void> _currentAccountsStreamListener(List<AssetsList> event) async {
     try {
@@ -53,7 +59,7 @@ class TokenCurrenciesRepository {
 
       for (final rootTokenContract in rootTokenContracts) {
         try {
-          final currency = await _restSource.getCurrency(rootTokenContract);
+          final currency = await _httpSource.getCurrency(rootTokenContract);
 
           await _hiveSource.saveCurrency(
             address: rootTokenContract,

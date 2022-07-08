@@ -1,29 +1,19 @@
 import 'dart:async';
 
+import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../sources/local/hive_source.dart';
-
-@preResolve
-@lazySingleton
 class SearchHistoryRepository {
   final HiveSource _hiveSource;
   final _searchHistorySubject = BehaviorSubject<List<String>>.seeded([]);
 
-  SearchHistoryRepository._(this._hiveSource);
-
-  @factoryMethod
-  static Future<SearchHistoryRepository> create({
-    required HiveSource hiveSource,
-  }) async {
-    final instance = SearchHistoryRepository._(hiveSource);
-    await instance._initialize();
-    return instance;
+  SearchHistoryRepository(this._hiveSource) {
+    _searchHistorySubject.add(_hiveSource.searchHistory);
   }
 
-  Stream<List<String>> get searchHistoryStream => _searchHistorySubject.distinct((a, b) => listEquals(a, b));
+  Stream<List<String>> get searchHistoryStream =>
+      _searchHistorySubject.distinct((a, b) => listEquals(a, b));
 
   List<String> get searchHistory => _searchHistorySubject.value;
 
@@ -43,7 +33,5 @@ class SearchHistoryRepository {
 
   Future<void> clear() => _hiveSource.clearSearchHistory();
 
-  Future<void> _initialize() async {
-    _searchHistorySubject.add(_hiveSource.searchHistory);
-  }
+  Future<void> dispose() => _searchHistorySubject.close();
 }

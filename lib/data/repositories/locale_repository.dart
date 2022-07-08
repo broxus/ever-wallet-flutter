@@ -1,11 +1,8 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
+import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:rxdart/subjects.dart';
 
-import '../sources/local/hive_source.dart';
-
-@lazySingleton
 class LocaleRepository {
   final HiveSource _hiveSource;
   final _localeSubject = BehaviorSubject<String?>();
@@ -22,4 +19,6 @@ class LocaleRepository {
     _localeSubject.add(locale);
     return _hiveSource.setLocale(locale);
   }
+
+  Future<void> dispose() => _localeSubject.close();
 }

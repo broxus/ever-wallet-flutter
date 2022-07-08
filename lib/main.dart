@@ -1,14 +1,11 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:ever_wallet/application/application.dart';
+import 'package:ever_wallet/logger.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
-
-import 'injection.dart';
-import 'logger.dart';
-import 'presentation/application.dart';
 
 Future<void> main(List<String> args) async => runZonedGuarded<Future<void>>(
       () async {
@@ -30,13 +27,9 @@ Future<void> main(List<String> args) async => runZonedGuarded<Future<void>>(
 
         await dotenv.load();
 
-        NekotonFlutter.initialize(logger);
-
         WidgetsFlutterBinding.ensureInitialized();
 
         await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
-        await configureDependencies();
 
         runApp(const Application());
       },
