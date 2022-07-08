@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../common/general/button/primary_button.dart';
-import '../../common/general/onboarding_appbar.dart';
 import '../../common/general/field/bordered_input.dart';
+import '../../common/general/onboarding_appbar.dart';
 import '../../util/extensions/context_extensions.dart';
 import '../create_wallet/save_seed_phrase_screen.dart';
 import '../sign_with_phrase/enter_seed_phrase_screen.dart';
@@ -56,7 +56,7 @@ class _SeedPhraseNameScreenState extends State<SeedPhraseNameScreen> {
                     controller: nameController,
                     label: localization.enter_name,
                     textInputAction: TextInputAction.done,
-                    validator: (v) => nameController.text.isEmpty ? '' : null,
+                    validator: (v) => nameController.text.trim().isEmpty ? '' : null,
                     onSubmitted: (_) => _goNextAction(),
                   ),
                 ),
@@ -77,10 +77,10 @@ class _SeedPhraseNameScreenState extends State<SeedPhraseNameScreen> {
     if (formKey.currentState?.validate() ?? false) {
       switch (widget.type) {
         case AuthType.createNewWallet:
-          Navigator.of(context).push(SaveSeedPhraseRoute(nameController.text));
+          Navigator.of(context).push(SaveSeedPhraseRoute(nameController.text.trim()));
           break;
         case AuthType.signWithSeedPhrase:
-          Navigator.of(context).push(EnterSeedPhraseRoute(nameController.text));
+          Navigator.of(context).push(EnterSeedPhraseRoute(nameController.text.trim()));
           break;
       }
     }

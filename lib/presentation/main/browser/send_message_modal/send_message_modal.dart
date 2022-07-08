@@ -11,7 +11,7 @@ import '../../../../data/extensions.dart';
 import '../../../../providers/ton_wallet/ton_wallet_prepare_transfer_provider.dart';
 import '../../../common/constants.dart';
 import '../../../common/extensions.dart';
-import '../../../common/widgets/custom_dropdown_button.dart';
+import '../../../common/general/button/ew_dropdown_button.dart';
 import '../../../common/general/button/primary_elevated_button.dart';
 import '../../../common/widgets/custom_outlined_button.dart';
 import '../../../common/widgets/modal_header.dart';
@@ -121,7 +121,7 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
                 orElse: () => <String, String>{},
               );
 
-          return CustomDropdownButton<String>(
+          return EWDropdownButton<String>(
             items: widget.publicKeys.map((e) => Tuple2(e, publicKeysLabels[e] ?? e.ellipsePublicKey())).toList(),
             value: selectedPublicKey,
             onChanged: (value) => ref.read(selectedPublicKeyProvider.notifier).state = value,

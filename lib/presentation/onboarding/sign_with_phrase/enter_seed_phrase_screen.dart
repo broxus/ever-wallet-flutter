@@ -5,9 +5,9 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../common/general/button/primary_button.dart';
 import '../../common/general/button/text_button.dart';
-import '../../common/general/onboarding_appbar.dart';
 import '../../common/general/dialog/default_dialog_controller.dart';
 import '../../common/general/field/seed_phrase_input.dart';
+import '../../common/general/onboarding_appbar.dart';
 import '../../common/widgets/crystal_flushbar.dart';
 import '../../util/extensions/context_extensions.dart';
 import '../../util/extensions/iterable_extensions.dart';

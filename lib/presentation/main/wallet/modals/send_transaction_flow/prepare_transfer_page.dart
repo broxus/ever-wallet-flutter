@@ -18,7 +18,7 @@ import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/widgets/crystal_flushbar.dart';
-import '../../../../common/widgets/custom_dropdown_button.dart';
+import '../../../../common/general/button/ew_dropdown_button.dart';
 import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/custom_text_form_field.dart';
 import '../../../../common/widgets/modal_header.dart';
@@ -163,7 +163,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
 
           return ValueListenableBuilder<String>(
             valueListenable: publicKeyNotifier,
-            builder: (context, value, child) => CustomDropdownButton<String>(
+            builder: (context, value, child) => EWDropdownButton<String>(
               items: widget.publicKeys.map(
                 (e) {
                   final title = publicKeysLabels[e] ?? e.ellipsePublicKey();

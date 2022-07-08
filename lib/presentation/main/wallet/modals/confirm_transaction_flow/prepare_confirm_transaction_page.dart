@@ -8,7 +8,7 @@ import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
-import '../../../../common/widgets/custom_dropdown_button.dart';
+import '../../../../common/general/button/ew_dropdown_button.dart';
 import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/modal_header.dart';
 import 'confirm_transaction_info_page.dart';
@@ -106,7 +106,7 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
 
           return ValueListenableBuilder<String>(
             valueListenable: publicKeyNotifier,
-            builder: (context, value, child) => CustomDropdownButton<String>(
+            builder: (context, value, child) => EWDropdownButton<String>(
               items: widget.publicKeys.map(
                 (e) {
                   final title = publicKeysLabels[e] ?? e.ellipsePublicKey();

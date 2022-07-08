@@ -7,7 +7,7 @@ import '../../../../../../data/repositories/keys_repository.dart';
 import '../../../../../../logger.dart';
 import '../../../../../data/extensions.dart';
 import '../../../../common/widgets/crystal_flushbar.dart';
-import '../../../../common/widgets/ew_bottom_sheet.dart';
+import '../../../../common/general/ew_bottom_sheet.dart';
 import '../../../../util/extensions/context_extensions.dart';
 import '../../../common/input_password_modal_body.dart';
 import 'seed_phrase_export_sheet.dart';

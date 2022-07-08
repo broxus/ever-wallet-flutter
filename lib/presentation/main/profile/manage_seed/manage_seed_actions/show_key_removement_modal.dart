@@ -7,7 +7,7 @@ import '../../../../../generated/assets.gen.dart';
 import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/general/default_divider.dart';
 import '../../../../common/general/default_list_tile.dart';
-import '../../../../common/widgets/ew_bottom_sheet.dart';
+import '../../../../common/general/ew_bottom_sheet.dart';
 import '../../../../util/colors.dart';
 import '../../../../util/extensions/context_extensions.dart';
 import '../../../../util/theme_styles.dart';

@@ -9,7 +9,7 @@ import 'package:validators/validators.dart';
 
 import '../../../../../generated/assets.gen.dart';
 import '../../../../common/theme.dart';
-import '../../../../common/widgets/custom_dropdown_button.dart';
+import '../../../../common/general/button/ew_dropdown_button.dart';
 import '../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../common/widgets/custom_text_button.dart';
 import '../../../../common/widgets/custom_text_form_field.dart';
@@ -125,7 +125,7 @@ class _PrepareDeployPageState extends State<PrepareDeployPage> {
 
   Widget dropdownButton() => ValueListenableBuilder<_WalletCreationOptions>(
         valueListenable: optionNotifier,
-        builder: (context, value, child) => CustomDropdownButton<_WalletCreationOptions>(
+        builder: (context, value, child) => EWDropdownButton<_WalletCreationOptions>(
           items: _WalletCreationOptions.values.map((e) => Tuple2(e, e.describe(context))).toList(),
           value: value,
           onChanged: (value) {

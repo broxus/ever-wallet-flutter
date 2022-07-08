@@ -14,13 +14,13 @@ import '../../../common/general/button/push_state_ink_widget.dart';
 import '../../../common/general/default_appbar.dart';
 import '../../../common/general/default_divider.dart';
 import '../../../common/general/default_list_tile.dart';
-import '../../../common/seed_creation/add_new_seed_page.dart';
-import '../../../common/widgets/ew_bottom_sheet.dart';
+import '../../../common/general/ew_bottom_sheet.dart';
 import '../../../util/auth_utils.dart';
 import '../../../util/colors.dart';
 import '../../../util/extensions/context_extensions.dart';
 import '../../../util/extensions/iterable_extensions.dart';
 import '../../../util/theme_styles.dart';
+import 'manage_seed_actions/add_new_seed_sheet/add_new_seed_sheet.dart';
 import 'manage_seed_actions/change_seed_phrase_password_modal_body.dart';
 import 'manage_seed_actions/export_seed_phrase_modal_body.dart';
 import 'manage_seed_actions/rename_key_modal_body.dart';
@@ -45,6 +45,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
     final themeStyle = context.themeStyle;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: DefaultAppBar(
         backText: localization.profile,
       ),
@@ -108,11 +109,12 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
         ...seedsList,
         if (seedsList.isNotEmpty) const DefaultDivider(bothIndent: 16),
         PushStateInkWidget(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const AddNewSeedPage()),
-            );
-          },
+          onPressed: () => showEWBottomSheet<void>(
+            context,
+            body: const AddNewSeedSheet(),
+            needCloseButton: false,
+            avoidBottomInsets: false,
+          ),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             height: 46,

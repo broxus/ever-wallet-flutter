@@ -18,7 +18,7 @@ import '../../../data/repositories/biometry_repository.dart';
 import '../../../providers/biometry/biometry_status_provider.dart';
 import '../../common/general/default_divider.dart';
 import '../../common/theme.dart';
-import '../../common/widgets/ew_bottom_sheet.dart';
+import '../../common/general/ew_bottom_sheet.dart';
 import '../../util/auth_utils.dart';
 import '../../util/extensions/context_extensions.dart';
 import 'biometry_modal_body.dart';

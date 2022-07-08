@@ -1,20 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 
-import 'common/seed_creation/add_new_seed_page.dart';
-import 'common/seed_creation/password_creation_page.dart';
-import 'common/seed_creation/seed_name_page.dart';
-import 'common/seed_creation/seed_phrase_check_page.dart';
-import 'common/seed_creation/seed_phrase_import_page.dart';
-import 'common/seed_creation/seed_phrase_save_page.dart';
-import 'common/seed_creation/seed_phrase_type_page.dart';
 import 'loading/loading_page.dart';
 import 'main/browser/browser_page.dart';
 import 'main/main_router_page.dart';
 import 'main/profile/profile_page.dart';
-import 'main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
 import 'main/wallet/wallet_page.dart';
-import 'wizard/decentralization_policy_page.dart';
-import 'wizard/welcome_page.dart';
+import 'onboarding/start_screen/start_screen.dart';
 
 @AdaptiveAutoRouter(
   replaceInRouteName: 'Page,Route',
@@ -24,14 +15,7 @@ import 'wizard/welcome_page.dart';
       name: 'WizardRouterRoute',
       page: EmptyRouterPage,
       children: [
-        AdaptiveRoute(page: WelcomePage, initial: true),
-        AdaptiveRoute(page: DecentralizationPolicyPage),
-        AdaptiveRoute(page: SeedPhraseTypePage),
-        AdaptiveRoute(page: SeedNamePage),
-        AdaptiveRoute(page: SeedPhraseSavePage),
-        AdaptiveRoute(page: SeedPhraseCheckPage),
-        AdaptiveRoute(page: SeedPhraseImportPage),
-        AdaptiveRoute(page: PasswordCreationPage),
+        AdaptiveRoute(page: StartScreen, initial: true),
       ],
     ),
     AdaptiveRoute(
@@ -44,19 +28,6 @@ import 'wizard/welcome_page.dart';
           page: EmptyRouterPage,
           children: [
             AdaptiveRoute(page: ProfilePage, initial: true),
-            AdaptiveRoute(
-              name: 'NewSeedRouterRoute',
-              page: EmptyRouterPage,
-              children: [
-                AdaptiveRoute(page: AddNewSeedPage, initial: true),
-                AdaptiveRoute(page: SeedNamePage),
-                AdaptiveRoute(page: SeedPhraseSavePage),
-                AdaptiveRoute(page: SeedPhraseCheckPage),
-                AdaptiveRoute(page: SeedPhraseImportPage),
-                AdaptiveRoute(page: PasswordCreationPage),
-              ],
-            ),
-            AdaptiveRoute(page: SeedPhraseExportSheet),
           ],
         ),
       ],

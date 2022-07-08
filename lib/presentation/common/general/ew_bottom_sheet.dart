@@ -3,7 +3,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../util/colors.dart';
 import '../../util/extensions/context_extensions.dart';
-import '../general/button/primary_icon_button.dart';
+import 'button/primary_icon_button.dart';
 
 Future<T?> showEWBottomSheet<T>(
   BuildContext context, {
@@ -13,6 +13,7 @@ Future<T?> showEWBottomSheet<T>(
   EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 16),
   bool expand = false,
   bool draggable = false,
+  bool needCloseButton = true,
   bool dismissible = true,
   bool wrapIntoAnimatedSize = true,
   bool avoidBottomInsets = true,
@@ -52,7 +53,7 @@ Future<T?> showEWBottomSheet<T>(
                   Flexible(child: Padding(padding: padding, child: body)),
                 ],
               ),
-              if (!draggable)
+              if (needCloseButton)
                 Positioned(
                   top: 0,
                   right: 0,
@@ -123,6 +124,7 @@ class __ContainerWidgetState extends State<_ContainerWidget> {
       child: MediaQuery.removePadding(
         context: context,
         removeTop: true,
+        removeBottom: true,
         child: widget.animated
             ? AnimatedSize(
                 duration: kThemeAnimationDuration,

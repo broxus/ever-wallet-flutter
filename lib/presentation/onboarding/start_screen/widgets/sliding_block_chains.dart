@@ -78,7 +78,7 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
     timer = null;
   }
 
-  void _scrollLists() => controllers.forEach((c) => c.jumpTo(c.offset + 1));
+  void _scrollLists() => controllers.forEach((c) => c.jumpTo(c.offset + 0.5));
 
   @override
   Widget build(BuildContext context) {
