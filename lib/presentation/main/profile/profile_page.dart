@@ -17,8 +17,8 @@ import '../../../../providers/key/keys_provider.dart';
 import '../../../data/repositories/biometry_repository.dart';
 import '../../../providers/biometry/biometry_status_provider.dart';
 import '../../common/general/default_divider.dart';
-import '../../common/theme.dart';
 import '../../common/general/ew_bottom_sheet.dart';
+import '../../common/theme.dart';
 import '../../util/auth_utils.dart';
 import '../../util/extensions/context_extensions.dart';
 import 'biometry_modal_body.dart';
@@ -66,7 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget buildTitle() {
     final themeStyle = context.themeStyle;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 48, 16, 8),
       child: Text(
         context.localization.profile,
         style: themeStyle.styles.appbarStyle.copyWith(

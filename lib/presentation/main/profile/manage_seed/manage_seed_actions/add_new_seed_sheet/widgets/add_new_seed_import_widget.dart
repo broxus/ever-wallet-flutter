@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../../../../common/general/button/primary_button.dart';
+import '../../../../../../common/general/button/primary_elevated_button.dart';
 import '../../../../../../common/general/button/text_button.dart';
 import '../../../../../../common/general/field/seed_phrase_input.dart';
 import '../../../../../../util/colors.dart';
@@ -37,6 +38,13 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
       (index) => TextEditingController(text: widget.savedPhrase?[index] ?? ''),
     );
     focuses = List.generate(12, (_) => FocusNode());
+    focuses.forEach(
+      (f) => f.addListener(() {
+        if (f.hasFocus) {
+          formKey.currentState?.reset();
+        }
+      }),
+    );
   }
 
   @override
@@ -57,21 +65,24 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
       children: [
         Row(
           children: [
-            Flexible(
-              child: TextPrimaryButton.appBar(
-                onPressed: widget.backAction,
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.arrow_back_ios, color: ColorsRes.darkBlue, size: 20),
-                      Text(
-                        // TODO: replace text
-                        'Back',
-                        style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.darkBlue),
-                      ),
-                    ],
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextPrimaryButton.appBar(
+                  onPressed: widget.backAction,
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.arrow_back_ios, color: ColorsRes.darkBlue, size: 20),
+                        Text(
+                          // TODO: replace text
+                          'Back',
+                          style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.darkBlue),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -91,7 +102,7 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
         SizedBox(
           height: bottomPadding < kPrimaryButtonHeight ? 0 : bottomPadding - kPrimaryButtonHeight,
         ),
-        PrimaryButton(
+        PrimaryElevatedButton(
           text: localization.confirm,
           onPressed: _confirmAction,
         ),
@@ -153,6 +164,9 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
         controller: controller,
         focus: focus,
         prefixText: '$index.',
+        suggestionBackground: ColorsRes.white,
+        suggestionStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+        textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
         requestNextField: () => focuses[index].requestFocus(),
         textInputAction: index == controllers.length ? TextInputAction.done : TextInputAction.next,
         confirmAction: _confirmAction,

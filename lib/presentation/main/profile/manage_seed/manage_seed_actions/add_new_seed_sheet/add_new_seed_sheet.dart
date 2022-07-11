@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'add_new_seed_bloc.dart';
 import 'widgets/add_new_seed_import_widget.dart';
 import 'widgets/add_new_seed_initial_widget.dart';
+import 'widgets/add_new_seed_password_widget.dart';
 import 'widgets/add_new_seed_save_widget.dart';
+import 'widgets/add_new_seed_validate_widget.dart';
 
 class AddNewSeedSheet extends StatefulWidget {
   const AddNewSeedSheet({
@@ -57,7 +59,11 @@ class _AddNewSeedSheetState extends State<AddNewSeedSheet> {
         phrase: phrase,
       );
 
-  Widget _validateSeedState(List<String> phrase) => Container();
+  Widget _validateSeedState(List<String> phrase) => AddNewSeedValidateWidget(
+        backAction: () => bloc.add(const AddNewSeedBlocEvent.prevState()),
+        nextAction: () => bloc.add(const AddNewSeedBlocEvent.seedValidated()),
+        phrase: phrase,
+      );
 
   Widget _importSeedState(List<String>? phrase) => AddNewSeedImportWidget(
         backAction: () => bloc.add(const AddNewSeedBlocEvent.prevState()),
@@ -65,7 +71,10 @@ class _AddNewSeedSheetState extends State<AddNewSeedSheet> {
         onPhraseEntered: (phrase) => bloc.add(AddNewSeedBlocEvent.importSeed(phrase)),
       );
 
-  Widget _enterPasswordState() => Container();
+  Widget _enterPasswordState() => AddNewSeedPasswordWidget(
+        backAction: () => bloc.add(const AddNewSeedBlocEvent.prevState()),
+        nextAction: (password) => bloc.add(AddNewSeedBlocEvent.confirmPassword(password)),
+      );
 
   void _closeSheet() => Navigator.of(context).pop();
 }

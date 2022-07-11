@@ -19,6 +19,10 @@ class SeedPhraseInput extends StatelessWidget {
   /// Confirm entering all phrase only when [textInputAction] not next
   final VoidCallback confirmAction;
 
+  final TextStyle? suggestionStyle;
+  final Color? suggestionBackground;
+  final TextStyle? textStyle;
+
   const SeedPhraseInput({
     Key? key,
     required this.controller,
@@ -27,6 +31,9 @@ class SeedPhraseInput extends StatelessWidget {
     required this.textInputAction,
     required this.prefixText,
     required this.confirmAction,
+    this.suggestionStyle,
+    this.suggestionBackground,
+    this.textStyle,
   }) : super(key: key);
 
   @override
@@ -41,6 +48,8 @@ class SeedPhraseInput extends StatelessWidget {
       controller: controller,
       focusNode: focus,
       textInputAction: textInputAction,
+      suggestionBackground: suggestionBackground,
+      textStyle: textStyle,
       validator: (v) {
         if (controller.text.isNotEmpty) {
           return null;
@@ -76,7 +85,10 @@ class SeedPhraseInput extends StatelessWidget {
       tileColor: Colors.transparent,
       title: Text(
         suggestion,
-        style: themeStyle.styles.basicStyle.copyWith(fontWeight: FontWeight.w700),
+        style: suggestionStyle ??
+            themeStyle.styles.basicStyle.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
       ),
     );
   }

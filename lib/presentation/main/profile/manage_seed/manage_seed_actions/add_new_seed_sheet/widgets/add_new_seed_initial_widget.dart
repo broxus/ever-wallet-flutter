@@ -49,59 +49,58 @@ class _AddNewSeedInitialWidgetState extends State<AddNewSeedInitialWidget> {
           right: 0,
           top: 0,
           child: PrimaryIconButton(
-            onPressed: Navigator.of(context).pop,
+            onPressed: () => Navigator.of(context).pop(),
+            outerPadding: EdgeInsets.zero,
             icon: const Icon(Icons.close, color: ColorsRes.grey, size: 20),
           ),
         ),
-        Positioned.fill(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Text(
-                  // TODO: replace text
-                  'Add seed phrase',
-                  style: themeStyle.styles.sheetHeaderStyle,
-                ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Text(
+                // TODO: replace text
+                'Add seed phrase',
+                style: themeStyle.styles.sheetHeaderStyle,
               ),
-              const SizedBox(height: 32),
-              Form(
-                key: formKey,
-                child: BorderedInput(
-                  controller: nameController,
-                  validator: (_) => nameController.text.trim().isEmpty ? '' : null,
-                  // TODO: replace text
-                  label: 'Seed name',
-                  cursorColor: ColorsRes.text,
-                  textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
-                  textInputAction: TextInputAction.done,
-                ),
+            ),
+            const SizedBox(height: 32),
+            Form(
+              key: formKey,
+              child: BorderedInput(
+                controller: nameController,
+                validator: (_) => nameController.text.trim().isEmpty ? '' : null,
+                // TODO: replace text
+                label: 'Seed name',
+                cursorColor: ColorsRes.text,
+                textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+                textInputAction: TextInputAction.done,
               ),
-              ValueListenableBuilder<AddNewSeedType>(
-                valueListenable: optionNotifier,
-                builder: (context, value, child) => EWDropdownButton<AddNewSeedType>(
-                  items: AddNewSeedType.values.map((e) => Tuple2(e, e.describe(context))).toList(),
-                  value: value,
-                  onChanged: (value) {
-                    if (value != null) {
-                      optionNotifier.value = value;
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(height: 170),
-              PrimaryElevatedButton(
-                text: context.localization.next,
-                onPressed: () {
-                  if (formKey.currentState?.validate() ?? false) {
-                    widget.action(nameController.text.trim(), optionNotifier.value);
+            ),
+            ValueListenableBuilder<AddNewSeedType>(
+              valueListenable: optionNotifier,
+              builder: (context, value, child) => EWDropdownButton<AddNewSeedType>(
+                items: AddNewSeedType.values.map((e) => Tuple2(e, e.describe(context))).toList(),
+                value: value,
+                onChanged: (value) {
+                  if (value != null) {
+                    optionNotifier.value = value;
                   }
                 },
-              )
-            ],
-          ),
+              ),
+            ),
+            const SizedBox(height: 170),
+            PrimaryElevatedButton(
+              text: context.localization.next,
+              onPressed: () {
+                if (formKey.currentState?.validate() ?? false) {
+                  widget.action(nameController.text.trim(), optionNotifier.value);
+                }
+              },
+            )
+          ],
         ),
       ],
     );

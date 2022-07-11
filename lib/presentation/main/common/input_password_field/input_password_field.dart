@@ -2,8 +2,8 @@ import 'package:change_notifier_builder/change_notifier_builder.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../../common/general/field/bordered_input.dart';
 import '../../../common/general/button/primary_elevated_button.dart';
+import '../../../common/general/field/bordered_input.dart';
 import '../../../util/colors.dart';
 import '../../../util/extensions/context_extensions.dart';
 import 'input_password_field_notifier.dart';

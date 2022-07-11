@@ -157,7 +157,7 @@ class _BorderedInputState extends State<BorderedInput> {
                   enabledBorder: OutlineInputBorder(
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
-                    borderSide: const BorderSide(color: ColorsRes.greyLight),
+                    borderSide: const BorderSide(color: ColorsRes.grey),
                   ),
                   focusedBorder: OutlineInputBorder(
                     gapPadding: 1,

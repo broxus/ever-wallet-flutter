@@ -35,21 +35,24 @@ class _AddNewSeedSaveWidgetState extends State<AddNewSeedSaveWidget> {
       children: [
         Row(
           children: [
-            Flexible(
-              child: TextPrimaryButton.appBar(
-                onPressed: widget.backAction,
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.arrow_back_ios, color: ColorsRes.darkBlue, size: 20),
-                      Text(
-                        // TODO: replace text
-                        'Back',
-                        style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.darkBlue),
-                      ),
-                    ],
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextPrimaryButton.appBar(
+                  onPressed: widget.backAction,
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.arrow_back_ios, color: ColorsRes.darkBlue, size: 20),
+                        Text(
+                          // TODO: replace text
+                          'Back',
+                          style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.darkBlue),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

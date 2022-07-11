@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 import '../../../generated/assets.gen.dart';
+import '../../util/colors.dart';
 import '../../util/extensions/context_extensions.dart';
 import '../general/field/bordered_input.dart';
 
@@ -29,6 +30,9 @@ class CustomTypeAheadField extends StatefulWidget {
   final VoidCallback? onClearField;
   final bool needClearButton;
 
+  final Color? suggestionBackground;
+  final TextStyle? textStyle;
+
   const CustomTypeAheadField({
     Key? key,
     this.controller,
@@ -50,6 +54,8 @@ class CustomTypeAheadField extends StatefulWidget {
     this.height,
     this.onClearField,
     this.needClearButton = true,
+    this.suggestionBackground,
+    this.textStyle,
   }) : super(key: key);
 
   @override
@@ -112,13 +118,14 @@ class _CustomTypeAheadFieldState extends State<CustomTypeAheadField> {
               hideOnError: true,
               hideOnLoading: true,
               textFieldConfiguration: TextFieldConfiguration(
-                style: themeStyle.styles.basicStyle,
+                style: widget.textStyle ?? themeStyle.styles.basicStyle,
                 controller: _controller,
                 focusNode: widget.focusNode,
                 keyboardType: widget.keyboardType ?? TextInputType.text,
                 onChanged: widget.onChanged,
                 textInputAction: widget.textInputAction ?? TextInputAction.next,
                 cursorWidth: 1,
+                cursorColor: widget.textStyle?.color ?? themeStyle.styles.basicStyle.color,
                 onSubmitted: widget.onSubmitted,
                 autocorrect: widget.autocorrect,
                 enableSuggestions: widget.enableSuggestions,
@@ -127,7 +134,7 @@ class _CustomTypeAheadFieldState extends State<CustomTypeAheadField> {
                   errorText: state.hasError ? '' : null,
                   errorStyle: const TextStyle(fontSize: 0, height: 0),
                   labelText: widget.labelText,
-                  labelStyle: themeStyle.styles.basicStyle,
+                  labelStyle: widget.textStyle ?? themeStyle.styles.basicStyle,
                   contentPadding: EdgeInsets.zero,
                   suffixIcon: _buildSuffixIcon(),
                   prefixIconConstraints: widget.prefixIcon == null
@@ -136,24 +143,33 @@ class _CustomTypeAheadFieldState extends State<CustomTypeAheadField> {
                   prefixIcon: widget.prefixIcon ?? const SizedBox(width: 16),
                   border: OutlineInputBorder(
                     gapPadding: 1,
+                    borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
                       color: themeStyle.colors.inactiveInputColor,
                     ),
                   ),
+                  enabledBorder: OutlineInputBorder(
+                    gapPadding: 1,
+                    borderRadius: BorderRadius.circular(0),
+                    borderSide: const BorderSide(color: ColorsRes.greyLight),
+                  ),
                   focusedBorder: OutlineInputBorder(
                     gapPadding: 1,
+                    borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
                       color: themeStyle.colors.activeInputColor,
                     ),
                   ),
                   errorBorder: OutlineInputBorder(
                     gapPadding: 1,
+                    borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
                       color: themeStyle.colors.errorInputColor,
                     ),
                   ),
                   focusedErrorBorder: OutlineInputBorder(
                     gapPadding: 1,
+                    borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
                       color: themeStyle.colors.errorInputColor,
                     ),
@@ -162,6 +178,9 @@ class _CustomTypeAheadFieldState extends State<CustomTypeAheadField> {
               ),
               suggestionsCallback: widget.suggestionsCallback,
               itemBuilder: widget.itemBuilder,
+              suggestionsBoxDecoration: SuggestionsBoxDecoration(
+                color: widget.suggestionBackground ?? ColorsRes.black.withOpacity(0.9),
+              ),
               onSuggestionSelected: widget.onSuggestionSelected,
             ),
           );
