@@ -1,74 +1,130 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:ever_wallet/data/constants.dart';
+import 'package:ever_wallet/data/extensions.dart';
+import 'package:ever_wallet/data/sources/local/current_accounts_source.dart';
+import 'package:ever_wallet/data/sources/local/current_key_source.dart';
+import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
+import 'package:ever_wallet/data/sources/remote/transport_source.dart';
+import 'package:ever_wallet/logger.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../logger.dart';
-import '../constants.dart';
-import '../extensions.dart';
-import '../sources/local/accounts_storage_source.dart';
-import '../sources/local/hive_source.dart';
-import '../sources/local/keystore_source.dart';
-import '../sources/remote/transport_source.dart';
-
-@preResolve
-@lazySingleton
 class AccountsRepository {
-  final AccountsStorageSource _accountsStorageSource;
+  final _lock = Lock();
+  final AccountsStorage _accountsStorage;
+  final CurrentAccountsSource _currentAccountsSource;
   final TransportSource _transportSource;
-  final KeystoreSource _keystoreSource;
+  final Keystore _keystore;
+  final CurrentKeySource _currentKeySource;
   final HiveSource _hiveSource;
   final _externalAccountsSubject = BehaviorSubject<Map<String, List<String>>>.seeded({});
-  final _lock = Lock();
+  late final StreamSubscription _keysStreamSubscription;
+  late final StreamSubscription _accountsStreamSubscription;
+  late final StreamSubscription _currentAccountsStreamSubscription;
 
-  AccountsRepository._(
-    this._accountsStorageSource,
+  AccountsRepository(
+    this._accountsStorage,
+    this._currentAccountsSource,
     this._transportSource,
-    this._keystoreSource,
+    this._keystore,
+    this._currentKeySource,
     this._hiveSource,
-  );
+  ) {
+    _externalAccountsSubject.add(_hiveSource.externalAccounts);
 
-  @factoryMethod
-  static Future<AccountsRepository> create({
-    required AccountsStorageSource accountsStorageSource,
-    required TransportSource transportSource,
-    required KeystoreSource keystoreSource,
-    required HiveSource hiveSource,
-  }) async {
-    final instance = AccountsRepository._(
-      accountsStorageSource,
-      transportSource,
-      keystoreSource,
-      hiveSource,
-    );
-    await instance._initialize();
-    return instance;
+    _keysStreamSubscription = _keystore.entriesStream
+        .skip(1)
+        .startWith(_keystore.entries)
+        .pairwise()
+        .listen((event) => _lock.synchronized(() => _keysStreamListener(event)));
+
+    _accountsStreamSubscription = accountsStream
+        .skip(1)
+        .startWith(accounts)
+        .pairwise()
+        .listen((event) => _lock.synchronized(() => _accountsStreamListener(event)));
+
+    _currentAccountsStreamSubscription = Rx.combineLatest3<KeyStoreEntry?, List<AssetsList>,
+            Map<String, List<String>>, List<AssetsList>>(
+      _currentKeySource.currentKeyStream,
+      accountsStream,
+      externalAccountsStream,
+      (a, b, c) {
+        if (a == null) return [];
+
+        final externalAddresses = c[a.publicKey] ?? [];
+
+        final internalAccounts = b.where((e) => e.publicKey == a.publicKey);
+        final externalAccounts =
+            b.where((e) => e.publicKey != a.publicKey && externalAddresses.contains(e.address));
+
+        final list = [
+          ...internalAccounts,
+          ...externalAccounts,
+        ]..sort();
+
+        return list;
+      },
+    )
+        .distinct((a, b) => listEquals(a, b))
+        .listen((event) => _currentAccountsSource.currentAccounts = event);
   }
 
-  Stream<List<AssetsList>> get accountsStream => _accountsStorageSource.accountsStream;
+  Stream<List<AssetsList>> get accountsStream => _accountsStorage.entriesStream;
 
-  List<AssetsList> get accounts => _accountsStorageSource.accounts;
+  List<AssetsList> get accounts => _accountsStorage.entries;
 
   Stream<Map<String, List<String>>> get externalAccountsStream =>
       _externalAccountsSubject.distinct((a, b) => const DeepCollectionEquality().equals(a, b));
 
   Map<String, List<String>> get externalAccounts => _externalAccountsSubject.value;
 
-  Stream<List<AssetsList>> get currentAccountsStream => _accountsStorageSource.currentAccountsStream;
+  Stream<List<AssetsList>> get currentAccountsStream =>
+      _currentAccountsSource.currentAccountsStream;
 
-  List<AssetsList> get currentAccounts => _accountsStorageSource.currentAccounts;
+  List<AssetsList> get currentAccounts => _currentAccountsSource.currentAccounts;
+
+  Stream<Tuple2<List<WalletType>, List<WalletType>>> accountCreationOptions(String publicKey) =>
+      accountsStream
+          .map((e) => e.where((e) => e.publicKey == publicKey))
+          .map((e) => e.map((e) => e.tonWallet.contract))
+          .map((e) {
+        final added = e.toList();
+        final available = kAvailableWallets.where((el) => !e.contains(el)).toList();
+
+        return Tuple2(
+          added,
+          available,
+        );
+      }).doOnError((err, st) => logger.e(err, err, st));
+
+  Stream<AssetsList> accountInfo(String address) => accountsStream
+      .expand((e) => e)
+      .where((e) => e.address == address)
+      .doOnError((err, st) => logger.e(err, err, st));
+
+  Stream<List<AssetsList>> get sortedAccounts => currentAccountsStream
+      .map((e) => [...e]..sort((a, b) => a.name.compareTo(b.name)))
+      .doOnError((err, st) => logger.e(err, err, st));
+
+  Stream<List<String>> get currentExternalAccounts =>
+      Rx.combineLatest2<KeyStoreEntry?, Map<String, List<String>>, List<String>>(
+        _currentKeySource.currentKeyStream,
+        externalAccountsStream,
+        (a, b) => b[a?.publicKey] ?? [],
+      ).doOnError((err, st) => logger.e(err, err, st));
 
   Future<AssetsList> addAccount({
     required String name,
     required String publicKey,
     required WalletType walletType,
   }) =>
-      _accountsStorageSource.addAccount(
+      _accountsStorage.addAccount(
         AccountToAdd(
           name: name,
           publicKey: publicKey,
@@ -122,12 +178,12 @@ class AccountsRepository {
     required String address,
     required String name,
   }) =>
-      _accountsStorageSource.renameAccount(
+      _accountsStorage.renameAccount(
         account: address,
         name: name,
       );
 
-  Future<AssetsList?> removeAccount(String address) => _accountsStorageSource.removeAccount(address);
+  Future<AssetsList?> removeAccount(String address) => _accountsStorage.removeAccount(address);
 
   Future<AssetsList?> removeExternalAccount({
     required String publicKey,
@@ -144,8 +200,9 @@ class AccountsRepository {
 
     if (account == null) return null;
 
-    final isExternal = _hiveSource.externalAccounts.values.expand((e) => e).contains(account.address);
-    final isLocal = _keystoreSource.keys.map((e) => e.publicKey).contains(account.publicKey);
+    final isExternal =
+        _hiveSource.externalAccounts.values.expand((e) => e).contains(account.address);
+    final isLocal = _keystore.entries.map((e) => e.publicKey).contains(account.publicKey);
 
     if (!isExternal && !isLocal) {
       final removedAccount = await removeAccount(account.address);
@@ -167,10 +224,10 @@ class AccountsRepository {
       rootTokenContract: rootTokenContract,
     );
 
-    final account = await _accountsStorageSource.addTokenWallet(
+    final account = await _accountsStorage.addTokenWallet(
       account: address,
       rootTokenContract: rootTokenContract,
-      networkGroup: transport.connectionData.group,
+      networkGroup: transport.group,
     );
 
     return account;
@@ -182,55 +239,26 @@ class AccountsRepository {
   }) async {
     final transport = await _transportSource.transport;
 
-    final account = await _accountsStorageSource.removeTokenWallet(
+    final account = await _accountsStorage.removeTokenWallet(
       account: address,
       rootTokenContract: rootTokenContract,
-      networkGroup: transport.connectionData.group,
+      networkGroup: transport.group,
     );
 
     return account;
   }
 
   Future<void> clear() async {
-    await _accountsStorageSource.clear();
+    await _accountsStorage.clear();
     await _hiveSource.clearExternalAccounts();
   }
 
-  Future<void> _initialize() async {
-    _externalAccountsSubject.add(_hiveSource.externalAccounts);
+  Future<void> dispose() async {
+    await _keysStreamSubscription.cancel();
+    await _accountsStreamSubscription.cancel();
+    await _currentAccountsStreamSubscription.cancel();
 
-    _keystoreSource.keysStream
-        .skip(1)
-        .startWith(_keystoreSource.keys)
-        .pairwise()
-        .listen((event) => _lock.synchronized(() => _keysStreamListener(event)));
-
-    accountsStream
-        .skip(1)
-        .startWith(accounts)
-        .pairwise()
-        .listen((event) => _lock.synchronized(() => _accountsStreamListener(event)));
-
-    Rx.combineLatest3<KeyStoreEntry?, List<AssetsList>, Map<String, List<String>>, List<AssetsList>>(
-      _keystoreSource.currentKeyStream,
-      accountsStream,
-      externalAccountsStream,
-      (a, b, c) {
-        if (a == null) return [];
-
-        final externalAddresses = c[a.publicKey] ?? [];
-
-        final internalAccounts = b.where((e) => e.publicKey == a.publicKey);
-        final externalAccounts = b.where((e) => e.publicKey != a.publicKey && externalAddresses.contains(e.address));
-
-        final list = [
-          ...internalAccounts,
-          ...externalAccounts,
-        ]..sort();
-
-        return list;
-      },
-    ).distinct((a, b) => listEquals(a, b)).listen((event) => _accountsStorageSource.currentAccounts = event);
+    await _externalAccountsSubject.close();
   }
 
   Future<void> _keysStreamListener(Iterable<List<KeyStoreEntry>> event) async {
@@ -238,8 +266,10 @@ class AccountsRepository {
       final prev = event.first;
       final next = event.last;
 
-      final addedKeys = [...next]..removeWhere((e) => prev.any((el) => el.publicKey == e.publicKey));
-      final removedKeys = [...prev]..removeWhere((e) => next.any((el) => el.publicKey == e.publicKey));
+      final addedKeys = [...next]
+        ..removeWhere((e) => prev.any((el) => el.publicKey == e.publicKey));
+      final removedKeys = [...prev]
+        ..removeWhere((e) => next.any((el) => el.publicKey == e.publicKey));
 
       for (final key in addedKeys) {
         try {
@@ -295,7 +325,8 @@ class AccountsRepository {
       final prev = event.first;
       final next = event.last;
 
-      final removedAccounts = [...prev]..removeWhere((e) => next.any((el) => el.address == e.address));
+      final removedAccounts = [...prev]
+        ..removeWhere((e) => next.any((el) => el.address == e.address));
 
       for (final account in removedAccounts) {
         final externalAccounts = this

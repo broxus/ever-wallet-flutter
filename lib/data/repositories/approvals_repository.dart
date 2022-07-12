@@ -1,15 +1,12 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
+import 'package:ever_wallet/data/models/approval_request.dart';
+import 'package:ever_wallet/data/models/permission.dart';
+import 'package:ever_wallet/data/models/permissions.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
-import '../models/approval_request.dart';
-import '../models/permission.dart';
-import '../models/permissions.dart';
-
-@lazySingleton
 class ApprovalsRepository {
   final _approvalsSubject = PublishSubject<ApprovalRequest>();
 
@@ -174,4 +171,6 @@ class ApprovalsRepository {
 
     return completer.future;
   }
+
+  Future<void> dispose() => _approvalsSubject.close();
 }

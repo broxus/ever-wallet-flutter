@@ -1,33 +1,21 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
+import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:rxdart/subjects.dart';
 
-import '../sources/local/hive_source.dart';
-import '../sources/local/local_auth_source.dart';
-
-@preResolve
-@lazySingleton
 class BiometryRepository {
   final HiveSource _hiveSource;
-  final LocalAuthSource _localAuthSource;
+  final _localAuth = LocalAuthentication();
   final _availabilitySubject = BehaviorSubject<bool>();
   final _statusSubject = BehaviorSubject<bool>();
+  late final StreamSubscription _availabilityStreamSubscription;
+  late final StreamSubscription _statusStreamSubscription;
 
-  BiometryRepository._(
-    this._hiveSource,
-    this._localAuthSource,
-  );
+  BiometryRepository._(this._hiveSource);
 
-  @factoryMethod
-  static Future<BiometryRepository> create({
-    required HiveSource hiveSource,
-    required LocalAuthSource localAuthSource,
-  }) async {
-    final instance = BiometryRepository._(
-      hiveSource,
-      localAuthSource,
-    );
+  static Future<BiometryRepository> create(HiveSource hiveSource) async {
+    final instance = BiometryRepository._(hiveSource);
     await instance._initialize();
     return instance;
   }
@@ -40,13 +28,13 @@ class BiometryRepository {
 
   bool get status => _statusSubject.value;
 
-  Future<void> checkAvailability() async => _availabilitySubject.add(await _localAuthSource.isAvailable);
+  Future<void> checkAvailability() async => _availabilitySubject.add(await _isAvailable);
 
   Future<void> setStatus({
     required String localizedReason,
     required bool isEnabled,
   }) async {
-    if (isEnabled && !await _localAuthSource.authenticate(localizedReason)) return;
+    if (isEnabled && !await _authenticate(localizedReason)) return;
 
     await _hiveSource.setIsBiometryEnabled(isEnabled: isEnabled);
 
@@ -69,7 +57,7 @@ class BiometryRepository {
     final password = _hiveSource.getKeyPassword(publicKey);
 
     if (password != null) {
-      if (await _localAuthSource.authenticate(localizedReason)) {
+      if (await _authenticate(localizedReason)) {
         return password;
       } else {
         throw Exception('Is not authenticated');
@@ -79,16 +67,46 @@ class BiometryRepository {
     }
   }
 
+  Future<bool> get _isAvailable async {
+    final isAvailable = await _localAuth.canCheckBiometrics;
+    final isDeviceSupported = await _localAuth.isDeviceSupported();
+    return isAvailable && isDeviceSupported;
+  }
+
   Future<void> clear() async {
     await _hiveSource.clearKeysPasswords();
     await _hiveSource.clearUserPreferences();
   }
 
+  Future<void> dispose() async {
+    await _availabilityStreamSubscription.cancel();
+    await _statusStreamSubscription.cancel();
+
+    await _availabilitySubject.close();
+    await _statusSubject.close();
+  }
+
+  Future<bool> _authenticate(String localizedReason) async {
+    try {
+      return await _localAuth.authenticate(
+        localizedReason: localizedReason,
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+        ),
+      );
+    } catch (_) {
+      _availabilitySubject.add(await _isAvailable);
+      rethrow;
+    }
+  }
+
   Future<void> _initialize() async {
-    _availabilitySubject.add(await _localAuthSource.isAvailable);
+    _availabilitySubject.add(await _isAvailable);
     _statusSubject.add(_hiveSource.isBiometryEnabled);
 
-    availabilityStream.where((e) => !e).listen((e) => _statusSubject.add(e));
-    statusStream.where((e) => !e).listen((e) => _hiveSource.clearKeysPasswords());
+    _availabilityStreamSubscription =
+        availabilityStream.where((e) => !e).listen((e) => _statusSubject.add(e));
+    _statusStreamSubscription =
+        statusStream.where((e) => !e).listen((e) => _hiveSource.clearKeysPasswords());
   }
 }

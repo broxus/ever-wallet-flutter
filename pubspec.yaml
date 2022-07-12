@@ -3,48 +3,45 @@ description: EVER Wallet
 
 publish_to: "none"
 
-version: 1.0.17+95
+version: 1.0.18+96
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
-  flutter: ">=3.0.0"
+  sdk: ">=2.17.5 <3.0.0"
+  flutter: ">=3.0.3"
 
 dependencies:
   another_flushbar: ^1.10.29
   async: ^2.8.2
-  auto_route: ^4.0.1
   auto_size_text: ^3.0.0
-  back_button_interceptor: ^6.0.0
+  beamer: ^1.5.0
   bloc: ^8.0.3
-  change_notifier_builder: ^1.1.2
+  bloc_concurrency: ^0.2.0
   collection: ^1.16.0
   country_icons: ^2.0.2
-  cupertino_icons: ^1.0.4
   dio: ^4.0.6
   dropdown_button2:
     git: https://github.com/Alex-A4/dropdown_button2.git
+  cupertino_icons: ^1.0.5
   duration: ^3.0.11
-  expand_tap_area: ^1.1.0
-  fading_edge_scrollview: ^2.0.1
+  expand_tap_area: ^1.1.1
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
   flutter_dotenv: ^5.0.2
-  flutter_form_builder: ^7.2.1
+  flutter_form_builder: ^7.3.1
   flutter_inappwebview: ^5.4.3+7
-  flutter_link_previewer: ^2.6.6
   flutter_localizations:
     sdk: flutter
-  flutter_platform_widgets: ^1.20.0
+  flutter_platform_widgets: ^2.0.0
   flutter_portal: ^1.1.0
-  flutter_riverpod: ^1.0.4
-  flutter_svg: ^1.0.2
+  flutter_svg: ^1.1.0
   flutter_typeahead: ^4.0.0
   freezed_annotation: ^2.0.3
-  get_it: ^7.2.0
-  hive: ^2.2.1
+  gap: ^2.0.0
+  hex: ^0.2.0
+  hive: ^2.2.2
   hive_flutter: ^1.1.0
-  injectable: ^1.5.3
+  http: ^0.13.4
   intl: ^0.17.0
   json_annotation: ^4.5.0
   local_auth: ^2.1.0
@@ -52,39 +49,39 @@ dependencies:
   lottie: ^1.3.0
   modal_bottom_sheet: ^2.0.1
   nekoton_flutter:
-    path: ../nekoton-flutter
+    path: ../nekoton_flutter
   package_info_plus: ^1.4.2
-  path_provider: ^2.0.10
-  permission_handler: ^9.2.0
+  path_provider: ^2.0.11
+  permission_handler: ^10.0.0
+  provider: ^6.0.3
   qr_code_scanner:
     git:
       url: https://github.com/X-SLAYER/qr_code_scanner.git
       ref: flutter-beta
   qr_flutter: ^4.0.0
-  rxdart: ^0.27.3
-  share_plus: ^4.0.4
+  rxdart: ^0.27.4
+  share_plus: ^4.0.8
   shimmer: ^2.0.0
   simple_link_preview: ^1.0.2
-  string_extensions: ^0.6.0
+  string_extensions: ^0.6.1
   synchronized: ^3.0.0+2
   tuple: ^2.0.0
-  url_launcher: ^6.1.2
+  url_launcher: ^6.1.3
   validators: ^3.0.0
   visibility_detector: ^0.3.3
 
 dependency_overrides:
-  ffi: ^2.0.0
+  ffi: ^1.0.0
 
 dev_dependencies:
   build_runner: ^2.1.11
-  flutter_gen_runner: ^4.1.6
-  flutter_launcher_icons: ^0.9.2
-  flutter_native_splash: ^2.1.6
+  flutter_gen_runner: ^4.3.0
+  flutter_launcher_icons: ^0.9.3
+  flutter_native_splash: ^2.2.3+1
   flutter_test:
     sdk: flutter
   freezed: ^2.0.3+1
   hive_generator: ^1.1.3
-  injectable_generator: ^1.5.3
   json_serializable: ^6.2.0
   lint: ^1.8.2
 

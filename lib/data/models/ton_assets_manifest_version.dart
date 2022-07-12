@@ -11,5 +11,6 @@ class TonAssetsManifestVersion with _$TonAssetsManifestVersion {
     required int patch,
   }) = _TonAssetsManifestVersion;
 
-  factory TonAssetsManifestVersion.fromJson(Map<String, dynamic> json) => _$TonAssetsManifestVersionFromJson(json);
+  factory TonAssetsManifestVersion.fromJson(Map<String, dynamic> json) =>
+      _$TonAssetsManifestVersionFromJson(json);
 }

@@ -1,31 +1,21 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:ever_wallet/data/models/bookmark.dart';
+import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../models/bookmark.dart';
-import '../sources/local/hive_source.dart';
-
-@preResolve
-@lazySingleton
 class BookmarksRepository {
   final HiveSource _hiveSource;
   final _bookmarksSubject = BehaviorSubject<List<Bookmark>>.seeded([]);
 
-  BookmarksRepository._(this._hiveSource);
-
-  @factoryMethod
-  static Future<BookmarksRepository> create({
-    required HiveSource hiveSource,
-  }) async {
-    final instance = BookmarksRepository._(hiveSource);
-    await instance._initialize();
-    return instance;
+  BookmarksRepository(this._hiveSource) {
+    _bookmarksSubject.add(_hiveSource.bookmarks);
   }
 
-  Stream<List<Bookmark>> get bookmarksStream => _bookmarksSubject.distinct((a, b) => listEquals(a, b));
+  Stream<List<Bookmark>> get bookmarksStream =>
+      _bookmarksSubject.distinct((a, b) => listEquals(a, b));
 
   List<Bookmark> get bookmarks => _bookmarksSubject.value;
 
@@ -72,5 +62,5 @@ class BookmarksRepository {
 
   Future<void> clear() => _hiveSource.clearBookmarks();
 
-  Future<void> _initialize() async => _bookmarksSubject.add(_hiveSource.bookmarks);
+  Future<void> dispose() => _bookmarksSubject.close();
 }

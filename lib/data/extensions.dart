@@ -1,4 +1,5 @@
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 extension TokenWalletVersionX on TokenWalletVersion {
   int toInt() {
@@ -84,16 +85,22 @@ extension KeyStoreEntryX on KeyStoreEntry {
       ? EncryptedKeyPassword(
           publicKey: publicKey,
           password: Password.explicit(
-            password: password,
-            cacheBehavior: const PasswordCacheBehavior.remove(),
+            PasswordExplicit(
+              password: password,
+              cacheBehavior: const PasswordCacheBehavior.nop(),
+            ),
           ),
         )
       : DerivedKeySignParams.byAccountId(
-          masterKey: masterKey,
-          accountId: accountId,
-          password: Password.explicit(
-            password: password,
-            cacheBehavior: const PasswordCacheBehavior.remove(),
+          DerivedKeySignParamsByAccountId(
+            masterKey: masterKey,
+            accountId: accountId,
+            password: Password.explicit(
+              PasswordExplicit(
+                password: password,
+                cacheBehavior: const PasswordCacheBehavior.nop(),
+              ),
+            ),
           ),
         );
 }
@@ -123,43 +130,16 @@ extension StringX on String {
 }
 
 extension IterableX<T> on Iterable<T> {
-  Future<T> asyncFirstWhere(Future<bool> Function(T element) test, {T Function()? orElse}) async {
-    for (final element in this) {
-      if (await test(element)) return element;
-    }
-    if (orElse != null) return orElse();
-    throw StateError('No element');
-  }
-
-  Future<T?> asyncFirstWhereOrNull(Future<bool> Function(T element) test) async {
-    for (final element in this) {
-      if (await test(element)) return element;
-    }
-    return null;
-  }
-
-  Future<Iterable<K>> asyncMap<K>(Future<K> Function(T element) toElement) => Future.wait<K>(map((e) => toElement(e)));
-
-  Future<Iterable<T>> asyncWhere(Future<bool> Function(T element) test) async => <T>[
-        for (final element in this)
-          if (await test(element)) element,
-      ];
-
-  Future<bool> asyncAny(Future<bool> Function(T element) test) async {
-    for (final element in this) {
-      if (await test(element)) return true;
-    }
-    return false;
-  }
-
-  Future<bool> asyncEvery(Future<bool> Function(T element) test) async {
-    for (final element in this) {
-      if (!(await test(element))) return false;
-    }
-    return true;
-  }
+  Future<Iterable<K>> asyncMap<K>(Future<K> Function(T element) toElement) =>
+      Future.wait<K>(map((e) => toElement(e)));
 }
 
 extension ExceptionX on Exception {
   String toUiMessage() => toString().replaceAllMapped('Exception: ', (match) => '');
+}
+
+extension SubjectX<T> on Subject<T> {
+  void tryAdd(T event) {
+    if (!isClosed) add(event);
+  }
 }

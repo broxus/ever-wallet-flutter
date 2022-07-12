@@ -1,11 +1,10 @@
 import 'dart:async';
 
+import 'package:ever_wallet/data/models/permission.dart';
+import 'package:ever_wallet/data/models/permissions.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:tuple/tuple.dart';
-
-import 'permission.dart';
-import 'permissions.dart';
 
 part 'approval_request.freezed.dart';
 

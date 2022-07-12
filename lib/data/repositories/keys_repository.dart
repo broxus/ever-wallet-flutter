@@ -3,54 +3,81 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:ever_wallet/data/extensions.dart';
+import 'package:ever_wallet/data/sources/local/current_key_source.dart';
+import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
+import 'package:ever_wallet/logger.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
-import '../../logger.dart';
-import '../extensions.dart';
-import '../sources/local/hive_source.dart';
-import '../sources/local/keystore_source.dart';
-
-@preResolve
-@lazySingleton
 class KeysRepository {
-  final KeystoreSource _keystoreSource;
+  final _lock = Lock();
+  final Keystore _keystore;
+  final CurrentKeySource _currentKeySource;
   final HiveSource _hiveSource;
   final _labelsSubject = BehaviorSubject<Map<String, String>>.seeded({});
-  final _lock = Lock();
+  late final StreamSubscription _keysStreamSubscription;
 
   KeysRepository._(
-    this._keystoreSource,
+    this._keystore,
+    this._currentKeySource,
     this._hiveSource,
   );
 
-  @factoryMethod
   static Future<KeysRepository> create({
-    required KeystoreSource keystoreSource,
+    required Keystore keystore,
+    required CurrentKeySource currentKeySource,
     required HiveSource hiveSource,
   }) async {
     final instance = KeysRepository._(
-      keystoreSource,
+      keystore,
+      currentKeySource,
       hiveSource,
     );
     await instance._initialize();
     return instance;
   }
 
-  Stream<List<KeyStoreEntry>> get keysStream => _keystoreSource.keysStream;
+  Stream<List<KeyStoreEntry>> get keysStream => _keystore.entriesStream;
 
-  List<KeyStoreEntry> get keys => _keystoreSource.keys;
+  List<KeyStoreEntry> get keys => _keystore.entries;
 
-  Stream<KeyStoreEntry?> get currentKeyStream => _keystoreSource.currentKeyStream;
+  Stream<KeyStoreEntry?> get currentKeyStream => _currentKeySource.currentKeyStream;
 
-  KeyStoreEntry? get currentKey => _keystoreSource.currentKey;
+  KeyStoreEntry? get currentKey => _currentKeySource.currentKey;
+
+  Stream<KeyStoreEntry> keyInfoStream(String publicKey) => keysStream
+      .expand((e) => e)
+      .where((e) => e.publicKey == publicKey)
+      .doOnError((err, st) => logger.e(err, err, st));
+
+  Stream<Map<KeyStoreEntry, List<KeyStoreEntry>?>> get mappedKeysStream => keysStream.map((e) {
+        final map = <KeyStoreEntry, List<KeyStoreEntry>?>{};
+
+        for (final key in e) {
+          if (key.publicKey == key.masterKey) {
+            if (!map.containsKey(key)) map[key] = null;
+          } else {
+            final parentKey = e.firstWhereOrNull((e) => e.publicKey == key.masterKey);
+
+            if (parentKey != null) {
+              if (map[parentKey] != null) {
+                map[parentKey]!.addAll([key]);
+              } else {
+                map[parentKey] = [key];
+              }
+            }
+          }
+        }
+
+        return map;
+      }).doOnError((err, st) => logger.e(err, err, st));
 
   Stream<Map<String, String>> get labelsStream =>
       Rx.combineLatest2<Map<String, String>, Map<String, String>, Map<String, String>>(
-        _keystoreSource.keysStream.map((e) => {for (final v in e) v.publicKey: v.name}),
+        _keystore.entriesStream.map((e) => {for (final v in e) v.publicKey: v.name}),
         _labelsSubject,
         (a, b) => {...b, ...a},
       ).distinct((a, b) => mapEquals(a, b));
@@ -58,7 +85,7 @@ class KeysRepository {
   Future<void> setCurrentKey(KeyStoreEntry? currentKey) async {
     await _hiveSource.setCurrentPublicKey(currentKey?.publicKey);
 
-    _keystoreSource.currentKey = currentKey;
+    _currentKeySource.currentKey = currentKey;
   }
 
   Future<KeyStoreEntry> createKey({
@@ -67,7 +94,7 @@ class KeysRepository {
     required String password,
   }) async {
     final isLegacy = phrase.length == 24;
-    final mnemonicType = isLegacy ? const MnemonicType.legacy() : const MnemonicType.labs(id: 0);
+    final mnemonicType = isLegacy ? const MnemonicType.legacy() : const MnemonicType.labs(0);
 
     late final CreateKeyInput createKeyInput;
 
@@ -77,22 +104,28 @@ class KeysRepository {
         phrase: phrase.join(' '),
         mnemonicType: mnemonicType,
         password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+          PasswordExplicit(
+            password: password,
+            cacheBehavior: const PasswordCacheBehavior.nop(),
+          ),
         ),
       );
     } else {
       createKeyInput = DerivedKeyCreateInput.import(
-        keyName: name,
-        phrase: phrase.join(' '),
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+        DerivedKeyCreateInputImport(
+          keyName: name,
+          phrase: phrase.join(' '),
+          password: Password.explicit(
+            PasswordExplicit(
+              password: password,
+              cacheBehavior: const PasswordCacheBehavior.nop(),
+            ),
+          ),
         ),
       );
     }
 
-    final key = await _keystoreSource.addKey(createKeyInput);
+    final key = await _keystore.addKey(createKeyInput);
 
     if (_hiveSource.isBiometryEnabled) {
       await _hiveSource.setKeyPassword(
@@ -119,16 +152,20 @@ class KeysRepository {
       final masterKey = key.publicKey;
 
       final createKeyInput = DerivedKeyCreateInput.derive(
-        keyName: name,
-        masterKey: masterKey,
-        accountId: id,
-        password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+        DerivedKeyCreateInputDerive(
+          keyName: name,
+          masterKey: masterKey,
+          accountId: id,
+          password: Password.explicit(
+            PasswordExplicit(
+              password: password,
+              cacheBehavior: const PasswordCacheBehavior.nop(),
+            ),
+          ),
         ),
       );
 
-      final derivedKey = await _keystoreSource.addKey(createKeyInput);
+      final derivedKey = await _keystore.addKey(createKeyInput);
 
       if (_hiveSource.isBiometryEnabled) {
         await _hiveSource.setKeyPassword(
@@ -156,31 +193,43 @@ class KeysRepository {
 
     if (key.isLegacy) {
       updateKeyInput = EncryptedKeyUpdateParams.changePassword(
-        publicKey: key.publicKey,
-        oldPassword: Password.explicit(
-          password: oldPassword,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
-        ),
-        newPassword: Password.explicit(
-          password: newPassword,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+        EncryptedKeyUpdateParamsChangePassword(
+          publicKey: key.publicKey,
+          oldPassword: Password.explicit(
+            PasswordExplicit(
+              password: oldPassword,
+              cacheBehavior: const PasswordCacheBehavior.nop(),
+            ),
+          ),
+          newPassword: Password.explicit(
+            PasswordExplicit(
+              password: newPassword,
+              cacheBehavior: const PasswordCacheBehavior.nop(),
+            ),
+          ),
         ),
       );
     } else {
       updateKeyInput = DerivedKeyUpdateParams.changePassword(
-        masterKey: key.masterKey,
-        oldPassword: Password.explicit(
-          password: oldPassword,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
-        ),
-        newPassword: Password.explicit(
-          password: newPassword,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+        DerivedKeyUpdateParamsChangePassword(
+          masterKey: key.masterKey,
+          oldPassword: Password.explicit(
+            PasswordExplicit(
+              password: oldPassword,
+              cacheBehavior: const PasswordCacheBehavior.nop(),
+            ),
+          ),
+          newPassword: Password.explicit(
+            PasswordExplicit(
+              password: newPassword,
+              cacheBehavior: const PasswordCacheBehavior.nop(),
+            ),
+          ),
         ),
       );
     }
 
-    final updatedKey = await _keystoreSource.updateKey(updateKeyInput);
+    final updatedKey = await _keystore.updateKey(updateKeyInput);
 
     if (_hiveSource.isBiometryEnabled) {
       await _hiveSource.setKeyPassword(
@@ -213,18 +262,22 @@ class KeysRepository {
 
     if (key.isLegacy) {
       updateKeyInput = EncryptedKeyUpdateParams.rename(
-        publicKey: key.publicKey,
-        name: name,
+        EncryptedKeyUpdateParamsRename(
+          publicKey: key.publicKey,
+          name: name,
+        ),
       );
     } else {
       updateKeyInput = DerivedKeyUpdateParams.renameKey(
-        masterKey: key.masterKey,
-        publicKey: key.publicKey,
-        name: name,
+        DerivedKeyUpdateParamsRenameKey(
+          masterKey: key.masterKey,
+          publicKey: key.publicKey,
+          name: name,
+        ),
       );
     }
 
-    await _keystoreSource.updateKey(updateKeyInput);
+    await _keystore.updateKey(updateKeyInput);
   }
 
   Future<List<String>> exportKey({
@@ -241,21 +294,25 @@ class KeysRepository {
       exportKeyInput = EncryptedKeyPassword(
         publicKey: key.publicKey,
         password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+          PasswordExplicit(
+            password: password,
+            cacheBehavior: const PasswordCacheBehavior.nop(),
+          ),
         ),
       );
     } else {
       exportKeyInput = DerivedKeyExportParams(
         masterKey: key.masterKey,
         password: Password.explicit(
-          password: password,
-          cacheBehavior: const PasswordCacheBehavior.remove(),
+          PasswordExplicit(
+            password: password,
+            cacheBehavior: const PasswordCacheBehavior.nop(),
+          ),
         ),
       );
     }
 
-    final exportKeyOutput = await _keystoreSource.exportKey(exportKeyInput);
+    final exportKeyOutput = await _keystore.exportKey(exportKeyInput);
 
     late final List<String> phrase;
 
@@ -277,9 +334,9 @@ class KeysRepository {
     required String publicKey,
     required String password,
   }) {
-    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+    final input = _keystore.entries.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
-    return _keystoreSource.encrypt(
+    return _keystore.encrypt(
       data: data,
       publicKeys: publicKeys,
       algorithm: algorithm,
@@ -292,9 +349,9 @@ class KeysRepository {
     required String publicKey,
     required String password,
   }) {
-    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+    final input = _keystore.entries.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
-    return _keystoreSource.decrypt(
+    return _keystore.decrypt(
       data: data,
       input: input,
     );
@@ -305,9 +362,9 @@ class KeysRepository {
     required String publicKey,
     required String password,
   }) {
-    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+    final input = _keystore.entries.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
-    return _keystoreSource.sign(
+    return _keystore.sign(
       data: data,
       input: input,
     );
@@ -318,9 +375,9 @@ class KeysRepository {
     required String publicKey,
     required String password,
   }) {
-    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+    final input = _keystore.entries.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
-    return _keystoreSource.signData(
+    return _keystore.signData(
       data: data,
       input: input,
     );
@@ -331,9 +388,9 @@ class KeysRepository {
     required String publicKey,
     required String password,
   }) {
-    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+    final input = _keystore.entries.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
-    return _keystoreSource.signDataRaw(
+    return _keystore.signDataRaw(
       data: data,
       input: input,
     );
@@ -343,12 +400,12 @@ class KeysRepository {
     required String publicKey,
     required String password,
   }) async {
-    final input = _keystoreSource.keys.firstWhere((e) => e.publicKey == publicKey).signInput(password);
+    final input = _keystore.entries.firstWhere((e) => e.publicKey == publicKey).signInput(password);
 
     try {
       final data = base64.encode(List.generate(kSignatureLength, (_) => 0));
 
-      await _keystoreSource.sign(data: data, input: input);
+      await _keystore.sign(data: data, input: input);
 
       return true;
     } catch (_) {
@@ -357,11 +414,11 @@ class KeysRepository {
   }
 
   Future<KeyStoreEntry?> removeKey(String publicKey) async {
-    final key = await _keystoreSource.removeKey(publicKey);
+    final key = await _keystore.removeKey(publicKey);
 
-    final derivedKeys = _keystoreSource.keys.where((e) => e.masterKey == publicKey);
+    final derivedKeys = _keystore.entries.where((e) => e.masterKey == publicKey);
 
-    await _keystoreSource.removeKeys(derivedKeys.map((e) => e.publicKey).toList());
+    await _keystore.removeKeys(derivedKeys.map((e) => e.publicKey).toList());
 
     return key;
   }
@@ -371,32 +428,40 @@ class KeysRepository {
 
     _labelsSubject.add(_hiveSource.publicKeysLabels);
 
-    await _keystoreSource.clear();
+    await _keystore.clear();
+  }
+
+  Future<void> dispose() async {
+    await _keysStreamSubscription.cancel();
+
+    await _labelsSubject.close();
   }
 
   Future<void> _initialize() async {
     final currentPublicKey = _hiveSource.currentPublicKey;
 
-    final currentKey = _keystoreSource.keys.firstWhereOrNull((e) => e.publicKey == currentPublicKey);
+    final currentKey = _keystore.entries.firstWhereOrNull((e) => e.publicKey == currentPublicKey);
 
     if (currentKey != null) {
-      _keystoreSource.currentKey = currentKey;
+      _currentKeySource.currentKey = currentKey;
     } else {
-      await setCurrentKey(_keystoreSource.keys.firstOrNull);
+      await setCurrentKey(_keystore.entries.firstOrNull);
     }
 
     _labelsSubject.add(_hiveSource.publicKeysLabels);
 
-    keysStream.listen((event) => _lock.synchronized(() => _keysStreamListener(event)));
+    _keysStreamSubscription =
+        keysStream.listen((event) => _lock.synchronized(() => _keysStreamListener(event)));
   }
 
   Future<void> _keysStreamListener(List<KeyStoreEntry> event) async {
     try {
       if (currentKey == null || !event.contains(currentKey)) {
-        await setCurrentKey(_keystoreSource.keys.firstOrNull);
+        await setCurrentKey(_keystore.entries.firstOrNull);
       }
 
-      final duplicatedPublicKeys = _hiveSource.publicKeysLabels.keys.where((e) => event.any((el) => e == el.publicKey));
+      final duplicatedPublicKeys =
+          _hiveSource.publicKeysLabels.keys.where((e) => event.any((el) => e == el.publicKey));
 
       for (final duplicatedPublicKey in duplicatedPublicKeys) {
         await _hiveSource.removePublicKeyLabel(duplicatedPublicKey);
