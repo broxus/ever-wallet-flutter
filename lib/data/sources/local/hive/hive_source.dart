@@ -41,6 +41,7 @@ import 'package:ever_wallet/data/sources/local/hive/dto/transaction_dto.dart';
 import 'package:ever_wallet/data/sources/local/hive/dto/transaction_id_dto.dart';
 import 'package:ever_wallet/data/sources/local/hive/dto/wallet_contract_type_dto.dart';
 import 'package:ever_wallet/data/sources/local/hive/dto/wallet_interaction_info_dto.dart';
+import 'package:ever_wallet/data/sources/local/hive/dto/wallet_type_dto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -474,7 +475,8 @@ class HiveSource {
       ..tryRegisterAdapter(TonWalletTransactionWithDataDtoAdapter())
       ..tryRegisterAdapter(TransactionDtoAdapter())
       ..tryRegisterAdapter(TransactionIdDtoAdapter())
-      ..tryRegisterAdapter(WalletInteractionInfoDtoAdapter());
+      ..tryRegisterAdapter(WalletInteractionInfoDtoAdapter())
+      ..tryRegisterAdapter(WalletTypeDtoMultisigAdapter());
 
     _keysPasswordsBox =
         await Hive.openBox(_keysPasswordsBoxName, encryptionCipher: HiveAesCipher(_key));
