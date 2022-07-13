@@ -1,7 +1,7 @@
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/utils.dart';
 import 'package:ever_wallet/application/common/widgets/address_card.dart';
-import 'package:ever_wallet/application/common/widgets/crystal_flushbar.dart';
 import 'package:ever_wallet/application/common/widgets/custom_outlined_button.dart';
 import 'package:ever_wallet/application/common/widgets/custom_text_form_field.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';

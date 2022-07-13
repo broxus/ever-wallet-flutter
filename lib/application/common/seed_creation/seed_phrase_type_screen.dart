@@ -1,3 +1,4 @@
+import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/widgets/crystal_title.dart';
 import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
@@ -49,7 +50,7 @@ class SeedPhraseTypePage extends StatelessWidget {
                       context: context,
                       title: AppLocalizations.of(context)!.regular_seed,
                       subtitle: AppLocalizations.of(context)!.regular_seed_description,
-                      mnemonicType: const MnemonicType.labs(0),
+                      mnemonicType: kDefaultMnemonicType,
                     ),
                     const SizedBox(height: 16),
                     seedButton(

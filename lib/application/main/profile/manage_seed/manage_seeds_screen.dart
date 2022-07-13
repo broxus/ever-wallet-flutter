@@ -1,4 +1,3 @@
-import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/general/button/menu_dropdown.dart';
 import 'package:ever_wallet/application/common/general/button/push_state_ink_widget.dart';
 import 'package:ever_wallet/application/common/general/default_appbar.dart';
@@ -11,6 +10,7 @@ import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_act
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/rename_key_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_key_removement_modal.dart';
+import 'package:ever_wallet/application/main/profile/widgets/keys_builder.dart';
 import 'package:ever_wallet/application/util/auth_utils.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -63,42 +63,13 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
               child: Text('Seed phrases', style: themeStyle.styles.sectionCaption),
             ),
             const DefaultDivider(),
-            StreamProvider<AsyncValue<Map<KeyStoreEntry, List<KeyStoreEntry>?>>>(
-              create: (context) => context
-                  .read<KeysRepository>()
-                  .mappedKeysStream
-                  .map((event) => AsyncValue.ready(event)),
-              initialData: const AsyncValue.loading(),
-              catchError: (context, error) => AsyncValue.error(error),
-              builder: (context, child) {
-                final keys =
-                    context.watch<AsyncValue<Map<KeyStoreEntry, List<KeyStoreEntry>?>>>().maybeWhen(
-                          ready: (value) => value,
-                          orElse: () => <KeyStoreEntry, List<KeyStoreEntry>?>{},
-                        );
-
-                return StreamProvider<AsyncValue<KeyStoreEntry?>>(
-                  create: (context) => context
-                      .read<KeysRepository>()
-                      .currentKeyStream
-                      .map((event) => AsyncValue.ready(event)),
-                  initialData: const AsyncValue.loading(),
-                  catchError: (context, error) => AsyncValue.error(error),
-                  builder: (context, child) {
-                    final currentKey = context.watch<AsyncValue<KeyStoreEntry?>>().maybeWhen(
-                          ready: (value) => value,
-                          orElse: () => null,
-                        );
-
-                    return _buildSeedItems(
-                      context.themeStyle,
-                      context.localization,
-                      keys,
-                      currentKey,
-                    );
-                  },
-                );
-              },
+            KeysBuilderWidget(
+              builder: (keys, currentKey) => _buildSeedItems(
+                context.themeStyle,
+                context.localization,
+                keys,
+                currentKey,
+              ),
             ),
           ],
         ),

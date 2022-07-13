@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
-class CustomTypeAheadField extends StatefulWidget {
+class EWTypeAheadField extends StatefulWidget {
   final double? height;
   final TextEditingController? controller;
   final FocusNode? focusNode;
@@ -32,7 +32,7 @@ class CustomTypeAheadField extends StatefulWidget {
   final Color? suggestionBackground;
   final TextStyle? textStyle;
 
-  const CustomTypeAheadField({
+  const EWTypeAheadField({
     Key? key,
     this.controller,
     this.focusNode,
@@ -58,10 +58,10 @@ class CustomTypeAheadField extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CustomTypeAheadField> createState() => _CustomTypeAheadFieldState();
+  State<EWTypeAheadField> createState() => _EWTypeAheadFieldState();
 }
 
-class _CustomTypeAheadFieldState extends State<CustomTypeAheadField> {
+class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
   late TextEditingController _controller;
   bool isEmpty = true;
   String currentInputText = '';
@@ -83,7 +83,7 @@ class _CustomTypeAheadFieldState extends State<CustomTypeAheadField> {
   }
 
   @override
-  void didUpdateWidget(covariant CustomTypeAheadField oldWidget) {
+  void didUpdateWidget(covariant EWTypeAheadField oldWidget) {
     if (widget.controller != null && widget.controller != _controller) {
       _controller.removeListener(_handleInput);
       _controller = widget.controller!;

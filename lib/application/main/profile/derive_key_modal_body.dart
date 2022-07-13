@@ -1,4 +1,4 @@
-import 'package:ever_wallet/application/common/widgets/crystal_flushbar.dart';
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/main/common/password_input_modal_body.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';

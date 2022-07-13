@@ -1,5 +1,5 @@
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/theme.dart';
-import 'package:ever_wallet/application/common/widgets/crystal_flushbar.dart';
 import 'package:ever_wallet/application/common/widgets/keep_alive.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/main/wallet/modals/add_asset_modal/assets_layout.dart';

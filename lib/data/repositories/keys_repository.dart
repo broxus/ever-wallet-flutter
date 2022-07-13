@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/sources/local/current_key_source.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
@@ -94,7 +95,7 @@ class KeysRepository {
     required String password,
   }) async {
     final isLegacy = phrase.length == 24;
-    final mnemonicType = isLegacy ? const MnemonicType.legacy() : const MnemonicType.labs(0);
+    final mnemonicType = isLegacy ? const MnemonicType.legacy() : kDefaultMnemonicType;
 
     late final CreateKeyInput createKeyInput;
 

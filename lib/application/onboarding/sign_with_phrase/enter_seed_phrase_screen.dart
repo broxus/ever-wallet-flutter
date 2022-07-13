@@ -1,9 +1,10 @@
+import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/dialog/default_dialog_controller.dart';
 import 'package:ever_wallet/application/common/general/field/seed_phrase_input.dart';
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
-import 'package:ever_wallet/application/common/widgets/crystal_flushbar.dart';
 import 'package:ever_wallet/application/onboarding/general_screens/create_password.dart';
 import 'package:ever_wallet/application/onboarding/sign_with_phrase/widgets/tabbar.dart';
 import 'package:ever_wallet/application/onboarding/widgets/onboarding_background.dart';
@@ -211,7 +212,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
         final phrase = controllers.take(valuesNotifier.value).map((e) => e.text).toList();
         final mnemonicType = valuesNotifier.value == values.last
             ? const MnemonicType.legacy()
-            : const MnemonicType.labs(0);
+            : kDefaultMnemonicType;
 
         deriveFromPhrase(
           phrase: phrase,
@@ -279,7 +280,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
       final key = generateKey(
         valuesNotifier.value == values.last
             ? const MnemonicType.legacy()
-            : const MnemonicType.labs(0),
+            : kDefaultMnemonicType,
       );
 
       for (var i = 0; i < controllers.take(valuesNotifier.value).length; i++) {

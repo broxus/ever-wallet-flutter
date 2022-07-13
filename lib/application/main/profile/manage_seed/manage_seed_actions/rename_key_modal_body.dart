@@ -1,6 +1,6 @@
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/general/field/bordered_input.dart';
-import 'package:ever_wallet/application/common/widgets/crystal_flushbar.dart';
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/data/extensions.dart';

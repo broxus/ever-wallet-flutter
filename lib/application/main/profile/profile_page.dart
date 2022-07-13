@@ -10,6 +10,7 @@ import 'package:ever_wallet/application/main/profile/logout_modal/show_logout_mo
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seeds_screen.dart';
 import 'package:ever_wallet/application/main/profile/name_new_key_modal_body.dart';
+import 'package:ever_wallet/application/main/profile/widgets/keys_builder.dart';
 import 'package:ever_wallet/application/util/auth_utils.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
@@ -74,40 +75,8 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget buildBody() => SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 16),
         controller: scrollController,
-        child: StreamProvider<AsyncValue<Map<KeyStoreEntry, List<KeyStoreEntry>?>>>(
-          create: (context) => context
-              .read<KeysRepository>()
-              .mappedKeysStream
-              .map((event) => AsyncValue.ready(event)),
-          initialData: const AsyncValue.loading(),
-          catchError: (context, error) => AsyncValue.error(error),
-          builder: (context, child) {
-            final keys =
-                context.watch<AsyncValue<Map<KeyStoreEntry, List<KeyStoreEntry>?>>>().maybeWhen(
-                      ready: (value) => value,
-                      orElse: () => <KeyStoreEntry, List<KeyStoreEntry>?>{},
-                    );
-
-            return StreamProvider<AsyncValue<KeyStoreEntry?>>(
-              create: (context) => context
-                  .read<KeysRepository>()
-                  .currentKeyStream
-                  .map((event) => AsyncValue.ready(event)),
-              initialData: const AsyncValue.loading(),
-              catchError: (context, error) => AsyncValue.error(error),
-              builder: (context, child) {
-                final currentKey = context.watch<AsyncValue<KeyStoreEntry?>>().maybeWhen(
-                      ready: (value) => value,
-                      orElse: () => null,
-                    );
-
-                return buildSettingsItemsList(
-                  keys: keys,
-                  currentKey: currentKey,
-                );
-              },
-            );
-          },
+        child: KeysBuilderWidget(
+          builder: (keys, current) => buildSettingsItemsList(keys: keys, currentKey: current),
         ),
       );
 

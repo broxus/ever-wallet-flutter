@@ -1,5 +1,5 @@
 import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
-import 'package:ever_wallet/application/common/widgets/crystal_flushbar.dart';
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/main/common/password_input_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';

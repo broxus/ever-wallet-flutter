@@ -1,7 +1,7 @@
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
-import 'package:ever_wallet/application/common/widgets/crystal_flushbar.dart';
 import 'package:ever_wallet/application/onboarding/create_wallet/check_seed_phrase_screen/check_seed_phase_screen.dart';
 import 'package:ever_wallet/application/onboarding/widgets/onboarding_background.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';

@@ -1,5 +1,5 @@
-import 'package:ever_wallet/application/common/widgets/custom_type_ahead_field.dart';
-import 'package:ever_wallet/application/common/widgets/suggestion_formatter.dart';
+import 'package:ever_wallet/application/common/general/field/suggestion_formatter.dart';
+import 'package:ever_wallet/application/common/general/field/type_ahead_field.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +39,7 @@ class SeedPhraseInput extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeStyle = context.themeStyle;
 
-    return CustomTypeAheadField(
+    return EWTypeAheadField(
       itemBuilder: (_, suggestion) => itemBuilder(suggestion, themeStyle),
       onSuggestionSelected: onSuggestionSelected,
       suggestionsCallback: (_) => suggestionsCallback(),
