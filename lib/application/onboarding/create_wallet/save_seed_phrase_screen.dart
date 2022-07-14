@@ -1,12 +1,15 @@
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
-import 'package:ever_wallet/application/common/general/flushbar.dart';
+import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
 import 'package:ever_wallet/application/onboarding/create_wallet/check_seed_phrase_screen/check_seed_phase_screen.dart';
+import 'package:ever_wallet/application/onboarding/general_screens/create_password.dart';
 import 'package:ever_wallet/application/onboarding/widgets/onboarding_background.dart';
+import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
+import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -30,6 +33,7 @@ class SaveSeedPhraseScreen extends StatefulWidget {
 
 class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
   final key = generateKey(kDefaultMnemonicType);
+  final isCopied = ValueNotifier<bool>(false);
 
   List<String> get words => key.words;
 
@@ -40,6 +44,7 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
 
     return OnboardingBackground(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.transparent,
         appBar: const OnboardingAppBar(),
         body: Padding(
@@ -79,20 +84,53 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
                   ),
                 ),
               ),
-              PrimaryButton(
-                text: localization.copy_words,
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: words.join(' ')));
-                  showFlushbar(context, message: localization.copied);
+              ValueListenableBuilder<bool>(
+                valueListenable: isCopied,
+                builder: (_, copied, __) {
+                  if (copied) {
+                    return Align(
+                      child: Text(
+                        // TODO: replace text
+                        'Copied',
+                        style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.green400),
+                      ),
+                    );
+                  }
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextPrimaryButton(
+                        icon: Assets.images.copy.svg(color: ColorsRes.lightBlue),
+                        fillWidth: false,
+                        text: localization.copy_words,
+                        style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.lightBlue),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: words.join(' ')));
+                          isCopied.value = true;
+                          Future.delayed(const Duration(seconds: 2), () {
+                            isCopied.value = false;
+                          });
+                        },
+                      ),
+                    ],
+                  );
                 },
-                isTransparent: true,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 30),
               PrimaryButton(
-                text: localization.confirm_seed_saved,
+                // TODO: replace text
+                text: 'I saved it',
                 onPressed: () => Navigator.of(context).push(
                   CheckSeedPhraseRoute(words, widget.phraseName),
                 ),
+              ),
+              const SizedBox(height: 12),
+              PrimaryButton(
+                text: "Skip I'll take the risk",
+                onPressed: () => Navigator.of(context).push(
+                  CreatePasswordRoute(words, widget.phraseName),
+                ),
+                isTransparent: true,
               ),
             ],
           ),

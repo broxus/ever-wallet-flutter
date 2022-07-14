@@ -1,4 +1,5 @@
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
+import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
 import 'package:ever_wallet/application/onboarding/create_wallet/check_seed_phrase_screen/check_seed_phrase_cubit.dart';
 import 'package:ever_wallet/application/onboarding/general_screens/create_password.dart';
@@ -32,11 +33,12 @@ class _CheckSeedPhraseScreenState extends State<CheckSeedPhraseScreen> {
 
   @override
   void initState() {
-    cubit = CheckSeedPhraseCubit(
-      widget.phrase,
-      () => Navigator.of(context).push(CreatePasswordRoute(widget.phrase, widget.phraseName)),
-    );
+    cubit = CheckSeedPhraseCubit(widget.phrase, _navigateToPassword);
     super.initState();
+  }
+
+  void _navigateToPassword() {
+    Navigator.of(context).push(CreatePasswordRoute(widget.phrase, widget.phraseName));
   }
 
   @override
@@ -47,7 +49,19 @@ class _CheckSeedPhraseScreenState extends State<CheckSeedPhraseScreen> {
     return OnboardingBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: const OnboardingAppBar(),
+        appBar: OnboardingAppBar(
+          actions: [
+            TextPrimaryButton.appBar(
+              // TODO: replace text
+              text: 'Skip',
+              style: themeStyle.styles.basicStyle.copyWith(
+                fontWeight: FontWeight.w600,
+                color: themeStyle.colors.primaryButtonColor,
+              ),
+              onPressed: _navigateToPassword,
+            ),
+          ],
+        ),
         body: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

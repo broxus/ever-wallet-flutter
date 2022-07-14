@@ -1,7 +1,7 @@
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 
-const kPrimaryButtonHeight = 40.0;
+const kPrimaryButtonHeight = 50.0;
 
 /// Default button in the app.
 /// Typically you do not need to specify text style or background color. It is picked up from theme.

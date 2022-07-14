@@ -80,6 +80,7 @@ class ColorsRes {
   static const text = Color(0xFF050A2E);
   static const buttonOpacity = Color(0x29C5E4F3);
   static const greenOpacity = Color(0x524AB44A);
+  static const green400 = Color(0xFF4AB44A);
   static const grey = Color(0xFF96A1A7);
   static const greyLight = Color(0xFFEBEDEE);
   static const greyOpacity = Color(0xE0F8F8FB);

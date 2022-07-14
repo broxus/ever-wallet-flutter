@@ -50,6 +50,7 @@ class _AgreeDecentralizationScreenState extends State<AgreeDecentralizationScree
       ],
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: false,
         appBar: const OnboardingAppBar(),
         body: Padding(
           padding: const EdgeInsets.all(16),

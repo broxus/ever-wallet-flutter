@@ -17,6 +17,7 @@ class TextPrimaryButton extends StatelessWidget {
     this.padding,
     this.pressStateColor,
     this.fillWidth = true,
+    this.icon,
   }) : super(key: key);
 
   factory TextPrimaryButton.appBar({
@@ -57,11 +58,13 @@ class TextPrimaryButton extends StatelessWidget {
   final Color backgroundColor;
   final Color? pressStateColor;
   final bool fillWidth;
+  final Widget? icon;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.themeStyle.colors;
     final button = PrimaryButton(
+      icon: icon,
       onPressed: onPressed,
       text: text,
       style: style,
