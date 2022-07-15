@@ -17,7 +17,7 @@ class SlidingBlockChains extends StatefulWidget {
 
 class _SlidingBlockChainsState extends State<SlidingBlockChains> {
   Timer? timer;
-  final controllers = List.generate(3, (_) => ScrollController());
+  final List<ScrollController> controllers = [];
   final images = <List<String>>[
     [
       'layer1/btc.svg',
@@ -65,6 +65,7 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
 
   @override
   void dispose() {
+    controllers.clear();
     timer?.cancel();
     super.dispose();
   }
@@ -77,7 +78,11 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
     timer = null;
   }
 
-  void _scrollLists() => controllers.forEach((c) => c.jumpTo(c.offset + 0.5));
+  void _scrollLists() => controllers.forEach((c) {
+        if (c.hasClients) {
+          c.jumpTo(c.offset + 0.5);
+        }
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +102,13 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final partSize = (constraints.maxHeight - _paddingBetweenRows * 2) / 3;
+              if (controllers.isEmpty) {
+                controllers.addAll([
+                  ScrollController(),
+                  ScrollController(initialScrollOffset: partSize / 2 + _paddingBetweenRows / 2),
+                  ScrollController(),
+                ]);
+              }
 
               return Column(
                 children: controllers
@@ -106,7 +118,6 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
                         child: ListView.builder(
                           physics: const NeverScrollableScrollPhysics(),
                           controller: c,
-                          reverse: listIndex.isOdd,
                           scrollDirection: Axis.horizontal,
                           itemBuilder: (_, index) {
                             return _generateItem(

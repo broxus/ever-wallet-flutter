@@ -26,7 +26,6 @@ class PrimaryElevatedButton extends StatelessWidget {
     return PrimaryButton(
       text: text,
       onPressed: onPressed,
-      height: 50,
       style: themeStyle.styles.primaryButtonStyle.copyWith(color: ColorsRes.white),
       backgroundColor: onPressed != null ? enabledColor : disabledColor,
     );

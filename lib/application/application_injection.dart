@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/error_splash_screen.dart';
 import 'package:ever_wallet/application/loading_splash_screen.dart';
+import 'package:ever_wallet/application/main/main_screen.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/approvals_repository.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
@@ -66,6 +67,8 @@ class ApplicationInjection extends StatelessWidget {
                   searchHistoryRepositoryProvider(),
                   tonAssetsRepositoryProvider(),
                   transportRepositoryProvider(),
+                  navigatorKeyProvider(),
+                  mainNavigatorKeyProvider(),
                 ],
                 builder: (context, child) => biometryRepositoryProvider(
                   child: keysRepositoryProvider(
@@ -322,4 +325,12 @@ class ApplicationInjection extends StatelessWidget {
               loading: () => const LoadingSplashScreen(),
             ),
       );
+
+  Provider navigatorKeyProvider() => Provider<GlobalKey<NavigatorState>>(
+        create: (context) => GlobalKey(),
+      );
+
+  Provider mainNavigatorKeyProvider() => Provider<GlobalKey<MainScreenState>>(
+    create: (context) => GlobalKey(),
+  );
 }

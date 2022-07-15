@@ -1,4 +1,4 @@
-import 'package:beamer/beamer.dart';
+import 'package:ever_wallet/application/application.dart';
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/general/field/bordered_input.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
@@ -90,7 +90,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                     focusNode: confirmFocus,
                     label: localization.confirm_password,
                     textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _nextAction(Beamer.of(context)),
+                    onSubmitted: (_) => _nextAction(Navigator.of(context)),
                     validator: (_) {
                       if (confirmController.text == passwordController.text) {
                         return null;
@@ -103,7 +103,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                   const Spacer(),
                   PrimaryButton(
                     text: localization.next,
-                    onPressed: () => _nextAction(Beamer.of(context)),
+                    onPressed: () => _nextAction(Navigator.of(context)),
                   ),
                 ],
               ),
@@ -114,7 +114,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
     );
   }
 
-  Future<void> _nextAction(BeamerDelegate beamer) async {
+  Future<void> _nextAction(NavigatorState navigator) async {
     if (formKey.currentState?.validate() ?? false) {
       await context.read<KeysRepository>().createKey(
             name: widget.seedName,
@@ -122,7 +122,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
             password: passwordController.text,
           );
 
-      beamer.beamToNamed('/main');
+      navigator.pushNamedAndRemoveUntil(AppRouter.main, (route) => false);
     }
   }
 }

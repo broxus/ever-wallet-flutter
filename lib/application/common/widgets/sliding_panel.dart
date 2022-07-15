@@ -417,7 +417,7 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
   Future<void> _close() async {
     await Future.wait([
       _resetScroll(),
-      _ac.fling(velocity: -1),
+      if (mounted) _ac.fling(velocity: -1),
     ]);
   }
 

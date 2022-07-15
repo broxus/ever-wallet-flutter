@@ -6,9 +6,13 @@ import 'package:ever_wallet/application/util/extensions/context_extensions.dart'
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 
+class OnboardingScreenRoute extends MaterialPageRoute<void> {
+  OnboardingScreenRoute() : super(builder: (_) => const OnboardingScreen());
+}
+
 /// Entry point in the app if user not authenticated
-class StartScreen extends StatelessWidget {
-  const StartScreen({Key? key}) : super(key: key);
+class OnboardingScreen extends StatelessWidget {
+  const OnboardingScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +40,8 @@ class StartScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      context.localization.welcome_subtitle,
+                      // TODO: replace text
+                      'Support of any token and access to the DApps of Everscale blockchain ecosystem',
                       style: style.styles.basicStyle,
                     ),
                     const SizedBox(height: 48),

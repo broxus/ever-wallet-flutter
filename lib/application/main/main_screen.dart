@@ -1,100 +1,67 @@
-import 'package:beamer/beamer.dart';
-import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/main/browser/browser_page.dart';
 import 'package:ever_wallet/application/main/profile/profile_page.dart';
 import 'package:ever_wallet/application/main/wallet/wallet_screen.dart';
+import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
-import 'package:ever_wallet/generated/fonts.gen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+
+class MainScreenRoute extends MaterialPageRoute<void> {
+  MainScreenRoute()
+      : super(
+          builder: (context) => MainScreen(key: context.read<GlobalKey<MainScreenState>>()),
+        );
+}
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MainScreen> createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  int currentIndex = 0;
+class MainScreenState extends State<MainScreen> {
+  final controller = CupertinoTabController();
 
-  final routerDelegates = [
-    BeamerDelegate(
-      initialPath: '/main/wallet',
-      locationBuilder: (routeInformation, _) {
-        if (routeInformation.location!.contains('wallet')) {
-          return WalletLocation(routeInformation);
-        }
-        return NotFound(path: routeInformation.location!);
-      },
-    ),
-    BeamerDelegate(
-      initialPath: '/main/browser',
-      locationBuilder: (routeInformation, _) {
-        if (routeInformation.location!.contains('browser')) {
-          return BrowserLocation(routeInformation);
-        }
-        return NotFound(path: routeInformation.location!);
-      },
-    ),
-    BeamerDelegate(
-      initialPath: '/main/profile',
-      locationBuilder: (routeInformation, _) {
-        if (routeInformation.location!.contains('profile')) {
-          return ProfileLocation(routeInformation);
-        }
-        return NotFound(path: routeInformation.location!);
-      },
-    ),
+  late final keysList = List<GlobalKey<NavigatorState>>.generate(3, (_) => GlobalKey());
+
+  late final pages = <Widget>[
+    const WalletScreen(),
+    const BrowserPage(),
+    const ProfilePage(),
   ];
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final uriString = Beamer.of(context).configuration.location!;
-    switch (uriString) {
-      case 'wallet':
-        currentIndex = 0;
-        break;
-      case 'browser':
-        currentIndex = 1;
-        break;
-      case 'profile':
-        currentIndex = 2;
-        break;
+  bool tryPop() {
+    final current = keysList[controller.index].currentState;
+    if (current != null && current.canPop()) {
+      current.maybePop();
+      return false;
     }
+    if (controller.index != 0) {
+      controller.index = 0;
+      return false;
+    }
+    return true;
   }
 
   @override
-  Widget build(BuildContext context) => CupertinoTheme(
-        data: const CupertinoThemeData(
-          textTheme: CupertinoTextThemeData(
-            tabLabelTextStyle: TextStyle(
-              fontFamily: FontFamily.pt,
-              fontSize: 11,
-              letterSpacing: 0.2,
-            ),
-          ),
-        ),
-        child: Scaffold(
-          body: IndexedStack(
-            index: currentIndex,
-            children: [
-              Beamer(
-                routerDelegate: routerDelegates[0],
-              ),
-              Beamer(
-                routerDelegate: routerDelegates[1],
-              ),
-              Beamer(
-                routerDelegate: routerDelegates[2],
-              ),
-            ],
-          ),
-          bottomNavigationBar: PlatformNavBar(
-            currentIndex: currentIndex,
+  Widget build(BuildContext context) => WillPopScope(
+        onWillPop: () async => tryPop(),
+        child: CupertinoTabScaffold(
+          controller: controller,
+          resizeToAvoidBottomInset: false,
+          tabBuilder: (BuildContext context, int index) {
+            return CupertinoTabView(
+              navigatorKey: keysList[index],
+              builder: (_) => pages[index],
+            );
+          },
+          tabBar: CupertinoTabBar(
+            activeColor: ColorsRes.darkBlue,
+            backgroundColor: ColorsRes.greyOpacity,
+            inactiveColor: ColorsRes.greyBlue,
             items: [
               item(
                 image: Assets.images.wallet,
@@ -109,12 +76,6 @@ class _MainScreenState extends State<MainScreen> {
                 label: AppLocalizations.of(context)!.profile,
               ),
             ],
-            itemChanged: (index) {
-              if (index != currentIndex) {
-                setState(() => currentIndex = index);
-                routerDelegates[currentIndex].update(rebuild: false);
-              }
-            },
           ),
         ),
       );
@@ -127,63 +88,13 @@ class _MainScreenState extends State<MainScreen> {
         icon: image.svg(
           width: 24,
           height: 24,
+          color: ColorsRes.greyBlue,
         ),
         activeIcon: image.svg(
           width: 24,
           height: 24,
-          color: CrystalColor.fontHeaderDark,
+          color: ColorsRes.darkBlue,
         ),
         label: label,
       );
-}
-
-class WalletLocation extends BeamLocation<BeamState> {
-  WalletLocation(RouteInformation routeInformation) : super(routeInformation);
-
-  @override
-  List<String> get pathPatterns => ['/main/wallet'];
-
-  @override
-  List<BeamPage> buildPages(BuildContext context, BeamState state) => [
-        const BeamPage(
-          key: ValueKey('wallet'),
-          title: 'Wallet',
-          type: BeamPageType.noTransition,
-          child: WalletScreen(),
-        ),
-      ];
-}
-
-class BrowserLocation extends BeamLocation<BeamState> {
-  BrowserLocation(RouteInformation routeInformation) : super(routeInformation);
-
-  @override
-  List<String> get pathPatterns => ['/main/browser'];
-
-  @override
-  List<BeamPage> buildPages(BuildContext context, BeamState state) => [
-        const BeamPage(
-          key: ValueKey('browser'),
-          title: 'Browser',
-          type: BeamPageType.noTransition,
-          child: BrowserPage(),
-        ),
-      ];
-}
-
-class ProfileLocation extends BeamLocation<BeamState> {
-  ProfileLocation(RouteInformation routeInformation) : super(routeInformation);
-
-  @override
-  List<String> get pathPatterns => ['/main/profile'];
-
-  @override
-  List<BeamPage> buildPages(BuildContext context, BeamState state) => [
-        const BeamPage(
-          key: ValueKey('profile'),
-          title: 'Profile',
-          type: BeamPageType.noTransition,
-          child: ProfilePage(),
-        ),
-      ];
 }

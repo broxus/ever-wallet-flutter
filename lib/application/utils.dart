@@ -3,14 +3,14 @@ import 'package:flutter/widgets.dart';
 extension LocaleString on String {
   String toLocaleName() {
     if (this == 'en') return 'English';
-    if (this == 'kr') return 'Korean';
+    if (this == 'ko') return 'Korean';
     if (this == 'ja') return 'Japanese';
     throw UnimplementedError();
   }
 
   String toLocaleIcon() {
     if (this == 'en') return 'us';
-    if (this == 'kr') return 'kr';
+    if (this == 'ko') return 'kr';
     if (this == 'ja') return 'jp';
     throw UnimplementedError();
   }

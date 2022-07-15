@@ -22,7 +22,6 @@ Future<void> showLogoutDialog({
     onDisagreeClicked: Navigator.pop,
     agreeText: localization.logout,
     onAgreeClicked: (context) async {
-      await context.read<KeysRepository>().clear();
       await context.read<AccountsRepository>().clear();
       await context.read<BiometryRepository>().clear();
       await context.read<TonAssetsRepository>().clear();
@@ -31,8 +30,8 @@ Future<void> showLogoutDialog({
       await context.read<SitesMetaDataRepository>().clear();
       await context.read<TokenCurrenciesRepository>().clear();
 
-      /// TODO: fix
-      Navigator.of(context).pop();
+      /// Call this in the end to avoid destroying context with auto going to onboarding
+      await context.read<KeysRepository>().clear();
     },
   );
 }

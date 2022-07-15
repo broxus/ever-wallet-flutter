@@ -13,7 +13,6 @@ dependencies:
   another_flushbar: ^1.10.29
   async: ^2.8.2
   auto_size_text: ^3.0.0
-  beamer: ^1.5.0
   bloc: ^8.0.3
   bloc_concurrency: ^0.2.0
   collection: ^1.16.0

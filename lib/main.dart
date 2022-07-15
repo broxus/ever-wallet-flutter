@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:ever_wallet/application/application.dart';
+import 'package:ever_wallet/application/error_splash_screen.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -25,6 +26,7 @@ void main(List<String> args) {
             details.exception,
             details.stack,
           );
+      ErrorWidget.builder = (details) => ErrorSplashScreen(text: details.exception.toString());
 
       await dotenv.load();
 
