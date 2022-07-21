@@ -1,12 +1,18 @@
 import 'package:ever_wallet/application/application.dart';
+import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/general/field/bordered_input.dart';
+import 'package:ever_wallet/application/common/general/field/switch_field.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
+import 'package:ever_wallet/application/onboarding/sign_with_phrase/select_phrase_type_screen.dart';
 import 'package:ever_wallet/application/onboarding/widgets/onboarding_background.dart';
+import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
+import 'package:ever_wallet/data/repositories/biometry_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
 
 const kPasswordInputHeight = 52.0;
 
@@ -100,6 +106,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                     },
                   ),
                   const SizedBox(height: 12),
+                  getBiometricSwitcher(),
                   const Spacer(),
                   PrimaryButton(
                     text: localization.next,
@@ -114,15 +121,78 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
     );
   }
 
+  Widget getBiometricSwitcher() {
+    // final localization = context.localization;
+    final themeStyle = context.themeStyle;
+
+    return StreamProvider<AsyncValue<bool>>(
+      create: (context) => context
+          .read<BiometryRepository>()
+          .availabilityStream
+          .map((event) => AsyncValue.ready(event)),
+      initialData: const AsyncValue.loading(),
+      catchError: (context, error) => AsyncValue.error(error),
+      builder: (context, child) {
+        final isAvailable = context.watch<AsyncValue<bool>>().maybeWhen(
+              ready: (value) => value,
+              orElse: () => false,
+            );
+
+        return !isAvailable
+            ? const SizedBox()
+            : Container(
+                color: ColorsRes.lightBlue.withOpacity(0.1),
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        // TODO: replace text
+                        'Use Biometry for fast login',
+                        style: themeStyle.styles.basicStyle,
+                      ),
+                    ),
+                    const Gap(16),
+                    StreamProvider<AsyncValue<bool>>(
+                      create: (context) => context
+                          .read<BiometryRepository>()
+                          .statusStream
+                          .map((event) => AsyncValue.ready(event)),
+                      initialData: const AsyncValue.loading(),
+                      catchError: (context, error) => AsyncValue.error(error),
+                      builder: (context, child) {
+                        final isEnabled = context.watch<AsyncValue<bool>>().maybeWhen(
+                              ready: (value) => value,
+                              orElse: () => false,
+                            );
+
+                        return EWSwitchField(
+                          value: isEnabled,
+                          onChanged: (value) => context.read<BiometryRepository>().setStatus(
+                                localizedReason: context.localization.authentication_reason,
+                                isEnabled: !isEnabled,
+                              ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+      },
+    );
+  }
+
   Future<void> _nextAction(NavigatorState navigator) async {
     if (formKey.currentState?.validate() ?? false) {
-      await context.read<KeysRepository>().createKey(
+      final key = await context.read<KeysRepository>().createKey(
             name: widget.seedName,
             phrase: widget.phrase,
             password: passwordController.text,
           );
 
-      navigator.pushNamedAndRemoveUntil(AppRouter.main, (route) => false);
+      /// TODO: add logic to check existed accounts for key
+      navigator.push(SelectPhraseTypeRute(key.publicKey));
+      // navigator.pushNamedAndRemoveUntil(AppRouter.main, (route) => false);
     }
   }
 }

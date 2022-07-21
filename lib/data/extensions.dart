@@ -1,3 +1,5 @@
+import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -49,7 +51,7 @@ extension WalletTypeX on WalletType {
         highloadWalletV2: () => 8,
       );
 
-  String describe() => when(
+  String get name => when(
         multisig: (multisigType) {
           switch (multisigType) {
             case MultisigType.safeMultisigWallet:
@@ -69,6 +71,31 @@ extension WalletTypeX on WalletType {
         walletV3: () => 'WalletV3',
         highloadWalletV2: () => 'HighloadWalletV2',
       );
+
+  String description(BuildContext context) {
+    final localization = context.localization;
+
+    return when(
+      multisig: (multisigType) {
+        switch (multisigType) {
+          case MultisigType.safeMultisigWallet:
+            return localization.safeMultisigDescription;
+          case MultisigType.safeMultisigWallet24h:
+            return localization.safeMultisig24Description;
+          case MultisigType.setcodeMultisigWallet:
+            return localization.setcodeMultisigDescription;
+          case MultisigType.setcodeMultisigWallet24h:
+            return localization.setcodeMultisig24Description;
+          case MultisigType.bridgeMultisigWallet:
+            return localization.bridgeMultisigDescription;
+          case MultisigType.surfWallet:
+            return localization.surfDescription;
+        }
+      },
+      walletV3: () => localization.walletV3Description,
+      highloadWalletV2: () => 'HighloadWalletV2',
+    );
+  }
 }
 
 extension ExistingWalletInfoX on ExistingWalletInfo {

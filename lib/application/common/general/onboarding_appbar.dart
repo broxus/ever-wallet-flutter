@@ -19,7 +19,7 @@ enum CloseType {
 
 const kMinLeadingButtonWidth = 80.0;
 const kAppBarButtonSize = 32.0;
-const kAppBarButtonPadding = EdgeInsets.all(4);
+const kAppBarButtonPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
 
 /// Default appbar for onboarding screens
 class OnboardingAppBar extends StatelessWidget implements PreferredSizeWidget {

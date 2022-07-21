@@ -69,6 +69,9 @@ class ColorsPalette {
 class ColorsRes {
   const ColorsRes._();
 
+  static const accentBlue = Color(0xFF2B63F1);
+  static const blackBlue = Color(0xFF182768);
+  static const blackBlueLight = Color(0xFF141F4A);
   static const darkBlue = Color(0xFF0088CC);
   static const lightBlue = Color(0xFFC5E4F3);
   static const lightBlueOpacity = Color(0xA3C5E4F3);
@@ -76,6 +79,7 @@ class ColorsRes {
   static const whiteOpacity = Color(0x8FFFFFFF);
   static const whiteOpacityLight = Color(0x66FFFFFF);
   static const black = Color(0xFF060C32);
+  static const onboardingErrorBackground = Color(0xFF1A1F43);
   static const modalBarrier = Color.fromRGBO(0, 0, 0, 0.5);
   static const text = Color(0xFF050A2E);
   static const buttonOpacity = Color(0x29C5E4F3);

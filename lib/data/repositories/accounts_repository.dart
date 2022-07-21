@@ -158,7 +158,7 @@ class AccountsRepository {
       );
 
       account = await addAccount(
-        name: name ?? existingWalletInfo.walletType.describe(),
+        name: name ?? existingWalletInfo.walletType.name,
         publicKey: existingWalletInfo.publicKey,
         walletType: existingWalletInfo.walletType,
       );
@@ -290,7 +290,7 @@ class AccountsRepository {
             if (!isExists) {
               try {
                 await addAccount(
-                  name: activeWallet.walletType.describe(),
+                  name: activeWallet.walletType.name,
                   publicKey: activeWallet.publicKey,
                   walletType: activeWallet.walletType,
                 );

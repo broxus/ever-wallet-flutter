@@ -311,5 +311,12 @@
     "passwords_match": "パスワードは一致する必要があります",
     "add_new_seed_phrase_description": "新しいシードを作成するか既存のシードを追加する",
     "invalid_data": "無効データ",
-    "language": "言語"
+    "language": "言語",
+    "safeMultisigDescription": "A multisig wallet with several custodians. If the required number of signatures is not reached in 1 hour, the transaction will expire. ",
+    "safeMultisig24Description": "Like SafeMultisig, but wallet custodian confirmations take up to 24 hours.",
+    "setcodeMultisigDescription": "A multisig wallet with the possibility to change codes and custodians. If the required number of signatures is not reached in 1 hour, the transaction will expire.",
+    "setcodeMultisig24Description": "Like SetCodeMultisigWallet, but wallet custodian confirmations take up to 24 hours.",
+    "bridgeMultisigDescription": "This kind of wallet does not have payload limits. Wallet custodian confirmations take up to 1 hour. If you want to use a multisig wallet with 3 or more custodians on Broxus DeFi platforms, be sure to use this type.",
+    "surfDescription": "Like SetCodeMultisig, but you should use this kind of wallet to import your Ever Surf wallet.",
+    "walletV3Description": "Simple wallet for basic operations with lowest comission. Сhoose this one if you don't know which one you need."
 }

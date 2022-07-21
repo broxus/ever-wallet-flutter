@@ -2,11 +2,12 @@ import 'package:ever_wallet/application/common/general/button/primary_button.dar
 import 'package:ever_wallet/application/common/general/field/bordered_input.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
 import 'package:ever_wallet/application/onboarding/create_wallet/save_seed_phrase_screen.dart';
-import 'package:ever_wallet/application/onboarding/general_screens/agree_decentralization_screen.dart';
 import 'package:ever_wallet/application/onboarding/sign_with_phrase/enter_seed_phrase_screen.dart';
 import 'package:ever_wallet/application/onboarding/widgets/onboarding_background.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
+
+enum AuthType { createNewWallet, signWithSeedPhrase }
 
 class SeedPhraseNameRoute extends MaterialPageRoute<void> {
   SeedPhraseNameRoute(AuthType type) : super(builder: (_) => SeedPhraseNameScreen(type: type));

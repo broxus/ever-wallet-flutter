@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:ever_wallet/application/common/async_value.dart';
-import 'package:ever_wallet/application/error_splash_screen.dart';
-import 'package:ever_wallet/application/loading_splash_screen.dart';
 import 'package:ever_wallet/application/main/main_screen.dart';
+import 'package:ever_wallet/application/onboarding/widgets/splash_screen.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/approvals_repository.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
@@ -321,8 +320,8 @@ class ApplicationInjection extends StatelessWidget {
                 dispose: dispose,
                 child: child,
               ),
-              error: (error) => ErrorSplashScreen(text: '$error'),
-              loading: () => const LoadingSplashScreen(),
+              error: (error) => OnboardingSplashScreen(error: '$error'),
+              loading: () => const OnboardingSplashScreen(),
             ),
       );
 
@@ -331,6 +330,6 @@ class ApplicationInjection extends StatelessWidget {
       );
 
   Provider mainNavigatorKeyProvider() => Provider<GlobalKey<MainScreenState>>(
-    create: (context) => GlobalKey(),
-  );
+        create: (context) => GlobalKey(),
+      );
 }

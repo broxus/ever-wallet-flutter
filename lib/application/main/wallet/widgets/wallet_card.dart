@@ -219,7 +219,7 @@ class WalletCard extends StatelessWidget {
                 return tonWalletInfo != null
                     ? namedField(
                         name: AppLocalizations.of(context)!.type,
-                        value: tonWalletInfo.walletType.describe(),
+                        value: tonWalletInfo.walletType.name,
                         isSelectable: false,
                       )
                     : namedField(

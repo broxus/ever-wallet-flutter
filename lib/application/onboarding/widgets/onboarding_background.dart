@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 /// be transparent to allow gradient be visible
 class OnboardingBackground extends StatelessWidget {
   final Widget child;
+  final Color? backgroundColor;
 
   /// Allow add more elements to screen.
   /// Widgets must be wrapped in Positioned for better positioning
@@ -15,6 +16,7 @@ class OnboardingBackground extends StatelessWidget {
   const OnboardingBackground({
     required this.child,
     this.otherPositioned,
+    this.backgroundColor,
     Key? key,
   }) : super(key: key);
 
@@ -22,7 +24,7 @@ class OnboardingBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const Positioned.fill(child: OnboardingGradient()),
+        Positioned.fill(child: OnboardingGradient(backgroundColor: backgroundColor)),
         ...?otherPositioned,
         Positioned.fill(child: child),
       ],
@@ -31,12 +33,17 @@ class OnboardingBackground extends StatelessWidget {
 }
 
 class OnboardingGradient extends StatelessWidget {
-  const OnboardingGradient({Key? key}) : super(key: key);
+  const OnboardingGradient({
+    Key? key,
+    this.backgroundColor,
+  }) : super(key: key);
+
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     /// color is used to avoid transparent scaffold when popping with left-swipe gesture
-    final background = context.themeStyle.colors.primaryBackgroundColor;
+    final background = backgroundColor ?? context.themeStyle.colors.primaryBackgroundColor;
 
     return Material(
       color: background,

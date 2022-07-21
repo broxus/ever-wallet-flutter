@@ -136,7 +136,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
           onChanged: !added.contains(list[index]) ? (value) => optionNotifier.value = value : null,
           activeColor: CrystalColor.accent,
           title: Text(
-            '${list[index].describe()}${list[index] == kDefaultWalletType ? ' (default)' : ""}',
+            '${list[index].name}${list[index] == kDefaultWalletType ? ' (default)' : ""}',
           ),
         ),
       );
@@ -151,7 +151,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
 
   Future<void> onPressed(WalletType value) async {
     await context.read<AccountsRepository>().addAccount(
-          name: widget.name ?? value.describe(),
+          name: widget.name ?? value.name,
           publicKey: widget.publicKey,
           walletType: value,
         );
