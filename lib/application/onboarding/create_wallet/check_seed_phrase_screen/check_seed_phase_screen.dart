@@ -10,18 +10,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CheckSeedPhraseRoute extends MaterialPageRoute<void> {
-  CheckSeedPhraseRoute(List<String> phrase, String phraseName)
-      : super(builder: (_) => CheckSeedPhraseScreen(phraseName: phraseName, phrase: phrase));
+  CheckSeedPhraseRoute(List<String> phrase)
+      : super(builder: (_) => CheckSeedPhraseScreen(phrase: phrase));
 }
 
 class CheckSeedPhraseScreen extends StatefulWidget {
   final List<String> phrase;
-  final String phraseName;
 
   const CheckSeedPhraseScreen({
     Key? key,
     required this.phrase,
-    required this.phraseName,
   }) : super(key: key);
 
   @override
@@ -38,7 +36,7 @@ class _CheckSeedPhraseScreenState extends State<CheckSeedPhraseScreen> {
   }
 
   void _navigateToPassword() {
-    Navigator.of(context).push(CreatePasswordRoute(widget.phrase, widget.phraseName));
+    Navigator.of(context).push(CreatePasswordRoute(widget.phrase));
   }
 
   @override

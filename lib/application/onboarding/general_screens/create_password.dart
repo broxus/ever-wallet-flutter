@@ -1,4 +1,3 @@
-import 'package:ever_wallet/application/application.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/general/field/bordered_input.dart';
@@ -19,20 +18,15 @@ const kPasswordInputHeight = 52.0;
 class CreatePasswordRoute extends MaterialPageRoute<void> {
   CreatePasswordRoute(
     List<String> phrase,
-    String seedName,
-  ) : super(
-          builder: (_) => CreatePasswordScreen(phrase: phrase, seedName: seedName),
-        );
+  ) : super(builder: (_) => CreatePasswordScreen(phrase: phrase));
 }
 
 class CreatePasswordScreen extends StatefulWidget {
   final List<String> phrase;
-  final String seedName;
 
   const CreatePasswordScreen({
-    Key? key,
     required this.phrase,
-    required this.seedName,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -184,11 +178,9 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
 
   Future<void> _nextAction(NavigatorState navigator) async {
     if (formKey.currentState?.validate() ?? false) {
-      final key = await context.read<KeysRepository>().createKey(
-            name: widget.seedName,
-            phrase: widget.phrase,
-            password: passwordController.text,
-          );
+      final key = await context
+          .read<KeysRepository>()
+          .createKey(phrase: widget.phrase, password: passwordController.text);
 
       /// TODO: add logic to check existed accounts for key
       navigator.push(SelectPhraseTypeRute(key.publicKey));

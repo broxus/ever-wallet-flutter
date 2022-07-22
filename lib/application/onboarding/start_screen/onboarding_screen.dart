@@ -1,6 +1,7 @@
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/utils.dart';
-import 'package:ever_wallet/application/onboarding/general_screens/seed_phrase_name_screen.dart';
+import 'package:ever_wallet/application/onboarding/create_wallet/save_seed_phrase_screen.dart';
+import 'package:ever_wallet/application/onboarding/sign_with_phrase/enter_seed_phrase_screen.dart';
 import 'package:ever_wallet/application/onboarding/start_screen/widgets/sliding_block_chains.dart';
 import 'package:ever_wallet/application/onboarding/widgets/onboarding_background.dart';
 import 'package:ever_wallet/application/util/colors.dart';
@@ -51,14 +52,12 @@ class OnboardingScreen extends StatelessWidget {
                     const SizedBox(height: 32),
                     PrimaryButton(
                       text: context.localization.create_new_wallet,
-                      onPressed: () =>
-                          Navigator.of(context).push(SeedPhraseNameRoute(AuthType.createNewWallet)),
+                      onPressed: () => Navigator.of(context).push(SaveSeedPhraseRoute()),
                     ),
                     const SizedBox(height: 12),
                     PrimaryButton(
                       text: context.localization.sign_in,
-                      onPressed: () => Navigator.of(context)
-                          .push(SeedPhraseNameRoute(AuthType.signWithSeedPhrase)),
+                      onPressed: () => Navigator.of(context).push(EnterSeedPhraseRoute()),
                       isTransparent: true,
                     ),
                     const SizedBox(height: 12),

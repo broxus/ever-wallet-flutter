@@ -88,8 +88,8 @@ class StylesRes {
   static const headerText = TextStyle(
     fontSize: 34,
     height: 1.176,
-    fontWeight: FontWeight.w700,
-    fontFamily: FontFamily.pt,
+    fontWeight: FontWeight.w600,
+    fontFamily: FontFamily.faktum,
   );
 
   /// Style for secondary headers

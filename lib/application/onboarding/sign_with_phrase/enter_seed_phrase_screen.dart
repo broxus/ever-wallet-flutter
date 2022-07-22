@@ -17,14 +17,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 class EnterSeedPhraseRoute extends MaterialPageRoute<void> {
-  EnterSeedPhraseRoute(String phraseName)
-      : super(builder: (_) => EnterSeedPhraseScreen(phraseName: phraseName));
+  EnterSeedPhraseRoute() : super(builder: (_) => const EnterSeedPhraseScreen());
 }
 
 class EnterSeedPhraseScreen extends StatefulWidget {
-  final String phraseName;
-
-  const EnterSeedPhraseScreen({Key? key, required this.phraseName}) : super(key: key);
+  const EnterSeedPhraseScreen({Key? key}) : super(key: key);
 
   @override
   State<EnterSeedPhraseScreen> createState() => _EnterSeedPhraseScreenState();
@@ -218,7 +215,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
           phrase: phrase,
           mnemonicType: mnemonicType,
         );
-        Navigator.of(context).push(CreatePasswordRoute(phrase, widget.phraseName));
+        Navigator.of(context).push(CreatePasswordRoute(phrase));
       } on Object catch (e) {
         DefaultDialogController.showAlertDialog<void>(
           context: context,
@@ -278,9 +275,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
   void _checkDebugPhraseGenerating() {
     if (controllers.any((e) => e.text == 'speakfriendandenter')) {
       final key = generateKey(
-        valuesNotifier.value == values.last
-            ? const MnemonicType.legacy()
-            : kDefaultMnemonicType,
+        valuesNotifier.value == values.last ? const MnemonicType.legacy() : kDefaultMnemonicType,
       );
 
       for (var i = 0; i < controllers.take(valuesNotifier.value).length; i++) {

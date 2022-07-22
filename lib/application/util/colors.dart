@@ -71,7 +71,7 @@ class ColorsRes {
 
   static const accentBlue = Color(0xFF2B63F1);
   static const blackBlue = Color(0xFF182768);
-  static const blackBlueLight = Color(0xFF141F4A);
+  static const blackBlueLight = Color(0xFF555B7A);
   static const darkBlue = Color(0xFF0088CC);
   static const lightBlue = Color(0xFFC5E4F3);
   static const lightBlueOpacity = Color(0xA3C5E4F3);

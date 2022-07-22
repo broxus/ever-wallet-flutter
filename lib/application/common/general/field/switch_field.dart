@@ -30,12 +30,10 @@ class _EWSwitchFieldState extends State<EWSwitchField> {
             backgroundColor: state.hasError
                 ? ColorsRes.redLight
                 : widget.value
-                    ? ColorsRes.lightBlue
+                    ? ColorsRes.green400
                     : ColorsRes.blackBlueLight,
-            thumbColor:
-                widget.value ? ColorsRes.blackBlue : const Color.fromRGBO(197, 228, 243, 0.64),
+            thumbColor: ColorsRes.white,
             thumbSize: widget.value ? 24 : 16,
-            borderColor: widget.value ? null : const Color.fromRGBO(197, 228, 243, 0.64),
           ),
         );
       },
@@ -52,13 +50,11 @@ class EWSwitcher extends StatelessWidget {
     Key? key,
     this.width = 52,
     this.height = 32,
-    this.borderColor,
   }) : super(key: key);
 
   final bool value;
   final Color thumbColor;
   final Color backgroundColor;
-  final Color? borderColor;
 
   final double width;
   final double height;
@@ -73,7 +69,6 @@ class EWSwitcher extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(100),
-        border: borderColor == null ? null : Border.all(color: borderColor!),
       ),
       child: AnimatedAlign(
         duration: kThemeAnimationDuration,

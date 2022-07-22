@@ -15,17 +15,12 @@ import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 class SaveSeedPhraseRoute extends MaterialPageRoute<void> {
-  SaveSeedPhraseRoute(String phraseName)
-      : super(
-          builder: (_) => SaveSeedPhraseScreen(phraseName: phraseName),
-        );
+  SaveSeedPhraseRoute() : super(builder: (_) => const SaveSeedPhraseScreen());
 }
 
 /// !!! Here displays only 12 words
 class SaveSeedPhraseScreen extends StatefulWidget {
-  final String phraseName;
-
-  const SaveSeedPhraseScreen({Key? key, required this.phraseName}) : super(key: key);
+  const SaveSeedPhraseScreen({Key? key}) : super(key: key);
 
   @override
   State<SaveSeedPhraseScreen> createState() => _SaveSeedPhraseScreenState();
@@ -142,17 +137,14 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
                           PrimaryButton(
                             // TODO: replace text
                             text: 'Check the phrase',
-                            onPressed: () => Navigator.of(context).push(
-                              CheckSeedPhraseRoute(words, widget.phraseName),
-                            ),
+                            onPressed: () =>
+                                Navigator.of(context).push(CheckSeedPhraseRoute(words)),
                           ),
                           const SizedBox(height: 12),
                           PrimaryButton(
                             backgroundColor: const Color(0xFF253056),
                             text: "Skip, I'll take the risk",
-                            onPressed: () => Navigator.of(context).push(
-                              CreatePasswordRoute(words, widget.phraseName),
-                            ),
+                            onPressed: () => Navigator.of(context).push(CreatePasswordRoute(words)),
                             isTransparent: true,
                           ),
                         ],
