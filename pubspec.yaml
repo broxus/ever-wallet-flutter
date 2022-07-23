@@ -51,7 +51,7 @@ dependencies:
   lottie: ^1.3.0
   modal_bottom_sheet: ^2.0.1
   nekoton_flutter:
-    path: ../nekoton-flutter
+    path: ../nekoton_flutter_venom
   package_info_plus: ^1.4.2
   path_provider: ^2.0.10
   permission_handler: ^9.2.0

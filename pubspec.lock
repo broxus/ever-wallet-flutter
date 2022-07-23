@@ -49,7 +49,7 @@ packages:
       name: auto_route
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.1"
+    version: "4.2.1"
   auto_size_text:
     dependency: "direct main"
     description:
@@ -355,7 +355,7 @@ packages:
       name: flutter_gen_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.6"
+    version: "4.3.0"
   flutter_gen_runner:
     dependency: "direct dev"
     description:
@@ -423,7 +423,7 @@ packages:
       name: flutter_native_splash
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.6"
+    version: "2.2.5"
   flutter_platform_widgets:
     dependency: "direct main"
     description:
@@ -458,7 +458,7 @@ packages:
       name: flutter_svg
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.3"
+    version: "1.1.1+1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -573,7 +573,7 @@ packages:
       name: image
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.3"
+    version: "3.2.0"
   injectable:
     dependency: "direct main"
     description:
@@ -738,7 +738,7 @@ packages:
   nekoton_flutter:
     dependency: "direct main"
     description:
-      path: "../nekoton-flutter"
+      path: "../nekoton_flutter_venom"
       relative: true
     source: path
     version: "0.2.0"
@@ -916,7 +916,7 @@ packages:
       name: petitparser
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.4.0"
+    version: "5.0.0"
   platform:
     dependency: transitive
     description:
@@ -1378,14 +1378,14 @@ packages:
       name: xml
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.3.1"
+    version: "6.1.0"
   yaml:
     dependency: transitive
     description:
       name: yaml
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.0"
+    version: "3.1.1"
 sdks:
   dart: ">=2.17.0 <3.0.0"
   flutter: ">=3.0.0"
