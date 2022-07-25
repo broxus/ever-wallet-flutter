@@ -17,6 +17,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+final splitPhraseRegex = RegExp('[ |;|,|:]');
+
 class EnterSeedPhraseRoute extends MaterialPageRoute<void> {
   EnterSeedPhraseRoute() : super(builder: (_) => const EnterSeedPhraseScreen());
 }
@@ -48,6 +50,13 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
         _checkDebugPhraseGenerating();
       }),
     );
+    controllers[0].addListener(() {
+      /// Only for 1-st controller allow paste as button
+      /// It's some bug but Input's paste removes spaces so check with length
+      if (controllers[0].text.length > 15) {
+        pastePhrase();
+      }
+    });
   }
 
   @override
@@ -69,20 +78,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor: Colors.transparent,
-          appBar: OnboardingAppBar(
-            actions: [
-              ValueListenableBuilder<bool>(
-                valueListenable: isClearButtonState,
-                builder: (_, isClear, __) {
-                  return TextPrimaryButton.appBar(
-                    onPressed: isClear ? clearFields : pastePhrase,
-                    text: isClear ? localization.clear : localization.paste,
-                    style: themeStyle.styles.basicBoldStyle,
-                  );
-                },
-              ),
-            ],
-          ),
+          appBar: const OnboardingAppBar(),
           body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Column(
@@ -124,25 +120,53 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
                   style: themeStyle.styles.appbarStyle,
                 ),
                 const SizedBox(height: 28),
-                EWTabBar<int>(
-                  values: values,
-                  selectedValue: value,
-                  onChanged: (v) {
-                    formKey.currentState?.reset();
-                    valuesNotifier.value = v;
-                  },
-                  builder: (_, v, isActive) {
-                    return Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Text(
-                        // TODO: replace word
-                        '$v words',
-                        style: themeStyle.styles.basicStyle.copyWith(
-                          color: isActive ? null : themeStyle.colors.textSecondaryTextButtonColor,
-                        ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: EWTabBar<int>(
+                        values: values,
+                        selectedValue: value,
+                        onChanged: (v) {
+                          formKey.currentState?.reset();
+                          valuesNotifier.value = v;
+                        },
+                        builder: (_, v, isActive) {
+                          return Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Text(
+                              // TODO: replace word
+                              '$v words',
+                              style: themeStyle.styles.basicStyle.copyWith(
+                                color: isActive
+                                    ? null
+                                    : themeStyle.colors.textSecondaryTextButtonColor,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isClearButtonState,
+                      builder: (_, isClear, __) {
+                        return TextPrimaryButton.appBar(
+                          onPressed: isClear ? clearFields : pastePhrase,
+                          padding: const EdgeInsets.all(4),
+                          text: isClear ? 'Clear all' : 'Paste all',
+                          style: themeStyle.styles.basicBoldStyle,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  // TODO: replace text
+                  'You can paste all the words from the clipboard into the first box',
+                  style: themeStyle.styles.captionStyle.copyWith(
+                    color: ColorsRes.white,
+                    letterSpacing: 0.1,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Row(

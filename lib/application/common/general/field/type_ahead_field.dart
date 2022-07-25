@@ -79,6 +79,7 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
 
     _controller.addListener(() {
       final value = _controller.text;
+      if (!mounted) return;
       _handleInput();
       field?.didChange(value);
     });
