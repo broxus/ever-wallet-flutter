@@ -8,6 +8,7 @@ import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
 import 'package:ever_wallet/application/onboarding/general_screens/create_password.dart';
 import 'package:ever_wallet/application/onboarding/sign_with_phrase/widgets/tabbar.dart';
 import 'package:ever_wallet/application/onboarding/widgets/onboarding_background.dart';
+import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
@@ -194,6 +195,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
       child: SeedPhraseInput(
         controller: controller,
         focus: focus,
+        enabledBorderColor: ColorsRes.lightBlueOpacity,
         prefixText: '$index.',
         requestNextField: () => focuses[index].requestFocus(),
         textInputAction:

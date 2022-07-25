@@ -87,8 +87,6 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return VisibilityDetector(
       key: const Key('SlidingBlockChains'),
       onVisibilityChanged: (info) {
@@ -104,7 +102,7 @@ class _SlidingBlockChainsState extends State<SlidingBlockChains> {
           constraints: const BoxConstraints(maxHeight: 200),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final lineCount = screenHeight <= 700 ? 2 : 3;
+              final lineCount = constraints.maxHeight < 150 ? 2 : 3;
               _paddingBetweenRows = lineCount == 3 ? _tripleRowsPadding : _doubleRowsPadding;
 
               final partSize =

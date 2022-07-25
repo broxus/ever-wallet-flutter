@@ -22,19 +22,19 @@ class _AppLifecycleWrapperState extends State<AppLifecycleWrapper> {
   @override
   void initState() {
     super.initState();
-    _subscription = context.read<KeysRepository>().keysStream.listen((keys) {
-      if (keys.isEmpty) {
-        context
-            .read<GlobalKey<NavigatorState>>()
-            .currentState
-            ?.pushNamedAndRemoveUntil(AppRouter.onboarding, (route) => false);
-      }
-    });
+    // _subscription = context.read<KeysRepository>().keysStream.listen((keys) {
+    //   if (keys.isEmpty) {
+    //     context
+    //         .read<GlobalKey<NavigatorState>>()
+    //         .currentState
+    //         ?.pushNamedAndRemoveUntil(AppRouter.onboarding, (route) => false);
+    //   }
+    // });
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    // _subscription.cancel();
     super.dispose();
   }
 

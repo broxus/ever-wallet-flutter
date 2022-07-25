@@ -21,6 +21,7 @@ class SeedPhraseInput extends StatelessWidget {
   final TextStyle? suggestionStyle;
   final Color? suggestionBackground;
   final TextStyle? textStyle;
+  final Color? enabledBorderColor;
 
   const SeedPhraseInput({
     Key? key,
@@ -33,6 +34,7 @@ class SeedPhraseInput extends StatelessWidget {
     this.suggestionStyle,
     this.suggestionBackground,
     this.textStyle,
+    this.enabledBorderColor,
   }) : super(key: key);
 
   @override
@@ -44,6 +46,7 @@ class SeedPhraseInput extends StatelessWidget {
       onSuggestionSelected: onSuggestionSelected,
       suggestionsCallback: (_) => suggestionsCallback(),
       key: Key('SeedPhrase_$prefixText'),
+      enabledBorderColor: enabledBorderColor,
       controller: controller,
       focusNode: focus,
       textInputAction: textInputAction,
@@ -76,7 +79,11 @@ class SeedPhraseInput extends StatelessWidget {
   List<String> suggestionsCallback() {
     final value = controller.value;
     final text = value.text.substring(0, value.selection.start);
-    return getHints(text);
+    final hints = getHints(text);
+    if (hints.length == 1 && hints[0] == value.text) {
+      return [];
+    }
+    return hints;
   }
 
   Widget itemBuilder(String suggestion, ThemeStyle themeStyle) {

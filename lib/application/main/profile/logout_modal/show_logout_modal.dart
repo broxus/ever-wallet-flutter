@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+import 'package:ever_wallet/application/application.dart';
 import 'package:ever_wallet/application/common/general/dialog/default_dialog_controller.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
@@ -22,6 +24,7 @@ Future<void> showLogoutDialog({
     onDisagreeClicked: Navigator.pop,
     agreeText: localization.logout,
     onAgreeClicked: (context) async {
+      await context.read<KeysRepository>().clear();
       await context.read<AccountsRepository>().clear();
       await context.read<BiometryRepository>().clear();
       await context.read<TonAssetsRepository>().clear();
@@ -30,8 +33,8 @@ Future<void> showLogoutDialog({
       await context.read<SitesMetaDataRepository>().clear();
       await context.read<TokenCurrenciesRepository>().clear();
 
-      /// Call this in the end to avoid destroying context with auto going to onboarding
-      await context.read<KeysRepository>().clear();
+      Navigator.of(context, rootNavigator: true)
+          .pushNamedAndRemoveUntil(AppRouter.onboarding, (route) => false);
     },
   );
 }

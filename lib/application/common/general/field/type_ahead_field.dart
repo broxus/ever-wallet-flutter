@@ -24,6 +24,7 @@ class EWTypeAheadField extends StatefulWidget {
   final SuggestionsCallback<String> suggestionsCallback;
   final ItemBuilder<String> itemBuilder;
   final SuggestionSelectionCallback<String> onSuggestionSelected;
+  final Color? enabledBorderColor;
 
   /// Callback to add button to clear field
   final VoidCallback? onClearField;
@@ -55,6 +56,7 @@ class EWTypeAheadField extends StatefulWidget {
     this.needClearButton = true,
     this.suggestionBackground,
     this.textStyle,
+    this.enabledBorderColor,
   }) : super(key: key);
 
   @override
@@ -150,7 +152,7 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
                   enabledBorder: OutlineInputBorder(
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
-                    borderSide: const BorderSide(color: ColorsRes.greyLight),
+                    borderSide: BorderSide(color: widget.enabledBorderColor ?? ColorsRes.greyLight),
                   ),
                   focusedBorder: OutlineInputBorder(
                     gapPadding: 1,
