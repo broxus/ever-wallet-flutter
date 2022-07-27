@@ -60,7 +60,8 @@ class MainScreenState extends State<MainScreen> {
           },
           tabBar: CupertinoTabBar(
             activeColor: ColorsRes.darkBlue,
-            backgroundColor: ColorsRes.greyOpacity,
+            // Do not set opacity to background, it removes bottom padding
+            backgroundColor: ColorsRes.greyOpacity.withOpacity(1),
             inactiveColor: ColorsRes.greyBlue,
             items: [
               item(

@@ -24,10 +24,12 @@ class MenuDropdown extends StatelessWidget {
     Key? key,
     required this.items,
     this.iconColor = ColorsRes.darkBlue,
+    this.buttonDecoration,
   }) : super(key: key);
 
   final List<MenuDropdownData> items;
   final Color iconColor;
+  final BoxDecoration? buttonDecoration;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +54,7 @@ class MenuDropdown extends StatelessWidget {
         child: Icon(Icons.more_horiz, color: iconColor, size: 20),
       ),
       dropdownWidth: 200,
-      buttonDecoration: BoxDecoration(borderRadius: BorderRadius.circular(90)),
+      buttonDecoration: buttonDecoration ?? BoxDecoration(borderRadius: BorderRadius.circular(90)),
       underline: const SizedBox.shrink(),
       onChanged: (_) {},
       dropdownElevation: 6,

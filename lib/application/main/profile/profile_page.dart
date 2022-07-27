@@ -266,7 +266,7 @@ class _ProfilePageState extends State<ProfilePage> {
         buildSeedItem(
           seed: seed,
           selectedSeed: selectedSeed,
-          onSelect: onSelect,
+          onSelect: seed == selectedSeed ? null : onSelect,
         ),
       );
       if (seeds[seed] != null && seeds[seed]!.isNotEmpty) {
@@ -275,7 +275,7 @@ class _ProfilePageState extends State<ProfilePage> {
             buildSeedItem(
               seed: key,
               selectedSeed: selectedSeed,
-              onSelect: onSelect,
+              onSelect: key == selectedSeed ? null : onSelect,
               isChild: true,
             ),
           );
@@ -306,7 +306,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget buildSeedItem({
     KeyStoreEntry? selectedSeed,
     required KeyStoreEntry seed,
-    required void Function(KeyStoreEntry) onSelect,
+    required void Function(KeyStoreEntry)? onSelect,
     bool isChild = false,
   }) {
     IconData? icon;
@@ -316,12 +316,14 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return buildSectionActionWithIcon(
-      onTap: () {
-        if (!selected) {
-          HapticFeedback.selectionClick();
-          onSelect(seed);
-        }
-      },
+      onTap: onSelect == null
+          ? null
+          : () {
+              if (!selected) {
+                HapticFeedback.selectionClick();
+                onSelect(seed);
+              }
+            },
       title: seed.name,
       icon: icon,
       isChild: isChild,

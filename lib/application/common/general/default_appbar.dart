@@ -47,6 +47,8 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   bool get _hasActions => actions?.isNotEmpty ?? false;
 
+  bool get _hasActionsAll => _hasActions || _showActionsClose;
+
   bool get _showLeadingClose => closeType == CloseType.leading || closeType == CloseType.multi;
 
   bool get _showActionsClose => closeType == CloseType.actions || closeType == CloseType.multi;
@@ -100,28 +102,29 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
                               )
                             : const SizedBox(width: kAppBarButtonSize)),
                   ),
-                  Flexible(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: _hasActions
-                          ? actions!
-                          : [
-                              if (_showActionsClose)
-                                TextPrimaryButton(
-                                  onPressed: onActionsClosePressed ??
-                                      onClosePressed ??
-                                      () => Navigator.of(context).maybePop(),
-                                  padding: kAppBarButtonPadding,
-                                  child: Icon(
-                                    Icons.close,
-                                    color: themeStyle.colors.primaryButtonColor,
-                                  ),
-                                )
-                              else
-                                const SizedBox(width: kAppBarButtonSize)
-                            ],
+                  if (_hasActionsAll)
+                    Flexible(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: _hasActions
+                            ? actions!
+                            : [
+                                if (_showActionsClose)
+                                  TextPrimaryButton(
+                                    onPressed: onActionsClosePressed ??
+                                        onClosePressed ??
+                                        () => Navigator.of(context).maybePop(),
+                                    padding: kAppBarButtonPadding,
+                                    child: Icon(
+                                      Icons.close,
+                                      color: themeStyle.colors.primaryButtonColor,
+                                    ),
+                                  )
+                                else
+                                  const SizedBox(width: kAppBarButtonSize)
+                              ],
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

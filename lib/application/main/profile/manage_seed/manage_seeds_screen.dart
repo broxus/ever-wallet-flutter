@@ -10,6 +10,7 @@ import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_act
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/rename_key_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_key_removement_modal.dart';
+import 'package:ever_wallet/application/main/profile/manage_seed/seed_detail_screen.dart';
 import 'package:ever_wallet/application/main/profile/widgets/keys_builder.dart';
 import 'package:ever_wallet/application/util/auth_utils.dart';
 import 'package:ever_wallet/application/util/colors.dart';
@@ -51,7 +52,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 // TODO: replace text
                 'Manage seeds & subscriptions',
@@ -60,7 +61,11 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text('Seed phrases', style: themeStyle.styles.sectionCaption),
+              child: Text(
+                // TODO: replace text
+                'Seed phrases',
+                style: themeStyle.styles.sectionCaption,
+              ),
             ),
             const DefaultDivider(),
             KeysBuilderWidget(
@@ -135,6 +140,9 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
     return EWListTile(
       leading: Assets.images.seed.svg(width: 32, height: 32),
       titleText: seed.name,
+      onPressed: () => Navigator.of(context).push(
+        SeedDetailScreenRoute(seed: seed, children: children, isSelected: isSelected),
+      ),
       // TODO: replace text and counting
       subtitleText: '${children?.length ?? 0} public keys',
       trailing: Row(
