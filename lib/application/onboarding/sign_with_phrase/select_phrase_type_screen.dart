@@ -231,11 +231,9 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
                         color: ColorsRes.lightBlue.withOpacity(0.16),
                         shape: BoxShape.circle,
                       ),
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 300),
-                        opacity: isSelected ? 1.0 : 0.0,
-                        child: const Icon(Icons.check, color: ColorsRes.lightBlue, size: 23),
-                      ),
+                      child: isSelected
+                          ? const Icon(Icons.check, color: ColorsRes.lightBlue, size: 23)
+                          : null,
                     ),
                   ],
                 ),
