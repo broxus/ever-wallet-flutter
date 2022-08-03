@@ -61,7 +61,7 @@ class CheckSeedAvailableAnswersWidget extends StatelessWidget {
           color: borderColor,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
               child: Text(
                 isSelected ? '' : answer,
                 style: StylesRes.captionText.copyWith(color: textColor),

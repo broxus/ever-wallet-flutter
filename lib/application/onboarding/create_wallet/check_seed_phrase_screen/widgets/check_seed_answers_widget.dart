@@ -46,7 +46,7 @@ class CheckSeedAnswersWidget extends StatelessWidget {
         onPressed: isSelected ? () => clearAnswer(answer.word) : null,
         child: Container(
           alignment: Alignment.center,
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
           decoration: BoxDecoration(
             border: Border.all(
               color: isCurrent ? currentBorderColor : borderColor,
