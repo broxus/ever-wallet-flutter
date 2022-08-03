@@ -91,7 +91,6 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  ...List.generate(10, (index) => _keyItem(themeStyle, localization, widget.seed)),
                   ...?widget.children?.map((e) => _keyItem(themeStyle, localization, e)).toList(),
                   PushStateInkWidget(
                     onPressed: () => showEWBottomSheet<void>(

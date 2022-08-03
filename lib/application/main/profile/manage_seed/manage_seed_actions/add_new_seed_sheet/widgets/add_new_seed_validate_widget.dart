@@ -1,8 +1,10 @@
-import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/onboarding/create_wallet/check_seed_phrase_screen/check_seed_phrase_cubit.dart';
+import 'package:ever_wallet/application/onboarding/create_wallet/check_seed_phrase_screen/widgets/check_seed_answers_widget.dart';
+import 'package:ever_wallet/application/onboarding/create_wallet/check_seed_phrase_screen/widgets/check_seed_available_answers_widget.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
+import 'package:ever_wallet/application/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -84,60 +86,56 @@ class _AddNewSeedValidateWidgetState extends State<AddNewSeedValidateWidget> {
         BlocBuilder<CheckSeedPhraseCubit, CheckSeedPhraseCubitState>(
           bloc: cubit,
           builder: (context, state) => state.when(
-            answer: _buildCheckBody,
-            correct: (q, a) => _buildCheckBody(q, userAnswer: a, isError: false),
-            error: (q, a) => _buildCheckBody(q, userAnswer: a, isError: true),
+            answer: (available, user, index) => _buildCheckBody(
+              available,
+              user,
+              currentIndex: index,
+            ),
+            correct: (available, user) => _buildCheckBody(available, user),
+            error: (available, user) => _buildCheckBody(available, user, isError: true),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCheckBody(CheckSeedPhraseQuestion question, {String? userAnswer, bool? isError}) {
-    final theme = context.themeStyle;
-    // final localization = context.localization;
-
+  Widget _buildCheckBody(
+    List<String> available,
+    List<CheckSeedCorrectAnswer> userAnswers, {
+    int? currentIndex,
+    bool isError = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          /// TODO: replace text
-          '${question.questionIndex + 1} of $kDefaultCheckPhraseAnswers',
-          style: theme.styles.basicStyle.copyWith(color: theme.colors.textSecondaryTextButtonColor),
+        CheckSeedAnswersWidget(
+          userAnswers: userAnswers,
+          currentIndex: currentIndex,
+          borderColor: isError ? ColorsRes.redLight : ColorsRes.greyLight,
+          currentBorderColor: ColorsRes.darkBlue.withOpacity(0.3),
+          clearAnswer: cubit.clearAnswer,
+          notSelectedTextColor: ColorsRes.grey,
+          selectedTextColor: ColorsRes.black,
+          pressColor: ColorsRes.greyOpacity,
         ),
-        const SizedBox(height: 8),
-        Text(
-          /// TODO: replace text
-          'Select word #${question.wordOrderIndex + 1} from the seed',
-          style: theme.styles.header2Style.copyWith(color: ColorsRes.text),
+        if (isError)
+          Text(
+            // TODO: replace text
+            'The seed phrase is wrong',
+            style: StylesRes.basicText.copyWith(color: ColorsRes.redLight),
+          )
+        else
+          SizedBox(height: StylesRes.basicText.fontSize! * StylesRes.basicText.height!),
+        const SizedBox(height: 70),
+        CheckSeedAvailableAnswersWidget(
+          availableAnswers: available,
+          selectedAnswers: userAnswers.map((e) => e.word).toList(),
+          selectAnswer: cubit.answerQuestion,
+          borderColor: ColorsRes.greyLight,
+          pressColor: ColorsRes.greyOpacity,
+          textColor: ColorsRes.black,
         ),
-        const SizedBox(height: 16),
-        ...question.answers
-            .map(
-              (a) => _answerButton(
-                a,
-                theme.colors,
-                isError: userAnswer != null && a == userAnswer ? isError : null,
-              ),
-            )
-            .toList(),
       ],
-    );
-  }
-
-  /// [isError] = true - red button, false - green button, null - default
-  Widget _answerButton(String answer, ColorsPalette colors, {bool? isError}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: PrimaryButton(
-        text: answer,
-        onPressed: () => cubit.answerQuestion(answer),
-        backgroundColor: isError == null
-            ? null
-            : isError
-                ? colors.errorInputColor.withAlpha(81)
-                : colors.thirdButtonColor,
-      ),
     );
   }
 }

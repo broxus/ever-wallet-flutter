@@ -4,7 +4,8 @@ const kDefaultWalletType = WalletType.multisig(MultisigType.safeMultisigWallet);
 
 const kDefaultMnemonicType = MnemonicType.labs(0);
 
-const kDefaultCheckingWordsAmount = 4;
+const kDefaultWordsToCheckAmount = 3;
+const kDefaultCheckAnswersAmount = 9;
 
 const kTonDecimals = 9;
 
