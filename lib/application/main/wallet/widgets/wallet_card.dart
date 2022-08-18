@@ -168,64 +168,42 @@ class WalletCard extends StatelessWidget {
                       orElse: () => null,
                     );
 
-                return tonWalletInfo != null
-                    ? namedField(
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (tonWalletInfo != null)
+                      namedField(
                         name: AppLocalizations.of(context)!.public_key,
                         value: tonWalletInfo.publicKey,
                         ellipsedValue: tonWalletInfo.publicKey.ellipsePublicKey(),
                       )
-                    : namedField(
+                    else
+                      namedField(
                         name: AppLocalizations.of(context)!.public_key,
-                      );
-              },
-            ),
-            StreamProvider<AsyncValue<TonWalletInfo?>>(
-              create: (context) => context
-                  .read<TonWalletsRepository>()
-                  .getInfoStream(address)
-                  .map((event) => AsyncValue.ready(event)),
-              initialData: const AsyncValue.loading(),
-              catchError: (context, error) => AsyncValue.error(error),
-              builder: (context, child) {
-                final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
-                      ready: (value) => value,
-                      orElse: () => null,
-                    );
-
-                return tonWalletInfo != null
-                    ? namedField(
+                      ),
+                    if (tonWalletInfo != null)
+                      namedField(
                         name: AppLocalizations.of(context)!.address,
                         value: tonWalletInfo.address,
                         ellipsedValue: tonWalletInfo.address.ellipseAddress(),
                       )
-                    : namedField(
+                    else
+                      namedField(
                         name: AppLocalizations.of(context)!.address,
-                      );
-              },
-            ),
-            StreamProvider<AsyncValue<TonWalletInfo?>>(
-              create: (context) => context
-                  .read<TonWalletsRepository>()
-                  .getInfoStream(address)
-                  .map((event) => AsyncValue.ready(event)),
-              initialData: const AsyncValue.loading(),
-              catchError: (context, error) => AsyncValue.error(error),
-              builder: (context, child) {
-                final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
-                      ready: (value) => value,
-                      orElse: () => null,
-                    );
-
-                return tonWalletInfo != null
-                    ? namedField(
+                      ),
+                    if (tonWalletInfo != null)
+                      namedField(
                         name: AppLocalizations.of(context)!.type,
                         value: tonWalletInfo.walletType.name,
                         isSelectable: false,
                       )
-                    : namedField(
+                    else
+                      namedField(
                         name: AppLocalizations.of(context)!.type,
                         isSelectable: false,
-                      );
+                      )
+                  ],
+                );
               },
             ),
             const Spacer(),

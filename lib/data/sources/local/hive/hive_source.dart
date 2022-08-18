@@ -476,6 +476,7 @@ class HiveSource {
       ..tryRegisterAdapter(TransactionDtoAdapter())
       ..tryRegisterAdapter(TransactionIdDtoAdapter())
       ..tryRegisterAdapter(WalletInteractionInfoDtoAdapter())
+      ..tryRegisterAdapter(WalletTypeDtoWalletV3Adapter())
       ..tryRegisterAdapter(WalletTypeDtoMultisigAdapter());
 
     _keysPasswordsBox =
