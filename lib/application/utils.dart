@@ -14,13 +14,7 @@ extension LocaleString on String {
     if (this == 'ja') return 'jp';
     throw UnimplementedError();
   }
-}
 
-extension LocaleToStringHelper on Locale {
-  String toStringWithSeparator({String separator = '_'}) => toString().split('_').join(separator);
-}
-
-extension StringToLocaleHelper on String {
   Locale toLocale({String separator = '_'}) {
     final localeList = split(separator);
     switch (localeList.length) {
@@ -36,4 +30,14 @@ extension StringToLocaleHelper on String {
         return Locale(localeList.first);
     }
   }
+
+  /// For [TextOverflow.ellipsis] for better displaying with ellipsis
+  ///
+  /// \u{200B} adds an unbreakable gap
+  /// {issue for this https://github.com/flutter/flutter/issues/18761}
+  String get overflow => characters.replaceAll(Characters(''), Characters('\u{200B}')).string;
+}
+
+extension LocaleToStringHelper on Locale {
+  String toStringWithSeparator({String separator = '_'}) => toString().split('_').join(separator);
 }

@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 
 class TextFieldClearButton extends StatelessWidget {
   final TextEditingController controller;
+  final Color? iconColor;
+  final FocusNode? focus;
 
   const TextFieldClearButton({
-    Key? key,
     required this.controller,
+    this.focus,
+    this.iconColor,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -21,8 +25,9 @@ class TextFieldClearButton extends StatelessWidget {
           onPressed: () {
             controller.clear();
             Form.of(context)?.validate();
+            focus?.requestFocus();
           },
-          icon: Assets.images.iconCross.svg(),
+          icon: Assets.images.iconCross.svg(color: iconColor),
         ),
       );
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ever_wallet/data/models/site_meta_data.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
+import 'package:favicon/favicon.dart';
 import 'package:simple_link_preview/simple_link_preview.dart';
 
 class SitesMetaDataRepository {
@@ -15,11 +16,12 @@ class SitesMetaDataRepository {
     if (cached != null) yield cached;
 
     final linkPreview = (await SimpleLinkPreview.getPreview(url))!;
+    final favicon = await Favicon.getBest(url);
 
     final siteMetaData = SiteMetaData(
       url: linkPreview.url,
       title: linkPreview.title,
-      image: linkPreview.image,
+      image: favicon?.url ?? linkPreview.url,
       description: linkPreview.description,
     );
 

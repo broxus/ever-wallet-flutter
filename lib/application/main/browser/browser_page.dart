@@ -1,19 +1,17 @@
 import 'dart:async';
 
-import 'package:ever_wallet/application/common/theme.dart';
-import 'package:ever_wallet/application/common/widgets/unfocusing_gesture_detector.dart';
 import 'package:ever_wallet/application/main/browser/back_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/forward_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/progress_cubit.dart';
 import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/main/browser/widgets/approvals_listener.dart';
-import 'package:ever_wallet/application/main/browser/widgets/browser_app_bar.dart';
-import 'package:ever_wallet/application/main/browser/widgets/browser_history.dart';
+import 'package:ever_wallet/application/main/browser/widgets/browser_app_bar/browser_app_bar.dart';
+import 'package:ever_wallet/application/main/browser/widgets/browser_app_bar/browser_app_bar_scroll_listener.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_home.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_web_view.dart';
 import 'package:ever_wallet/application/main/browser/widgets/events_listener.dart';
+import 'package:ever_wallet/application/util/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -28,6 +26,7 @@ class _BrowserPageState extends State<BrowserPage> {
   final controller = Completer<InAppWebViewController>();
   final urlController = TextEditingController();
   final urlFocusNode = FocusNode();
+  final browserListener = BrowserAppBarScrollListener();
 
   @override
   void initState() {
@@ -37,6 +36,7 @@ class _BrowserPageState extends State<BrowserPage> {
 
   @override
   void dispose() {
+    browserListener.dispose();
     urlController.dispose();
     urlFocusNode.removeListener(urlFocusNodeListener);
     super.dispose();
@@ -61,21 +61,26 @@ class _BrowserPageState extends State<BrowserPage> {
               child: EventsListener(
                 controller: controller,
                 child: ApprovalsListener(
-                  child: AnnotatedRegion<SystemUiOverlayStyle>(
-                    value: SystemUiOverlayStyle.dark,
-                    child: Scaffold(
-                      resizeToAvoidBottomInset: false,
-                      backgroundColor: CrystalColor.iosBackground,
-                      body: SafeArea(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            appBar(),
-                            Expanded(
-                              child: body(),
-                            ),
-                          ],
-                        ),
+                  child: Scaffold(
+                    resizeToAvoidBottomInset: false,
+                    backgroundColor: ColorsRes.white,
+                    body: SafeArea(
+                      child: Stack(
+                        children: [
+                          Positioned.fill(child: body()),
+                          ValueListenableBuilder<double>(
+                            valueListenable: browserListener,
+                            builder: (_, show, __) {
+                              final size = MediaQuery.of(context).size;
+
+                              return Positioned(
+                                top: show,
+                                width: size.width,
+                                child: appBar(),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -87,43 +92,45 @@ class _BrowserPageState extends State<BrowserPage> {
       );
 
   Widget appBar() => BrowserAppBar(
+        key: browserListener.browserFlexibleKey,
         controller: controller,
         urlController: urlController,
         urlFocusNode: urlFocusNode,
       );
 
-  Widget body() => AnimatedBuilder(
-        animation: urlFocusNode,
-        builder: (context, child) => BlocBuilder<UrlCubit, Uri?>(
-          builder: (context, state) {
-            final url = state;
+  Widget body() => BlocBuilder<UrlCubit, Uri?>(
+        builder: (context, state) {
+          final url = state;
 
-            var index = 0;
+          var index = 0;
 
-            if (url == Uri.parse('about:blank')) index = 1;
+          if (url == Uri.parse('about:blank')) index = 1;
 
-            if (urlFocusNode.hasFocus) index = 2;
-
-            return IndexedStack(
-              index: index,
-              sizing: StackFit.expand,
-              children: [
-                BrowserWebView(
-                  controller: controller,
-                  urlController: urlController,
+          return Column(
+            children: [
+              // This displays separately from Expanded to reduce webview re-render
+              ValueListenableBuilder<double>(
+                valueListenable: browserListener,
+                builder: (_, show, __) => SizedBox(
+                  height: BrowserAppBarScrollListener.appBarHeight + show,
                 ),
-                BrowserHome(
-                  controller: controller,
+              ),
+              Expanded(
+                child: IndexedStack(
+                  index: index,
+                  sizing: StackFit.expand,
+                  children: [
+                    BrowserWebView(
+                      controller: controller,
+                      urlController: urlController,
+                      browserListener: browserListener,
+                    ),
+                    BrowserHome(controller: controller),
+                  ],
                 ),
-                UnfocusingGestureDetector(
-                  child: BrowserHistory(
-                    controller: controller,
-                    urlFocusNode: urlFocusNode,
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+              )
+            ],
+          );
+        },
       );
 }

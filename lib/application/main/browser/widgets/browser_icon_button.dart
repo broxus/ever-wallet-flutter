@@ -1,39 +1,32 @@
-import 'package:ever_wallet/application/common/theme.dart';
+import 'package:ever_wallet/application/common/general/button/primary_icon_button.dart';
+import 'package:ever_wallet/application/util/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 class BrowserIconButton extends StatelessWidget {
   final VoidCallback? onPressed;
-  final IconData icon;
+  final IconData? icon;
+  final Widget? child;
 
   const BrowserIconButton({
     Key? key,
     required this.onPressed,
-    required this.icon,
-  }) : super(key: key);
+    this.icon,
+    this.child,
+  })  : assert(icon == null && child != null || icon != null && child == null),
+        super(key: key);
 
   @override
-  Widget build(BuildContext context) => PlatformWidget(
-        cupertino: (_, __) => CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: onPressed,
-          child: Icon(
+  Widget build(BuildContext context) {
+    return PrimaryIconButton(
+      icon: child ??
+          Icon(
             icon,
-            color: onPressed != null ? CrystalColor.accent : CrystalColor.hintColor,
+            color: onPressed == null ? ColorsRes.neutral500 : ColorsRes.bluePrimary400,
+            size: 24,
           ),
-        ),
-        material: (_, __) => RawMaterialButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50),
-          ),
-          visualDensity: VisualDensity.compact,
-          constraints: const BoxConstraints(),
-          onPressed: onPressed,
-          child: Icon(
-            icon,
-            color: onPressed != null ? CrystalColor.accent : CrystalColor.hintColor,
-          ),
-        ),
-      );
+      onPressed: onPressed,
+      outerPadding: EdgeInsets.zero,
+    );
+  }
 }

@@ -101,6 +101,13 @@ class StylesRes {
     fontFamily: FontFamily.pt,
   );
 
+  /// Style for secondary headers with Faktum font
+  static const header2Faktum = TextStyle(
+    fontSize: 24,
+    height: 1.16,
+    fontWeight: FontWeight.w600,
+  );
+
   /// Style for headers under appbar
   static const header3Text = TextStyle(
     fontSize: 24,
@@ -123,5 +130,21 @@ class StylesRes {
     letterSpacing: 0.25,
     fontWeight: FontWeight.w700,
     fontFamily: FontFamily.pt,
+  );
+
+  static const bold20 = TextStyle(
+    fontSize: 20,
+    letterSpacing: 0.15,
+    fontWeight: FontWeight.w700,
+    fontFamily: FontFamily.pt,
+    height: 1.2,
+  );
+
+  static const regular14 = TextStyle(
+    fontSize: 14,
+    letterSpacing: 0.1,
+    fontWeight: FontWeight.w400,
+    fontFamily: FontFamily.pt,
+    height: 1.42,
   );
 }

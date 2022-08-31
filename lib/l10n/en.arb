@@ -272,7 +272,7 @@
     "callback_payload": "Callback payload",
     "favorites_placeholder": "Here you’ll see your favorites",
     "favorites": "Favorites",
-    "address_field_placeholder": "Search or enter website name",
+    "address_field_placeholder": "Search or enter site",
     "url": "Url",
     "no_password": "No password",
     "not_granted": "Not granted",
@@ -319,5 +319,9 @@
     "setcodeMultisig24Description": "Like SetCodeMultisigWallet, but wallet custodian confirmations take up to 24 hours.",
     "bridgeMultisigDescription": "This kind of wallet does not have payload limits. Wallet custodian confirmations take up to 1 hour. If you want to use a multisig wallet with 3 or more custodians on Broxus DeFi platforms, be sure to use this type.",
     "surfDescription": "Like SetCodeMultisig, but you should use this kind of wallet to import your Ever Surf wallet.",
-    "walletV3Description": "Simple wallet for basic operations with lowest comission. Сhoose this one if you don't know which one you need."
+    "walletV3Description": "Simple wallet for basic operations with lowest comission. Сhoose this one if you don't know which one you need.",
+    "farming_title" : "Farming",
+    "farming_description" : "Lend your assets at FlatQube and get up to 200% yield",
+    "staking_title" : "Staking",
+    "staking_description" : "Stake your tokens with low risk and get up to 20% yield"
 }

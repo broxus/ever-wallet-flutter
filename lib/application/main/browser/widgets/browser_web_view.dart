@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
-import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/main/browser/back_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/extensions.dart';
 import 'package:ever_wallet/application/main/browser/forward_button_enabled_cubit.dart';
@@ -46,6 +45,7 @@ import 'package:ever_wallet/application/main/browser/requests/unsubscribe_handle
 import 'package:ever_wallet/application/main/browser/requests/verify_signature_handler.dart';
 import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/main/browser/utils.dart';
+import 'package:ever_wallet/application/main/browser/widgets/browser_app_bar/browser_app_bar_scroll_listener.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/approvals_repository.dart';
 import 'package:ever_wallet/data/repositories/generic_contracts_repository.dart';
@@ -64,11 +64,13 @@ import 'package:url_launcher/url_launcher_string.dart';
 class BrowserWebView extends StatefulWidget {
   final Completer<InAppWebViewController> controller;
   final TextEditingController urlController;
+  final BrowserAppBarScrollListener browserListener;
 
   const BrowserWebView({
     Key? key,
     required this.controller,
     required this.urlController,
+    required this.browserListener,
   }) : super(key: key);
 
   @override
@@ -88,45 +90,41 @@ class _BrowserWebViewState extends State<BrowserWebView> {
         initialData: const AsyncValue.loading(),
         catchError: (context, error) => AsyncValue.error(error),
         builder: (context, child) => context.watch<AsyncValue<String>>().maybeWhen(
-              ready: (value) => DecoratedBox(
-                decoration: const BoxDecoration(
-                  color: CrystalColor.background,
-                ),
-                child: InAppWebView(
-                  initialUrlRequest: URLRequest(url: Uri.parse('about:blank')),
-                  initialOptions: InAppWebViewGroupOptions(
-                    crossPlatform: InAppWebViewOptions(
-                      useShouldOverrideUrlLoading: true,
-                      mediaPlaybackRequiresUserGesture: false,
-                      transparentBackground: true,
-                    ),
-                    android: AndroidInAppWebViewOptions(
-                      disableDefaultErrorPage: true,
-                      useHybridComposition: true,
-                    ),
-                    ios: IOSInAppWebViewOptions(
-                      allowsInlineMediaPlayback: true,
-                    ),
+              ready: (value) => InAppWebView(
+                onScrollChanged: (_, __, y) => widget.browserListener.webViewScrolled(y),
+                initialUrlRequest: URLRequest(url: Uri.parse('about:blank')),
+                initialOptions: InAppWebViewGroupOptions(
+                  crossPlatform: InAppWebViewOptions(
+                    useShouldOverrideUrlLoading: true,
+                    mediaPlaybackRequiresUserGesture: false,
+                    transparentBackground: true,
                   ),
-                  initialUserScripts: UnmodifiableListView<UserScript>([
-                    UserScript(
-                      source: value,
-                      injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
-                    ),
-                  ]),
-                  pullToRefreshController: pullToRefreshController,
-                  onWebViewCreated: onWebViewCreated,
-                  onLoadStart: onLoadStart,
-                  onLoadStop: (controller, url) => onLoadStop(controller, url),
-                  onLoadError: onLoadError,
-                  onLoadHttpError: onLoadError,
-                  onProgressChanged: (controller, progress) =>
-                      onProgressChanged(controller, progress),
-                  onUpdateVisitedHistory: onUpdateVisitedHistory,
-                  androidOnPermissionRequest: androidOnPermissionRequest,
-                  shouldOverrideUrlLoading: shouldOverrideUrlLoading,
-                  onConsoleMessage: onConsoleMessage,
+                  android: AndroidInAppWebViewOptions(
+                    disableDefaultErrorPage: true,
+                    useHybridComposition: true,
+                  ),
+                  ios: IOSInAppWebViewOptions(
+                    allowsInlineMediaPlayback: true,
+                  ),
                 ),
+                initialUserScripts: UnmodifiableListView<UserScript>([
+                  UserScript(
+                    source: value,
+                    injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                  ),
+                ]),
+                pullToRefreshController: pullToRefreshController,
+                onWebViewCreated: onWebViewCreated,
+                onLoadStart: onLoadStart,
+                onLoadStop: (controller, url) => onLoadStop(controller, url),
+                onLoadError: onLoadError,
+                onLoadHttpError: onLoadError,
+                onProgressChanged: (controller, progress) =>
+                    onProgressChanged(controller, progress),
+                onUpdateVisitedHistory: onUpdateVisitedHistory,
+                androidOnPermissionRequest: androidOnPermissionRequest,
+                shouldOverrideUrlLoading: shouldOverrideUrlLoading,
+                onConsoleMessage: onConsoleMessage,
               ),
               orElse: () => Center(
                 child: PlatformCircularProgressIndicator(),
@@ -579,8 +577,11 @@ class _BrowserWebViewState extends State<BrowserWebView> {
   void updateUrlControllerValue(Uri? url) {
     var text = url.toString();
 
-    if (url == Uri.parse('about:blank')) text = '';
-
+    if (url == Uri.parse('about:blank')) {
+      text = '';
+    } else {
+      context.read<UrlCubit>().setUrl(url);
+    }
     widget.urlController.value = TextEditingValue(
       text: text,
       selection: TextSelection.collapsed(offset: text.length),

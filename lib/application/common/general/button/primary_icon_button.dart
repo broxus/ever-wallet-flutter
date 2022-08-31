@@ -10,11 +10,11 @@ class PrimaryIconButton extends StatelessWidget {
     this.innerPadding = const EdgeInsets.all(8),
     this.outerPadding = const EdgeInsets.all(8),
     this.backgroundColor = Colors.transparent,
-    this.presstateColor = ColorsRes.greyOpacity,
+    this.presstateColor = ColorsRes.neutral750,
   }) : super(key: key);
 
   final Widget icon;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color backgroundColor;
   final Color presstateColor;
 

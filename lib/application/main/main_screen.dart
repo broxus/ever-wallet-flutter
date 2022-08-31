@@ -2,11 +2,11 @@ import 'package:ever_wallet/application/main/browser/browser_page.dart';
 import 'package:ever_wallet/application/main/profile/profile_page.dart';
 import 'package:ever_wallet/application/main/wallet/wallet_screen.dart';
 import 'package:ever_wallet/application/util/colors.dart';
+import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MainScreenRoute extends MaterialPageRoute<void> {
   MainScreenRoute()
@@ -59,22 +59,22 @@ class MainScreenState extends State<MainScreen> {
             );
           },
           tabBar: CupertinoTabBar(
-            activeColor: ColorsRes.darkBlue,
+            activeColor: ColorsRes.bluePrimary400,
             // Do not set opacity to background, it removes bottom padding
             backgroundColor: ColorsRes.greyOpacity.withOpacity(1),
-            inactiveColor: ColorsRes.greyBlue,
+            inactiveColor: ColorsRes.neutral500,
             items: [
               item(
                 image: Assets.images.wallet,
-                label: AppLocalizations.of(context)!.wallet,
+                label: context.localization.wallet,
               ),
               item(
-                image: Assets.images.browser,
-                label: AppLocalizations.of(context)!.browser,
+                image: Assets.images.browserSvg,
+                label: context.localization.browser,
               ),
               item(
                 image: Assets.images.profile,
-                label: AppLocalizations.of(context)!.profile,
+                label: context.localization.profile,
               ),
             ],
           ),
@@ -89,12 +89,12 @@ class MainScreenState extends State<MainScreen> {
         icon: image.svg(
           width: 24,
           height: 24,
-          color: ColorsRes.greyBlue,
+          color: ColorsRes.neutral500,
         ),
         activeIcon: image.svg(
           width: 24,
           height: 24,
-          color: ColorsRes.darkBlue,
+          color: ColorsRes.bluePrimary400,
         ),
         label: label,
       );

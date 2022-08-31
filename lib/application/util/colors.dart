@@ -69,7 +69,11 @@ class ColorsPalette {
 class ColorsRes {
   const ColorsRes._();
 
-  static const accentBlue = Color(0xFF2B63F1);
+  static const bluePrimary400 = Color(0xFF2B63F1);
+  static const neutral500 = Color(0xFF999DA6);
+  static const neutral750 = Color(0xFFF7F7F9);
+  static const blue970 = Color(0xFFF9FAFF);
+
   static const blackBlue = Color(0xFF182768);
   static const blackBlueLight = Color(0xFF555B7A);
   static const darkBlue = Color(0xFF0088CC);

@@ -24,6 +24,7 @@ dependencies:
     git: https://github.com/Alex-A4/dropdown_button2.git
   duration: ^3.0.11
   expand_tap_area: ^1.1.1
+  favicon: ^1.0.15
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
@@ -114,6 +115,7 @@ flutter:
     - .env
     - assets/fonts/
     - assets/images/
+    - assets/images/browser/
     - assets/images/onboarding/layer1/
     - assets/images/onboarding/layer2/
     - assets/images/onboarding/layer3/

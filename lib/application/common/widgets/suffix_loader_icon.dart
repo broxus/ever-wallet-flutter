@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 class SuffixLoaderIcon extends StatelessWidget {
-  const SuffixLoaderIcon({Key? key}) : super(key: key);
+  const SuffixLoaderIcon({
+    this.color,
+    Key? key,
+  }) : super(key: key);
+
+  final Color? color;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -11,9 +15,7 @@ class SuffixLoaderIcon extends StatelessWidget {
         children: [
           SizedBox.square(
             dimension: 20,
-            child: PlatformCircularProgressIndicator(
-              material: (context, platform) => MaterialProgressIndicatorData(strokeWidth: 2),
-            ),
+            child: CircularProgressIndicator(strokeWidth: 2, color: color),
           ),
         ],
       );
