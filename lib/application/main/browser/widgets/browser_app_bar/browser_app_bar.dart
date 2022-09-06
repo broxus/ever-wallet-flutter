@@ -4,6 +4,7 @@ import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/main/browser/back_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/forward_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/progress_cubit.dart';
+import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_app_bar/browser_app_bar_scroll_listener.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_history.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_icon_button.dart';
@@ -109,6 +110,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
                 widget.controller,
                 widget.urlFocusNode,
                 widget.urlController,
+                context.read<UrlCubit>(),
               ),
             ),
             child: Container(

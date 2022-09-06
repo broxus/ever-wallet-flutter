@@ -9,7 +9,7 @@ EVER Wallet Flutter application. Manage Everscale wallets and access dApps direc
 2. Clone the plugin from `https://github.com/broxus/nekoton-flutter.git` to folder alongside the project and do steps described in `README.md` to build it
 
 3. Run following commands  
-   `flutter pub run build_runner build --delete-conflicting-outputs`  
+   `flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs && flutter format -l 100 .`  
    `flutter gen-l10n`
 
 4. Create `.env` file in root of the project with `HIVE_AES_CIPHER_KEY` string contains 32 integers separated with spaces  

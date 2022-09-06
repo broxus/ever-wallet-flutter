@@ -10,10 +10,10 @@ class SitesMetaDataRepository {
 
   const SitesMetaDataRepository(this._hiveSource);
 
-  Stream<SiteMetaData> getSiteMetaData(String url) async* {
+  Future<SiteMetaData> getSiteMetaData(String url) async {
     final cached = _hiveSource.getSiteMetaData(url);
 
-    if (cached != null) yield cached;
+    if (cached != null) return cached;
 
     final linkPreview = (await SimpleLinkPreview.getPreview(url))!;
     final favicon = await Favicon.getBest(url);
@@ -27,7 +27,7 @@ class SitesMetaDataRepository {
 
     await _hiveSource.cacheSiteMetaData(url: url, metaData: siteMetaData);
 
-    yield siteMetaData;
+    return siteMetaData;
   }
 
   Future<void> clear() => _hiveSource.clearSitesMetaData();

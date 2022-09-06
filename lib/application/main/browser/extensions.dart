@@ -16,7 +16,7 @@ extension InAppWebViewControllerX on InAppWebViewController {
     return origin;
   }
 
-  Future<void> goHome() => loadUrl(urlRequest: URLRequest(url: Uri.parse('about:blank')));
+  Future<void> goHome() => loadUrl(urlRequest: URLRequest(url: Uri.parse(aboutBlankPage)));
 
   Future<void> refresh() async {
     if (Platform.isAndroid) {

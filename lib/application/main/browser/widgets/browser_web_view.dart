@@ -92,7 +92,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
         builder: (context, child) => context.watch<AsyncValue<String>>().maybeWhen(
               ready: (value) => InAppWebView(
                 onScrollChanged: (_, __, y) => widget.browserListener.webViewScrolled(y),
-                initialUrlRequest: URLRequest(url: Uri.parse('about:blank')),
+                initialUrlRequest: URLRequest(url: Uri.parse(aboutBlankPage)),
                 initialOptions: InAppWebViewGroupOptions(
                   crossPlatform: InAppWebViewOptions(
                     useShouldOverrideUrlLoading: true,
@@ -119,8 +119,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
                 onLoadStop: (controller, url) => onLoadStop(controller, url),
                 onLoadError: onLoadError,
                 onLoadHttpError: onLoadError,
-                onProgressChanged: (controller, progress) =>
-                    onProgressChanged(controller, progress),
+                onProgressChanged: onProgressChanged,
                 onUpdateVisitedHistory: onUpdateVisitedHistory,
                 androidOnPermissionRequest: androidOnPermissionRequest,
                 shouldOverrideUrlLoading: shouldOverrideUrlLoading,
@@ -494,7 +493,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
   ) async {
     pullToRefreshController.endRefreshing();
 
-    context.read<UrlCubit>().setUrl(url);
+    context.read<UrlCubit>().setUrl(url?.toString());
 
     final canGoBack = await controller.canGoBack();
     final canGoForward = await controller.canGoForward();
@@ -515,7 +514,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
   ) async {
     if (Platform.isIOS && code == -999) return;
 
-    final errorUrl = url ?? Uri.parse('about:blank');
+    final errorUrl = url ?? Uri.parse(aboutBlankPage);
 
     controller.loadData(
       data: getErrorPage(url: errorUrl, message: message),
@@ -577,10 +576,10 @@ class _BrowserWebViewState extends State<BrowserWebView> {
   void updateUrlControllerValue(Uri? url) {
     var text = url.toString();
 
-    if (url == Uri.parse('about:blank')) {
+    if (url == Uri.parse(aboutBlankPage)) {
       text = '';
     } else {
-      context.read<UrlCubit>().setUrl(url);
+      context.read<UrlCubit>().setUrl(text);
     }
     widget.urlController.value = TextEditingValue(
       text: text,

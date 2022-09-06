@@ -6,7 +6,7 @@ import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
 import 'package:ever_wallet/application/common/widgets/text_field_clear_button.dart';
-import 'package:ever_wallet/application/main/browser/extensions.dart';
+import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_search_field.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -26,11 +26,13 @@ class BrowserSearchRoute extends NoAnimationPageRoute<void> {
     Completer<InAppWebViewController> controller,
     FocusNode urlFocusNode,
     TextEditingController urlController,
+    UrlCubit urlCubit,
   ) : super(
           builder: (_) => BrowserSearchScreen(
             controller: controller,
             urlFocusNode: urlFocusNode,
             urlController: urlController,
+            urlCubit: urlCubit,
           ),
         );
 }
@@ -39,11 +41,13 @@ class BrowserSearchScreen extends StatefulWidget {
   final Completer<InAppWebViewController> controller;
   final FocusNode urlFocusNode;
   final TextEditingController urlController;
+  final UrlCubit urlCubit;
 
   const BrowserSearchScreen({
     required this.controller,
     required this.urlFocusNode,
     required this.urlController,
+    required this.urlCubit,
     Key? key,
   }) : super(key: key);
 
@@ -71,6 +75,7 @@ class _BrowserSearchScreenState extends State<BrowserSearchScreen> {
                 child: BrowserSearchHistory(
                   controller: widget.controller,
                   urlFocusNode: widget.urlFocusNode,
+                  urlCubit: widget.urlCubit,
                 ),
               ),
             ),
@@ -137,7 +142,7 @@ class _BrowserSearchScreenState extends State<BrowserSearchScreen> {
 
         context.read<SearchHistoryRepository>().addSearchHistoryEntry(value);
 
-        widget.controller.future.then((v) => v.tryLoadUrl(value));
+        widget.urlCubit.setUrl(value);
         _closeSearch(context);
       },
       suffixIcon: suffixIcon,
@@ -153,11 +158,13 @@ class _BrowserSearchScreenState extends State<BrowserSearchScreen> {
 class BrowserSearchHistory extends StatelessWidget {
   final Completer<InAppWebViewController> controller;
   final FocusNode urlFocusNode;
+  final UrlCubit urlCubit;
 
   const BrowserSearchHistory({
     Key? key,
     required this.controller,
     required this.urlFocusNode,
+    required this.urlCubit,
   }) : super(key: key);
 
   @override
@@ -235,7 +242,7 @@ class BrowserSearchHistory extends StatelessWidget {
 
         urlFocusNode.unfocus();
 
-        controller.future.then((v) => v.tryLoadUrl(entry));
+        urlCubit.setUrl(entry);
       },
       leading: uri == null
           ? Assets.images.iconSearch.svg(width: 24, height: 24)

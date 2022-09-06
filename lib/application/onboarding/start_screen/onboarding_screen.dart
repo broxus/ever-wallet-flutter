@@ -80,7 +80,8 @@ class OnboardingScreen extends StatelessWidget {
                           ),
                           TextSpan(
                             text: 'Read here',
-                            style: style.styles.basicStyle.copyWith(color: ColorsRes.bluePrimary400),
+                            style:
+                                style.styles.basicStyle.copyWith(color: ColorsRes.bluePrimary400),
                             recognizer: TapGestureRecognizer()..onTap = onLinkTap,
                           ),
                         ],

@@ -1,7 +1,5 @@
-import 'dart:async';
-
 import 'package:ever_wallet/application/common/async_value.dart';
-import 'package:ever_wallet/application/main/browser/extensions.dart';
+import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
@@ -13,15 +11,14 @@ import 'package:ever_wallet/data/repositories/bookmarks_repository.dart';
 import 'package:ever_wallet/data/repositories/sites_meta_data_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 class BrowserHome extends StatefulWidget {
-  final Completer<InAppWebViewController> controller;
+  final UrlCubit? urlCubit;
 
   const BrowserHome({
+    required this.urlCubit,
     Key? key,
-    required this.controller,
   }) : super(key: key);
 
   @override
@@ -200,11 +197,11 @@ class _BrowserHomeState extends State<BrowserHome> {
     );
   }
 
-  Widget _bookmarkTile(Bookmark bookmark) => StreamProvider<AsyncValue<SiteMetaData>>(
+  Widget _bookmarkTile(Bookmark bookmark) => FutureProvider<AsyncValue<SiteMetaData>>(
         create: (context) => context
             .read<SitesMetaDataRepository>()
             .getSiteMetaData(bookmark.url)
-            .map((event) => AsyncValue.ready(event)),
+            .then((event) => AsyncValue.ready(event)),
         initialData: const AsyncValue.loading(),
         catchError: (context, error) => AsyncValue.error(error),
         builder: (context, child) {
@@ -235,7 +232,7 @@ class _BrowserHomeState extends State<BrowserHome> {
     return Material(
       color: ColorsRes.blue970,
       child: InkWell(
-        onTap: () => widget.controller.future.then((v) => v.tryLoadUrl(url)),
+        onTap: () => widget.urlCubit?.setUrl(url),
         onLongPress: onLongPress,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),

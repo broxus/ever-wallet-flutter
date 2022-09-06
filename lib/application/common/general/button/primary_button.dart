@@ -67,7 +67,7 @@ class PrimaryButton extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   icon!,
-                  const SizedBox(width: 12),
+                  if (text != null) const SizedBox(width: 12),
                   _textWidget,
                 ],
               ),

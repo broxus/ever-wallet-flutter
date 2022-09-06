@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:ever_wallet/data/models/bookmark.dart';
+import 'package:ever_wallet/data/models/browser_tabs_dto.dart';
 import 'package:ever_wallet/data/models/currency.dart';
 import 'package:ever_wallet/data/models/permissions.dart';
 import 'package:ever_wallet/data/models/site_meta_data.dart';
@@ -69,6 +70,9 @@ class HiveSource {
   final _currentPublicKeyKey = 'current_public_key';
   final _currentConnectionKey = 'current_connection';
   final _localeKey = 'locale';
+  final _browserNeedKey = 'browser_need_key';
+  final _browserTabsKey = 'browser_tabs_key';
+
   late final Uint8List _key;
   late final Box<String> _keysPasswordsBox;
   late final Box<Object?> _userPreferencesBox;
@@ -87,6 +91,8 @@ class HiveSource {
   late final Box<String> _searchHistoryBox;
   late final Box<SiteMetaDataDto> _sitesMetaDataBox;
   late final Box<CurrencyDto> _currenciesBox;
+  late final Box<bool> _browserNeedBox;
+  late final Box<BrowserTabsDto> _browserTabsBox;
 
   HiveSource._();
 
@@ -410,6 +416,16 @@ class HiveSource {
 
   Future<void> clearCurrencies() => _currenciesBox.clear();
 
+  bool get getWhyNeedBrowser => _browserNeedBox.get(_browserNeedKey) ?? false;
+
+  Future<void> saveWhyNeedBrowser() => _browserNeedBox.put(_browserNeedKey, true);
+
+  BrowserTabsDto get browserTabs =>
+      _browserTabsBox.get(_browserTabsKey) ??
+      const BrowserTabsDto(lastActiveTabIndex: -1, tabs: []);
+
+  Future<void> saveBrowserTabs(BrowserTabsDto dto) => _browserTabsBox.put(_browserTabsKey, dto);
+
   Future<void> dispose() async {
     await _keysPasswordsBox.close();
     await _userPreferencesBox.close();
@@ -428,6 +444,8 @@ class HiveSource {
     await _searchHistoryBox.close();
     await _sitesMetaDataBox.close();
     await _currenciesBox.close();
+    await _browserNeedBox.close();
+    await _browserTabsBox.close();
   }
 
   Future<void> _initialize() async {
@@ -477,7 +495,9 @@ class HiveSource {
       ..tryRegisterAdapter(TransactionIdDtoAdapter())
       ..tryRegisterAdapter(WalletInteractionInfoDtoAdapter())
       ..tryRegisterAdapter(WalletTypeDtoWalletV3Adapter())
-      ..tryRegisterAdapter(WalletTypeDtoMultisigAdapter());
+      ..tryRegisterAdapter(WalletTypeDtoMultisigAdapter())
+      ..tryRegisterAdapter(BrowserTabAdapter())
+      ..tryRegisterAdapter(BrowserTabsDtoAdapter());
 
     _keysPasswordsBox =
         await Hive.openBox(_keysPasswordsBoxName, encryptionCipher: HiveAesCipher(_key));
@@ -497,6 +517,8 @@ class HiveSource {
     _searchHistoryBox = await Hive.openBox(_searchHistoryBoxName);
     _sitesMetaDataBox = await Hive.openBox(_siteMetaDataBoxName);
     _currenciesBox = await Hive.openBox(_currenciesBoxName);
+    _browserNeedBox = await Hive.openBox(_browserNeedKey);
+    _browserTabsBox = await Hive.openBox(_browserTabsKey);
 
     await _migrateStorage();
   }
