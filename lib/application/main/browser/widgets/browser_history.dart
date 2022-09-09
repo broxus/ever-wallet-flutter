@@ -7,6 +7,7 @@ import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
 import 'package:ever_wallet/application/common/widgets/text_field_clear_button.dart';
 import 'package:ever_wallet/application/main/browser/url_cubit.dart';
+import 'package:ever_wallet/application/main/browser/utils.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_search_field.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -20,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
+import 'package:validators/validators.dart';
 
 class BrowserSearchRoute extends NoAnimationPageRoute<void> {
   BrowserSearchRoute(
@@ -242,7 +244,12 @@ class BrowserSearchHistory extends StatelessWidget {
 
         urlFocusNode.unfocus();
 
-        urlCubit.setUrl(entry);
+        if (isURL(entry)) {
+          urlCubit.setUrl(entry);
+        } else {
+          urlCubit.setUrl(getDuckDuckGoSearchLink(entry));
+        }
+        Navigator.of(context).pop();
       },
       leading: uri == null
           ? Assets.images.iconSearch.svg(width: 24, height: 24)

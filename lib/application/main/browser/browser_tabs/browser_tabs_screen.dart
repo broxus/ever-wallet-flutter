@@ -7,7 +7,7 @@ import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class BrowserTabsScreen extends StatefulWidget {
   final BrowserTabsCubit tabsCubit;
@@ -22,30 +22,45 @@ class BrowserTabsScreen extends StatefulWidget {
 }
 
 class _BrowserTabsScreenState extends State<BrowserTabsScreen> {
+  static const childAspectRation = 160 / 190;
+
   @override
   Widget build(BuildContext context) {
     final localization = context.localization;
+    final size = MediaQuery.of(context).size;
+    final itemWidth = (size.width - 44) / 2;
+    final itemHeight = itemWidth / childAspectRation;
 
     return Scaffold(
       backgroundColor: ColorsRes.neutral900,
       body: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 2,
+        padding: const EdgeInsets.only(top: 60, left: 16, right: 16),
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: itemWidth,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 160 / 190,
+          childAspectRatio: childAspectRation,
         ),
         itemCount: widget.tabsCubit.tabsCount,
         itemBuilder: (_, index) {
           final tab = widget.tabsCubit.tabs[index];
-          return Material(
-            color: Colors.transparent,
-            elevation: 5,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: tab.url == aboutBlankPage || tab.url.isEmpty
-                      ? IgnorePointer(
+
+          return GestureDetector(
+            onTap: () => widget.tabsCubit.openTab(index),
+            child: Material(
+              color: Colors.white,
+              elevation: 5,
+              child: SizedBox(
+                width: itemWidth,
+                height: itemHeight,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned.fill(
+                      child: SizedBox(
+                        width: itemWidth,
+                        height: itemHeight,
+                        child: IgnorePointer(
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               border: Border.all(
@@ -54,22 +69,42 @@ class _BrowserTabsScreenState extends State<BrowserTabsScreen> {
                                     : Colors.transparent,
                               ),
                             ),
-                            child: const BrowserHome(urlCubit: null),
+                            child: FittedBox(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxHeight: 400,
+                                  maxWidth: 400 * childAspectRation,
+                                ),
+                                child: tab.url == aboutBlankPage || tab.url.isEmpty
+                                    ? const BrowserHome(urlCubit: null)
+                                    : WebView(
+                                        initialUrl: tab.url,
+                                        backgroundColor: ColorsRes.white,
+                                      ),
+                              ),
+                            ),
                           ),
-                        )
-                      : Html(data: tab.url),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: PrimaryIconButton(
+                        backgroundColor: ColorsRes.blue950,
+                        outerPadding: EdgeInsets.zero,
+                        innerPadding: const EdgeInsets.all(4),
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          size: 18,
+                          color: ColorsRes.bluePrimary400,
+                        ),
+                        onPressed: () => widget.tabsCubit.closeTab(index),
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: PrimaryIconButton(
-                    backgroundColor: ColorsRes.blue950,
-                    icon:
-                        const Icon(Icons.close_rounded, size: 24, color: ColorsRes.bluePrimary400),
-                    onPressed: () => widget.tabsCubit.closeTab(index),
-                  ),
-                ),
-              ],
+              ),
             ),
           );
         },
@@ -78,21 +113,26 @@ class _BrowserTabsScreenState extends State<BrowserTabsScreen> {
         height: 50,
         color: ColorsRes.white,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            TextPrimaryButton(
-              text: localization.close_all,
-              style: StylesRes.buttonText.copyWith(color: ColorsRes.bluePrimary400),
-              onPressed: () => widget.tabsCubit.closeAllTabs(),
+            Expanded(
+              child: TextPrimaryButton(
+                text: localization.close_all,
+                style: StylesRes.buttonText.copyWith(color: ColorsRes.bluePrimary400),
+                onPressed: () => widget.tabsCubit.closeAllTabs(),
+              ),
             ),
-            TextPrimaryButton(
-              icon: const Icon(Icons.add, size: 24, color: ColorsRes.bluePrimary400),
-              onPressed: () => widget.tabsCubit.openNewTab(),
+            Expanded(
+              child: TextPrimaryButton(
+                icon: const Icon(Icons.add, size: 24, color: ColorsRes.bluePrimary400),
+                onPressed: () => widget.tabsCubit.openNewTab(),
+              ),
             ),
-            TextPrimaryButton(
-              text: localization.done,
-              style: StylesRes.buttonText.copyWith(color: ColorsRes.bluePrimary400),
-              onPressed: () => widget.tabsCubit.hideTabs(),
+            Expanded(
+              child: TextPrimaryButton(
+                text: localization.done,
+                style: StylesRes.buttonText.copyWith(color: ColorsRes.bluePrimary400),
+                onPressed: () => widget.tabsCubit.hideTabs(),
+              ),
             ),
           ],
         ),

@@ -88,48 +88,61 @@ class _BrowserPageState extends State<BrowserPage> {
               child: EventsListener(
                 controller: controller,
                 child: ApprovalsListener(
-                  child: BlocBuilder<BrowserTabsCubit, BrowserTabsCubitState>(
-                    bloc: browserTabsCubit,
-                    builder: (_, tabsState) {
-                      return BlocConsumer<UrlCubit, String?>(
-                        listener: (_, url) {
-                          /// Update all url dependent objects
-                          if (url != null) {
-                            if (urlController.text != url) urlController.text = url;
-                            browserTabsCubit.updateCurrentTab(url);
-                            if (url == aboutBlankPage) {
-                              controller.future.then((c) => c.goHome());
-                            } else {
-                              controller.future.then((c) => c.tryLoadUrl(url));
-                            }
-                          }
-                        },
-                        builder: (context, url) {
-                          return tabsState.when(
-                            showTabs: (_) => BrowserTabsScreen(tabsCubit: browserTabsCubit),
-                            hideTabs: () => Scaffold(
-                              resizeToAvoidBottomInset: false,
-                              backgroundColor: ColorsRes.white,
-                              body: SafeArea(
-                                child: Stack(
-                                  children: [
-                                    Positioned.fill(child: body(url)),
-                                    ValueListenableBuilder<double>(
-                                      valueListenable: browserListener,
-                                      builder: (_, show, __) {
-                                        final size = MediaQuery.of(context).size;
+                  child: BlocConsumer<UrlCubit, String?>(
+                    listener: (_, url) async {
+                      /// Update all url dependent objects
+                      if (url != null) {
+                        final webController = await controller.future;
+                        final webUrl = (await webController.getUrl()).toString();
 
-                                        return Positioned(
-                                          top: show,
-                                          width: size.width,
-                                          child: appBar(),
-                                        );
-                                      },
-                                    ),
-                                  ],
+                        if (urlController.text != url) urlController.text = url;
+                        browserTabsCubit.updateCurrentTab(url);
+                        if (webUrl == url) return;
+                        if (url == aboutBlankPage) {
+                          controller.future.then((c) => c.goHome());
+                        } else {
+                          controller.future.then((c) => c.tryLoadUrl(url));
+                        }
+                      }
+                    },
+                    builder: (context, url) {
+                      return BlocBuilder<BrowserTabsCubit, BrowserTabsCubitState>(
+                        bloc: browserTabsCubit,
+                        builder: (_, tabsState) {
+                          final index = tabsState.when(
+                            showTabs: (_) => 0,
+                            hideTabs: (_) => 1,
+                          );
+
+                          // stack is used here to avoid deleting webview from the tree
+                          return IndexedStack(
+                            index: index,
+                            children: [
+                              BrowserTabsScreen(tabsCubit: browserTabsCubit),
+                              Scaffold(
+                                resizeToAvoidBottomInset: false,
+                                backgroundColor: ColorsRes.white,
+                                body: SafeArea(
+                                  child: Stack(
+                                    children: [
+                                      Positioned.fill(child: body(url)),
+                                      ValueListenableBuilder<double>(
+                                        valueListenable: browserListener,
+                                        builder: (_, show, __) {
+                                          final size = MediaQuery.of(context).size;
+
+                                          return Positioned(
+                                            top: show,
+                                            width: size.width,
+                                            child: appBar(),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ),
+                              )
+                            ],
                           );
                         },
                       );
@@ -147,6 +160,7 @@ class _BrowserPageState extends State<BrowserPage> {
         controller: controller,
         urlController: urlController,
         urlFocusNode: urlFocusNode,
+        tabsCubit: browserTabsCubit,
       );
 
   Widget body(String? url) {

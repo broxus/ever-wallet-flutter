@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/main/browser/back_button_enabled_cubit.dart';
+import 'package:ever_wallet/application/main/browser/browser_tabs/browser_tabs_cubit/browser_tabs_cubit.dart';
 import 'package:ever_wallet/application/main/browser/forward_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/progress_cubit.dart';
 import 'package:ever_wallet/application/main/browser/url_cubit.dart';
@@ -21,12 +22,14 @@ class BrowserAppBar extends StatefulWidget {
   final Completer<InAppWebViewController> controller;
   final TextEditingController urlController;
   final FocusNode urlFocusNode;
+  final BrowserTabsCubit tabsCubit;
 
   const BrowserAppBar({
-    Key? key,
     required this.controller,
     required this.urlController,
     required this.urlFocusNode,
+    required this.tabsCubit,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -157,27 +160,32 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
       );
 
   Widget tabs() {
-    return BrowserIconButton(
-      onPressed: () {},
-      child: Container(
-        width: 20,
-        height: 20,
-        padding: const EdgeInsets.only(top: 2),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(width: 2, color: ColorsRes.bluePrimary400),
-        ),
-        child: Center(
-          child: Text(
-            '1',
-            style: StylesRes.subtitleStyle.copyWith(
-              color: ColorsRes.bluePrimary400,
-              height: 1,
-              fontWeight: FontWeight.w700,
+    return BlocBuilder<BrowserTabsCubit, BrowserTabsCubitState>(
+      bloc: widget.tabsCubit,
+      builder: (_, state) {
+        return BrowserIconButton(
+          onPressed: () => widget.tabsCubit.showTabs(),
+          child: Container(
+            width: 20,
+            height: 20,
+            padding: const EdgeInsets.only(top: 2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(width: 2, color: ColorsRes.bluePrimary400),
+            ),
+            child: Center(
+              child: Text(
+                '${state.tabs.tabs.length}',
+                style: StylesRes.subtitleStyle.copyWith(
+                  color: ColorsRes.bluePrimary400,
+                  height: 1,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

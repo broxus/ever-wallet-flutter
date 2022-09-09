@@ -492,6 +492,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     Uri? url,
   ) async {
     pullToRefreshController.endRefreshing();
+    if (!mounted) return;
 
     context.read<UrlCubit>().setUrl(url?.toString());
 

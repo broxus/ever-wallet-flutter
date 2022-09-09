@@ -17,7 +17,7 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
 
   BrowserTabsCubit(this._hiveSource, this.openUrl, this.metaDataRepository)
       : _tabsDto = _hiveSource.browserTabs,
-        super(const BrowserTabsCubitState.hideTabs()) {
+        super(BrowserTabsCubitState.hideTabs(_hiveSource.browserTabs)) {
     if (_tabsDto.lastActiveTabIndex == -1) {
       openNewTab();
     }
@@ -35,7 +35,7 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
 
   void showTabs() => emit(BrowserTabsCubitState.showTabs(_tabsDto));
 
-  void hideTabs() => emit(const BrowserTabsCubitState.hideTabs());
+  void hideTabs() => emit(BrowserTabsCubitState.hideTabs(_tabsDto));
 
   void openTab(int tabIndex) {
     _tabsDto = _tabsDto.copyWith(lastActiveTabIndex: tabIndex);
@@ -45,9 +45,10 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
   }
 
   void openNewTab() {
-    final tabs = _tabsDto.tabs;
+    final tabs = List<BrowserTab>.from(_tabsDto.tabs);
     tabs.add(const BrowserTab(url: aboutBlankPage, image: '', title: ''));
     _tabsDto = _tabsDto.copyWith(tabs: tabs, lastActiveTabIndex: tabs.length - 1);
+    openUrl(aboutBlankPage);
     hideTabs();
   }
 
@@ -67,12 +68,12 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
       tabs[_tabsDto.lastActiveTabIndex] = tab;
     }
     _tabsDto = _tabsDto.copyWith(tabs: tabs);
-    showTabs();
+    hideTabs();
   }
 
   void closeTab(int tabIndex) {
     final prevIndex = _tabsDto.lastActiveTabIndex;
-    final tabs = _tabsDto.tabs;
+    final tabs = List<BrowserTab>.from(_tabsDto.tabs);
     tabs.removeAt(tabIndex);
 
     int newIndex;
@@ -99,7 +100,7 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
       openUrl(_activeTab.url);
       showTabs();
     } else {
-      hideTabs();
+      openNewTab();
     }
   }
 
@@ -114,5 +115,5 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
 class BrowserTabsCubitState with _$BrowserTabsCubitState {
   const factory BrowserTabsCubitState.showTabs(BrowserTabsDto tabs) = _ShowTabs;
 
-  const factory BrowserTabsCubitState.hideTabs() = _HideTabs;
+  const factory BrowserTabsCubitState.hideTabs(BrowserTabsDto tabs) = _HideTabs;
 }

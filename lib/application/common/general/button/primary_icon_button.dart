@@ -27,6 +27,7 @@ class PrimaryIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      borderRadius: BorderRadius.circular(90),
       color: backgroundColor,
       child: Padding(
         padding: outerPadding,
