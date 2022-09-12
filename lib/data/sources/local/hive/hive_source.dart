@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:ever_wallet/data/models/bookmark.dart';
 import 'package:ever_wallet/data/models/browser_tabs_dto.dart';
 import 'package:ever_wallet/data/models/currency.dart';
 import 'package:ever_wallet/data/models/permissions.dart';
+import 'package:ever_wallet/data/models/search_history_dto.dart';
 import 'package:ever_wallet/data/models/site_meta_data.dart';
 import 'package:ever_wallet/data/models/token_contract_asset.dart';
 import 'package:ever_wallet/data/models/token_wallet_info.dart';
@@ -88,7 +88,7 @@ class HiveSource {
   late final Box<PermissionsDto> _permissionsBox;
   late final Box<List> _externalAccountsBox;
   late final Box<BookmarkDto> _bookmarksBox;
-  late final Box<String> _searchHistoryBox;
+  late final Box<SearchHistoryDto> _searchHistoryBox;
   late final Box<SiteMetaDataDto> _sitesMetaDataBox;
   late final Box<CurrencyDto> _currenciesBox;
   late final Box<bool> _browserNeedBox;
@@ -360,33 +360,29 @@ class HiveSource {
 
   Future<void> clearBookmarks() => _bookmarksBox.clear();
 
-  List<String> get searchHistory => _searchHistoryBox.values.toList();
+  List<SearchHistoryDto> get searchHistory => _searchHistoryBox.values.toList();
 
-  Future<void> addSearchHistoryEntry(String entry) async {
-    var list = _searchHistoryBox.toMap().cast<int, String>().entries;
+  Future<void> addSearchHistoryEntry(SearchHistoryDto entry) async {
+    var list = _searchHistoryBox.toMap().cast<String, SearchHistoryDto>().entries;
 
-    var key = 0;
-
-    if (list.isNotEmpty) key = list.map((e) => e.key).reduce(max) + 1;
-
-    list = list.where((e) => e.value != entry);
+    list = list.where((e) => e.value.url != entry.url);
 
     final entries = [
       ...list,
-      MapEntry(key, entry),
-    ]..sort((a, b) => -a.key.compareTo(b.key));
+      MapEntry(entry.openTime.toString(), entry),
+    ]..sort((a, b) => -a.value.openTime.compareTo(b.value.openTime));
 
     await _searchHistoryBox.clear();
 
     await _searchHistoryBox.putAll(Map.fromEntries(entries.take(50)));
   }
 
-  Future<void> removeSearchHistoryEntry(String entry) async {
+  Future<void> removeSearchHistoryEntry(SearchHistoryDto entry) async {
     final keys = _searchHistoryBox
         .toMap()
-        .cast<int, String>()
+        .cast<String, SearchHistoryDto>()
         .entries
-        .where((e) => e.value == entry)
+        .where((e) => e.value.url == entry.url)
         .map((e) => e.key);
 
     for (final key in keys) {
@@ -497,7 +493,8 @@ class HiveSource {
       ..tryRegisterAdapter(WalletTypeDtoWalletV3Adapter())
       ..tryRegisterAdapter(WalletTypeDtoMultisigAdapter())
       ..tryRegisterAdapter(BrowserTabAdapter())
-      ..tryRegisterAdapter(BrowserTabsDtoAdapter());
+      ..tryRegisterAdapter(BrowserTabsDtoAdapter())
+      ..tryRegisterAdapter(SearchHistoryDtoAdapter());
 
     _keysPasswordsBox =
         await Hive.openBox(_keysPasswordsBoxName, encryptionCipher: HiveAesCipher(_key));

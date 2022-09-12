@@ -14,6 +14,7 @@ import 'package:ever_wallet/application/util/extensions/context_extensions.dart'
 import 'package:ever_wallet/application/util/page_routes.dart';
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:ever_wallet/application/utils.dart';
+import 'package:ever_wallet/data/models/search_history_dto.dart';
 import 'package:ever_wallet/data/repositories/search_history_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:favicon/favicon.dart' as fav;
@@ -142,7 +143,9 @@ class _BrowserSearchScreenState extends State<BrowserSearchScreen> {
           return;
         }
 
-        context.read<SearchHistoryRepository>().addSearchHistoryEntry(value);
+        context
+            .read<SearchHistoryRepository>()
+            .addSearchHistoryEntry(SearchHistoryDto(url: value, openTime: DateTime.now()));
 
         widget.urlCubit.setUrl(value);
         _closeSearch(context);
@@ -170,7 +173,7 @@ class BrowserSearchHistory extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => StreamProvider<AsyncValue<List<String>>>(
+  Widget build(BuildContext context) => StreamProvider<AsyncValue<List<SearchHistoryDto>>>(
         create: (context) => context
             .read<SearchHistoryRepository>()
             .searchHistoryStream
@@ -179,10 +182,10 @@ class BrowserSearchHistory extends StatelessWidget {
         catchError: (context, error) => AsyncValue.error(error),
         builder: (context, child) {
           final searchHistory = context
-              .watch<AsyncValue<List<String>>>()
+              .watch<AsyncValue<List<SearchHistoryDto>>>()
               .maybeWhen(
                 ready: (value) => value,
-                orElse: () => <String>[],
+                orElse: () => <SearchHistoryDto>[],
               )
               .reversed;
 
@@ -235,33 +238,34 @@ class BrowserSearchHistory extends StatelessWidget {
   Widget tile({
     required BuildContext context,
     required Key key,
-    required String entry,
+    required SearchHistoryDto entry,
   }) {
-    final uri = Uri.tryParse(entry);
+    final isUrl = isURL(entry.url);
     return EWListTile(
       onPressed: () {
         context.read<SearchHistoryRepository>().addSearchHistoryEntry(entry);
 
         urlFocusNode.unfocus();
 
-        if (isURL(entry)) {
-          urlCubit.setUrl(entry);
+        if (isUrl) {
+          urlCubit.setUrl(entry.url);
         } else {
-          urlCubit.setUrl(getDuckDuckGoSearchLink(entry));
+          urlCubit.setUrl(getDuckDuckGoSearchLink(entry.url));
         }
         Navigator.of(context).pop();
       },
-      leading: uri == null
+      leading: !isUrl
           ? Assets.images.iconSearch.svg(width: 24, height: 24)
           : FutureBuilder<fav.Icon?>(
-              future: fav.Favicon.getBest(uri.toString()),
+              future: fav.Favicon.getBest(entry.url),
               builder: (context, icon) {
                 if (icon.data?.url != null) {
                   return CircleAvatar(
+                    maxRadius: 13,
                     child: Image.network(
                       icon.data!.url,
-                      width: 32,
-                      height: 32,
+                      width: 20,
+                      height: 20,
                       fit: BoxFit.cover,
                     ),
                   );
@@ -270,7 +274,7 @@ class BrowserSearchHistory extends StatelessWidget {
               },
             ),
       titleWidget: Text(
-        entry.overflow,
+        entry.url.overflow,
         style: StylesRes.basicText.copyWith(color: ColorsRes.black),
         overflow: TextOverflow.ellipsis,
       ),
