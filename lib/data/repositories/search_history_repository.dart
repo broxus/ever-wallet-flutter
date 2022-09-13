@@ -32,7 +32,10 @@ class SearchHistoryRepository {
     _searchHistorySubject.add(_hiveSource.searchHistory);
   }
 
-  Future<void> clear() => _hiveSource.clearSearchHistory();
+  Future<void> clear() {
+    _searchHistorySubject.add([]);
+    return _hiveSource.clearSearchHistory();
+  }
 
   Future<void> dispose() => _searchHistorySubject.close();
 }

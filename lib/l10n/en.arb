@@ -328,5 +328,7 @@
   "why_need_browser": "Why do you need a built-in browser?",
   "whe_need_browser_description": "You can use browser to open other applications and websites where you may need your wallet",
   "done": "Done",
-  "close_all": "Close All"
+  "close_all": "Close All",
+  "history_will_appear_here": "Your history will appear here",
+  "clear_all_data": "Clear All Data"
 }

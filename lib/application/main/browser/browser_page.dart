@@ -161,6 +161,7 @@ class _BrowserPageState extends State<BrowserPage> {
         urlController: urlController,
         urlFocusNode: urlFocusNode,
         tabsCubit: browserTabsCubit,
+        urlCubit: urlCubit,
       );
 
   Widget body(String? url) {

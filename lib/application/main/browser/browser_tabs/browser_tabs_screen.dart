@@ -7,6 +7,7 @@ import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:validators/validators.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class BrowserTabsScreen extends StatefulWidget {
@@ -78,7 +79,9 @@ class _BrowserTabsScreenState extends State<BrowserTabsScreen> {
                                 child: tab.url == aboutBlankPage || tab.url.isEmpty
                                     ? const BrowserHome(urlCubit: null)
                                     : WebView(
-                                        initialUrl: tab.url,
+                                        initialUrl: isURL(tab.url)
+                                            ? tab.url
+                                            : getDuckDuckGoSearchLink(tab.url),
                                         backgroundColor: ColorsRes.white,
                                       ),
                               ),

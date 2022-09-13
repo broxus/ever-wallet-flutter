@@ -116,6 +116,14 @@ class StylesRes {
     fontFamily: FontFamily.pt,
   );
 
+  static const header3Faktum = TextStyle(
+    fontSize: 18,
+    height: 1.33,
+    fontWeight: FontWeight.w600,
+    fontFamily: FontFamily.faktum,
+    letterSpacing: 0.1,
+  );
+
   /// Style for header in bottom sheet
   static const sheetHeaderText = TextStyle(
     fontWeight: FontWeight.w700,
@@ -146,5 +154,13 @@ class StylesRes {
     fontWeight: FontWeight.w400,
     fontFamily: FontFamily.pt,
     height: 1.42,
+  );
+
+  static const regular16 = TextStyle(
+    fontSize: 16,
+    letterSpacing: 0.1,
+    fontWeight: FontWeight.w400,
+    fontFamily: FontFamily.pt,
+    height: 1.375,
   );
 }

@@ -21,6 +21,7 @@ import 'package:favicon/favicon.dart' as fav;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:validators/validators.dart';
 
@@ -225,9 +226,7 @@ class BrowserSearchHistory extends StatelessWidget {
               ),
               SliverList(
                 delegate: SliverChildListDelegate(
-                  searchHistory
-                      .map((e) => tile(context: context, key: ValueKey(e), entry: e))
-                      .toList(),
+                  searchHistory.map((e) => tile(context: context, entry: e)).toList(),
                 ),
               ),
             ],
@@ -237,7 +236,6 @@ class BrowserSearchHistory extends StatelessWidget {
 
   Widget tile({
     required BuildContext context,
-    required Key key,
     required SearchHistoryDto entry,
   }) {
     final isUrl = isURL(entry.url);
@@ -260,14 +258,17 @@ class BrowserSearchHistory extends StatelessWidget {
               future: fav.Favicon.getBest(entry.url),
               builder: (context, icon) {
                 if (icon.data?.url != null) {
+                  final image = icon.data!.url;
                   return CircleAvatar(
                     maxRadius: 13,
-                    child: Image.network(
-                      icon.data!.url,
-                      width: 20,
-                      height: 20,
-                      fit: BoxFit.cover,
-                    ),
+                    child: image.endsWith('svg')
+                        ? SvgPicture.network(image, width: 24, height: 24)
+                        : Image.network(
+                            icon.data!.url,
+                            width: 20,
+                            height: 20,
+                            fit: BoxFit.cover,
+                          ),
                   );
                 }
                 return Assets.images.browser.iconGlobe.svg(width: 24, height: 24);

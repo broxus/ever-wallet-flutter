@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/main/browser/back_button_enabled_cubit.dart';
+import 'package:ever_wallet/application/main/browser/browser_history/browser_history_screen.dart';
 import 'package:ever_wallet/application/main/browser/browser_tabs/browser_tabs_cubit/browser_tabs_cubit.dart';
 import 'package:ever_wallet/application/main/browser/forward_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/progress_cubit.dart';
 import 'package:ever_wallet/application/main/browser/url_cubit.dart';
+import 'package:ever_wallet/application/main/browser/utils.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_app_bar/browser_app_bar_scroll_listener.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_icon_button.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_search_history.dart';
@@ -23,12 +25,14 @@ class BrowserAppBar extends StatefulWidget {
   final TextEditingController urlController;
   final FocusNode urlFocusNode;
   final BrowserTabsCubit tabsCubit;
+  final UrlCubit urlCubit;
 
   const BrowserAppBar({
     required this.controller,
     required this.urlController,
     required this.urlFocusNode,
     required this.tabsCubit,
+    required this.urlCubit,
     Key? key,
   }) : super(key: key);
 
@@ -113,7 +117,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
                 widget.controller,
                 widget.urlFocusNode,
                 widget.urlController,
-                context.read<UrlCubit>(),
+                widget.urlCubit,
               ),
             ),
             child: Container(
@@ -139,21 +143,13 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
   Widget trailing() => Row(
         children: [
           tabs(),
-          FutureBuilder<InAppWebViewController>(
-            future: widget.controller.future,
-            builder: (_, snap) {
-              if (snap.hasData) {
-                return FutureBuilder<Uri?>(
-                  future: snap.data!.getUrl(),
-                  builder: (_, uri) {
-                    if (uri.hasData && uri.data != null) {
-                      return menu();
-                    }
-                    return history();
-                  },
-                );
+          BlocBuilder<UrlCubit, String?>(
+            bloc: widget.urlCubit,
+            builder: (context, url) {
+              if (url == null || url.isEmpty || url == aboutBlankPage) {
+                return history();
               }
-              return history();
+              return menu();
             },
           ),
         ],
@@ -191,7 +187,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
 
   Widget history() {
     return BrowserIconButton(
-      onPressed: () {},
+      onPressed: () => Navigator.of(context).push(BrowserHistoryRoute(widget.urlCubit)),
       child: Assets.images.history.svg(width: 20, height: 20),
     );
   }
