@@ -11,6 +11,7 @@ import 'package:ever_wallet/data/repositories/bookmarks_repository.dart';
 import 'package:ever_wallet/data/repositories/sites_meta_data_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 class BrowserHome extends StatefulWidget {
@@ -210,18 +211,21 @@ class _BrowserHomeState extends State<BrowserHome> {
                 orElse: () => null,
               );
 
+          final image = meta?.image;
           return _tile(
-            bookmark.name,
+            bookmark.name.isEmpty ? (meta?.title ?? bookmark.name) : bookmark.name,
             bookmark.url,
-            meta?.image == null
+            image == null
                 ? const SizedBox.shrink()
                 : CircleAvatar(
-                    child: Image.network(
-                      meta!.image!,
-                      width: 32,
-                      height: 32,
-                      fit: BoxFit.cover,
-                    ),
+                    child: image.endsWith('svg')
+                        ? SvgPicture.network(image, width: 32, height: 32)
+                        : Image.network(
+                            meta!.image!,
+                            width: 32,
+                            height: 32,
+                            fit: BoxFit.cover,
+                          ),
                   ),
             onLongPress: () {},
           );

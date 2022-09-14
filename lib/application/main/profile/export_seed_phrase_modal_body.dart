@@ -45,7 +45,7 @@ class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
             showEWBottomSheet<void>(
               context,
               title: context.localization.save_seed_phrase,
-              body: SeedPhraseExportSheet(phrase: phrase),
+              body: (_) => SeedPhraseExportSheet(phrase: phrase),
             );
           } catch (err, st) {
             logger.e(err, err, st);

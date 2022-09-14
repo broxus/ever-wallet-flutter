@@ -20,7 +20,7 @@ Future<void> showSeedDeleteSheet({
     // TODO: replace text
     title: 'Delete seed phrase',
     // title: context.localization.remove_seed,
-    body: SeedDeleteSheet(seed: seed),
+    body: (_) => SeedDeleteSheet(seed: seed),
   );
 }
 

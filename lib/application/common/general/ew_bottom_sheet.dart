@@ -7,7 +7,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 Future<T?> showEWBottomSheet<T>(
   BuildContext context, {
   String? title,
-  required Widget body,
+  required WidgetBuilder body,
   Widget? closeButton,
   EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 16),
   bool expand = false,
@@ -49,7 +49,7 @@ Future<T?> showEWBottomSheet<T>(
                           const EdgeInsets.only(top: 16, right: 16),
                       child: Text(title, style: themeStyle.styles.sheetHeaderStyle),
                     ),
-                  Flexible(child: Padding(padding: padding, child: body)),
+                  Flexible(child: Padding(padding: padding, child: body(context))),
                 ],
               ),
               if (needCloseButton)

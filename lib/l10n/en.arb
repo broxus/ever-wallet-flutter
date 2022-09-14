@@ -330,5 +330,10 @@
   "done": "Done",
   "close_all": "Close All",
   "history_will_appear_here": "Your history will appear here",
-  "clear_all_data": "Clear All Data"
+  "clear_all_data": "Clear All Data",
+  "add_to_bookmarks": "Add to Bookmarks",
+  "site_added_to_bookmarks": "Site added to bookmarks",
+  "bookmark_removed": "Bookmark has been removed",
+  "undo": "Undo",
+  "history_cleared": "History has been cleared"
 }

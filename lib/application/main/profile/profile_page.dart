@@ -101,7 +101,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         final name = await showEWBottomSheet<String?>(
                           context,
                           title: localization.name_new_key,
-                          body: const NameNewKeyModalBody(),
+                          body: (_) => const NameNewKeyModalBody(),
                         );
 
                         await Future<void>.delayed(const Duration(seconds: 1));
@@ -134,7 +134,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               showEWBottomSheet<void>(
                                 context,
                                 title: localization.derive_enter_password,
-                                body: DeriveKeyModalBody(
+                                body: (_) => DeriveKeyModalBody(
                                   publicKey: currentKey.publicKey,
                                   name: name.isNotEmpty ? name : null,
                                 ),
@@ -146,7 +146,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             showEWBottomSheet<void>(
                               context,
                               title: localization.derive_enter_password,
-                              body: DeriveKeyModalBody(
+                              body: (_) => DeriveKeyModalBody(
                                 publicKey: currentKey.publicKey,
                                 name: name.isNotEmpty ? name : null,
                               ),
@@ -167,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           showEWBottomSheet<void>(
                             context,
                             title: context.localization.save_seed_phrase,
-                            body: SeedPhraseExportSheet(phrase: phrase),
+                            body: (_) => SeedPhraseExportSheet(phrase: phrase),
                           );
                         },
                         enterPassword: (seed) {
@@ -176,7 +176,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           showEWBottomSheet<void>(
                             context,
                             title: context.localization.export_enter_password,
-                            body: ExportSeedPhraseModalBody(publicKey: seed.publicKey),
+                            body: (_) => ExportSeedPhraseModalBody(publicKey: seed.publicKey),
                           );
                         },
                       )
@@ -224,7 +224,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           showEWBottomSheet<void>(
                             context,
                             title: localization.biometry,
-                            body: const BiometryModalBody(),
+                            body: (_) => const BiometryModalBody(),
                           );
                         },
                       )
@@ -237,7 +237,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 showEWBottomSheet<void>(
                   context,
                   title: localization.language,
-                  body: const LanguageModalBody(),
+                  body: (_) => const LanguageModalBody(),
                 );
               },
             ),

@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:ever_wallet/application/common/general/default_divider.dart';
+import 'package:ever_wallet/application/common/general/default_list_tile.dart';
+import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/main/browser/back_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/browser_history/browser_history_screen.dart';
 import 'package:ever_wallet/application/main/browser/browser_tabs/browser_tabs_cubit/browser_tabs_cubit.dart';
+import 'package:ever_wallet/application/main/browser/extensions.dart';
 import 'package:ever_wallet/application/main/browser/forward_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/progress_cubit.dart';
 import 'package:ever_wallet/application/main/browser/url_cubit.dart';
@@ -14,10 +18,12 @@ import 'package:ever_wallet/application/main/browser/widgets/browser_search_hist
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
+import 'package:ever_wallet/data/repositories/bookmarks_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:share_plus/share_plus.dart';
 
 /// Appbar without editing url
 class BrowserAppBar extends StatefulWidget {
@@ -149,7 +155,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
               if (url == null || url.isEmpty || url == aboutBlankPage) {
                 return history();
               }
-              return menu();
+              return menu(context);
             },
           ),
         ],
@@ -192,14 +198,104 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
     );
   }
 
-  Widget menu() {
+  Widget menu(BuildContext context) {
     return BrowserIconButton(
-      onPressed: () {},
+      onPressed: () {
+        showEWBottomSheet<void>(
+          context,
+          expand: false,
+          needCloseButton: false,
+          body: _menuBody,
+        );
+      },
       child: const Icon(
         Icons.more_horiz,
         color: ColorsRes.bluePrimary400,
         size: 20,
       ),
+    );
+  }
+
+  Widget _menuBody(BuildContext sheetContext) {
+    final localization = sheetContext.localization;
+    // ignore: prefer_function_declarations_over_variables
+    final closeSheet = () => Navigator.of(sheetContext).pop();
+    final currentTab = widget.tabsCubit.tabs[widget.tabsCubit.currentTabIndex];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        EWListTile(
+          // TODO: implement changing accounts
+          onPressed: () {},
+          leading: Assets.images.wallet.svg(color: ColorsRes.bluePrimary400),
+          titleWidget: Text(
+            localization.change_account,
+            style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+          ),
+        ),
+        const DefaultDivider(),
+        EWListTile(
+          onPressed: () {
+            widget.controller.future.then((c) => c.refresh());
+            closeSheet();
+          },
+          leading: Assets.images.reload.svg(color: ColorsRes.bluePrimary400),
+          titleWidget: Text(
+            localization.reload,
+            style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+          ),
+        ),
+        const DefaultDivider(),
+        EWListTile(
+          onPressed: () {
+            closeSheet();
+            Share.share(currentTab.url);
+          },
+          leading: Assets.images.share.svg(color: ColorsRes.bluePrimary400),
+          titleWidget: Text(
+            localization.share,
+            style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+          ),
+        ),
+        const DefaultDivider(),
+        EWListTile(
+          onPressed: () {
+            final repo = sheetContext.read<BookmarksRepository>();
+            repo
+                .addBookmark(
+              name: currentTab.title ?? '',
+              url: widget.urlCubit.state!,
+            )
+                .then((bookmark) {
+              closeSheet();
+              showFlushbarWithAction(
+                context: context,
+                text: localization.site_added_to_bookmarks,
+                actionText: localization.undo,
+                action: () => repo.deleteBookmark(bookmark.id),
+              );
+            });
+          },
+          leading: Assets.images.browser.star.svg(color: ColorsRes.bluePrimary400),
+          titleWidget: Text(
+            localization.add_to_bookmarks,
+            style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+          ),
+        ),
+        const DefaultDivider(),
+        EWListTile(
+          onPressed: () => Navigator.of(sheetContext).pushReplacement(
+            BrowserHistoryRoute(widget.urlCubit),
+          ),
+          leading: Assets.images.history.svg(color: ColorsRes.bluePrimary400),
+          titleWidget: Text(
+            localization.history,
+            style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+          ),
+        ),
+        const DefaultDivider(),
+      ],
     );
   }
 

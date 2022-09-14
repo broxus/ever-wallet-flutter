@@ -121,17 +121,10 @@ class _BrowserSearchScreenState extends State<BrowserSearchScreen> {
   }
 
   Widget _field(BuildContext context) {
-    final suffixIcon = ValueListenableBuilder<TextEditingValue>(
-      valueListenable: widget.urlController,
-      builder: (_, value, ___) {
-        if (value.text.isEmpty) return const SizedBox.shrink();
-
-        return TextFieldClearButton(
-          focus: widget.urlFocusNode,
-          controller: widget.urlController,
-          iconColor: ColorsRes.bluePrimary400,
-        );
-      },
+    final suffixIcon = TextFieldClearButton(
+      focus: widget.urlFocusNode,
+      controller: widget.urlController,
+      iconColor: ColorsRes.bluePrimary400,
     );
 
     return BrowserSearchField(

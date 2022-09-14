@@ -6,15 +6,15 @@ class BrowserSearchField extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focus;
   final String hintText;
-  final ValueChanged<String> onSubmitted;
+  final ValueChanged<String>? onSubmitted;
   final Widget suffixIcon;
 
   const BrowserSearchField({
     required this.controller,
     required this.focus,
     required this.hintText,
-    required this.onSubmitted,
     required this.suffixIcon,
+    this.onSubmitted,
     Key? key,
   }) : super(key: key);
 

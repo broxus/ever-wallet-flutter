@@ -19,7 +19,7 @@ class BookmarksRepository {
 
   List<Bookmark> get bookmarks => _bookmarksSubject.value;
 
-  Future<void> addBookmark({
+  Future<Bookmark> addBookmark({
     required String name,
     required String url,
   }) async {
@@ -36,6 +36,7 @@ class BookmarksRepository {
     await _hiveSource.putBookmark(bookmark);
 
     _bookmarksSubject.add(_hiveSource.bookmarks);
+    return bookmark;
   }
 
   Future<void> editBookmark({

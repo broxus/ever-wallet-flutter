@@ -203,6 +203,7 @@ class _BrowserPageState extends State<BrowserPage> {
       builder: (context) {
         final localization = context.localization;
         return Dialog(
+          alignment: Alignment.bottomCenter,
           insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 320, maxHeight: 400),

@@ -2,8 +2,10 @@ import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
+import 'package:ever_wallet/application/common/widgets/text_field_clear_button.dart';
 import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/main/browser/utils.dart';
+import 'package:ever_wallet/application/main/browser/widgets/browser_search_field.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
@@ -40,6 +42,15 @@ class BrowserHistoryScreen extends StatefulWidget {
 class _BrowserHistoryScreenState extends State<BrowserHistoryScreen> {
   final timeFormat = DateFormat('HH:mm');
   final dateFormat = DateFormat('EEEE, c MMMM y');
+  final searchController = TextEditingController();
+  final searchFocus = FocusNode();
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    searchFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,57 +59,90 @@ class _BrowserHistoryScreenState extends State<BrowserHistoryScreen> {
 
     return Scaffold(
       backgroundColor: ColorsRes.white,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 70, bottom: 16, right: 16, left: 16),
-              child: Text(
-                localization.history,
-                style: StylesRes.header2Faktum.copyWith(color: ColorsRes.black),
-              ),
-            ),
-          ),
-          StreamProvider<AsyncValue<List<SearchHistoryDto>>>(
-            create: (_) => historyRepo.searchHistoryStream.map((event) => AsyncValue.ready(event)),
-            initialData: const AsyncValue.loading(),
-            catchError: (context, error) => AsyncValue.error(error),
-            builder: (context, child) {
-              final searchHistory = context
-                  .watch<AsyncValue<List<SearchHistoryDto>>>()
-                  .maybeWhen(
-                    ready: (value) => value,
-                    orElse: () => <SearchHistoryDto>[],
-                  )
-                  .reversed
-                  .toList();
-
-              if (searchHistory.isEmpty) {
-                return _emptyHistory(localization.history_will_appear_here);
-              }
-
-              return SliverList(
-                delegate: SliverChildListDelegate(
-                  searchHistory
-                      .mapIndex(
-                        (e, index) => tile(
-                          context: context,
-                          entry: e,
-                          prevTileDate: index == 0 ? null : searchHistory[index - 1].openTime,
-                        ),
-                      )
-                      .toList(),
+      body: GestureDetector(
+        onTap: () => searchFocus.unfocus(),
+        child: StreamProvider<AsyncValue<List<SearchHistoryDto>>>(
+          create: (_) => historyRepo.searchHistoryStream.map((event) => AsyncValue.ready(event)),
+          initialData: const AsyncValue.loading(),
+          catchError: (context, error) => AsyncValue.error(error),
+          builder: (context, child) {
+            final searchHistory = context
+                .watch<AsyncValue<List<SearchHistoryDto>>>()
+                .maybeWhen(
+                  ready: (value) => value,
+                  orElse: () => <SearchHistoryDto>[],
+                )
+                .reversed
+                .toList();
+            return CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 70, bottom: 16, right: 16, left: 16),
+                    child: Text(
+                      localization.history,
+                      style: StylesRes.header2Faktum.copyWith(color: ColorsRes.black),
+                    ),
+                  ),
                 ),
-              );
-            },
-          ),
-        ],
+                if (searchHistory.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16).add(
+                        const EdgeInsets.only(bottom: 16),
+                      ),
+                      child: _searchField(context),
+                    ),
+                  ),
+                if (searchHistory.isEmpty)
+                  _emptyHistory(localization.history_will_appear_here)
+                else
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: searchController,
+                    builder: (context, value, __) {
+                      final history = value.text.isEmpty
+                          ? searchHistory
+                          : searchHistory.where((s) => s.url.contains(value.text)).toList();
+                      return SliverList(
+                        delegate: SliverChildListDelegate(
+                          history
+                              .mapIndex(
+                                (e, index) => tile(
+                                  context: context,
+                                  entry: e,
+                                  prevTileDate: index == 0 ? null : history[index - 1].openTime,
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            );
+          },
+        ),
       ),
       bottomNavigationBar: _historyFooter(
         historyRepo,
         localization.clear_all_data,
         localization.done,
       ),
+    );
+  }
+
+  Widget _searchField(BuildContext context) {
+    final suffixIcon = TextFieldClearButton(
+      focus: searchFocus,
+      controller: searchController,
+      iconColor: ColorsRes.bluePrimary400,
+    );
+
+    return BrowserSearchField(
+      controller: searchController,
+      focus: searchFocus,
+      hintText: context.localization.search,
+      suffixIcon: suffixIcon,
     );
   }
 

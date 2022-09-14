@@ -95,7 +95,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                   PushStateInkWidget(
                     onPressed: () => showEWBottomSheet<void>(
                       context,
-                      body: const AddNewSeedSheet(),
+                      body: (_) => const AddNewSeedSheet(),
                       needCloseButton: false,
                       avoidBottomInsets: false,
                     ),
@@ -140,7 +140,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
               showEWBottomSheet<void>(
                 context,
                 title: localization.enter_new_name,
-                body: RenameKeyModalBody(publicKey: seed.publicKey),
+                body: (_) => RenameKeyModalBody(publicKey: seed.publicKey),
               );
             },
           ),
@@ -155,7 +155,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                 showEWBottomSheet<void>(
                   context,
                   title: context.localization.save_seed_phrase,
-                  body: SeedPhraseExportSheet(phrase: phrase),
+                  body: (_) => SeedPhraseExportSheet(phrase: phrase),
                 );
               },
               enterPassword: (seed) {
@@ -164,7 +164,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                 showEWBottomSheet<void>(
                   context,
                   title: context.localization.export_enter_password,
-                  body: ExportSeedPhraseModalBody(publicKey: seed.publicKey),
+                  body: (_) => ExportSeedPhraseModalBody(publicKey: seed.publicKey),
                 );
               },
             ),
@@ -175,7 +175,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             onTap: () => showEWBottomSheet<void>(
               context,
               title: localization.change_seed_password,
-              body: ChangeSeedPhrasePasswordModalBody(publicKey: seed.publicKey),
+              body: (_) => ChangeSeedPhrasePasswordModalBody(publicKey: seed.publicKey),
             ),
           ),
           MenuDropdownData(
@@ -231,7 +231,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             showEWBottomSheet<void>(
               context,
               title: localization.enter_new_name,
-              body: RenameKeyModalBody(publicKey: seed.publicKey),
+              body: (_) => RenameKeyModalBody(publicKey: seed.publicKey),
             );
           },
         ),
