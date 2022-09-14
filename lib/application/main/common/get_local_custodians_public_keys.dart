@@ -11,6 +11,7 @@ Future<List<String>> getLocalCustodiansPublicKeys({
   required BuildContext context,
   required String address,
 }) async {
+  final keysRepo = context.read<KeysRepository>();
   final tonWalletInfo = await context.read<TonWalletsRepository>().getInfo(address);
 
   final requiresSeparateDeploy = tonWalletInfo.details.requiresSeparateDeploy;
@@ -24,11 +25,11 @@ Future<List<String>> getLocalCustodiansPublicKeys({
 
   final custodians = tonWalletInfo.custodians!;
 
-  final keys = context.read<KeysRepository>().keys;
+  final keys = keysRepo.keys;
 
   final localCustodians = keys.where((e) => custodians.any((el) => el == e.publicKey)).toList();
 
-  final currentKey = context.read<KeysRepository>().currentKey;
+  final currentKey = keysRepo.currentKey;
 
   final initiatorKey = localCustodians.firstWhereOrNull((e) => e == currentKey);
 

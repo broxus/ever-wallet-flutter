@@ -1,4 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
 import 'package:ever_wallet/application/application.dart';
 import 'package:ever_wallet/application/common/general/dialog/default_dialog_controller.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -24,17 +23,26 @@ Future<void> showLogoutDialog({
     onDisagreeClicked: Navigator.pop,
     agreeText: localization.logout,
     onAgreeClicked: (context) async {
-      await context.read<KeysRepository>().clear();
-      await context.read<AccountsRepository>().clear();
-      await context.read<BiometryRepository>().clear();
-      await context.read<TonAssetsRepository>().clear();
-      await context.read<BookmarksRepository>().clear();
-      await context.read<SearchHistoryRepository>().clear();
-      await context.read<SitesMetaDataRepository>().clear();
-      await context.read<TokenCurrenciesRepository>().clear();
+      final keyRepo = context.read<KeysRepository>();
+      final accountsRepo = context.read<AccountsRepository>();
+      final bioRepo = context.read<BiometryRepository>();
+      final tonRepo = context.read<TonAssetsRepository>();
+      final bookmarksRepo = context.read<BookmarksRepository>();
+      final historyRepo = context.read<SearchHistoryRepository>();
+      final metaRepo = context.read<SitesMetaDataRepository>();
+      final tokenRepo = context.read<TokenCurrenciesRepository>();
+      final navigator = Navigator.of(context, rootNavigator: true);
 
-      Navigator.of(context, rootNavigator: true)
-          .pushNamedAndRemoveUntil(AppRouter.onboarding, (route) => false);
+      await keyRepo.clear();
+      await accountsRepo.clear();
+      await bioRepo.clear();
+      await tonRepo.clear();
+      await bookmarksRepo.clear();
+      await historyRepo.clear();
+      await metaRepo.clear();
+      await tokenRepo.clear();
+
+      navigator.pushNamedAndRemoveUntil(AppRouter.onboarding, (route) => false);
     },
   );
 }

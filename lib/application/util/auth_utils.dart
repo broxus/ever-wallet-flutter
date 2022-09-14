@@ -17,20 +17,22 @@ class AuthUtils {
     required PasswordAskAction<List<String>> goExport,
     required PasswordAskAction<KeyStoreEntry> enterPassword,
   }) async {
-    final isEnabled = context.read<BiometryRepository>().status;
-    final isAvailable = context.read<BiometryRepository>().availability;
+    final bioRepo = context.read<BiometryRepository>();
+    final keysRepo = context.read<KeysRepository>();
+    final isEnabled = bioRepo.status;
+    final isAvailable = bioRepo.availability;
 
     if (isAvailable && isEnabled) {
       try {
-        final password = await context.read<BiometryRepository>().getKeyPassword(
-              localizedReason: context.localization.authentication_reason,
-              publicKey: seed.publicKey,
-            );
+        final password = await bioRepo.getKeyPassword(
+          localizedReason: context.localization.authentication_reason,
+          publicKey: seed.publicKey,
+        );
 
-        final phrase = await context.read<KeysRepository>().exportKey(
-              publicKey: seed.publicKey,
-              password: password,
-            );
+        final phrase = await keysRepo.exportKey(
+          publicKey: seed.publicKey,
+          password: password,
+        );
 
         goExport(phrase);
       } catch (err) {

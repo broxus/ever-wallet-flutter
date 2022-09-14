@@ -167,6 +167,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
       if (newPassword.isNotEmpty && (formKey.currentState?.validate() ?? false)) {
         try {
+          if (!mounted) return;
           Navigator.of(context).pop();
 
           await context.read<KeysRepository>().changePassword(
@@ -184,6 +185,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
         } catch (err, st) {
           logger.e(err, err, st);
 
+          if (!mounted) return;
           Navigator.of(context).pop();
 
           if (!mounted) return;
