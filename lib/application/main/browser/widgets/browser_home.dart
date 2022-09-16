@@ -1,5 +1,8 @@
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/general/default_list_tile.dart';
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/main/browser/url_cubit.dart';
+import 'package:ever_wallet/application/main/browser/widgets/longtap_focusable_widget.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
@@ -13,6 +16,7 @@ import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class BrowserHome extends StatefulWidget {
   final UrlCubit? urlCubit;
@@ -191,14 +195,20 @@ class _BrowserHomeState extends State<BrowserHome> {
   }
 
   Widget _popularResourceTile(PopularResources resource) {
-    return _tile(
-      resource.name,
-      resource.url,
-      resource.image.svg(width: 32, height: 32),
+    return LongTapFocusableWidget(
+      backgroundColor: ColorsRes.blue970,
+      onTap: () => widget.urlCubit?.setUrl(resource.url),
+      longTapEnabled: false,
+      menuBuilder: null,
+      child: _tileContent(
+        resource.name,
+        resource.image.svg(width: 32, height: 32),
+      ),
     );
   }
 
   Widget _bookmarkTile(Bookmark bookmark) => FutureProvider<AsyncValue<SiteMetaData>>(
+        key: ValueKey(bookmark.id),
         create: (context) => context
             .read<SitesMetaDataRepository>()
             .getSiteMetaData(bookmark.url)
@@ -212,52 +222,53 @@ class _BrowserHomeState extends State<BrowserHome> {
               );
 
           final image = meta?.image;
-          return _tile(
-            bookmark.name.isEmpty ? (meta?.title ?? bookmark.name) : bookmark.name,
-            bookmark.url,
-            image == null
-                ? const SizedBox.shrink()
-                : CircleAvatar(
-                    child: image.endsWith('svg')
-                        ? SvgPicture.network(image, width: 32, height: 32)
-                        : Image.network(
-                            meta!.image!,
-                            width: 32,
-                            height: 32,
-                            fit: BoxFit.cover,
-                          ),
-                  ),
-            onLongPress: () {},
+          return LongTapFocusableWidget(
+            backgroundColor: ColorsRes.blue970,
+            child: _tileContent(
+              bookmark.name.isEmpty ? (meta?.title ?? bookmark.name) : bookmark.name,
+              image == null
+                  ? const SizedBox.shrink()
+                  : CircleAvatar(
+                      child: image.endsWith('svg')
+                          ? SvgPicture.network(image, width: 32, height: 32)
+                          : Image.network(
+                              meta!.image!,
+                              width: 32,
+                              height: 32,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+            ),
+            onTap: () => widget.urlCubit?.setUrl(bookmark.url),
+            menuBuilder: (context) => _bookmarkLongTapBuilder(
+              context: context,
+              url: bookmark.url,
+              bookmarkId: bookmark.id,
+              bookmarkName: bookmark.name,
+            ),
           );
         },
       );
 
-  Widget _tile(String title, String url, Widget image, {VoidCallback? onLongPress}) {
-    return Material(
-      color: ColorsRes.blue970,
-      child: InkWell(
-        onTap: () => widget.urlCubit?.setUrl(url),
-        onLongPress: onLongPress,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-          child: Row(
-            children: [
-              image,
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  title.overflow,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: StylesRes.captionText.copyWith(
-                    color: ColorsRes.black,
-                    letterSpacing: 0.1,
-                  ),
-                ),
+  Widget _tileContent(String title, Widget image) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      child: Row(
+        children: [
+          image,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              title.overflow,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: StylesRes.captionText.copyWith(
+                color: ColorsRes.black,
+                letterSpacing: 0.1,
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -302,6 +313,47 @@ class _BrowserHomeState extends State<BrowserHome> {
           icon,
         ],
       ),
+    );
+  }
+
+  Widget _bookmarkLongTapBuilder({
+    required BuildContext context,
+    required String url,
+    required String bookmarkName,
+    required int bookmarkId,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        EWListTile(
+          leading: Assets.images.share.svg(color: ColorsRes.bluePrimary400),
+          titleWidget: Text(
+            context.localization.share,
+            style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+            Share.share(url);
+          },
+        ),
+        EWListTile(
+          leading: Assets.images.iconTrash.svg(color: ColorsRes.red400Primary),
+          titleWidget: Text(
+            context.localization.remove,
+            style: StylesRes.regular16.copyWith(color: ColorsRes.red400Primary),
+          ),
+          onPressed: () {
+            final bookRepo = context.read<BookmarksRepository>()..deleteBookmark(bookmarkId);
+            Navigator.of(context).pop();
+            showFlushbarWithAction(
+              context: this.context,
+              text: context.localization.bookmark_removed,
+              action: () => bookRepo.addBookmark(name: bookmarkName, url: url),
+              actionText: context.localization.undo,
+            );
+          },
+        ),
+      ],
     );
   }
 }

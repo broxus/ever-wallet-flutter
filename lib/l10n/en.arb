@@ -335,5 +335,6 @@
   "site_added_to_bookmarks": "Site added to bookmarks",
   "bookmark_removed": "Bookmark has been removed",
   "undo": "Undo",
-  "history_cleared": "History has been cleared"
+  "history_cleared": "History has been cleared",
+  "remove": "Remove"
 }

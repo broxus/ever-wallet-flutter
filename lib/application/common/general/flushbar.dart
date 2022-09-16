@@ -87,6 +87,6 @@ Future<void> showFlushbarWithAction({
     borderRadius: BorderRadius.circular(10),
     backgroundColor: ColorsRes.neutral950,
     margin: const EdgeInsets.symmetric(horizontal: 16) + margin,
-    duration: kFlushbarDisplayDuration,
+    duration: const Duration(seconds: 3),
   )..show(context);
 }
