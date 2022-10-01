@@ -10,7 +10,6 @@ import 'package:ever_wallet/application/main/browser/browser_tabs/browser_tabs_c
 import 'package:ever_wallet/application/main/browser/extensions.dart';
 import 'package:ever_wallet/application/main/browser/forward_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/progress_cubit.dart';
-import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/main/browser/utils.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_app_bar/browser_app_bar_scroll_listener.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_icon_button.dart';
@@ -29,16 +28,16 @@ import 'package:share_plus/share_plus.dart';
 class BrowserAppBar extends StatefulWidget {
   final Completer<InAppWebViewController> controller;
   final TextEditingController urlController;
-  final FocusNode urlFocusNode;
   final BrowserTabsCubit tabsCubit;
-  final UrlCubit urlCubit;
+  final ValueChanged<String> changeUrl;
+  final int tabsCount;
 
   const BrowserAppBar({
-    required this.controller,
     required this.urlController,
-    required this.urlFocusNode,
     required this.tabsCubit,
-    required this.urlCubit,
+    required this.changeUrl,
+    required this.tabsCount,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
@@ -71,7 +70,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
                     height: 2,
                     child: LinearProgressIndicator(
                       color: ColorsRes.bluePrimary400,
-                      value: state.toDouble(),
+                      value: state / 100,
                     ),
                   );
                 },
@@ -119,12 +118,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
         builder: (context, value, __) {
           return GestureDetector(
             onTap: () => Navigator.of(context).push(
-              BrowserSearchRoute(
-                widget.controller,
-                widget.urlFocusNode,
-                widget.urlController,
-                widget.urlCubit,
-              ),
+              BrowserSearchRoute(widget.urlController.text, widget.changeUrl),
             ),
             child: Container(
               height: 48,
@@ -149,10 +143,10 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
   Widget trailing() => Row(
         children: [
           tabs(),
-          BlocBuilder<UrlCubit, String?>(
-            bloc: widget.urlCubit,
-            builder: (context, url) {
-              if (url == null || url.isEmpty || url == aboutBlankPage) {
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: widget.urlController,
+            builder: (context, url, __) {
+              if (url.text.isEmpty || url.text == aboutBlankPage) {
                 return history();
               }
               return menu(context);
@@ -193,7 +187,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
 
   Widget history() {
     return BrowserIconButton(
-      onPressed: () => Navigator.of(context).push(BrowserHistoryRoute(widget.urlCubit)),
+      onPressed: () => Navigator.of(context).push(BrowserHistoryRoute(widget.changeUrl)),
       child: Assets.images.history.svg(width: 20, height: 20),
     );
   }
@@ -220,7 +214,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
     final localization = sheetContext.localization;
     // ignore: prefer_function_declarations_over_variables
     final closeSheet = () => Navigator.of(sheetContext).pop();
-    final currentTab = widget.tabsCubit.tabs[widget.tabsCubit.currentTabIndex];
+    final currentTab = widget.tabsCubit.tabs[widget.tabsCubit.activeTabIndex];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -265,7 +259,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
             repo
                 .addBookmark(
               name: currentTab.title ?? '',
-              url: widget.urlCubit.state!,
+              url: widget.urlController.text,
             )
                 .then((bookmark) {
               closeSheet();
@@ -286,7 +280,7 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
         const DefaultDivider(),
         EWListTile(
           onPressed: () => Navigator.of(sheetContext).pushReplacement(
-            BrowserHistoryRoute(widget.urlCubit),
+            BrowserHistoryRoute(widget.changeUrl),
           ),
           leading: Assets.images.history.svg(color: ColorsRes.bluePrimary400),
           titleWidget: Text(
@@ -298,78 +292,4 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
       ],
     );
   }
-
-// Widget home() => BrowserIconButton(
-//       onPressed: () => widget.controller.future.then((v) => v.goHome()),
-//       icon: PlatformIcons(context).home,
-//     );
-//
-// Widget menu() => BlocBuilder<UrlCubit, Uri?>(
-//       builder: (context, state) {
-//         final url = state;
-//
-//         return CustomPopupMenu(
-//           items: [
-//             reload(),
-//             if (isURL(url.toString())) ...[
-//               share(),
-//               addBookmark(),
-//             ]
-//           ],
-//           icon: Icon(
-//             PlatformIcons(context).ellipsis,
-//             color: CrystalColor.accent,
-//           ),
-//         );
-//       },
-//     );
-
-// CustomPopupItem reload() => CustomPopupItem(
-//       title: Text(
-//         context.localization.reload,
-//         style: const TextStyle(fontSize: 16),
-//       ),
-//       onTap: () => widget.controller.future.then((v) => v.reload()),
-//     );
-//
-// CustomPopupItem share() => CustomPopupItem(
-//       title: Text(
-//         context.localization.share,
-//         style: const TextStyle(fontSize: 16),
-//       ),
-//       onTap: () async {
-//         final url = await widget.controller.future.then((v) => v.getUrl());
-//
-//         if (url == null) return;
-//
-//         Share.share(url.toString());
-//       },
-//     );
-//
-// CustomPopupItem addBookmark() => CustomPopupItem(
-//       title: Text(
-//         context.localization.add_bookmark,
-//         style: const TextStyle(fontSize: 16),
-//       ),
-//       onTap: () async {
-//         final url = await widget.controller.future.then((v) => v.getUrl());
-//
-//         if (!mounted) return;
-//
-//         showAddBookmarkDialog(
-//           context: context,
-//           title: context.localization.add_bookmark,
-//           name: url?.authority,
-//           url: url?.toString(),
-//           onSubmit: ({
-//             required String name,
-//             required String url,
-//           }) =>
-//               context.read<BookmarksRepository>().addBookmark(
-//                     name: name,
-//                     url: url,
-//                   ),
-//         );
-//       },
-//     );
 }

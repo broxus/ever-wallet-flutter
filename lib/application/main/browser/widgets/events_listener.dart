@@ -44,8 +44,7 @@ class _EventsListenerState extends State<EventsListener> {
   PermissionsChangedEvent? prevPermissionsChangedEvent;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
     genericContractsTransactionsSubscription =
         genericContractsTransactionsStream(context.read<GenericContractsRepository>()).listen(
       (event) async => transactionsFoundHandler(
@@ -96,6 +95,7 @@ class _EventsListenerState extends State<EventsListener> {
         controller: await widget.controller.future,
       ),
     );
+    super.initState();
   }
 
   @override

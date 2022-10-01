@@ -1,7 +1,6 @@
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
-import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/main/browser/widgets/longtap_focusable_widget.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -19,10 +18,10 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 class BrowserHome extends StatefulWidget {
-  final UrlCubit? urlCubit;
+  final ValueChanged<String> changeUrl;
 
   const BrowserHome({
-    required this.urlCubit,
+    required this.changeUrl,
     Key? key,
   }) : super(key: key);
 
@@ -197,7 +196,7 @@ class _BrowserHomeState extends State<BrowserHome> {
   Widget _popularResourceTile(PopularResources resource) {
     return LongTapFocusableWidget(
       backgroundColor: ColorsRes.blue970,
-      onTap: () => widget.urlCubit?.setUrl(resource.url),
+      onTap: () => widget.changeUrl(resource.url),
       longTapEnabled: false,
       menuBuilder: null,
       child: _tileContent(
@@ -239,7 +238,7 @@ class _BrowserHomeState extends State<BrowserHome> {
                             ),
                     ),
             ),
-            onTap: () => widget.urlCubit?.setUrl(bookmark.url),
+            onTap: () => widget.changeUrl(bookmark.url),
             menuBuilder: (context) => _bookmarkLongTapBuilder(
               context: context,
               url: bookmark.url,

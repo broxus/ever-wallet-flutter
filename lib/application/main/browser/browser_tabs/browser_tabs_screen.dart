@@ -7,22 +7,20 @@ import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:flutter/material.dart';
-import 'package:validators/validators.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
-class BrowserTabsScreen extends StatefulWidget {
+class BrowserTabsViewerScreen extends StatefulWidget {
   final BrowserTabsCubit tabsCubit;
 
-  const BrowserTabsScreen({
+  const BrowserTabsViewerScreen({
     required this.tabsCubit,
     Key? key,
   }) : super(key: key);
 
   @override
-  State<BrowserTabsScreen> createState() => _BrowserTabsScreenState();
+  State<BrowserTabsViewerScreen> createState() => _BrowserTabsViewerScreenState();
 }
 
-class _BrowserTabsScreenState extends State<BrowserTabsScreen> {
+class _BrowserTabsViewerScreenState extends State<BrowserTabsViewerScreen> {
   static const childAspectRation = 160 / 190;
 
   @override
@@ -44,7 +42,8 @@ class _BrowserTabsScreenState extends State<BrowserTabsScreen> {
         ),
         itemCount: widget.tabsCubit.tabsCount,
         itemBuilder: (_, index) {
-          final tab = widget.tabsCubit.tabs[index];
+          final tabs = widget.tabsCubit.tabs;
+          final tab = tabs[index];
 
           return GestureDetector(
             onTap: () => widget.tabsCubit.openTab(index),
@@ -62,10 +61,11 @@ class _BrowserTabsScreenState extends State<BrowserTabsScreen> {
                         width: itemWidth,
                         height: itemHeight,
                         child: IgnorePointer(
-                          child: DecoratedBox(
+                          child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: index == widget.tabsCubit.currentTabIndex
+                                width: 1.5,
+                                color: index == widget.tabsCubit.activeTabIndex
                                     ? ColorsRes.bluePrimary400
                                     : Colors.transparent,
                               ),
@@ -77,12 +77,13 @@ class _BrowserTabsScreenState extends State<BrowserTabsScreen> {
                                   maxWidth: 400 * childAspectRation,
                                 ),
                                 child: tab.url == aboutBlankPage || tab.url.isEmpty
-                                    ? const BrowserHome(urlCubit: null)
-                                    : WebView(
-                                        initialUrl: isURL(tab.url)
-                                            ? tab.url
-                                            : getDuckDuckGoSearchLink(tab.url),
-                                        backgroundColor: ColorsRes.white,
+                                    ? BrowserHome(changeUrl: (_) {})
+                                    : Container(
+                                        decoration: const BoxDecoration(color: Colors.white),
+                                        width: double.infinity,
+                                        child: tab.screenshot != null
+                                            ? Image.memory(tab.screenshot!, fit: BoxFit.cover)
+                                            : null,
                                       ),
                               ),
                             ),

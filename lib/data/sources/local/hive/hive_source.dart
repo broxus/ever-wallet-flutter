@@ -72,6 +72,7 @@ class HiveSource {
   final _localeKey = 'locale';
   final _browserNeedKey = 'browser_need_key';
   final _browserTabsKey = 'browser_tabs_key';
+  final _browserTabsLastIndexKey = 'browser_tabs_last_index_key';
 
   late final Uint8List _key;
   late final Box<String> _keysPasswordsBox;
@@ -92,7 +93,7 @@ class HiveSource {
   late final Box<SiteMetaDataDto> _sitesMetaDataBox;
   late final Box<CurrencyDto> _currenciesBox;
   late final Box<bool> _browserNeedBox;
-  late final Box<BrowserTabsDto> _browserTabsBox;
+  late final Box<dynamic> _browserTabsBox;
 
   HiveSource._();
 
@@ -416,11 +417,16 @@ class HiveSource {
 
   Future<void> saveWhyNeedBrowser() => _browserNeedBox.put(_browserNeedKey, true);
 
-  BrowserTabsDto get browserTabs =>
-      _browserTabsBox.get(_browserTabsKey) ??
-      const BrowserTabsDto(lastActiveTabIndex: -1, tabs: []);
+  List<BrowserTab> get browserTabs =>
+      (_browserTabsBox.get(_browserTabsKey) as List<dynamic>?)?.cast<BrowserTab>() ??
+      <BrowserTab>[];
 
-  Future<void> saveBrowserTabs(BrowserTabsDto dto) => _browserTabsBox.put(_browserTabsKey, dto);
+  int get browserTabsLastIndex => _browserTabsBox.get(_browserTabsLastIndexKey) as int? ?? -1;
+
+  Future<void> saveBrowserTabs(List<BrowserTab> dto) => _browserTabsBox.put(_browserTabsKey, dto);
+
+  Future<void> saveBrowserTabsLastIndex(int lastIndex) =>
+      _browserTabsBox.put(_browserTabsLastIndexKey, lastIndex);
 
   Future<void> dispose() async {
     await _keysPasswordsBox.close();
@@ -493,7 +499,6 @@ class HiveSource {
       ..tryRegisterAdapter(WalletTypeDtoWalletV3Adapter())
       ..tryRegisterAdapter(WalletTypeDtoMultisigAdapter())
       ..tryRegisterAdapter(BrowserTabAdapter())
-      ..tryRegisterAdapter(BrowserTabsDtoAdapter())
       ..tryRegisterAdapter(SearchHistoryDtoAdapter());
 
     _keysPasswordsBox =

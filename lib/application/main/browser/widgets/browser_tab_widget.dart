@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/main/browser/back_button_enabled_cubit.dart';
+import 'package:ever_wallet/application/main/browser/browser_tabs/browser_tabs_cubit/browser_tabs_cubit.dart';
+import 'package:ever_wallet/application/main/browser/browser_tabs/browser_tabs_cubit/browser_tabs_notifiers.dart';
 import 'package:ever_wallet/application/main/browser/extensions.dart';
 import 'package:ever_wallet/application/main/browser/forward_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/progress_cubit.dart';
@@ -43,95 +44,282 @@ import 'package:ever_wallet/application/main/browser/requests/unpack_from_cell_h
 import 'package:ever_wallet/application/main/browser/requests/unsubscribe_all_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/unsubscribe_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/verify_signature_handler.dart';
-import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/main/browser/utils.dart';
+import 'package:ever_wallet/application/main/browser/widgets/browser_app_bar/browser_app_bar.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_app_bar/browser_app_bar_scroll_listener.dart';
+import 'package:ever_wallet/application/main/browser/widgets/browser_home.dart';
+import 'package:ever_wallet/application/main/browser/widgets/events_listener.dart';
+import 'package:ever_wallet/application/util/colors.dart';
+import 'package:ever_wallet/data/models/search_history_dto.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/approvals_repository.dart';
 import 'package:ever_wallet/data/repositories/generic_contracts_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/permissions_repository.dart';
+import 'package:ever_wallet/data/repositories/search_history_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:ever_wallet/data/repositories/transport_repository.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-class BrowserWebView extends StatefulWidget {
-  final Completer<InAppWebViewController> controller;
-  final TextEditingController urlController;
-  final BrowserAppBarScrollListener browserListener;
-
-  const BrowserWebView({
+class BrowserTabWidget extends StatefulWidget {
+  const BrowserTabWidget({
+    required this.tab,
+    required this.tabsCubit,
     Key? key,
-    required this.controller,
-    required this.urlController,
-    required this.browserListener,
   }) : super(key: key);
 
+  final BrowserTabNotifier tab;
+  final BrowserTabsCubit tabsCubit;
+
   @override
-  State<BrowserWebView> createState() => _BrowserWebViewState();
+  State<BrowserTabWidget> createState() => _BrowserTabWidgetState();
 }
 
-class _BrowserWebViewState extends State<BrowserWebView> {
+class _BrowserTabWidgetState extends State<BrowserTabWidget> {
+  /// This flag allows to avoid loading all tabs simultaneously.
+  /// This flag rising only when tab was loaded with focus or user opened it by clicking in
+  /// tabViewer
+  final _wasTabOpenByUser = ValueNotifier<bool>(false);
+
+  final isShowWebView = ValueNotifier<bool>(false);
   late final pullToRefreshController = PullToRefreshController(
-    onRefresh: () => widget.controller.future.then((v) => v.refresh()),
+    onRefresh: () => controller?.refresh(),
   );
+  final webViewScrollController = StreamController<int>();
+  late StreamSubscription subscription;
+  final browserListener = BrowserAppBarScrollListener();
+  final urlTextController = TextEditingController();
+
+  /// If controller is null (starting page is aboutPage) then url will be changed by [BrowserTabsCubit]
+  /// and controller will be initialized then.
+  InAppWebViewController? controller;
+  final _controllerCompleter = Completer<InAppWebViewController>();
 
   @override
-  Widget build(BuildContext context) => FutureProvider<AsyncValue<String>>(
-        create: (context) => rootBundle
-            .loadString('packages/nekoton_flutter/assets/js/main.js')
-            .then((value) => AsyncValue.ready(value)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
-        builder: (context, child) => context.watch<AsyncValue<String>>().maybeWhen(
-              ready: (value) => InAppWebView(
-                onScrollChanged: (_, __, y) => widget.browserListener.webViewScrolled(y),
-                initialUrlRequest: URLRequest(url: Uri.parse(aboutBlankPage)),
-                initialOptions: InAppWebViewGroupOptions(
-                  crossPlatform: InAppWebViewOptions(
-                    useShouldOverrideUrlLoading: true,
-                    mediaPlaybackRequiresUserGesture: false,
-                    transparentBackground: true,
-                  ),
-                  android: AndroidInAppWebViewOptions(
-                    disableDefaultErrorPage: true,
-                    useHybridComposition: true,
-                  ),
-                  ios: IOSInAppWebViewOptions(
-                    allowsInlineMediaPlayback: true,
+  void initState() {
+    _updateCurrentUrl(widget.tab.tab.url, false);
+
+    subscription = webViewScrollController.stream
+        .throttleTime(const Duration(seconds: 10))
+        .listen((scroll) async {
+      if (isCurrentTabActive) {
+        final size = MediaQuery.of(context).size;
+        final screenshot = await controller!.takeScreenshot(
+          screenshotConfiguration: ScreenshotConfiguration(
+            quality: 5,
+            compressFormat: CompressFormat.JPEG,
+            rect: InAppWebViewRect(
+              height: size.height,
+              width: size.width,
+              x: 0,
+              y: 0,
+            ),
+          ),
+        );
+        // average size of image ~10-20kb
+        widget.tabsCubit.updateCurrentTabData(scroll, screenshot);
+      }
+    });
+
+    widget.tab.addListener(_tabChangedListener);
+    _tabChangedListener();
+    super.initState();
+  }
+
+  void _tabChangedListener() {
+    if (!_wasTabOpenByUser.value && isCurrentTabActive) {
+      _wasTabOpenByUser.value = true;
+    }
+
+    if (widget.tab.tab.url != aboutBlankPage) {
+      isShowWebView.value = true;
+    } else {
+      isShowWebView.value = false;
+    }
+
+    if (isCurrentTabActive) {
+      resumeAll();
+    } else {
+      pauseAll();
+    }
+  }
+
+  bool get isCurrentTabActive => widget.tab.isTabActive;
+
+  @override
+  void dispose() {
+    widget.tab.removeListener(_tabChangedListener);
+    subscription.cancel();
+    webViewScrollController.close();
+    browserListener.dispose();
+    urlTextController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: _wasTabOpenByUser,
+      builder: (_, wasOpened, __) {
+        if (!wasOpened) return const SizedBox();
+
+        return BlocProvider<BackButtonEnabledCubit>(
+          create: (context) => BackButtonEnabledCubit(),
+          child: BlocProvider<ForwardButtonEnabledCubit>(
+            create: (context) => ForwardButtonEnabledCubit(),
+            child: BlocProvider<ProgressCubit>(
+              create: (context) => ProgressCubit(),
+              child: Scaffold(
+                resizeToAvoidBottomInset: false,
+                backgroundColor: ColorsRes.white,
+                body: SafeArea(
+                  child: Stack(
+                    children: [
+                      Positioned.fill(child: body()),
+                      ValueListenableBuilder<double>(
+                        valueListenable: browserListener,
+                        builder: (_, show, __) {
+                          final size = MediaQuery.of(context).size;
+
+                          return Positioned(
+                            top: show,
+                            width: size.width,
+                            child: appBar(),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                initialUserScripts: UnmodifiableListView<UserScript>([
-                  UserScript(
-                    source: value,
-                    injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
-                  ),
-                ]),
-                pullToRefreshController: pullToRefreshController,
-                onWebViewCreated: onWebViewCreated,
-                onLoadStart: onLoadStart,
-                onLoadStop: (controller, url) => onLoadStop(controller, url),
-                onLoadError: onLoadError,
-                onLoadHttpError: onLoadError,
-                onProgressChanged: onProgressChanged,
-                onUpdateVisitedHistory: onUpdateVisitedHistory,
-                androidOnPermissionRequest: androidOnPermissionRequest,
-                shouldOverrideUrlLoading: shouldOverrideUrlLoading,
-                onConsoleMessage: onConsoleMessage,
-              ),
-              orElse: () => Center(
-                child: PlatformCircularProgressIndicator(),
               ),
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// if [isControllerChange] true then update only text and browserTab data
+  /// else update controllers url (ex: it was changed via search bar)
+  void _updateCurrentUrl(String? url, bool isControllerChange) {
+    if (url == null) return;
+
+    if (controller != null && !isControllerChange) {
+      controller!.tryLoadUrl(url);
+    }
+    _updateUrlControllerValue(Uri.parse(url));
+    widget.tabsCubit.updateCurrentTab(url);
+    context
+        .read<SearchHistoryRepository>()
+        .addSearchHistoryEntry(SearchHistoryDto(url: url, openTime: DateTime.now()));
+  }
+
+  Widget appBar() => BrowserAppBar(
+        controller: _controllerCompleter,
+        key: browserListener.browserFlexibleKey,
+        tabsCubit: widget.tabsCubit,
+        urlController: urlTextController,
+        changeUrl: (url) => _updateCurrentUrl(url, false),
+        tabsCount: widget.tabsCubit.tabsCount,
       );
 
-  void onWebViewCreated(InAppWebViewController controller) {
+  Widget body() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: isShowWebView,
+      builder: (_, isShow, __) {
+        return Column(
+          children: [
+            // This displays separately from Expanded to reduce webview re-render
+            ValueListenableBuilder<double>(
+              valueListenable: browserListener,
+              builder: (_, show, __) => SizedBox(
+                height: BrowserAppBarScrollListener.appBarHeight + show,
+              ),
+            ),
+            Expanded(
+              child: IndexedStack(
+                index: isShow ? 0 : 1,
+                children: [
+                  EventsListener(
+                    controller: _controllerCompleter,
+                    child: _webViewBuilder(),
+                  ),
+                  BrowserHome(changeUrl: (url) => _updateCurrentUrl(url, false)),
+                ],
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _webViewBuilder() {
+    return FutureProvider<AsyncValue<String>>(
+      create: (context) => rootBundle
+          .loadString('packages/nekoton_flutter/assets/js/main.js')
+          .then((value) => AsyncValue.ready(value)),
+      initialData: const AsyncValue.loading(),
+      catchError: (context, error) => AsyncValue.error(error),
+      builder: (context, child) => context.watch<AsyncValue<String>>().maybeWhen(
+            ready: (value) => InAppWebView(
+              onScrollChanged: (_, __, y) {
+                webViewScrollController.add(y);
+                browserListener.webViewScrolled(y);
+              },
+              initialUrlRequest: URLRequest(url: Uri.parse(widget.tab.tab.url)),
+              initialOptions: InAppWebViewGroupOptions(
+                crossPlatform: InAppWebViewOptions(
+                  useShouldOverrideUrlLoading: true,
+                  mediaPlaybackRequiresUserGesture: false,
+                  transparentBackground: true,
+                ),
+                android: AndroidInAppWebViewOptions(
+                  disableDefaultErrorPage: true,
+                  useHybridComposition: true,
+                ),
+                ios: IOSInAppWebViewOptions(
+                  allowsInlineMediaPlayback: true,
+                ),
+              ),
+              initialUserScripts: UnmodifiableListView<UserScript>([
+                UserScript(
+                  source: value,
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                ),
+                UserScript(
+                  source: 'window.scrollBy(0, ${widget.tab.tab.lastScrollPosition});',
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
+                ),
+              ]),
+              pullToRefreshController: pullToRefreshController,
+              onWebViewCreated: (c) => onWebViewCreated(context, c),
+              onLoadStart: onLoadStart,
+              onLoadStop: (controller, url) => onLoadStop(controller, url, context),
+              onLoadError: onLoadError,
+              onLoadHttpError: onLoadError,
+              onProgressChanged: (c, p) => onProgressChanged(c, p, context),
+              onUpdateVisitedHistory: onUpdateVisitedHistory,
+              androidOnPermissionRequest: androidOnPermissionRequest,
+              shouldOverrideUrlLoading: shouldOverrideUrlLoading,
+              onConsoleMessage: onConsoleMessage,
+            ),
+            orElse: () => Center(
+              child: PlatformCircularProgressIndicator(),
+            ),
+          ),
+    );
+  }
+
+  void onWebViewCreated(BuildContext context, InAppWebViewController controller) {
     controller.addJavaScriptHandler(
       handlerName: 'requestPermissions',
       callback: (args) => requestPermissionsHandler(
@@ -478,23 +666,23 @@ class _BrowserWebViewState extends State<BrowserWebView> {
       ),
     );
 
-    widget.controller.complete(controller);
+    this.controller = controller;
+    _controllerCompleter.complete(controller);
   }
 
   void onLoadStart(
     InAppWebViewController controller,
     Uri? url,
   ) =>
-      updateUrlControllerValue(url);
+      _updateCurrentUrl(url?.toString(), true);
 
   Future<void> onLoadStop(
     InAppWebViewController controller,
     Uri? url,
+    BuildContext context,
   ) async {
     pullToRefreshController.endRefreshing();
     if (!mounted) return;
-
-    context.read<UrlCubit>().setUrl(url?.toString());
 
     final canGoBack = await controller.canGoBack();
     final canGoForward = await controller.canGoForward();
@@ -504,7 +692,8 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     context.read<BackButtonEnabledCubit>().setIsEnabled(canGoBack);
     context.read<ForwardButtonEnabledCubit>().setIsEnabled(canGoForward);
 
-    updateUrlControllerValue(url);
+    webViewScrollController.add(0);
+    _updateCurrentUrl(url?.toString(), true);
   }
 
   Future<void> onLoadError(
@@ -527,6 +716,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
   void onProgressChanged(
     InAppWebViewController controller,
     int progress,
+    BuildContext context,
   ) {
     if (progress == 100) pullToRefreshController.endRefreshing();
     context.read<ProgressCubit>().setProgress(progress);
@@ -537,7 +727,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     Uri? url,
     bool? androidIsReload,
   ) =>
-      updateUrlControllerValue(url);
+      _updateCurrentUrl(url?.toString(), true);
 
   Future<PermissionRequestResponse?> androidOnPermissionRequest(
     InAppWebViewController controller,
@@ -574,17 +764,46 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     logger.d(message.message, message.message);
   }
 
-  void updateUrlControllerValue(Uri? url) {
+  void _updateUrlControllerValue(Uri? url) {
     var text = url.toString();
 
     if (url == Uri.parse(aboutBlankPage)) {
       text = '';
-    } else {
-      context.read<UrlCubit>().setUrl(text);
     }
-    widget.urlController.value = TextEditingValue(
+
+    urlTextController.value = TextEditingValue(
       text: text,
       selection: TextSelection.collapsed(offset: text.length),
     );
+  }
+
+  void pauseAll() {
+    pause();
+    pauseTimers();
+  }
+
+  void resumeAll() {
+    resume();
+    resumeTimers();
+  }
+
+  void pause() {
+    if (Platform.isAndroid) {
+      controller?.android.pause();
+    }
+  }
+
+  void resume() {
+    if (Platform.isAndroid) {
+      controller?.android.resume();
+    }
+  }
+
+  void pauseTimers() {
+    controller?.pauseTimers();
+  }
+
+  void resumeTimers() {
+    controller?.resumeTimers();
   }
 }

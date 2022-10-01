@@ -1,5 +1,9 @@
 // ignore_for_file: parameter_assignments
+import 'dart:typed_data';
+
+import 'package:ever_wallet/application/main/browser/browser_tabs/browser_tabs_cubit/browser_tabs_notifiers.dart';
 import 'package:ever_wallet/application/main/browser/utils.dart';
+import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/data/models/browser_tabs_dto.dart';
 import 'package:ever_wallet/data/repositories/sites_meta_data_repository.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
@@ -13,91 +17,87 @@ part 'browser_tabs_cubit.freezed.dart';
 class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
   final HiveSource _hiveSource;
   final SitesMetaDataRepository metaDataRepository;
-  final ValueChanged<String> openUrl;
 
-  BrowserTabsCubit(this._hiveSource, this.openUrl, this.metaDataRepository)
-      : _tabsDto = _hiveSource.browserTabs,
-        super(BrowserTabsCubitState.hideTabs(_hiveSource.browserTabs)) {
-    if (_tabsDto.lastActiveTabIndex == -1) {
+  factory BrowserTabsCubit(HiveSource _hiveSource, SitesMetaDataRepository metaDataRepository) {
+    final activeIndex = _hiveSource.browserTabsLastIndex;
+    return BrowserTabsCubit._(
+      _hiveSource,
+      metaDataRepository,
+      BrowserTabsList(
+        _hiveSource.browserTabs
+            .mapIndex((t, i) => BrowserTabNotifier(t, i, i == activeIndex))
+            .toList(),
+        activeIndex,
+      ),
+    );
+  }
+
+  BrowserTabsCubit._(this._hiveSource, this.metaDataRepository, this._tabsDto)
+      : super(
+          BrowserTabsCubitState.hideTabs(_tabsDto, _tabsDto.lastActiveIndex, _tabsDto.tabs.length),
+        ) {
+    if (_tabsDto.lastActiveIndex == -1) {
       openNewTab();
     }
   }
 
-  BrowserTabsDto _tabsDto;
+  BrowserTabsList _tabsDto;
 
   int get tabsCount => _tabsDto.tabs.length;
 
-  List<BrowserTab> get tabs => _tabsDto.tabs;
+  List<BrowserTab> get tabs => _tabsDto.tabsDto;
 
-  int get currentTabIndex => _tabsDto.lastActiveTabIndex;
+  int get activeTabIndex => _tabsDto.lastActiveIndex;
 
-  BrowserTab get _activeTab => _tabsDto.tabs[_tabsDto.lastActiveTabIndex];
+  BrowserTab get _activeTab => tabs[activeTabIndex];
 
-  void showTabs() => emit(BrowserTabsCubitState.showTabs(_tabsDto));
+  void showTabs() => emit(
+        BrowserTabsCubitState.showTabs(_tabsDto, _tabsDto.lastActiveIndex, _tabsDto.tabs.length),
+      );
 
-  void hideTabs() => emit(BrowserTabsCubitState.hideTabs(_tabsDto));
+  void hideTabs() => emit(
+        BrowserTabsCubitState.hideTabs(_tabsDto, _tabsDto.lastActiveIndex, _tabsDto.tabs.length),
+      );
 
   void openTab(int tabIndex) {
-    _tabsDto = _tabsDto.copyWith(lastActiveTabIndex: tabIndex);
-    _hiveSource.saveBrowserTabs(_tabsDto);
-    openUrl(_activeTab.url);
+    _tabsDto.lastActiveIndex = tabIndex;
+    _hiveSource.saveBrowserTabsLastIndex(tabIndex);
     hideTabs();
   }
 
   void openNewTab() {
-    final tabs = List<BrowserTab>.from(_tabsDto.tabs);
-    tabs.add(const BrowserTab(url: aboutBlankPage, image: '', title: ''));
-    _tabsDto = _tabsDto.copyWith(tabs: tabs, lastActiveTabIndex: tabs.length - 1);
-    openUrl(aboutBlankPage);
+    _tabsDto.addTab(
+      const BrowserTab(url: aboutBlankPage, image: '', title: '', lastScrollPosition: 0),
+    );
+    _saveTabs();
+    _saveIndex();
     hideTabs();
   }
 
-  Future<void> updateCurrentTab(String url, [String? image, String? title]) async {
-    if (_tabsDto.lastActiveTabIndex != -1 && _activeTab.url == url) return;
+  Future<void> updateCurrentTab(String url) async {
+    if (activeTabIndex != -1 && _activeTab.url == url) return;
 
-    final tabs = List<BrowserTab>.from(_tabsDto.tabs);
-    if (image == null || title == null) {
-      final meta = await metaDataRepository.getSiteMetaData(url);
-      image = meta.image;
-      title = meta.title;
-    }
-    final tab = BrowserTab(url: url, image: image, title: title);
-    if (tabs.isEmpty) {
-      tabs.add(tab);
-    } else {
-      tabs[_tabsDto.lastActiveTabIndex] = tab;
-    }
-    _tabsDto = _tabsDto.copyWith(tabs: tabs);
-    hideTabs();
+    final meta = await metaDataRepository.getSiteMetaData(url);
+    final image = meta.image;
+    final title = meta.title;
+    final tab = BrowserTab(url: url, image: image, title: title, lastScrollPosition: 0);
+    _tabsDto.updateCurrentTab(tab);
+    _saveTabs();
+  }
+
+  /// Data updates when user scrolls web page, but not every tick.
+  /// Mustn't be called at home page.
+  Future<void> updateCurrentTabData(int scrollPosition, Uint8List? screenshot) async {
+    if (activeTabIndex == -1) return;
+    _tabsDto.updateCurrentTabData(scrollPosition, screenshot);
+    _saveTabs();
   }
 
   void closeTab(int tabIndex) {
-    final prevIndex = _tabsDto.lastActiveTabIndex;
-    final tabs = List<BrowserTab>.from(_tabsDto.tabs);
-    tabs.removeAt(tabIndex);
-
-    int newIndex;
-    // "!" - deleted, "." - current
-    // 0, .1, !2 - index didn't change
-    if (prevIndex < tabIndex) {
-      newIndex = prevIndex;
-      // 0, !1, .2 - index moved to deleted position (all tabs shifted)
-    } else if (tabs.length > tabIndex) {
-      newIndex = tabIndex;
-      // 0, .!1 or .!0, 1 - select last tab
-    } else if (tabs.isNotEmpty) {
-      newIndex = tabs.length - 1;
-      // no tabs in list
-    } else {
-      newIndex = -1;
-    }
-
-    _tabsDto = _tabsDto.copyWith(
-      tabs: tabs,
-      lastActiveTabIndex: newIndex,
-    );
+    final newIndex = _tabsDto.removeTab(tabIndex);
     if (newIndex != -1) {
-      openUrl(_activeTab.url);
+      _saveTabs();
+      _saveIndex();
       showTabs();
     } else {
       openNewTab();
@@ -105,15 +105,29 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
   }
 
   void closeAllTabs() {
-    _tabsDto = _tabsDto.copyWith(lastActiveTabIndex: -1, tabs: []);
-    _hiveSource.saveBrowserTabs(_tabsDto);
+    _tabsDto.closeAllTabs();
     openNewTab();
   }
+
+  /// TODO: add saving via stream with throttle or optimize saving
+  void _saveTabs() => _hiveSource.saveBrowserTabs(tabs);
+
+  void _saveIndex() => _hiveSource.saveBrowserTabsLastIndex(activeTabIndex);
 }
 
 @freezed
 class BrowserTabsCubitState with _$BrowserTabsCubitState {
-  const factory BrowserTabsCubitState.showTabs(BrowserTabsDto tabs) = _ShowTabs;
+  /// [currentIndex] and [tabsCount] is used to simulate state changing
+  const factory BrowserTabsCubitState.showTabs(
+    BrowserTabsList tabs,
+    int currentIndex,
+    int tabsCount,
+  ) = _ShowTabs;
 
-  const factory BrowserTabsCubitState.hideTabs(BrowserTabsDto tabs) = _HideTabs;
+  /// [currentIndex] and [tabsCount] is used to simulate state changing
+  const factory BrowserTabsCubitState.hideTabs(
+    BrowserTabsList tabs,
+    int currentIndex,
+    int tabsCount,
+  ) = _HideTabs;
 }

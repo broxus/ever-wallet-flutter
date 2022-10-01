@@ -2,6 +2,7 @@ import 'package:ever_wallet/application/application_injection.dart';
 import 'package:ever_wallet/application/application_localization.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/main/app_lifecycle_wrapper.dart';
+import 'package:ever_wallet/application/main/browser/browser_page.dart';
 import 'package:ever_wallet/application/main/main_screen.dart';
 import 'package:ever_wallet/application/onboarding/start_screen/onboarding_screen.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -18,7 +19,7 @@ class AppRouter {
   static String main = 'main';
 
   static final Map<String, Route Function(Object?)> routes = {
-    AppRouter.onboarding: (_) => MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+    AppRouter.onboarding: (_) => MaterialPageRoute(builder: (_) => const BrowserPage()),
     AppRouter.main: (_) => MainScreenRoute(),
   };
 }

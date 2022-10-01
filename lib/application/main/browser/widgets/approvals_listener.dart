@@ -39,8 +39,8 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
   late final StreamSubscription _streamSubscription;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
     _streamSubscription = context.read<ApprovalsRepository>().approvalsStream.listen(
           (event) => event.when(
             requestPermissions: (
