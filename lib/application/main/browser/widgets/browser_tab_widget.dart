@@ -83,7 +83,7 @@ class BrowserTabWidget extends StatefulWidget {
   State<BrowserTabWidget> createState() => _BrowserTabWidgetState();
 }
 
-class _BrowserTabWidgetState extends State<BrowserTabWidget> {
+class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBindingObserver {
   /// This flag allows to avoid loading all tabs simultaneously.
   /// This flag rising only when tab was loaded with focus or user opened it by clicking in
   /// tabViewer
@@ -106,6 +106,8 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> {
   @override
   void initState() {
     _updateCurrentUrl(widget.tab.tab.url, false);
+
+    WidgetsBinding.instance.addObserver(this);
 
     subscription = webViewScrollController.stream
         .throttleTime(const Duration(seconds: 10))
@@ -156,6 +158,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     widget.tab.removeListener(_tabChangedListener);
     subscription.cancel();
     webViewScrollController.close();
@@ -171,32 +174,36 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> {
       builder: (_, wasOpened, __) {
         if (!wasOpened) return const SizedBox();
 
-        return BlocProvider<BackButtonEnabledCubit>(
-          create: (context) => BackButtonEnabledCubit(),
-          child: BlocProvider<ForwardButtonEnabledCubit>(
-            create: (context) => ForwardButtonEnabledCubit(),
-            child: BlocProvider<ProgressCubit>(
-              create: (context) => ProgressCubit(),
-              child: Scaffold(
-                resizeToAvoidBottomInset: false,
-                backgroundColor: ColorsRes.white,
-                body: SafeArea(
-                  child: Stack(
-                    children: [
-                      Positioned.fill(child: body()),
-                      ValueListenableBuilder<double>(
-                        valueListenable: browserListener,
-                        builder: (_, show, __) {
-                          final size = MediaQuery.of(context).size;
+        return Listener(
+          onPointerDown: (_) => browserListener.startHolding(),
+          onPointerUp: (_) => browserListener.stopHolding(),
+          child: BlocProvider<BackButtonEnabledCubit>(
+            create: (context) => BackButtonEnabledCubit(),
+            child: BlocProvider<ForwardButtonEnabledCubit>(
+              create: (context) => ForwardButtonEnabledCubit(),
+              child: BlocProvider<ProgressCubit>(
+                create: (context) => ProgressCubit(),
+                child: Scaffold(
+                  resizeToAvoidBottomInset: false,
+                  backgroundColor: ColorsRes.white,
+                  body: SafeArea(
+                    child: Stack(
+                      children: [
+                        Positioned.fill(child: body()),
+                        ValueListenableBuilder<double>(
+                          valueListenable: browserListener,
+                          builder: (_, show, __) {
+                            final size = MediaQuery.of(context).size;
 
-                          return Positioned(
-                            top: show,
-                            width: size.width,
-                            child: appBar(),
-                          );
-                        },
-                      ),
-                    ],
+                            return Positioned(
+                              top: show,
+                              width: size.width,
+                              child: appBar(),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -217,9 +224,12 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> {
     }
     _updateUrlControllerValue(Uri.parse(url));
     widget.tabsCubit.updateCurrentTab(url);
-    context
-        .read<SearchHistoryRepository>()
-        .addSearchHistoryEntry(SearchHistoryDto(url: url, openTime: DateTime.now()));
+
+    if (url != aboutBlankPage) {
+      context
+          .read<SearchHistoryRepository>()
+          .addSearchHistoryEntry(SearchHistoryDto(url: url, openTime: DateTime.now()));
+    }
   }
 
   Widget appBar() => BrowserAppBar(
@@ -235,28 +245,23 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> {
     return ValueListenableBuilder<bool>(
       valueListenable: isShowWebView,
       builder: (_, isShow, __) {
-        return Column(
-          children: [
-            // This displays separately from Expanded to reduce webview re-render
-            ValueListenableBuilder<double>(
-              valueListenable: browserListener,
-              builder: (_, show, __) => SizedBox(
-                height: BrowserAppBarScrollListener.appBarHeight + show,
+        return ValueListenableBuilder<double>(
+          valueListenable: browserListener,
+          builder: (_, show, child) => AnimatedPadding(
+            padding: EdgeInsets.only(top: BrowserAppBarScrollListener.appBarHeight + show),
+            duration: const Duration(milliseconds: 10),
+            child: child,
+          ),
+          child: IndexedStack(
+            index: isShow ? 0 : 1,
+            children: [
+              EventsListener(
+                controller: _controllerCompleter,
+                child: _webViewBuilder(),
               ),
-            ),
-            Expanded(
-              child: IndexedStack(
-                index: isShow ? 0 : 1,
-                children: [
-                  EventsListener(
-                    controller: _controllerCompleter,
-                    child: _webViewBuilder(),
-                  ),
-                  BrowserHome(changeUrl: (url) => _updateCurrentUrl(url, false)),
-                ],
-              ),
-            )
-          ],
+              BrowserHome(changeUrl: (url) => _updateCurrentUrl(url, false)),
+            ],
+          ),
         );
       },
     );
@@ -317,6 +322,23 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> {
             ),
           ),
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        if (isCurrentTabActive) {
+          resumeAll();
+        }
+        break;
+      case AppLifecycleState.paused:
+        pauseAll();
+        break;
+      default:
+        break;
+    }
   }
 
   void onWebViewCreated(BuildContext context, InAppWebViewController controller) {
