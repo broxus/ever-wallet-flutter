@@ -88,7 +88,7 @@ class AccountsRepository {
   }) =>
       _accountsStorage.addAccount(
         AccountToAdd(
-          name: name ?? walletType.describe(),
+          name: name ?? walletType.name,
           publicKey: publicKey,
           contract: walletType,
           workchain: workchain,

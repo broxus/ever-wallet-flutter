@@ -81,6 +81,10 @@ class HiveSource {
 
   Box<CurrencyDto> get _currenciesBox => Hive.box<CurrencyDto>(_currenciesBoxName);
 
+  Box<bool> get _browserNeedBox => Hive.box<bool>(_browserNeedKey);
+
+  Box<BrowserTabsDto> get _browserTabsBox => Hive.box<BrowserTabsDto>(_browserTabsKey);
+
   Stream<Map<String, String>> get seedsStream =>
       _seedsBox.watchAll().map((e) => e.cast<String, String>());
 
@@ -271,8 +275,6 @@ class HiveSource {
 
   Future<void> clearBookmarks() => _bookmarksBox.clear();
 
-  
-  
   Stream<List<SearchHistoryDto>> get searchHistoryStream =>
       _searchHistoryBox.watchAllValues().map((e) => e.toList());
 
@@ -396,9 +398,6 @@ class HiveSource {
       ..tryRegisterAdapter(SearchHistoryDtoAdapter())
       ..tryRegisterAdapter(CurrencyDtoAdapter());
 
-    
-      
-
     await Hive.openBox<String>(_keyPasswordsBoxName, encryptionCipher: HiveAesCipher(key));
     await Hive.openBox<Object?>(_userPreferencesBoxName);
     await Hive.openBox<TokenContractAssetDto>(_systemTokenContractAssetsBoxName);
@@ -413,8 +412,8 @@ class HiveSource {
     await Hive.openBox<String>(_searchHistoryBoxName);
     await Hive.openBox<SiteMetaDataDto>(_siteMetaDataBoxName);
     await Hive.openBox<CurrencyDto>(_currenciesBoxName);
-    await Hive.openBox<CurrencyDto>(_browserNeedKey);
-    await Hive.openBox<CurrencyDto>(_browserTabsKey);
+    await Hive.openBox<bool>(_browserNeedKey);
+    await Hive.openBox<BrowserTabsDto>(_browserTabsKey);
 
     await _migrateStorage();
   }

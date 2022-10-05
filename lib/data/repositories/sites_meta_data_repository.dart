@@ -18,7 +18,7 @@ class SitesMetaDataRepository {
 
     final isUrl = isURL(url);
     final linkPreview = isUrl ? await SimpleLinkPreview.getPreview(url) : null;
-    final favicon = isUrl ? await Favicon.getBest(url) : null;
+    final favicon = isUrl ? await FaviconFinder.getBest(url) : null;
 
     final siteMetaData = SiteMetaData(
       url: url,
