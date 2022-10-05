@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 
 class PrimaryIconButton extends StatelessWidget {
   const PrimaryIconButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.onPressed,
     this.innerPadding = const EdgeInsets.all(8),
     this.outerPadding = const EdgeInsets.all(8),
     this.backgroundColor = Colors.transparent,
     this.presstateColor = ColorsRes.neutral750,
-  }) : super(key: key);
+  });
 
   final Widget icon;
   final VoidCallback? onPressed;

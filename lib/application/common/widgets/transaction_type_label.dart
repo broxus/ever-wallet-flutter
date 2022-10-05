@@ -6,11 +6,11 @@ class TransactionTypeLabel extends StatelessWidget {
   final BorderRadiusGeometry? borderRadius;
 
   const TransactionTypeLabel({
-    Key? key,
+    super.key,
     required this.text,
     required this.color,
     this.borderRadius,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Container(

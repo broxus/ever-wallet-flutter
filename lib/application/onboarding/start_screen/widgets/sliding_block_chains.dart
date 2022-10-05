@@ -10,7 +10,7 @@ const _tripleRowsPadding = 16.0;
 
 /// Panel of sliding block chains on main screen
 class SlidingBlockChains extends StatefulWidget {
-  const SlidingBlockChains({Key? key}) : super(key: key);
+  const SlidingBlockChains({super.key});
 
   @override
   State<SlidingBlockChains> createState() => _SlidingBlockChainsState();

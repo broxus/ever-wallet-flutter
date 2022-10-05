@@ -10,10 +10,10 @@ class SelectableField extends StatefulWidget {
   final Widget child;
 
   const SelectableField({
-    Key? key,
+    super.key,
     required this.value,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   _SelectableFieldState createState() => _SelectableFieldState();

@@ -1,4 +1,8 @@
+import 'dart:math';
+
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_future_provider.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
 import 'package:ever_wallet/application/common/theme.dart';
@@ -25,7 +29,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -126,6 +130,13 @@ class _ProfilePageState extends State<ProfilePage> {
                               await context.read<KeysRepository>().deriveKey(
                                     name: name.isNotEmpty ? name : null,
                                     publicKey: currentKey.publicKey,
+                                    accountId: context
+                                            .read<KeysRepository>()
+                                            .keys
+                                            .where((e) => e.masterKey == currentKey.publicKey)
+                                            .map((e) => e.accountId)
+                                            .reduce(max) +
+                                        1,
                                     password: password,
                                   );
                             } catch (err) {
@@ -192,7 +203,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     selectedSeed: currentKey,
                     seeds: keys,
                     onAdd: () => Navigator.of(context).push(ManageSeedsRoute()),
-                    onSelect: (seed) => context.read<KeysRepository>().setCurrentKey(seed),
+                    onSelect: (seed) =>
+                        context.read<KeysRepository>().setCurrentKey(seed.publicKey),
                     showAddAction: true,
                   ),
               ],
@@ -204,13 +216,8 @@ class _ProfilePageState extends State<ProfilePage> {
           title: 'Preferences'.toUpperCase(),
           // title: context.localization.wallet_preferences,
           children: [
-            StreamProvider<AsyncValue<bool>>(
-              create: (context) => context
-                  .read<BiometryRepository>()
-                  .availabilityStream
-                  .map((event) => AsyncValue.ready(event)),
-              initialData: const AsyncValue.loading(),
-              catchError: (context, error) => AsyncValue.error(error),
+            AsyncValueStreamProvider<bool>(
+              create: (context) => context.read<BiometryRepository>().availabilityStream,
               builder: (context, child) {
                 final isAvailable = context.watch<AsyncValue<bool>>().maybeWhen(
                       ready: (value) => value,
@@ -459,10 +466,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget buildAppVersion() => Padding(
         padding: const EdgeInsets.only(top: 16),
-        child: FutureProvider<AsyncValue<PackageInfo>>(
-          create: (context) => PackageInfo.fromPlatform().then((value) => AsyncValue.ready(value)),
-          initialData: const AsyncValue.loading(),
-          catchError: (context, error) => AsyncValue.error(error),
+        child: AsyncValueFutureProvider<PackageInfo>(
+          create: (context) => PackageInfo.fromPlatform(),
           builder: (context, child) => context.watch<AsyncValue<PackageInfo>>().maybeWhen(
                 ready: (value) {
                   final version = value.version;

@@ -48,7 +48,5 @@ app.*.map.json
 *.freezed.dart
 
 # Private data
-*.env
 GoogleService-Info.plist
 google-services.json
-pubspec.lock

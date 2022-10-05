@@ -30,7 +30,7 @@ class ManageSeedsRoute extends MaterialPageRoute<void> {
 }
 
 class ManageSeedsScreen extends StatefulWidget {
-  const ManageSeedsScreen({Key? key}) : super(key: key);
+  const ManageSeedsScreen({super.key});
 
   @override
   State<ManageSeedsScreen> createState() => _ManageSeedsScreenState();
@@ -170,7 +170,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
         MenuDropdownData(
           // TODO: replace text
           title: 'Use this seed',
-          onTap: () => context.read<KeysRepository>().setCurrentKey(seed),
+          onTap: () => context.read<KeysRepository>().setCurrentKey(seed.publicKey),
         ),
         MenuDropdownData(
           title: localization.rename,

@@ -7,34 +7,34 @@ import 'package:tuple/tuple.dart';
 
 extension KnownPayloadX on KnownPayload {
   Tuple2<String, Map<String, String>>? toRepresentableData(BuildContext context) => when(
-        comment: (value) => value.isNotEmpty
+        comment: (data) => data.isNotEmpty
             ? Tuple2(
                 AppLocalizations.of(context)!.comment,
                 {
-                  AppLocalizations.of(context)!.comment: value,
+                  AppLocalizations.of(context)!.comment: data,
                 },
               )
             : null,
-        tokenOutgoingTransfer: (tokenOutgoingTransfer) => Tuple2(
+        tokenOutgoingTransfer: (data) => Tuple2(
           AppLocalizations.of(context)!.token_incoming_transfer,
           {
-            ...tokenOutgoingTransfer.to.when(
-              ownerWallet: (address) => {
-                AppLocalizations.of(context)!.owner_wallet: address,
+            ...data.to.when(
+              ownerWallet: (data) => {
+                AppLocalizations.of(context)!.owner_wallet: data,
               },
-              tokenWallet: (address) => {
-                AppLocalizations.of(context)!.token_wallet: address,
+              tokenWallet: (data) => {
+                AppLocalizations.of(context)!.token_wallet: data,
               },
             ),
-            AppLocalizations.of(context)!.tokens: tokenOutgoingTransfer.tokens,
+            AppLocalizations.of(context)!.tokens: data.tokens,
           },
         ),
-        tokenSwapBack: (tokenSwapBack) => Tuple2(
+        tokenSwapBack: (data) => Tuple2(
           AppLocalizations.of(context)!.token_swap_back,
           {
-            AppLocalizations.of(context)!.tokens: tokenSwapBack.tokens,
-            AppLocalizations.of(context)!.callback_address: tokenSwapBack.callbackAddress,
-            AppLocalizations.of(context)!.callback_payload: tokenSwapBack.callbackPayload,
+            AppLocalizations.of(context)!.tokens: data.tokens,
+            AppLocalizations.of(context)!.callback_address: data.callbackAddress,
+            AppLocalizations.of(context)!.callback_payload: data.callbackPayload,
           },
         ),
       );
@@ -46,43 +46,42 @@ extension WalletInteractionMethodX on WalletInteractionMethod {
           AppLocalizations.of(context)!.wallet_v3_transfer,
           <String, String>{},
         ),
-        multisig: (multisigTransaction) => multisigTransaction.when(
-          send: (multisigSendTransaction) => Tuple2(
+        multisig: (data) => data.when(
+          send: (data) => Tuple2(
             AppLocalizations.of(context)!.multisig_send_transaction,
             {
-              AppLocalizations.of(context)!.destination: multisigSendTransaction.dest,
+              AppLocalizations.of(context)!.destination: data.dest,
               AppLocalizations.of(context)!.value:
-                  '${multisigSendTransaction.value.toTokens().removeZeroes().formatValue()} $kEverTicker',
-              AppLocalizations.of(context)!.bounce: multisigSendTransaction.bounce
+                  '${data.value.toTokens().removeZeroes().formatValue()} $kEverTicker',
+              AppLocalizations.of(context)!.bounce: data.bounce
                   ? AppLocalizations.of(context)!.yes
                   : AppLocalizations.of(context)!.no,
-              AppLocalizations.of(context)!.flags: multisigSendTransaction.flags.toString(),
-              AppLocalizations.of(context)!.payload: multisigSendTransaction.payload,
+              AppLocalizations.of(context)!.flags: data.flags.toString(),
+              AppLocalizations.of(context)!.payload: data.payload,
             },
           ),
-          submit: (multisigSubmitTransaction) => Tuple2(
+          submit: (data) => Tuple2(
             AppLocalizations.of(context)!.multisig_submit_transaction,
             {
-              AppLocalizations.of(context)!.custodian: multisigSubmitTransaction.custodian,
-              AppLocalizations.of(context)!.destination: multisigSubmitTransaction.dest,
+              AppLocalizations.of(context)!.custodian: data.custodian,
+              AppLocalizations.of(context)!.destination: data.dest,
               AppLocalizations.of(context)!.value:
-                  '${multisigSubmitTransaction.value.toTokens().removeZeroes().formatValue()} $kEverTicker',
-              AppLocalizations.of(context)!.bounce: multisigSubmitTransaction.bounce
+                  '${data.value.toTokens().removeZeroes().formatValue()} $kEverTicker',
+              AppLocalizations.of(context)!.bounce: data.bounce
                   ? AppLocalizations.of(context)!.yes
                   : AppLocalizations.of(context)!.no,
-              AppLocalizations.of(context)!.all_balance: multisigSubmitTransaction.allBalance
+              AppLocalizations.of(context)!.all_balance: data.allBalance
                   ? AppLocalizations.of(context)!.yes
                   : AppLocalizations.of(context)!.no,
-              AppLocalizations.of(context)!.payload: multisigSubmitTransaction.payload,
-              AppLocalizations.of(context)!.transaction_id: multisigSubmitTransaction.transId,
+              AppLocalizations.of(context)!.payload: data.payload,
+              AppLocalizations.of(context)!.transaction_id: data.transId,
             },
           ),
-          confirm: (multisigConfirmTransaction) => Tuple2(
+          confirm: (data) => Tuple2(
             AppLocalizations.of(context)!.multisig_confirm_transaction,
             {
-              AppLocalizations.of(context)!.custodian: multisigConfirmTransaction.custodian,
-              AppLocalizations.of(context)!.transaction_id:
-                  multisigConfirmTransaction.transactionId,
+              AppLocalizations.of(context)!.custodian: data.custodian,
+              AppLocalizations.of(context)!.transaction_id: data.transactionId,
             },
           ),
         ),

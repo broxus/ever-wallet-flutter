@@ -9,12 +9,11 @@ class BrowserIconButton extends StatelessWidget {
   final Widget? child;
 
   const BrowserIconButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.icon,
     this.child,
-  })  : assert(icon == null && child != null || icon != null && child == null),
-        super(key: key);
+  }) : assert(icon == null && child != null || icon != null && child == null);
 
   @override
   Widget build(BuildContext context) {

@@ -16,14 +16,14 @@ class ProfileCarousel extends StatefulWidget {
   final void Function(int)? onPageSelected;
 
   const ProfileCarousel({
-    Key? key,
+    super.key,
     required this.accounts,
     this.loading = false,
     this.initialIndex = 0,
     this.onScrollStart,
     this.onPageChanged,
     this.onPageSelected,
-  }) : super(key: key);
+  });
 
   @override
   _ProfileCarouselState createState() => _ProfileCarouselState();
@@ -89,6 +89,8 @@ class _ProfileCarouselState extends State<ProfileCarousel> {
           (e) => WalletCard(
             key: ValueKey(e.address),
             address: e.address,
+            publicKey: e.publicKey,
+            walletType: e.tonWallet.contract,
           ),
         )
         .toList();

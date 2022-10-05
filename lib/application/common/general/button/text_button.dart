@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class TextPrimaryButton extends StatelessWidget {
   const TextPrimaryButton({
     required this.onPressed,
-    Key? key,
+    super.key,
     this.text,
     this.style,
     this.child,
@@ -18,7 +18,7 @@ class TextPrimaryButton extends StatelessWidget {
     this.pressStateColor,
     this.fillWidth = true,
     this.icon,
-  }) : super(key: key);
+  });
 
   factory TextPrimaryButton.appBar({
     required VoidCallback onPressed,

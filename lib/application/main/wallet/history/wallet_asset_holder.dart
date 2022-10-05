@@ -9,12 +9,12 @@ class WalletAssetHolder extends StatelessWidget {
   final VoidCallback onTap;
 
   const WalletAssetHolder({
-    Key? key,
+    super.key,
     required this.icon,
     required this.balance,
     required this.balanceUsdt,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Material(

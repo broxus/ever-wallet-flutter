@@ -24,7 +24,7 @@ class SeedPhraseInput extends StatelessWidget {
   final Color? enabledBorderColor;
 
   const SeedPhraseInput({
-    Key? key,
+    super.key,
     required this.controller,
     required this.focus,
     required this.requestNextField,
@@ -35,7 +35,7 @@ class SeedPhraseInput extends StatelessWidget {
     this.suggestionBackground,
     this.textStyle,
     this.enabledBorderColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

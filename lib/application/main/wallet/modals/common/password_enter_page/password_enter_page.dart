@@ -20,11 +20,11 @@ class PasswordEnterPage extends StatefulWidget {
   final void Function(String password) onSubmit;
 
   const PasswordEnterPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.publicKey,
     required this.onSubmit,
-  }) : super(key: key);
+  });
 
   @override
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();

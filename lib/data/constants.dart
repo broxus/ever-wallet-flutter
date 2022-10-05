@@ -1,5 +1,8 @@
-import 'package:ever_wallet/data/models/connection_data.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+
+const kIntensivePollingInterval = Duration(seconds: 2);
+
+const kNextBlockTimeout = Duration(seconds: 60);
 
 const kSubscriptionRefreshTimeout = Duration(seconds: 10);
 
@@ -24,54 +27,4 @@ const kAvailableWallets = [
   WalletType.multisig(MultisigType.bridgeMultisigWallet),
   WalletType.multisig(MultisigType.surfWallet),
   WalletType.walletV3(),
-];
-
-const kNetworkPresets = <ConnectionData>[
-  ConnectionData.jrpc(
-    name: 'Mainnet (ADNL)',
-    group: 'mainnet',
-    endpoint: 'https://jrpc.everwallet.net/rpc',
-  ),
-  ConnectionData.gql(
-    name: 'Mainnet (GQL)',
-    group: 'mainnet',
-    endpoints: [
-      'https://eri01.main.everos.dev/graphql',
-      'https://gra01.main.everos.dev/graphql',
-      'https://gra02.main.everos.dev/graphql',
-      'https://lim01.main.everos.dev/graphql',
-      'https://rbx01.main.everos.dev/graphql',
-    ],
-    timeout: 60000,
-    local: false,
-  ),
-  ConnectionData.gql(
-    name: 'Testnet',
-    group: 'testnet',
-    endpoints: [
-      'https://eri01.net.everos.dev/graphql',
-      'https://rbx01.net.everos.dev/graphql',
-      'https://gra01.net.everos.dev/graphql',
-    ],
-    timeout: 60000,
-    local: false,
-  ),
-  ConnectionData.gql(
-    name: 'fld.ton.dev',
-    group: 'fld',
-    endpoints: [
-      'https://gql.custler.net/graphql',
-    ],
-    timeout: 60000,
-    local: false,
-  ),
-  ConnectionData.gql(
-    name: 'Local node',
-    group: 'localnet',
-    endpoints: [
-      'http://127.0.0.1/graphql',
-    ],
-    timeout: 60000,
-    local: false,
-  ),
 ];

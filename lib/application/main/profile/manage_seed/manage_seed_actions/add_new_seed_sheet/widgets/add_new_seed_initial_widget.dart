@@ -15,8 +15,8 @@ class AddNewSeedInitialWidget extends StatefulWidget {
     required this.action,
     required this.savedName,
     required this.savedType,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String? savedName;
   final AddNewSeedType? savedType;

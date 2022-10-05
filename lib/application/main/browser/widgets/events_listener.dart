@@ -1,13 +1,9 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:ever_wallet/application/bloc/provider/generic_contracts_state_changes_stream.dart';
-import 'package:ever_wallet/application/bloc/provider/generic_contracts_transactions_stream.dart';
-import 'package:ever_wallet/application/bloc/provider/logged_out_stream.dart';
-import 'package:ever_wallet/application/bloc/provider/network_changes_stream.dart';
-import 'package:ever_wallet/application/bloc/provider/permissions_stream.dart';
 import 'package:ever_wallet/application/main/browser/events/contract_state_changed_handler.dart';
 import 'package:ever_wallet/application/main/browser/events/logged_out_handler.dart';
+import 'package:ever_wallet/application/main/browser/events/models/network_changed_event.dart';
 import 'package:ever_wallet/application/main/browser/events/models/permissions_changed_event.dart';
 import 'package:ever_wallet/application/main/browser/events/network_changed_handler.dart';
 import 'package:ever_wallet/application/main/browser/events/permissions_changed_handler.dart';
@@ -20,16 +16,17 @@ import 'package:ever_wallet/data/repositories/transport_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:tuple/tuple.dart';
 
 class EventsListener extends StatefulWidget {
   final Completer<InAppWebViewController> controller;
   final Widget child;
 
   const EventsListener({
-    Key? key,
+    super.key,
     required this.controller,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   State<EventsListener> createState() => _EventsListenerState();
@@ -47,36 +44,57 @@ class _EventsListenerState extends State<EventsListener> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     genericContractsTransactionsSubscription =
-        genericContractsTransactionsStream(context.read<GenericContractsRepository>()).listen(
-      (event) async => transactionsFoundHandler(
-        controller: await widget.controller.future,
-        event: event,
-      ),
-    );
+        context.read<GenericContractsRepository>().tabTransactionsStream(0).listen(
+              (event) async => transactionsFoundHandler(
+                controller: await widget.controller.future,
+                event: event,
+              ),
+            );
 
     genericContractsStateChangesSubscription =
-        genericContractsStateChangesStream(context.read<GenericContractsRepository>()).listen(
-      (event) async => contractStateChangedHandler(
-        controller: await widget.controller.future,
-        event: event,
-      ),
-    );
+        context.read<GenericContractsRepository>().tabStateChangesStream(0).listen(
+              (event) async => contractStateChangedHandler(
+                controller: await widget.controller.future,
+                event: event,
+              ),
+            );
 
-    networkChangesSubscription = networkChangesStream(context.read<TransportRepository>()).listen(
-      (event) async => networkChangedHandler(
-        controller: await widget.controller.future,
-        event: event,
-      ),
-    );
+    networkChangesSubscription = context
+        .read<TransportRepository>()
+        .transportStream
+        .map(
+          (e) => NetworkChangedEvent(
+            selectedConnection: e.name,
+          ),
+        )
+        .listen(
+          (event) async => networkChangedHandler(
+            controller: await widget.controller.future,
+            event: event,
+          ),
+        );
 
-    permissionsSubscription =
-        permissionsStream(context.read<PermissionsRepository>()).listen((event) async {
+    permissionsSubscription = context
+        .read<PermissionsRepository>()
+        .permissionsStream
+        .map(
+          (e) => e.entries
+              .map(
+                (e) => Tuple2(
+                  e.key,
+                  PermissionsChangedEvent(
+                    permissions: e.value,
+                  ),
+                ),
+              )
+              .toList(),
+        )
+        .listen((e) async {
       final controller = await widget.controller.future;
 
       final currentOrigin = await controller.getOrigin();
 
-      final permissionsChangedEvent =
-          event.firstWhereOrNull((e) => e.item1 == currentOrigin)?.item2;
+      final permissionsChangedEvent = e.firstWhereOrNull((el) => el.item1 == currentOrigin)?.item2;
 
       if (permissionsChangedEvent == null ||
           permissionsChangedEvent == prevPermissionsChangedEvent) {
@@ -91,11 +109,12 @@ class _EventsListenerState extends State<EventsListener> {
       );
     });
 
-    loggedOutSubscription = loggedOutStream(context.read<KeysRepository>()).listen(
-      (event) async => loggedOutHandler(
-        controller: await widget.controller.future,
-      ),
-    );
+    loggedOutSubscription =
+        context.read<KeysRepository>().keysStream.where((e) => e.isEmpty).listen(
+              (event) async => loggedOutHandler(
+                controller: await widget.controller.future,
+              ),
+            );
   }
 
   @override

@@ -14,9 +14,9 @@ class RenameKeyModalBody extends StatefulWidget {
   final String publicKey;
 
   const RenameKeyModalBody({
-    Key? key,
+    super.key,
     required this.publicKey,
-  }) : super(key: key);
+  });
 
   @override
   _RenameKeyModalBodyState createState() => _RenameKeyModalBodyState();

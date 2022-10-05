@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:ever_wallet/application/bloc/utils.dart';
 import 'package:ever_wallet/application/common/form/ew_field_state.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
-import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'password_input_form_bloc.freezed.dart';

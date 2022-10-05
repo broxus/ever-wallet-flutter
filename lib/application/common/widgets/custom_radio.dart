@@ -7,11 +7,11 @@ class CustomRadio<T> extends StatelessWidget {
   final void Function(T?)? onChanged;
 
   const CustomRadio({
-    Key? key,
+    super.key,
     this.value,
     this.groupValue,
     this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Radio<T?>(

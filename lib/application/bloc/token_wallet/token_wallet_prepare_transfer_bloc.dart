@@ -1,7 +1,7 @@
-import 'dart:convert';
-
 import 'package:bloc/bloc.dart';
 import 'package:ever_wallet/application/bloc/utils.dart';
+import 'package:ever_wallet/data/constants.dart';
+import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
 import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -46,22 +46,17 @@ class TokenWalletPrepareTransferBloc
             destination: internalMessage.destination,
             amount: internalMessage.amount,
             body: internalMessage.body,
+            bounce: kMessageBounce,
           );
-
-          await unsignedMessage.refreshTimeout();
-
-          final signature = base64.encode(List.generate(kSignatureLength, (_) => 0));
-
-          final signedMessage = await unsignedMessage.sign(signature);
 
           final fees = await _tonWalletsRepository.estimateFees(
             address: _owner,
-            signedMessage: signedMessage,
+            unsignedMessageWithAdditionalInfo: unsignedMessage,
           );
           final feesValue = int.parse(fees);
 
           final balance =
-              await _tonWalletsRepository.getInfo(_owner).then((v) => v.contractState.balance);
+              await _tonWalletsRepository.contractState(_owner).then((value) => value.balance);
           final balanceValue = int.parse(balance);
 
           final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);
@@ -101,7 +96,7 @@ class TokenWalletPrepareTransferState with _$TokenWalletPrepareTransferState {
   const factory TokenWalletPrepareTransferState.loading() = _Loading;
 
   const factory TokenWalletPrepareTransferState.ready({
-    required UnsignedMessage unsignedMessage,
+    required UnsignedMessageWithAdditionalInfo unsignedMessage,
     required String fees,
   }) = _Ready;
 

@@ -1,5 +1,6 @@
 import 'package:ever_wallet/application/bloc/account/current_account_cubit.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/widgets/animated_appearance.dart';
 import 'package:ever_wallet/application/common/widgets/sliding_panel.dart';
 import 'package:ever_wallet/application/main/wallet/widgets/connection_button.dart';
@@ -11,15 +12,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:provider/provider.dart';
 
 class WalletBody extends StatefulWidget {
   final PanelController modalController;
 
   const WalletBody({
-    Key? key,
+    super.key,
     required this.modalController,
-  }) : super(key: key);
+  });
 
   @override
   State<WalletBody> createState() => _WalletBodyState();
@@ -56,13 +56,8 @@ class _WalletBodyState extends State<WalletBody> {
               AnimatedAppearance(
                 duration: const Duration(milliseconds: 250),
                 offset: const Offset(1, 0),
-                child: StreamProvider<AsyncValue<List<AssetsList>>>(
-                  create: (context) => context
-                      .read<AccountsRepository>()
-                      .currentAccountsStream
-                      .map((event) => AsyncValue.ready(event)),
-                  initialData: const AsyncValue.loading(),
-                  catchError: (context, error) => AsyncValue.error(error),
+                child: AsyncValueStreamProvider<List<AssetsList>>(
+                  create: (context) => context.read<AccountsRepository>().currentAccountsStream,
                   builder: (context, child) {
                     final accounts = context.watch<AsyncValue<List<AssetsList>>>().maybeWhen(
                           ready: (value) => value,

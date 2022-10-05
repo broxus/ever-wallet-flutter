@@ -5,9 +5,9 @@ class CustomCloseButton extends StatelessWidget {
   final void Function()? onPressed;
 
   const CustomCloseButton({
-    Key? key,
+    super.key,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => CustomIconButton(

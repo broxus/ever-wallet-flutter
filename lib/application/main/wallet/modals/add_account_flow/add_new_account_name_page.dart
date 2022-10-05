@@ -15,10 +15,10 @@ class AddNewAccountNamePage extends StatefulWidget {
   final String publicKey;
 
   const AddNewAccountNamePage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.publicKey,
-  }) : super(key: key);
+  });
 
   @override
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();

@@ -1,5 +1,5 @@
-import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/theme.dart';
@@ -9,170 +9,79 @@ import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/common/widgets/transaction_type_label.dart';
 import 'package:ever_wallet/application/main/common/extensions.dart';
 import 'package:ever_wallet/application/main/wallet/modals/utils.dart';
+import 'package:ever_wallet/data/models/ton_wallet_multisig_expired_transaction.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class TonWalletMultisigExpiredTransactionInfoModalBody extends StatelessWidget {
-  final TonWalletTransactionWithData transactionWithData;
-  final String creator;
-  final List<String> confirmations;
-  final String walletAddress;
-  final List<String> custodians;
+  final TonWalletMultisigExpiredTransaction transaction;
 
   const TonWalletMultisigExpiredTransactionInfoModalBody({
-    Key? key,
-    required this.transactionWithData,
-    required this.creator,
-    required this.confirmations,
-    required this.walletAddress,
-    required this.custodians,
-  }) : super(key: key);
+    super.key,
+    required this.transaction,
+  });
 
   @override
-  Widget build(BuildContext context) => StreamProvider<AsyncValue<Map<String, String>>>(
-        create: (context) =>
-            context.read<KeysRepository>().labelsStream.map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget build(BuildContext context) => AsyncValueStreamProvider<Map<String, String>>(
+        create: (context) => context.read<KeysRepository>().labelsStream,
         builder: (context, child) {
           final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => <String, String>{},
               );
 
-          final msgSender = transactionWithData.transaction.inMessage.src;
+          final dePoolOnRoundComplete =
+              transaction.dePoolOnRoundCompleteNotification?.toRepresentableData(context);
 
-          final dataSender = transactionWithData.data?.maybeWhen(
-            walletInteraction: (info) => info.knownPayload?.maybeWhen(
-              tokenSwapBack: (tokenSwapBack) => tokenSwapBack.callbackAddress,
-              orElse: () => null,
-            ),
-            orElse: () => null,
-          );
+          final dePoolReceiveAnswer =
+              transaction.dePoolReceiveAnswerNotification?.toRepresentableData(context);
 
-          final sender = dataSender ?? msgSender;
+          final tokenWalletDeployed =
+              transaction.tokenWalletDeployedNotification?.toRepresentableData(context);
 
-          final msgRecipient = transactionWithData.transaction.outMessages.firstOrNull?.dst;
-
-          final dataRecipient = transactionWithData.data?.maybeWhen(
-            walletInteraction: (info) =>
-                info.knownPayload?.maybeWhen(
-                  tokenOutgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.data,
-                  orElse: () => null,
-                ) ??
-                info.method.maybeWhen(
-                  multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
-                    send: (multisigSendTransaction) => multisigSendTransaction.dest,
-                    submit: (multisigSubmitTransaction) => multisigSubmitTransaction.dest,
-                    orElse: () => null,
-                  ),
-                  orElse: () => null,
-                ) ??
-                info.recipient,
-            orElse: () => null,
-          );
-
-          final recipient = dataRecipient ?? msgRecipient;
-
-          final isOutgoing = recipient != null;
-
-          final msgValue = isOutgoing
-              ? transactionWithData.transaction.outMessages.firstOrNull?.value
-              : transactionWithData.transaction.inMessage.value;
-
-          final dataValue = transactionWithData.data?.maybeWhen(
-            dePoolOnRoundComplete: (notification) => notification.reward,
-            walletInteraction: (info) => info.method.maybeWhen(
-              multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
-                send: (multisigSendTransaction) => multisigSendTransaction.value,
-                submit: (multisigSubmitTransaction) => multisigSubmitTransaction.value,
-                orElse: () => null,
-              ),
-              orElse: () => null,
-            ),
-            orElse: () => null,
-          );
-
-          final value = dataValue ?? msgValue;
-
-          final address = isOutgoing ? recipient : sender;
-
-          final date = transactionWithData.transaction.createdAt.toDateTime();
-
-          final fees = transactionWithData.transaction.totalFees;
-
-          final hash = transactionWithData.transaction.id.hash;
-
-          final comment = transactionWithData.data?.maybeWhen(
-            comment: (value) => value,
-            orElse: () => null,
-          );
-
-          final dePoolOnRoundComplete = transactionWithData.data?.maybeWhen(
-            dePoolOnRoundComplete: (notification) => notification.toRepresentableData(context),
-            orElse: () => null,
-          );
-
-          final dePoolReceiveAnswer = transactionWithData.data?.maybeWhen(
-            dePoolReceiveAnswer: (notification) => notification.toRepresentableData(context),
-            orElse: () => null,
-          );
-
-          final tokenWalletDeployed = transactionWithData.data?.maybeWhen(
-            tokenWalletDeployed: (notification) => notification.toRepresentableData(context),
-            orElse: () => null,
-          );
-
-          final walletInteraction = transactionWithData.data?.maybeWhen(
-            walletInteraction: (info) => info.toRepresentableData(context),
-            orElse: () => null,
-          );
+          final walletInteraction = transaction.walletInteractionInfo?.toRepresentableData(context);
 
           final sections = [
             section(
               [
                 dateItem(
                   context: context,
-                  date: date,
+                  date: transaction.date,
                 ),
-                if (address != null) ...[
-                  addressItem(
-                    context: context,
-                    isOutgoing: isOutgoing,
-                    address: address,
-                  ),
-                ],
+                addressItem(
+                  context: context,
+                  isOutgoing: transaction.isOutgoing,
+                  address: transaction.address,
+                ),
                 hashItem(
                   context: context,
-                  hash: hash,
+                  hash: transaction.hash,
                 ),
               ],
             ),
             section(
               [
-                if (value != null)
-                  amountItem(
-                    context: context,
-                    isOutgoing: isOutgoing,
-                    value: value.toTokens().removeZeroes().formatValue(),
-                  ),
+                amountItem(
+                  context: context,
+                  isOutgoing: transaction.isOutgoing,
+                  value: transaction.value.toTokens().removeZeroes().formatValue(),
+                ),
                 feeItem(
                   context: context,
-                  fees: fees.toTokens().removeZeroes().formatValue(),
+                  fees: transaction.fees.toTokens().removeZeroes().formatValue(),
                 ),
               ],
             ),
-            if (comment != null && comment.isNotEmpty)
+            if (transaction.comment != null && transaction.comment!.isNotEmpty)
               section(
                 [
                   item(
                     title: AppLocalizations.of(context)!.comment,
-                    subtitle: comment,
+                    subtitle: transaction.comment!,
                   ),
                 ],
               ),
@@ -246,7 +155,7 @@ class TonWalletMultisigExpiredTransactionInfoModalBody extends StatelessWidget {
               ),
             section(
               [
-                ...custodians.asMap().entries.map(
+                ...transaction.custodians.asMap().entries.map(
                   (e) {
                     final title = publicKeysLabels[e.value] ??
                         AppLocalizations.of(context)!.custodian_n('${e.key + 1}');
@@ -255,8 +164,8 @@ class TonWalletMultisigExpiredTransactionInfoModalBody extends StatelessWidget {
                       context: context,
                       label: title,
                       publicKey: e.value,
-                      isCreator: e.value == creator,
-                      isSigned: confirmations.contains(e.value),
+                      isCreator: e.value == transaction.creator,
+                      isSigned: transaction.confirmations.contains(e.value),
                     );
                   },
                 ).toList(),
@@ -286,7 +195,7 @@ class TonWalletMultisigExpiredTransactionInfoModalBody extends StatelessWidget {
                     const Gap(16),
                     explorerButton(
                       context: context,
-                      hash: hash,
+                      hash: transaction.hash,
                     ),
                   ],
                 ),

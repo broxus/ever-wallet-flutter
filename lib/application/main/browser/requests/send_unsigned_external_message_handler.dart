@@ -43,7 +43,7 @@ Future<Map<String, dynamic>> sendUnsignedExternalMessageHandler({
 
     Transaction transaction;
 
-    final transport = await transportRepository.transport;
+    final transport = transportRepository.transport;
     final genericContract = await GenericContract.subscribe(
       transport: transport,
       address: repackedRecipient,

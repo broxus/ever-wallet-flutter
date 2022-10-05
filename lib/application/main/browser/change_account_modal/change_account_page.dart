@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/widgets/address_generated_icon.dart';
@@ -10,7 +11,6 @@ import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/main/browser/common/grant_permissions_page.dart';
 import 'package:ever_wallet/application/main/browser/common/selected_account_cubit.dart';
 import 'package:ever_wallet/data/models/permission.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +18,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:provider/provider.dart';
 
 class ChangeAccountPage extends StatefulWidget {
   final BuildContext modalContext;
@@ -26,11 +25,11 @@ class ChangeAccountPage extends StatefulWidget {
   final List<Permission> permissions;
 
   const ChangeAccountPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.origin,
     required this.permissions,
-  }) : super(key: key);
+  });
 
   @override
   _RequestPermissionsModalState createState() => _RequestPermissionsModalState();
@@ -68,13 +67,8 @@ class _RequestPermissionsModalState extends State<ChangeAccountPage> {
         ),
       );
 
-  Widget accounts() => StreamProvider<AsyncValue<List<AssetsList>>>(
-        create: (context) => context
-            .read<AccountsRepository>()
-            .currentAccountsStream
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget accounts() => AsyncValueStreamProvider<List<AssetsList>>(
+        create: (context) => context.read<AccountsRepository>().currentAccountsStream,
         builder: (context, child) {
           final accounts = context.watch<AsyncValue<List<AssetsList>>>().maybeWhen(
                 ready: (value) => value,
@@ -137,21 +131,19 @@ class _RequestPermissionsModalState extends State<ChangeAccountPage> {
         ),
       );
 
-  Widget balance(AssetsList account) => StreamProvider<AsyncValue<TonWalletInfo?>>(
+  Widget balance(AssetsList account) => AsyncValueStreamProvider<String>(
         create: (context) => context
             .read<TonWalletsRepository>()
-            .getInfoStream(account.address)
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+            .contractStateStream(account.address)
+            .map((e) => e.balance),
         builder: (context, child) {
-          final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
+          final balance = context.watch<AsyncValue<String>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => null,
               );
 
           return Text(
-            '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes().formatValue() ?? '0'} $kEverTicker',
+            '${balance?.toTokens().removeZeroes().formatValue() ?? '0'} $kEverTicker',
             style: const TextStyle(
               fontSize: 14,
               color: Colors.grey,

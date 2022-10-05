@@ -24,7 +24,7 @@ Future<Map<String, dynamic>> getProviderStateHandler({
 
     final origin = await controller.getOrigin();
 
-    final transport = await transportRepository.transport;
+    final transport = transportRepository.transport;
 
     const version = kProviderVersion;
     final numericVersion = kProviderVersion.toInt();

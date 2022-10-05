@@ -7,12 +7,12 @@ class AnimatedFadeSlideIn extends StatefulWidget {
   final Widget child;
 
   const AnimatedFadeSlideIn({
-    Key? key,
+    super.key,
     required this.duration,
     required this.delay,
     required this.offset,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   _AnimatedFadeSlideInState createState() => _AnimatedFadeSlideInState();

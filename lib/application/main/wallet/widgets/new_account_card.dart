@@ -1,22 +1,19 @@
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/main/wallet/modals/add_account_flow/start_add_account_flow.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:provider/provider.dart';
 
 class NewAccountCard extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => StreamProvider<AsyncValue<KeyStoreEntry?>>(
-        create: (context) =>
-            context.read<KeysRepository>().currentKeyStream.map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget build(BuildContext context) => AsyncValueStreamProvider<String?>(
+        create: (context) => context.read<KeysRepository>().currentKeyStream,
         builder: (context, child) {
-          final currentKey = context.watch<AsyncValue<KeyStoreEntry?>>().maybeWhen(
+          final currentKey = context.watch<AsyncValue<String?>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => null,
               );
@@ -26,7 +23,7 @@ class NewAccountCard extends StatelessWidget {
               if (currentKey != null) {
                 startAddAccountFlow(
                   context: context,
-                  publicKey: currentKey.publicKey,
+                  publicKey: currentKey,
                 );
               }
             },

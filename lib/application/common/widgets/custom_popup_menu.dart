@@ -13,12 +13,12 @@ class CustomPopupMenu extends StatefulWidget {
   final Widget icon;
 
   const CustomPopupMenu({
-    Key? key,
+    super.key,
     this.portalAnchor = Alignment.topRight,
     this.childAnchor = Alignment.topRight,
     required this.items,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   _CustomPopupMenuState createState() => _CustomPopupMenuState();

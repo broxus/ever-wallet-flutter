@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class DefaultDivider extends StatelessWidget {
   final double bothIndent;
 
-  const DefaultDivider({Key? key, this.bothIndent = 0}) : super(key: key);
+  const DefaultDivider({super.key, this.bothIndent = 0});
 
   @override
   Widget build(BuildContext context) {

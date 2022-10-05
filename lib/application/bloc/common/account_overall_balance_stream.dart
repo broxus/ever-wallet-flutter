@@ -1,8 +1,6 @@
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/models/currency.dart';
-import 'package:ever_wallet/data/models/token_wallet_info.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/token_currencies_repository.dart';
 import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
@@ -20,35 +18,37 @@ Stream<double> accountOverallBalanceStream(
   TokenCurrenciesRepository tokenCurrenciesRepository,
   String address,
 ) =>
-    Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
-      accountsRepository.accountsStream.expand((e) => e).where((e) => e.address == address),
+    Rx.combineLatest2<Transport, AssetsList, Tuple2<Transport, AssetsList>>(
       transportRepository.transportStream,
+      accountsRepository.accountsStream.expand((e) => e).where((e) => e.address == address),
       (a, b) => Tuple2(a, b),
     ).flatMap((v) {
-      final account = v.item1;
-      final transport = v.item2;
+      final transport = v.item1;
+      final account = v.item2;
 
       final tokenWallets = account.additionalAssets[transport.group]?.tokenWallets
               .map((e) => e.rootTokenContract)
               .toList() ??
           [];
 
-      final tonWalletBalanceStream = Rx.combineLatest2<TonWalletInfo?, Currency?, double>(
-        tonWalletsRepository.getInfoStream(account.address),
+      final tonWalletBalanceStream = Rx.combineLatest2<String, Currency?, double>(
+        tonWalletsRepository.contractStateStream(account.address).map((e) => e.balance),
         tokenCurrenciesRepository.currenciesStream
             .expand((e) => e)
             .where((e) => e.address == kAddressForEverCurrency)
             .cast<Currency?>()
             .onErrorReturn(null)
             .startWith(null),
-        (a, b) => a != null && b != null
-            ? double.parse(a.contractState.balance.toTokens()) * double.parse(b.price)
-            : 0,
+        (a, b) => b != null ? double.parse(a.toTokens()) * double.parse(b.price) : 0,
       );
 
       final tokenWalletBalancesStream = tokenWallets.map(
-        (e) => Rx.combineLatest2<TokenWalletInfo?, Currency?, double>(
-          tokenWalletsRepository.getInfoStream(
+        (e) => Rx.combineLatest3<String, Symbol, Currency?, double>(
+          tokenWalletsRepository.balanceStream(
+            owner: account.address,
+            rootTokenContract: e,
+          ),
+          tokenWalletsRepository.symbolStream(
             owner: account.address,
             rootTokenContract: e,
           ),
@@ -58,9 +58,7 @@ Stream<double> accountOverallBalanceStream(
               .cast<Currency?>()
               .onErrorReturn(null)
               .startWith(null),
-          (a, b) => a != null && b != null
-              ? double.parse(a.balance.toTokens(a.symbol.decimals)) * double.parse(b.price)
-              : 0,
+          (a, b, c) => c != null ? double.parse(a.toTokens(b.decimals)) * double.parse(c.price) : 0,
         ),
       );
 

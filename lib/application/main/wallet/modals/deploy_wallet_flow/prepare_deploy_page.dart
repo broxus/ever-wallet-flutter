@@ -25,11 +25,11 @@ class PrepareDeployPage extends StatefulWidget {
   final String publicKey;
 
   const PrepareDeployPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.address,
     required this.publicKey,
-  }) : super(key: key);
+  });
 
   @override
   _PrepareDeployPageState createState() => _PrepareDeployPageState();

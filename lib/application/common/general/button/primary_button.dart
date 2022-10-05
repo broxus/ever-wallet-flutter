@@ -16,7 +16,7 @@ class PrimaryButton extends StatelessWidget {
     this.onPressed,
     this.isTransparent = false,
     this.icon,
-    Key? key,
+    super.key,
     this.style,
     this.child,
     this.focusNode,
@@ -26,7 +26,7 @@ class PrimaryButton extends StatelessWidget {
     this.padding,
     this.fillWidth = true,
     this.presstateColor,
-  }) : super(key: key);
+  });
 
   final String? text;
   final VoidCallback? onPressed;
@@ -56,29 +56,29 @@ class PrimaryButton extends StatelessWidget {
             ? palette.colors.secondaryPressStateColor
             : palette.colors.primaryPressStateColor);
 
-    Widget _child;
-    if (child == null) {
-      final _textWidget = Text(text ?? '', style: textStyle);
-      _child = Padding(
+    Widget child;
+    if (this.child == null) {
+      final textWidget = Text(text ?? '', style: textStyle);
+      child = Padding(
         padding: padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
         child: icon == null
-            ? _textWidget
+            ? textWidget
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   icon!,
                   if (text != null) const SizedBox(width: 12),
-                  _textWidget,
+                  textWidget,
                 ],
               ),
       );
     } else {
-      _child = child!;
+      child = this.child!;
     }
 
     return SizedBox(
       height: height,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: radius ?? BorderRadius.zero,
@@ -93,10 +93,10 @@ class PrimaryButton extends StatelessWidget {
             splashColor: pressColor,
             onTap: onPressed,
             child: fillWidth
-                ? Center(child: _child)
+                ? Center(child: child)
                 : Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: [_child],
+                    children: [child],
                   ),
           ),
         ),

@@ -7,10 +7,10 @@ class ModalHeader extends StatelessWidget {
   final void Function()? onCloseButtonPressed;
 
   const ModalHeader({
-    Key? key,
+    super.key,
     required this.text,
     this.onCloseButtonPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Material(

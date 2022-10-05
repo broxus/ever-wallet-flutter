@@ -10,12 +10,12 @@ class SectionedCardSection extends StatelessWidget {
   final bool isSelectable;
 
   const SectionedCardSection({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
     this.hasError = false,
     this.isSelectable = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Column(

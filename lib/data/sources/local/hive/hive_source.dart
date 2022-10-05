@@ -9,90 +9,39 @@ import 'package:ever_wallet/data/models/permissions.dart';
 import 'package:ever_wallet/data/models/search_history_dto.dart';
 import 'package:ever_wallet/data/models/site_meta_data.dart';
 import 'package:ever_wallet/data/models/token_contract_asset.dart';
-import 'package:ever_wallet/data/models/token_wallet_info.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
 import 'package:ever_wallet/data/sources/local/hive/dto/account_interaction_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/account_status_dto.dart';
 import 'package:ever_wallet/data/sources/local/hive/dto/bookmark_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/contract_state_dto.dart';
 import 'package:ever_wallet/data/sources/local/hive/dto/currency_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/de_pool_on_round_complete_notification_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/de_pool_receive_answer_notification_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/gen_timings_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/last_transaction_id_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/message_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/multisig_confirm_transaction_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/multisig_send_transaction_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/multisig_submit_transaction_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/multisig_type_dto.dart';
 import 'package:ever_wallet/data/sources/local/hive/dto/permissions_dto.dart';
 import 'package:ever_wallet/data/sources/local/hive/dto/site_meta_data_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/symbol_dto.dart';
 import 'package:ever_wallet/data/sources/local/hive/dto/token_contract_asset_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/token_incoming_transfer_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/token_outgoing_transfer_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/token_swap_back_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/token_wallet_deployed_notification_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/token_wallet_info_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/token_wallet_transaction_with_data_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/ton_wallet_details_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/ton_wallet_info_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/ton_wallet_transaction_with_data_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/transaction_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/transaction_id_dto.dart';
 import 'package:ever_wallet/data/sources/local/hive/dto/wallet_contract_type_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/wallet_interaction_info_dto.dart';
-import 'package:ever_wallet/data/sources/local/hive/dto/wallet_type_dto.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 class HiveSource {
-  final _keysPasswordsBoxName = 'keys_passwords_v1';
+  final _keyPasswordsBoxName = 'keys_passwords_v1';
   final _userPreferencesBoxName = 'user_preferences_v1';
   final _systemTokenContractAssetsBoxName = 'system_token_contract_assets_v1';
   final _customTokenContractAssetsBoxName = 'custom_token_contract_assets_v1';
-  final _tonWalletInfosBoxName = 'ton_wallet_infos_v8';
-  final _tokenWalletInfosBoxName = 'token_wallet_infos_v8';
-  final _tonWalletTransactionsBoxName = 'ton_wallet_transactions_v10';
-  final _tokenWalletTransactionsBoxName = 'token_wallet_transactions_v10';
-  final _publicKeysLabelsBoxName = 'public_keys_labels_v1';
+  final _keyLabelsBoxName = 'public_keys_labels_v1';
+  final _seedsBoxName = 'seeds_v1';
   final _nekotonFlutterBoxName = 'nekoton_flutter';
   final _preferencesBoxName = 'nekoton_preferences';
   final _permissionsBoxName = 'nekoton_permissions_v1';
   final _externalAccountsBoxName = 'nekoton_external_accounts';
   final _bookmarksBoxName = 'bookmarks_box_v2';
-  final _searchHistoryBoxName = 'search_history_v1';
+  final _searchHistoryBoxName = 'search_history_v2';
   final _siteMetaDataBoxName = 'site_meta_data_v1';
   final _currenciesBoxName = 'currencies_v1';
   final _biometryStatusKey = 'biometry_status';
-  final _currentPublicKeyKey = 'current_public_key';
+  final _currentKeyKey = 'current_public_key';
   final _currentConnectionKey = 'current_connection';
   final _localeKey = 'locale';
   final _browserNeedKey = 'browser_need_key';
   final _browserTabsKey = 'browser_tabs_key';
-
-  late final Uint8List _key;
-  late final Box<String> _keysPasswordsBox;
-  late final Box<Object?> _userPreferencesBox;
-  late final Box<TokenContractAssetDto> _systemTokenContractAssetsBox;
-  late final Box<TokenContractAssetDto> _customTokenContractAssetsBox;
-  late final Box<TonWalletInfoDto> _tonWalletInfosBox;
-  late final Box<TokenWalletInfoDto> _tokenWalletInfosBox;
-  late final Box<List> _tonWalletTransactionsBox;
-  late final Box<List> _tokenWalletTransactionsBox;
-  late final Box<String> _publicKeysLabelsBox;
-  late final Box<String> _nekotonFlutterBox;
-  late final Box<dynamic> _preferencesBox;
-  late final Box<PermissionsDto> _permissionsBox;
-  late final Box<List> _externalAccountsBox;
-  late final Box<BookmarkDto> _bookmarksBox;
-  late final Box<SearchHistoryDto> _searchHistoryBox;
-  late final Box<SiteMetaDataDto> _sitesMetaDataBox;
-  late final Box<CurrencyDto> _currenciesBox;
-  late final Box<bool> _browserNeedBox;
-  late final Box<BrowserTabsDto> _browserTabsBox;
 
   HiveSource._();
 
@@ -102,221 +51,90 @@ class HiveSource {
     return instance;
   }
 
-  Future<String?> getStorageData(String key) async => _nekotonFlutterBox.get(key);
+  Box<String> get _keyPasswordsBox => Hive.box<String>(_keyPasswordsBoxName);
 
-  Future<void> setStorageData({
-    required String key,
-    required String value,
+  Box<Object?> get _userPreferencesBox => Hive.box<Object?>(_userPreferencesBoxName);
+
+  Box<TokenContractAssetDto> get _systemTokenContractAssetsBox =>
+      Hive.box<TokenContractAssetDto>(_systemTokenContractAssetsBoxName);
+
+  Box<TokenContractAssetDto> get _customTokenContractAssetsBox =>
+      Hive.box<TokenContractAssetDto>(_customTokenContractAssetsBoxName);
+
+  Box<String> get _keyLabelsBox => Hive.box<String>(_keyLabelsBoxName);
+
+  Box<String> get _seedsBox => Hive.box<String>(_seedsBoxName);
+
+  Box<String> get _nekotonFlutterBox => Hive.box<String>(_nekotonFlutterBoxName);
+
+  Box<dynamic> get _preferencesBox => Hive.box<dynamic>(_preferencesBoxName);
+
+  Box<PermissionsDto> get _permissionsBox => Hive.box<PermissionsDto>(_permissionsBoxName);
+
+  Box<List> get _externalAccountsBox => Hive.box<List>(_externalAccountsBoxName);
+
+  Box<BookmarkDto> get _bookmarksBox => Hive.box<BookmarkDto>(_bookmarksBoxName);
+
+  Box<SearchHistoryDto> get _searchHistoryBox => Hive.box<SearchHistoryDto>(_searchHistoryBoxName);
+
+  Box<SiteMetaDataDto> get _siteMetaDataBox => Hive.box<SiteMetaDataDto>(_siteMetaDataBoxName);
+
+  Box<CurrencyDto> get _currenciesBox => Hive.box<CurrencyDto>(_currenciesBoxName);
+
+  Stream<Map<String, String>> get seedsStream =>
+      _seedsBox.watchAll().map((e) => e.cast<String, String>());
+
+  Map<String, String> get seeds => _seedsBox.toMap().cast<String, String>();
+
+  Future<void> addSeed({
+    required String masterKey,
+    required String name,
   }) =>
-      _nekotonFlutterBox.put(key, value);
+      _seedsBox.put(masterKey, name);
 
-  Future<void> removeStorageData(String key) => _nekotonFlutterBox.delete(key);
+  Future<void> removeSeed(String masterKey) => _seedsBox.delete(masterKey);
 
-  List<TokenContractAsset> get systemTokenContractAssets =>
-      _systemTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+  Future<void> clearSeeds() => _seedsBox.clear();
 
-  Future<void> updateSystemTokenContractAssets(List<TokenContractAsset> assets) async {
-    await _systemTokenContractAssetsBox.clear();
-    await _systemTokenContractAssetsBox.addAll(assets.map((e) => e.toDto()));
-  }
+  Stream<String?> get currentKeyStream => _preferencesBox.watchKey(_currentKeyKey).cast<String?>();
 
-  List<TokenContractAsset> get customTokenContractAssets =>
-      _customTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+  String? get currentKey => _preferencesBox.get(_currentKeyKey) as String?;
 
-  Future<void> addCustomTokenContractAsset(TokenContractAsset tokenContractAsset) =>
-      _customTokenContractAssetsBox.put(tokenContractAsset.address, tokenContractAsset.toDto());
-
-  Future<void> removeCustomTokenContractAsset(String address) =>
-      _customTokenContractAssetsBox.delete(address);
-
-  Future<void> clearCustomTokenContractAssets() => _customTokenContractAssetsBox.clear();
-
-  TonWalletInfo? getTonWalletInfo({
-    required String address,
-    required String group,
-  }) =>
-      _tonWalletInfosBox.get('${address}_$group')?.toDto();
-
-  Future<void> saveTonWalletInfo({
-    required String address,
-    required String group,
-    required TonWalletInfo info,
-  }) =>
-      _tonWalletInfosBox.put('${address}_$group', info.toDto());
-
-  Future<void> removeTonWalletInfo(String address) {
-    final keys = _tonWalletInfosBox.keys.cast<String>().where((e) => e.contains(address));
-
-    return _tonWalletInfosBox.deleteAll(keys);
-  }
-
-  Future<void> clearTonWalletInfos() => _tonWalletInfosBox.clear();
-
-  TokenWalletInfoDto? getTokenWalletInfo({
-    required String owner,
-    required String rootTokenContract,
-    required String group,
-  }) =>
-      _tokenWalletInfosBox.get('${owner}_${rootTokenContract}_$group');
-
-  Future<void> saveTokenWalletInfo({
-    required String owner,
-    required String rootTokenContract,
-    required String group,
-    required TokenWalletInfo info,
-  }) =>
-      _tokenWalletInfosBox.put('${owner}_${rootTokenContract}_$group', info.toDto());
-
-  Future<void> removeTokenWalletInfo({
-    required String owner,
-    required String rootTokenContract,
-  }) {
-    final keys = _tokenWalletInfosBox.keys
-        .cast<String>()
-        .where((e) => e.contains('${owner}_$rootTokenContract'));
-
-    return _tokenWalletInfosBox.deleteAll(keys);
-  }
-
-  Future<void> clearTokenWalletInfos() => _tokenWalletInfosBox.clear();
-
-  List<TonWalletTransactionWithData>? getTonWalletTransactions({
-    required String address,
-    required String group,
-  }) =>
-      _tonWalletTransactionsBox
-          .get('${address}_$group')
-          ?.cast<TonWalletTransactionWithDataDto>()
-          .map((e) => e.toModel())
-          .toList();
-
-  Future<void> saveTonWalletTransactions({
-    required String address,
-    required String group,
-    required List<TonWalletTransactionWithData> transactions,
-  }) =>
-      _tonWalletTransactionsBox.put(
-        '${address}_$group',
-        transactions.take(200).map((e) => e.toDto()).toList(),
+  Future<void> setCurrentKey(String? publicKey) => _preferencesBox.put(
+        _currentKeyKey,
+        publicKey,
       );
 
-  Future<void> removeTonWalletTransactions(String address) {
-    final keys = _tonWalletTransactionsBox.keys.cast<String>().where((e) => e.contains(address));
+  Stream<Map<String, String>> get keyLabelsStream =>
+      _keyLabelsBox.watchAll().map((e) => e.cast<String, String>());
 
-    return _tonWalletTransactionsBox.deleteAll(keys);
-  }
+  Map<String, String> get keyLabels => _keyLabelsBox.toMap().cast<String, String>();
 
-  Future<void> clearTonWalletTransactions() => _tonWalletTransactionsBox.clear();
-
-  List<TokenWalletTransactionWithData>? getTokenWalletTransactions({
-    required String owner,
-    required String rootTokenContract,
-    required String group,
+  Future<void> setKeyLabel({
+    required String publicKey,
+    required String label,
   }) =>
-      _tokenWalletTransactionsBox
-          .get('${owner}_${rootTokenContract}_$group')
-          ?.cast<TokenWalletTransactionWithDataDto>()
-          .map((e) => e.toModel())
-          .toList();
+      _keyLabelsBox.put(publicKey, label);
 
-  Future<void> saveTokenWalletTransactions({
-    required String owner,
-    required String rootTokenContract,
-    required String group,
-    required List<TokenWalletTransactionWithData> transactions,
-  }) =>
-      _tokenWalletTransactionsBox.put(
-        '${owner}_${rootTokenContract}_$group',
-        transactions.take(200).map((e) => e.toDto()).toList(),
-      );
+  Future<void> removeKeyLabel(String publicKey) => _keyLabelsBox.delete(publicKey);
 
-  Future<void> removeTokenWalletTransactions({
-    required String owner,
-    required String rootTokenContract,
-  }) {
-    final keys = _tokenWalletTransactionsBox.keys
-        .cast<String>()
-        .where((e) => e.contains('${owner}_$rootTokenContract'));
+  Future<void> clearKeyLabels() => _keyLabelsBox.clear();
 
-    return _tokenWalletTransactionsBox.deleteAll(keys);
-  }
-
-  Future<void> clearTokenWalletTransactions() => _tokenWalletTransactionsBox.clear();
-
-  String? get locale => _userPreferencesBox.get(_localeKey) as String?;
-
-  Future<void> setLocale(String locale) => _userPreferencesBox.put(_localeKey, locale);
-
-  bool get isBiometryEnabled =>
-      (_userPreferencesBox.get(_biometryStatusKey, defaultValue: false) as bool?)!;
-
-  Future<void> setIsBiometryEnabled({
-    required bool isEnabled,
-  }) =>
-      _userPreferencesBox.put(_biometryStatusKey, isEnabled);
-
-  Future<void> clearUserPreferences() => _userPreferencesBox.clear();
-
-  String? getKeyPassword(String publicKey) => _keysPasswordsBox.get(publicKey);
+  String? getKeyPassword(String publicKey) => _keyPasswordsBox.get(publicKey);
 
   Future<void> setKeyPassword({
     required String publicKey,
     required String password,
   }) =>
-      _keysPasswordsBox.put(publicKey, password);
+      _keyPasswordsBox.put(publicKey, password);
 
-  Future<void> clearKeysPasswords() => _keysPasswordsBox.clear();
+  Future<void> removeKeyPassword(String publicKey) => _keyPasswordsBox.delete(publicKey);
 
-  Map<String, String> get publicKeysLabels => _publicKeysLabelsBox.toMap().cast<String, String>();
+  Future<void> clearKeyPasswords() => _keyPasswordsBox.clear();
 
-  Future<void> setPublicKeyLabel({
-    required String publicKey,
-    required String label,
-  }) =>
-      _publicKeysLabelsBox.put(publicKey, label);
-
-  Future<void> removePublicKeyLabel(String publicKey) => _publicKeysLabelsBox.delete(publicKey);
-
-  Future<void> clearPublicKeysLabels() => _publicKeysLabelsBox.clear();
-
-  String? get currentPublicKey => _preferencesBox.get(_currentPublicKeyKey) as String?;
-
-  Future<void> setCurrentPublicKey(String? currentPublicKey) => _preferencesBox.put(
-        _currentPublicKeyKey,
-        currentPublicKey,
-      );
-
-  String? get currentConnection => _preferencesBox.get(_currentConnectionKey) as String?;
-
-  Future<void> setCurrentConnection(String? currentConnection) => _preferencesBox.put(
-        _currentConnectionKey,
-        currentConnection,
-      );
-
-  Map<String, Permissions> get permissions => _permissionsBox
-      .toMap()
-      .cast<String, PermissionsDto>()
-      .map((k, v) => MapEntry(k, v.toModel()));
-
-  Future<void> setPermissions({
-    required String origin,
-    required Permissions permissions,
-  }) =>
-      _permissionsBox.put(origin, permissions.toDto());
-
-  Future<void> deletePermissionsForOrigin(String origin) => _permissionsBox.delete(origin);
-
-  Future<void> deletePermissionsForAccount(String address) async {
-    final origins = permissions.entries
-        .where((e) => e.value.accountInteraction?.address == address)
-        .map((e) => e.key);
-
-    for (final origin in origins) {
-      final permissions = _permissionsBox.get(origin)!.copyWith(accountInteraction: null);
-
-      await _permissionsBox.put(origin, permissions);
-    }
-  }
+  Stream<Map<String, List<String>>> get externalAccountsStream => _externalAccountsBox
+      .watchAll()
+      .map((e) => e.map((k, v) => MapEntry(k as String, v.cast<String>())));
 
   Map<String, List<String>> get externalAccounts =>
       _externalAccountsBox.toMap().map((k, v) => MapEntry(k as String, v.cast<String>()));
@@ -352,13 +170,111 @@ class HiveSource {
 
   Future<void> clearExternalAccounts() => _externalAccountsBox.clear();
 
+  String? get currentConnection => _preferencesBox.get(_currentConnectionKey) as String?;
+
+  Future<void> setCurrentConnection(String currentConnection) => _preferencesBox.put(
+        _currentConnectionKey,
+        currentConnection,
+      );
+
+  Future<String?> getStorageData(String key) async => _nekotonFlutterBox.get(key);
+
+  Future<void> setStorageData({
+    required String key,
+    required String value,
+  }) =>
+      _nekotonFlutterBox.put(key, value);
+
+  Future<void> removeStorageData(String key) => _nekotonFlutterBox.delete(key);
+
+  Stream<List<TokenContractAsset>> get systemTokenContractAssetsStream =>
+      _systemTokenContractAssetsBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
+
+  List<TokenContractAsset> get systemTokenContractAssets =>
+      _systemTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+
+  Future<void> updateSystemTokenContractAssets(List<TokenContractAsset> assets) async {
+    await _systemTokenContractAssetsBox.clear();
+    await _systemTokenContractAssetsBox.addAll(assets.map((e) => e.toDto()));
+  }
+
+  Stream<List<TokenContractAsset>> get customTokenContractAssetsStream =>
+      _customTokenContractAssetsBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
+
+  List<TokenContractAsset> get customTokenContractAssets =>
+      _customTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+
+  Future<void> addCustomTokenContractAsset(TokenContractAsset tokenContractAsset) =>
+      _customTokenContractAssetsBox.put(tokenContractAsset.address, tokenContractAsset.toDto());
+
+  Future<void> removeCustomTokenContractAsset(String address) =>
+      _customTokenContractAssetsBox.delete(address);
+
+  Future<void> clearCustomTokenContractAssets() => _customTokenContractAssetsBox.clear();
+
+  Stream<String?> get localeStream => _userPreferencesBox.watchKey(_localeKey).cast<String?>();
+
+  String? get locale => _userPreferencesBox.get(_localeKey) as String?;
+
+  Future<void> setLocale(String locale) => _userPreferencesBox.put(_localeKey, locale);
+
+  Future<void> clearLocale() => _userPreferencesBox.delete(_localeKey);
+
+  Stream<bool> get isBiometryEnabledStream =>
+      _userPreferencesBox.watchKey(_biometryStatusKey).cast<bool?>().map((e) => e ?? false);
+
+  bool get isBiometryEnabled => _userPreferencesBox.get(_biometryStatusKey) as bool? ?? false;
+
+  Future<void> setIsBiometryEnabled(bool isEnabled) =>
+      _userPreferencesBox.put(_biometryStatusKey, isEnabled);
+
+  Future<void> clearIsBiometryEnabled() => _userPreferencesBox.delete(_biometryStatusKey);
+
+  Stream<Map<String, Permissions>> get permissionsStream => _permissionsBox
+      .watchAll()
+      .cast<Map<String, PermissionsDto>>()
+      .map((e) => e.map((k, v) => MapEntry(k, v.toModel())));
+
+  Map<String, Permissions> get permissions => _permissionsBox
+      .toMap()
+      .cast<String, PermissionsDto>()
+      .map((k, v) => MapEntry(k, v.toModel()));
+
+  Future<void> setPermissions({
+    required String origin,
+    required Permissions permissions,
+  }) =>
+      _permissionsBox.put(origin, permissions.toDto());
+
+  Future<void> deletePermissionsForOrigin(String origin) => _permissionsBox.delete(origin);
+
+  Future<void> deletePermissionsForAccount(String address) async {
+    final origins = permissions.entries
+        .where((e) => e.value.accountInteraction?.address == address)
+        .map((e) => e.key);
+
+    for (final origin in origins) {
+      final permissions = _permissionsBox.get(origin)!.copyWith(accountInteraction: null);
+
+      await _permissionsBox.put(origin, permissions);
+    }
+  }
+
+  Stream<List<Bookmark>> get bookmarksStream =>
+      _bookmarksBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
+
   List<Bookmark> get bookmarks => _bookmarksBox.values.map((e) => e.toModel()).toList();
 
-  Future<void> putBookmark(Bookmark bookmark) => _bookmarksBox.put(bookmark.id, bookmark.toDto());
+  Future<void> addBookmark(Bookmark bookmark) => _bookmarksBox.put(bookmark.id, bookmark.toDto());
 
   Future<void> deleteBookmark(int id) => _bookmarksBox.delete(id);
 
   Future<void> clearBookmarks() => _bookmarksBox.clear();
+
+  
+  
+  Stream<List<SearchHistoryDto>> get searchHistoryStream =>
+      _searchHistoryBox.watchAllValues().map((e) => e.toList());
 
   List<SearchHistoryDto> get searchHistory => _searchHistoryBox.values.toList();
 
@@ -392,15 +308,18 @@ class HiveSource {
 
   Future<void> clearSearchHistory() => _searchHistoryBox.clear();
 
-  SiteMetaData? getSiteMetaData(String url) => _sitesMetaDataBox.get(url)?.toModel();
+  SiteMetaData? getSiteMetaData(String url) => _siteMetaDataBox.get(url)?.toModel();
 
   Future<void> cacheSiteMetaData({
     required String url,
     required SiteMetaData metaData,
   }) =>
-      _sitesMetaDataBox.put(url, metaData.toDto());
+      _siteMetaDataBox.put(url, metaData.toDto());
 
-  Future<void> clearSitesMetaData() => _sitesMetaDataBox.clear();
+  Future<void> clearSitesMetaData() => _siteMetaDataBox.clear();
+
+  Stream<List<Currency>> get currenciesStream =>
+      _currenciesBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
 
   List<Currency> get currencies => _currenciesBox.values.map((e) => e.toModel()).toList();
 
@@ -422,39 +341,45 @@ class HiveSource {
 
   Future<void> saveBrowserTabs(BrowserTabsDto dto) => _browserTabsBox.put(_browserTabsKey, dto);
 
-  Future<void> dispose() async {
-    await _keysPasswordsBox.close();
-    await _userPreferencesBox.close();
-    await _systemTokenContractAssetsBox.close();
-    await _customTokenContractAssetsBox.close();
-    await _tonWalletInfosBox.close();
-    await _tokenWalletInfosBox.close();
-    await _tonWalletTransactionsBox.close();
-    await _tokenWalletTransactionsBox.close();
-    await _publicKeysLabelsBox.close();
-    await _nekotonFlutterBox.close();
-    await _preferencesBox.close();
-    await _permissionsBox.close();
-    await _externalAccountsBox.close();
-    await _bookmarksBox.close();
-    await _searchHistoryBox.close();
-    await _sitesMetaDataBox.close();
-    await _currenciesBox.close();
-    await _browserNeedBox.close();
-    await _browserTabsBox.close();
-  }
+  Future<void> dispose() => Hive.close();
 
   Future<void> _initialize() async {
-    final hiveAesCipherKeyList =
-        dotenv.env['HIVE_AES_CIPHER_KEY']?.split(' ').map((e) => int.parse(e)).toList();
-    final hiveAesCipherKey =
-        hiveAesCipherKeyList != null ? Uint8List.fromList(hiveAesCipherKeyList) : null;
-
-    if (hiveAesCipherKey == null) {
-      throw Exception('Provide HIVE_AES_CIPHER_KEY in .env file in correct format!');
-    }
-
-    _key = hiveAesCipherKey;
+    final key = Uint8List.fromList(
+      [
+        142,
+        201,
+        97,
+        67,
+        9,
+        207,
+        25,
+        19,
+        205,
+        112,
+        165,
+        64,
+        130,
+        45,
+        105,
+        15,
+        199,
+        146,
+        22,
+        64,
+        34,
+        45,
+        150,
+        200,
+        199,
+        63,
+        145,
+        56,
+        34,
+        80,
+        128,
+        80
+      ],
+    );
 
     await Hive.initFlutter();
 
@@ -466,56 +391,30 @@ class HiveSource {
       ..tryRegisterAdapter(BookmarkDtoAdapter())
       ..tryRegisterAdapter(SiteMetaDataDtoAdapter())
       ..tryRegisterAdapter(CurrencyDtoAdapter())
-      ..tryRegisterAdapter(TonWalletInfoDtoAdapter())
-      ..tryRegisterAdapter(TokenWalletInfoDtoAdapter())
-      ..tryRegisterAdapter(AccountStatusDtoAdapter())
-      ..tryRegisterAdapter(ContractStateDtoAdapter())
-      ..tryRegisterAdapter(DePoolOnRoundCompleteNotificationDtoAdapter())
-      ..tryRegisterAdapter(DePoolReceiveAnswerNotificationDtoAdapter())
-      ..tryRegisterAdapter(GenTimingsDtoAdapter())
-      ..tryRegisterAdapter(LastTransactionIdDtoAdapter())
-      ..tryRegisterAdapter(MessageDtoAdapter())
-      ..tryRegisterAdapter(MultisigConfirmTransactionDtoAdapter())
-      ..tryRegisterAdapter(MultisigSendTransactionDtoAdapter())
-      ..tryRegisterAdapter(MultisigSubmitTransactionDtoAdapter())
-      ..tryRegisterAdapter(MultisigTypeDtoAdapter())
-      ..tryRegisterAdapter(SymbolDtoAdapter())
-      ..tryRegisterAdapter(TokenIncomingTransferDtoAdapter())
-      ..tryRegisterAdapter(TokenOutgoingTransferDtoAdapter())
-      ..tryRegisterAdapter(TokenSwapBackDtoAdapter())
-      ..tryRegisterAdapter(TokenWalletDeployedNotificationDtoAdapter())
-      ..tryRegisterAdapter(TokenWalletTransactionWithDataDtoAdapter())
-      ..tryRegisterAdapter(TonWalletDetailsDtoAdapter())
-      ..tryRegisterAdapter(TonWalletTransactionWithDataDtoAdapter())
-      ..tryRegisterAdapter(TransactionDtoAdapter())
-      ..tryRegisterAdapter(TransactionIdDtoAdapter())
-      ..tryRegisterAdapter(WalletInteractionInfoDtoAdapter())
-      ..tryRegisterAdapter(WalletTypeDtoWalletV3Adapter())
-      ..tryRegisterAdapter(WalletTypeDtoMultisigAdapter())
       ..tryRegisterAdapter(BrowserTabAdapter())
       ..tryRegisterAdapter(BrowserTabsDtoAdapter())
-      ..tryRegisterAdapter(SearchHistoryDtoAdapter());
+      ..tryRegisterAdapter(SearchHistoryDtoAdapter())
+      ..tryRegisterAdapter(CurrencyDtoAdapter());
 
-    _keysPasswordsBox =
-        await Hive.openBox(_keysPasswordsBoxName, encryptionCipher: HiveAesCipher(_key));
-    _userPreferencesBox = await Hive.openBox(_userPreferencesBoxName);
-    _systemTokenContractAssetsBox = await Hive.openBox(_systemTokenContractAssetsBoxName);
-    _customTokenContractAssetsBox = await Hive.openBox(_customTokenContractAssetsBoxName);
-    _tonWalletInfosBox = await Hive.openBox(_tonWalletInfosBoxName);
-    _tokenWalletInfosBox = await Hive.openBox(_tokenWalletInfosBoxName);
-    _tonWalletTransactionsBox = await Hive.openBox(_tonWalletTransactionsBoxName);
-    _tokenWalletTransactionsBox = await Hive.openBox(_tokenWalletTransactionsBoxName);
-    _publicKeysLabelsBox = await Hive.openBox(_publicKeysLabelsBoxName);
-    _nekotonFlutterBox = await Hive.openBox(_nekotonFlutterBoxName);
-    _preferencesBox = await Hive.openBox(_preferencesBoxName);
-    _permissionsBox = await Hive.openBox(_permissionsBoxName);
-    _externalAccountsBox = await Hive.openBox(_externalAccountsBoxName);
-    _bookmarksBox = await Hive.openBox(_bookmarksBoxName);
-    _searchHistoryBox = await Hive.openBox(_searchHistoryBoxName);
-    _sitesMetaDataBox = await Hive.openBox(_siteMetaDataBoxName);
-    _currenciesBox = await Hive.openBox(_currenciesBoxName);
-    _browserNeedBox = await Hive.openBox(_browserNeedKey);
-    _browserTabsBox = await Hive.openBox(_browserTabsKey);
+    
+      
+
+    await Hive.openBox<String>(_keyPasswordsBoxName, encryptionCipher: HiveAesCipher(key));
+    await Hive.openBox<Object?>(_userPreferencesBoxName);
+    await Hive.openBox<TokenContractAssetDto>(_systemTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(_customTokenContractAssetsBoxName);
+    await Hive.openBox<String>(_keyLabelsBoxName);
+    await Hive.openBox<String>(_seedsBoxName);
+    await Hive.openBox<String>(_nekotonFlutterBoxName);
+    await Hive.openBox<dynamic>(_preferencesBoxName);
+    await Hive.openBox<PermissionsDto>(_permissionsBoxName);
+    await Hive.openBox<List>(_externalAccountsBoxName);
+    await Hive.openBox<BookmarkDto>(_bookmarksBoxName);
+    await Hive.openBox<String>(_searchHistoryBoxName);
+    await Hive.openBox<SiteMetaDataDto>(_siteMetaDataBoxName);
+    await Hive.openBox<CurrencyDto>(_currenciesBoxName);
+    await Hive.openBox<CurrencyDto>(_browserNeedKey);
+    await Hive.openBox<CurrencyDto>(_browserTabsKey);
 
     await _migrateStorage();
   }
@@ -548,7 +447,16 @@ class HiveSource {
   }
 }
 
-extension HiveInterfaceX on HiveInterface {
+extension<T> on Box<T> {
+  Stream<T?> watchKey(dynamic key) =>
+      watch(key: key).map((e) => e.value as T).cast<T?>().startWith(get(key));
+
+  Stream<Map<dynamic, T>> watchAll() => watch().map((_) => toMap()).startWith(toMap());
+
+  Stream<Iterable<T>> watchAllValues() => watch().map((_) => values).startWith(values);
+}
+
+extension on HiveInterface {
   void tryRegisterAdapter<T>(TypeAdapter<T> adapter) {
     if (!isAdapterRegistered(adapter.typeId)) registerAdapter(adapter);
   }

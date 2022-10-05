@@ -7,7 +7,7 @@ const _scaleRatio = 5.0;
 class PushStateScaleWidget extends StatefulWidget {
   const PushStateScaleWidget({
     required this.child,
-    Key? key,
+    super.key,
     this.onPressed,
     this.onHighlightChanged,
     this.radius,
@@ -15,7 +15,7 @@ class PushStateScaleWidget extends StatefulWidget {
     this.onLongPress,
     this.height,
     this.width,
-  }) : super(key: key);
+  });
 
   final double? height;
   final double? width;

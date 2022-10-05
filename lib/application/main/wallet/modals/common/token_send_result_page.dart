@@ -1,6 +1,7 @@
 import 'package:ever_wallet/application/bloc/ton_wallet/ton_wallet_send_bloc.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/widgets/crystal_title.dart';
+import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
@@ -10,20 +11,19 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:lottie/lottie.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 class TokenSendResultPage extends StatefulWidget {
   final BuildContext modalContext;
   final String owner;
   final String rootTokenContract;
-  final UnsignedMessage message;
+  final UnsignedMessageWithAdditionalInfo message;
   final String publicKey;
   final String password;
   final String sendingText;
   final String successText;
 
   const TokenSendResultPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.owner,
     required this.rootTokenContract,
@@ -32,7 +32,7 @@ class TokenSendResultPage extends StatefulWidget {
     required this.password,
     required this.sendingText,
     required this.successText,
-  }) : super(key: key);
+  });
 
   @override
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();

@@ -17,12 +17,12 @@ class SignDataPage extends StatefulWidget {
   final String data;
 
   const SignDataPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.origin,
     required this.publicKey,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   _SendMessageModalState createState() => _SendMessageModalState();

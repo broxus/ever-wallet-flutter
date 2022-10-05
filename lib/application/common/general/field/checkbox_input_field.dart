@@ -17,8 +17,8 @@ class CheckboxInputField extends StatelessWidget {
     this.padding,
     this.hasError,
     this.needValidation = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

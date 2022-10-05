@@ -1,4 +1,5 @@
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/main/wallet/history/token_wallet_asset_holder.dart';
 import 'package:ever_wallet/application/main/wallet/history/ton_wallet_asset_holder.dart';
@@ -15,10 +16,10 @@ class AllAssetsLayout extends StatefulWidget {
   final ScrollController controller;
 
   const AllAssetsLayout({
-    Key? key,
+    super.key,
     required this.address,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   _AllAssetsLayoutState createState() => _AllAssetsLayoutState();
@@ -27,13 +28,8 @@ class AllAssetsLayout extends StatefulWidget {
 class _AllAssetsLayoutState extends State<AllAssetsLayout> {
   @override
   Widget build(BuildContext context) =>
-      StreamProvider<AsyncValue<Tuple2<TonWalletAsset, List<TokenContractAsset>>>>(
-        create: (context) => context
-            .read<TonAssetsRepository>()
-            .accountAssets(widget.address)
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+      AsyncValueStreamProvider<Tuple2<TonWalletAsset, List<TokenContractAsset>>>(
+        create: (context) => context.read<TonAssetsRepository>().accountAssets(widget.address),
         builder: (context, child) {
           final accountAssets = context
               .watch<AsyncValue<Tuple2<TonWalletAsset, List<TokenContractAsset>>>>()
@@ -58,6 +54,7 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
                       key: ValueKey(tokenContractAsset.address),
                       owner: tonWalletAsset.address,
                       rootTokenContract: tokenContractAsset.address,
+                      name: tokenContractAsset.name,
                       symbol: tokenContractAsset.symbol,
                       decimals: tokenContractAsset.decimals,
                       version: tokenContractAsset.version.toTokenWalletVersion(),

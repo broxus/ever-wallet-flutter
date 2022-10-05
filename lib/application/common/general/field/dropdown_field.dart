@@ -18,7 +18,7 @@ class DropdownField<T> extends StatelessWidget {
   final ValueChanged<T> onValueSelected;
 
   const DropdownField({
-    Key? key,
+    super.key,
     this.height,
     required this.value,
     required this.values,
@@ -30,8 +30,7 @@ class DropdownField<T> extends StatelessWidget {
         assert(
           titleBuilder == null && childBuilder != null ||
               titleBuilder != null && childBuilder == null,
-        ),
-        super(key: key);
+        );
 
   @override
   Widget build(BuildContext context) {

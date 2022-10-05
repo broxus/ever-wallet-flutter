@@ -21,10 +21,10 @@ class PreferencesModalBody extends StatefulWidget {
   final String? publicKey;
 
   const PreferencesModalBody({
-    Key? key,
+    super.key,
     required this.address,
     this.publicKey,
-  }) : super(key: key);
+  });
 
   @override
   State<PreferencesModalBody> createState() => _PreferencesModalBodyState();

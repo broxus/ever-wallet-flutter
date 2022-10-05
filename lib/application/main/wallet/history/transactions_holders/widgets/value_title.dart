@@ -7,11 +7,11 @@ class ValueTitle extends StatelessWidget {
   final bool isOutgoing;
 
   const ValueTitle({
-    Key? key,
+    super.key,
     required this.value,
     required this.currency,
     required this.isOutgoing,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Text(

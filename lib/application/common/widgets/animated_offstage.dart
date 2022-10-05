@@ -6,11 +6,11 @@ class AnimatedOffstage extends StatefulWidget {
   final Widget child;
 
   const AnimatedOffstage({
-    Key? key,
+    super.key,
     required this.duration,
     required this.offstage,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   _AnimatedOffstageState createState() => _AnimatedOffstageState();

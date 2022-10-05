@@ -22,9 +22,9 @@ class SelectPhraseTypeRute extends MaterialPageRoute<void> {
 
 class SelectPhraseTypeScreen extends StatefulWidget {
   const SelectPhraseTypeScreen({
-    Key? key,
+    super.key,
     required this.publicKey,
-  }) : super(key: key);
+  });
 
   final String publicKey;
 

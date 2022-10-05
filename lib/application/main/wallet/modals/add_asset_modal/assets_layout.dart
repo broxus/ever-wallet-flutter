@@ -1,4 +1,5 @@
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/widgets/custom_text_form_field.dart';
 import 'package:ever_wallet/application/common/widgets/text_field_clear_button.dart';
@@ -20,10 +21,10 @@ class AssetsLayout extends StatefulWidget {
   ) onSave;
 
   const AssetsLayout({
-    Key? key,
+    super.key,
     required this.address,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _AssetsLayoutState createState() => _AssetsLayoutState();
@@ -44,13 +45,9 @@ class _AssetsLayoutState extends State<AssetsLayout> {
 
   @override
   Widget build(BuildContext context) =>
-      StreamProvider<AsyncValue<Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>>>(
-        create: (context) => context
-            .read<TonAssetsRepository>()
-            .accountAssetsOptions(widget.address)
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+      AsyncValueStreamProvider<Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>>(
+        create: (context) =>
+            context.read<TonAssetsRepository>().accountAssetsOptions(widget.address),
         builder: (context, child) {
           final accountAssetsOptions = context
               .watch<AsyncValue<Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>>>()

@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 /// PressState for default widgets with ink response
 class PushStateInkWidget extends StatelessWidget {
   const PushStateInkWidget({
-    Key? key,
+    super.key,
     this.onPressed,
     this.child,
     this.onLongPress,
     this.borderRadius = BorderRadius.zero,
     this.pressStateColor,
-  }) : super(key: key);
+  });
 
   final Widget? child;
   final Color? pressStateColor;

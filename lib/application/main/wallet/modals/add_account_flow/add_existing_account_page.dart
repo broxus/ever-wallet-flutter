@@ -22,10 +22,10 @@ class AddExistingAccountPage extends StatefulWidget {
   final String publicKey;
 
   const AddExistingAccountPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.publicKey,
-  }) : super(key: key);
+  });
 
   @override
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
@@ -201,7 +201,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
       final currentKey = context.read<KeysRepository>().currentKey;
 
       await context.read<AccountsRepository>().addExternalAccount(
-            publicKey: currentKey!.publicKey,
+            publicKey: currentKey!,
             address: addressController.text,
             name: name,
           );

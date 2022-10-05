@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 
 class EWSwitchField extends StatefulWidget {
   const EWSwitchField({
+    super.key,
     required this.value,
     required this.onChanged,
     this.validator,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final bool value;
   final ValueChanged<bool> onChanged;
@@ -47,10 +47,10 @@ class EWSwitcher extends StatelessWidget {
     required this.thumbColor,
     required this.backgroundColor,
     required this.thumbSize,
-    Key? key,
+    super.key,
     this.width = 52,
     this.height = 32,
-  }) : super(key: key);
+  });
 
   final bool value;
   final Color thumbColor;

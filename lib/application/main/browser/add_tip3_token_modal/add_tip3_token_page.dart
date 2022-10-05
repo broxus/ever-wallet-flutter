@@ -16,12 +16,12 @@ class AddTip3TokenPage extends StatefulWidget {
   final RootTokenContractDetails details;
 
   const AddTip3TokenPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.origin,
     required this.account,
     required this.details,
-  }) : super(key: key);
+  });
 
   @override
   _RequestPermissionsModalState createState() => _RequestPermissionsModalState();

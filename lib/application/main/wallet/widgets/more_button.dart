@@ -1,11 +1,11 @@
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/custom_popup_item.dart';
 import 'package:ever_wallet/application/common/widgets/custom_popup_menu.dart';
 import 'package:ever_wallet/application/main/wallet/modals/account_removement_modal/show_account_removement_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/custodians_modal/show_custodians_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/preferences_modal/show_preferences_modal.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
@@ -18,10 +18,10 @@ class MoreButton extends StatefulWidget {
   final String? publicKey;
 
   const MoreButton({
-    Key? key,
+    super.key,
     required this.address,
     this.publicKey,
-  }) : super(key: key);
+  });
 
   @override
   State<MoreButton> createState() => _MoreButtonState();
@@ -29,15 +29,10 @@ class MoreButton extends StatefulWidget {
 
 class _MoreButtonState extends State<MoreButton> {
   @override
-  Widget build(BuildContext context) => StreamProvider<AsyncValue<TonWalletInfo?>>(
-        create: (context) => context
-            .read<TonWalletsRepository>()
-            .getInfoStream(widget.address)
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget build(BuildContext context) => AsyncValueStreamProvider<List<String>?>(
+        create: (context) => context.read<TonWalletsRepository>().custodiansStream(widget.address),
         builder: (context, child) {
-          final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
+          final custodians = context.watch<AsyncValue<List<String>?>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => null,
               );
@@ -45,7 +40,7 @@ class _MoreButtonState extends State<MoreButton> {
           return CustomPopupMenu(
             items: [
               _Actions.preferences,
-              if (tonWalletInfo?.custodians?.isNotEmpty ?? false) _Actions.custodians,
+              if (custodians?.isNotEmpty ?? false) _Actions.custodians,
               _Actions.removeAccount,
             ]
                 .map(
@@ -97,16 +92,15 @@ class _MoreButtonState extends State<MoreButton> {
           context: context,
           address: widget.address,
           onDeletePressed: () async {
-            final externalAccounts =
-                await context.read<AccountsRepository>().currentExternalAccounts.first;
+            final externalAccounts = context.read<AccountsRepository>().externalAccounts;
 
-            if (externalAccounts.any((e) => e == widget.address)) {
+            if (externalAccounts.values.expand((e) => e).any((e) => e == widget.address)) {
               if (!mounted) return;
 
               final currentKey = context.read<KeysRepository>().currentKey;
 
               await context.read<AccountsRepository>().removeExternalAccount(
-                    publicKey: currentKey!.publicKey,
+                    publicKey: currentKey!,
                     address: widget.address,
                   );
             } else {

@@ -15,9 +15,9 @@ class ChangeSeedPhrasePasswordModalBody extends StatefulWidget {
   final String publicKey;
 
   const ChangeSeedPhrasePasswordModalBody({
-    Key? key,
+    super.key,
     required this.publicKey,
-  }) : super(key: key);
+  });
 
   @override
   _ChangeSeedPhrasePasswordModalBodyState createState() =>

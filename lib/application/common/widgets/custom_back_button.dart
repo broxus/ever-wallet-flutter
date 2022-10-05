@@ -6,9 +6,9 @@ class CustomBackButton extends StatelessWidget {
   final void Function()? onPressed;
 
   const CustomBackButton({
-    Key? key,
+    super.key,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => PlatformWidget(

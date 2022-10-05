@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 class NameNewKeyModalBody extends StatefulWidget {
   const NameNewKeyModalBody({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   NameNewKeyModalBodyState createState() => NameNewKeyModalBodyState();

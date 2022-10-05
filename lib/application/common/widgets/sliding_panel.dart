@@ -71,7 +71,7 @@ class SlidingUpPanel extends StatefulWidget {
   final SlideDirection slideDirection;
 
   const SlidingUpPanel({
-    Key? key,
+    super.key,
     this.panel,
     this.panelBuilder,
     this.body,
@@ -108,8 +108,7 @@ class SlidingUpPanel extends StatefulWidget {
     this.footer,
   })  : assert(panel != null || panelBuilder != null),
         assert(0 <= backdropOpacity && backdropOpacity <= 1),
-        assert(snapPoint == null || 0 < snapPoint && snapPoint < 1),
-        super(key: key);
+        assert(snapPoint == null || 0 < snapPoint && snapPoint < 1);
 
   @override
   _SlidingUpPanelState createState() => _SlidingUpPanelState();

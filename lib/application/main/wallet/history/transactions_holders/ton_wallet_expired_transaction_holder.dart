@@ -1,33 +1,24 @@
-import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/ton_asset_icon.dart';
 import 'package:ever_wallet/application/common/widgets/transaction_type_label.dart';
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/widgets/address_title.dart';
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/widgets/date_title.dart';
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/widgets/expire_title.dart';
+import 'package:ever_wallet/data/models/ton_wallet_expired_transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 class TonWalletExpiredTransactionHolder extends StatelessWidget {
-  final PendingTransaction pendingTransaction;
-  final String walletAddress;
+  final TonWalletExpiredTransaction transaction;
 
   const TonWalletExpiredTransactionHolder({
-    Key? key,
-    required this.pendingTransaction,
-    required this.walletAddress,
-  }) : super(key: key);
+    super.key,
+    required this.transaction,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final expireAt = pendingTransaction.expireAt.toDateTime();
-
-    final address = pendingTransaction.src ?? walletAddress;
-
-    final date = expireAt;
-
     return InkWell(
       onTap: () => {},
       child: Padding(
@@ -43,9 +34,9 @@ class TonWalletExpiredTransactionHolder extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: AddressTitle(address: address),
+                        child: AddressTitle(address: transaction.address),
                       ),
-                      DateTitle(date: date),
+                      DateTitle(date: transaction.date),
                     ],
                   ),
                   const Gap(4),
@@ -55,7 +46,7 @@ class TonWalletExpiredTransactionHolder extends StatelessWidget {
                   ),
                   const Gap(4),
                   ExpireTitle(
-                    date: expireAt,
+                    date: transaction.expireAt,
                     expired: true,
                   ),
                 ],

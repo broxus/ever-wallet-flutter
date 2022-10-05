@@ -1,10 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
 import 'package:ever_wallet/application/common/widgets/unfocusing_gesture_detector.dart';
+import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:flutter/material.dart';
@@ -20,11 +22,11 @@ class AddNewAccountTypePage extends StatefulWidget {
   final String? name;
 
   const AddNewAccountTypePage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.publicKey,
     this.name,
-  }) : super(key: key);
+  });
 
   @override
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
@@ -36,11 +38,11 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    context
+    optionNotifier.value = context
         .read<AccountsRepository>()
         .accountCreationOptions(widget.publicKey)
-        .first
-        .then((value) => optionNotifier.value = value.item2.firstOrNull);
+        .item2
+        .firstOrNull;
   }
 
   @override
@@ -89,13 +91,9 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
         ),
       );
 
-  Widget list() => StreamProvider<AsyncValue<Tuple2<List<WalletType>, List<WalletType>>>>(
-        create: (context) => context
-            .read<AccountsRepository>()
-            .accountCreationOptions(widget.publicKey)
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget list() => AsyncValueStreamProvider<Tuple2<List<WalletType>, List<WalletType>>>(
+        create: (context) =>
+            context.read<AccountsRepository>().accountCreationOptionsStream(widget.publicKey),
         builder: (context, child) {
           final options =
               context.watch<AsyncValue<Tuple2<List<WalletType>, List<WalletType>>>>().maybeWhen(
@@ -154,6 +152,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
           name: widget.name ?? value.name,
           publicKey: widget.publicKey,
           walletType: value,
+          workchain: kDefaultWorkchain,
         );
 
     if (!mounted) return;

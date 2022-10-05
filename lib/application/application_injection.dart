@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:event_bus/event_bus.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_future_provider.dart';
 import 'package:ever_wallet/application/main/main_screen.dart';
 import 'package:ever_wallet/application/onboarding/widgets/splash_screen.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
+import 'package:ever_wallet/data/repositories/app_lifecycle_state_repository.dart';
 import 'package:ever_wallet/data/repositories/approvals_repository.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
 import 'package:ever_wallet/data/repositories/bookmarks_repository.dart';
@@ -18,10 +21,11 @@ import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_assets_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:ever_wallet/data/repositories/transport_repository.dart';
+import 'package:ever_wallet/data/sources/local/app_lifecycle_state_source.dart';
 import 'package:ever_wallet/data/sources/local/current_accounts_source.dart';
-import 'package:ever_wallet/data/sources/local/current_key_source.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:ever_wallet/data/sources/local/ledger_source.dart';
+import 'package:ever_wallet/data/sources/local/sqlite/sqlite_database.dart';
 import 'package:ever_wallet/data/sources/remote/http_source.dart';
 import 'package:ever_wallet/data/sources/remote/transport_source.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,45 +37,49 @@ class ApplicationInjection extends StatelessWidget {
   final Widget child;
 
   const ApplicationInjection({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => hiveSourceProvider(
         child: MultiProvider(
           providers: [
+            sqliteDatabaseProvider(),
             storageProvider(),
             ledgerSourceProvider(),
             ledgerConnectionProvider(),
+            eventBusProvider(),
+            appLifecycleStateSourceProvider(),
+            appLifecycleStateRepositoryProvider(),
           ],
           builder: (context, child) => keystoreProvider(
-            child: accountsStorageProvider(
-              child: MultiProvider(
-                providers: [
-                  currentAccountsSourceProvider(),
-                  currentKeySourceProvider(),
-                  httpSourceProvider(),
-                  transportSourceProvider(),
-                  approvalsRepositoryProvider(),
-                  genericContractsRepositoryProvider(),
-                  localeRepositoryProvider(),
-                  permissionsRepositoryProvider(),
-                  sitesMetaDataRepositoryProvider(),
-                  tokenCurrenciesRepositoryProvider(),
-                  tokenWalletsRepositoryProvider(),
-                  tonWalletsRepositoryProvider(),
-                  accountsRepositoryProvider(),
-                  bookmarksRepositoryProvider(),
-                  searchHistoryRepositoryProvider(),
-                  tonAssetsRepositoryProvider(),
-                  transportRepositoryProvider(),
-                  navigatorKeyProvider(),
-                  mainNavigatorKeyProvider(),
-                ],
-                builder: (context, child) => biometryRepositoryProvider(
-                  child: keysRepositoryProvider(
-                    child: this.child,
+            child: transportRepositoryProvider(
+              child: accountsStorageProvider(
+                child: MultiProvider(
+                  providers: [
+                    currentAccountsSourceProvider(),
+                    httpSourceProvider(),
+                    transportSourceProvider(),
+                    approvalsRepositoryProvider(),
+                    genericContractsRepositoryProvider(),
+                    localeRepositoryProvider(),
+                    permissionsRepositoryProvider(),
+                    sitesMetaDataRepositoryProvider(),
+                    tokenCurrenciesRepositoryProvider(),
+                    tokenWalletsRepositoryProvider(),
+                    tonWalletsRepositoryProvider(),
+                    accountsRepositoryProvider(),
+                    bookmarksRepositoryProvider(),
+                    searchHistoryRepositoryProvider(),
+                    tonAssetsRepositoryProvider(),
+                    navigatorKeyProvider(),
+                    mainNavigatorKeyProvider(),
+                  ],
+                  builder: (context, child) => biometryRepositoryProvider(
+                    child: keysRepositoryProvider(
+                      child: this.child,
+                    ),
                   ),
                 ),
               ),
@@ -112,6 +120,11 @@ class ApplicationInjection extends StatelessWidget {
         dispose: (context, value) => value.dispose(),
       );
 
+  Provider<SqliteDatabase> sqliteDatabaseProvider() => Provider<SqliteDatabase>(
+        create: (context) => SqliteDatabase(),
+        dispose: (context, value) => value.close(),
+      );
+
   Provider<LedgerSource> ledgerSourceProvider() => Provider(create: (context) => LedgerSource());
 
   Provider<LedgerConnection> ledgerConnectionProvider() => Provider<LedgerConnection>(
@@ -129,6 +142,22 @@ class ApplicationInjection extends StatelessWidget {
           );
         },
         dispose: (context, value) => value.dispose(),
+      );
+
+  Provider<EventBus> eventBusProvider() => Provider<EventBus>(
+        create: (context) => EventBus(),
+        dispose: (context, value) => value.destroy(),
+      );
+
+  Provider<AppLifecycleStateSource> appLifecycleStateSourceProvider() =>
+      Provider<AppLifecycleStateSource>(
+        create: (context) => AppLifecycleStateSource(),
+        dispose: (context, value) => value.dispose(),
+      );
+
+  Provider<AppLifecycleStateRepository> appLifecycleStateRepositoryProvider() =>
+      Provider<AppLifecycleStateRepository>(
+        create: (context) => AppLifecycleStateRepository(context.read<AppLifecycleStateSource>()),
       );
 
   Widget keystoreProvider({
@@ -168,11 +197,6 @@ class ApplicationInjection extends StatelessWidget {
         dispose: (context, value) => value.dispose(),
       );
 
-  Provider<CurrentKeySource> currentKeySourceProvider() => Provider<CurrentKeySource>(
-        create: (context) => CurrentKeySource(),
-        dispose: (context, value) => value.dispose(),
-      );
-
   Provider<HttpSource> httpSourceProvider() => Provider<HttpSource>(
         create: (context) => HttpSource(),
       );
@@ -189,20 +213,22 @@ class ApplicationInjection extends StatelessWidget {
 
   Provider<GenericContractsRepository> genericContractsRepositoryProvider() =>
       Provider<GenericContractsRepository>(
-        create: (context) => GenericContractsRepository(context.read<TransportSource>()),
+        create: (context) => GenericContractsRepository(
+          transportSource: context.read<TransportSource>(),
+          appLifecycleStateSource: context.read<AppLifecycleStateSource>(),
+        ),
         dispose: (context, value) => value.dispose(),
       );
 
   Provider<LocaleRepository> localeRepositoryProvider() => Provider<LocaleRepository>(
         create: (context) => LocaleRepository(context.read<HiveSource>()),
-        dispose: (context, value) => value.dispose(),
       );
 
   Provider<PermissionsRepository> permissionsRepositoryProvider() =>
       Provider<PermissionsRepository>(
         create: (context) => PermissionsRepository(
-          context.read<AccountsStorage>(),
-          context.read<HiveSource>(),
+          hiveSource: context.read<HiveSource>(),
+          eventBus: context.read<EventBus>(),
         ),
         dispose: (context, value) => value.dispose(),
       );
@@ -215,9 +241,9 @@ class ApplicationInjection extends StatelessWidget {
   Provider<TokenCurrenciesRepository> tokenCurrenciesRepositoryProvider() =>
       Provider<TokenCurrenciesRepository>(
         create: (context) => TokenCurrenciesRepository(
-          context.read<CurrentAccountsSource>(),
-          context.read<HiveSource>(),
-          context.read<HttpSource>(),
+          currentAccountsSource: context.read<CurrentAccountsSource>(),
+          hiveSource: context.read<HiveSource>(),
+          httpSource: context.read<HttpSource>(),
         ),
         dispose: (context, value) => value.dispose(),
       );
@@ -225,69 +251,76 @@ class ApplicationInjection extends StatelessWidget {
   Provider<TokenWalletsRepository> tokenWalletsRepositoryProvider() =>
       Provider<TokenWalletsRepository>(
         create: (context) => TokenWalletsRepository(
-          context.read<AccountsStorage>(),
-          context.read<CurrentAccountsSource>(),
-          context.read<TransportSource>(),
-          context.read<HiveSource>(),
+          sqliteDatabase: context.read<SqliteDatabase>(),
+          transportSource: context.read<TransportSource>(),
+          currentAccountsSource: context.read<CurrentAccountsSource>(),
+          appLifecycleStateSource: context.read<AppLifecycleStateSource>(),
         ),
         dispose: (context, value) => value.dispose(),
       );
 
   Provider<TonWalletsRepository> tonWalletsRepositoryProvider() => Provider<TonWalletsRepository>(
         create: (context) => TonWalletsRepository(
-          context.read<AccountsStorage>(),
-          context.read<CurrentAccountsSource>(),
-          context.read<TransportSource>(),
-          context.read<HiveSource>(),
+          keystore: context.read<Keystore>(),
+          sqliteDatabase: context.read<SqliteDatabase>(),
+          hiveSource: context.read<HiveSource>(),
+          transportSource: context.read<TransportSource>(),
+          currentAccountsSource: context.read<CurrentAccountsSource>(),
+          appLifecycleStateSource: context.read<AppLifecycleStateSource>(),
         ),
         dispose: (context, value) => value.dispose(),
       );
 
   Provider<AccountsRepository> accountsRepositoryProvider() => Provider<AccountsRepository>(
         create: (context) => AccountsRepository(
-          context.read<AccountsStorage>(),
-          context.read<CurrentAccountsSource>(),
-          context.read<TransportSource>(),
-          context.read<Keystore>(),
-          context.read<CurrentKeySource>(),
-          context.read<HiveSource>(),
+          keystore: context.read<Keystore>(),
+          accountsStorage: context.read<AccountsStorage>(),
+          hiveSource: context.read<HiveSource>(),
+          transportSource: context.read<TransportSource>(),
+          currentAccountsSource: context.read<CurrentAccountsSource>(),
+          eventBus: context.read<EventBus>(),
         ),
         dispose: (context, value) => value.dispose(),
       );
 
   Provider<BookmarksRepository> bookmarksRepositoryProvider() => Provider<BookmarksRepository>(
         create: (context) => BookmarksRepository(context.read<HiveSource>()),
-        dispose: (context, value) => value.dispose(),
       );
 
   Provider<SearchHistoryRepository> searchHistoryRepositoryProvider() =>
       Provider<SearchHistoryRepository>(
         create: (context) => SearchHistoryRepository(context.read<HiveSource>()),
-        dispose: (context, value) => value.dispose(),
       );
 
   Provider<TonAssetsRepository> tonAssetsRepositoryProvider() => Provider<TonAssetsRepository>(
         create: (context) => TonAssetsRepository(
-          context.read<AccountsStorage>(),
-          context.read<TransportSource>(),
-          context.read<HiveSource>(),
-          context.read<HttpSource>(),
+          accountsStorage: context.read<AccountsStorage>(),
+          transportSource: context.read<TransportSource>(),
+          hiveSource: context.read<HiveSource>(),
+          httpSource: context.read<HttpSource>(),
         ),
         dispose: (context, value) => value.dispose(),
       );
 
-  Provider<TransportRepository> transportRepositoryProvider() => Provider<TransportRepository>(
-        create: (context) => TransportRepository(
-          context.read<TransportSource>(),
-          context.read<HiveSource>(),
+  Widget transportRepositoryProvider({
+    required Widget child,
+  }) =>
+      asyncValueProvider<TransportRepository>(
+        create: (context) => TransportRepository.create(
+          hiveSource: context.read<HiveSource>(),
+          transportSource: context.read<TransportSource>(),
         ),
+        child: child,
       );
 
   Widget biometryRepositoryProvider({
     required Widget child,
   }) =>
       asyncValueProvider<BiometryRepository>(
-        create: (context) => BiometryRepository.create(context.read<HiveSource>()),
+        create: (context) => BiometryRepository.create(
+          hiveSource: context.read<HiveSource>(),
+          appLifecycleStateSource: context.read<AppLifecycleStateSource>(),
+        ),
         dispose: (context, value) => value.dispose(),
         child: child,
       );
@@ -298,8 +331,8 @@ class ApplicationInjection extends StatelessWidget {
       asyncValueProvider<KeysRepository>(
         create: (context) => KeysRepository.create(
           keystore: context.read<Keystore>(),
-          currentKeySource: context.read<CurrentKeySource>(),
           hiveSource: context.read<HiveSource>(),
+          eventBus: context.read<EventBus>(),
         ),
         dispose: (context, value) => value.dispose(),
         child: child,
@@ -307,13 +340,11 @@ class ApplicationInjection extends StatelessWidget {
 
   Widget asyncValueProvider<T>({
     required Future<T> Function(BuildContext context) create,
-    required void Function(BuildContext context, T value)? dispose,
+    void Function(BuildContext context, T value)? dispose,
     required Widget child,
   }) =>
-      FutureProvider<AsyncValue<T>>(
-        create: (context) => create(context).then((value) => AsyncValue.ready(value)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+      AsyncValueFutureProvider<T>(
+        create: (context) => create(context),
         builder: (context, _) => context.watch<AsyncValue<T>>().when(
               ready: (value) => Provider<T>(
                 create: (context) => value,

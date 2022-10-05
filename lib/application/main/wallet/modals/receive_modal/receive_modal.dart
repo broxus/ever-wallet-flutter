@@ -13,9 +13,9 @@ class ReceiveModalBody extends StatefulWidget {
   final String address;
 
   const ReceiveModalBody({
-    Key? key,
+    super.key,
     required this.address,
-  }) : super(key: key);
+  });
 
   @override
   State<ReceiveModalBody> createState() => _ReceiveModalBodyState();

@@ -18,13 +18,13 @@ class CallContractMethodPage extends StatefulWidget {
   final FunctionCall? payload;
 
   const CallContractMethodPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.origin,
     required this.publicKey,
     required this.recipient,
     required this.payload,
-  }) : super(key: key);
+  });
 
   @override
   _CallContractMethodPageState createState() => _CallContractMethodPageState();

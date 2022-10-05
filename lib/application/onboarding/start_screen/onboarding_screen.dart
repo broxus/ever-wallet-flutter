@@ -17,7 +17,7 @@ class OnboardingScreenRoute extends MaterialPageRoute<void> {
 
 /// Entry point in the app if user not authenticated
 class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+  const OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

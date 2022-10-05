@@ -7,9 +7,9 @@ class AddressCard extends StatefulWidget {
   final String address;
 
   const AddressCard({
-    Key? key,
+    super.key,
     required this.address,
-  }) : super(key: key);
+  });
 
   @override
   State<AddressCard> createState() => _AddressCardState();

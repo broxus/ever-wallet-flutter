@@ -28,9 +28,9 @@ class SeedDeleteSheet extends StatelessWidget {
   final KeyStoreEntry seed;
 
   const SeedDeleteSheet({
-    Key? key,
+    super.key,
     required this.seed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

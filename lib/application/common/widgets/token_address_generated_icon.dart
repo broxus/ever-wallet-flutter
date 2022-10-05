@@ -8,10 +8,10 @@ class TokenAddressGeneratedIcon extends StatelessWidget {
   final TokenWalletVersion version;
 
   const TokenAddressGeneratedIcon({
-    Key? key,
+    super.key,
     required this.address,
     required this.version,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => SizedBox.square(

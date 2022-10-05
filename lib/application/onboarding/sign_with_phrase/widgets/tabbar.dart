@@ -15,8 +15,8 @@ class EWTabBar<T> extends StatelessWidget {
     required this.builder,
     required this.selectedValue,
     required this.onChanged,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

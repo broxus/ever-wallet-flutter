@@ -30,8 +30,8 @@ class OnboardingAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.closeType = CloseType.leading,
     this.backgroundColor = Colors.transparent,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);

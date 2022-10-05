@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/ew_dropdown_button.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
@@ -17,7 +18,6 @@ import 'package:ever_wallet/application/main/wallet/modals/common/parse_scan_res
 import 'package:ever_wallet/application/main/wallet/modals/common/scanner_widget.dart';
 import 'package:ever_wallet/application/main/wallet/modals/token_send_transaction_flow/token_send_info_page.dart';
 import 'package:ever_wallet/data/extensions.dart';
-import 'package:ever_wallet/data/models/token_wallet_info.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
@@ -39,12 +39,12 @@ class PrepareTokenTransferPage extends StatefulWidget {
   final List<String> publicKeys;
 
   const PrepareTokenTransferPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.owner,
     required this.rootTokenContract,
     required this.publicKeys,
-  }) : super(key: key);
+  });
 
   @override
   _PrepareTokenTransferPageState createState() => _PrepareTokenTransferPageState();
@@ -165,11 +165,8 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
     formValidityNotifier.value = formKey.currentState?.validate() ?? false;
   }
 
-  Widget dropdownButton() => StreamProvider<AsyncValue<Map<String, String>>>(
-        create: (context) =>
-            context.read<KeysRepository>().labelsStream.map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget dropdownButton() => AsyncValueStreamProvider<Map<String, String>>(
+        create: (context) => context.read<KeysRepository>().labelsStream,
         builder: (context, child) {
           final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
                 ready: (value) => value,
@@ -236,16 +233,11 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         },
       );
 
-  Widget maxButton() => StreamProvider<AsyncValue<TokenWalletInfo?>>(
-        create: (context) => context
-            .read<TokenWalletsRepository>()
-            .getInfoStream(
+  Widget maxButton() => AsyncValueStreamProvider<TokenWalletInfo?>(
+        create: (context) => context.read<TokenWalletsRepository>().getInfoStream(
               owner: widget.owner,
               rootTokenContract: widget.rootTokenContract,
-            )
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+            ),
         builder: (context, child) {
           final tokenWalletInfo = context.watch<AsyncValue<TokenWalletInfo?>>().maybeWhen(
                 ready: (value) => value,
@@ -276,16 +268,11 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         },
       );
 
-  Widget balance() => StreamProvider<AsyncValue<TokenWalletInfo?>>(
-        create: (context) => context
-            .read<TokenWalletsRepository>()
-            .getInfoStream(
+  Widget balance() => AsyncValueStreamProvider<TokenWalletInfo?>(
+        create: (context) => context.read<TokenWalletsRepository>().getInfoStream(
               owner: widget.owner,
               rootTokenContract: widget.rootTokenContract,
-            )
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+            ),
         builder: (context, child) {
           final tokenWalletInfo = context.watch<AsyncValue<TokenWalletInfo?>>().maybeWhen(
                 ready: (value) => value,
@@ -433,16 +420,11 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         ],
       );
 
-  Widget submitButton() => StreamProvider<AsyncValue<TokenWalletInfo?>>(
-        create: (context) => context
-            .read<TokenWalletsRepository>()
-            .getInfoStream(
+  Widget submitButton() => AsyncValueStreamProvider<TokenWalletInfo?>(
+        create: (context) => context.read<TokenWalletsRepository>().getInfoStream(
               owner: widget.owner,
               rootTokenContract: widget.rootTokenContract,
-            )
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+            ),
         builder: (context, child) {
           final tokenWalletInfo = context.watch<AsyncValue<TokenWalletInfo?>>().maybeWhen(
                 ready: (value) => value,

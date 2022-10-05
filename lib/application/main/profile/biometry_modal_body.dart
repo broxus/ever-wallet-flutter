@@ -1,4 +1,5 @@
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/general/field/switch_field.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -9,7 +10,7 @@ import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 
 class BiometryModalBody extends StatefulWidget {
-  const BiometryModalBody({Key? key}) : super(key: key);
+  const BiometryModalBody({super.key});
 
   @override
   _BiometryModalBodyState createState() => _BiometryModalBodyState();
@@ -43,13 +44,8 @@ class _BiometryModalBodyState extends State<BiometryModalBody> {
           ),
         ),
         const Gap(16),
-        StreamProvider<AsyncValue<bool>>(
-          create: (context) => context
-              .read<BiometryRepository>()
-              .statusStream
-              .map((event) => AsyncValue.ready(event)),
-          initialData: const AsyncValue.loading(),
-          catchError: (context, error) => AsyncValue.error(error),
+        AsyncValueStreamProvider<bool>(
+          create: (context) => context.read<BiometryRepository>().statusStream,
           builder: (context, child) {
             final isEnabled = context.watch<AsyncValue<bool>>().maybeWhen(
                   ready: (value) => value,

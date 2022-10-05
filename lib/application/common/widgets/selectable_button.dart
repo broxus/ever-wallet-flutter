@@ -12,12 +12,12 @@ class SelectableButton extends StatelessWidget {
   final bool isSelected;
 
   const SelectableButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.text,
     required this.onPressed,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => PlatformWidget(

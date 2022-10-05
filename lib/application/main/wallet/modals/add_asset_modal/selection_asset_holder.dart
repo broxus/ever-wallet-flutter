@@ -14,11 +14,11 @@ class SelectionAssetHolder extends StatelessWidget {
   final VoidCallback onTap;
 
   const SelectionAssetHolder({
-    Key? key,
+    super.key,
     required this.asset,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => ListTile(

@@ -1,14 +1,12 @@
-import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/main/wallet/modals/add_asset_modal/show_add_asset_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
 import 'package:ever_wallet/application/main/wallet/modals/receive_modal/show_receive_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/send_transaction_flow/start_send_transaction_flow.dart';
 import 'package:ever_wallet/application/main/wallet/widgets/wallet_button.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
-import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
@@ -20,9 +18,9 @@ class ProfileActions extends StatelessWidget {
   final String address;
 
   const ProfileActions({
-    Key? key,
+    super.key,
     required this.address,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Row(
@@ -46,148 +44,112 @@ class ProfileActions extends StatelessWidget {
               ),
             ),
           ),
-          StreamProvider<AsyncValue<AssetsList>>(
-            create: (context) => context
-                .read<AccountsRepository>()
-                .accountInfo(address)
-                .map((event) => AsyncValue.ready(event)),
-            initialData: const AsyncValue.loading(),
-            catchError: (context, error) => AsyncValue.error(error),
+          WalletButton(
+            onTap: () => showReceiveModal(
+              context: context,
+              address: address,
+            ),
+            title: AppLocalizations.of(context)!.receive,
+            icon: Assets.images.iconReceive.svg(
+              color: CrystalColor.secondary,
+            ),
+          ),
+          AsyncValueStreamProvider<List<String>?>(
+            create: (context) =>
+                context.read<TonWalletsRepository>().localCustodiansStream(address),
             builder: (context, child) {
-              final value = context.watch<AsyncValue<AssetsList>>().maybeWhen(
+              final localCustodians = context.watch<AsyncValue<List<String>?>>().maybeWhen(
                     ready: (value) => value,
                     orElse: () => null,
                   );
 
-              return WalletButton(
-                onTap: value != null
-                    ? () => showReceiveModal(
-                          context: context,
-                          address: value.address,
-                        )
-                    : null,
-                title: AppLocalizations.of(context)!.receive,
-                icon: Assets.images.iconReceive.svg(
-                  color: CrystalColor.secondary,
-                ),
-              );
-            },
-          ),
-          StreamProvider<AsyncValue<Map<KeyStoreEntry, List<KeyStoreEntry>?>>>(
-            create: (context) => context
-                .read<KeysRepository>()
-                .mappedKeysStream
-                .map((event) => AsyncValue.ready(event)),
-            initialData: const AsyncValue.loading(),
-            catchError: (context, error) => AsyncValue.error(error),
-            builder: (context, child) {
-              final keys =
-                  context.watch<AsyncValue<Map<KeyStoreEntry, List<KeyStoreEntry>?>>>().maybeWhen(
-                        ready: (value) => value,
-                        orElse: () => <KeyStoreEntry, List<KeyStoreEntry>?>{},
-                      );
-
-              return StreamProvider<AsyncValue<KeyStoreEntry?>>(
+              return AsyncValueStreamProvider<AssetsList>(
                 create: (context) => context
-                    .read<KeysRepository>()
-                    .currentKeyStream
-                    .map((event) => AsyncValue.ready(event)),
-                initialData: const AsyncValue.loading(),
-                catchError: (context, error) => AsyncValue.error(error),
+                    .read<AccountsRepository>()
+                    .accountsStream
+                    .expand((e) => e)
+                    .where((e) => e.address == address),
                 builder: (context, child) {
-                  final currentKey = context.watch<AsyncValue<KeyStoreEntry?>>().maybeWhen(
+                  final account = context.watch<AsyncValue<KeyStoreEntry?>>().maybeWhen(
                         ready: (value) => value,
                         orElse: () => null,
                       );
 
-                  return StreamProvider<AsyncValue<TonWalletInfo?>>(
-                    create: (context) => context
-                        .read<TonWalletsRepository>()
-                        .getInfoStream(address)
-                        .map((event) => AsyncValue.ready(event)),
-                    initialData: const AsyncValue.loading(),
-                    catchError: (context, error) => AsyncValue.error(error),
+                  return AsyncValueStreamProvider<TonWalletDetails>(
+                    create: (context) =>
+                        context.read<TonWalletsRepository>().detailsStream(address),
                     builder: (context, child) {
-                      final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
+                      final details = context.watch<AsyncValue<TonWalletDetails>>().maybeWhen(
                             ready: (value) => value,
                             orElse: () => null,
                           );
 
-                      if (currentKey != null && tonWalletInfo != null) {
-                        final requiresSeparateDeploy = tonWalletInfo.details.requiresSeparateDeploy;
+                      return AsyncValueStreamProvider<ContractState>(
+                        create: (context) =>
+                            context.read<TonWalletsRepository>().contractStateStream(address),
+                        builder: (context, child) {
+                          final contractState =
+                              context.watch<AsyncValue<ContractState>>().maybeWhen(
+                                    ready: (value) => value,
+                                    orElse: () => null,
+                                  );
 
-                        if (!requiresSeparateDeploy) {
-                          return WalletButton(
-                            onTap: () => startSendTransactionFlow(
-                              context: context,
-                              address: address,
-                              publicKeys: [tonWalletInfo.publicKey],
-                            ),
-                            title: AppLocalizations.of(context)!.send,
-                            icon: Assets.images.iconSend.svg(
-                              color: CrystalColor.secondary,
-                            ),
-                          );
-                        }
+                          if (account != null && details != null && contractState != null) {
+                            final requiresSeparateDeploy = details.requiresSeparateDeploy;
 
-                        final isDeployed = tonWalletInfo.contractState.isDeployed;
+                            if (!requiresSeparateDeploy) {
+                              return WalletButton(
+                                onTap: () => startSendTransactionFlow(
+                                  context: context,
+                                  address: address,
+                                  publicKeys: [account.publicKey],
+                                ),
+                                title: AppLocalizations.of(context)!.send,
+                                icon: Assets.images.iconSend.svg(
+                                  color: CrystalColor.secondary,
+                                ),
+                              );
+                            }
 
-                        if (isDeployed) {
-                          final keysList = [
-                            ...keys.keys,
-                            ...keys.values.whereNotNull().expand((e) => e),
-                          ];
+                            final isDeployed = contractState.isDeployed;
 
-                          final custodians = tonWalletInfo.custodians ?? [];
-
-                          final localCustodians = keysList
-                              .where((e) => custodians.any((el) => el == e.publicKey))
-                              .toList();
-
-                          final initiatorKey = localCustodians
-                              .firstWhereOrNull((e) => e.publicKey == currentKey.publicKey);
-
-                          final listOfKeys = [
-                            if (initiatorKey != null) initiatorKey,
-                            ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
-                          ];
-
-                          final publicKeys = listOfKeys.map((e) => e.publicKey).toList();
-
-                          return WalletButton(
-                            onTap: publicKeys.isNotEmpty
-                                ? () => startSendTransactionFlow(
-                                      context: context,
-                                      address: address,
-                                      publicKeys: publicKeys,
-                                    )
-                                : null,
-                            title: AppLocalizations.of(context)!.send,
-                            icon: Assets.images.iconSend.svg(
-                              color: CrystalColor.secondary,
-                            ),
-                          );
-                        } else {
-                          return WalletButton(
-                            onTap: () => startDeployWalletFlow(
-                              context: context,
-                              address: address,
-                              publicKey: tonWalletInfo.publicKey,
-                            ),
-                            title: AppLocalizations.of(context)!.deploy,
-                            icon: Assets.images.iconDeploy.svg(
-                              color: CrystalColor.secondary,
-                            ),
-                          );
-                        }
-                      } else {
-                        return WalletButton(
-                          title: AppLocalizations.of(context)!.send,
-                          icon: Assets.images.iconSend.svg(
-                            color: CrystalColor.secondary,
-                          ),
-                        );
-                      }
+                            if (isDeployed) {
+                              return WalletButton(
+                                onTap: localCustodians != null && localCustodians.isNotEmpty
+                                    ? () => startSendTransactionFlow(
+                                          context: context,
+                                          address: address,
+                                          publicKeys: localCustodians,
+                                        )
+                                    : null,
+                                title: AppLocalizations.of(context)!.send,
+                                icon: Assets.images.iconSend.svg(
+                                  color: CrystalColor.secondary,
+                                ),
+                              );
+                            } else {
+                              return WalletButton(
+                                onTap: () => startDeployWalletFlow(
+                                  context: context,
+                                  address: address,
+                                  publicKey: account.publicKey,
+                                ),
+                                title: AppLocalizations.of(context)!.deploy,
+                                icon: Assets.images.iconDeploy.svg(
+                                  color: CrystalColor.secondary,
+                                ),
+                              );
+                            }
+                          } else {
+                            return WalletButton(
+                              title: AppLocalizations.of(context)!.send,
+                              icon: Assets.images.iconSend.svg(
+                                color: CrystalColor.secondary,
+                              ),
+                            );
+                          }
+                        },
+                      );
                     },
                   );
                 },

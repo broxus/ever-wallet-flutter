@@ -1,6 +1,6 @@
-import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/bloc/ton_wallet/ton_wallet_prepare_transfer_bloc.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/widgets/custom_dropdown_button.dart';
@@ -21,7 +21,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 class SendMessagePage extends StatefulWidget {
@@ -36,7 +35,7 @@ class SendMessagePage extends StatefulWidget {
   final KnownPayload? knownPayload;
 
   const SendMessagePage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.origin,
     required this.sender,
@@ -46,7 +45,7 @@ class SendMessagePage extends StatefulWidget {
     required this.bounce,
     required this.payload,
     required this.knownPayload,
-  }) : super(key: key);
+  });
 
   @override
   _SendMessageModalState createState() => _SendMessageModalState();
@@ -55,19 +54,19 @@ class SendMessagePage extends StatefulWidget {
 class _SendMessageModalState extends State<SendMessagePage> {
   @override
   Widget build(BuildContext context) => BlocProvider<SelectedPublicKeyCubit>(
-        create: (context) => SelectedPublicKeyCubit(widget.publicKeys.firstOrNull),
+        create: (context) => SelectedPublicKeyCubit(widget.publicKeys.first),
         child: BlocProvider<TonWalletPrepareTransferBloc>(
           key: ValueKey(widget.sender),
           create: (context) =>
               TonWalletPrepareTransferBloc(context.read<TonWalletsRepository>(), widget.sender)
                 ..add(
                   TonWalletPrepareTransferEvent.prepareTransfer(
-                    publicKey: widget.publicKeys.firstOrNull,
+                    publicKey: widget.publicKeys.first,
                     destination: widget.recipient,
                     amount: widget.amount,
                   ),
                 ),
-          child: BlocListener<SelectedPublicKeyCubit, String?>(
+          child: BlocListener<SelectedPublicKeyCubit, String>(
             listener: (context, state) => context.read<TonWalletPrepareTransferBloc>().add(
                   TonWalletPrepareTransferEvent.prepareTransfer(
                     publicKey: state,
@@ -113,11 +112,8 @@ class _SendMessageModalState extends State<SendMessagePage> {
         builder: (context, state) {
           if (state == null) return const SizedBox();
 
-          return StreamProvider<AsyncValue<Map<String, String>>>(
-            create: (context) =>
-                context.read<KeysRepository>().labelsStream.map((event) => AsyncValue.ready(event)),
-            initialData: const AsyncValue.loading(),
-            catchError: (context, error) => AsyncValue.error(error),
+          return AsyncValueStreamProvider<Map<String, String>>(
+            create: (context) => context.read<KeysRepository>().labelsStream,
             builder: (context, child) {
               final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
                     ready: (value) => value,

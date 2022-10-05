@@ -20,7 +20,7 @@ class SaveSeedPhraseRoute extends MaterialPageRoute<void> {
 
 /// !!! Here displays only 12 words
 class SaveSeedPhraseScreen extends StatefulWidget {
-  const SaveSeedPhraseScreen({Key? key}) : super(key: key);
+  const SaveSeedPhraseScreen({super.key});
 
   @override
   State<SaveSeedPhraseScreen> createState() => _SaveSeedPhraseScreenState();

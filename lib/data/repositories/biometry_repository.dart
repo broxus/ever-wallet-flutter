@@ -1,34 +1,44 @@
 import 'dart:async';
 
+import 'package:ever_wallet/data/sources/local/app_lifecycle_state_source.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:rxdart/subjects.dart';
 
 class BiometryRepository {
   final HiveSource _hiveSource;
-  final _localAuth = LocalAuthentication();
+  final AppLifecycleStateSource _appLifecycleStateSource;
   final _availabilitySubject = BehaviorSubject<bool>();
-  final _statusSubject = BehaviorSubject<bool>();
+  final _localAuth = LocalAuthentication();
+  late final StreamSubscription _appLifecycleStateStreamSubscription;
   late final StreamSubscription _availabilityStreamSubscription;
   late final StreamSubscription _statusStreamSubscription;
 
-  BiometryRepository._(this._hiveSource);
+  BiometryRepository._({
+    required HiveSource hiveSource,
+    required AppLifecycleStateSource appLifecycleStateSource,
+  })  : _hiveSource = hiveSource,
+        _appLifecycleStateSource = appLifecycleStateSource;
 
-  static Future<BiometryRepository> create(HiveSource hiveSource) async {
-    final instance = BiometryRepository._(hiveSource);
+  static Future<BiometryRepository> create({
+    required HiveSource hiveSource,
+    required AppLifecycleStateSource appLifecycleStateSource,
+  }) async {
+    final instance = BiometryRepository._(
+      hiveSource: hiveSource,
+      appLifecycleStateSource: appLifecycleStateSource,
+    );
     await instance._initialize();
     return instance;
   }
 
-  Stream<bool> get availabilityStream => _availabilitySubject.distinct();
+  Stream<bool> get availabilityStream => _availabilitySubject;
 
   bool get availability => _availabilitySubject.value;
 
-  Stream<bool> get statusStream => _statusSubject.distinct();
+  Stream<bool> get statusStream => _hiveSource.isBiometryEnabledStream;
 
-  bool get status => _statusSubject.value;
-
-  Future<void> checkAvailability() async => _availabilitySubject.add(await _isAvailable);
+  bool get status => _hiveSource.isBiometryEnabled;
 
   Future<void> setStatus({
     required String localizedReason,
@@ -36,9 +46,7 @@ class BiometryRepository {
   }) async {
     if (isEnabled && !await _authenticate(localizedReason)) return;
 
-    await _hiveSource.setIsBiometryEnabled(isEnabled: isEnabled);
-
-    _statusSubject.add(isEnabled);
+    await _hiveSource.setIsBiometryEnabled(isEnabled);
   }
 
   Future<void> setKeyPassword({
@@ -68,22 +76,23 @@ class BiometryRepository {
   }
 
   Future<bool> get _isAvailable async {
-    final isAvailable = await _localAuth.canCheckBiometrics;
-    final isDeviceSupported = await _localAuth.isDeviceSupported();
-    return isAvailable && isDeviceSupported;
+    if (!await _localAuth.canCheckBiometrics) return false;
+    if (!await _localAuth.isDeviceSupported()) return false;
+    if (await _localAuth.getAvailableBiometrics().then((v) => v.isEmpty)) return false;
+    return true;
   }
 
   Future<void> clear() async {
-    await _hiveSource.clearKeysPasswords();
-    await _hiveSource.clearUserPreferences();
+    await _hiveSource.clearKeyPasswords();
+    await _hiveSource.clearIsBiometryEnabled();
   }
 
   Future<void> dispose() async {
+    await _appLifecycleStateStreamSubscription.cancel();
     await _availabilityStreamSubscription.cancel();
     await _statusStreamSubscription.cancel();
 
     await _availabilitySubject.close();
-    await _statusSubject.close();
   }
 
   Future<bool> _authenticate(String localizedReason) async {
@@ -102,11 +111,15 @@ class BiometryRepository {
 
   Future<void> _initialize() async {
     _availabilitySubject.add(await _isAvailable);
-    _statusSubject.add(_hiveSource.isBiometryEnabled);
+
+    _appLifecycleStateStreamSubscription = _appLifecycleStateSource.appLifecycleStateStream
+        .asyncMap((_) => _isAvailable)
+        .listen((e) => _availabilitySubject.add(e));
 
     _availabilityStreamSubscription =
-        availabilityStream.where((e) => !e).listen((e) => _statusSubject.add(e));
+        availabilityStream.where((e) => !e).listen((e) => _hiveSource.setIsBiometryEnabled(e));
+
     _statusStreamSubscription =
-        statusStream.where((e) => !e).listen((e) => _hiveSource.clearKeysPasswords());
+        statusStream.where((e) => !e).listen((e) => _hiveSource.clearKeyPasswords());
   }
 }

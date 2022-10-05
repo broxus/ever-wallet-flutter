@@ -11,10 +11,10 @@ class WalletCardSelectableField extends StatefulWidget {
   final String value;
 
   const WalletCardSelectableField({
-    Key? key,
+    super.key,
     required this.text,
     required this.value,
-  }) : super(key: key);
+  });
 
   @override
   _WalletCardSelectableFieldState createState() => _WalletCardSelectableFieldState();

@@ -7,10 +7,10 @@ class CrystalShimmer extends StatelessWidget {
   final double? width;
 
   const CrystalShimmer({
-    Key? key,
+    super.key,
     this.height,
     this.width,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(

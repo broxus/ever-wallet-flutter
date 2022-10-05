@@ -27,7 +27,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class BrowserPage extends StatefulWidget {
-  const BrowserPage({Key? key}) : super(key: key);
+  const BrowserPage({super.key});
 
   @override
   State<BrowserPage> createState() => _BrowserPageState();

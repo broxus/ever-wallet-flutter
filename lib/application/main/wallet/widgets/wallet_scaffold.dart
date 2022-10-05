@@ -15,14 +15,14 @@ class WalletScaffold extends StatefulWidget {
   final bool isModalDragEnabled;
 
   const WalletScaffold({
-    Key? key,
+    super.key,
     this.isModalDragEnabled = true,
     this.expand = true,
     this.isScrollControlled = true,
     this.modalController,
     required this.body,
     required this.modalBody,
-  }) : super(key: key);
+  });
 
   @override
   _WalletScaffoldState createState() => _WalletScaffoldState();

@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/bloc/ton_wallet/ton_wallet_transactions_bloc.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/theme.dart';
@@ -12,7 +13,12 @@ import 'package:ever_wallet/application/main/wallet/map_ton_wallet_transactions_
 import 'package:ever_wallet/application/main/wallet/modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
 import 'package:ever_wallet/application/main/wallet/modals/receive_modal/show_receive_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/send_transaction_flow/start_send_transaction_flow.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
+import 'package:ever_wallet/data/models/ton_wallet_expired_transaction.dart';
+import 'package:ever_wallet/data/models/ton_wallet_multisig_expired_transaction.dart';
+import 'package:ever_wallet/data/models/ton_wallet_multisig_ordinary_transaction.dart';
+import 'package:ever_wallet/data/models/ton_wallet_multisig_pending_transaction.dart';
+import 'package:ever_wallet/data/models/ton_wallet_ordinary_transaction.dart';
+import 'package:ever_wallet/data/models/ton_wallet_pending_transaction.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
@@ -23,15 +29,14 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:gap/gap.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:provider/provider.dart';
 
 class TonAssetInfoModalBody extends StatefulWidget {
   final String address;
 
   const TonAssetInfoModalBody({
-    Key? key,
+    super.key,
     required this.address,
-  }) : super(key: key);
+  });
 
   @override
   _TonAssetInfoModalBodyState createState() => _TonAssetInfoModalBodyState();
@@ -39,13 +44,8 @@ class TonAssetInfoModalBody extends StatefulWidget {
 
 class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
   @override
-  Widget build(BuildContext context) => StreamProvider<AsyncValue<TonWalletInfo?>>(
-        create: (context) => context
-            .read<TonWalletsRepository>()
-            .getInfoStream(widget.address)
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget build(BuildContext context) => AsyncValueStreamProvider<TonWalletInfo?>(
+        create: (context) => context.read<TonWalletsRepository>().getInfoStream(widget.address),
         builder: (context, child) {
           final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
                 ready: (value) => value,
@@ -120,11 +120,8 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget actions(TonWalletInfo tonWalletInfo) =>
-      StreamProvider<AsyncValue<Map<KeyStoreEntry, List<KeyStoreEntry>?>>>(
-        create: (context) =>
-            context.read<KeysRepository>().mappedKeysStream.map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+      AsyncValueStreamProvider<Map<KeyStoreEntry, List<KeyStoreEntry>?>>(
+        create: (context) => context.read<KeysRepository>().mappedKeysStream,
         builder: (context, child) {
           final keys =
               context.watch<AsyncValue<Map<KeyStoreEntry, List<KeyStoreEntry>?>>>().maybeWhen(
@@ -132,13 +129,8 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                     orElse: () => <KeyStoreEntry, List<KeyStoreEntry>?>{},
                   );
 
-          return StreamProvider<AsyncValue<KeyStoreEntry?>>(
-            create: (context) => context
-                .read<KeysRepository>()
-                .currentKeyStream
-                .map((event) => AsyncValue.ready(event)),
-            initialData: const AsyncValue.loading(),
-            catchError: (context, error) => AsyncValue.error(error),
+          return AsyncValueStreamProvider<KeyStoreEntry?>(
+            create: (context) => context.read<KeysRepository>().currentKeyStream,
             builder: (context, child) {
               final currentKey = context.watch<AsyncValue<KeyStoreEntry?>>().maybeWhen(
                     ready: (value) => value,
@@ -223,16 +215,9 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         },
       );
 
-  Widget history({
-    required TonWalletInfo tonWalletInfo,
-  }) =>
-      StreamProvider<AsyncValue<List<MultisigPendingTransaction>?>>(
-        create: (context) => context
-            .read<TonWalletsRepository>()
-            .getUnconfirmedTransactionsStream(widget.address)
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget history() => AsyncValueStreamProvider<List<MultisigPendingTransaction>?>(
+        create: (context) =>
+            context.read<TonWalletsRepository>().getUnconfirmedTransactionsStream(widget.address),
         builder: (context, child) {
           final multisigPendingTransactionsState =
               context.watch<AsyncValue<List<MultisigPendingTransaction>?>>().maybeWhen(
@@ -240,32 +225,24 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                     orElse: () => <MultisigPendingTransaction>[],
                   );
 
-          return StreamProvider<AsyncValue<List<PendingTransaction>?>>(
-            create: (context) => context
-                .read<TonWalletsRepository>()
-                .getExpiredMessagesStream(widget.address)
-                .map((event) => AsyncValue.ready(event)),
-            initialData: const AsyncValue.loading(),
-            catchError: (context, error) => AsyncValue.error(error),
+          return AsyncValueStreamProvider<List<TonWalletExpiredTransaction>>(
+            create: (context) =>
+                context.read<TonWalletsRepository>().expiredTransactionsStream(widget.address),
             builder: (context, child) {
-              final expiredTransactionsState =
-                  context.watch<AsyncValue<List<PendingTransaction>?>>().maybeWhen(
-                        ready: (value) => value ?? <PendingTransaction>[],
-                        orElse: () => <PendingTransaction>[],
+              final expiredTransactions =
+                  context.watch<AsyncValue<List<TonWalletExpiredTransaction>>>().maybeWhen(
+                        ready: (value) => value,
+                        orElse: () => <TonWalletExpiredTransaction>[],
                       );
 
-              return StreamProvider<AsyncValue<List<PendingTransaction>?>>(
-                create: (context) => context
-                    .read<TonWalletsRepository>()
-                    .getPendingTransactionsStream(widget.address)
-                    .map((event) => AsyncValue.ready(event)),
-                initialData: const AsyncValue.loading(),
-                catchError: (context, error) => AsyncValue.error(error),
+              return AsyncValueStreamProvider<List<TonWalletPendingTransaction>>(
+                create: (context) =>
+                    context.read<TonWalletsRepository>().pendingTransactionsStream(widget.address),
                 builder: (context, child) {
-                  final pendingTransactionsState =
-                      context.watch<AsyncValue<List<PendingTransaction>?>>().maybeWhen(
-                            ready: (value) => value ?? <PendingTransaction>[],
-                            orElse: () => <PendingTransaction>[],
+                  final pendingTransactions =
+                      context.watch<AsyncValue<List<TonWalletPendingTransaction>>>().maybeWhen(
+                            ready: (value) => value,
+                            orElse: () => <TonWalletPendingTransaction>[],
                           );
 
                   return BlocProvider<TonWalletTransactionsBloc>(
@@ -276,11 +253,11 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                     ),
                     child: BlocBuilder<TonWalletTransactionsBloc, TonWalletTransactionsState>(
                       builder: (context, state) {
-                        final transactionsState = state.when(
-                          initial: () => <TonWalletTransactionWithData>[],
+                        final ordinaryTransactions = state.when(
+                          initial: () => <TonWalletOrdinaryTransaction>[],
                           loading: (transactions) => transactions,
                           ready: (transactions) => transactions,
-                          error: (error) => <TonWalletTransactionWithData>[],
+                          error: (error) => <TonWalletOrdinaryTransaction>[],
                         );
 
                         final loading = state.maybeWhen(
@@ -291,10 +268,12 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                         return Column(
                           children: [
                             historyTitle(
-                              transactionsState: transactionsState,
-                              pendingTransactionsState: pendingTransactionsState,
-                              expiredTransactionsState: expiredTransactionsState,
-                              multisigPendingTransactionsState: multisigPendingTransactionsState,
+                              ordinaryTransactions: ordinaryTransactions,
+                              pendingTransactions: pendingTransactions,
+                              expiredTransactions: expiredTransactions,
+                              multisigOrdinaryTransactions: multisigOrdinaryTransactions,
+                              multisigPendingTransactions: multisigPendingTransactions,
+                              multisigExpiredTransactions: multisigExpiredTransactions,
                             ),
                             const Divider(
                               height: 1,
@@ -305,12 +284,12 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
                                 fit: StackFit.expand,
                                 children: [
                                   list(
-                                    tonWalletInfo: tonWalletInfo,
-                                    transactionsState: transactionsState,
-                                    pendingTransactionsState: pendingTransactionsState,
-                                    expiredTransactionsState: expiredTransactionsState,
-                                    multisigPendingTransactionsState:
-                                        multisigPendingTransactionsState,
+                                    ordinaryTransactions: ordinaryTransactions,
+                                    pendingTransactions: pendingTransactions,
+                                    expiredTransactions: expiredTransactions,
+                                    multisigOrdinaryTransactions: multisigOrdinaryTransactions,
+                                    multisigPendingTransactions: multisigPendingTransactions,
+                                    multisigExpiredTransactions: multisigExpiredTransactions,
                                   ),
                                   loader(loading: loading),
                                 ],
@@ -329,10 +308,12 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget historyTitle({
-    required List<TonWalletTransactionWithData> transactionsState,
-    required List<PendingTransaction> pendingTransactionsState,
-    required List<PendingTransaction> expiredTransactionsState,
-    required List<MultisigPendingTransaction> multisigPendingTransactionsState,
+    required List<TonWalletOrdinaryTransaction> ordinaryTransactions,
+    required List<TonWalletPendingTransaction> pendingTransactions,
+    required List<TonWalletExpiredTransaction> expiredTransactions,
+    required List<TonWalletMultisigOrdinaryTransaction> multisigOrdinaryTransactions,
+    required List<TonWalletMultisigPendingTransaction> multisigPendingTransactions,
+    required List<TonWalletMultisigExpiredTransaction> multisigExpiredTransactions,
   }) =>
       Padding(
         padding: const EdgeInsets.all(16),
@@ -346,10 +327,12 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
               ),
             ),
             const Spacer(),
-            if (transactionsState.isEmpty &&
-                pendingTransactionsState.isEmpty &&
-                expiredTransactionsState.isEmpty &&
-                multisigPendingTransactionsState.isEmpty)
+            if (ordinaryTransactions.isEmpty &&
+                pendingTransactions.isEmpty &&
+                expiredTransactions.isEmpty &&
+                multisigOrdinaryTransactions.isEmpty &&
+                multisigPendingTransactions.isEmpty &&
+                multisigExpiredTransactions.isEmpty)
               Text(
                 AppLocalizations.of(context)!.transactions_empty,
                 style: const TextStyle(
@@ -362,21 +345,20 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       );
 
   Widget list({
-    required TonWalletInfo tonWalletInfo,
-    required List<TonWalletTransactionWithData> transactionsState,
-    required List<PendingTransaction> pendingTransactionsState,
-    required List<PendingTransaction> expiredTransactionsState,
-    required List<MultisigPendingTransaction> multisigPendingTransactionsState,
+    required List<TonWalletOrdinaryTransaction> ordinaryTransactions,
+    required List<TonWalletPendingTransaction> pendingTransactions,
+    required List<TonWalletExpiredTransaction> expiredTransactions,
+    required List<TonWalletMultisigOrdinaryTransaction> multisigOrdinaryTransactions,
+    required List<TonWalletMultisigPendingTransaction> multisigPendingTransactions,
+    required List<TonWalletMultisigExpiredTransaction> multisigExpiredTransactions,
   }) {
-    final timeForConfirmation = Duration(seconds: tonWalletInfo.details.expirationTime);
-
     final all = mapTonWalletTransactionsToWidgets(
-      timeForConfirmation: timeForConfirmation,
-      tonWalletInfo: tonWalletInfo,
-      transactions: transactionsState,
-      pendingTransactions: pendingTransactionsState,
-      expiredTransactions: expiredTransactionsState,
-      multisigPendingTransactions: multisigPendingTransactionsState,
+      ordinaryTransactions: ordinaryTransactions,
+      pendingTransactions: pendingTransactions,
+      expiredTransactions: expiredTransactions,
+      multisigOrdinaryTransactions: multisigOrdinaryTransactions,
+      multisigPendingTransactions: multisigPendingTransactions,
+      multisigExpiredTransactions: multisigExpiredTransactions,
     );
 
     return RawScrollbar(
@@ -388,13 +370,13 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
       child: PreloadTransactionsListener(
         scrollController: ModalScrollController.of(context)!,
         onNotification: () {
-          final prevTransactionId = transactionsState.lastOrNull?.transaction.prevTransactionId;
+          final prevTransactionLt = ordinaryTransactions.lastOrNull?.prevTransactionLt;
 
-          if (prevTransactionId == null) return;
+          if (prevTransactionLt == null) return;
 
           context
               .read<TonWalletTransactionsBloc>()
-              .add(TonWalletTransactionsEvent.preload(prevTransactionId));
+              .add(TonWalletTransactionsEvent.preload(prevTransactionLt));
         },
         child: ListView.separated(
           controller: ModalScrollController.of(context),

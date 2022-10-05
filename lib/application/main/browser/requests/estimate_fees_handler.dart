@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:ever_wallet/application/main/browser/extensions.dart';
 import 'package:ever_wallet/application/main/browser/requests/models/estimate_fees_input.dart';
 import 'package:ever_wallet/application/main/browser/requests/models/estimate_fees_output.dart';
+import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/repositories/permissions_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
+import 'package:ever_wallet/data/utils.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -46,23 +47,24 @@ Future<Map<String, dynamic>> estimateFeesHandler({
       );
     }
 
-    final unsignedMessage = await tonWalletsRepository.prepareTransfer(
-      address: input.sender,
+    final tonWallet = await tonWalletsRepository.getTonWallet(input.sender);
+
+    final unsignedMessage = await tonWallet.prepareTransfer(
+      publicKey: tonWallet.publicKey,
       destination: repackedRecipient,
       amount: input.amount,
       body: body,
+      bounce: kMessageBounce,
+      expiration: kDefaultMessageExpiration,
     );
 
-    final signature = base64.encode(List.generate(kSignatureLength, (_) => 0));
+    final signature = fakeSignature();
 
     await unsignedMessage.refreshTimeout();
 
     final signedMessage = await unsignedMessage.sign(signature);
 
-    final fees = await tonWalletsRepository.estimateFees(
-      address: input.sender,
-      signedMessage: signedMessage,
-    );
+    final fees = await tonWallet.estimateFees(signedMessage);
 
     final output = EstimateFeesOutput(
       fees: fees,

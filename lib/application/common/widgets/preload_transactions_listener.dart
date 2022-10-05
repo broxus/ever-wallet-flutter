@@ -7,11 +7,11 @@ class PreloadTransactionsListener extends StatefulWidget {
   final Widget child;
 
   const PreloadTransactionsListener({
-    Key? key,
+    super.key,
     required this.scrollController,
     required this.onNotification,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   State<PreloadTransactionsListener> createState() => _PreloadTransactionsListenerState();

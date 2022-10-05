@@ -4,9 +4,9 @@ class CrystalSubtitle extends StatelessWidget {
   final String text;
 
   const CrystalSubtitle({
-    Key? key,
+    super.key,
     required this.text,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Text(

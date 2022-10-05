@@ -1,11 +1,11 @@
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/custom_popup_item.dart';
 import 'package:ever_wallet/application/common/widgets/custom_popup_menu.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/main/wallet/modals/custodians_modal/edit_custodian_label_dialog.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +18,9 @@ class CustodiansModalBody extends StatefulWidget {
   final String address;
 
   const CustodiansModalBody({
-    Key? key,
+    super.key,
     required this.address,
-  }) : super(key: key);
+  });
 
   @override
   State<CustodiansModalBody> createState() => _CustodiansModalBodyState();
@@ -28,31 +28,25 @@ class CustodiansModalBody extends StatefulWidget {
 
 class _CustodiansModalBodyState extends State<CustodiansModalBody> {
   @override
-  Widget build(BuildContext context) => StreamProvider<AsyncValue<Map<String, String>>>(
-        create: (context) =>
-            context.read<KeysRepository>().labelsStream.map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget build(BuildContext context) => AsyncValueStreamProvider<Map<String, String>>(
+        create: (context) => context.read<KeysRepository>().labelsStream,
         builder: (context, child) {
           final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => <String, String>{},
               );
 
-          return StreamProvider<AsyncValue<TonWalletInfo?>>(
-            create: (context) => context
-                .read<TonWalletsRepository>()
-                .getInfoStream(widget.address)
-                .map((event) => AsyncValue.ready(event)),
-            initialData: const AsyncValue.loading(),
-            catchError: (context, error) => AsyncValue.error(error),
+          return AsyncValueStreamProvider<List<String>?>(
+            create: (context) =>
+                context.read<TonWalletsRepository>().custodiansStream(widget.address),
             builder: (context, child) {
-              final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
-                    ready: (value) => value,
-                    orElse: () => null,
-                  );
-
-              final custodians = tonWalletInfo?.custodians?.map((e) {
+              final custodians = context
+                      .watch<AsyncValue<List<String>?>>()
+                      .maybeWhen(
+                        ready: (value) => value,
+                        orElse: () => null,
+                      )
+                      ?.map((e) {
                     final title = publicKeysLabels[e] ?? e.ellipsePublicKey();
 
                     return Tuple2(title, e);

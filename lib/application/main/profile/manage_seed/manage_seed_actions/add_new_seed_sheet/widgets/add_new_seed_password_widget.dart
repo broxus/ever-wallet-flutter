@@ -12,8 +12,8 @@ class AddNewSeedPasswordWidget extends StatefulWidget {
   const AddNewSeedPasswordWidget({
     required this.backAction,
     required this.nextAction,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final VoidCallback backAction;
   final ValueChanged<String> nextAction;

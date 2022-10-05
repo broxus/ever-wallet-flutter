@@ -26,7 +26,7 @@ Future<Map<String, dynamic>> getTransactionHandler({
 
     if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
-    final transport = await transportRepository.transport;
+    final transport = transportRepository.transport;
 
     final transaction = await transport.getTransaction(input.hash);
 

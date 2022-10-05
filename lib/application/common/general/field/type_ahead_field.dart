@@ -34,7 +34,7 @@ class EWTypeAheadField extends StatefulWidget {
   final TextStyle? textStyle;
 
   const EWTypeAheadField({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
     this.keyboardType,
@@ -57,7 +57,7 @@ class EWTypeAheadField extends StatefulWidget {
     this.suggestionBackground,
     this.textStyle,
     this.enabledBorderColor,
-  }) : super(key: key);
+  });
 
   @override
   State<EWTypeAheadField> createState() => _EWTypeAheadFieldState();

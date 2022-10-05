@@ -8,7 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 
 class LanguageModalBody extends StatefulWidget {
-  const LanguageModalBody({Key? key}) : super(key: key);
+  const LanguageModalBody({super.key});
 
   @override
   _LanguageModalBodyState createState() => _LanguageModalBodyState();

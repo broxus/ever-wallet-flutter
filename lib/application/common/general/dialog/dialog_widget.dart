@@ -13,8 +13,8 @@ class PlatformAlertDialog extends StatelessWidget {
     this.contentWidget,
     this.cancelText,
     this.okText,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   final String? alertText;
   final Widget? titleWidget;
   final String? contentText;

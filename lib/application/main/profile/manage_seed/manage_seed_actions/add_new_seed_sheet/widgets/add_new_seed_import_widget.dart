@@ -11,11 +11,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddNewSeedImportWidget extends StatefulWidget {
   const AddNewSeedImportWidget({
-    Key? key,
+    super.key,
     required this.backAction,
     required this.savedPhrase,
     required this.onPhraseEntered,
-  }) : super(key: key);
+  });
 
   final VoidCallback backAction;
   final List<String>? savedPhrase;

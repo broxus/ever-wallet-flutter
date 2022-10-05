@@ -4,9 +4,9 @@ class AddressGeneratedIcon extends StatelessWidget {
   final String address;
 
   const AddressGeneratedIcon({
-    Key? key,
+    super.key,
     required this.address,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => ClipOval(

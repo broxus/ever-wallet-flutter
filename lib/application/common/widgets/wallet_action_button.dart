@@ -11,11 +11,11 @@ class WalletActionButton extends StatelessWidget {
   final void Function()? onPressed;
 
   const WalletActionButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => PlatformWidget(

@@ -20,9 +20,9 @@ class CheckSeedPhraseScreen extends StatefulWidget {
   final List<String> phrase;
 
   const CheckSeedPhraseScreen({
-    Key? key,
+    super.key,
     required this.phrase,
-  }) : super(key: key);
+  });
 
   @override
   State<CheckSeedPhraseScreen> createState() => _CheckSeedPhraseScreenState();

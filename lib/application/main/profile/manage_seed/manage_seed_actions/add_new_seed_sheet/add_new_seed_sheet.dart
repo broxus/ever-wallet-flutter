@@ -10,8 +10,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddNewSeedSheet extends StatefulWidget {
   const AddNewSeedSheet({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<AddNewSeedSheet> createState() => _AddNewSeedSheetState();

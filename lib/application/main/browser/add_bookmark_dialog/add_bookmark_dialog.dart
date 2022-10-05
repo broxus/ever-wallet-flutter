@@ -16,12 +16,12 @@ class AddBookmarkDialog extends StatefulWidget {
   }) onSubmit;
 
   const AddBookmarkDialog({
-    Key? key,
+    super.key,
     required this.title,
     this.name,
     this.url,
     required this.onSubmit,
-  }) : super(key: key);
+  });
 
   @override
   State<AddBookmarkDialog> createState() => _AddBookmarkDialogState();

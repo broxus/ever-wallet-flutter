@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:bloc/bloc.dart';
 import 'package:ever_wallet/application/bloc/utils.dart';
+import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 part 'ton_wallet_prepare_deploy_bloc.freezed.dart';
 
@@ -22,7 +20,7 @@ class TonWalletPrepareDeployBloc
         emit(const TonWalletPrepareDeployState.loading());
 
         try {
-          late final UnsignedMessage unsignedMessage;
+          late final UnsignedMessageWithAdditionalInfo unsignedMessage;
 
           if (event.custodians != null && event.reqConfirms != null) {
             unsignedMessage = await _tonWalletsRepository.prepareDeployWithMultipleOwners(
@@ -34,20 +32,14 @@ class TonWalletPrepareDeployBloc
             unsignedMessage = await _tonWalletsRepository.prepareDeploy(_address);
           }
 
-          await unsignedMessage.refreshTimeout();
-
-          final signature = base64.encode(List.generate(kSignatureLength, (_) => 0));
-
-          final signedMessage = await unsignedMessage.sign(signature);
-
           final fees = await _tonWalletsRepository.estimateFees(
             address: _address,
-            signedMessage: signedMessage,
+            unsignedMessageWithAdditionalInfo: unsignedMessage,
           );
           final feesValue = int.parse(fees);
 
           final balance =
-              await _tonWalletsRepository.getInfo(_address).then((v) => v.contractState.balance);
+              await _tonWalletsRepository.contractState(_address).then((value) => value.balance);
           final balanceValue = int.parse(balance);
 
           final isPossibleToSendMessage = balanceValue > feesValue;
@@ -84,7 +76,7 @@ class TonWalletPrepareDeployState with _$TonWalletPrepareDeployState {
   const factory TonWalletPrepareDeployState.loading() = _Loading;
 
   const factory TonWalletPrepareDeployState.ready({
-    required UnsignedMessage unsignedMessage,
+    required UnsignedMessageWithAdditionalInfo unsignedMessage,
     required String fees,
   }) = _Ready;
 

@@ -21,13 +21,13 @@ class GrantPermissionsPage extends StatefulWidget {
   final void Function(Permissions permissions) onSubmit;
 
   const GrantPermissionsPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.origin,
     required this.account,
     required this.permissions,
     required this.onSubmit,
-  }) : super(key: key);
+  });
 
   @override
   _GrantPermissionsPageState createState() => _GrantPermissionsPageState();

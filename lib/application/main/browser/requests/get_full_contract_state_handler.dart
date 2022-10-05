@@ -26,7 +26,7 @@ Future<Map<String, dynamic>> getFullContractStateHandler({
 
     if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
-    final transport = await transportRepository.transport;
+    final transport = transportRepository.transport;
 
     final fullContractState = await transport.getFullContractState(input.address);
 

@@ -14,10 +14,10 @@ class WalletModalBody extends StatefulWidget {
   final void Function(int)? onTabSelected;
 
   const WalletModalBody({
-    Key? key,
+    super.key,
     required this.scrollController,
     this.onTabSelected,
-  }) : super(key: key);
+  });
 
   @override
   _WalletModalBodyState createState() => _WalletModalBodyState();

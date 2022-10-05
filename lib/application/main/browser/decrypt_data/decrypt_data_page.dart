@@ -17,12 +17,12 @@ class DecryptDataPage extends StatefulWidget {
   final String sourcePublicKey;
 
   const DecryptDataPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.origin,
     required this.publicKey,
     required this.sourcePublicKey,
-  }) : super(key: key);
+  });
 
   @override
   _SendMessageModalState createState() => _SendMessageModalState();

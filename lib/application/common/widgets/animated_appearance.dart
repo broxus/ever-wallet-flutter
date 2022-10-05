@@ -4,14 +4,14 @@ const _kAppearanceDuration = Duration(milliseconds: 200);
 
 class AnimatedAppearance extends StatefulWidget {
   const AnimatedAppearance({
-    Key? key,
+    super.key,
     this.curve = Curves.decelerate,
     this.duration = _kAppearanceDuration,
     this.delay = Duration.zero,
     this.offset = Offset.zero,
     this.showing = true,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 

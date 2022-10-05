@@ -1,4 +1,5 @@
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/widgets/unfocusing_gesture_detector.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,11 +15,8 @@ Future<void> showEditCustodianLabelDialog({
     showPlatformDialog(
       context: context,
       barrierDismissible: true,
-      builder: (BuildContext context) => StreamProvider<AsyncValue<Map<String, String>>>(
-        create: (context) =>
-            context.read<KeysRepository>().labelsStream.map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+      builder: (BuildContext context) => AsyncValueStreamProvider<Map<String, String>>(
+        create: (context) => context.read<KeysRepository>().labelsStream,
         builder: (context, child) {
           final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
                 ready: (value) => value,

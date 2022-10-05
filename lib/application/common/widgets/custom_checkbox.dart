@@ -6,10 +6,10 @@ class CustomCheckbox extends StatelessWidget {
   final void Function(bool?)? onChanged;
 
   const CustomCheckbox({
-    Key? key,
+    super.key,
     this.value,
     this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Checkbox(

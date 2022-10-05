@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/main/common/password_input_modal_body.dart';
 import 'package:ever_wallet/data/extensions.dart';
@@ -11,10 +13,10 @@ class DeriveKeyModalBody extends StatefulWidget {
   final String? name;
 
   const DeriveKeyModalBody({
-    Key? key,
+    super.key,
     required this.publicKey,
     required this.name,
-  }) : super(key: key);
+  });
 
   @override
   _DeriveKeyModalBodyState createState() => _DeriveKeyModalBodyState();
@@ -28,6 +30,13 @@ class _DeriveKeyModalBodyState extends State<DeriveKeyModalBody> {
             await context.read<KeysRepository>().deriveKey(
                   name: widget.name,
                   publicKey: widget.publicKey,
+                  accountId: context
+                          .read<KeysRepository>()
+                          .keys
+                          .where((e) => e.masterKey == widget.publicKey)
+                          .map((e) => e.accountId)
+                          .reduce(max) +
+                      1,
                   password: password,
                 );
 

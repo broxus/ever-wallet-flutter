@@ -6,10 +6,10 @@ class ConfirmsTitle extends StatelessWidget {
   final int signsRequired;
 
   const ConfirmsTitle({
-    Key? key,
+    super.key,
     required this.signsReceived,
     required this.signsRequired,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Text(

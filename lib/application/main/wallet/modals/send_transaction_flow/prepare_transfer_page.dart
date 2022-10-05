@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/ew_dropdown_button.dart';
@@ -17,7 +18,6 @@ import 'package:ever_wallet/application/main/wallet/modals/common/parse_scan_res
 import 'package:ever_wallet/application/main/wallet/modals/common/scanner_widget.dart';
 import 'package:ever_wallet/application/main/wallet/modals/send_transaction_flow/send_info_page.dart';
 import 'package:ever_wallet/data/extensions.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
@@ -38,11 +38,11 @@ class PrepareTransferPage extends StatefulWidget {
   final List<String> publicKeys;
 
   const PrepareTransferPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.address,
     required this.publicKeys,
-  }) : super(key: key);
+  });
 
   @override
   _PrepareTransferPageState createState() => _PrepareTransferPageState();
@@ -159,11 +159,8 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
     formValidityNotifier.value = formKey.currentState?.validate() ?? false;
   }
 
-  Widget dropdownButton() => StreamProvider<AsyncValue<Map<String, String>>>(
-        create: (context) =>
-            context.read<KeysRepository>().labelsStream.map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget dropdownButton() => AsyncValueStreamProvider<Map<String, String>>(
+        create: (context) => context.read<KeysRepository>().labelsStream,
         builder: (context, child) {
           final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
                 ready: (value) => value,
@@ -224,22 +221,20 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         },
       );
 
-  Widget balance() => StreamProvider<AsyncValue<TonWalletInfo?>>(
+  Widget balance() => AsyncValueStreamProvider<String>(
         create: (context) => context
             .read<TonWalletsRepository>()
-            .getInfoStream(widget.address)
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+            .contractStateStream(widget.address)
+            .map((e) => e.balance),
         builder: (context, child) {
-          final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
+          final balance = context.watch<AsyncValue<String>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => null,
               );
 
           return Text(
             AppLocalizations.of(context)!.balance(
-              tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0',
+              balance?.toTokens().removeZeroes() ?? '0',
               kEverTicker,
             ),
             style: const TextStyle(

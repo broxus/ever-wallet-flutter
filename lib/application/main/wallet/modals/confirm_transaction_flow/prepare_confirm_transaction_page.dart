@@ -1,11 +1,11 @@
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/ew_dropdown_button.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/main/wallet/modals/confirm_transaction_flow/confirm_transaction_info_page.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +25,7 @@ class PrepareConfirmTransactionPage extends StatefulWidget {
   final String? comment;
 
   const PrepareConfirmTransactionPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.address,
     required this.publicKeys,
@@ -33,7 +33,7 @@ class PrepareConfirmTransactionPage extends StatefulWidget {
     required this.destination,
     required this.amount,
     this.comment,
-  }) : super(key: key);
+  });
 
   @override
   _PrepareConfirmTransactionPageState createState() => _PrepareConfirmTransactionPageState();
@@ -102,11 +102,8 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
         ),
       );
 
-  Widget dropdownButton() => StreamProvider<AsyncValue<Map<String, String>>>(
-        create: (context) =>
-            context.read<KeysRepository>().labelsStream.map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget dropdownButton() => AsyncValueStreamProvider<Map<String, String>>(
+        create: (context) => context.read<KeysRepository>().labelsStream,
         builder: (context, child) {
           final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
                 ready: (value) => value,
@@ -137,22 +134,20 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
         },
       );
 
-  Widget balance() => StreamProvider<AsyncValue<TonWalletInfo?>>(
+  Widget balance() => AsyncValueStreamProvider<String>(
         create: (context) => context
             .read<TonWalletsRepository>()
-            .getInfoStream(widget.address)
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+            .contractStateStream(widget.address)
+            .map((e) => e.balance),
         builder: (context, child) {
-          final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
+          final balance = context.watch<AsyncValue<String>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => null,
               );
 
           return Text(
             AppLocalizations.of(context)!.balance(
-              tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0',
+              balance?.toTokens().removeZeroes() ?? '0',
               kEverTicker,
             ),
             style: const TextStyle(

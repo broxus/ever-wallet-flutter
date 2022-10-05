@@ -13,9 +13,9 @@ class ExportSeedPhraseModalBody extends StatefulWidget {
   final String publicKey;
 
   const ExportSeedPhraseModalBody({
-    Key? key,
+    super.key,
     required this.publicKey,
-  }) : super(key: key);
+  });
 
   @override
   _ExportSeedPhraseModalBodyState createState() => _ExportSeedPhraseModalBodyState();

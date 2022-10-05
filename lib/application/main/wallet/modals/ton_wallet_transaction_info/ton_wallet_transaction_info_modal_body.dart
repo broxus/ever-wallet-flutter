@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/utils.dart';
@@ -6,82 +5,48 @@ import 'package:ever_wallet/application/common/widgets/custom_outlined_button.da
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/main/common/extensions.dart';
 import 'package:ever_wallet/application/main/wallet/modals/utils.dart';
+import 'package:ever_wallet/data/models/ton_wallet_ordinary_transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class TonWalletTransactionInfoModalBody extends StatelessWidget {
-  final TonWalletTransactionWithData transactionWithData;
+  final TonWalletOrdinaryTransaction transaction;
 
   const TonWalletTransactionInfoModalBody({
-    Key? key,
-    required this.transactionWithData,
-  }) : super(key: key);
+    super.key,
+    required this.transaction,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isOutgoing = transactionWithData.transaction.outMessages.isNotEmpty;
+    final dePoolOnRoundComplete =
+        transaction.dePoolOnRoundCompleteNotification?.toRepresentableData(context);
 
-    final sender = transactionWithData.transaction.inMessage.src;
+    final dePoolReceiveAnswer =
+        transaction.dePoolReceiveAnswerNotification?.toRepresentableData(context);
 
-    final recipient = transactionWithData.transaction.outMessages.firstOrNull?.dst;
+    final tokenWalletDeployed =
+        transaction.tokenWalletDeployedNotification?.toRepresentableData(context);
 
-    final value = isOutgoing
-        ? transactionWithData.transaction.outMessages.first.value
-        : transactionWithData.transaction.inMessage.value;
-
-    final address = isOutgoing ? recipient : sender;
-
-    final date = transactionWithData.transaction.createdAt.toDateTime();
-
-    final fees = transactionWithData.transaction.totalFees;
-
-    final hash = transactionWithData.transaction.id.hash;
-
-    final comment = transactionWithData.data?.maybeWhen(
-      comment: (value) => value,
-      orElse: () => null,
-    );
-
-    final dePoolOnRoundComplete = transactionWithData.data?.maybeWhen(
-      dePoolOnRoundComplete: (notification) => notification.toRepresentableData(context),
-      orElse: () => null,
-    );
-
-    final dePoolReceiveAnswer = transactionWithData.data?.maybeWhen(
-      dePoolReceiveAnswer: (notification) => notification.toRepresentableData(context),
-      orElse: () => null,
-    );
-
-    final tokenWalletDeployed = transactionWithData.data?.maybeWhen(
-      tokenWalletDeployed: (notification) => notification.toRepresentableData(context),
-      orElse: () => null,
-    );
-
-    final walletInteraction = transactionWithData.data?.maybeWhen(
-      walletInteraction: (info) => info.toRepresentableData(context),
-      orElse: () => null,
-    );
+    final walletInteraction = transaction.walletInteractionInfo?.toRepresentableData(context);
 
     final sections = [
       section(
         [
           dateItem(
             context: context,
-            date: date,
+            date: transaction.date,
           ),
-          if (address != null) ...[
-            addressItem(
-              context: context,
-              isOutgoing: isOutgoing,
-              address: address,
-            ),
-          ],
+          addressItem(
+            context: context,
+            isOutgoing: transaction.isOutgoing,
+            address: transaction.address,
+          ),
           hashItem(
             context: context,
-            hash: hash,
+            hash: transaction.hash,
           ),
         ],
       ),
@@ -89,21 +54,21 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
         [
           amountItem(
             context: context,
-            isOutgoing: isOutgoing,
-            value: value.toTokens().removeZeroes().formatValue(),
+            isOutgoing: transaction.isOutgoing,
+            value: transaction.value.toTokens().removeZeroes().formatValue(),
           ),
           feeItem(
             context: context,
-            fees: fees.toTokens().removeZeroes().formatValue(),
+            fees: transaction.fees.toTokens().removeZeroes().formatValue(),
           ),
         ],
       ),
-      if (comment != null && comment.isNotEmpty)
+      if (transaction.comment != null && transaction.comment!.isNotEmpty)
         section(
           [
             item(
               title: AppLocalizations.of(context)!.comment,
-              subtitle: comment,
+              subtitle: transaction.comment!,
             ),
           ],
         ),
@@ -197,7 +162,7 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
               const Gap(16),
               explorerButton(
                 context: context,
-                hash: hash,
+                hash: transaction.hash,
               ),
             ],
           ),

@@ -10,9 +10,9 @@ class SeedPhraseExportSheet extends StatefulWidget {
   final List<String> phrase;
 
   const SeedPhraseExportSheet({
-    Key? key,
+    super.key,
     required this.phrase,
-  }) : super(key: key);
+  });
 
   @override
   State<SeedPhraseExportSheet> createState() => _SeedPhraseExportSheetState();

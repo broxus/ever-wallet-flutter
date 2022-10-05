@@ -1,13 +1,13 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:ever_wallet/application/bloc/common/account_overall_balance_stream.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/animated_appearance.dart';
 import 'package:ever_wallet/application/common/widgets/wallet_card_selectable_field.dart';
 import 'package:ever_wallet/application/main/wallet/widgets/more_button.dart';
 import 'package:ever_wallet/data/extensions.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/token_currencies_repository.dart';
 import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
@@ -23,13 +23,15 @@ import 'package:shimmer/shimmer.dart';
 
 class WalletCard extends StatelessWidget {
   final String address;
-  final String? publicKey;
+  final String publicKey;
+  final WalletType walletType;
 
   const WalletCard({
-    Key? key,
+    super.key,
     required this.address,
-    this.publicKey,
-  }) : super(key: key);
+    required this.publicKey,
+    required this.walletType,
+  });
 
   @override
   Widget build(BuildContext context) => AnimatedAppearance(
@@ -76,30 +78,13 @@ class WalletCard extends StatelessWidget {
                 ),
               ),
             ),
-            StreamProvider<AsyncValue<TonWalletInfo?>>(
-              create: (context) => context
-                  .read<TonWalletsRepository>()
-                  .getInfoStream(address)
-                  .map((event) => AsyncValue.ready(event)),
-              initialData: const AsyncValue.loading(),
-              catchError: (context, error) => AsyncValue.error(error),
-              builder: (context, child) {
-                final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
-                      ready: (value) => value,
-                      orElse: () => null,
-                    );
-
-                return tonWalletInfo != null
-                    ? Positioned(
-                        top: 8,
-                        right: 8,
-                        child: MoreButton(
-                          address: tonWalletInfo.address,
-                          publicKey: publicKey,
-                        ),
-                      )
-                    : const SizedBox();
-              },
+            Positioned(
+              top: 8,
+              right: 8,
+              child: MoreButton(
+                address: address,
+                publicKey: publicKey,
+              ),
             ),
           ],
         ),
@@ -127,13 +112,12 @@ class WalletCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            StreamProvider<AsyncValue<AssetsList>>(
+            AsyncValueStreamProvider<AssetsList>(
               create: (context) => context
                   .read<AccountsRepository>()
-                  .accountInfo(address)
-                  .map((event) => AsyncValue.ready(event)),
-              initialData: const AsyncValue.loading(),
-              catchError: (context, error) => AsyncValue.error(error),
+                  .accountsStream
+                  .expand((e) => e)
+                  .where((e) => e.address == address),
               builder: (context, child) {
                 final accountInfo = context.watch<AsyncValue<AssetsList>>().maybeWhen(
                       ready: (value) => value,
@@ -207,26 +191,22 @@ class WalletCard extends StatelessWidget {
               },
             ),
             const Spacer(),
-            StreamProvider<AsyncValue<List<String>>>(
+            AsyncValueStreamProvider<bool>(
               create: (context) => context
                   .read<AccountsRepository>()
-                  .currentExternalAccounts
-                  .map((event) => AsyncValue.ready(event)),
-              initialData: const AsyncValue.loading(),
-              catchError: (context, error) => AsyncValue.error(error),
+                  .externalAccountsStream
+                  .map((e) => e.values.expand((e) => e).any((e) => e == address)),
               builder: (context, child) {
-                final externalAccounts = context.watch<AsyncValue<List<String>>>().maybeWhen(
+                final isExternal = context.watch<AsyncValue<bool>>().maybeWhen(
                       ready: (value) => value,
-                      orElse: () => <String>[],
+                      orElse: () => false,
                     );
 
-                return externalAccounts.any((e) => e == address)
-                    ? externalAccountLabel(context)
-                    : const SizedBox();
+                return isExternal ? externalAccountLabel(context) : const SizedBox();
               },
             ),
             const Spacer(flex: 2),
-            StreamProvider<AsyncValue<double>>(
+            AsyncValueStreamProvider<double>(
               create: (context) => accountOverallBalanceStream(
                 context.read<AccountsRepository>(),
                 context.read<TransportRepository>(),
@@ -234,9 +214,7 @@ class WalletCard extends StatelessWidget {
                 context.read<TokenWalletsRepository>(),
                 context.read<TokenCurrenciesRepository>(),
                 address,
-              ).map((event) => AsyncValue.ready(event)),
-              initialData: const AsyncValue.loading(),
-              catchError: (context, error) => AsyncValue.error(error),
+              ),
               builder: (context, child) {
                 final balanceUsdt = context.watch<AsyncValue<double>>().maybeWhen(
                       ready: (value) => value,
@@ -362,7 +340,7 @@ class WalletCard extends StatelessWidget {
         child: Shimmer.fromColors(
           baseColor: CrystalColor.shimmerBackground,
           highlightColor: CrystalColor.shimmerHighlight,
-          child: Container(color: Colors.white),
+          child: const ColoredBox(color: Colors.white),
         ),
       );
 }

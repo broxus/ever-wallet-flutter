@@ -8,7 +8,7 @@ class LocaleCubit extends Cubit<String?> {
   late final StreamSubscription _streamSubscription;
 
   LocaleCubit(this._localeRepository) : super(_localeRepository.locale) {
-    _streamSubscription = _localeRepository.localeStream.listen((event) => emit(event));
+    _streamSubscription = _localeRepository.localeStream.listen((e) => emit(e));
   }
 
   @override

@@ -5,12 +5,12 @@ class SectionedCard extends StatelessWidget {
   final List<Widget> sections;
 
   const SectionedCard({
-    Key? key,
+    super.key,
     required this.sections,
-  }) : super(key: key);
+  });
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => ColoredBox(
         color: Colors.grey.shade100,
         child: Padding(
           padding: const EdgeInsets.all(16),

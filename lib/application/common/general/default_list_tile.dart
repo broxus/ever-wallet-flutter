@@ -18,8 +18,8 @@ class EWListTile extends StatelessWidget {
     this.presstateColor,
     this.height = defaultListTileHeight,
     this.contentPadding = const EdgeInsets.symmetric(horizontal: 16),
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final VoidCallback? onPressed;
 

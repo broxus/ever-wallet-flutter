@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 /// Mark for checkbox with 3 states
 class CheckMarkWidget extends StatelessWidget {
   const CheckMarkWidget({
-    Key? key,
+    super.key,
     this.size = 18,
     this.hasError = false,
     this.isChecked = false,
     this.color,
-  }) : super(key: key);
+  });
 
   final bool hasError;
   final bool isChecked;

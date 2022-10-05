@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ever_wallet/application/main/browser/extensions.dart';
 import 'package:ever_wallet/application/main/browser/requests/models/send_message_input.dart';
 import 'package:ever_wallet/application/main/browser/requests/models/send_message_output.dart';
+import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/repositories/approvals_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/permissions_repository.dart';
@@ -64,12 +65,15 @@ Future<Map<String, dynamic>> sendMessageHandler({
     final publicKey = tuple.item1;
     final password = tuple.item2;
 
-    final unsignedMessage = await tonWalletsRepository.prepareTransfer(
-      address: input.sender,
+    final tonWallet = await tonWalletsRepository.getTonWallet(input.sender);
+
+    final unsignedMessage = await tonWallet.prepareTransfer(
       publicKey: publicKey,
       destination: repackedRecipient,
       amount: input.amount,
       body: body,
+      bounce: kMessageBounce,
+      expiration: kDefaultMessageExpiration,
     );
 
     await unsignedMessage.refreshTimeout();
@@ -84,10 +88,7 @@ Future<Map<String, dynamic>> sendMessageHandler({
 
     final signedMessage = await unsignedMessage.sign(signature);
 
-    final transaction = await tonWalletsRepository.send(
-      address: input.sender,
-      signedMessage: signedMessage,
-    );
+    final transaction = await tonWallet.send(signedMessage);
 
     if (transaction == null) throw Exception('Unable to parse transaction');
 

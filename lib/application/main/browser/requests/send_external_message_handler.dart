@@ -42,7 +42,7 @@ Future<Map<String, dynamic>> sendExternalMessageHandler({
 
     final repackedRecipient = repackAddress(input.recipient);
 
-    final unsignedMessage = createExternalMessage(
+    final unsignedMessage = await createExternalMessage(
       dst: repackedRecipient,
       contractAbi: input.payload.abi,
       method: input.payload.method,
@@ -61,7 +61,7 @@ Future<Map<String, dynamic>> sendExternalMessageHandler({
 
     await unsignedMessage.refreshTimeout();
 
-    final hash = await unsignedMessage.hash;
+    final hash = unsignedMessage.hash;
 
     final signature = await keysRepository.sign(
       data: hash,
@@ -80,14 +80,10 @@ Future<Map<String, dynamic>> sendExternalMessageHandler({
         options: const TransactionExecutionOptions(disableSignatureCheck: false),
       );
     } else {
-      final sent = await genericContractsRepository.send(
+      transaction = await genericContractsRepository.send(
         address: repackedRecipient,
         signedMessage: signedMessage,
       );
-
-      if (sent == null) throw Exception('Unable to parse transaction');
-
-      transaction = sent;
     }
 
     TokensObject? decodedOutput;

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ever_wallet/application/main/browser/extensions.dart';
 import 'package:ever_wallet/application/main/browser/requests/models/split_tvc_input.dart';
+import 'package:ever_wallet/application/main/browser/requests/models/split_tvc_output.dart';
 import 'package:ever_wallet/data/repositories/permissions_repository.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -24,7 +25,12 @@ Future<Map<String, dynamic>> splitTvcHandler({
 
     if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
-    final output = splitTvc(input.tvc);
+    final result = splitTvc(input.tvc);
+
+    final output = SplitTvcOutput(
+      data: result.item1,
+      code: result.item2,
+    );
 
     final jsonOutput = output.toJson();
 

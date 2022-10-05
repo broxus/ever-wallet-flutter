@@ -1,5 +1,5 @@
-import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/theme.dart';
@@ -11,363 +11,215 @@ import 'package:ever_wallet/application/common/widgets/transaction_type_label.da
 import 'package:ever_wallet/application/main/common/extensions.dart';
 import 'package:ever_wallet/application/main/wallet/modals/confirm_transaction_flow/start_confirm_transaction_flow.dart';
 import 'package:ever_wallet/application/main/wallet/modals/utils.dart';
+import 'package:ever_wallet/data/models/ton_wallet_multisig_pending_transaction.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
-  final TonWalletTransactionWithData transactionWithData;
-  final MultisigPendingTransaction? multisigPendingTransaction;
-  final String walletAddress;
-  final String walletPublicKey;
-  final WalletType walletType;
-  final List<String> custodians;
+  final TonWalletMultisigPendingTransaction transaction;
 
   const TonWalletMultisigPendingTransactionInfoModalBody({
-    Key? key,
-    required this.transactionWithData,
-    required this.multisigPendingTransaction,
-    required this.walletAddress,
-    required this.walletPublicKey,
-    required this.walletType,
-    required this.custodians,
-  }) : super(key: key);
+    super.key,
+    required this.transaction,
+  });
 
   @override
-  Widget build(BuildContext context) => StreamProvider<AsyncValue<Map<String, String>>>(
-        create: (context) =>
-            context.read<KeysRepository>().labelsStream.map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget build(BuildContext context) => AsyncValueStreamProvider<Map<String, String>>(
+        create: (context) => context.read<KeysRepository>().labelsStream,
         builder: (context, child) {
           final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => <String, String>{},
               );
 
-          return StreamProvider<AsyncValue<Map<KeyStoreEntry, List<KeyStoreEntry>?>>>(
-            create: (context) => context
-                .read<KeysRepository>()
-                .mappedKeysStream
-                .map((event) => AsyncValue.ready(event)),
-            initialData: const AsyncValue.loading(),
-            catchError: (context, error) => AsyncValue.error(error),
-            builder: (context, child) {
-              final keys =
-                  context.watch<AsyncValue<Map<KeyStoreEntry, List<KeyStoreEntry>?>>>().maybeWhen(
-                        ready: (value) => value,
-                        orElse: () => <KeyStoreEntry, List<KeyStoreEntry>?>{},
-                      );
+          final dePoolOnRoundComplete =
+              transaction.dePoolOnRoundCompleteNotification?.toRepresentableData(context);
 
-              final keysList = [
-                ...keys.keys,
-                ...keys.values.whereNotNull().expand((e) => e),
-              ];
+          final dePoolReceiveAnswer =
+              transaction.dePoolReceiveAnswerNotification?.toRepresentableData(context);
 
-              final msgSender = transactionWithData.transaction.inMessage.src;
+          final tokenWalletDeployed =
+              transaction.tokenWalletDeployedNotification?.toRepresentableData(context);
 
-              final dataSender = transactionWithData.data?.maybeWhen(
-                walletInteraction: (info) => info.knownPayload?.maybeWhen(
-                  tokenSwapBack: (tokenSwapBack) => tokenSwapBack.callbackAddress,
-                  orElse: () => null,
+          final walletInteraction = transaction.walletInteractionInfo?.toRepresentableData(context);
+
+          final sections = [
+            section(
+              [
+                dateItem(
+                  context: context,
+                  date: transaction.date,
                 ),
-                orElse: () => null,
-              );
-
-              final sender = dataSender ?? msgSender;
-
-              final msgRecipient = transactionWithData.transaction.outMessages.firstOrNull?.dst;
-
-              final dataRecipient = transactionWithData.data?.maybeWhen(
-                walletInteraction: (info) =>
-                    info.knownPayload?.maybeWhen(
-                      tokenOutgoingTransfer: (tokenOutgoingTransfer) =>
-                          tokenOutgoingTransfer.to.data,
-                      orElse: () => null,
-                    ) ??
-                    info.method.maybeWhen(
-                      multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
-                        send: (multisigSendTransaction) => multisigSendTransaction.dest,
-                        submit: (multisigSubmitTransaction) => multisigSubmitTransaction.dest,
-                        orElse: () => null,
-                      ),
-                      orElse: () => null,
-                    ) ??
-                    info.recipient,
-                orElse: () => null,
-              );
-
-              final recipient = dataRecipient ?? msgRecipient;
-
-              final isOutgoing = recipient != null;
-
-              final msgValue = isOutgoing
-                  ? transactionWithData.transaction.outMessages.firstOrNull?.value
-                  : transactionWithData.transaction.inMessage.value;
-
-              final dataValue = transactionWithData.data?.maybeWhen(
-                dePoolOnRoundComplete: (notification) => notification.reward,
-                walletInteraction: (info) => info.method.maybeWhen(
-                  multisig: (multisigTransaction) => multisigTransaction.maybeWhen(
-                    send: (multisigSendTransaction) => multisigSendTransaction.value,
-                    submit: (multisigSubmitTransaction) => multisigSubmitTransaction.value,
-                    orElse: () => null,
+                addressItem(
+                  context: context,
+                  isOutgoing: transaction.isOutgoing,
+                  address: transaction.address,
+                ),
+                hashItem(
+                  context: context,
+                  hash: transaction.hash,
+                ),
+              ],
+            ),
+            section(
+              [
+                amountItem(
+                  context: context,
+                  isOutgoing: transaction.isOutgoing,
+                  value: transaction.value.toTokens().removeZeroes().formatValue(),
+                ),
+                feeItem(
+                  context: context,
+                  fees: transaction.fees.toTokens().removeZeroes().formatValue(),
+                ),
+              ],
+            ),
+            if (transaction.comment != null && transaction.comment!.isNotEmpty)
+              section(
+                [
+                  item(
+                    title: AppLocalizations.of(context)!.comment,
+                    subtitle: transaction.comment!,
                   ),
-                  orElse: () => null,
+                ],
+              ),
+            if (dePoolOnRoundComplete != null)
+              section(
+                [
+                  typeItem(
+                    context: context,
+                    type: AppLocalizations.of(context)!.de_pool_on_round_complete,
+                  ),
+                  ...dePoolOnRoundComplete.entries
+                      .map(
+                        (e) => item(
+                          title: e.key,
+                          subtitle: e.value,
+                        ),
+                      )
+                      .toList(),
+                ],
+              ),
+            if (dePoolReceiveAnswer != null)
+              section(
+                [
+                  typeItem(
+                    context: context,
+                    type: AppLocalizations.of(context)!.de_pool_receive_answer,
+                  ),
+                  ...dePoolReceiveAnswer.entries
+                      .map(
+                        (e) => item(
+                          title: e.key,
+                          subtitle: e.value,
+                        ),
+                      )
+                      .toList(),
+                ],
+              ),
+            if (tokenWalletDeployed != null)
+              section(
+                [
+                  typeItem(
+                    context: context,
+                    type: AppLocalizations.of(context)!.token_wallet_deployed,
+                  ),
+                  ...tokenWalletDeployed.entries
+                      .map(
+                        (e) => item(
+                          title: e.key,
+                          subtitle: e.value,
+                        ),
+                      )
+                      .toList(),
+                ],
+              ),
+            if (walletInteraction != null)
+              section(
+                [
+                  typeItem(
+                    context: context,
+                    type: AppLocalizations.of(context)!.wallet_interaction,
+                  ),
+                  ...walletInteraction.entries
+                      .map(
+                        (e) => item(
+                          title: e.key,
+                          subtitle: e.value,
+                        ),
+                      )
+                      .toList(),
+                ],
+              ),
+            section(
+              [
+                signaturesItem(
+                  context: context,
+                  received: transaction.signsReceived,
+                  required: transaction.signsRequired,
                 ),
-                orElse: () => null,
-              );
+                ...transaction.custodians.asMap().entries.map(
+                  (e) {
+                    final title = publicKeysLabels[e.value] ??
+                        AppLocalizations.of(context)!.custodian_n('${e.key + 1}');
 
-              final value = dataValue ?? msgValue;
-
-              final address = isOutgoing ? recipient : sender;
-
-              final date = transactionWithData.transaction.createdAt.toDateTime();
-
-              final fees = transactionWithData.transaction.totalFees;
-
-              final hash = transactionWithData.transaction.id.hash;
-
-              final comment = transactionWithData.data?.maybeWhen(
-                comment: (value) => value,
-                orElse: () => null,
-              );
-
-              final dePoolOnRoundComplete = transactionWithData.data?.maybeWhen(
-                dePoolOnRoundComplete: (notification) => notification.toRepresentableData(context),
-                orElse: () => null,
-              );
-
-              final dePoolReceiveAnswer = transactionWithData.data?.maybeWhen(
-                dePoolReceiveAnswer: (notification) => notification.toRepresentableData(context),
-                orElse: () => null,
-              );
-
-              final tokenWalletDeployed = transactionWithData.data?.maybeWhen(
-                tokenWalletDeployed: (notification) => notification.toRepresentableData(context),
-                orElse: () => null,
-              );
-
-              final walletInteraction = transactionWithData.data?.maybeWhen(
-                walletInteraction: (info) => info.toRepresentableData(context),
-                orElse: () => null,
-              );
-
-              final signsReceived = multisigPendingTransaction?.signsReceived;
-
-              final signsRequired = multisigPendingTransaction?.signsRequired;
-
-              final creator = multisigPendingTransaction?.creator;
-
-              final confirmations = multisigPendingTransaction?.confirmations;
-
-              final transactionId = multisigPendingTransaction?.id;
-
-              final localCustodians =
-                  keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
-
-              final initiatorKey =
-                  localCustodians.firstWhereOrNull((e) => e.publicKey == walletPublicKey);
-
-              final listOfKeys = [
-                if (initiatorKey != null) initiatorKey,
-                ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
-              ];
-
-              final nonConfirmedLocalCustodians =
-                  listOfKeys.where((e) => confirmations?.every((el) => el != e.publicKey) ?? false);
-
-              final publicKeys = nonConfirmedLocalCustodians.map((e) => e.publicKey).toList();
-
-              final canConfirm = publicKeys.isNotEmpty;
-
-              final sections = [
-                section(
-                  [
-                    dateItem(
+                    return custodiansItem(
                       context: context,
-                      date: date,
+                      label: title,
+                      publicKey: e.value,
+                      isCreator: e.value == transaction.creator,
+                      isSigned: transaction.confirmations.contains(e.value),
+                    );
+                  },
+                ).toList(),
+              ],
+            ),
+          ];
+
+          return Material(
+            color: Colors.white,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    ModalHeader(
+                      text: AppLocalizations.of(context)!.transaction_information,
                     ),
-                    if (address != null) ...[
-                      addressItem(
-                        context: context,
-                        isOutgoing: isOutgoing,
-                        address: address,
+                    const Gap(16),
+                    label(context),
+                    const Gap(16),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: list(sections),
                       ),
+                    ),
+                    const Gap(16),
+                    if (transaction.canConfirm) ...[
+                      confirmButton(
+                        context: context,
+                        address: transaction.walletAddress,
+                        publicKeys: transaction.publicKeys,
+                        transactionId: transaction.transactionId,
+                        destination: transaction.address,
+                        amount: transaction.value,
+                        comment: transaction.comment,
+                      ),
+                      const Gap(16),
                     ],
-                    hashItem(
+                    explorerButton(
                       context: context,
-                      hash: hash,
+                      hash: transaction.hash,
                     ),
                   ],
                 ),
-                section(
-                  [
-                    if (value != null)
-                      amountItem(
-                        context: context,
-                        isOutgoing: isOutgoing,
-                        value: value.toTokens().removeZeroes().formatValue(),
-                      ),
-                    feeItem(
-                      context: context,
-                      fees: fees.toTokens().removeZeroes().formatValue(),
-                    ),
-                  ],
-                ),
-                if (comment != null && comment.isNotEmpty)
-                  section(
-                    [
-                      item(
-                        title: AppLocalizations.of(context)!.comment,
-                        subtitle: comment,
-                      ),
-                    ],
-                  ),
-                if (dePoolOnRoundComplete != null)
-                  section(
-                    [
-                      typeItem(
-                        context: context,
-                        type: AppLocalizations.of(context)!.de_pool_on_round_complete,
-                      ),
-                      ...dePoolOnRoundComplete.entries
-                          .map(
-                            (e) => item(
-                              title: e.key,
-                              subtitle: e.value,
-                            ),
-                          )
-                          .toList(),
-                    ],
-                  ),
-                if (dePoolReceiveAnswer != null)
-                  section(
-                    [
-                      typeItem(
-                        context: context,
-                        type: AppLocalizations.of(context)!.de_pool_receive_answer,
-                      ),
-                      ...dePoolReceiveAnswer.entries
-                          .map(
-                            (e) => item(
-                              title: e.key,
-                              subtitle: e.value,
-                            ),
-                          )
-                          .toList(),
-                    ],
-                  ),
-                if (tokenWalletDeployed != null)
-                  section(
-                    [
-                      typeItem(
-                        context: context,
-                        type: AppLocalizations.of(context)!.token_wallet_deployed,
-                      ),
-                      ...tokenWalletDeployed.entries
-                          .map(
-                            (e) => item(
-                              title: e.key,
-                              subtitle: e.value,
-                            ),
-                          )
-                          .toList(),
-                    ],
-                  ),
-                if (walletInteraction != null)
-                  section(
-                    [
-                      typeItem(
-                        context: context,
-                        type: AppLocalizations.of(context)!.wallet_interaction,
-                      ),
-                      ...walletInteraction.entries
-                          .map(
-                            (e) => item(
-                              title: e.key,
-                              subtitle: e.value,
-                            ),
-                          )
-                          .toList(),
-                    ],
-                  ),
-                section(
-                  [
-                    if (signsReceived != null && signsRequired != null)
-                      signaturesItem(
-                        context: context,
-                        received: signsReceived,
-                        required: signsRequired,
-                      ),
-                    if (confirmations != null)
-                      ...custodians.asMap().entries.map(
-                        (e) {
-                          final title = publicKeysLabels[e.value] ??
-                              AppLocalizations.of(context)!.custodian_n('${e.key + 1}');
-
-                          return custodiansItem(
-                            context: context,
-                            label: title,
-                            publicKey: e.value,
-                            isCreator: e.value == creator,
-                            isSigned: confirmations.contains(e.value),
-                          );
-                        },
-                      ).toList(),
-                  ],
-                ),
-              ];
-
-              return Material(
-                color: Colors.white,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        ModalHeader(
-                          text: AppLocalizations.of(context)!.transaction_information,
-                        ),
-                        const Gap(16),
-                        label(context),
-                        const Gap(16),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            physics: const ClampingScrollPhysics(),
-                            child: list(sections),
-                          ),
-                        ),
-                        const Gap(16),
-                        if (canConfirm &&
-                            transactionId != null &&
-                            address != null &&
-                            value != null) ...[
-                          confirmButton(
-                            context: context,
-                            address: walletAddress,
-                            publicKeys: publicKeys,
-                            transactionId: transactionId,
-                            destination: address,
-                            amount: value,
-                            comment: comment,
-                          ),
-                          const Gap(16),
-                        ],
-                        explorerButton(
-                          context: context,
-                          hash: hash,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+              ),
+            ),
           );
         },
       );

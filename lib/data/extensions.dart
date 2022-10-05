@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -169,4 +171,24 @@ extension SubjectX<T> on Subject<T> {
   void tryAdd(T event) {
     if (!isClosed) add(event);
   }
+}
+
+extension ExpireAtToTimeout on int {
+  Duration toTimeout() =>
+      DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(this * 1000));
+}
+
+extension FutureX<T> on Future<T> {
+  Completer<T> wrapInCompleter() {
+    final completer = Completer<T>();
+
+    then(completer.complete).catchError(completer.completeError);
+
+    return completer;
+  }
+}
+
+extension SecondsSinceEpoch on DateTime {
+  int get secondsSinceEpoch =>
+      DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
 }

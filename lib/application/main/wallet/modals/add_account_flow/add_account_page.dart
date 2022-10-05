@@ -14,10 +14,10 @@ class AddAccountPage extends StatefulWidget {
   final String publicKey;
 
   const AddAccountPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.publicKey,
-  }) : super(key: key);
+  });
 
   @override
   _AddAccountPageState createState() => _AddAccountPageState();

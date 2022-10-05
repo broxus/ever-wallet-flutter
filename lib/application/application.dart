@@ -1,4 +1,5 @@
 import 'package:ever_wallet/application/application_injection.dart';
+import 'package:ever_wallet/application/application_lifecycle_listener.dart';
 import 'package:ever_wallet/application/application_localization.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/main/app_lifecycle_wrapper.dart';
@@ -24,44 +25,46 @@ class AppRouter {
 }
 
 class Application extends StatelessWidget {
-  const Application({Key? key}) : super(key: key);
+  const Application({super.key});
 
   @override
   Widget build(BuildContext context) => ApplicationInjection(
-        child: ApplicationLocalization(
-          builder: (locale) => Portal(
-            child: Builder(
-              builder: (context) {
-                final navigatorKey = context.read<GlobalKey<NavigatorState>>();
+        child: ApplicationLifecycleListener(
+          builder: () => ApplicationLocalization(
+            builder: (locale) => Portal(
+              child: Builder(
+                builder: (context) {
+                  final navigatorKey = context.read<GlobalKey<NavigatorState>>();
 
-                return AppLifecycleWrapper(
-                  child: MaterialApp(
-                    navigatorKey: navigatorKey,
-                    scrollBehavior: NoGlowBehavior(),
-                    debugShowCheckedModeBanner: false,
-                    onGenerateTitle: (context) => context.localization.application_title,
-                    locale: locale?.toLocale(),
-                    localizationsDelegates: AppLocalizations.localizationsDelegates,
-                    supportedLocales: AppLocalizations.supportedLocales,
-                    themeMode: ThemeMode.light,
-                    theme: materialTheme(context, Brightness.light),
-                    darkTheme: materialTheme(context, Brightness.dark),
-                    // TODO: remove CupertinoTheme after full rewriting
-                    builder: (context, child) => CupertinoTheme(
-                      data: cupertinoTheme(context),
-                      child: MediaQuery(
-                        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                        child: child!,
+                  return AppLifecycleWrapper(
+                    child: MaterialApp(
+                      navigatorKey: navigatorKey,
+                      scrollBehavior: NoGlowBehavior(),
+                      debugShowCheckedModeBanner: false,
+                      onGenerateTitle: (context) => context.localization.application_title,
+                      locale: locale?.toLocale(),
+                      localizationsDelegates: AppLocalizations.localizationsDelegates,
+                      supportedLocales: AppLocalizations.supportedLocales,
+                      themeMode: ThemeMode.light,
+                      theme: materialTheme(context, Brightness.light),
+                      darkTheme: materialTheme(context, Brightness.dark),
+                      // TODO: remove CupertinoTheme after full rewriting
+                      builder: (context, child) => CupertinoTheme(
+                        data: cupertinoTheme(context),
+                        child: MediaQuery(
+                          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                          child: child!,
+                        ),
                       ),
+                      initialRoute: context.read<KeysRepository>().keys.isEmpty
+                          ? AppRouter.onboarding
+                          : AppRouter.main,
+                      onGenerateRoute: (routeSettings) =>
+                          AppRouter.routes[routeSettings.name]!(routeSettings.arguments),
                     ),
-                    initialRoute: context.read<KeysRepository>().keys.isEmpty
-                        ? AppRouter.onboarding
-                        : AppRouter.main,
-                    onGenerateRoute: (routeSettings) =>
-                        AppRouter.routes[routeSettings.name]!(routeSettings.arguments),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),

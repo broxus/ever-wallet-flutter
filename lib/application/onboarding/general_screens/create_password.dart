@@ -25,9 +25,9 @@ class CreatePasswordScreen extends StatefulWidget {
   final List<String> phrase;
 
   const CreatePasswordScreen({
+    super.key,
     required this.phrase,
-    Key? key,
-  }) : super(key: key);
+  });
 
   @override
   State<CreatePasswordScreen> createState() => _CreatePasswordScreenState();

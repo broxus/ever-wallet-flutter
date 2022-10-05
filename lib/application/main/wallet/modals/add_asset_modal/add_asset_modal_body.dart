@@ -16,9 +16,9 @@ class AddAssetModalBody extends StatefulWidget {
   final String address;
 
   const AddAssetModalBody({
-    Key? key,
+    super.key,
     required this.address,
-  }) : super(key: key);
+  });
 
   @override
   State<AddAssetModalBody> createState() => _AddAssetModalBodyState();

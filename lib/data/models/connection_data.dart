@@ -6,6 +6,7 @@ part 'connection_data.freezed.dart';
 class ConnectionData with _$ConnectionData {
   const factory ConnectionData.gql({
     required String name,
+    required int networkId,
     required String group,
     required List<String> endpoints,
     required int timeout,
@@ -14,6 +15,7 @@ class ConnectionData with _$ConnectionData {
 
   const factory ConnectionData.jrpc({
     required String name,
+    required int networkId,
     required String group,
     required String endpoint,
   }) = _ConnectionDataJrpc;

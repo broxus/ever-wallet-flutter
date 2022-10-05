@@ -11,8 +11,8 @@ class CurrentAccountCubit extends Cubit<AssetsList?> {
 
   CurrentAccountCubit(this._accountsRepository)
       : super(_accountsRepository.currentAccounts.firstOrNull) {
-    _currentAccountsSubscription = _accountsRepository.currentAccountsStream
-        .listen((event) => _currentAccountsStreamListener(event));
+    _currentAccountsSubscription =
+        _accountsRepository.currentAccountsStream.listen((e) => _currentAccountsStreamListener(e));
   }
 
   @override

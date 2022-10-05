@@ -10,8 +10,6 @@ import 'package:tuple/tuple.dart';
 class ApprovalsRepository {
   final _approvalsSubject = PublishSubject<ApprovalRequest>();
 
-  ApprovalsRepository();
-
   Stream<ApprovalRequest> get approvalsStream => _approvalsSubject;
 
   Future<Permissions> requestPermissions({

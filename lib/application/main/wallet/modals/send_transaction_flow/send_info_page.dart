@@ -7,6 +7,7 @@ import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/password_enter_page/password_enter_page.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/send_result_page.dart';
+import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 class SendInfoPage extends StatefulWidget {
   final BuildContext modalContext;
@@ -25,14 +25,14 @@ class SendInfoPage extends StatefulWidget {
   final String? comment;
 
   const SendInfoPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.address,
     required this.publicKey,
     required this.destination,
     required this.amount,
     this.comment,
-  }) : super(key: key);
+  });
 
   @override
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
@@ -159,7 +159,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
       );
 
   Future<void> onPressed({
-    required UnsignedMessage message,
+    required UnsignedMessageWithAdditionalInfo message,
     required String publicKey,
   }) async {
     String? password;
@@ -210,7 +210,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
   }
 
   Future<void> pushSendResult({
-    required UnsignedMessage message,
+    required UnsignedMessageWithAdditionalInfo message,
     required String publicKey,
     required String password,
   }) =>

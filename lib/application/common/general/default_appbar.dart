@@ -14,11 +14,11 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.closeType = CloseType.leading,
     this.backgroundColor = Colors.transparent,
-    Key? key,
+    super.key,
     this.backText,
     this.needDivider = true,
     this.backColor,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);

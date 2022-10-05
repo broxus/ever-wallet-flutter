@@ -1,5 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:ever_wallet/application/bloc/utils.dart';
+import 'package:ever_wallet/data/models/signed_message_with_additional_info.dart';
+import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -22,9 +24,9 @@ class TonWalletSendBloc extends Bloc<TonWalletSendEvent, TonWalletSendState> {
         emit(const TonWalletSendState.loading());
 
         try {
-          await event.unsignedMessage.refreshTimeout();
+          await event.unsignedMessage.message.refreshTimeout();
 
-          final hash = await event.unsignedMessage.hash;
+          final hash = event.unsignedMessage.message.hash;
 
           final signature = await _keysRepository.sign(
             data: hash,
@@ -32,11 +34,17 @@ class TonWalletSendBloc extends Bloc<TonWalletSendEvent, TonWalletSendState> {
             password: event.password,
           );
 
-          final signedMessage = await event.unsignedMessage.sign(signature);
+          final signedMessage = await event.unsignedMessage.message.sign(signature);
+
+          final signedMessageWithAdditionalInfo = SignedMessageWithAdditionalInfo(
+            message: signedMessage,
+            dst: event.unsignedMessage.dst,
+            amount: event.unsignedMessage.amount,
+          );
 
           final transaction = await _tonWalletsRepository.send(
             address: _address,
-            signedMessage: signedMessage,
+            signedMessageWithAdditionalInfo: signedMessageWithAdditionalInfo,
           );
 
           emit(TonWalletSendState.ready(transaction));
@@ -52,7 +60,7 @@ class TonWalletSendBloc extends Bloc<TonWalletSendEvent, TonWalletSendState> {
 @freezed
 class TonWalletSendEvent with _$TonWalletSendEvent {
   const factory TonWalletSendEvent.send({
-    required UnsignedMessage unsignedMessage,
+    required UnsignedMessageWithAdditionalInfo unsignedMessage,
     required String publicKey,
     required String password,
   }) = _Send;

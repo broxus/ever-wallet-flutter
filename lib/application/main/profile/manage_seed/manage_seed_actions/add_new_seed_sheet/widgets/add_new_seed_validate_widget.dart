@@ -13,8 +13,8 @@ class AddNewSeedValidateWidget extends StatefulWidget {
     required this.backAction,
     required this.nextAction,
     required this.phrase,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final List<String> phrase;
   final VoidCallback backAction;

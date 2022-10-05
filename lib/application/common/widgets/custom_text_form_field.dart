@@ -24,7 +24,7 @@ class CustomTextFormField extends StatelessWidget {
   final Color? errorBorderColor;
 
   const CustomTextFormField({
-    Key? key,
+    super.key,
     this.fieldKey,
     required this.name,
     this.controller,
@@ -44,7 +44,7 @@ class CustomTextFormField extends StatelessWidget {
     this.maxLength,
     this.borderColor,
     this.errorBorderColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => FormBuilderTextField(
@@ -132,7 +132,7 @@ class CustomTextFormFieldWithDecoration extends StatelessWidget {
   final Color? errorBorderColor;
 
   const CustomTextFormFieldWithDecoration({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
     this.autofocus = false,
@@ -152,7 +152,7 @@ class CustomTextFormFieldWithDecoration extends StatelessWidget {
     this.maxLength,
     this.borderColor,
     this.errorBorderColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => TextField(

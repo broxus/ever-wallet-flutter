@@ -8,11 +8,11 @@ class WalletButton extends StatelessWidget {
   final Widget icon;
 
   const WalletButton({
-    Key? key,
+    super.key,
     this.onTap,
     required this.title,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(

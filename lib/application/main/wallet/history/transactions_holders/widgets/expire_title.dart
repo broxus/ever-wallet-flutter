@@ -7,10 +7,10 @@ class ExpireTitle extends StatelessWidget {
   final bool expired;
 
   const ExpireTitle({
-    Key? key,
+    super.key,
     required this.date,
     required this.expired,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Text(

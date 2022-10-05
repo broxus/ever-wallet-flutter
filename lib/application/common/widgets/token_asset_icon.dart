@@ -8,10 +8,10 @@ class TokenAssetIcon extends StatelessWidget {
   final TokenWalletVersion version;
 
   const TokenAssetIcon({
-    Key? key,
+    super.key,
     required this.logoURI,
     required this.version,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => SizedBox.square(

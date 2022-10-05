@@ -23,7 +23,6 @@ Future<T?> showEWBottomSheet<T>(
     context: context,
     isDismissible: dismissible,
     useRootNavigator: true,
-    bounce: false,
     enableDrag: draggable,
     barrierColor: barrierColor,
     containerWidget: (context, animation, child) => _ContainerWidget(
@@ -96,10 +95,9 @@ Widget _getCloseButton() => Builder(
 
 class _ContainerWidget extends StatefulWidget {
   const _ContainerWidget({
-    Key? key,
     required this.child,
     this.animated = true,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final bool animated;

@@ -21,11 +21,11 @@ class MenuDropdownData {
 /// Default button that displays list of menu items without values
 class MenuDropdown extends StatelessWidget {
   const MenuDropdown({
-    Key? key,
+    super.key,
     required this.items,
     this.iconColor = ColorsRes.darkBlue,
     this.buttonDecoration,
-  }) : super(key: key);
+  });
 
   final List<MenuDropdownData> items;
   final Color iconColor;

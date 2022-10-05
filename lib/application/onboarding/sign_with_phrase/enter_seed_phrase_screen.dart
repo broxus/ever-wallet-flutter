@@ -24,7 +24,7 @@ class EnterSeedPhraseRoute extends MaterialPageRoute<void> {
 }
 
 class EnterSeedPhraseScreen extends StatefulWidget {
-  const EnterSeedPhraseScreen({Key? key}) : super(key: key);
+  const EnterSeedPhraseScreen({super.key});
 
   @override
   State<EnterSeedPhraseScreen> createState() => _EnterSeedPhraseScreenState();

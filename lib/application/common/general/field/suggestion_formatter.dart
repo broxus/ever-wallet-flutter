@@ -15,21 +15,22 @@ class SuggestionFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue _oldValue,
+    TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
     TextEditingValue restrictedValue = newValue.copyWith(
       text: newValue.text.replaceAll('\u200B', '').trim(),
     );
 
-    final oldValue = _oldValue.copyWith(
-      text: _oldValue.text.replaceAll('\u200B', ''),
+    final oldValueModified = oldValue.copyWith(
+      text: oldValue.text.replaceAll('\u200B', ''),
     );
     final newLength = restrictedValue.text.length;
-    final isDeleting = oldValue.text.isNotEmpty &&
-        oldValue.selection.baseOffset == restrictedValue.selection.baseOffset;
+    final isDeleting = oldValueModified.text.isNotEmpty &&
+        oldValueModified.selection.baseOffset == restrictedValue.selection.baseOffset;
 
-    final showingSuggestion = oldValue.selection.extentOffset - oldValue.selection.baseOffset > 1;
+    final showingSuggestion =
+        oldValueModified.selection.extentOffset - oldValueModified.selection.baseOffset > 1;
 
     if (newLength == minimalLength && isDeleting && showingSuggestion) {
       final length = newLength - 1;

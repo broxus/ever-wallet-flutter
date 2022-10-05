@@ -12,9 +12,9 @@ class CustomTokenLayout extends StatefulWidget {
   final void Function(String) onSave;
 
   const CustomTokenLayout({
-    Key? key,
+    super.key,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _CustomTokenLayoutState createState() => _CustomTokenLayoutState();

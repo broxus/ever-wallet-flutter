@@ -6,9 +6,9 @@ class FeesTitle extends StatelessWidget {
   final String fees;
 
   const FeesTitle({
-    Key? key,
+    super.key,
     required this.fees,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Text(

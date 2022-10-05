@@ -14,7 +14,7 @@ class WalletScreenRoute extends MaterialPageRoute<void> {
 }
 
 class WalletScreen extends StatefulWidget {
-  const WalletScreen({Key? key}) : super(key: key);
+  const WalletScreen({super.key});
 
   @override
   _WalletScreenState createState() => _WalletScreenState();

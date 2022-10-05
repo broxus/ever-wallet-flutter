@@ -11,8 +11,8 @@ class TextFieldClearButton extends StatelessWidget {
     required this.controller,
     this.focus,
     this.iconColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<TextEditingValue>(

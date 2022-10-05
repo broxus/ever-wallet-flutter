@@ -8,9 +8,9 @@ class ApplicationLocalization extends StatelessWidget {
   final Widget Function(String? locale) builder;
 
   const ApplicationLocalization({
-    Key? key,
+    super.key,
     required this.builder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => BlocProvider<LocaleCubit>(

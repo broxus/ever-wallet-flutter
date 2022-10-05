@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_future_provider.dart';
 import 'package:ever_wallet/application/main/browser/back_button_enabled_cubit.dart';
 import 'package:ever_wallet/application/main/browser/extensions.dart';
 import 'package:ever_wallet/application/main/browser/forward_button_enabled_cubit.dart';
@@ -67,11 +68,11 @@ class BrowserWebView extends StatefulWidget {
   final BrowserAppBarScrollListener browserListener;
 
   const BrowserWebView({
-    Key? key,
+    super.key,
     required this.controller,
     required this.urlController,
     required this.browserListener,
-  }) : super(key: key);
+  });
 
   @override
   State<BrowserWebView> createState() => _BrowserWebViewState();
@@ -83,12 +84,8 @@ class _BrowserWebViewState extends State<BrowserWebView> {
   );
 
   @override
-  Widget build(BuildContext context) => FutureProvider<AsyncValue<String>>(
-        create: (context) => rootBundle
-            .loadString('packages/nekoton_flutter/assets/js/main.js')
-            .then((value) => AsyncValue.ready(value)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget build(BuildContext context) => AsyncValueFutureProvider<String>(
+        create: (context) => rootBundle.loadString('packages/nekoton_flutter/assets/js/main.js'),
         builder: (context, child) => context.watch<AsyncValue<String>>().maybeWhen(
               ready: (value) => InAppWebView(
                 onScrollChanged: (_, __, y) => widget.browserListener.webViewScrolled(y),

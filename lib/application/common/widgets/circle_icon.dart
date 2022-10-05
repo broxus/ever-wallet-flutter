@@ -6,11 +6,11 @@ class CircleIcon extends StatelessWidget {
   final Widget? icon;
 
   const CircleIcon({
-    Key? key,
+    super.key,
     this.size = 40,
     required this.color,
     this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => IgnorePointer(

@@ -1,23 +1,23 @@
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/widgets/custom_popup_item.dart';
 import 'package:ever_wallet/application/common/widgets/custom_popup_menu.dart';
-import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/models/connection_data.dart';
 import 'package:ever_wallet/data/repositories/transport_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ConnectionButton extends StatelessWidget {
-  const ConnectionButton({Key? key}) : super(key: key);
+  const ConnectionButton({super.key});
 
   @override
-  Widget build(BuildContext context) => StreamProvider<AsyncValue<ConnectionData>>(
-        create: (context) => context
-            .read<TransportRepository>()
-            .connectionDataStream()
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+  Widget build(BuildContext context) => AsyncValueStreamProvider<ConnectionData>(
+        create: (context) => context.read<TransportRepository>().transportStream.map(
+              (e) => context
+                  .read<TransportRepository>()
+                  .networkPresets
+                  .firstWhere((el) => el.name == e.name),
+            ),
         builder: (context, child) {
           final connectionData = context.watch<AsyncValue<ConnectionData>>().maybeWhen(
                 ready: (value) => value,
@@ -26,7 +26,9 @@ class ConnectionButton extends StatelessWidget {
 
           return connectionData != null
               ? CustomPopupMenu(
-                  items: kNetworkPresets
+                  items: context
+                      .watch<TransportRepository>()
+                      .networkPresets
                       .map(
                         (e) => CustomPopupItem(
                           title: Text(

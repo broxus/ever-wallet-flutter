@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ever_wallet/data/models/connection_data.dart';
+import 'package:ever_wallet/data/sources/remote/constants.dart';
 import 'package:ever_wallet/data/sources/remote/http_source.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -13,33 +14,33 @@ class TransportSource {
 
   Stream<Transport> get transportStream => _transportSubject;
 
-  Future<Transport> get transport => _transportSubject.first;
+  Transport get transport => _transportSubject.value;
 
   Future<void> updateTransport(ConnectionData connectionData) async {
     final prevTransport = _transportSubject.valueOrNull;
 
     _transportSubject.add(_createTransport(connectionData));
 
-    if (prevTransport != null) prevTransport.dispose();
+    await prevTransport?.dispose();
   }
 
   Future<void> dispose() async {
-    final transport = _transportSubject.valueOrNull;
-
     await _transportSubject.close();
 
-    await transport?.dispose();
+    await _transportSubject.valueOrNull?.dispose();
   }
 
   Transport _createTransport(ConnectionData connectionData) => connectionData.when(
-        gql: (name, group, endpoints, timeout, local) => _createGqlTransport(
+        gql: (name, networkId, group, endpoints, timeout, local) => _createGqlTransport(
           name: name,
+          networkId: networkId,
           group: group,
           endpoints: endpoints,
           local: local,
         ),
-        jrpc: (name, group, endpoint) => _createJrpcTransport(
+        jrpc: (name, networkId, group, endpoint) => _createJrpcTransport(
           name: name,
+          networkId: networkId,
           group: group,
           endpoint: endpoint,
         ),
@@ -47,55 +48,69 @@ class TransportSource {
 
   GqlTransport _createGqlTransport({
     required String name,
+    required int networkId,
     required String group,
     required List<String> endpoints,
     required bool local,
-  }) =>
-      GqlTransport(
-        GqlConnection(
-          post: ({
-            required endpoint,
-            required headers,
-            required data,
-          }) async =>
-              _httpSource.postTransportData(
-            endpoint: endpoint,
-            headers: headers,
-            data: data,
-          ),
-          get: (endpoint) async => _httpSource.getTransportData(endpoint),
-          name: name,
-          group: group,
-          settings: GqlNetworkSettings(
-            endpoints: endpoints,
-            latencyDetectionInterval: 60000,
-            maxLatency: 60000,
-            endpointSelectionRetryCount: 5,
-            local: local,
-          ),
-        ),
-      );
+  }) {
+    final settings = GqlNetworkSettings(
+      endpoints: endpoints,
+      latencyDetectionInterval: kDefaultLatencyDetectionInterval,
+      maxLatency: kDefaultMaxLatency,
+      endpointSelectionRetryCount: kDefaultEndpointSelectionRetryCount,
+      local: local,
+    );
+
+    final connection = GqlConnection(
+      post: ({
+        required endpoint,
+        required headers,
+        required data,
+      }) async =>
+          _httpSource.postTransportData(
+        endpoint: endpoint,
+        headers: headers,
+        data: data,
+      ),
+      get: (endpoint) async => _httpSource.getTransportData(endpoint),
+      name: name,
+      networkId: networkId,
+      group: group,
+      settings: settings,
+    );
+
+    final transport = GqlTransport(connection);
+
+    return transport;
+  }
 
   JrpcTransport _createJrpcTransport({
     required String name,
+    required int networkId,
     required String group,
     required String endpoint,
-  }) =>
-      JrpcTransport(
-        JrpcConnection(
-          post: ({
-            required endpoint,
-            required headers,
-            required data,
-          }) async =>
-              _httpSource.postTransportData(
-            endpoint: endpoint,
-            headers: headers,
-            data: data,
-          ),
-          name: name,
-          group: group,
-          settings: JrpcNetworkSettings(endpoint: endpoint),
-        ),
-      );
+  }) {
+    final settings = JrpcNetworkSettings(endpoint: endpoint);
+
+    final connection = JrpcConnection(
+      post: ({
+        required endpoint,
+        required headers,
+        required data,
+      }) async =>
+          _httpSource.postTransportData(
+        endpoint: endpoint,
+        headers: headers,
+        data: data,
+      ),
+      name: name,
+      networkId: networkId,
+      group: group,
+      settings: settings,
+    );
+
+    final transport = JrpcTransport(connection);
+
+    return transport;
+  }
 }

@@ -7,7 +7,7 @@ part 'decode_transaction_events_output.g.dart';
 @freezed
 class DecodeTransactionEventsOutput with _$DecodeTransactionEventsOutput {
   const factory DecodeTransactionEventsOutput({
-    required List<DecodedTransactionEvent> events,
+    required List<DecodedEvent> events,
   }) = _DecodeTransactionEventsOutput;
 
   factory DecodeTransactionEventsOutput.fromJson(Map<String, dynamic> json) =>

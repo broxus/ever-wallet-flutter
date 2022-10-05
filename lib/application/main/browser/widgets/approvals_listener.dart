@@ -9,12 +9,12 @@ import 'package:ever_wallet/application/main/browser/request_permissions_modal/s
 import 'package:ever_wallet/application/main/browser/send_message_modal/show_send_message_modal.dart';
 import 'package:ever_wallet/application/main/browser/show_add_account_dialog.dart';
 import 'package:ever_wallet/application/main/browser/sign_data/show_sign_data_modal.dart';
-import 'package:ever_wallet/application/main/common/get_local_custodians_public_keys.dart';
 import 'package:ever_wallet/data/models/permission.dart';
 import 'package:ever_wallet/data/models/permissions.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/approvals_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
+import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -27,9 +27,9 @@ class ApprovalsListener extends StatefulWidget {
   final Widget child;
 
   const ApprovalsListener({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   State<ApprovalsListener> createState() => _ApprovalsListenerState();
@@ -183,7 +183,7 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
 
         showAddAccountDialog(
           context: context,
-          publicKey: currentKey.publicKey,
+          publicKey: currentKey,
         );
 
         if (!mounted) return;
@@ -224,7 +224,7 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
 
         showAddAccountDialog(
           context: context,
-          publicKey: currentKey.publicKey,
+          publicKey: currentKey,
         );
 
         if (!mounted) return;
@@ -392,10 +392,7 @@ class _ApprovalsListenerState extends State<ApprovalsListener> {
     required Completer<Tuple2<String, String>> completer,
   }) async {
     try {
-      final publicKeys = await getLocalCustodiansPublicKeys(
-        context: context,
-        address: sender,
-      );
+      final publicKeys = (await context.read<TonWalletsRepository>().localCustodians(sender))!;
 
       final result = await showSendMessageModal(
         context: context,

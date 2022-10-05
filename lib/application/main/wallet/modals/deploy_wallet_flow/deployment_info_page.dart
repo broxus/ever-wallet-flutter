@@ -1,5 +1,6 @@
 import 'package:ever_wallet/application/bloc/ton_wallet/ton_wallet_prepare_deploy_bloc.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
@@ -9,7 +10,7 @@ import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/password_enter_page/password_enter_page.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/send_result_page.dart';
-import 'package:ever_wallet/data/models/ton_wallet_info.dart';
+import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +18,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:provider/provider.dart';
 
 class DeploymentInfoPage extends StatefulWidget {
   final BuildContext modalContext;
@@ -28,13 +27,13 @@ class DeploymentInfoPage extends StatefulWidget {
   final int? reqConfirms;
 
   const DeploymentInfoPage({
-    Key? key,
+    super.key,
     required this.modalContext,
     required this.address,
     required this.publicKey,
     this.custodians,
     this.reqConfirms,
-  }) : super(key: key);
+  });
 
   @override
   _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
@@ -114,23 +113,20 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
         ],
       );
 
-  Widget balance() => StreamProvider<AsyncValue<TonWalletInfo?>>(
+  Widget balance() => AsyncValueStreamProvider<String>(
         create: (context) => context
             .read<TonWalletsRepository>()
-            .getInfoStream(widget.address)
-            .map((event) => AsyncValue.ready(event)),
-        initialData: const AsyncValue.loading(),
-        catchError: (context, error) => AsyncValue.error(error),
+            .contractStateStream(widget.address)
+            .map((e) => e.balance),
         builder: (context, child) {
-          final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
+          final balance = context.watch<AsyncValue<String>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => null,
               );
 
           return SectionedCardSection(
             title: AppLocalizations.of(context)!.account_balance,
-            subtitle:
-                '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes()} $kEverTicker',
+            subtitle: '${balance?.toTokens().removeZeroes()} $kEverTicker',
           );
         },
       );
@@ -190,7 +186,7 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
       );
 
   Future<void> onPressed({
-    required UnsignedMessage message,
+    required UnsignedMessageWithAdditionalInfo message,
     required String publicKey,
   }) async {
     String? password;
@@ -241,7 +237,7 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
   }
 
   Future<void> pushDeploymentResult({
-    required UnsignedMessage message,
+    required UnsignedMessageWithAdditionalInfo message,
     required String publicKey,
     required String password,
   }) =>

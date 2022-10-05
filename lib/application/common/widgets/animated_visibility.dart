@@ -6,11 +6,11 @@ class AnimatedVisibility extends StatefulWidget {
   final bool visible;
 
   const AnimatedVisibility({
-    Key? key,
+    super.key,
     required this.duration,
     required this.visible,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   _AnimatedVisibilityState createState() => _AnimatedVisibilityState();

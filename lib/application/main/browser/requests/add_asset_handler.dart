@@ -44,7 +44,7 @@ Future<Map<String, dynamic>> addAssetHandler({
       case AssetType.tip3Token:
         final rootTokenContract = repackAddress(input.params.rootContract);
 
-        final transport = await transportRepository.transport;
+        final transport = transportRepository.transport;
 
         final hasTokenWallet = accountsRepository.accounts
                 .firstWhere((e) => e.address == input.account)

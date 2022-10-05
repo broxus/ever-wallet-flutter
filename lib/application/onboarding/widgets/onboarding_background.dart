@@ -17,8 +17,8 @@ class OnboardingBackground extends StatelessWidget {
     required this.child,
     this.otherPositioned,
     this.backgroundColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +34,9 @@ class OnboardingBackground extends StatelessWidget {
 
 class OnboardingGradient extends StatelessWidget {
   const OnboardingGradient({
-    Key? key,
+    super.key,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   final Color? backgroundColor;
 
@@ -49,14 +49,14 @@ class OnboardingGradient extends StatelessWidget {
       color: background,
       child: Stack(
         fit: StackFit.expand,
-        children: [
+        children: const [
           Positioned(
             left: -200,
             top: -100,
             width: 500,
             height: 500,
-            child: Container(
-              decoration: const BoxDecoration(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
                 gradient: RadialGradient(
                   stops: [0.35, 1],
                   colors: [
@@ -72,8 +72,8 @@ class OnboardingGradient extends StatelessWidget {
             bottom: -50,
             width: 400,
             height: 400,
-            child: Container(
-              decoration: const BoxDecoration(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
                 gradient: RadialGradient(
                   stops: [0.4, 1],
                   colors: [

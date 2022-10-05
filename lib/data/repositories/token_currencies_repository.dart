@@ -6,7 +6,6 @@ import 'package:ever_wallet/data/sources/local/current_accounts_source.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:ever_wallet/data/sources/remote/http_source.dart';
 import 'package:ever_wallet/logger.dart';
-import 'package:flutter/foundation.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -14,36 +13,30 @@ class TokenCurrenciesRepository {
   final CurrentAccountsSource _currentAccountsSource;
   final HiveSource _hiveSource;
   final HttpSource _httpSource;
-  final _tokenCurrenciesSubject = BehaviorSubject<List<Currency>>.seeded([]);
   late final StreamSubscription _currentAccountsStreamSubscription;
 
-  TokenCurrenciesRepository(
-    this._currentAccountsSource,
-    this._hiveSource,
-    this._httpSource,
-  ) {
-    _tokenCurrenciesSubject.add(_hiveSource.currencies);
-
+  TokenCurrenciesRepository({
+    required CurrentAccountsSource currentAccountsSource,
+    required HiveSource hiveSource,
+    required HttpSource httpSource,
+  })  : _currentAccountsSource = currentAccountsSource,
+        _hiveSource = hiveSource,
+        _httpSource = httpSource {
     _currentAccountsStreamSubscription =
         Rx.combineLatest2<List<AssetsList>, void, List<AssetsList>>(
       _currentAccountsSource.currentAccountsStream,
       Stream<void>.periodic(kCurrenciesRefreshTimeout).startWith(null),
       (a, b) => a,
-    ).listen((event) => _currentAccountsStreamListener(event));
+    ).listen((e) => _currentAccountsStreamListener(e));
   }
 
-  Stream<List<Currency>> get currenciesStream =>
-      _tokenCurrenciesSubject.distinct((a, b) => listEquals(a, b));
+  Stream<List<Currency>> get currenciesStream => _hiveSource.currenciesStream;
 
-  List<Currency> get currencies => _tokenCurrenciesSubject.value;
+  List<Currency> get currencies => _hiveSource.currencies;
 
   Future<void> clear() => _hiveSource.clearCurrencies();
 
-  Future<void> dispose() async {
-    await _currentAccountsStreamSubscription.cancel();
-
-    await _tokenCurrenciesSubject.close();
-  }
+  Future<void> dispose() => _currentAccountsStreamSubscription.cancel();
 
   Future<void> _currentAccountsStreamListener(List<AssetsList> event) async {
     try {
@@ -65,8 +58,6 @@ class TokenCurrenciesRepository {
             address: rootTokenContract,
             currency: currency,
           );
-
-          _tokenCurrenciesSubject.add(_hiveSource.currencies);
         } catch (err) {
           // logger.e(err, err, st);
         }

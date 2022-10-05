@@ -39,7 +39,7 @@ class BorderedInput extends StatefulWidget {
   final bool needError;
 
   const BorderedInput({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
     this.autofocus = false,
@@ -61,7 +61,7 @@ class BorderedInput extends StatefulWidget {
     this.cursorColor,
     this.autovalidateMode,
     this.needError = true,
-  }) : super(key: key);
+  });
 
   @override
   State<BorderedInput> createState() => _BorderedInputState();

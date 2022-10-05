@@ -3,21 +3,15 @@ import 'dart:math';
 
 import 'package:ever_wallet/data/models/bookmark.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
-import 'package:flutter/foundation.dart';
-import 'package:rxdart/rxdart.dart';
 
 class BookmarksRepository {
   final HiveSource _hiveSource;
-  final _bookmarksSubject = BehaviorSubject<List<Bookmark>>.seeded([]);
 
-  BookmarksRepository(this._hiveSource) {
-    _bookmarksSubject.add(_hiveSource.bookmarks);
-  }
+  BookmarksRepository(this._hiveSource);
 
-  Stream<List<Bookmark>> get bookmarksStream =>
-      _bookmarksSubject.distinct((a, b) => listEquals(a, b));
+  Stream<List<Bookmark>> get bookmarksStream => _hiveSource.bookmarksStream;
 
-  List<Bookmark> get bookmarks => _bookmarksSubject.value;
+  List<Bookmark> get bookmarks => _hiveSource.bookmarks;
 
   Future<Bookmark> addBookmark({
     required String name,
@@ -33,9 +27,8 @@ class BookmarksRepository {
       url: url,
     );
 
-    await _hiveSource.putBookmark(bookmark);
+    await _hiveSource.addBookmark(bookmark);
 
-    _bookmarksSubject.add(_hiveSource.bookmarks);
     return bookmark;
   }
 
@@ -50,18 +43,10 @@ class BookmarksRepository {
 
     if (newUrl != null) bookmark = bookmark.copyWith(url: newUrl);
 
-    await _hiveSource.putBookmark(bookmark);
-
-    _bookmarksSubject.add(_hiveSource.bookmarks);
+    await _hiveSource.addBookmark(bookmark);
   }
 
-  Future<void> deleteBookmark(int id) async {
-    await _hiveSource.deleteBookmark(id);
-
-    _bookmarksSubject.add(_hiveSource.bookmarks);
-  }
+  Future<void> deleteBookmark(int id) => _hiveSource.deleteBookmark(id);
 
   Future<void> clear() => _hiveSource.clearBookmarks();
-
-  Future<void> dispose() => _bookmarksSubject.close();
 }

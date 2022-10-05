@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class SuffixLoaderIcon extends StatelessWidget {
   const SuffixLoaderIcon({
+    super.key,
     this.color,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final Color? color;
 

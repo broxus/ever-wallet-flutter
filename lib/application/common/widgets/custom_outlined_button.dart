@@ -8,10 +8,10 @@ class CustomOutlinedButton extends StatelessWidget {
   final String text;
 
   const CustomOutlinedButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.text,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => AnimatedSwitcher(

@@ -1,96 +1,66 @@
-import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/utils.dart';
 import 'package:ever_wallet/application/common/widgets/custom_outlined_button.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/main/wallet/modals/utils.dart';
+import 'package:ever_wallet/data/models/token_wallet_ordinary_transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class TokenWalletTransactionInfoModalBody extends StatelessWidget {
-  final TokenWalletTransactionWithData transactionWithData;
+  final TokenWalletOrdinaryTransaction transaction;
   final String currency;
   final int decimals;
 
   const TokenWalletTransactionInfoModalBody({
-    Key? key,
-    required this.transactionWithData,
+    super.key,
+    required this.transaction,
     required this.currency,
     required this.decimals,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final sender = transactionWithData.data!.maybeWhen(
-          incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.senderAddress,
-          orElse: () => null,
-        ) ??
-        transactionWithData.transaction.inMessage.src;
+    late final String type;
 
-    final recipient = transactionWithData.data!.maybeWhen(
-          outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.data,
-          orElse: () => null,
-        ) ??
-        transactionWithData.transaction.outMessages.firstOrNull?.dst;
+    if (transaction.incomingTransfer != null) {
+      type = AppLocalizations.of(context)!.token_incoming_transfer;
+    }
 
-    final value = transactionWithData.data!.when(
-      incomingTransfer: (tokenIncomingTransfer) => tokenIncomingTransfer.tokens,
-      outgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.tokens,
-      swapBack: (tokenSwapBack) => tokenSwapBack.tokens,
-      accept: (value) => value,
-      transferBounced: (value) => value,
-      swapBackBounced: (value) => value,
-    );
+    if (transaction.outgoingTransfer != null) {
+      type = AppLocalizations.of(context)!.token_outgoing_transfer;
+    }
 
-    final isOutgoing = transactionWithData.data!.when(
-      incomingTransfer: (tokenIncomingTransfer) => false,
-      outgoingTransfer: (tokenOutgoingTransfer) => true,
-      swapBack: (tokenSwapBack) => true,
-      accept: (value) => false,
-      transferBounced: (value) => false,
-      swapBackBounced: (value) => false,
-    );
+    if (transaction.swapBack != null) type = AppLocalizations.of(context)!.swap_back;
 
-    final address = isOutgoing ? recipient : sender;
+    if (transaction.accept != null) type = AppLocalizations.of(context)!.accept;
 
-    final date = transactionWithData.transaction.createdAt.toDateTime();
+    if (transaction.transferBounced != null) {
+      type = AppLocalizations.of(context)!.transfer_bounced;
+    }
 
-    final fees = transactionWithData.transaction.totalFees;
-
-    final hash = transactionWithData.transaction.id.hash;
-
-    final type = transactionWithData.data!.when(
-      incomingTransfer: (tokenIncomingTransfer) =>
-          AppLocalizations.of(context)!.token_incoming_transfer,
-      outgoingTransfer: (tokenOutgoingTransfer) =>
-          AppLocalizations.of(context)!.token_outgoing_transfer,
-      swapBack: (tokenSwapBack) => AppLocalizations.of(context)!.swap_back,
-      accept: (value) => AppLocalizations.of(context)!.accept,
-      transferBounced: (value) => AppLocalizations.of(context)!.transfer_bounced,
-      swapBackBounced: (value) => AppLocalizations.of(context)!.swap_back_bounced,
-    );
+    if (transaction.swapBackBounced != null) {
+      type = AppLocalizations.of(context)!.swap_back_bounced;
+    }
 
     final sections = [
       section(
         [
           dateItem(
             context: context,
-            date: date,
+            date: transaction.date,
           ),
-          if (address != null) ...[
-            addressItem(
-              context: context,
-              isOutgoing: isOutgoing,
-              address: address,
-            ),
-          ],
+          addressItem(
+            context: context,
+            isOutgoing: transaction.isOutgoing,
+            address: transaction.address,
+          ),
           hashItem(
             context: context,
-            hash: hash,
+            hash: transaction.hash,
           ),
         ],
       ),
@@ -98,12 +68,12 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
         [
           amountItem(
             context: context,
-            isOutgoing: isOutgoing,
-            value: value.toTokens(decimals).removeZeroes().formatValue(),
+            isOutgoing: transaction.isOutgoing,
+            value: transaction.value.toTokens(decimals).removeZeroes().formatValue(),
           ),
           feeItem(
             context: context,
-            fees: fees.toTokens().removeZeroes().formatValue(),
+            fees: transaction.fees.toTokens().removeZeroes().formatValue(),
           ),
         ],
       ),
@@ -132,7 +102,7 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
                 ),
               ),
               const Gap(16),
-              explorerButton(context: context, hash: hash),
+              explorerButton(context: context, hash: transaction.hash),
             ],
           ),
         ),

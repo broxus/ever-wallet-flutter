@@ -19,16 +19,17 @@ class TonAssetsRepository {
   final TransportSource _transportSource;
   final HiveSource _hiveSource;
   final HttpSource _httpSource;
-  final _systemAssetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
-  final _customAssetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
   late final StreamSubscription _systemAssetsStreamSubscription;
 
-  TonAssetsRepository(
-    this._accountsStorage,
-    this._transportSource,
-    this._hiveSource,
-    this._httpSource,
-  ) {
+  TonAssetsRepository({
+    required AccountsStorage accountsStorage,
+    required TransportSource transportSource,
+    required HiveSource hiveSource,
+    required HttpSource httpSource,
+  })  : _accountsStorage = accountsStorage,
+        _transportSource = transportSource,
+        _hiveSource = hiveSource,
+        _httpSource = httpSource {
     _systemAssetsStreamSubscription = Rx.combineLatest2<List<TokenContractAsset>,
             List<TokenContractAsset>, Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>>(
       systemAssetsStream,
@@ -36,23 +37,20 @@ class TonAssetsRepository {
       (a, b) => Tuple2(a, b),
     )
         .distinct((a, b) => listEquals(a.item1, b.item1) && listEquals(a.item2, b.item2))
-        .listen((event) => _lock.synchronized(() => _systemAssetsStreamListener(event)));
-
-    _systemAssetsSubject.add(_hiveSource.systemTokenContractAssets);
-    _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
+        .listen((e) => _lock.synchronized(() => _systemAssetsStreamListener(e)));
 
     _updateSystemTokenContractAssets().onError((err, st) => logger.e(err, err, st));
   }
 
   Stream<List<TokenContractAsset>> get systemAssetsStream =>
-      _systemAssetsSubject.distinct((a, b) => listEquals(a, b));
+      _hiveSource.systemTokenContractAssetsStream;
 
-  List<TokenContractAsset> get systemAssets => _systemAssetsSubject.value;
+  List<TokenContractAsset> get systemAssets => _hiveSource.systemTokenContractAssets;
 
   Stream<List<TokenContractAsset>> get customAssetsStream =>
-      _customAssetsSubject.distinct((a, b) => listEquals(a, b));
+      _hiveSource.customTokenContractAssetsStream;
 
-  List<TokenContractAsset> get customAssets => _customAssetsSubject.value;
+  List<TokenContractAsset> get customAssets => _hiveSource.customTokenContractAssets;
 
   Stream<Tuple2<List<TokenContractAsset>, List<TokenContractAsset>>> accountAssetsOptions(
     String address,
@@ -139,7 +137,7 @@ class TonAssetsRepository {
 
     if (asset != null) return asset;
 
-    final transport = await _transportSource.transport;
+    final transport = _transportSource.transport;
 
     final tokenRootDetails = await getTokenRootDetails(
       transport: transport,
@@ -156,26 +154,17 @@ class TonAssetsRepository {
 
     await _hiveSource.addCustomTokenContractAsset(asset);
 
-    _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
-
     return asset;
   }
 
   Future<void> clear() async => _hiveSource.clearCustomTokenContractAssets();
 
-  Future<void> dispose() async {
-    await _systemAssetsStreamSubscription.cancel();
-
-    await _customAssetsSubject.close();
-    await _systemAssetsSubject.close();
-  }
+  Future<void> dispose() => _systemAssetsStreamSubscription.cancel();
 
   Future<void> _updateSystemTokenContractAssets() async {
     final manifest = await _httpSource.getTonAssetsManifest();
 
     await _hiveSource.updateSystemTokenContractAssets(manifest.tokens);
-
-    _systemAssetsSubject.add(_hiveSource.systemTokenContractAssets);
   }
 
   Future<void> _systemAssetsStreamListener(
@@ -190,8 +179,6 @@ class TonAssetsRepository {
 
       for (final asset in duplicatedAssets) {
         _hiveSource.removeCustomTokenContractAsset(asset.address);
-
-        _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
       }
 
       final oldAssets = customAssets
@@ -199,8 +186,6 @@ class TonAssetsRepository {
 
       for (final asset in oldAssets) {
         _hiveSource.removeCustomTokenContractAsset(asset.address);
-
-        _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
       }
     } catch (err, st) {
       logger.e(err, err, st);

@@ -25,7 +25,7 @@ Future<Map<String, dynamic>> getAccountsByCodeHashHandler({
 
     if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
-    final transport = await transportRepository.transport;
+    final transport = transportRepository.transport;
 
     final accountsList = await transport.getAccountsByCodeHash(
       codeHash: input.codeHash,

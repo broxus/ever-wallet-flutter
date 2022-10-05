@@ -7,9 +7,9 @@ class ConfirmationTimeCounter extends StatefulWidget {
   final DateTime expireAt;
 
   const ConfirmationTimeCounter({
-    Key? key,
+    super.key,
     required this.expireAt,
-  }) : super(key: key);
+  });
 
   @override
   _ConfirmationTimeCounterState createState() => _ConfirmationTimeCounterState();

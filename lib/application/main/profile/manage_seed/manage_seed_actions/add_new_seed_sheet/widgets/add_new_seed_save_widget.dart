@@ -11,8 +11,8 @@ class AddNewSeedSaveWidget extends StatefulWidget {
     required this.backAction,
     required this.nextAction,
     required this.phrase,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final VoidCallback backAction;
   final VoidCallback nextAction;

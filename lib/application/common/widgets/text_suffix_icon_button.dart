@@ -5,10 +5,10 @@ class SuffixIconButton extends StatelessWidget {
   final Widget icon;
 
   const SuffixIconButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => IconButton(

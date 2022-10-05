@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class ScannerWidget extends StatefulWidget {
-  const ScannerWidget({Key? key}) : super(key: key);
+  const ScannerWidget({super.key});
 
   @override
   _ScannerWidgetState createState() => _ScannerWidgetState();

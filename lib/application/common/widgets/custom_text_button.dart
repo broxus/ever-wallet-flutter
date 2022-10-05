@@ -7,11 +7,11 @@ class CustomTextButton extends StatelessWidget {
   final TextStyle? style;
 
   const CustomTextButton({
-    Key? key,
+    super.key,
     this.onPressed,
     required this.text,
     this.style,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Padding(
