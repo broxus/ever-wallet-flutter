@@ -75,6 +75,7 @@ class BrowserTabNotifier extends ChangeNotifier {
   BrowserTabNotifier(this._tab, this._currentIndex, this._isTabActive);
 
   final webViewTabKey = UniqueKey();
+  final tabKey = UniqueKey();
 
   int _currentIndex;
   bool _isTabActive;

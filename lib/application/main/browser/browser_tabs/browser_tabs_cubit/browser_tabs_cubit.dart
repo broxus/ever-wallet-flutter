@@ -47,6 +47,8 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
 
   List<BrowserTab> get tabs => _tabsDto.tabsDto;
 
+  List<BrowserTabNotifier> get tabsNotifiers => _tabsDto.tabs;
+
   int get activeTabIndex => _tabsDto.lastActiveIndex;
 
   BrowserTab get _activeTab => tabs[activeTabIndex];

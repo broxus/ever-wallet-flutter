@@ -38,6 +38,7 @@ dependencies:
   flutter_svg: ^1.1.0
   flutter_typeahead: ^4.0.0
   freezed_annotation: ^2.0.3
+  flutter_slidable: ^2.0.0
   gap: ^2.0.0
   hex: ^0.2.0
   hive: ^2.2.2
