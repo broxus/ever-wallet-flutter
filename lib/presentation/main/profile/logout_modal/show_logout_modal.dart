@@ -9,12 +9,10 @@ import '../../../../../injection.dart';
 import '../../../../data/repositories/accounts_repository.dart';
 import '../../../../data/repositories/biometry_repository.dart';
 import '../../../../data/repositories/bookmarks_repository.dart';
-import '../../../../data/repositories/keys_repository.dart';
 import '../../../../data/repositories/search_history_repository.dart';
 import '../../../../data/repositories/sites_meta_data_repository.dart';
 import '../../../../data/repositories/token_currencies_repository.dart';
 import '../../../../data/repositories/ton_assets_repository.dart';
-import '../../../../injection.dart';
 
 Future<void> showLogoutDialog({
   required BuildContext context,

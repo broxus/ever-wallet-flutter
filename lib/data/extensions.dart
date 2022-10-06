@@ -28,24 +28,27 @@ extension IntX on int {
 
 extension WalletTypeX on WalletType {
   int toInt() => when(
-        walletV3: () => 0,
+        walletV3: () => 3,
         multisig: (multisigType) {
           switch (multisigType) {
             case MultisigType.safeMultisigWallet:
-              return 1;
-            case MultisigType.safeMultisigWallet24h:
-              return 2;
-            case MultisigType.setcodeMultisigWallet:
-              return 3;
-            case MultisigType.setcodeMultisigWallet24h:
               return 4;
-            case MultisigType.bridgeMultisigWallet:
+            case MultisigType.safeMultisigWallet24h:
               return 5;
-            case MultisigType.surfWallet:
+            case MultisigType.setcodeMultisigWallet:
               return 6;
+            case MultisigType.setcodeMultisigWallet24h:
+              return 7;
+            case MultisigType.bridgeMultisigWallet:
+              return 8;
+            case MultisigType.surfWallet:
+              return 9;
+            case MultisigType.multisig2:
+              return 2;
           }
         },
-        highloadWalletV2: () => 7,
+        highloadWalletV2: () => 10,
+        everWallet: () => 1,
       );
 
   String describe() => when(
@@ -63,10 +66,13 @@ extension WalletTypeX on WalletType {
               return 'BridgeMultisig';
             case MultisigType.surfWallet:
               return 'Surf';
+            case MultisigType.multisig2:
+              return 'Multisig';
           }
         },
         walletV3: () => 'WalletV3',
         highloadWalletV2: () => 'HighloadWalletV2',
+        everWallet: () => 'EverWallet',
       );
 }
 

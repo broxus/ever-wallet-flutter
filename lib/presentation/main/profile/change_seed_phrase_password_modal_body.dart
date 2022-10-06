@@ -5,8 +5,6 @@ import 'package:validators/validators.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../../data/repositories/keys_repository.dart';
-import '../../../../../injection.dart';
-import '../../../../data/repositories/keys_repository.dart';
 import '../../../../logger.dart';
 import '../../../data/extensions.dart';
 import '../../common/theme.dart';
@@ -23,7 +21,8 @@ class ChangeSeedPhrasePasswordModalBody extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ChangeSeedPhrasePasswordModalBodyState createState() => _ChangeSeedPhrasePasswordModalBodyState();
+  _ChangeSeedPhrasePasswordModalBodyState createState() =>
+      _ChangeSeedPhrasePasswordModalBodyState();
 }
 
 class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePasswordModalBody> {
@@ -55,7 +54,8 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
           if (incorrectPasswordNotifier.value) {
             text = AppLocalizations.of(context)!.incorrect_password;
-          } else if (newPasswordController.text.isNotEmpty && !isLength(newPasswordController.text, 8)) {
+          } else if (newPasswordController.text.isNotEmpty &&
+              !isLength(newPasswordController.text, 8)) {
             text = AppLocalizations.of(context)!.password_length;
           }
 
@@ -151,7 +151,8 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
 
                   if (incorrectPasswordNotifier.value) {
                     text = AppLocalizations.of(context)!.incorrect_password;
-                  } else if (newPasswordController.text.isNotEmpty && !isLength(newPasswordController.text, 8)) {
+                  } else if (newPasswordController.text.isNotEmpty &&
+                      !isLength(newPasswordController.text, 8)) {
                     text = AppLocalizations.of(context)!.password_length;
                   }
 

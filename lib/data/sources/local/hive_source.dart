@@ -456,6 +456,7 @@ class HiveSource {
       ..registerAdapter(ContractStateAdapter())
       ..registerAdapter(WalletTypeWalletV3Adapter())
       ..registerAdapter(WalletTypeHighloadWalletV2Adapter())
+      ..registerAdapter(WalletTypeEverWalletAdapter())
       ..registerAdapter(WalletInteractionMethodMultisigAdapter())
       ..registerAdapter(MultisigTypeAdapter())
       ..registerAdapter(TokenWalletInfoAdapter())

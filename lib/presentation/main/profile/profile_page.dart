@@ -11,9 +11,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../../../injection.dart';
 import '../../../../../data/repositories/keys_repository.dart';
-import '../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
-import '../../../../data/repositories/keys_repository.dart';
 import '../../../../providers/biometry/biometry_availability_provider.dart';
 import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../providers/key/current_key_provider.dart';

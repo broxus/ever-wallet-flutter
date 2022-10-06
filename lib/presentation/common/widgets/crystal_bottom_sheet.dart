@@ -27,7 +27,6 @@ Future<T?> showCrystalBottomSheet<T>(
     context: context,
     isDismissible: dismissible,
     useRootNavigator: true,
-    bounce: false,
     enableDrag: draggable,
     barrierColor: barrierColor,
     containerWidget: (context, animation, child) => _ContainerWidget(
@@ -46,7 +45,8 @@ Future<T?> showCrystalBottomSheet<T>(
               children: <Widget>[
                 if (title != null)
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16) + const EdgeInsets.only(top: 16),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16) + const EdgeInsets.only(top: 16),
                     height: 32,
                     child: Text(
                       title,

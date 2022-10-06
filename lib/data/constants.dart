@@ -21,6 +21,8 @@ const kDefaultMessageExpiration = Expiration.timeout(value: kDefaultMessageTimeo
 const kDefaultMessageTimeout = 60;
 
 const kEverAvailableWallets = [
+  WalletType.everWallet(),
+  WalletType.multisig(multisigType: MultisigType.multisig2),
   WalletType.walletV3(),
   WalletType.multisig(multisigType: MultisigType.safeMultisigWallet),
   WalletType.multisig(multisigType: MultisigType.safeMultisigWallet24h),

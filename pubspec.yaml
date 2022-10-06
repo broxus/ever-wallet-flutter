@@ -30,7 +30,8 @@ dependencies:
   flutter_bloc: ^8.0.1
   flutter_dotenv: ^5.0.2
   flutter_form_builder: ^7.2.1
-  flutter_inappwebview: ^5.4.3+7
+  flutter_inappwebview: 
+    git: https://github.com/CodeEagle/flutter_inappwebview
   flutter_link_previewer: ^2.6.6
   flutter_localizations:
     sdk: flutter

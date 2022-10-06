@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
-import '../../../../injection.dart';
 import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../common/theme.dart';
 

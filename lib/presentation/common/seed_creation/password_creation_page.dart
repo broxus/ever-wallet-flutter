@@ -8,7 +8,6 @@ import 'package:validators/validators.dart';
 import '../../../../../injection.dart';
 import '../../../../data/repositories/biometry_repository.dart';
 import '../../../../data/repositories/keys_repository.dart';
-import '../../../../injection.dart';
 import '../../../../providers/biometry/biometry_availability_provider.dart';
 import '../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../data/extensions.dart';
@@ -140,7 +139,8 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
 
     if (!isLength(passwordController.text, 8)) {
       text = AppLocalizations.of(context)!.password_length;
-    } else if (repeatController.text.isNotEmpty && passwordController.text != repeatController.text) {
+    } else if (repeatController.text.isNotEmpty &&
+        passwordController.text != repeatController.text) {
       text = AppLocalizations.of(context)!.passwords_match;
     }
 
@@ -239,7 +239,8 @@ class _PasswordCreationPageState extends State<PasswordCreationPage> {
                         CustomCheckbox(
                           value: isEnabled,
                           onChanged: (value) => getIt.get<BiometryRepository>().setStatus(
-                                localizedReason: AppLocalizations.of(context)!.authentication_reason,
+                                localizedReason:
+                                    AppLocalizations.of(context)!.authentication_reason,
                                 isEnabled: !isEnabled,
                               ),
                         ),

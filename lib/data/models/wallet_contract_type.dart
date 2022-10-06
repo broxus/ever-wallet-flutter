@@ -22,4 +22,8 @@ enum WalletContractType {
   walletV3,
   @HiveField(7)
   highloadWalletV2,
+  @HiveField(8)
+  everWallet,
+  @HiveField(9)
+  multisig2,
 }
