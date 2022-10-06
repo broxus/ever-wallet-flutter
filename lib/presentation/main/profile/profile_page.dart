@@ -154,7 +154,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           if (isAvailable && isEnabled) {
                             try {
                               final password = await getIt.get<BiometryRepository>().getKeyPassword(
-                                    localizedReason: AppLocalizations.of(context)!.authentication_reason,
+                                    localizedReason:
+                                        AppLocalizations.of(context)!.authentication_reason,
                                     publicKey: currentKey.publicKey,
                                   );
 
@@ -200,7 +201,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       ? () => showCrystalBottomSheet<void>(
                             context,
                             title: AppLocalizations.of(context)!.change_seed_password,
-                            body: ChangeSeedPhrasePasswordModalBody(publicKey: currentKey.publicKey),
+                            body:
+                                ChangeSeedPhrasePasswordModalBody(publicKey: currentKey.publicKey),
                           )
                       : null,
                 ),
@@ -221,14 +223,17 @@ class _ProfilePageState extends State<ProfilePage> {
                               if (!mounted) return;
 
                               final isEnabled = await ref.read(biometryStatusProvider.future);
-                              final isAvailable = await ref.read(biometryAvailabilityProvider.future);
+                              final isAvailable =
+                                  await ref.read(biometryAvailabilityProvider.future);
 
                               if (isAvailable && isEnabled) {
                                 try {
-                                  final password = await getIt.get<BiometryRepository>().getKeyPassword(
-                                        localizedReason: AppLocalizations.of(context)!.authentication_reason,
-                                        publicKey: currentKey.publicKey,
-                                      );
+                                  final password =
+                                      await getIt.get<BiometryRepository>().getKeyPassword(
+                                            localizedReason:
+                                                AppLocalizations.of(context)!.authentication_reason,
+                                            publicKey: currentKey.publicKey,
+                                          );
 
                                   await getIt.get<KeysRepository>().deriveKey(
                                         name: name.isNotEmpty ? name : null,
@@ -282,7 +287,8 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 Consumer(
                   builder: (context, ref, child) {
-                    final isAvailable = ref.watch(biometryAvailabilityProvider).asData?.value ?? false;
+                    final isAvailable =
+                        ref.watch(biometryAvailabilityProvider).asData?.value ?? false;
 
                     return isAvailable
                         ? buildSectionAction(

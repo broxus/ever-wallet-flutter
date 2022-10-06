@@ -6,6 +6,7 @@ import 'package:tuple/tuple.dart';
 
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/custom_dropdown_button.dart';
@@ -132,10 +133,13 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
         builder: (context, ref, child) {
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
           return Text(
             AppLocalizations.of(context)!.balance(
               tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0',
-              kEverTicker,
+              ticker,
             ),
             style: const TextStyle(
               color: Colors.black54,

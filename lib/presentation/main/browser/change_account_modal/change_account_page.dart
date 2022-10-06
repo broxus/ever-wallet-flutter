@@ -6,6 +6,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../../../data/models/permission.dart';
 import '../../../../providers/account/accounts_provider.dart';
+import '../../../../providers/common/network_type_provider.dart';
 import '../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../common/constants.dart';
 import '../../../common/extensions.dart';
@@ -142,10 +143,14 @@ class _RequestPermissionsModalState extends ConsumerState<ChangeAccountPage> {
 
   Widget balance(AssetsList account) => Consumer(
         builder: (context, ref, child) {
-          final tonWalletInfo = ref.watch(tonWalletInfoProvider(account.address)).whenOrNull(data: (data) => data);
+          final tonWalletInfo =
+              ref.watch(tonWalletInfoProvider(account.address)).whenOrNull(data: (data) => data);
+
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
 
           return Text(
-            '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes().formatValue() ?? '0'} $kEverTicker',
+            '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes().formatValue() ?? '0'} $ticker',
             style: const TextStyle(
               fontSize: 14,
               color: Colors.grey,

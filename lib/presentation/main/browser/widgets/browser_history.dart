@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jovial_svg/jovial_svg.dart';
 
 import '../../../../data/repositories/search_history_repository.dart';
 import '../../../../generated/assets.gen.dart';
@@ -79,8 +81,14 @@ class BrowserHistory extends StatelessWidget {
                   ),
                 ),
                 CustomIconButton(
-                  onPressed: () => getIt.get<SearchHistoryRepository>().removeSearchHistoryEntry(entry),
-                  icon: Assets.images.iconCross.svg(),
+                  onPressed: () =>
+                      getIt.get<SearchHistoryRepository>().removeSearchHistoryEntry(entry),
+                  icon: ScalableImageWidget.fromSISource(
+                    si: ScalableImageSource.fromSvg(
+                      rootBundle,
+                      Assets.images.iconCross.path,
+                    ),
+                  ),
                 ),
               ],
             ),

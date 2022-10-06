@@ -17,7 +17,11 @@ import '../../presentation/common/extensions.dart';
 
 final accountOverallBalanceProvider = StreamProvider.autoDispose.family<double, String>(
   (ref, address) => Rx.combineLatest2<AssetsList, Transport, Tuple2<AssetsList, Transport>>(
-    getIt.get<AccountsRepository>().accountsStream.expand((e) => e).where((e) => e.address == address),
+    getIt
+        .get<AccountsRepository>()
+        .accountsStream
+        .expand((e) => e)
+        .where((e) => e.address == address),
     getIt.get<TransportRepository>().transportStream,
     (a, b) => Tuple2(a, b),
   ).flatMap((v) {
@@ -31,15 +35,24 @@ final accountOverallBalanceProvider = StreamProvider.autoDispose.family<double, 
 
     final tonWalletBalanceStream = Rx.combineLatest2<TonWalletInfo?, Currency?, double>(
       getIt.get<TonWalletsRepository>().getInfoStream(account.address),
-      getIt
-          .get<TokenCurrenciesRepository>()
-          .currenciesStream
-          .expand((e) => e)
-          .where((e) => e.address == kAddressForEverCurrency)
-          .cast<Currency?>()
-          .onErrorReturn(null)
-          .startWith(null),
-      (a, b) => a != null && b != null ? double.parse(a.contractState.balance.toTokens()) * double.parse(b.price) : 0,
+      Rx.combineLatest2<Map<String, List<Currency>>, Transport, List<Currency>>(
+        getIt.get<TokenCurrenciesRepository>().currenciesStream,
+        getIt.get<TransportRepository>().transportStream,
+        (a, b) {
+          final isEver = !b.connectionData.name.contains('Venom');
+
+          final result = a[isEver ? 'ever' : 'venom'] ?? [];
+
+          return result
+              .where(
+                (e) => e.address == (isEver ? kAddressForEverCurrency : kAddressForVenomCurrency),
+              )
+              .toList();
+        },
+      ).expand((e) => e).cast<Currency?>().onErrorReturn(null).startWith(null),
+      (a, b) => a != null && b != null
+          ? double.parse(a.contractState.balance.toTokens()) * double.parse(b.price)
+          : 0,
     );
 
     final tokenWalletBalancesStream = tokenWallets.map(
@@ -48,16 +61,25 @@ final accountOverallBalanceProvider = StreamProvider.autoDispose.family<double, 
               owner: account.address,
               rootTokenContract: e,
             ),
-        getIt
-            .get<TokenCurrenciesRepository>()
-            .currenciesStream
+        Rx.combineLatest2<Map<String, List<Currency>>, Transport, List<Currency>>(
+          getIt.get<TokenCurrenciesRepository>().currenciesStream,
+          getIt.get<TransportRepository>().transportStream,
+          (a, b) {
+            final isEver = !b.connectionData.name.contains('Venom');
+
+            final result = a[isEver ? 'ever' : 'venom'] ?? [];
+
+            return result;
+          },
+        )
             .expand((e) => e)
             .where((el) => el.address == e)
             .cast<Currency?>()
             .onErrorReturn(null)
             .startWith(null),
-        (a, b) =>
-            a != null && b != null ? double.parse(a.balance.toTokens(a.symbol.decimals)) * double.parse(b.price) : 0,
+        (a, b) => a != null && b != null
+            ? double.parse(a.balance.toTokens(a.symbol.decimals)) * double.parse(b.price)
+            : 0,
       ),
     );
 

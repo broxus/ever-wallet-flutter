@@ -7,7 +7,9 @@ part 'network_changed_event.g.dart';
 class NetworkChangedEvent with _$NetworkChangedEvent {
   const factory NetworkChangedEvent({
     required String selectedConnection,
+    required int networkId,
   }) = _NetworkChangedEvent;
 
-  factory NetworkChangedEvent.fromJson(Map<String, dynamic> json) => _$NetworkChangedEventFromJson(json);
+  factory NetworkChangedEvent.fromJson(Map<String, dynamic> json) =>
+      _$NetworkChangedEventFromJson(json);
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:jovial_svg/jovial_svg.dart';
 
 import '../../../generated/assets.gen.dart';
 import 'text_suffix_icon_button.dart';
@@ -23,7 +25,12 @@ class TextFieldClearButton extends StatelessWidget {
             controller.clear();
             Form.of(context)?.validate();
           },
-          icon: Assets.images.iconCross.svg(),
+          icon: ScalableImageWidget.fromSISource(
+            si: ScalableImageSource.fromSvg(
+              rootBundle,
+              Assets.images.iconCross.path,
+            ),
+          ),
         ),
       );
 }

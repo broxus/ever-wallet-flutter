@@ -7,6 +7,7 @@ part 'get_expected_address_output.g.dart';
 class GetExpectedAddressOutput with _$GetExpectedAddressOutput {
   const factory GetExpectedAddressOutput({
     required String address,
+    required String stateInit,
   }) = _GetExpectedAddressOutput;
 
   factory GetExpectedAddressOutput.fromJson(Map<String, dynamic> json) => _$GetExpectedAddressOutputFromJson(json);

@@ -13,6 +13,7 @@ final networkChangesProvider = StreamProvider.autoDispose<NetworkChangedEvent>(
       .map(
         (e) => NetworkChangedEvent(
           selectedConnection: e.connectionData.name,
+          networkId: e.connectionData.networkId,
         ),
       )
       .doOnError((err, st) => logger.e(err, err, st)),

@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:jovial_svg/jovial_svg.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../generated/assets.gen.dart';
@@ -102,7 +103,12 @@ class _DecentralizationPolicyPageState extends State<DecentralizationPolicyPage>
 
   Widget image() => Align(
         alignment: Alignment.centerLeft,
-        child: Assets.images.signImage.svg(),
+        child: ScalableImageWidget.fromSISource(
+          si: ScalableImageSource.fromSvg(
+            rootBundle,
+            Assets.images.signImage.path,
+          ),
+        ),
       );
 
   Widget policyCheck() => Row(

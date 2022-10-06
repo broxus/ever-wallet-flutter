@@ -26,7 +26,7 @@ class BrowserCurrentAccountNotifier extends StateNotifier<AssetsList?> {
   }
 
   Future<void> setCurrent(String? address) async =>
-      state = getIt.get<AccountsRepository>().currentAccounts.firstWhereOrNull((e) => e.address == address);
+      state = (await getIt.get<AccountsRepository>().currentAccounts).firstWhereOrNull((e) => e.address == address);
 
   void _currentAccountsStreamListener(List<AssetsList> event) {
     if (state == null || event.every((e) => e.address != state?.address)) {

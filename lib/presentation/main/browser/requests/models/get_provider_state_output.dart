@@ -14,6 +14,7 @@ class GetProviderStateOutput with _$GetProviderStateOutput {
     required String version,
     required int numericVersion,
     required String selectedConnection,
+    required int networkId,
     required List<Permission> supportedPermissions,
     required Permissions permissions,
     required Map<String, ContractUpdatesSubscription> subscriptions,

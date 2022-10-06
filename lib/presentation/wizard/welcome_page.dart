@@ -2,9 +2,12 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jovial_svg/jovial_svg.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import '../../generated/assets.gen.dart';
+import '../../providers/common/network_type_provider.dart';
 import '../common/theme.dart';
 import '../common/widgets/crystal_subtitle.dart';
 import '../common/widgets/crystal_title.dart';
@@ -78,7 +81,12 @@ class WelcomePage extends StatelessWidget {
 
   Widget image() => Align(
         alignment: Alignment.centerLeft,
-        child: Assets.images.welcomeImage.svg(),
+        child: ScalableImageWidget.fromSISource(
+          si: ScalableImageSource.fromSvg(
+            rootBundle,
+            Assets.images.welcomeImage.path,
+          ),
+        ),
       );
 
   Widget createNewButton(BuildContext context) => CustomElevatedButton(
@@ -98,25 +106,44 @@ class WelcomePage extends StatelessWidget {
         text: AppLocalizations.of(context)!.create_new_wallet,
       );
 
-  Widget signInButton(BuildContext context) => CustomOutlinedButton(
-        onPressed: () => context.router.push(
-          DecentralizationPolicyRoute(
-            onPressed: () => context.router.push(
-              SeedPhraseTypeRoute(
-                onSelected: (MnemonicType mnemonicType) => context.router.push(
-                  SeedNameRoute(
-                    onSubmit: (String? name) => context.router.push(
-                      SeedPhraseImportRoute(
-                        seedName: name,
-                        isLegacy: mnemonicType == const MnemonicType.legacy(),
+  Widget signInButton(BuildContext context) => Consumer(
+        builder: (context, ref, child) => CustomOutlinedButton(
+          onPressed: () => context.router.push(
+            DecentralizationPolicyRoute(
+              onPressed: () {
+                final isEver = ref.read(networkTypeProvider).asData?.value == 'Ever';
+
+                if (isEver) {
+                  context.router.push(
+                    SeedPhraseTypeRoute(
+                      onSelected: (MnemonicType mnemonicType) => context.router.push(
+                        SeedNameRoute(
+                          onSubmit: (String? name) => context.router.push(
+                            SeedPhraseImportRoute(
+                              seedName: name,
+                              isLegacy: mnemonicType == const MnemonicType.legacy(),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
+                  );
+                } else {
+                  context.router.push(
+                    SeedNameRoute(
+                      onSubmit: (String? name) => context.router.push(
+                        SeedPhraseImportRoute(
+                          seedName: name,
+                          isLegacy: false,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              },
             ),
           ),
+          text: AppLocalizations.of(context)!.sign_in,
         ),
-        text: AppLocalizations.of(context)!.sign_in,
       );
 }

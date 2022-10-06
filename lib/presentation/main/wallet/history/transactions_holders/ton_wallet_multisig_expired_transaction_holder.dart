@@ -1,8 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
@@ -121,10 +123,18 @@ class TonWalletMultisigExpiredTransactionHolder extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: ValueTitle(
-                          value: value.toTokens().removeZeroes().formatValue(),
-                          currency: kEverTicker,
-                          isOutgoing: isOutgoing,
+                        child: Consumer(
+                          builder: (context, ref, child) {
+                            final ticker = ref.watch(networkTypeProvider).asData?.value == 'Ever'
+                                ? kEverTicker
+                                : kVenomTicker;
+
+                            return ValueTitle(
+                              value: value.toTokens().removeZeroes().formatValue(),
+                              currency: ticker,
+                              isOutgoing: isOutgoing,
+                            );
+                          },
                         ),
                       ),
                       const IconForward(),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:jovial_svg/jovial_svg.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 import 'token_asset_old_label.dart';
@@ -20,10 +20,8 @@ class TokenAssetIcon extends StatelessWidget {
         child: Stack(
           children: [
             ClipOval(
-              child: SvgPicture.network(
-                logoURI,
-                width: 36,
-                height: 36,
+              child: ScalableImageWidget.fromSISource(
+                si: ScalableImageSource.fromSvgHttpUrl(Uri.parse(logoURI)),
               ),
             ),
             if (version == TokenWalletVersion.oldTip3v4)

@@ -28,6 +28,7 @@ extension IntX on int {
 
 extension WalletTypeX on WalletType {
   int toInt() => when(
+        walletV3: () => 0,
         multisig: (multisigType) {
           switch (multisigType) {
             case MultisigType.safeMultisigWallet:
@@ -44,8 +45,7 @@ extension WalletTypeX on WalletType {
               return 6;
           }
         },
-        walletV3: () => 7,
-        highloadWalletV2: () => 8,
+        highloadWalletV2: () => 7,
       );
 
   String describe() => when(
@@ -138,7 +138,8 @@ extension IterableX<T> on Iterable<T> {
     return null;
   }
 
-  Future<Iterable<K>> asyncMap<K>(Future<K> Function(T element) toElement) => Future.wait<K>(map((e) => toElement(e)));
+  Future<Iterable<K>> asyncMap<K>(Future<K> Function(T element) toElement) =>
+      Future.wait<K>(map((e) => toElement(e)));
 
   Future<Iterable<T>> asyncWhere(Future<bool> Function(T element) test) async => <T>[
         for (final element in this)

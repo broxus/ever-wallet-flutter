@@ -167,7 +167,7 @@ class ApprovalsListener extends StatelessWidget {
     required Completer<Permissions> completer,
   }) async {
     try {
-      final accounts = getIt.get<AccountsRepository>().currentAccounts;
+      final accounts = await getIt.get<AccountsRepository>().currentAccounts;
 
       if (accounts.isEmpty) {
         final currentKey = getIt.get<KeysRepository>().currentKey;
@@ -205,7 +205,7 @@ class ApprovalsListener extends StatelessWidget {
     required Completer<Permissions> completer,
   }) async {
     try {
-      final accounts = getIt.get<AccountsRepository>().currentAccounts;
+      final accounts = await getIt.get<AccountsRepository>().currentAccounts;
 
       if (accounts.isEmpty) {
         final currentKey = getIt.get<KeysRepository>().currentKey;

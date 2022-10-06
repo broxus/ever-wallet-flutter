@@ -11,6 +11,7 @@ import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_prepare_deploy_provider.dart';
 import '../../../../../data/extensions.dart';
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/crystal_subtitle.dart';
@@ -117,9 +118,12 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
         builder: (context, ref, child) {
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
           return SectionedCardSection(
             title: AppLocalizations.of(context)!.account_balance,
-            subtitle: '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes()} $kEverTicker',
+            subtitle: '${tonWalletInfo?.contractState.balance.toTokens().removeZeroes()} $ticker',
           );
         },
       );
@@ -128,8 +132,11 @@ class _NewSelectWalletTypePageState extends ConsumerState<DeploymentInfoPage> {
         builder: (context, ref, child) {
           final result = ref.watch(tonWalletPrepareDeployProvider);
 
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} $kEverTicker',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} $ticker',
             error: (err, st) => (err as Exception).toUiMessage(),
             loading: () => null,
           );

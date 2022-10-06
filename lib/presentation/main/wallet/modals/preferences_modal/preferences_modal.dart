@@ -8,6 +8,7 @@ import '../../../../../../injection.dart';
 import '../../../../../../logger.dart';
 import '../../../../../../providers/account/account_info_provider.dart';
 import '../../../../../data/extensions.dart';
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/theme.dart';
 import '../../../../common/utils.dart';
 import '../../../../common/widgets/address_card.dart';
@@ -40,7 +41,8 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
     super.initState();
     ref.read(accountInfoProvider(widget.address).future).then((value) {
       controller.text = value.name;
-      controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+      controller.selection =
+          TextSelection.fromPosition(TextPosition(offset: controller.text.length));
     });
   }
 
@@ -116,8 +118,16 @@ class _PreferencesModalBodyConsumerState extends ConsumerState<PreferencesModalB
         ),
       );
 
-  Widget explorerButton() => CustomOutlinedButton(
-        onPressed: () => launchUrlString(accountExplorerLink(widget.address)),
-        text: AppLocalizations.of(context)!.see_in_the_explorer,
+  Widget explorerButton() => Consumer(
+        builder: (context, ref, child) {
+          final accountExplorerLink = ref.watch(networkTypeProvider).asData?.value == 'Ever'
+              ? everAccountExplorerLink
+              : venomAccountExplorerLink;
+
+          return CustomOutlinedButton(
+            onPressed: () => launchUrlString(accountExplorerLink(widget.address)),
+            text: AppLocalizations.of(context)!.see_in_the_explorer,
+          );
+        },
       );
 }

@@ -14,6 +14,7 @@ import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_info_provider.dart';
 import '../../../../../data/extensions.dart';
 import '../../../../../generated/assets.gen.dart';
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
@@ -219,10 +220,13 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         builder: (context, ref, child) {
           final tonWalletInfo = ref.watch(tonWalletInfoProvider(widget.address)).asData?.value;
 
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
           return Text(
             AppLocalizations.of(context)!.balance(
               tonWalletInfo?.contractState.balance.toTokens().removeZeroes() ?? '0',
-              kEverTicker,
+              ticker,
             ),
             style: const TextStyle(
               color: Colors.black54,

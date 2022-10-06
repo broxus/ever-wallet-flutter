@@ -12,6 +12,7 @@ import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/token_wallet/token_wallet_info_provider.dart';
 import '../../../../../../providers/token_wallet/token_wallet_prepare_transfer_provider.dart';
 import '../../../../../data/extensions.dart';
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/custom_back_button.dart';
@@ -151,8 +152,11 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
         builder: (context, ref, child) {
           final result = ref.watch(tokenWalletPrepareTransferProvider);
 
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} $kEverTicker',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} $ticker',
             error: (err, st) => (err as Exception).toUiMessage(),
             loading: () => null,
           );
@@ -177,7 +181,9 @@ class _NewSelectWalletTypePageState extends ConsumerState<TokenSendInfoPage> {
 
   Widget notifyReceiver() => SectionedCardSection(
         title: AppLocalizations.of(context)!.notify_receiver,
-        subtitle: widget.notifyReceiver ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no,
+        subtitle: widget.notifyReceiver
+            ? AppLocalizations.of(context)!.yes
+            : AppLocalizations.of(context)!.no,
       );
 
   Widget submitButton() => Consumer(

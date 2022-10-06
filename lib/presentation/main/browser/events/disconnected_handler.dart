@@ -10,7 +10,7 @@ Future<void> disconnectedHandler({
   try {
     logger.d('DisconnectedEvent');
 
-    await controller.evaluateJavascript(source: 'window.__dartNotifications.disconnected()');
+    await controller.evaluateJavascript(source: 'window.__dartNotifications.disconnected({})');
   } catch (err, st) {
     logger.e(err, err, st);
     rethrow;

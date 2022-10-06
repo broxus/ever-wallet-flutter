@@ -29,17 +29,22 @@ import '../requests/estimate_fees_handler.dart';
 import '../requests/extract_public_key_handler.dart';
 import '../requests/get_accounts_by_code_hash_handler.dart';
 import '../requests/get_boc_hash_handler.dart';
+import '../requests/get_code_salt_handler.dart';
 import '../requests/get_expected_address_handler.dart';
 import '../requests/get_full_contract_state_handler.dart';
 import '../requests/get_provider_state_handler.dart';
 import '../requests/get_transaction_handler.dart';
 import '../requests/get_transactions_handler.dart';
+import '../requests/merge_tvc_handler.dart';
 import '../requests/pack_into_cell_handler.dart';
 import '../requests/request_permissions_handler.dart';
 import '../requests/run_local_handler.dart';
+import '../requests/send_external_message_delayed_handler.dart';
 import '../requests/send_external_message_handler.dart';
+import '../requests/send_message_delayed_handler.dart';
 import '../requests/send_message_handler.dart';
 import '../requests/send_unsigned_external_message_handler.dart';
+import '../requests/set_code_salt_handler.dart';
 import '../requests/sign_data_handler.dart';
 import '../requests/sign_data_raw_handler.dart';
 import '../requests/split_tvc_handler.dart';
@@ -80,6 +85,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
                   initialUrlRequest: URLRequest(url: Uri.parse('about:blank')),
                   initialOptions: InAppWebViewGroupOptions(
                     crossPlatform: InAppWebViewOptions(
+                      applicationNameForUserAgent: 'EverWalletBrowser',
                       useShouldOverrideUrlLoading: true,
                       mediaPlaybackRequiresUserGesture: false,
                       transparentBackground: true,
@@ -104,7 +110,8 @@ class _BrowserWebViewState extends State<BrowserWebView> {
                   onLoadStop: (controller, url) => onLoadStop(ref.read, controller, url),
                   onLoadError: onLoadError,
                   onLoadHttpError: onLoadError,
-                  onProgressChanged: (controller, progress) => onProgressChanged(ref.read, controller, progress),
+                  onProgressChanged: (controller, progress) =>
+                      onProgressChanged(ref.read, controller, progress),
                   onUpdateVisitedHistory: onUpdateVisitedHistory,
                   androidOnPermissionRequest: androidOnPermissionRequest,
                   shouldOverrideUrlLoading: shouldOverrideUrlLoading,
@@ -209,8 +216,23 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     );
 
     controller.addJavaScriptHandler(
+      handlerName: 'mergeTvc',
+      callback: (args) => mergeTvcHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
       handlerName: 'splitTvc',
       callback: (args) => splitTvcHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'setCodeSalt',
+      callback: (args) => setCodeSaltHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'getCodeSalt',
+      callback: (args) => getCodeSaltHandler(controller: controller, args: args),
     );
 
     controller.addJavaScriptHandler(
@@ -224,13 +246,13 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     );
 
     controller.addJavaScriptHandler(
-      handlerName: 'decodeEvent',
-      callback: (args) => decodeEventHandler(controller: controller, args: args),
+      handlerName: 'decodeOutput',
+      callback: (args) => decodeOutputHandler(controller: controller, args: args),
     );
 
     controller.addJavaScriptHandler(
-      handlerName: 'decodeOutput',
-      callback: (args) => decodeOutputHandler(controller: controller, args: args),
+      handlerName: 'decodeEvent',
+      callback: (args) => decodeEventHandler(controller: controller, args: args),
     );
 
     controller.addJavaScriptHandler(
@@ -289,8 +311,18 @@ class _BrowserWebViewState extends State<BrowserWebView> {
     );
 
     controller.addJavaScriptHandler(
+      handlerName: 'sendMessageDelayed',
+      callback: (args) => sendMessageDelayedHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
       handlerName: 'sendExternalMessage',
       callback: (args) => sendExternalMessageHandler(controller: controller, args: args),
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'sendExternalMessageDelayed',
+      callback: (args) => sendExternalMessageDelayedHandler(controller: controller, args: args),
     );
 
     widget.controller.complete(controller);

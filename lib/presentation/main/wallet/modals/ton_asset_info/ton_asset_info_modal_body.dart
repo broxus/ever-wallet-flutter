@@ -15,6 +15,7 @@ import '../../../../../../providers/ton_wallet/ton_wallet_multisig_pending_trans
 import '../../../../../../providers/ton_wallet/ton_wallet_pending_transactions_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_transactions_state_provider.dart';
 import '../../../../../generated/assets.gen.dart';
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
@@ -97,19 +98,32 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         ],
       );
 
-  Widget balanceText(String balance) => Text(
-        '${balance.toTokens().removeZeroes().formatValue()} $kEverTicker',
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-        ),
+  Widget balanceText(String balance) => Consumer(
+        builder: (context, ref, child) {
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
+          return Text(
+            '${balance.toTokens().removeZeroes().formatValue()} $ticker',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          );
+        },
       );
 
-  Widget nameText() => const Text(
-        kEverNetworkName,
-        style: TextStyle(
-          fontSize: 16,
-        ),
+  Widget nameText() => Consumer(
+        builder: (context, ref, child) {
+          final isEver = ref.watch(networkTypeProvider).asData?.value == 'Ever';
+
+          return Text(
+            isEver ? kEverNetworkName : kVenomNetworkName,
+            style: const TextStyle(
+              fontSize: 16,
+            ),
+          );
+        },
       );
 
   Widget actions(TonWalletInfo tonWalletInfo) => Consumer(
@@ -140,9 +154,11 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
 
               final custodians = tonWalletInfo.custodians ?? [];
 
-              final localCustodians = keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
+              final localCustodians =
+                  keysList.where((e) => custodians.any((el) => el == e.publicKey)).toList();
 
-              final initiatorKey = localCustodians.firstWhereOrNull((e) => e.publicKey == currentKey.publicKey);
+              final initiatorKey =
+                  localCustodians.firstWhereOrNull((e) => e.publicKey == currentKey.publicKey);
 
               final listOfKeys = [
                 if (initiatorKey != null) initiatorKey,
@@ -201,8 +217,11 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
               ref.watch(tonWalletPendingTransactionsProvider(widget.address)).asData?.value ?? [];
           final expiredTransactionsState =
               ref.watch(tonWalletExpiredTransactionsProvider(widget.address)).asData?.value ?? [];
-          final multisigPendingTransactionsState =
-              ref.watch(tonWalletMultisigPendingTransactionsProvider(widget.address)).asData?.value ?? [];
+          final multisigPendingTransactionsState = ref
+                  .watch(tonWalletMultisigPendingTransactionsProvider(widget.address))
+                  .asData
+                  ?.value ??
+              [];
 
           return Column(
             children: [

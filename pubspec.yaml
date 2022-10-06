@@ -3,7 +3,7 @@ description: EVER Wallet
 
 publish_to: "none"
 
-version: 1.0.18+96
+version: 1.0.21+103
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
@@ -34,7 +34,7 @@ dependencies:
   flutter_link_previewer: ^2.6.6
   flutter_localizations:
     sdk: flutter
-  flutter_platform_widgets: ^1.20.0
+  flutter_platform_widgets: ^2.0.0
   flutter_portal: ^1.1.0
   flutter_riverpod: ^1.0.4
   flutter_svg: ^1.0.2
@@ -45,6 +45,7 @@ dependencies:
   hive_flutter: ^1.1.0
   injectable: ^1.5.3
   intl: ^0.17.0
+  jovial_svg: ^1.1.5
   json_annotation: ^4.5.0
   local_auth: ^2.1.0
   logger: ^1.1.0

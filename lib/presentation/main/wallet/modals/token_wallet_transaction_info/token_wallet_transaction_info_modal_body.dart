@@ -1,9 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/utils.dart';
@@ -64,8 +66,10 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     final hash = transactionWithData.transaction.id.hash;
 
     final type = transactionWithData.data!.when(
-      incomingTransfer: (tokenIncomingTransfer) => AppLocalizations.of(context)!.token_incoming_transfer,
-      outgoingTransfer: (tokenOutgoingTransfer) => AppLocalizations.of(context)!.token_outgoing_transfer,
+      incomingTransfer: (tokenIncomingTransfer) =>
+          AppLocalizations.of(context)!.token_incoming_transfer,
+      outgoingTransfer: (tokenOutgoingTransfer) =>
+          AppLocalizations.of(context)!.token_outgoing_transfer,
       swapBack: (tokenSwapBack) => AppLocalizations.of(context)!.swap_back,
       accept: (value) => AppLocalizations.of(context)!.accept,
       transferBounced: (value) => AppLocalizations.of(context)!.transfer_bounced,
@@ -195,7 +199,9 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     required String address,
   }) =>
       item(
-        title: isOutgoing ? AppLocalizations.of(context)!.recipient : AppLocalizations.of(context)!.sender,
+        title: isOutgoing
+            ? AppLocalizations.of(context)!.recipient
+            : AppLocalizations.of(context)!.sender,
         subtitle: address,
       );
 
@@ -222,9 +228,16 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     required BuildContext context,
     required String fees,
   }) =>
-      item(
-        title: AppLocalizations.of(context)!.blockchain_fee,
-        subtitle: '$fees $kEverTicker',
+      Consumer(
+        builder: (context, ref, child) {
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
+          return item(
+            title: AppLocalizations.of(context)!.blockchain_fee,
+            subtitle: '$fees $ticker',
+          );
+        },
       );
 
   Widget typeItem({
@@ -240,8 +253,16 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     required BuildContext context,
     required String hash,
   }) =>
-      CustomOutlinedButton(
-        onPressed: () => launchUrlString(transactionExplorerLink(hash)),
-        text: AppLocalizations.of(context)!.see_in_the_explorer,
+      Consumer(
+        builder: (context, ref, child) {
+          final transactionExplorerLink = ref.watch(networkTypeProvider).asData?.value == 'Ever'
+              ? everTransactionExplorerLink
+              : venomTransactionExplorerLink;
+
+          return CustomOutlinedButton(
+            onPressed: () => launchUrlString(transactionExplorerLink(hash)),
+            text: AppLocalizations.of(context)!.see_in_the_explorer,
+          );
+        },
       );
 }

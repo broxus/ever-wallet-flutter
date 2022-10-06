@@ -2,8 +2,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../providers/common/network_type_provider.dart';
 import '../../router.gr.dart';
 import '../widgets/crystal_title.dart';
 import '../widgets/custom_back_button.dart';
@@ -78,17 +80,29 @@ class _AddNewSeedPageState extends State<AddNewSeedPage> {
         text: AppLocalizations.of(context)!.add_new_seed_phrase_description,
       );
 
-  Widget dropdownButton() => ValueListenableBuilder<_CreationActions>(
-        valueListenable: optionNotifier,
-        builder: (context, value, child) => CustomDropdownButton<_CreationActions>(
-          items: _CreationActions.values.map((e) => Tuple2(e, e.describe(context))).toList(),
-          value: value,
-          onChanged: (value) {
-            if (value != null) {
-              optionNotifier.value = value;
-            }
-          },
-        ),
+  Widget dropdownButton() => Consumer(
+        builder: (context, ref, child) {
+          final isEver = ref.watch(networkTypeProvider).asData?.value == 'Ever';
+
+          final values = (isEver
+                  ? _CreationActions.values
+                  : [_CreationActions.create, _CreationActions.import])
+              .map((e) => Tuple2(e, e.describe(context, isEver)))
+              .toList();
+
+          return ValueListenableBuilder<_CreationActions>(
+            valueListenable: optionNotifier,
+            builder: (context, value, child) => CustomDropdownButton<_CreationActions>(
+              items: values,
+              value: value,
+              onChanged: (value) {
+                if (value != null) {
+                  optionNotifier.value = value;
+                }
+              },
+            ),
+          );
+        },
       );
 
   Widget submitButton() => CustomElevatedButton(
@@ -121,12 +135,12 @@ enum _CreationActions {
 }
 
 extension on _CreationActions {
-  String describe(BuildContext context) {
+  String describe(BuildContext context, bool isEver) {
     switch (this) {
       case _CreationActions.create:
         return AppLocalizations.of(context)!.create_seed;
       case _CreationActions.import:
-        return AppLocalizations.of(context)!.import_seed;
+        return isEver ? AppLocalizations.of(context)!.import_seed : 'Import seed';
       case _CreationActions.importLegacy:
         return AppLocalizations.of(context)!.import_legacy_seed;
     }

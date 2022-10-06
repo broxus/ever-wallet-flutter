@@ -21,8 +21,10 @@ class TonAssetsRepository {
   final TransportSource _transportSource;
   final HiveSource _hiveSource;
   final RestSource _restSource;
-  final _systemAssetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
-  final _customAssetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
+  final _everSystemAssetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
+  final _everCustomAssetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
+  final _venomSystemAssetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
+  final _venomCustomAssetsSubject = BehaviorSubject<List<TokenContractAsset>>.seeded([]);
   final _lock = Lock();
 
   TonAssetsRepository._(
@@ -46,17 +48,40 @@ class TonAssetsRepository {
     return instance;
   }
 
-  Stream<List<TokenContractAsset>> get systemAssetsStream => _systemAssetsSubject.distinct((a, b) => listEquals(a, b));
+  Stream<List<TokenContractAsset>> get systemAssetsStream => _transportSource.transportStream
+      .flatMap(
+        (v) => !v.connectionData.name.contains('Venom')
+            ? _everSystemAssetsSubject
+            : _venomSystemAssetsSubject,
+      )
+      .distinct((a, b) => listEquals(a, b));
 
-  List<TokenContractAsset> get systemAssets => _systemAssetsSubject.value;
+  Future<List<TokenContractAsset>> get systemAssets async {
+    final isEver = !(await _transportSource.transport).connectionData.name.contains('Venom');
 
-  Stream<List<TokenContractAsset>> get customAssetsStream => _customAssetsSubject.distinct((a, b) => listEquals(a, b));
+    return isEver ? _venomSystemAssetsSubject.value : _everSystemAssetsSubject.value;
+  }
 
-  List<TokenContractAsset> get customAssets => _customAssetsSubject.value;
+  Stream<List<TokenContractAsset>> get customAssetsStream => _transportSource.transportStream
+      .flatMap(
+        (v) => !v.connectionData.name.contains('Venom')
+            ? _everSystemAssetsSubject
+            : _venomSystemAssetsSubject,
+      )
+      .distinct((a, b) => listEquals(a, b));
+
+  Future<List<TokenContractAsset>> get customAssets async {
+    final isEver = !(await _transportSource.transport).connectionData.name.contains('Venom');
+
+    return isEver ? _venomCustomAssetsSubject.value : _everCustomAssetsSubject.value;
+  }
 
   Future<TokenContractAsset> getTokenContractAsset(String rootTokenContract) async {
-    var asset = systemAssets.firstWhereOrNull((e) => e.address == rootTokenContract) ??
-        customAssets.firstWhereOrNull((e) => e.address == rootTokenContract);
+    var asset = (_venomSystemAssetsSubject.value)
+            .firstWhereOrNull((e) => e.address == rootTokenContract) ??
+        (_everSystemAssetsSubject.value).firstWhereOrNull((e) => e.address == rootTokenContract) ??
+        (_venomCustomAssetsSubject.value).firstWhereOrNull((e) => e.address == rootTokenContract) ??
+        (_everCustomAssetsSubject.value).firstWhereOrNull((e) => e.address == rootTokenContract);
 
     if (asset != null) return asset;
 
@@ -75,21 +100,40 @@ class TonAssetsRepository {
       version: tokenRootDetails.version.toInt(),
     );
 
-    await _hiveSource.addCustomTokenContractAsset(asset);
+    final isEver = !(await _transportSource.transport).connectionData.name.contains('Venom');
 
-    _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
+    if (isEver) {
+      await _hiveSource.addEverCustomTokenContractAsset(asset);
+
+      _everCustomAssetsSubject.add(_hiveSource.everCustomTokenContractAssets);
+    } else {
+      await _hiveSource.addVenomCustomTokenContractAsset(asset);
+
+      _venomCustomAssetsSubject.add(_hiveSource.venomCustomTokenContractAssets);
+    }
 
     return asset;
   }
 
-  Future<void> clear() async => _hiveSource.clearCustomTokenContractAssets();
+  Future<void> clear() async {
+    await _hiveSource.clearEverCustomTokenContractAssets();
+    await _hiveSource.clearVenomCustomTokenContractAssets();
+  }
 
-  Future<void> _updateSystemTokenContractAssets() async {
-    final manifest = await _restSource.getTonAssetsManifest();
+  Future<void> _updateEverSystemTokenContractAssets() async {
+    final manifest = await _restSource.getEverTonAssetsManifest();
 
-    await _hiveSource.updateSystemTokenContractAssets(manifest.tokens);
+    await _hiveSource.updateEverSystemTokenContractAssets(manifest.tokens);
 
-    _systemAssetsSubject.add(_hiveSource.systemTokenContractAssets);
+    _everSystemAssetsSubject.add(_hiveSource.everSystemTokenContractAssets);
+  }
+
+  Future<void> _updateVenomSystemTokenContractAssets() async {
+    final manifest = await _restSource.getVenomTonAssetsManifest();
+
+    await _hiveSource.updateVenomSystemTokenContractAssets(manifest.tokens);
+
+    _venomSystemAssetsSubject.add(_hiveSource.venomSystemTokenContractAssets);
   }
 
   Future<void> _initialize() async {
@@ -102,31 +146,53 @@ class TonAssetsRepository {
         .distinct((a, b) => listEquals(a.item1, b.item1) && listEquals(a.item2, b.item2))
         .listen((event) => _lock.synchronized(() => _systemAssetsStreamListener(event)));
 
-    _systemAssetsSubject.add(_hiveSource.systemTokenContractAssets);
-    _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
+    _everSystemAssetsSubject.add(_hiveSource.everSystemTokenContractAssets);
+    _everCustomAssetsSubject.add(_hiveSource.everCustomTokenContractAssets);
 
-    _updateSystemTokenContractAssets().onError((err, st) => logger.e(err, err, st));
+    _venomSystemAssetsSubject.add(_hiveSource.venomSystemTokenContractAssets);
+    _venomCustomAssetsSubject.add(_hiveSource.venomCustomTokenContractAssets);
+
+    _updateEverSystemTokenContractAssets().onError((err, st) => logger.e(err, err, st));
+    _updateVenomSystemTokenContractAssets().onError((err, st) => logger.e(err, err, st));
   }
 
-  Future<void> _systemAssetsStreamListener(Tuple2<List<TokenContractAsset>, List<TokenContractAsset>> event) async {
+  Future<void> _systemAssetsStreamListener(
+    Tuple2<List<TokenContractAsset>, List<TokenContractAsset>> event,
+  ) async {
     try {
+      final isEver = !(await _transportSource.transport).connectionData.name.contains('Venom');
+
       final systemAssets = event.item1;
       final customAssets = event.item2;
 
-      final duplicatedAssets = customAssets.where((e) => systemAssets.any((el) => e.address == el.address));
+      final duplicatedAssets =
+          customAssets.where((e) => systemAssets.any((el) => e.address == el.address));
 
       for (final asset in duplicatedAssets) {
-        _hiveSource.removeCustomTokenContractAsset(asset.address);
+        if (isEver) {
+          _hiveSource.removeEverCustomTokenContractAsset(asset.address);
 
-        _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
+          _everCustomAssetsSubject.add(_hiveSource.everCustomTokenContractAssets);
+        } else {
+          _hiveSource.removeVenomCustomTokenContractAsset(asset.address);
+
+          _venomCustomAssetsSubject.add(_hiveSource.venomCustomTokenContractAssets);
+        }
       }
 
-      final oldAssets = customAssets.where((e) => e.version.toTokenWalletVersion() == TokenWalletVersion.oldTip3v4);
+      final oldAssets = customAssets
+          .where((e) => e.version.toTokenWalletVersion() == TokenWalletVersion.oldTip3v4);
 
       for (final asset in oldAssets) {
-        _hiveSource.removeCustomTokenContractAsset(asset.address);
+        if (isEver) {
+          _hiveSource.removeEverCustomTokenContractAsset(asset.address);
 
-        _customAssetsSubject.add(_hiveSource.customTokenContractAssets);
+          _everCustomAssetsSubject.add(_hiveSource.everCustomTokenContractAssets);
+        } else {
+          _hiveSource.removeVenomCustomTokenContractAsset(asset.address);
+
+          _venomCustomAssetsSubject.add(_hiveSource.venomCustomTokenContractAssets);
+        }
       }
     } catch (err, st) {
       logger.e(err, err, st);

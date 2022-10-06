@@ -25,7 +25,9 @@ class GenericContractsRepository {
       _transportSource.transportStream,
       Stream<void>.periodic(kSubscriptionRefreshTimeout).startWith(null),
       (a, b, c) => Tuple2(a, b),
-    ).listen((event) => _lock.synchronized(() => _currentContractSubscriptionsStreamListener(event)));
+    ).listen(
+      (event) => _lock.synchronized(() => _currentContractSubscriptionsStreamListener(event)),
+    );
   }
 
   Map<String, ContractUpdatesSubscription> get subscriptions => {
@@ -44,14 +46,15 @@ class GenericContractsRepository {
             ),
           );
 
-  Stream<Tuple2<String, ContractState>> get stateChangesStream => _genericContractsSubject.expand((e) => e).flatMap(
-        (v) => v.onStateChangedStream.asyncMap(
-          (e) async => Tuple2(
-            await v.address,
-            e.newState,
-          ),
-        ),
-      );
+  Stream<Tuple2<String, ContractState>> get stateChangesStream =>
+      _genericContractsSubject.expand((e) => e).flatMap(
+            (v) => v.onStateChangedStream.asyncMap(
+              (e) async => Tuple2(
+                await v.address,
+                e.newState,
+              ),
+            ),
+          );
 
   Future<Transaction> executeTransactionLocally({
     required String address,
@@ -100,25 +103,32 @@ class GenericContractsRepository {
         onTimeout: () => throw Exception('Generic contract not found'),
       );
 
-  Future<void> _currentContractSubscriptionsStreamListener(Tuple2<List<String>, Transport> event) async {
+  Future<void> _currentContractSubscriptionsStreamListener(
+    Tuple2<List<String>, Transport> event,
+  ) async {
     try {
       final contractSubscriptions = event.item1;
       final transport = event.item2;
 
       final genericContractsForUnsubscription = await _genericContractsSubject.value.asyncWhere(
         (e) async =>
-            e.transport != transport || !await contractSubscriptions.asyncAny((el) async => el == await e.address),
+            e.transport != transport ||
+            !await contractSubscriptions.asyncAny((el) async => el == await e.address),
       );
 
       for (final genericContractForUnsubscription in genericContractsForUnsubscription) {
-        _genericContractsSubject
-            .add(_genericContractsSubject.value.where((e) => e != genericContractForUnsubscription).toList());
+        _genericContractsSubject.add(
+          _genericContractsSubject.value
+              .where((e) => e != genericContractForUnsubscription)
+              .toList(),
+        );
 
         genericContractForUnsubscription.freePtr();
       }
 
       final contractSubscriptionsForSubscription = await contractSubscriptions.asyncWhere(
-        (e) async => !await _genericContractsSubject.value.asyncAny((el) async => await el.address == e),
+        (e) async =>
+            !await _genericContractsSubject.value.asyncAny((el) async => await el.address == e),
       );
 
       for (final contractSubscriptionForSubscription in contractSubscriptionsForSubscription) {

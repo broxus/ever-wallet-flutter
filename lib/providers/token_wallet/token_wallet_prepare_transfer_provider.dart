@@ -9,21 +9,14 @@ import '../../../injection.dart';
 import '../../data/repositories/token_wallets_repository.dart';
 import '../../data/repositories/ton_wallets_repository.dart';
 
-final tokenWalletPrepareTransferProvider =
-    StateNotifierProvider.autoDispose<TokenWalletPrepareTransferNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
+final tokenWalletPrepareTransferProvider = StateNotifierProvider.autoDispose<
+    TokenWalletPrepareTransferNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
   (ref) => TokenWalletPrepareTransferNotifier(),
 );
 
-class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
-  UnsignedMessage? _unsignedMessage;
-
+class TokenWalletPrepareTransferNotifier
+    extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
   TokenWalletPrepareTransferNotifier() : super(const AsyncValue.loading());
-
-  @override
-  void dispose() {
-    _unsignedMessage?.freePtr();
-    super.dispose();
-  }
 
   Future<void> prepareTransfer({
     required String publicKey,
@@ -37,8 +30,6 @@ class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      _unsignedMessage?.freePtr();
-
       final repackedDestination = repackAddress(destination);
 
       final internalMessage = await getIt.get<TokenWalletsRepository>().prepareTransfer(
@@ -60,8 +51,6 @@ class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2
             body: internalMessage.body,
           );
 
-      _unsignedMessage = unsignedMessage;
-
       await unsignedMessage.refreshTimeout();
 
       final signature = base64.encode(List.generate(kSignatureLength, (_) => 0));
@@ -74,7 +63,10 @@ class TokenWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2
           );
       final feesValue = int.parse(fees);
 
-      final balance = await getIt.get<TonWalletsRepository>().getInfo(owner).then((v) => v.contractState.balance);
+      final balance = await getIt
+          .get<TonWalletsRepository>()
+          .getInfo(owner)
+          .then((v) => v.contractState.balance);
       final balanceValue = int.parse(balance);
 
       final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);

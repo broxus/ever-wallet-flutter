@@ -59,9 +59,34 @@ class AccountsRepository {
 
   Map<String, List<String>> get externalAccounts => _externalAccountsSubject.value;
 
-  Stream<List<AssetsList>> get currentAccountsStream => _accountsStorageSource.currentAccountsStream;
+  Stream<List<AssetsList>> get currentAccountsStream =>
+      Rx.combineLatest2<List<AssetsList>, Transport, Tuple2<List<AssetsList>, Transport>>(
+        _accountsStorageSource.currentAccountsStream,
+        _transportSource.transportStream,
+        (a, b) => Tuple2(a, b),
+      ).map((e) {
+        final isEver = !e.item2.connectionData.name.contains('Venom');
 
-  List<AssetsList> get currentAccounts => _accountsStorageSource.currentAccounts;
+        return e.item1
+            .where(
+              (e) => isEver
+                  ? kEverAvailableWallets.contains(e.tonWallet.contract)
+                  : kVenomAvailableWallets.contains(e.tonWallet.contract),
+            )
+            .toList();
+      });
+
+  Future<List<AssetsList>> get currentAccounts async {
+    final isEver = !(await _transportSource.transport).connectionData.name.contains('Venom');
+
+    return _accountsStorageSource.currentAccounts
+        .where(
+          (e) => isEver
+              ? kEverAvailableWallets.contains(e.tonWallet.contract)
+              : kVenomAvailableWallets.contains(e.tonWallet.contract),
+        )
+        .toList();
+  }
 
   Future<AssetsList> addAccount({
     required String name,
@@ -127,7 +152,8 @@ class AccountsRepository {
         name: name,
       );
 
-  Future<AssetsList?> removeAccount(String address) => _accountsStorageSource.removeAccount(address);
+  Future<AssetsList?> removeAccount(String address) =>
+      _accountsStorageSource.removeAccount(address);
 
   Future<AssetsList?> removeExternalAccount({
     required String publicKey,
@@ -144,7 +170,8 @@ class AccountsRepository {
 
     if (account == null) return null;
 
-    final isExternal = _hiveSource.externalAccounts.values.expand((e) => e).contains(account.address);
+    final isExternal =
+        _hiveSource.externalAccounts.values.expand((e) => e).contains(account.address);
     final isLocal = _keystoreSource.keys.map((e) => e.publicKey).contains(account.publicKey);
 
     if (!isExternal && !isLocal) {
@@ -211,7 +238,8 @@ class AccountsRepository {
         .pairwise()
         .listen((event) => _lock.synchronized(() => _accountsStreamListener(event)));
 
-    Rx.combineLatest3<KeyStoreEntry?, List<AssetsList>, Map<String, List<String>>, List<AssetsList>>(
+    Rx.combineLatest3<KeyStoreEntry?, List<AssetsList>, Map<String, List<String>>,
+            List<AssetsList>>(
       _keystoreSource.currentKeyStream,
       accountsStream,
       externalAccountsStream,
@@ -221,7 +249,8 @@ class AccountsRepository {
         final externalAddresses = c[a.publicKey] ?? [];
 
         final internalAccounts = b.where((e) => e.publicKey == a.publicKey);
-        final externalAccounts = b.where((e) => e.publicKey != a.publicKey && externalAddresses.contains(e.address));
+        final externalAccounts =
+            b.where((e) => e.publicKey != a.publicKey && externalAddresses.contains(e.address));
 
         final list = [
           ...internalAccounts,
@@ -230,7 +259,9 @@ class AccountsRepository {
 
         return list;
       },
-    ).distinct((a, b) => listEquals(a, b)).listen((event) => _accountsStorageSource.currentAccounts = event);
+    )
+        .distinct((a, b) => listEquals(a, b))
+        .listen((event) => _accountsStorageSource.currentAccounts = event);
   }
 
   Future<void> _keysStreamListener(Iterable<List<KeyStoreEntry>> event) async {
@@ -238,18 +269,22 @@ class AccountsRepository {
       final prev = event.first;
       final next = event.last;
 
-      final addedKeys = [...next]..removeWhere((e) => prev.any((el) => el.publicKey == e.publicKey));
-      final removedKeys = [...prev]..removeWhere((e) => next.any((el) => el.publicKey == e.publicKey));
+      final addedKeys = [...next]
+        ..removeWhere((e) => prev.any((el) => el.publicKey == e.publicKey));
+      final removedKeys = [...prev]
+        ..removeWhere((e) => next.any((el) => el.publicKey == e.publicKey));
 
       for (final key in addedKeys) {
         try {
           final transport = await _transportSource.transport;
 
+          final isEver = !transport.connectionData.name.contains('Venom');
+
           final wallets = await findExistingWallets(
             transport: transport,
             publicKey: key.publicKey,
             workchainId: kDefaultWorkchain,
-            walletTypes: kAvailableWallets,
+            walletTypes: isEver ? kEverAvailableWallets : kVenomAvailableWallets,
           );
 
           final activeWallets = wallets.where((e) => e.isActive);
@@ -295,7 +330,8 @@ class AccountsRepository {
       final prev = event.first;
       final next = event.last;
 
-      final removedAccounts = [...prev]..removeWhere((e) => next.any((el) => el.address == e.address));
+      final removedAccounts = [...prev]
+        ..removeWhere((e) => next.any((el) => el.address == e.address));
 
       for (final account in removedAccounts) {
         final externalAccounts = this

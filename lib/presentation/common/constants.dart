@@ -1,6 +1,6 @@
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-const kDefaultWalletType = WalletType.multisig(multisigType: MultisigType.safeMultisigWallet);
+const kDefaultWalletType = WalletType.walletV3();
 
 const kDefaultMnemonicType = MnemonicType.labs(id: 0);
 
@@ -12,4 +12,8 @@ const kNonBreakingHyphen = '\u2011';
 
 const kEverTicker = 'EVER';
 
+const kVenomTicker = 'VENOM';
+
 const kEverNetworkName = 'Everscale';
+
+const kVenomNetworkName = 'Venom';

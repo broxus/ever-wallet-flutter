@@ -6,6 +6,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/theme.dart';
@@ -52,7 +53,8 @@ class TonWalletMultisigTransactionInfoModalBody extends StatelessWidget {
           final dataRecipient = transactionWithData.data?.maybeWhen(
             walletInteraction: (info) =>
                 info.knownPayload?.maybeWhen(
-                  tokenOutgoingTransfer: (tokenOutgoingTransfer) => tokenOutgoingTransfer.to.address,
+                  tokenOutgoingTransfer: (tokenOutgoingTransfer) =>
+                      tokenOutgoingTransfer.to.address,
                   orElse: () => null,
                 ) ??
                 info.method.maybeWhen(
@@ -103,8 +105,14 @@ class TonWalletMultisigTransactionInfoModalBody extends StatelessWidget {
             orElse: () => null,
           );
 
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
           final dePoolOnRoundComplete = transactionWithData.data?.maybeWhen(
-            dePoolOnRoundComplete: (notification) => notification.toRepresentableData(context),
+            dePoolOnRoundComplete: (notification) => notification.toRepresentableData(
+              context: context,
+              ticker: ticker,
+            ),
             orElse: () => null,
           );
 
@@ -238,8 +246,8 @@ class TonWalletMultisigTransactionInfoModalBody extends StatelessWidget {
               [
                 ...custodians.asMap().entries.map(
                   (e) {
-                    final title =
-                        publicKeysLabels[e.value] ?? AppLocalizations.of(context)!.custodian_n('${e.key + 1}');
+                    final title = publicKeysLabels[e.value] ??
+                        AppLocalizations.of(context)!.custodian_n('${e.key + 1}');
 
                     return custodiansItem(
                       context: context,
@@ -350,7 +358,9 @@ class TonWalletMultisigTransactionInfoModalBody extends StatelessWidget {
     required String address,
   }) =>
       item(
-        title: isOutgoing ? AppLocalizations.of(context)!.recipient : AppLocalizations.of(context)!.sender,
+        title: isOutgoing
+            ? AppLocalizations.of(context)!.recipient
+            : AppLocalizations.of(context)!.sender,
         subtitle: address,
       );
 
@@ -368,18 +378,32 @@ class TonWalletMultisigTransactionInfoModalBody extends StatelessWidget {
     required bool isOutgoing,
     required String value,
   }) =>
-      item(
-        title: AppLocalizations.of(context)!.amount,
-        subtitle: '${isOutgoing ? '-' : ''}$value $kEverTicker',
+      Consumer(
+        builder: (context, ref, child) {
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
+          return item(
+            title: AppLocalizations.of(context)!.amount,
+            subtitle: '${isOutgoing ? '-' : ''}$value $ticker',
+          );
+        },
       );
 
   Widget feeItem({
     required BuildContext context,
     required String fees,
   }) =>
-      item(
-        title: AppLocalizations.of(context)!.blockchain_fee,
-        subtitle: '$fees $kEverTicker',
+      Consumer(
+        builder: (context, ref, child) {
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
+          return item(
+            title: AppLocalizations.of(context)!.blockchain_fee,
+            subtitle: '$fees $ticker',
+          );
+        },
       );
 
   Widget typeItem({
@@ -428,9 +452,17 @@ class TonWalletMultisigTransactionInfoModalBody extends StatelessWidget {
     required BuildContext context,
     required String hash,
   }) =>
-      CustomOutlinedButton(
-        onPressed: () => launchUrlString(transactionExplorerLink(hash)),
-        text: AppLocalizations.of(context)!.see_in_the_explorer,
+      Consumer(
+        builder: (context, ref, child) {
+          final transactionExplorerLink = ref.watch(networkTypeProvider).asData?.value == 'Ever'
+              ? everTransactionExplorerLink
+              : venomTransactionExplorerLink;
+
+          return CustomOutlinedButton(
+            onPressed: () => launchUrlString(transactionExplorerLink(hash)),
+            text: AppLocalizations.of(context)!.see_in_the_explorer,
+          );
+        },
       );
 
   Widget custodianLabel({

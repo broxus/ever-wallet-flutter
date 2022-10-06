@@ -78,7 +78,7 @@ Future<Map<String, dynamic>> sendExternalMessageHandler({
               options: const TransactionExecutionOptions(disableSignatureCheck: false),
             );
       } else {
-        final pendingTransaction = await getIt.get<GenericContractsRepository>().send(
+        final pendingTransaction = await getIt.get<TonWalletsRepository>().send(
               address: repackedRecipient,
               signedMessage: signedMessage,
             );

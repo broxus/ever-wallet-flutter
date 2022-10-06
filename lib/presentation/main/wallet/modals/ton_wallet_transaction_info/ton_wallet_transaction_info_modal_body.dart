@@ -1,9 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/utils.dart';
@@ -21,190 +23,198 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final isOutgoing = transactionWithData.transaction.outMessages.isNotEmpty;
+  Widget build(BuildContext context) => Consumer(
+        builder: (context, ref, child) {
+          final isOutgoing = transactionWithData.transaction.outMessages.isNotEmpty;
 
-    final sender = transactionWithData.transaction.inMessage.src;
+          final sender = transactionWithData.transaction.inMessage.src;
 
-    final recipient = transactionWithData.transaction.outMessages.firstOrNull?.dst;
+          final recipient = transactionWithData.transaction.outMessages.firstOrNull?.dst;
 
-    final value = isOutgoing
-        ? transactionWithData.transaction.outMessages.first.value
-        : transactionWithData.transaction.inMessage.value;
+          final value = isOutgoing
+              ? transactionWithData.transaction.outMessages.first.value
+              : transactionWithData.transaction.inMessage.value;
 
-    final address = isOutgoing ? recipient : sender;
+          final address = isOutgoing ? recipient : sender;
 
-    final date = transactionWithData.transaction.createdAt.toDateTime();
+          final date = transactionWithData.transaction.createdAt.toDateTime();
 
-    final fees = transactionWithData.transaction.totalFees;
+          final fees = transactionWithData.transaction.totalFees;
 
-    final hash = transactionWithData.transaction.id.hash;
+          final hash = transactionWithData.transaction.id.hash;
 
-    final comment = transactionWithData.data?.maybeWhen(
-      comment: (value) => value,
-      orElse: () => null,
-    );
+          final comment = transactionWithData.data?.maybeWhen(
+            comment: (value) => value,
+            orElse: () => null,
+          );
 
-    final dePoolOnRoundComplete = transactionWithData.data?.maybeWhen(
-      dePoolOnRoundComplete: (notification) => notification.toRepresentableData(context),
-      orElse: () => null,
-    );
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
 
-    final dePoolReceiveAnswer = transactionWithData.data?.maybeWhen(
-      dePoolReceiveAnswer: (notification) => notification.toRepresentableData(context),
-      orElse: () => null,
-    );
-
-    final tokenWalletDeployed = transactionWithData.data?.maybeWhen(
-      tokenWalletDeployed: (notification) => notification.toRepresentableData(context),
-      orElse: () => null,
-    );
-
-    final walletInteraction = transactionWithData.data?.maybeWhen(
-      walletInteraction: (info) => info.toRepresentableData(context),
-      orElse: () => null,
-    );
-
-    final sections = [
-      section(
-        [
-          dateItem(
-            context: context,
-            date: date,
-          ),
-          if (address != null) ...[
-            addressItem(
+          final dePoolOnRoundComplete = transactionWithData.data?.maybeWhen(
+            dePoolOnRoundComplete: (notification) => notification.toRepresentableData(
               context: context,
-              isOutgoing: isOutgoing,
-              address: address,
+              ticker: ticker,
             ),
-          ],
-          hashItem(
-            context: context,
-            hash: hash,
-          ),
-        ],
-      ),
-      section(
-        [
-          amountItem(
-            context: context,
-            isOutgoing: isOutgoing,
-            value: value.toTokens().removeZeroes().formatValue(),
-          ),
-          feeItem(
-            context: context,
-            fees: fees.toTokens().removeZeroes().formatValue(),
-          ),
-        ],
-      ),
-      if (comment != null && comment.isNotEmpty)
-        section(
-          [
-            item(
-              title: AppLocalizations.of(context)!.comment,
-              subtitle: comment,
-            ),
-          ],
-        ),
-      if (dePoolOnRoundComplete != null)
-        section(
-          [
-            typeItem(
-              context: context,
-              type: AppLocalizations.of(context)!.de_pool_on_round_complete,
-            ),
-            ...dePoolOnRoundComplete.entries
-                .map(
-                  (e) => item(
-                    title: e.key,
-                    subtitle: e.value,
+            orElse: () => null,
+          );
+
+          final dePoolReceiveAnswer = transactionWithData.data?.maybeWhen(
+            dePoolReceiveAnswer: (notification) => notification.toRepresentableData(context),
+            orElse: () => null,
+          );
+
+          final tokenWalletDeployed = transactionWithData.data?.maybeWhen(
+            tokenWalletDeployed: (notification) => notification.toRepresentableData(context),
+            orElse: () => null,
+          );
+
+          final walletInteraction = transactionWithData.data?.maybeWhen(
+            walletInteraction: (info) => info.toRepresentableData(context),
+            orElse: () => null,
+          );
+
+          final sections = [
+            section(
+              [
+                dateItem(
+                  context: context,
+                  date: date,
+                ),
+                if (address != null) ...[
+                  addressItem(
+                    context: context,
+                    isOutgoing: isOutgoing,
+                    address: address,
                   ),
-                )
-                .toList(),
-          ],
-        ),
-      if (dePoolReceiveAnswer != null)
-        section(
-          [
-            typeItem(
-              context: context,
-              type: AppLocalizations.of(context)!.de_pool_receive_answer,
+                ],
+                hashItem(
+                  context: context,
+                  hash: hash,
+                ),
+              ],
             ),
-            ...dePoolReceiveAnswer.entries
-                .map(
-                  (e) => item(
-                    title: e.key,
-                    subtitle: e.value,
-                  ),
-                )
-                .toList(),
-          ],
-        ),
-      if (tokenWalletDeployed != null)
-        section(
-          [
-            typeItem(
-              context: context,
-              type: AppLocalizations.of(context)!.token_wallet_deployed,
+            section(
+              [
+                amountItem(
+                  context: context,
+                  isOutgoing: isOutgoing,
+                  value: value.toTokens().removeZeroes().formatValue(),
+                ),
+                feeItem(
+                  context: context,
+                  fees: fees.toTokens().removeZeroes().formatValue(),
+                ),
+              ],
             ),
-            ...tokenWalletDeployed.entries
-                .map(
-                  (e) => item(
-                    title: e.key,
-                    subtitle: e.value,
+            if (comment != null && comment.isNotEmpty)
+              section(
+                [
+                  item(
+                    title: AppLocalizations.of(context)!.comment,
+                    subtitle: comment,
                   ),
-                )
-                .toList(),
-          ],
-        ),
-      if (walletInteraction != null)
-        section(
-          [
-            typeItem(
-              context: context,
-              type: AppLocalizations.of(context)!.wallet_interaction,
-            ),
-            ...walletInteraction.entries
-                .map(
-                  (e) => item(
-                    title: e.key,
-                    subtitle: e.value,
-                  ),
-                )
-                .toList(),
-          ],
-        ),
-    ];
-
-    return Material(
-      color: Colors.white,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              ModalHeader(
-                text: AppLocalizations.of(context)!.transaction_information,
+                ],
               ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  child: list(sections),
+            if (dePoolOnRoundComplete != null)
+              section(
+                [
+                  typeItem(
+                    context: context,
+                    type: AppLocalizations.of(context)!.de_pool_on_round_complete,
+                  ),
+                  ...dePoolOnRoundComplete.entries
+                      .map(
+                        (e) => item(
+                          title: e.key,
+                          subtitle: e.value,
+                        ),
+                      )
+                      .toList(),
+                ],
+              ),
+            if (dePoolReceiveAnswer != null)
+              section(
+                [
+                  typeItem(
+                    context: context,
+                    type: AppLocalizations.of(context)!.de_pool_receive_answer,
+                  ),
+                  ...dePoolReceiveAnswer.entries
+                      .map(
+                        (e) => item(
+                          title: e.key,
+                          subtitle: e.value,
+                        ),
+                      )
+                      .toList(),
+                ],
+              ),
+            if (tokenWalletDeployed != null)
+              section(
+                [
+                  typeItem(
+                    context: context,
+                    type: AppLocalizations.of(context)!.token_wallet_deployed,
+                  ),
+                  ...tokenWalletDeployed.entries
+                      .map(
+                        (e) => item(
+                          title: e.key,
+                          subtitle: e.value,
+                        ),
+                      )
+                      .toList(),
+                ],
+              ),
+            if (walletInteraction != null)
+              section(
+                [
+                  typeItem(
+                    context: context,
+                    type: AppLocalizations.of(context)!.wallet_interaction,
+                  ),
+                  ...walletInteraction.entries
+                      .map(
+                        (e) => item(
+                          title: e.key,
+                          subtitle: e.value,
+                        ),
+                      )
+                      .toList(),
+                ],
+              ),
+          ];
+
+          return Material(
+            color: Colors.white,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    ModalHeader(
+                      text: AppLocalizations.of(context)!.transaction_information,
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: list(sections),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    explorerButton(
+                      context: context,
+                      hash: hash,
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              explorerButton(
-                context: context,
-                hash: hash,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+            ),
+          );
+        },
+      );
 
   Widget list(List<Widget> list) => ListView.separated(
         shrinkWrap: true,
@@ -263,7 +273,9 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
     required String address,
   }) =>
       item(
-        title: isOutgoing ? AppLocalizations.of(context)!.recipient : AppLocalizations.of(context)!.sender,
+        title: isOutgoing
+            ? AppLocalizations.of(context)!.recipient
+            : AppLocalizations.of(context)!.sender,
         subtitle: address,
       );
 
@@ -281,18 +293,32 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
     required bool isOutgoing,
     required String value,
   }) =>
-      item(
-        title: AppLocalizations.of(context)!.amount,
-        subtitle: '${isOutgoing ? '-' : ''}$value $kEverTicker',
+      Consumer(
+        builder: (context, ref, child) {
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
+          return item(
+            title: AppLocalizations.of(context)!.amount,
+            subtitle: '${isOutgoing ? '-' : ''}$value $ticker',
+          );
+        },
       );
 
   Widget feeItem({
     required BuildContext context,
     required String fees,
   }) =>
-      item(
-        title: AppLocalizations.of(context)!.blockchain_fee,
-        subtitle: '$fees $kEverTicker',
+      Consumer(
+        builder: (context, ref, child) {
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
+          return item(
+            title: AppLocalizations.of(context)!.blockchain_fee,
+            subtitle: '$fees $ticker',
+          );
+        },
       );
 
   Widget typeItem({
@@ -308,8 +334,16 @@ class TonWalletTransactionInfoModalBody extends StatelessWidget {
     required BuildContext context,
     required String hash,
   }) =>
-      CustomOutlinedButton(
-        onPressed: () => launchUrlString(transactionExplorerLink(hash)),
-        text: AppLocalizations.of(context)!.see_in_the_explorer,
+      Consumer(
+        builder: (context, ref, child) {
+          final transactionExplorerLink = ref.watch(networkTypeProvider).asData?.value == 'Ever'
+              ? everTransactionExplorerLink
+              : venomTransactionExplorerLink;
+
+          return CustomOutlinedButton(
+            onPressed: () => launchUrlString(transactionExplorerLink(hash)),
+            text: AppLocalizations.of(context)!.see_in_the_explorer,
+          );
+        },
       );
 }

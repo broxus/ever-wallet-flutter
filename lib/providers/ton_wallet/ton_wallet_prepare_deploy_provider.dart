@@ -8,21 +8,14 @@ import 'package:tuple/tuple.dart';
 import '../../../injection.dart';
 import '../../data/repositories/ton_wallets_repository.dart';
 
-final tonWalletPrepareDeployProvider =
-    StateNotifierProvider.autoDispose<TonWalletPrepareDeployNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
+final tonWalletPrepareDeployProvider = StateNotifierProvider.autoDispose<
+    TonWalletPrepareDeployNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
   (ref) => TonWalletPrepareDeployNotifier(),
 );
 
-class TonWalletPrepareDeployNotifier extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
-  UnsignedMessage? _unsignedMessage;
-
+class TonWalletPrepareDeployNotifier
+    extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
   TonWalletPrepareDeployNotifier() : super(const AsyncValue.loading());
-
-  @override
-  void dispose() {
-    _unsignedMessage?.freePtr();
-    super.dispose();
-  }
 
   Future<void> prepareDeploy({
     required String address,
@@ -32,8 +25,6 @@ class TonWalletPrepareDeployNotifier extends StateNotifier<AsyncValue<Tuple2<Uns
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      _unsignedMessage?.freePtr();
-
       late final UnsignedMessage unsignedMessage;
 
       if (custodians != null && reqConfirms != null) {
@@ -45,8 +36,6 @@ class TonWalletPrepareDeployNotifier extends StateNotifier<AsyncValue<Tuple2<Uns
       } else {
         unsignedMessage = await getIt.get<TonWalletsRepository>().prepareDeploy(address);
       }
-
-      _unsignedMessage = unsignedMessage;
 
       await unsignedMessage.refreshTimeout();
 
@@ -60,7 +49,10 @@ class TonWalletPrepareDeployNotifier extends StateNotifier<AsyncValue<Tuple2<Uns
           );
       final feesValue = int.parse(fees);
 
-      final balance = await getIt.get<TonWalletsRepository>().getInfo(address).then((v) => v.contractState.balance);
+      final balance = await getIt
+          .get<TonWalletsRepository>()
+          .getInfo(address)
+          .then((v) => v.contractState.balance);
       final balanceValue = int.parse(balance);
 
       final isPossibleToSendMessage = balanceValue > feesValue;

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:jovial_svg/jovial_svg.dart';
 
 import '../../application.dart';
 import '../../bloc/locale_cubit.dart';
@@ -43,7 +44,12 @@ class _LanguageModalBodyState extends State<LanguageModalBody> {
         },
         trailing: SizedBox.square(
           dimension: 48,
-          child: SvgPicture.asset('icons/flags/svg/${list[locale.languageCode]!.icon}.svg', package: 'country_icons'),
+          child: ScalableImageWidget.fromSISource(
+            si: ScalableImageSource.fromSvg(
+              rootBundle,
+              'packages/country_icons/icons/flags/svg/${list[locale.languageCode]!.icon}.svg',
+            ),
+          ),
         ),
       );
 }

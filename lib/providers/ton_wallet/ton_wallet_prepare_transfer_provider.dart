@@ -8,21 +8,14 @@ import 'package:tuple/tuple.dart';
 import '../../../injection.dart';
 import '../../data/repositories/ton_wallets_repository.dart';
 
-final tonWalletPrepareTransferProvider =
-    StateNotifierProvider.autoDispose<TonWalletPrepareTransferNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
+final tonWalletPrepareTransferProvider = StateNotifierProvider.autoDispose<
+    TonWalletPrepareTransferNotifier, AsyncValue<Tuple2<UnsignedMessage, String>>>(
   (ref) => TonWalletPrepareTransferNotifier(),
 );
 
-class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
-  UnsignedMessage? _unsignedMessage;
-
+class TonWalletPrepareTransferNotifier
+    extends StateNotifier<AsyncValue<Tuple2<UnsignedMessage, String>>> {
   TonWalletPrepareTransferNotifier() : super(const AsyncValue.loading());
-
-  @override
-  void dispose() {
-    _unsignedMessage?.freePtr();
-    super.dispose();
-  }
 
   Future<void> prepareTransfer({
     required String address,
@@ -34,8 +27,6 @@ class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<U
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      _unsignedMessage?.freePtr();
-
       final repackedDestination = repackAddress(destination);
 
       final amountValue = int.parse(amount);
@@ -47,8 +38,6 @@ class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<U
             amount: amount,
             body: body,
           );
-
-      _unsignedMessage = unsignedMessage;
 
       await unsignedMessage.refreshTimeout();
 
@@ -62,7 +51,10 @@ class TonWalletPrepareTransferNotifier extends StateNotifier<AsyncValue<Tuple2<U
           );
       final feesValue = int.parse(fees);
 
-      final balance = await getIt.get<TonWalletsRepository>().getInfo(address).then((v) => v.contractState.balance);
+      final balance = await getIt
+          .get<TonWalletsRepository>()
+          .getInfo(address)
+          .then((v) => v.contractState.balance);
       final balanceValue = int.parse(balance);
 
       final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);

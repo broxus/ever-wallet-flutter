@@ -25,6 +25,10 @@ Map<int, String> generateCheckingMap(List<String> phrase) {
 
 String decentralizationPolicyLink() => 'https://l1.broxus.com/everscale/wallet/terms';
 
-String accountExplorerLink(String address) => 'https://everscan.io/accounts/$address';
+String everAccountExplorerLink(String address) => 'https://everscan.io/accounts/$address';
 
-String transactionExplorerLink(String id) => 'https://everscan.io/transactions/$id';
+String everTransactionExplorerLink(String id) => 'https://everscan.io/transactions/$id';
+
+String venomAccountExplorerLink(String address) => 'https://venomscan.com/accounts/$address';
+
+String venomTransactionExplorerLink(String id) => 'https://venomscan.com/transactions/$id';

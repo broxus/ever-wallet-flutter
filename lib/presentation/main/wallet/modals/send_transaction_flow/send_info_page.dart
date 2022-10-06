@@ -10,6 +10,7 @@ import '../../../../../../providers/biometry/biometry_availability_provider.dart
 import '../../../../../../providers/biometry/biometry_status_provider.dart';
 import '../../../../../../providers/ton_wallet/ton_wallet_prepare_transfer_provider.dart';
 import '../../../../../data/extensions.dart';
+import '../../../../../providers/common/network_type_provider.dart';
 import '../../../../common/constants.dart';
 import '../../../../common/extensions.dart';
 import '../../../../common/widgets/custom_back_button.dart';
@@ -115,17 +116,27 @@ class _NewSelectWalletTypePageState extends ConsumerState<SendInfoPage> {
         isSelectable: true,
       );
 
-  Widget amount() => SectionedCardSection(
-        title: AppLocalizations.of(context)!.amount,
-        subtitle: '${widget.amount.toTokens().removeZeroes()} $kEverTicker',
+  Widget amount() => Consumer(
+        builder: (context, ref, child) {
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
+          return SectionedCardSection(
+            title: AppLocalizations.of(context)!.amount,
+            subtitle: '${widget.amount.toTokens().removeZeroes()} $ticker',
+          );
+        },
       );
 
   Widget fee() => Consumer(
         builder: (context, ref, child) {
           final result = ref.watch(tonWalletPrepareTransferProvider);
 
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} $kEverTicker',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} $ticker',
             error: (err, st) => (err as Exception).toUiMessage(),
             loading: () => null,
           );

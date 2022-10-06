@@ -54,8 +54,9 @@ extension WalletInteractionMethodX on WalletInteractionMethod {
               AppLocalizations.of(context)!.destination: multisigSendTransaction.dest,
               AppLocalizations.of(context)!.value:
                   '${multisigSendTransaction.value.toTokens().removeZeroes().formatValue()} $kEverTicker',
-              AppLocalizations.of(context)!.bounce:
-                  multisigSendTransaction.bounce ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no,
+              AppLocalizations.of(context)!.bounce: multisigSendTransaction.bounce
+                  ? AppLocalizations.of(context)!.yes
+                  : AppLocalizations.of(context)!.no,
               AppLocalizations.of(context)!.flags: multisigSendTransaction.flags.toString(),
               AppLocalizations.of(context)!.payload: multisigSendTransaction.payload,
             },
@@ -81,7 +82,8 @@ extension WalletInteractionMethodX on WalletInteractionMethod {
             AppLocalizations.of(context)!.multisig_confirm_transaction,
             {
               AppLocalizations.of(context)!.custodian: multisigConfirmTransaction.custodian,
-              AppLocalizations.of(context)!.transaction_id: multisigConfirmTransaction.transactionId,
+              AppLocalizations.of(context)!.transaction_id:
+                  multisigConfirmTransaction.transactionId,
             },
           ),
         ),
@@ -119,14 +121,20 @@ extension DePoolReceiveAnswerNotificationX on DePoolReceiveAnswerNotification {
 }
 
 extension DePoolOnRoundCompleteNotificationX on DePoolOnRoundCompleteNotification {
-  Map<String, String> toRepresentableData(BuildContext context) => {
+  Map<String, String> toRepresentableData({
+    required BuildContext context,
+    required String ticker,
+  }) =>
+      {
         AppLocalizations.of(context)!.round_id: roundId,
-        AppLocalizations.of(context)!.reward: '${reward.toTokens().removeZeroes().formatValue()} $kEverTicker',
+        AppLocalizations.of(context)!.reward:
+            '${reward.toTokens().removeZeroes().formatValue()} $kEverTicker',
         AppLocalizations.of(context)!.ordinary_stake:
             '${ordinaryStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
         AppLocalizations.of(context)!.vesting_stake:
             '${vestingStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
-        AppLocalizations.of(context)!.lock_stake: '${lockStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
+        AppLocalizations.of(context)!.lock_stake:
+            '${lockStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
         AppLocalizations.of(context)!.reinvest:
             reinvest ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no,
         AppLocalizations.of(context)!.reason: reason.toString(),

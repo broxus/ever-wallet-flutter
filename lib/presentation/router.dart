@@ -14,6 +14,7 @@ import 'main/profile/profile_page.dart';
 import 'main/profile/seed_phrase_export_page.dart';
 import 'main/wallet/wallet_page.dart';
 import 'wizard/decentralization_policy_page.dart';
+import 'wizard/network_selection_page.dart';
 import 'wizard/welcome_page.dart';
 
 @AdaptiveAutoRouter(
@@ -24,7 +25,8 @@ import 'wizard/welcome_page.dart';
       name: 'WizardRouterRoute',
       page: EmptyRouterPage,
       children: [
-        AdaptiveRoute(page: WelcomePage, initial: true),
+        AdaptiveRoute(page: NetworkSelectionPage, initial: true),
+        AdaptiveRoute(page: WelcomePage),
         AdaptiveRoute(page: DecentralizationPolicyPage),
         AdaptiveRoute(page: SeedPhraseTypePage),
         AdaptiveRoute(page: SeedNamePage),

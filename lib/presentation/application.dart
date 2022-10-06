@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/repositories/biometry_repository.dart';
 import '../injection.dart';
+import '../providers/common/network_type_provider.dart';
 import '../providers/key/keys_presence_provider.dart';
 import 'bloc/locale_cubit.dart';
 import 'common/theme.dart';
@@ -48,6 +49,8 @@ class _ApplicationState extends State<Application> with WidgetsBindingObserver {
               color: CrystalColor.background,
               child: Consumer(
                 builder: (context, ref, child) {
+                  ref.watch(networkTypeProvider);
+
                   ref.listen<AsyncValue<bool>>(
                     keysPresenceProvider,
                     (previous, next) {

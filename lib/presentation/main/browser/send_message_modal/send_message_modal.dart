@@ -8,6 +8,7 @@ import 'package:tuple/tuple.dart';
 
 import '../../../../../../providers/key/public_keys_labels_provider.dart';
 import '../../../../data/extensions.dart';
+import '../../../../providers/common/network_type_provider.dart';
 import '../../../../providers/ton_wallet/ton_wallet_prepare_transfer_provider.dart';
 import '../../../common/constants.dart';
 import '../../../common/extensions.dart';
@@ -122,7 +123,9 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
               );
 
           return CustomDropdownButton<String>(
-            items: widget.publicKeys.map((e) => Tuple2(e, publicKeysLabels[e] ?? e.ellipsePublicKey())).toList(),
+            items: widget.publicKeys
+                .map((e) => Tuple2(e, publicKeysLabels[e] ?? e.ellipsePublicKey()))
+                .toList(),
             value: selectedPublicKey,
             onChanged: (value) => ref.read(selectedPublicKeyProvider.notifier).state = value,
           );
@@ -166,18 +169,28 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
         isSelectable: true,
       );
 
-  Widget amount() => SectionedCardSection(
-        title: AppLocalizations.of(context)!.amount,
-        subtitle: '${widget.amount.toTokens().removeZeroes()} $kEverTicker',
-        isSelectable: true,
+  Widget amount() => Consumer(
+        builder: (context, ref, child) {
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
+          return SectionedCardSection(
+            title: AppLocalizations.of(context)!.amount,
+            subtitle: '${widget.amount.toTokens().removeZeroes()} $ticker',
+            isSelectable: true,
+          );
+        },
       );
 
   Widget fee() => Consumer(
         builder: (context, ref, child) {
           final result = ref.watch(tonWalletPrepareTransferProvider);
 
+          final ticker =
+              ref.watch(networkTypeProvider).asData?.value == 'Ever' ? kEverTicker : kVenomTicker;
+
           final subtitle = result.when(
-            data: (data) => '${data.item2.toTokens().removeZeroes()} $kEverTicker',
+            data: (data) => '${data.item2.toTokens().removeZeroes()} $ticker',
             error: (err, st) => (err as Exception).toUiMessage(),
             loading: () => null,
           );
@@ -197,7 +210,8 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
 
   Widget bounce() => SectionedCardSection(
         title: AppLocalizations.of(context)!.bounce,
-        subtitle: widget.bounce ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no,
+        subtitle:
+            widget.bounce ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no,
         isSelectable: true,
       );
 
@@ -274,7 +288,8 @@ class _SendMessageModalState extends ConsumerState<SendMessagePage> {
           builder: (context) => PasswordEnterPage(
             modalContext: widget.modalContext,
             publicKey: selectedPublicKey,
-            onSubmit: (password) => Navigator.of(widget.modalContext).pop(Tuple2(selectedPublicKey, password)),
+            onSubmit: (password) =>
+                Navigator.of(widget.modalContext).pop(Tuple2(selectedPublicKey, password)),
           ),
         ),
       );
