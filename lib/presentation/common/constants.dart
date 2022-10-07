@@ -1,6 +1,6 @@
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-const kDefaultWalletType = WalletType.walletV3();
+const kDefaultWalletType = WalletType.everWallet();
 
 const kDefaultMnemonicType = MnemonicType.labs(id: 0);
 
