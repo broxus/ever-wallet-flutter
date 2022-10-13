@@ -22,8 +22,8 @@ class CheckSeedAvailableAnswersWidget extends StatelessWidget {
     required this.pressColor,
     this.borderColor = ColorsRes.grey,
     this.textColor = ColorsRes.white,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -4,6 +4,7 @@ import 'package:ever_wallet/application/main/browser/extensions.dart';
 import 'package:ever_wallet/application/main/browser/requests/models/send_message_input.dart';
 import 'package:ever_wallet/application/main/browser/requests/models/send_message_output.dart';
 import 'package:ever_wallet/data/constants.dart';
+import 'package:ever_wallet/data/models/signed_message_with_additional_info.dart';
 import 'package:ever_wallet/data/repositories/approvals_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/permissions_repository.dart';
@@ -65,20 +66,17 @@ Future<Map<String, dynamic>> sendMessageHandler({
     final publicKey = tuple.item1;
     final password = tuple.item2;
 
-    final tonWallet = await tonWalletsRepository.getTonWallet(input.sender);
-
-    final unsignedMessage = await tonWallet.prepareTransfer(
-      publicKey: publicKey,
+    final unsignedMessage = await tonWalletsRepository.prepareTransfer(
+      address: input.sender,
       destination: repackedRecipient,
       amount: input.amount,
       body: body,
       bounce: kMessageBounce,
-      expiration: kDefaultMessageExpiration,
     );
 
-    await unsignedMessage.refreshTimeout();
+    await unsignedMessage.message.refreshTimeout();
 
-    final hash = await unsignedMessage.hash;
+    final hash = unsignedMessage.message.hash;
 
     final signature = await keysRepository.sign(
       data: hash,
@@ -86,15 +84,18 @@ Future<Map<String, dynamic>> sendMessageHandler({
       password: password,
     );
 
-    final signedMessage = await unsignedMessage.sign(signature);
+    final signedMessage = await unsignedMessage.message.sign(signature);
 
-    final transaction = await tonWallet.send(signedMessage);
-
-    if (transaction == null) throw Exception('Unable to parse transaction');
-
-    final output = SendMessageOutput(
-      transaction: transaction,
+    final transaction = await tonWalletsRepository.send(
+      address: input.sender,
+      signedMessageWithAdditionalInfo: SignedMessageWithAdditionalInfo(
+        message: signedMessage,
+        amount: unsignedMessage.amount,
+        dst: unsignedMessage.dst,
+      ),
     );
+
+    final output = SendMessageOutput(transaction: transaction);
 
     final jsonOutput = output.toJson();
 

@@ -15,8 +15,8 @@ class BrowserTabsScreen extends StatefulWidget {
 
   const BrowserTabsScreen({
     required this.tabsCubit,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<BrowserTabsScreen> createState() => _BrowserTabsScreenState();

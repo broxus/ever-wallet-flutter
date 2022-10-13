@@ -54,6 +54,31 @@ class KeysRepository {
 
   String? get currentKey => _hiveSource.currentKey;
 
+  Stream<KeyStoreEntry?> get currentKeyEntryStream =>
+      keysStream.map((keys) => keys.firstWhereOrNull((k) => k.publicKey == currentKey));
+
+  Stream<Map<KeyStoreEntry, List<KeyStoreEntry>?>> get mappedKeysStream => keysStream.map((e) {
+        final map = <KeyStoreEntry, List<KeyStoreEntry>?>{};
+
+        for (final key in e) {
+          if (key.publicKey == key.masterKey) {
+            if (!map.containsKey(key)) map[key] = null;
+          } else {
+            final parentKey = e.firstWhereOrNull((e) => e.publicKey == key.masterKey);
+
+            if (parentKey != null) {
+              if (map[parentKey] != null) {
+                map[parentKey]!.addAll([key]);
+              } else {
+                map[parentKey] = [key];
+              }
+            }
+          }
+        }
+
+        return map;
+      });
+
   Future<void> setCurrentKey(String? publicKey) => _hiveSource.setCurrentKey(publicKey);
 
   Stream<Map<String, String>> get labelsStream =>

@@ -15,8 +15,8 @@ class BrowserSearchField extends StatelessWidget {
     required this.hintText,
     required this.suffixIcon,
     this.onSubmitted,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

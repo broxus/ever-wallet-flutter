@@ -12,6 +12,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 Future<Map<String, dynamic>> disconnectHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
+  required int tabId,
   required PermissionsRepository permissionsRepository,
   required GenericContractsRepository genericContractsRepository,
 }) async {
@@ -21,7 +22,7 @@ Future<Map<String, dynamic>> disconnectHandler({
     final origin = await controller.getOrigin();
 
     await permissionsRepository.deletePermissionsForOrigin(origin);
-    genericContractsRepository.clear();
+    await genericContractsRepository.unsubscribeTab(tabId);
 
     const event = PermissionsChangedEvent(permissions: Permissions());
 

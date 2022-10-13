@@ -39,8 +39,8 @@ class BrowserAppBar extends StatefulWidget {
     required this.urlFocusNode,
     required this.tabsCubit,
     required this.urlCubit,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<BrowserAppBar> createState() => _BrowserAppBarState();
@@ -203,7 +203,6 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
       onPressed: () {
         showEWBottomSheet<void>(
           context,
-          expand: false,
           needCloseButton: false,
           body: _menuBody,
         );

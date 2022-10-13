@@ -34,8 +34,8 @@ class SeedDetailScreen extends StatefulWidget {
     required this.seed,
     required this.children,
     required this.isSelected,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final KeyStoreEntry seed;
   final List<KeyStoreEntry>? children;
@@ -127,6 +127,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     AppLocalizations localization,
     KeyStoreEntry seed,
   ) {
+    // ignore: use_decorated_box
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: ColorsRes.darkBlue.withOpacity(0.2)),

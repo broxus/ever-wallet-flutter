@@ -7,6 +7,7 @@ import 'package:ever_wallet/application/onboarding/widgets/onboarding_background
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
+import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/generated/fonts.gen.dart';
@@ -112,7 +113,7 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
                                 Stack(
                               children: [
                                 // 0 size to avoid scroll into nowhere
-                                SizedBox(height: 0, width: 0, child: bottomChild),
+                                SizedBox.shrink(child: bottomChild),
                                 topChild
                               ],
                             ),
@@ -134,6 +135,7 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
                         name: type.name,
                         publicKey: widget.publicKey,
                         walletType: type,
+                        workchain: kDefaultWorkchain,
                       );
 
                   if (!mounted) return;
@@ -254,7 +256,7 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
     return StreamProvider<AsyncValue<Tuple2<List<WalletType>, List<WalletType>>>>(
       create: (context) => context
           .read<AccountsRepository>()
-          .accountCreationOptions(widget.publicKey)
+          .accountCreationOptionsStream(widget.publicKey)
           .map((event) => AsyncValue.ready(event)),
       initialData: const AsyncValue.loading(),
       catchError: (context, error) => AsyncValue.error(error),

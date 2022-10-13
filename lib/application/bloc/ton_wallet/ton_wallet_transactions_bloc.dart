@@ -5,7 +5,6 @@ import 'package:ever_wallet/application/bloc/utils.dart';
 import 'package:ever_wallet/data/models/ton_wallet_ordinary_transaction.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 part 'ton_wallet_transactions_bloc.freezed.dart';
 

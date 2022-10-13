@@ -6,7 +6,6 @@ import 'package:ever_wallet/application/main/browser/requests/models/estimate_fe
 import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/repositories/permissions_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
-import 'package:ever_wallet/data/utils.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -47,28 +46,20 @@ Future<Map<String, dynamic>> estimateFeesHandler({
       );
     }
 
-    final tonWallet = await tonWalletsRepository.getTonWallet(input.sender);
-
-    final unsignedMessage = await tonWallet.prepareTransfer(
-      publicKey: tonWallet.publicKey,
+    final unsignedMessage = await tonWalletsRepository.prepareTransfer(
       destination: repackedRecipient,
       amount: input.amount,
       body: body,
       bounce: kMessageBounce,
-      expiration: kDefaultMessageExpiration,
+      address: input.sender,
     );
 
-    final signature = fakeSignature();
-
-    await unsignedMessage.refreshTimeout();
-
-    final signedMessage = await unsignedMessage.sign(signature);
-
-    final fees = await tonWallet.estimateFees(signedMessage);
-
-    final output = EstimateFeesOutput(
-      fees: fees,
+    final fees = await tonWalletsRepository.estimateFees(
+      address: input.sender,
+      unsignedMessageWithAdditionalInfo: unsignedMessage,
     );
+
+    final output = EstimateFeesOutput(fees: fees);
 
     final jsonOutput = output.toJson();
 

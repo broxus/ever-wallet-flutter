@@ -5,7 +5,7 @@ import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 
 class OnboardingSplashScreen extends StatelessWidget {
-  const OnboardingSplashScreen({Key? key, this.error}) : super(key: key);
+  const OnboardingSplashScreen({super.key, this.error});
 
   final String? error;
 

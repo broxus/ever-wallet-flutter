@@ -26,8 +26,8 @@ class CheckSeedAnswersWidget extends StatelessWidget {
     required this.currentBorderColor,
     required this.selectedTextColor,
     required this.notSelectedTextColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

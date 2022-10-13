@@ -34,9 +34,7 @@ Future<Map<String, dynamic>> getExpectedAddressHandler({
       initData: input.initParams,
     );
 
-    final output = GetExpectedAddressOutput(
-      address: address,
-    );
+    final output = GetExpectedAddressOutput(address: address.item1);
 
     final jsonOutput = output.toJson();
 

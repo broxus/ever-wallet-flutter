@@ -30,8 +30,8 @@ class BrowserHistoryRoute extends MaterialPageRoute<void> {
 class BrowserHistoryScreen extends StatefulWidget {
   const BrowserHistoryScreen({
     required this.urlCubit,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final UrlCubit urlCubit;
 

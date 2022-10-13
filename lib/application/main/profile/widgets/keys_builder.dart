@@ -32,7 +32,7 @@ class KeysBuilderWidget extends StatelessWidget {
                 );
 
         return AsyncValueStreamProvider<KeyStoreEntry?>(
-          create: (context) => context.read<KeysRepository>().currentKeyStream,
+          create: (context) => context.read<KeysRepository>().currentKeyEntryStream,
           builder: (context, child) {
             final currentKey = context.watch<AsyncValue<KeyStoreEntry?>>().maybeWhen(
                   ready: (value) => value,

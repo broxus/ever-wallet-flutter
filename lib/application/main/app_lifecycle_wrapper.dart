@@ -8,8 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class AppLifecycleWrapper extends StatefulWidget {
   const AppLifecycleWrapper({
     required this.child,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   final Widget child;
 
   @override

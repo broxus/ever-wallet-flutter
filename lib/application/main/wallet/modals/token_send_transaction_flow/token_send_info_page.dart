@@ -18,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 class TokenSendInfoPage extends StatefulWidget {
   final BuildContext modalContext;
@@ -125,13 +126,13 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
         isSelectable: true,
       );
 
-  Widget amount() => AsyncValueStreamProvider<TokenWalletInfo?>(
-        create: (context) => context.read<TokenWalletsRepository>().getInfoStream(
+  Widget amount() => AsyncValueStreamProvider<TokenWallet?>(
+        create: (context) => context.read<TokenWalletsRepository>().tokenWalletStream(
               owner: widget.owner,
               rootTokenContract: widget.rootTokenContract,
             ),
         builder: (context, child) {
-          final tokenWalletInfo = context.watch<AsyncValue<TokenWalletInfo?>>().maybeWhen(
+          final tokenWalletInfo = context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => null,
               );

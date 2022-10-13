@@ -139,15 +139,15 @@ class WalletCard extends StatelessWidget {
               },
             ),
             const Gap(8),
-            StreamProvider<AsyncValue<TonWalletInfo?>>(
+            StreamProvider<AsyncValue<TonWallet?>>(
               create: (context) => context
                   .read<TonWalletsRepository>()
-                  .getInfoStream(address)
+                  .getTonWalletStream(address)
                   .map((event) => AsyncValue.ready(event)),
               initialData: const AsyncValue.loading(),
               catchError: (context, error) => AsyncValue.error(error),
               builder: (context, child) {
-                final tonWalletInfo = context.watch<AsyncValue<TonWalletInfo?>>().maybeWhen(
+                final tonWalletInfo = context.watch<AsyncValue<TonWallet?>>().maybeWhen(
                       ready: (value) => value,
                       orElse: () => null,
                     );

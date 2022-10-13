@@ -15,6 +15,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 Future<Map<String, dynamic>> getProviderStateHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
+  required int tabId,
   required PermissionsRepository permissionsRepository,
   required TransportRepository transportRepository,
   required GenericContractsRepository genericContractsRepository,
@@ -31,7 +32,7 @@ Future<Map<String, dynamic>> getProviderStateHandler({
     final selectedConnection = transport.group;
     const supportedPermissions = Permission.values;
     final permissions = permissionsRepository.permissions[origin] ?? const Permissions();
-    final subscriptions = genericContractsRepository.subscriptions;
+    final subscriptions = genericContractsRepository.tabSubscriptions(tabId);
 
     final output = GetProviderStateOutput(
       version: version,
@@ -39,7 +40,7 @@ Future<Map<String, dynamic>> getProviderStateHandler({
       selectedConnection: selectedConnection,
       supportedPermissions: supportedPermissions,
       permissions: permissions,
-      subscriptions: subscriptions,
+      subscriptions: subscriptions ?? {},
     );
 
     final jsonOutput = output.toJson();

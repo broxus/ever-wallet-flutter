@@ -9,9 +9,8 @@ class LongTapFocusableWidget extends StatefulWidget {
     required this.onTap,
     this.longTapEnabled = true,
     this.backgroundColor,
-    Key? key,
-  })  : assert(longTapEnabled && menuBuilder != null || !longTapEnabled),
-        super(key: key);
+    super.key,
+  })  : assert(longTapEnabled && menuBuilder != null || !longTapEnabled);
 
   final Widget child;
   final WidgetBuilder? menuBuilder;
@@ -98,8 +97,7 @@ class _FocusableScreen extends StatelessWidget {
     required this.targetRect,
     required this.menuBuilder,
     required this.position,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final Rect targetRect;
   final WidgetBuilder menuBuilder;

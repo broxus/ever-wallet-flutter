@@ -360,6 +360,12 @@ class TokenWalletsRepository {
       _tokenWalletsSubject.value[Tuple2(owner, rootTokenContract)]!.future
           .then((v) => v.tokenWallet);
 
+  Stream<TokenWallet> tokenWalletStream({
+    required String owner,
+    required String rootTokenContract,
+  }) =>
+      _tokenWallet(owner: owner, rootTokenContract: rootTokenContract).asStream();
+
   List<TokenWalletOrdinaryTransaction> _mapOrdinaryTransactions({
     required TokenWallet tokenWallet,
     required List<TransactionWithData<TokenWalletTransaction?>> transactions,

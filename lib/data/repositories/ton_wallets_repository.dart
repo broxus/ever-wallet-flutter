@@ -303,9 +303,9 @@ class TonWalletsRepository {
 
   Future<UnsignedMessageWithAdditionalInfo> prepareTransfer({
     required String address,
-    required String publicKey,
     required String destination,
     required String amount,
+    String? publicKey,
     String? body,
     required bool bounce,
   }) async {
@@ -315,7 +315,7 @@ class TonWalletsRepository {
 
     final unsignedMessage = await tonWallet.prepareTransfer(
       contractState: contractState,
-      publicKey: publicKey,
+      publicKey: publicKey ?? tonWallet.publicKey,
       destination: destination,
       amount: amount,
       bounce: bounce,
@@ -666,6 +666,10 @@ class TonWalletsRepository {
 
   Future<TonWallet> _tonWallet(String address) =>
       _tonWalletsSubject.value[address]!.future.then((v) => v.tonWallet);
+
+  Future<TonWallet> getTonWallet(String address) => _tonWallet(address);
+
+  Stream<TonWallet> getTonWalletStream(String address) => _tonWallet(address).asStream();
 
   List<TonWalletOrdinaryTransaction> _mapOrdinaryTransactions({
     required TonWallet tonWallet,

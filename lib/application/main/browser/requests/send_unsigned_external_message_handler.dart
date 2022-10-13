@@ -4,6 +4,7 @@ import 'package:ever_wallet/application/main/browser/extensions.dart';
 import 'package:ever_wallet/application/main/browser/requests/models/send_unsigned_external_message_input.dart';
 import 'package:ever_wallet/application/main/browser/requests/models/send_unsigned_external_message_output.dart';
 import 'package:ever_wallet/data/constants.dart';
+import 'package:ever_wallet/data/repositories/generic_contracts_repository.dart';
 import 'package:ever_wallet/data/repositories/permissions_repository.dart';
 import 'package:ever_wallet/data/repositories/transport_repository.dart';
 import 'package:ever_wallet/logger.dart';
@@ -15,6 +16,7 @@ Future<Map<String, dynamic>> sendUnsignedExternalMessageHandler({
   required List<dynamic> args,
   required PermissionsRepository permissionsRepository,
   required TransportRepository transportRepository,
+  required GenericContractsRepository contractsRepository,
 }) async {
   try {
     logger.d('sendUnsignedExternalMessage', args);
@@ -57,9 +59,10 @@ Future<Map<String, dynamic>> sendUnsignedExternalMessageHandler({
           options: const TransactionExecutionOptions(disableSignatureCheck: false),
         );
       } else {
-        final sent = await genericContract.send(signedMessage);
-
-        if (sent == null) throw Exception('Unable to parse transaction');
+        final sent = await contractsRepository.send(
+          address: repackedRecipient,
+          signedMessage: signedMessage,
+        );
 
         transaction = sent;
       }

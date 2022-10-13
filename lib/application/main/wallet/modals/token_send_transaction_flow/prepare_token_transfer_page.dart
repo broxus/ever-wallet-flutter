@@ -233,13 +233,13 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         },
       );
 
-  Widget maxButton() => AsyncValueStreamProvider<TokenWalletInfo?>(
-        create: (context) => context.read<TokenWalletsRepository>().getInfoStream(
+  Widget maxButton() => AsyncValueStreamProvider<TokenWallet?>(
+        create: (context) => context.read<TokenWalletsRepository>().tokenWalletStream(
               owner: widget.owner,
               rootTokenContract: widget.rootTokenContract,
             ),
         builder: (context, child) {
-          final tokenWalletInfo = context.watch<AsyncValue<TokenWalletInfo?>>().maybeWhen(
+          final tokenWalletInfo = context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => null,
               );
@@ -268,13 +268,13 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         },
       );
 
-  Widget balance() => AsyncValueStreamProvider<TokenWalletInfo?>(
-        create: (context) => context.read<TokenWalletsRepository>().getInfoStream(
+  Widget balance() => AsyncValueStreamProvider<TokenWallet?>(
+        create: (context) => context.read<TokenWalletsRepository>().tokenWalletStream(
               owner: widget.owner,
               rootTokenContract: widget.rootTokenContract,
             ),
         builder: (context, child) {
-          final tokenWalletInfo = context.watch<AsyncValue<TokenWalletInfo?>>().maybeWhen(
+          final tokenWalletInfo = context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => null,
               );
@@ -420,13 +420,13 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         ],
       );
 
-  Widget submitButton() => AsyncValueStreamProvider<TokenWalletInfo?>(
-        create: (context) => context.read<TokenWalletsRepository>().getInfoStream(
+  Widget submitButton() => AsyncValueStreamProvider<TokenWallet?>(
+        create: (context) => context.read<TokenWalletsRepository>().tokenWalletStream(
               owner: widget.owner,
               rootTokenContract: widget.rootTokenContract,
             ),
         builder: (context, child) {
-          final tokenWalletInfo = context.watch<AsyncValue<TokenWalletInfo?>>().maybeWhen(
+          final tokenWalletInfo = context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => null,
               );

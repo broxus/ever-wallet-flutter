@@ -23,8 +23,8 @@ class BrowserHome extends StatefulWidget {
 
   const BrowserHome({
     required this.urlCubit,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<BrowserHome> createState() => _BrowserHomeState();

@@ -156,6 +156,8 @@ class _BrowserWebViewState extends State<BrowserWebView> {
         args: args,
         permissionsRepository: context.read<PermissionsRepository>(),
         genericContractsRepository: context.read<GenericContractsRepository>(),
+        // TODO: replace with tab id
+        tabId: 0,
       ),
     );
 
@@ -166,12 +168,16 @@ class _BrowserWebViewState extends State<BrowserWebView> {
         args: args,
         permissionsRepository: context.read<PermissionsRepository>(),
         genericContractsRepository: context.read<GenericContractsRepository>(),
+        // TODO: replace with tab id
+        tabId: 0,
       ),
     );
 
     controller.addJavaScriptHandler(
       handlerName: 'unsubscribe',
       callback: (args) => unsubscribeHandler(
+        // TODO: replace with tab id
+        tabId: 0,
         controller: controller,
         args: args,
         genericContractsRepository: context.read<GenericContractsRepository>(),
@@ -184,12 +190,16 @@ class _BrowserWebViewState extends State<BrowserWebView> {
         controller: controller,
         args: args,
         genericContractsRepository: context.read<GenericContractsRepository>(),
+        // TODO: replace with tab id
+        tabId: 0,
       ),
     );
 
     controller.addJavaScriptHandler(
       handlerName: 'getProviderState',
       callback: (args) => getProviderStateHandler(
+        // TODO: replace with tab id
+        tabId: 0,
         controller: controller,
         args: args,
         permissionsRepository: context.read<PermissionsRepository>(),
@@ -381,6 +391,7 @@ class _BrowserWebViewState extends State<BrowserWebView> {
         args: args,
         permissionsRepository: context.read<PermissionsRepository>(),
         transportRepository: context.read<TransportRepository>(),
+        contractsRepository: context.read<GenericContractsRepository>(),
       ),
     );
 

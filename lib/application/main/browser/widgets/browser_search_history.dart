@@ -52,8 +52,8 @@ class BrowserSearchScreen extends StatefulWidget {
     required this.urlFocusNode,
     required this.urlController,
     required this.urlCubit,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<BrowserSearchScreen> createState() => _BrowserSearchScreenState();
@@ -160,11 +160,11 @@ class BrowserSearchHistory extends StatelessWidget {
   final UrlCubit urlCubit;
 
   const BrowserSearchHistory({
-    Key? key,
+    super.key,
     required this.controller,
     required this.urlFocusNode,
     required this.urlCubit,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => StreamProvider<AsyncValue<List<SearchHistoryDto>>>(
@@ -247,8 +247,8 @@ class BrowserSearchHistory extends StatelessWidget {
       },
       leading: !isUrl
           ? Assets.images.iconSearch.svg(width: 24, height: 24)
-          : FutureBuilder<fav.Icon?>(
-              future: fav.Favicon.getBest(entry.url),
+          : FutureBuilder<fav.Favicon?>(
+              future: fav.FaviconFinder.getBest(entry.url),
               builder: (context, icon) {
                 if (icon.data?.url != null) {
                   final image = icon.data!.url;

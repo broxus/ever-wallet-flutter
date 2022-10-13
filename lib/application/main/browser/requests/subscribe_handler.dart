@@ -12,6 +12,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 Future<Map<String, dynamic>> subscribeHandler({
   required InAppWebViewController controller,
   required List<dynamic> args,
+  required int tabId,
   required PermissionsRepository permissionsRepository,
   required GenericContractsRepository genericContractsRepository,
 }) async {
@@ -29,11 +30,16 @@ Future<Map<String, dynamic>> subscribeHandler({
 
     if (!validateAddress(input.address)) throw Exception('Invalid address');
 
-    genericContractsRepository.subscribe(input.address);
-
     const output = ContractUpdatesSubscription(
       state: true,
       transactions: true,
+    );
+
+    genericContractsRepository.subscribe(
+      tabId: tabId,
+      address: input.address,
+      origin: origin,
+      contractUpdatesSubscription: output,
     );
 
     final jsonOutput = output.toJson();
