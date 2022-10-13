@@ -37,6 +37,7 @@ dependencies:
     sdk: flutter
   flutter_platform_widgets: ^2.0.0
   flutter_portal: ^1.1.1
+  flutter_slidable: ^2.0.0
   flutter_svg: ^1.1.4
   flutter_typeahead: ^4.0.0
   freezed_annotation: ^2.1.0

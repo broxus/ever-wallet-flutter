@@ -1,12 +1,9 @@
-import 'dart:async';
-
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/general/button/primary_icon_button.dart';
 import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
 import 'package:ever_wallet/application/common/widgets/text_field_clear_button.dart';
-import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/main/browser/utils.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_search_field.dart';
 import 'package:ever_wallet/application/util/colors.dart';
@@ -20,38 +17,29 @@ import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:favicon/favicon.dart' as fav;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:validators/validators.dart';
 
 class BrowserSearchRoute extends NoAnimationPageRoute<void> {
   BrowserSearchRoute(
-    Completer<InAppWebViewController> controller,
-    FocusNode urlFocusNode,
-    TextEditingController urlController,
-    UrlCubit urlCubit,
+    String initUrl,
+    ValueChanged<String> changeUrl,
   ) : super(
           builder: (_) => BrowserSearchScreen(
-            controller: controller,
-            urlFocusNode: urlFocusNode,
-            urlController: urlController,
-            urlCubit: urlCubit,
+            initUrl: initUrl,
+            changeUrl: changeUrl,
           ),
         );
 }
 
 class BrowserSearchScreen extends StatefulWidget {
-  final Completer<InAppWebViewController> controller;
-  final FocusNode urlFocusNode;
-  final TextEditingController urlController;
-  final UrlCubit urlCubit;
+  final String initUrl;
+  final ValueChanged<String> changeUrl;
 
   const BrowserSearchScreen({
-    required this.controller,
-    required this.urlFocusNode,
-    required this.urlController,
-    required this.urlCubit,
+    required this.initUrl,
+    required this.changeUrl,
     super.key,
   });
 
@@ -60,10 +48,26 @@ class BrowserSearchScreen extends StatefulWidget {
 }
 
 class _BrowserSearchScreenState extends State<BrowserSearchScreen> {
+  final urlFocusNode = FocusNode();
+  final controller = TextEditingController();
+
   @override
   void initState() {
-    widget.urlFocusNode.requestFocus();
+    urlFocusNode.requestFocus();
+    controller.value = TextEditingValue(
+      text: widget.initUrl,
+      selection: TextSelection(
+        baseOffset: 0,
+        extentOffset: widget.initUrl.length,
+      ),
+    );
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    urlFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -76,11 +80,7 @@ class _BrowserSearchScreenState extends State<BrowserSearchScreen> {
             Expanded(
               child: GestureDetector(
                 onTap: () => _closeSearch(context),
-                child: BrowserSearchHistory(
-                  controller: widget.controller,
-                  urlFocusNode: widget.urlFocusNode,
-                  urlCubit: widget.urlCubit,
-                ),
+                child: BrowserSearchHistory(changeUrl: widget.changeUrl),
               ),
             ),
           ],
@@ -122,14 +122,14 @@ class _BrowserSearchScreenState extends State<BrowserSearchScreen> {
 
   Widget _field(BuildContext context) {
     final suffixIcon = TextFieldClearButton(
-      focus: widget.urlFocusNode,
-      controller: widget.urlController,
+      focus: urlFocusNode,
+      controller: controller,
       iconColor: ColorsRes.bluePrimary400,
     );
 
     return BrowserSearchField(
-      controller: widget.urlController,
-      focus: widget.urlFocusNode,
+      controller: controller,
+      focus: urlFocusNode,
       hintText: context.localization.address_field_placeholder,
       onSubmitted: (value) {
         if (value.trim().isEmpty) {
@@ -137,11 +137,7 @@ class _BrowserSearchScreenState extends State<BrowserSearchScreen> {
           return;
         }
 
-        context
-            .read<SearchHistoryRepository>()
-            .addSearchHistoryEntry(SearchHistoryDto(url: value, openTime: DateTime.now()));
-
-        widget.urlCubit.setUrl(value);
+        widget.changeUrl(value);
         _closeSearch(context);
       },
       suffixIcon: suffixIcon,
@@ -149,21 +145,17 @@ class _BrowserSearchScreenState extends State<BrowserSearchScreen> {
   }
 
   void _closeSearch(BuildContext context) {
-    widget.urlFocusNode.unfocus();
+    urlFocusNode.unfocus();
     Navigator.of(context).pop();
   }
 }
 
 class BrowserSearchHistory extends StatelessWidget {
-  final Completer<InAppWebViewController> controller;
-  final FocusNode urlFocusNode;
-  final UrlCubit urlCubit;
+  final ValueChanged<String> changeUrl;
 
   const BrowserSearchHistory({
+    required this.changeUrl,
     super.key,
-    required this.controller,
-    required this.urlFocusNode,
-    required this.urlCubit,
   });
 
   @override
@@ -196,6 +188,7 @@ class BrowserSearchHistory extends StatelessWidget {
                         builder: (context, clip) {
                           if (clip.data?.text != null && clip.data!.text!.isNotEmpty) {
                             return EWListTile(
+                              onPressed: () => changeUrl(clip.data!.text!),
                               leading: Assets.images.copy.svg(
                                 color: ColorsRes.neutral500,
                                 width: 24,
@@ -234,14 +227,10 @@ class BrowserSearchHistory extends StatelessWidget {
     final isUrl = isURL(entry.url);
     return EWListTile(
       onPressed: () {
-        context.read<SearchHistoryRepository>().addSearchHistoryEntry(entry);
-
-        urlFocusNode.unfocus();
-
         if (isUrl) {
-          urlCubit.setUrl(entry.url);
+          changeUrl(entry.url);
         } else {
-          urlCubit.setUrl(getDuckDuckGoSearchLink(entry.url));
+          changeUrl(getDuckDuckGoSearchLink(entry.url));
         }
         Navigator.of(context).pop();
       },

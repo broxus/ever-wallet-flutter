@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -10,9 +12,16 @@ class BrowserAppBarScrollListener extends ValueNotifier<double> {
   final browserFlexibleKey = GlobalKey();
   double _prevValue = 0.0;
 
+  /// Timer that signalize about webView scrolling progress.
+  /// WebView can continue scrolling even if user removes finger from the screen, so to jump appbar
+  /// correctly, it waits for some delay when scrolling finish
+  Timer? _scrollTimer;
+  static const _scrollDelay = Duration(milliseconds: 500);
+  bool _isHolding = false;
+
   void webViewScrolled(int dY) {
     /// delta could be from 1.0 to 150.0 so to move appbar smoothly it is reduces
-    final delta = (dY - _prevValue) / 15;
+    final delta = (dY - _prevValue) / 8;
 
     final render = browserFlexibleKey.currentContext?.findRenderObject();
     final height = render?.semanticBounds.size.height ?? appBarHeight;
@@ -29,5 +38,23 @@ class BrowserAppBarScrollListener extends ValueNotifier<double> {
     }
 
     _prevValue = dY.toDouble();
+    _scrollTimer?.cancel();
+    _scrollTimer = Timer(_scrollDelay, _jumpToNearestPosition);
+  }
+
+  void startHolding() => _isHolding = true;
+
+  void stopHolding() => _isHolding = false;
+
+  /// When user stops holding finger, appbar jumps to the nearest position (top or bottom) so the
+  /// appbar won't stay at any middle position
+  void _jumpToNearestPosition() {
+    if (_isHolding) return;
+
+    if (value < -appBarHeight / 2) {
+      value = -appBarHeight;
+    } else {
+      value = 0;
+    }
   }
 }

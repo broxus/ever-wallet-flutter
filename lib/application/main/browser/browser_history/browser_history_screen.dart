@@ -3,7 +3,6 @@ import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
 import 'package:ever_wallet/application/common/widgets/text_field_clear_button.dart';
-import 'package:ever_wallet/application/main/browser/url_cubit.dart';
 import 'package:ever_wallet/application/main/browser/utils.dart';
 import 'package:ever_wallet/application/main/browser/widgets/browser_search_field.dart';
 import 'package:ever_wallet/application/util/colors.dart';
@@ -23,17 +22,17 @@ import 'package:provider/provider.dart';
 import 'package:validators/validators.dart';
 
 class BrowserHistoryRoute extends MaterialPageRoute<void> {
-  BrowserHistoryRoute(UrlCubit urlCubit)
-      : super(builder: (_) => BrowserHistoryScreen(urlCubit: urlCubit));
+  BrowserHistoryRoute(ValueChanged<String> changeUrl)
+      : super(builder: (_) => BrowserHistoryScreen(changeUrl: changeUrl));
 }
 
 class BrowserHistoryScreen extends StatefulWidget {
   const BrowserHistoryScreen({
-    required this.urlCubit,
+    required this.changeUrl,
     super.key,
   });
 
-  final UrlCubit urlCubit;
+  final ValueChanged<String> changeUrl;
 
   @override
   State<BrowserHistoryScreen> createState() => _BrowserHistoryScreenState();
@@ -208,9 +207,9 @@ class _BrowserHistoryScreenState extends State<BrowserHistoryScreen> {
         final tile = EWListTile(
           onPressed: () {
             if (isUrl) {
-              widget.urlCubit.setUrl(entry.url);
+              widget.changeUrl(entry.url);
             } else {
-              widget.urlCubit.setUrl(getDuckDuckGoSearchLink(entry.url));
+              widget.changeUrl(getDuckDuckGoSearchLink(entry.url));
             }
             Navigator.of(context).pop();
           },

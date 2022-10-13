@@ -42,6 +42,7 @@ class HiveSource {
   final _localeKey = 'locale';
   final _browserNeedKey = 'browser_need_key';
   final _browserTabsKey = 'browser_tabs_key';
+  final _browserTabsLastIndexKey = 'browser_tabs_last_index_key';
 
   HiveSource._();
 
@@ -81,9 +82,7 @@ class HiveSource {
 
   Box<CurrencyDto> get _currenciesBox => Hive.box<CurrencyDto>(_currenciesBoxName);
 
-  Box<bool> get _browserNeedBox => Hive.box<bool>(_browserNeedKey);
-
-  Box<BrowserTabsDto> get _browserTabsBox => Hive.box<BrowserTabsDto>(_browserTabsKey);
+  Box<dynamic> get _browserTabsBox => Hive.box<dynamic>(_browserTabsKey);
 
   Stream<Map<String, String>> get seedsStream =>
       _seedsBox.watchAll().map((e) => e.cast<String, String>());
@@ -333,15 +332,20 @@ class HiveSource {
 
   Future<void> clearCurrencies() => _currenciesBox.clear();
 
-  bool get getWhyNeedBrowser => _browserNeedBox.get(_browserNeedKey) ?? false;
+  bool get getWhyNeedBrowser => _preferencesBox.get(_browserNeedKey) as bool? ?? false;
 
-  Future<void> saveWhyNeedBrowser() => _browserNeedBox.put(_browserNeedKey, true);
+  Future<void> saveWhyNeedBrowser() => _preferencesBox.put(_browserNeedKey, true);
 
-  BrowserTabsDto get browserTabs =>
-      _browserTabsBox.get(_browserTabsKey) ??
-      const BrowserTabsDto(lastActiveTabIndex: -1, tabs: []);
+  List<BrowserTab> get browserTabs =>
+      (_browserTabsBox.get(_browserTabsKey) as List<dynamic>?)?.cast<BrowserTab>() ??
+      <BrowserTab>[];
 
-  Future<void> saveBrowserTabs(BrowserTabsDto dto) => _browserTabsBox.put(_browserTabsKey, dto);
+  int get browserTabsLastIndex => _browserTabsBox.get(_browserTabsLastIndexKey) as int? ?? -1;
+
+  Future<void> saveBrowserTabs(List<BrowserTab> dto) => _browserTabsBox.put(_browserTabsKey, dto);
+
+  Future<void> saveBrowserTabsLastIndex(int lastIndex) =>
+      _browserTabsBox.put(_browserTabsLastIndexKey, lastIndex);
 
   Future<void> dispose() => Hive.close();
 
@@ -394,7 +398,6 @@ class HiveSource {
       ..tryRegisterAdapter(SiteMetaDataDtoAdapter())
       ..tryRegisterAdapter(CurrencyDtoAdapter())
       ..tryRegisterAdapter(BrowserTabAdapter())
-      ..tryRegisterAdapter(BrowserTabsDtoAdapter())
       ..tryRegisterAdapter(SearchHistoryDtoAdapter())
       ..tryRegisterAdapter(CurrencyDtoAdapter());
 
@@ -413,7 +416,7 @@ class HiveSource {
     await Hive.openBox<SiteMetaDataDto>(_siteMetaDataBoxName);
     await Hive.openBox<CurrencyDto>(_currenciesBoxName);
     await Hive.openBox<bool>(_browserNeedKey);
-    await Hive.openBox<BrowserTabsDto>(_browserTabsKey);
+    await Hive.openBox<dynamic>(_browserTabsKey);
 
     await _migrateStorage();
   }
