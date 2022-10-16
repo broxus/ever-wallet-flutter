@@ -20,23 +20,19 @@ class TonWalletSubscription {
           Tuple2<List<TransactionWithData<TransactionAdditionalInfo?>>, TransactionsBatchInfo>>
       _onTransactionsFoundStreamSubscription;
 
-  TonWalletSubscription._(this.tonWallet);
-
-  static Future<TonWalletSubscription> subscribe({
-    required TonWallet tonWallet,
+  TonWalletSubscription.subscribe({
+    required this.tonWallet,
     required TonWalletOnMessageSent onMessageSent,
     required TonWalletOnMessageExpired onMessageExpired,
     required TonWalletOnStateChanged onStateChanged,
     required TonWalletOnTransactionsFound onTransactionsFound,
-  }) async {
-    final instance = TonWalletSubscription._(tonWallet);
-    await instance._initialize(
+  }) {
+    _initialize(
       onMessageSent: onMessageSent,
       onMessageExpired: onMessageExpired,
       onStateChanged: onStateChanged,
       onTransactionsFound: onTransactionsFound,
     );
-    return instance;
   }
 
   Future<void> dispose() async {
@@ -47,12 +43,12 @@ class TonWalletSubscription {
     await _onTransactionsFoundStreamSubscription.cancel();
   }
 
-  Future<void> _initialize({
+  void _initialize({
     required TonWalletOnMessageSent onMessageSent,
     required TonWalletOnMessageExpired onMessageExpired,
     required TonWalletOnStateChanged onStateChanged,
     required TonWalletOnTransactionsFound onTransactionsFound,
-  }) async {
+  }) {
     _onMessageSentStreamSubscription = tonWallet.onMessageSentStream.listen(onMessageSent);
     _onMessageExpiredStreamSubscription = tonWallet.onMessageExpiredStream.listen(onMessageExpired);
     _onStateChangedStreamSubscription = tonWallet.onStateChangedStream.listen(onStateChanged);

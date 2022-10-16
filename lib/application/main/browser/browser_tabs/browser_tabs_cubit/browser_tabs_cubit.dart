@@ -1,6 +1,3 @@
-// ignore_for_file: parameter_assignments
-import 'dart:typed_data';
-
 import 'package:ever_wallet/application/main/browser/browser_tabs/browser_tabs_cubit/browser_tabs_notifiers.dart';
 import 'package:ever_wallet/application/main/browser/utils.dart';
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';

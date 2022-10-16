@@ -70,7 +70,7 @@ class ProfileActions extends StatelessWidget {
                     .expand((e) => e)
                     .where((e) => e.address == address),
                 builder: (context, child) {
-                  final account = context.watch<AsyncValue<KeyStoreEntry?>>().maybeWhen(
+                  final account = context.watch<AsyncValue<AssetsList>>().maybeWhen(
                         ready: (value) => value,
                         orElse: () => null,
                       );

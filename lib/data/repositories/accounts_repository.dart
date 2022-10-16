@@ -51,11 +51,11 @@ class AccountsRepository {
 
     _keyAddedStreamSubscription = _eventBus
         .on<KeyAddedEvent>()
-        .listen((e) => _lock.synchronized(() => _keyAddedStreamListener));
+        .listen((e) => _lock.synchronized(() => _keyAddedStreamListener(e)));
 
     _keyRemovedStreamSubscription = _eventBus
         .on<KeyRemovedEvent>()
-        .listen((e) => _lock.synchronized(() => _keyRemovedStreamListener));
+        .listen((e) => _lock.synchronized(() => _keyRemovedStreamListener(e)));
   }
 
   Stream<List<AssetsList>> get accountsStream => _accountsStorage.entriesStream;

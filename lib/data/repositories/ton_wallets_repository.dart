@@ -12,6 +12,7 @@ import 'package:ever_wallet/data/models/ton_wallet_multisig_expired_transaction.
 import 'package:ever_wallet/data/models/ton_wallet_multisig_ordinary_transaction.dart';
 import 'package:ever_wallet/data/models/ton_wallet_multisig_pending_transaction.dart';
 import 'package:ever_wallet/data/models/ton_wallet_ordinary_transaction.dart';
+import 'package:ever_wallet/data/models/ton_wallet_pending_subscription_collection.dart';
 import 'package:ever_wallet/data/models/ton_wallet_pending_transaction.dart';
 import 'package:ever_wallet/data/models/ton_wallet_subscription.dart';
 import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
@@ -29,6 +30,8 @@ import 'package:tuple/tuple.dart';
 
 class TonWalletsRepository {
   final _lock = Lock();
+  final Map<TonWalletPendingSubscriptionCollection, Completer<TonWalletSubscription>>
+      _pendingTonWalletSubscriptions = {};
   final Keystore _keystore;
   final sql.SqliteDatabase _sqliteDatabase;
   final HiveSource _hiveSource;
@@ -195,84 +198,47 @@ class TonWalletsRepository {
                 ),
           );
 
-  Stream<ContractState> contractStateStream(String address) => _tonWallet(address)
-      .asStream()
-      .flatMap((v) => v.onStateChangedStream.startWith(v.contractState));
+  Stream<ContractState> contractStateStream(String address) =>
+      _tonWallet(address).flatMap((v) => v.onStateChangedStream.startWith(v.contractState));
 
-  Future<ContractState> contractState(String address) async {
-    final tonWallet = await _tonWallet(address);
-
-    return tonWallet.contractState;
-  }
+  Future<ContractState> contractState(String address) => contractStateStream(address).first;
 
   Stream<TonWalletDetails> detailsStream(String address) => _tonWallet(address)
-      .asStream()
       .flatMap((v) => v.onStateChangedStream.map((_) => v.details).startWith(v.details));
 
-  Future<TonWalletDetails> details(String address) async {
-    final tonWallet = await _tonWallet(address);
-
-    return tonWallet.details;
-  }
+  Future<TonWalletDetails> details(String address) => detailsStream(address).first;
 
   Stream<List<String>?> custodiansStream(String address) => _tonWallet(address)
-      .asStream()
       .flatMap((v) => v.onStateChangedStream.map((_) => v.custodians).startWith(v.custodians));
 
-  Future<List<String>?> custodians(String address) async {
-    final tonWallet = await _tonWallet(address);
+  Future<List<String>?> custodians(String address) => custodiansStream(address).first;
 
-    return tonWallet.custodians;
-  }
+  Stream<List<String>?> localCustodiansStream(String address) => _tonWallet(address).flatMap(
+        (v) => v.onStateChangedStream.map((_) => v.custodians).startWith(v.custodians).map((e) {
+          final custodians = e;
 
-  Stream<List<String>?> localCustodiansStream(String address) =>
-      _tonWallet(address).asStream().flatMap(
-            (v) => v.onStateChangedStream.map((_) => v.custodians).startWith(v.custodians).map((e) {
-              final custodians = e;
+          if (custodians == null) return null;
 
-              if (custodians == null) return null;
+          final localCustodians = _keystore.entries
+              .map((e) => e.publicKey)
+              .where((e) => custodians.any((el) => el == e))
+              .toList();
 
-              final localCustodians = _keystore.entries
-                  .map((e) => e.publicKey)
-                  .where((e) => custodians.any((el) => el == e))
-                  .toList();
+          final initiatorKey = localCustodians.firstWhereOrNull((e) => e == _hiveSource.currentKey);
 
-              final initiatorKey =
-                  localCustodians.firstWhereOrNull((e) => e == _hiveSource.currentKey);
+          final sortedLocalCustodians = [
+            if (initiatorKey != null) initiatorKey,
+            ...localCustodians.where((e) => e != initiatorKey),
+          ];
 
-              final sortedLocalCustodians = [
-                if (initiatorKey != null) initiatorKey,
-                ...localCustodians.where((e) => e != initiatorKey),
-              ];
+          return sortedLocalCustodians;
+        }),
+      );
 
-              return sortedLocalCustodians;
-            }),
-          );
-
-  Future<List<String>?> localCustodians(String address) async {
-    final tonWallet = await _tonWallet(address);
-
-    final custodians = tonWallet.custodians;
-
-    if (custodians == null) return null;
-
-    final localCustodians = _keystore.entries
-        .map((e) => e.publicKey)
-        .where((e) => custodians.any((el) => el == e))
-        .toList();
-
-    final initiatorKey = localCustodians.firstWhereOrNull((e) => e == _hiveSource.currentKey);
-
-    final sortedLocalCustodians = [
-      if (initiatorKey != null) initiatorKey,
-      ...localCustodians.where((e) => e != initiatorKey),
-    ];
-
-    return sortedLocalCustodians;
-  }
+  Future<List<String>?> localCustodians(String address) => localCustodiansStream(address).first;
 
   Future<UnsignedMessageWithAdditionalInfo> prepareDeploy(String address) async {
-    final tonWallet = await _tonWallet(address);
+    final tonWallet = await getTonWalletStream(address).first;
 
     final unsignedMessage = await tonWallet.prepareDeploy(kDefaultMessageExpiration);
 
@@ -287,7 +253,7 @@ class TonWalletsRepository {
     required List<String> custodians,
     required int reqConfirms,
   }) async {
-    final tonWallet = await _tonWallet(address);
+    final tonWallet = await getTonWalletStream(address).first;
 
     final unsignedMessage = await tonWallet.prepareDeployWithMultipleOwners(
       expiration: kDefaultMessageExpiration,
@@ -309,7 +275,7 @@ class TonWalletsRepository {
     String? body,
     required bool bounce,
   }) async {
-    final tonWallet = await _tonWallet(address);
+    final tonWallet = await getTonWalletStream(address).first;
 
     final contractState = await tonWallet.transport.getContractState(address);
 
@@ -336,7 +302,7 @@ class TonWalletsRepository {
     required String publicKey,
     required String transactionId,
   }) async {
-    final tonWallet = await _tonWallet(address);
+    final tonWallet = await getTonWalletStream(address).first;
 
     final contractState = await tonWallet.transport.getContractState(address);
 
@@ -357,7 +323,7 @@ class TonWalletsRepository {
     required String address,
     required UnsignedMessageWithAdditionalInfo unsignedMessageWithAdditionalInfo,
   }) async {
-    final tonWallet = await _tonWallet(address);
+    final tonWallet = await getTonWalletStream(address).first;
 
     final unsignedMessage = unsignedMessageWithAdditionalInfo.message;
 
@@ -374,7 +340,7 @@ class TonWalletsRepository {
     required String address,
     required SignedMessageWithAdditionalInfo signedMessageWithAdditionalInfo,
   }) async {
-    final tonWallet = await _tonWallet(address);
+    final tonWallet = await getTonWalletStream(address).first;
 
     final transport = tonWallet.transport;
     final signedMessage = signedMessageWithAdditionalInfo.message;
@@ -472,7 +438,7 @@ class TonWalletsRepository {
   }
 
   Future<void> refresh(String address) async {
-    final tonWallet = await _tonWallet(address);
+    final tonWallet = await getTonWalletStream(address).first;
 
     await tonWallet.refresh();
   }
@@ -481,12 +447,13 @@ class TonWalletsRepository {
     required String address,
     required String fromLt,
   }) async {
-    final tonWallet = await _tonWallet(address);
+    final tonWallet = await getTonWalletStream(address).first;
 
     await tonWallet.preloadTransactions(fromLt);
   }
 
-  Future<void> updateSubscription(String address) async => _lock.synchronized(() {
+  /// Update subscriptions by adding a new one with [address] and return it
+  Future<void> updateSubscription(String address) => _lock.synchronized(() async {
         final transport = _transportSource.transport;
         final subscriptions = {..._tonWalletsSubject.value};
 
@@ -494,12 +461,18 @@ class TonWalletsRepository {
             .map((e) => e.tonWallet)
             .firstWhere((e) => e.address == address);
 
-        subscriptions[address]?.future.then((v) => v.dispose()).ignore();
+        await subscriptions[address]?.future.then((v) => v.dispose());
 
-        subscriptions[address] = _subscribe(
+        final newCompleter = _subscribe(
           tonWalletAsset: tonWallet,
           transport: transport,
         ).wrapInCompleter();
+        _pendingTonWalletSubscriptions[TonWalletPendingSubscriptionCollection(
+          asset: tonWallet,
+          transportCollection: transport.toEquatableCollection(),
+        )] = newCompleter;
+
+        subscriptions[address] = newCompleter;
 
         _tonWalletsSubject.add(subscriptions);
       });
@@ -540,31 +513,35 @@ class TonWalletsRepository {
       final transport = _transportSource.transport;
       final subscriptions = {..._tonWalletsSubject.value};
 
-      final tonWalletsForUnsubscription = subscriptions.keys.where(
+      final tonWalletsForUnSubscription = subscriptions.keys.where(
         (e) => !tonWallets.any((el) => el.address == e),
       );
 
-      for (final tonWalletForUnsubscription in tonWalletsForUnsubscription) {
-        _tonWalletsSubject.add({
-          ...subscriptions
-            ..remove(tonWalletForUnsubscription)!.future.then((v) => v.dispose()).ignore()
-        });
+      for (final address in tonWalletsForUnSubscription) {
+        subscriptions.remove(address)!.future.then((v) => v.dispose()).ignore();
+        final pendedKey = _pendingTonWalletSubscriptions.keys
+            .firstWhereOrNull((key) => key.asset.address == address);
+        if (pendedKey != null) {
+          _pendingTonWalletSubscriptions.remove(pendedKey);
+        }
       }
 
       final tonWalletsForSubscription = tonWallets.where(
         (e) => !subscriptions.keys.any((el) => el == e.address),
       );
 
-      _tonWalletsSubject.add({
-        ...subscriptions
-          ..addAll({
-            for (final e in tonWalletsForSubscription)
-              e.address: _subscribe(
-                tonWalletAsset: e,
-                transport: transport,
-              ).wrapInCompleter()
-          }),
-      });
+      for (final e in tonWalletsForSubscription) {
+        final completer = _subscribe(
+          tonWalletAsset: e,
+          transport: transport,
+        ).wrapInCompleter();
+        _pendingTonWalletSubscriptions[TonWalletPendingSubscriptionCollection(
+          asset: e,
+          transportCollection: transport.toEquatableCollection(),
+        )] = completer;
+        subscriptions[e.address] = completer;
+      }
+      _tonWalletsSubject.add({...subscriptions});
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -576,17 +553,42 @@ class TonWalletsRepository {
 
       final tonWallets = _currentAccountsSource.currentAccounts.map((e) => e.tonWallet);
 
-      for (final tonWalletForUnsubscription in _tonWalletsSubject.value.values) {
-        tonWalletForUnsubscription.future.then((v) => v.dispose()).ignore();
+      /// contains assets where transport is different to new one
+      final assetsToRemove = tonWallets.where((asset) {
+        final pendingKey = TonWalletPendingSubscriptionCollection(
+          asset: asset,
+          transportCollection: transport.toEquatableCollection(),
+        );
+        final pendedEntry =
+            _pendingTonWalletSubscriptions.entries.where((e) => e.key == pendingKey).firstOrNull;
+        if (pendedEntry != null &&
+            pendedEntry.key.isSameTransport(transport.toEquatableCollection())) {
+          return false;
+        }
+        return true;
+      });
+
+      /// Unsubscribe
+      for (final key in assetsToRemove) {
+        _tonWalletsSubject.value[key.address]!.future.then((v) => v.dispose()).ignore();
+        _pendingTonWalletSubscriptions.remove(
+          TonWalletPendingSubscriptionCollection(asset: key, transportCollection: []),
+        );
       }
 
-      _tonWalletsSubject.add({
-        for (final e in tonWallets)
-          e.address: _subscribe(
-            tonWalletAsset: e,
-            transport: transport,
-          ).wrapInCompleter()
-      });
+      final subscriptions = <String, Completer<TonWalletSubscription>>{};
+      for (final e in tonWallets) {
+        final completer = _subscribe(
+          tonWalletAsset: e,
+          transport: transport,
+        ).wrapInCompleter();
+        _pendingTonWalletSubscriptions[TonWalletPendingSubscriptionCollection(
+          asset: e,
+          transportCollection: transport.toEquatableCollection(),
+        )] = completer;
+        subscriptions[e.address] = completer;
+      }
+      _tonWalletsSubject.add(subscriptions);
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -596,6 +598,17 @@ class TonWalletsRepository {
     required TonWalletAsset tonWalletAsset,
     required Transport transport,
   }) async {
+    final pendingKey = TonWalletPendingSubscriptionCollection(
+      asset: tonWalletAsset,
+      transportCollection: transport.toEquatableCollection(),
+    );
+    final pendedEntry =
+        _pendingTonWalletSubscriptions.entries.where((e) => e.key == pendingKey).firstOrNull;
+    if (pendedEntry != null) {
+      if (pendedEntry.key.isSameTransport(pendingKey.transportCollection)) {
+        return pendedEntry.value.future;
+      }
+    }
     final tonWallet = await TonWallet.subscribe(
       transport: transport,
       workchain: tonWalletAsset.workchain,
@@ -664,12 +677,11 @@ class TonWalletsRepository {
     return subscription;
   }
 
-  Future<TonWallet> _tonWallet(String address) =>
-      _tonWalletsSubject.value[address]!.future.then((v) => v.tonWallet);
+  Stream<TonWallet> _tonWallet(String address) => getTonWalletStream(address);
 
-  Future<TonWallet> getTonWallet(String address) => _tonWallet(address);
-
-  Stream<TonWallet> getTonWalletStream(String address) => _tonWallet(address).asStream();
+  Stream<TonWallet> getTonWalletStream(String address) => _tonWalletsSubject.stream
+      .where((v) => v[address] != null)
+      .flatMap((value) => value[address]!.future.then((v) => v.tonWallet).asStream());
 
   List<TonWalletOrdinaryTransaction> _mapOrdinaryTransactions({
     required TonWallet tonWallet,

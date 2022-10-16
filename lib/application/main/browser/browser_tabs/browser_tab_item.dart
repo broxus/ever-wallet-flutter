@@ -16,8 +16,8 @@ class BrowserTabItem extends StatefulWidget {
     required this.itemWidth,
     required this.itemHeight,
     required this.isCurrentActive,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final VoidCallback onClose;
   final VoidCallback onOpen;

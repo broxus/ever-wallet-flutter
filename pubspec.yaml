@@ -54,6 +54,7 @@ dependencies:
   modal_bottom_sheet: ^2.1.0
   nekoton_flutter:
     path: ../nekoton_flutter
+  overlay_support: ^2.0.1
   package_info_plus: ^1.4.3+1
   path: ^1.8.2
   path_provider: ^2.0.11

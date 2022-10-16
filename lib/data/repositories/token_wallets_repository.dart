@@ -6,6 +6,7 @@ import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/models/token_wallet_ordinary_transaction.dart';
+import 'package:ever_wallet/data/models/token_wallet_pending_subscription_collection.dart';
 import 'package:ever_wallet/data/models/token_wallet_subscription.dart';
 import 'package:ever_wallet/data/sources/local/app_lifecycle_state_source.dart';
 import 'package:ever_wallet/data/sources/local/current_accounts_source.dart';
@@ -24,6 +25,8 @@ class TokenWalletsRepository {
   final TransportSource _transportSource;
   final CurrentAccountsSource _currentAccountsSource;
   final AppLifecycleStateSource _appLifecycleStateSource;
+  final Map<TokenWalletPendingSubscriptionCollection, Completer<TokenWalletSubscription>>
+      _pendingTokenWalletSubscriptions = {};
   final _tokenWalletsSubject =
       BehaviorSubject<Map<Tuple2<String, String>, Completer<TokenWalletSubscription>>>.seeded({});
   late final Timer _pollingTimer;
@@ -74,10 +77,10 @@ class TokenWalletsRepository {
     required String owner,
     required String rootTokenContract,
   }) =>
-      _tokenWallet(
+      tokenWalletStream(
         owner: owner,
         rootTokenContract: rootTokenContract,
-      ).asStream().flatMap((v) => v.onBalanceChangedStream.startWith(v.balance));
+      ).flatMap((v) => v.onBalanceChangedStream.startWith(v.balance));
 
   Future<String> balance({
     required String owner,
@@ -95,12 +98,10 @@ class TokenWalletsRepository {
     required String owner,
     required String rootTokenContract,
   }) =>
-      _tokenWallet(
+      tokenWalletStream(
         owner: owner,
         rootTokenContract: rootTokenContract,
-      )
-          .asStream()
-          .flatMap((v) => v.onBalanceChangedStream.map((_) => v.symbol).startWith(v.symbol));
+      ).flatMap((v) => v.onBalanceChangedStream.map((_) => v.symbol).startWith(v.symbol));
 
   Future<Symbol> symbol({
     required String owner,
@@ -166,17 +167,25 @@ class TokenWalletsRepository {
     required String owner,
     required String rootTokenContract,
   }) async =>
-      _lock.synchronized(() {
+      _lock.synchronized(() async {
         final transport = _transportSource.transport;
         final subscriptions = {..._tokenWalletsSubject.value};
 
-        subscriptions[Tuple2(owner, rootTokenContract)]?.future.then((v) => v.dispose()).ignore();
+        await subscriptions[Tuple2(owner, rootTokenContract)]?.future.then((v) => v.dispose());
 
-        subscriptions[Tuple2(owner, rootTokenContract)] = _subscribe(
+        final tuple = Tuple2(owner, rootTokenContract);
+
+        final newCompleter = _subscribe(
           owner: owner,
           rootTokenContract: rootTokenContract,
           transport: transport,
         ).wrapInCompleter();
+        _pendingTokenWalletSubscriptions[TokenWalletPendingSubscriptionCollection(
+          asset: tuple,
+          transportCollection: transport.toEquatableCollection(),
+        )] = newCompleter;
+
+        subscriptions[tuple] = newCompleter;
 
         _tokenWalletsSubject.add(subscriptions);
       });
@@ -231,28 +240,32 @@ class TokenWalletsRepository {
         (e) => !tokenWallets.any((el) => el == e),
       );
 
-      for (final tokenWalletForUnsubscription in tokenWalletsForUnsubscription) {
-        _tokenWalletsSubject.add({
-          ...subscriptions
-            ..remove(tokenWalletForUnsubscription)!.future.then((v) => v.dispose()).ignore()
-        });
+      for (final tuple in tokenWalletsForUnsubscription) {
+        subscriptions.remove(tuple)!.future.then((v) => v.dispose()).ignore();
+        final pendedKey = _pendingTokenWalletSubscriptions.keys
+            .firstWhereOrNull((key) => key.asset.item1 == tuple.item1);
+        if (pendedKey != null) {
+          _pendingTokenWalletSubscriptions.remove(pendedKey);
+        }
       }
 
       final tokenWalletsForSubscription = tokenWallets.where(
         (e) => !subscriptions.keys.any((el) => el == e),
       );
 
-      _tokenWalletsSubject.add({
-        ...subscriptions
-          ..addAll({
-            for (final e in tokenWalletsForSubscription)
-              e: _subscribe(
-                owner: e.item1,
-                rootTokenContract: e.item2,
-                transport: transport,
-              ).wrapInCompleter()
-          }),
-      });
+      for (final e in tokenWalletsForSubscription) {
+        final completer = _subscribe(
+          owner: e.item1,
+          rootTokenContract: e.item2,
+          transport: transport,
+        ).wrapInCompleter();
+        _pendingTokenWalletSubscriptions[TokenWalletPendingSubscriptionCollection(
+          asset: e,
+          transportCollection: transport.toEquatableCollection(),
+        )] = completer;
+        subscriptions[e] = completer;
+      }
+      _tokenWalletsSubject.add({...subscriptions});
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -276,18 +289,43 @@ class TokenWalletsRepository {
           .whereNotNull()
           .expand((e) => e);
 
-      for (final tokenWalletForUnsubscription in _tokenWalletsSubject.value.values) {
-        tokenWalletForUnsubscription.future.then((v) => v.dispose()).ignore();
+      /// contains assets where transport is different to new one
+      final assetsToRemove = tokenWallets.where((asset) {
+        final pendingKey = TokenWalletPendingSubscriptionCollection(
+          asset: asset,
+          transportCollection: transport.toEquatableCollection(),
+        );
+        final pendedEntry =
+            _pendingTokenWalletSubscriptions.entries.where((e) => e.key == pendingKey).firstOrNull;
+        if (pendedEntry != null &&
+            pendedEntry.key.isSameTransport(transport.toEquatableCollection())) {
+          return false;
+        }
+        return true;
+      });
+
+      /// Unsubscribe
+      for (final key in assetsToRemove) {
+        _tokenWalletsSubject.value[key]!.future.then((v) => v.dispose()).ignore();
+        _pendingTokenWalletSubscriptions.remove(
+          TokenWalletPendingSubscriptionCollection(asset: key, transportCollection: []),
+        );
       }
 
-      _tokenWalletsSubject.add({
-        for (final e in tokenWallets)
-          e: _subscribe(
-            owner: e.item1,
-            rootTokenContract: e.item2,
-            transport: transport,
-          ).wrapInCompleter()
-      });
+      final subscriptions = <Tuple2<String, String>, Completer<TokenWalletSubscription>>{};
+      for (final e in tokenWallets) {
+        final completer = _subscribe(
+          owner: e.item1,
+          rootTokenContract: e.item2,
+          transport: transport,
+        ).wrapInCompleter();
+        _pendingTokenWalletSubscriptions[TokenWalletPendingSubscriptionCollection(
+          asset: e,
+          transportCollection: transport.toEquatableCollection(),
+        )] = completer;
+        subscriptions[e] = completer;
+      }
+      _tokenWalletsSubject.add(subscriptions);
     } catch (err, st) {
       logger.e(err, err, st);
     }
@@ -298,6 +336,18 @@ class TokenWalletsRepository {
     required String rootTokenContract,
     required Transport transport,
   }) async {
+    final pendingKey = TokenWalletPendingSubscriptionCollection(
+      asset: Tuple2(owner, rootTokenContract),
+      transportCollection: transport.toEquatableCollection(),
+    );
+    final pendedEntry =
+        _pendingTokenWalletSubscriptions.entries.where((e) => e.key == pendingKey).firstOrNull;
+    if (pendedEntry != null) {
+      if (pendedEntry.key.isSameTransport(pendingKey.transportCollection)) {
+        return pendedEntry.value.future;
+      }
+    }
+
     final tokenWallet = await TokenWallet.subscribe(
       transport: transport,
       owner: owner,
@@ -357,14 +407,18 @@ class TokenWalletsRepository {
     required String owner,
     required String rootTokenContract,
   }) =>
-      _tokenWalletsSubject.value[Tuple2(owner, rootTokenContract)]!.future
-          .then((v) => v.tokenWallet);
+      tokenWalletStream(owner: owner, rootTokenContract: rootTokenContract).first;
 
   Stream<TokenWallet> tokenWalletStream({
     required String owner,
     required String rootTokenContract,
   }) =>
-      _tokenWallet(owner: owner, rootTokenContract: rootTokenContract).asStream();
+      _tokenWalletsSubject.stream.where((v) => v[Tuple2(owner, rootTokenContract)] != null).flatMap(
+            (value) => value[Tuple2(owner, rootTokenContract)]!
+                .future
+                .then((v) => v.tokenWallet)
+                .asStream(),
+          );
 
   List<TokenWalletOrdinaryTransaction> _mapOrdinaryTransactions({
     required TokenWallet tokenWallet,

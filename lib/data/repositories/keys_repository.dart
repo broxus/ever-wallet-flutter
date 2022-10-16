@@ -10,6 +10,7 @@ import 'package:ever_wallet/data/utils.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
+/// Repository that stores, manipulate and provide information about keys/seeds
 class KeysRepository {
   final Keystore _keystore;
   final HiveSource _hiveSource;
@@ -37,26 +38,36 @@ class KeysRepository {
     return instance;
   }
 
+  /// Equivalent of [keys] with stream
   Stream<List<KeyStoreEntry>> get keysStream => _keystore.entriesStream;
 
+  /// Get list of all keys
   List<KeyStoreEntry> get keys => _keystore.entries;
 
+  /// Equivalent of [seeds] with stream
   Stream<Map<String, String>> get seedsStream => _hiveSource.seedsStream;
 
+  /// Dictionary of keys where key - publicKey of master key, value - name of sub(derived) key
   Map<String, String> get seeds => _hiveSource.seeds;
 
+  /// Equivalent of [seedKeys] with stream
   Stream<List<KeyStoreEntry>> seedKeysStream(String masterKey) =>
       keysStream.map((e) => e.whereKeysFor(masterKey));
 
+  /// Get list of sub(derived) keys from [masterKey]
   List<KeyStoreEntry> seedKeys(String masterKey) => keys.whereKeysFor(masterKey);
 
+  /// Equivalent of [currentKey] with stream
   Stream<String?> get currentKeyStream => _hiveSource.currentKeyStream;
 
+  /// Returns publicKey of currently activated key
   String? get currentKey => _hiveSource.currentKey;
 
+  /// Equivalent of [currentKeyStream] but with blockchain representation of object
   Stream<KeyStoreEntry?> get currentKeyEntryStream =>
       keysStream.map((keys) => keys.firstWhereOrNull((k) => k.publicKey == currentKey));
 
+  /// All keys mapped by: key - keyEntry that is master, value - list of sub keyEntries of master
   Stream<Map<KeyStoreEntry, List<KeyStoreEntry>?>> get mappedKeysStream => keysStream.map((e) {
         final map = <KeyStoreEntry, List<KeyStoreEntry>?>{};
 
@@ -79,8 +90,10 @@ class KeysRepository {
         return map;
       });
 
+  /// Change currently active key
   Future<void> setCurrentKey(String? publicKey) => _hiveSource.setCurrentKey(publicKey);
 
+  /// Equivalent of [labels] with stream
   Stream<Map<String, String>> get labelsStream =>
       Rx.combineLatest2<Map<String, String>, Map<String, String>, Map<String, String>>(
         _hiveSource.keyLabelsStream,
@@ -88,11 +101,14 @@ class KeysRepository {
         (a, b) => {...a, ...b},
       );
 
+  /// Dictionary of publicKey - key label
   Map<String, String> get labels => {
         ..._hiveSource.keyLabels,
         ...{for (final v in keys) v.publicKey: v.name}
       };
 
+  /// Create key by seed phrase and save information about it in local store.
+  /// Returns blockchain representation of key.
   Future<KeyStoreEntry> createKey({
     String? name,
     required List<String> phrase,
@@ -150,6 +166,8 @@ class KeysRepository {
     return key;
   }
 
+  /// Create a sub(derived) key of [publicKey].
+  /// Returns blockchain representation of key.
   Future<KeyStoreEntry> deriveKey({
     String? name,
     required String publicKey,
@@ -188,6 +206,8 @@ class KeysRepository {
     return derivedKey;
   }
 
+  /// Changes password of key by [publicKey] and returns update key. (local operation)
+  /// If [oldPassword] is wrong - throws an exception.
   Future<KeyStoreEntry> changePassword({
     required String publicKey,
     required String oldPassword,
@@ -245,6 +265,7 @@ class KeysRepository {
     return updatedKey;
   }
 
+  /// Change the label of key (local operation)
   Future<void> renameKey({
     required String publicKey,
     required String name,
@@ -282,6 +303,7 @@ class KeysRepository {
     await _keystore.updateKey(updateKeyInput);
   }
 
+  /// Returns the seed phrase of [publicKey]
   Future<List<String>> exportKey({
     required String publicKey,
     required String password,
@@ -332,6 +354,7 @@ class KeysRepository {
     return phrase;
   }
 
+  /// Encrypt data for external usages
   Future<List<EncryptedData>> encrypt({
     required String data,
     required List<String> publicKeys,
@@ -358,6 +381,7 @@ class KeysRepository {
     return encryptedData;
   }
 
+  /// Decrypt data from external usages.
   Future<String> decrypt({
     required EncryptedData data,
     required String publicKey,
@@ -380,6 +404,7 @@ class KeysRepository {
     return decryptedData;
   }
 
+  /// Sign [data] message with [publicKey]
   Future<String> sign({
     required String data,
     required String publicKey,
@@ -402,6 +427,7 @@ class KeysRepository {
     return signature;
   }
 
+  /// Sign [data] data with [publicKey]
   Future<SignedData> signData({
     required String data,
     required String publicKey,
@@ -424,6 +450,7 @@ class KeysRepository {
     return signedData;
   }
 
+  /// Sign [data] raw data with [publicKey]
   Future<SignedDataRaw> signDataRaw({
     required String data,
     required String publicKey,
@@ -446,6 +473,7 @@ class KeysRepository {
     return signedData;
   }
 
+  /// Check if password of [publicKey] equals to [password]
   Future<bool> checkKeyPassword({
     required String publicKey,
     required String password,
@@ -463,6 +491,7 @@ class KeysRepository {
     }
   }
 
+  /// Remove key and all derived keys from local store by [publicKey]
   Future<KeyStoreEntry> removeKey(String publicKey) async {
     final key = keys.firstWhere((e) => e.publicKey == publicKey);
 
@@ -491,6 +520,7 @@ class KeysRepository {
     return removedKey;
   }
 
+  /// Clear all local data
   Future<void> clear() async {
     await _keystore.clear();
 

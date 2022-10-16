@@ -192,3 +192,8 @@ extension SecondsSinceEpoch on DateTime {
   int get secondsSinceEpoch =>
       DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
 }
+
+extension TransportX on Transport {
+  /// List of items that can be used to compare transport objects
+  List<dynamic> toEquatableCollection() => [name, networkId, group];
+}

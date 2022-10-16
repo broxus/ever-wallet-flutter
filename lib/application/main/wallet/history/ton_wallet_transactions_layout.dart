@@ -35,33 +35,33 @@ class TonWalletTransactionsLayout extends StatefulWidget {
 class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayout> {
   @override
   Widget build(BuildContext context) =>
-      AsyncValueStreamProvider<List<TonWalletMultisigPendingTransaction>?>(
+      AsyncValueStreamProvider<List<TonWalletMultisigPendingTransaction>>(
         create: (context) =>
             context.read<TonWalletsRepository>().multisigPendingTransactionsStream(widget.address),
         builder: (context, child) {
           final multisigPendingTransactionsState =
-              context.watch<AsyncValue<List<TonWalletMultisigPendingTransaction>?>>().maybeWhen(
-                    ready: (value) => value ?? <TonWalletMultisigPendingTransaction>[],
+              context.watch<AsyncValue<List<TonWalletMultisigPendingTransaction>>>().maybeWhen(
+                    ready: (value) => value,
                     orElse: () => <TonWalletMultisigPendingTransaction>[],
                   );
 
-          return AsyncValueStreamProvider<List<TonWalletExpiredTransaction>?>(
+          return AsyncValueStreamProvider<List<TonWalletExpiredTransaction>>(
             create: (context) =>
                 context.read<TonWalletsRepository>().expiredTransactionsStream(widget.address),
             builder: (context, child) {
               final expiredTransactionsState =
-                  context.watch<AsyncValue<List<TonWalletExpiredTransaction>?>>().maybeWhen(
-                        ready: (value) => value ?? <TonWalletExpiredTransaction>[],
+                  context.watch<AsyncValue<List<TonWalletExpiredTransaction>>>().maybeWhen(
+                        ready: (value) => value,
                         orElse: () => <TonWalletExpiredTransaction>[],
                       );
 
-              return AsyncValueStreamProvider<List<TonWalletPendingTransaction>?>(
+              return AsyncValueStreamProvider<List<TonWalletPendingTransaction>>(
                 create: (context) =>
                     context.read<TonWalletsRepository>().pendingTransactionsStream(widget.address),
                 builder: (context, child) {
                   final pendingTransactionsState =
-                      context.watch<AsyncValue<List<TonWalletPendingTransaction>?>>().maybeWhen(
-                            ready: (value) => value ?? <TonWalletPendingTransaction>[],
+                      context.watch<AsyncValue<List<TonWalletPendingTransaction>>>().maybeWhen(
+                            ready: (value) => value,
                             orElse: () => <TonWalletPendingTransaction>[],
                           );
 
@@ -71,9 +71,9 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
                         .multisigExpiredTransactionsStream(widget.address),
                     builder: (context, child) {
                       final multisigExpiredTransactions = context
-                          .watch<AsyncValue<List<TonWalletMultisigExpiredTransaction>?>>()
+                          .watch<AsyncValue<List<TonWalletMultisigExpiredTransaction>>>()
                           .maybeWhen(
-                            ready: (value) => value ?? <TonWalletMultisigExpiredTransaction>[],
+                            ready: (value) => value,
                             orElse: () => <TonWalletMultisigExpiredTransaction>[],
                           );
 
@@ -83,18 +83,18 @@ class _TonWalletTransactionsLayoutState extends State<TonWalletTransactionsLayou
                             .multisigOrdinaryTransactionsStream(widget.address),
                         builder: (context, child) {
                           final multisigOrdinaryTransactions = context
-                              .watch<AsyncValue<List<TonWalletMultisigOrdinaryTransaction>?>>()
+                              .watch<AsyncValue<List<TonWalletMultisigOrdinaryTransaction>>>()
                               .maybeWhen(
-                                ready: (value) => value ?? <TonWalletMultisigOrdinaryTransaction>[],
+                                ready: (value) => value,
                                 orElse: () => <TonWalletMultisigOrdinaryTransaction>[],
                               );
-                          return AsyncValueStreamProvider<TonWallet?>(
+                          return AsyncValueStreamProvider<TonWallet>(
                             create: (context) => context
                                 .read<TonWalletsRepository>()
                                 .getTonWalletStream(widget.address),
                             builder: (context, child) {
                               final tonWalletInfo =
-                                  context.watch<AsyncValue<TonWallet?>>().maybeWhen(
+                                  context.watch<AsyncValue<TonWallet>>().maybeWhen(
                                         ready: (value) => value,
                                         orElse: () => null,
                                       );

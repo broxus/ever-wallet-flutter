@@ -52,6 +52,8 @@ class ApplicationInjection extends StatelessWidget {
             eventBusProvider(),
             appLifecycleStateSourceProvider(),
             appLifecycleStateRepositoryProvider(),
+            httpSourceProvider(),
+            transportSourceProvider(),
           ],
           builder: (context, child) => keystoreProvider(
             child: transportRepositoryProvider(
@@ -59,8 +61,6 @@ class ApplicationInjection extends StatelessWidget {
                 child: MultiProvider(
                   providers: [
                     currentAccountsSourceProvider(),
-                    httpSourceProvider(),
-                    transportSourceProvider(),
                     approvalsRepositoryProvider(),
                     genericContractsRepositoryProvider(),
                     localeRepositoryProvider(),

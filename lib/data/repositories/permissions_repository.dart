@@ -20,7 +20,7 @@ class PermissionsRepository {
         _eventBus = eventBus {
     _accountRemovedStreamSubscription = _eventBus
         .on<AccountRemovedEvent>()
-        .listen((e) => _lock.synchronized(() => _accountRemovedStreamListener));
+        .listen((e) => _lock.synchronized(() => _accountRemovedStreamListener(e)));
   }
 
   Stream<Map<String, Permissions>> get permissionsStream => _hiveSource.permissionsStream;

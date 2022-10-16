@@ -85,7 +85,7 @@ class HiveSource {
   Box<dynamic> get _browserTabsBox => Hive.box<dynamic>(_browserTabsKey);
 
   Stream<Map<String, String>> get seedsStream =>
-      _seedsBox.watchAll().map((e) => e.cast<String, String>());
+      _seedsBox.watchAll<String>().map((e) => e.cast<String, String>());
 
   Map<String, String> get seeds => _seedsBox.toMap().cast<String, String>();
 
@@ -103,14 +103,17 @@ class HiveSource {
 
   String? get currentKey => _preferencesBox.get(_currentKeyKey) as String?;
 
+  /// Set label(name) to publicKey
   Future<void> setCurrentKey(String? publicKey) => _preferencesBox.put(
         _currentKeyKey,
         publicKey,
       );
 
+  /// Equivalent stream of [keyLabels]
   Stream<Map<String, String>> get keyLabelsStream =>
-      _keyLabelsBox.watchAll().map((e) => e.cast<String, String>());
+      _keyLabelsBox.watchAll<String>().map((e) => e.cast<String, String>());
 
+  /// Public keys and their labels (names) that are displayed to user
   Map<String, String> get keyLabels => _keyLabelsBox.toMap().cast<String, String>();
 
   Future<void> setKeyLabel({
@@ -136,8 +139,8 @@ class HiveSource {
   Future<void> clearKeyPasswords() => _keyPasswordsBox.clear();
 
   Stream<Map<String, List<String>>> get externalAccountsStream => _externalAccountsBox
-      .watchAll()
-      .map((e) => e.map((k, v) => MapEntry(k as String, v.cast<String>())));
+      .watchAll<String>()
+      .map((e) => e.map((k, v) => MapEntry(k, v.cast<String>())));
 
   Map<String, List<String>> get externalAccounts =>
       _externalAccountsBox.toMap().map((k, v) => MapEntry(k as String, v.cast<String>()));
@@ -234,7 +237,7 @@ class HiveSource {
   Future<void> clearIsBiometryEnabled() => _userPreferencesBox.delete(_biometryStatusKey);
 
   Stream<Map<String, Permissions>> get permissionsStream => _permissionsBox
-      .watchAll()
+      .watchAll<String>()
       .cast<Map<String, PermissionsDto>>()
       .map((e) => e.map((k, v) => MapEntry(k, v.toModel())));
 
@@ -412,7 +415,7 @@ class HiveSource {
     await Hive.openBox<PermissionsDto>(_permissionsBoxName);
     await Hive.openBox<List>(_externalAccountsBoxName);
     await Hive.openBox<BookmarkDto>(_bookmarksBoxName);
-    await Hive.openBox<String>(_searchHistoryBoxName);
+    await Hive.openBox<SearchHistoryDto>(_searchHistoryBoxName);
     await Hive.openBox<SiteMetaDataDto>(_siteMetaDataBoxName);
     await Hive.openBox<CurrencyDto>(_currenciesBoxName);
     await Hive.openBox<bool>(_browserNeedKey);
@@ -453,7 +456,8 @@ extension<T> on Box<T> {
   Stream<T?> watchKey(dynamic key) =>
       watch(key: key).map((e) => e.value as T).cast<T?>().startWith(get(key));
 
-  Stream<Map<dynamic, T>> watchAll() => watch().map((_) => toMap()).startWith(toMap());
+  Stream<Map<K, T>> watchAll<K>() =>
+      watch().map((_) => toMap().cast<K, T>()).startWith(toMap().cast<K, T>());
 
   Stream<Iterable<T>> watchAllValues() => watch().map((_) => values).startWith(values);
 }
