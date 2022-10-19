@@ -10,6 +10,7 @@ import 'package:ever_wallet/application/util/extensions/context_extensions.dart'
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CheckSeedPhraseRoute extends MaterialPageRoute<void> {
   CheckSeedPhraseRoute(List<String> phrase)
@@ -52,8 +53,7 @@ class _CheckSeedPhraseScreenState extends State<CheckSeedPhraseScreen> {
         appBar: OnboardingAppBar(
           actions: [
             TextPrimaryButton.appBar(
-              // TODO: replace text
-              text: 'Skip',
+              text: localization.skip_word,
               style: themeStyle.styles.basicStyle.copyWith(
                 fontWeight: FontWeight.w600,
                 color: themeStyle.colors.primaryButtonColor,
@@ -69,8 +69,7 @@ class _CheckSeedPhraseScreenState extends State<CheckSeedPhraseScreen> {
               Text(localization.check_seed_phrase, style: themeStyle.styles.appbarStyle),
               const SizedBox(height: 16),
               Text(
-                // TODO: change text
-                'Now let’s check that you wrote your seed phrase correctly. Please choose the correct words to continue.',
+                localization.check_seed_phrase_correctly,
                 style: themeStyle.styles.basicStyle,
               ),
               const SizedBox(height: 32),
@@ -81,10 +80,20 @@ class _CheckSeedPhraseScreenState extends State<CheckSeedPhraseScreen> {
                     answer: (available, user, index) => _buildCheckBody(
                       available,
                       user,
+                      localization,
                       currentIndex: index,
                     ),
-                    correct: (available, user) => _buildCheckBody(available, user),
-                    error: (available, user) => _buildCheckBody(available, user, isError: true),
+                    correct: (available, user) => _buildCheckBody(
+                      available,
+                      user,
+                      localization,
+                    ),
+                    error: (available, user) => _buildCheckBody(
+                      available,
+                      user,
+                      localization,
+                      isError: true,
+                    ),
                   ),
                 ),
               ),
@@ -97,7 +106,8 @@ class _CheckSeedPhraseScreenState extends State<CheckSeedPhraseScreen> {
 
   Widget _buildCheckBody(
     List<String> available,
-    List<CheckSeedCorrectAnswer> userAnswers, {
+    List<CheckSeedCorrectAnswer> userAnswers,
+    AppLocalizations localization, {
     int? currentIndex,
     bool isError = false,
   }) {
@@ -116,8 +126,7 @@ class _CheckSeedPhraseScreenState extends State<CheckSeedPhraseScreen> {
         ),
         if (isError)
           Text(
-            // TODO: replace text
-            'The seed phrase is wrong',
+            localization.seed_is_wrong,
             style: StylesRes.basicText.copyWith(color: ColorsRes.redDark),
           ),
         const Spacer(),

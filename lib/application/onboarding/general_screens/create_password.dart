@@ -121,7 +121,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   }
 
   Widget getBiometricSwitcher() {
-    // final localization = context.localization;
+    final localization = context.localization;
     final themeStyle = context.themeStyle;
 
     return StreamProvider<AsyncValue<bool>>(
@@ -146,8 +146,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        // TODO: replace text
-                        'Use Biometry for fast login',
+                        localization.use_biometry_for_fast_login,
                         style: themeStyle.styles.basicStyle,
                       ),
                     ),

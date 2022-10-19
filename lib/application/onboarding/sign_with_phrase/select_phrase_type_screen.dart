@@ -59,7 +59,7 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
   @override
   Widget build(BuildContext context) {
     final themeStyle = context.themeStyle;
-    // final localization = context.localization;
+    final localization = context.localization;
 
     return OnboardingBackground(
       child: Scaffold(
@@ -76,14 +76,12 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        // TODO: replace text
-                        'Select wallet type',
+                        localization.select_wallet_type,
                         style: themeStyle.styles.appbarStyle,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        // TODO: replace text
-                        'Depends on the type of transactions you want to make',
+                        localization.depend_on_transactions,
                         style: themeStyle.styles.basicStyle,
                       ),
                       const SizedBox(height: 28),
@@ -127,8 +125,7 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
                 ),
               ),
               PrimaryButton(
-                // TODO: replace text
-                text: 'Create the wallet',
+                text: localization.create_wallet,
                 onPressed: () async {
                   final type = selectedWalletNotifier.value;
                   await context.read<AccountsRepository>().addAccount(
@@ -152,13 +149,12 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
   Widget _advancedWallets(ThemeStyle themeStyle) {
     return ValueListenableBuilder<bool>(
       valueListenable: isAdvancedWallets,
-      builder: (_, isAdvanced, __) {
+      builder: (context, isAdvanced, __) {
         return Row(
           children: [
             Expanded(
               child: Text(
-                // TODO: replace text
-                'Advanced wallet types',
+                context.localization.advanced_wallet_types,
                 style: themeStyle.styles.basicStyle,
               ),
             ),
@@ -181,7 +177,7 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
   }) {
     return ValueListenableBuilder<WalletType>(
       valueListenable: selectedWalletNotifier,
-      builder: (_, selectedType, __) {
+      builder: (context, selectedType, __) {
         final isSelected = type.toInt() == selectedType.toInt();
 
         return GestureDetector(
@@ -207,7 +203,6 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
                 Row(
                   children: [
                     Text(
-                      // TODO: replace text
                       name,
                       style: const TextStyle(
                         fontSize: 20,
@@ -220,8 +215,7 @@ class _SelectPhraseTypeScreenState extends State<SelectPhraseTypeScreen> {
                     if (isRecommended) ...[
                       const SizedBox(width: 8),
                       Text(
-                        // TODO: replace text
-                        'Recommended',
+                        context.localization.recommended_word,
                         style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.grey),
                       ),
                     ],

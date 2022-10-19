@@ -52,9 +52,8 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     final themeStyle = context.themeStyle;
 
     return Scaffold(
-      appBar: const DefaultAppBar(
-        // TODO: replace text
-        backText: 'Seeds & subscriptions',
+      appBar: DefaultAppBar(
+        backText: localization.seeds_and_subscriptions,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -65,13 +64,11 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             subtitleWidget: !widget.isSelected
                 ? null
                 : Text(
-                    // TODO: replace text
-                    'Current seed'.toUpperCase(),
+                    localization.current_seed.toUpperCase(),
                     style: themeStyle.styles.sectionCaption,
                   ),
             titleWidget: Text(
-              // TODO: replace text
-              '${widget.seed.name} seed phrase',
+              localization.seed_phrase_with_name(widget.seed.name),
               maxLines: 2,
               style: themeStyle.styles.header3Style,
             ),
@@ -81,8 +78,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              // TODO: replace text
-              'Keys',
+              localization.keys_word,
               style: themeStyle.styles.sectionCaption,
             ),
           ),
@@ -104,8 +100,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                       height: 46,
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        // TODO: replace text
-                        '+ Add key',
+                        localization.plus_add_key,
                         style: themeStyle.styles.basicStyle.copyWith(
                           color: ColorsRes.darkBlue,
                           fontWeight: FontWeight.w500,
@@ -127,7 +122,6 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     AppLocalizations localization,
     KeyStoreEntry seed,
   ) {
-    // ignore: use_decorated_box
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: ColorsRes.darkBlue.withOpacity(0.2)),
@@ -146,8 +140,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             },
           ),
           MenuDropdownData(
-            // TODO: replace text
-            title: 'Export',
+            title: localization.export_word,
             onTap: () => AuthUtils.askPasswordBeforeExport(
               context: context,
               seed: seed,
@@ -171,8 +164,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             ),
           ),
           MenuDropdownData(
-            // TODO: replace text
-            title: 'Change password',
+            title: localization.change_password,
             onTap: () => showEWBottomSheet<void>(
               context,
               title: localization.change_seed_password,
@@ -180,8 +172,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             ),
           ),
           MenuDropdownData(
-            // TODO: replace text
-            title: 'Delete',
+            title: localization.delete_word,
             onTap: () => showSeedDeleteSheet(
               context: context,
               seed: seed,
@@ -209,7 +200,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
         child: Assets.images.key.svg(width: 18, height: 18),
       ),
       titleText: key.name,
-      subtitleText: '${key.name} 3 accounts',
+      subtitleText: localization.key_name_with_sub_count(key.name, 3),
       trailing: _keyDropdown(themeStyle, localization, key),
     );
   }
@@ -222,8 +213,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     return MenuDropdown(
       items: [
         MenuDropdownData(
-          // TODO: replace text
-          title: 'Hide',
+          title: localization.hide_word,
           onTap: () {},
         ),
         MenuDropdownData(
@@ -237,13 +227,11 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
           },
         ),
         MenuDropdownData(
-          // TODO: replace text
-          title: 'Copy key',
+          title: localization.copy_key,
           onTap: () {},
         ),
         MenuDropdownData(
-          // TODO: replace text
-          title: 'Delete',
+          title: localization.delete_word,
           onTap: () => showSeedDeleteSheet(
             context: context,
             seed: seed,

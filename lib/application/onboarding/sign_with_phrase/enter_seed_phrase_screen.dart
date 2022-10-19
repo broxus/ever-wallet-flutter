@@ -134,8 +134,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
                           return Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Text(
-                              // TODO: replace word
-                              '$v words',
+                              localization.words_count(v),
                               style: themeStyle.styles.basicStyle.copyWith(
                                 color: isActive
                                     ? null
@@ -161,8 +160,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  // TODO: replace text
-                  'You can paste all the words from the clipboard into the first box',
+                  localization.paste_seed_into_first_box,
                   style: themeStyle.styles.captionStyle.copyWith(
                     color: ColorsRes.white,
                     letterSpacing: 0.1,

@@ -55,8 +55,7 @@ class _AddNewSeedPasswordWidgetState extends State<AddNewSeedPasswordWidget> {
                         children: [
                           const Icon(Icons.arrow_back_ios, color: ColorsRes.darkBlue, size: 20),
                           Text(
-                            // TODO: replace text
-                            'Back',
+                            context.localization.back_word,
                             style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.darkBlue),
                           ),
                         ],

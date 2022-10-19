@@ -50,8 +50,7 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
               Text(localization.save_seed_phrase, style: themeStyle.styles.appbarStyle),
               const SizedBox(height: 12),
               Text(
-                // TODO: change text
-                'It gives access to your wallet, don’t share it with anyone and store in a safe place. If you lose it, you will not be able to restore it.',
+                localization.save_seed_warning,
                 style: themeStyle.styles.basicStyle,
               ),
               const SizedBox(height: 24),
@@ -94,8 +93,7 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
                                   height: kPrimaryButtonHeight,
                                   child: Align(
                                     child: Text(
-                                      // TODO: replace text
-                                      'Copied',
+                                      localization.copied_no_exclamation,
                                       style: themeStyle.styles.basicStyle
                                           .copyWith(color: ColorsRes.green400),
                                     ),
@@ -135,15 +133,14 @@ class _SaveSeedPhraseScreenState extends State<SaveSeedPhraseScreen> {
                       child: Column(
                         children: [
                           PrimaryButton(
-                            // TODO: replace text
-                            text: 'Check the phrase',
+                            text: localization.check_seed_phrase,
                             onPressed: () =>
                                 Navigator.of(context).push(CheckSeedPhraseRoute(words)),
                           ),
                           const SizedBox(height: 12),
                           PrimaryButton(
                             backgroundColor: const Color(0xFF253056),
-                            text: "Skip, I'll take the risk",
+                            text: localization.skip_take_risk,
                             onPressed: () => Navigator.of(context).push(CreatePasswordRoute(words)),
                             isTransparent: true,
                           ),

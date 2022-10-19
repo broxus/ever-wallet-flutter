@@ -7,6 +7,7 @@ import 'package:ever_wallet/application/util/extensions/context_extensions.dart'
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddNewSeedValidateWidget extends StatefulWidget {
   const AddNewSeedValidateWidget({
@@ -54,8 +55,7 @@ class _AddNewSeedValidateWidgetState extends State<AddNewSeedValidateWidget> {
                     children: [
                       const Icon(Icons.arrow_back_ios, color: ColorsRes.darkBlue, size: 20),
                       Text(
-                        // TODO: replace text
-                        'Back',
+                        context.localization.back_word,
                         style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.darkBlue),
                       ),
                     ],
@@ -78,8 +78,7 @@ class _AddNewSeedValidateWidgetState extends State<AddNewSeedValidateWidget> {
         ),
         const SizedBox(height: 16),
         Text(
-          // TODO: change text
-          'Now let’s check that you wrote your seed phrase correctly. Please choose the correct words to continue.',
+          localization.check_seed_phrase_correctly,
           style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
         ),
         const SizedBox(height: 30),
@@ -90,9 +89,19 @@ class _AddNewSeedValidateWidgetState extends State<AddNewSeedValidateWidget> {
               available,
               user,
               currentIndex: index,
+              localization,
             ),
-            correct: (available, user) => _buildCheckBody(available, user),
-            error: (available, user) => _buildCheckBody(available, user, isError: true),
+            correct: (available, user) => _buildCheckBody(
+              available,
+              user,
+              localization,
+            ),
+            error: (available, user) => _buildCheckBody(
+              available,
+              user,
+              localization,
+              isError: true,
+            ),
           ),
         ),
       ],
@@ -101,7 +110,8 @@ class _AddNewSeedValidateWidgetState extends State<AddNewSeedValidateWidget> {
 
   Widget _buildCheckBody(
     List<String> available,
-    List<CheckSeedCorrectAnswer> userAnswers, {
+    List<CheckSeedCorrectAnswer> userAnswers,
+    AppLocalizations localization, {
     int? currentIndex,
     bool isError = false,
   }) {
@@ -120,8 +130,7 @@ class _AddNewSeedValidateWidgetState extends State<AddNewSeedValidateWidget> {
         ),
         if (isError)
           Text(
-            // TODO: replace text
-            'The seed phrase is wrong',
+            localization.seed_is_wrong,
             style: StylesRes.basicText.copyWith(color: ColorsRes.redLight),
           )
         else

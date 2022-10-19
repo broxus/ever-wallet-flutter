@@ -93,9 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       children: [
         buildSection(
-          // TODO: replace text
-          title: 'Current seed (name of seed)'.toUpperCase(),
-          // title: AppLocalizations.of(context)!.current_seed_preferences,
+          title: localization.current_seed_name_of_seed.toUpperCase(),
           children: [
             if (currentKey != null && currentKey.isNotLegacy && currentKey.isMaster)
               buildSectionAction(
@@ -194,9 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   : null,
             ),
             buildSection(
-              // TODO: replace text
-              title: 'All seeds'.toUpperCase(),
-              // title: context.localization.seeds,
+              title: localization.all_seeds.toUpperCase(),
               children: [
                 if (keys.isNotEmpty)
                   buildSeedsList(
@@ -206,15 +202,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     onSelect: (seed) =>
                         context.read<KeysRepository>().setCurrentKey(seed.publicKey),
                     showAddAction: true,
+                    localization: localization,
                   ),
               ],
             ),
           ],
         ),
         buildSection(
-          // TODO: replace text
-          title: 'Preferences'.toUpperCase(),
-          // title: context.localization.wallet_preferences,
+          title: localization.preferences.toUpperCase(),
           children: [
             AsyncValueStreamProvider<bool>(
               create: (context) => context.read<BiometryRepository>().availabilityStream,
@@ -266,6 +261,7 @@ class _ProfilePageState extends State<ProfilePage> {
     required void Function(KeyStoreEntry) onSelect,
     required void Function() onAdd,
     required bool showAddAction,
+    required AppLocalizations localization,
   }) {
     final children = <Widget>[];
     for (final seed in seeds.keys) {
@@ -294,9 +290,7 @@ class _ProfilePageState extends State<ProfilePage> {
       children.add(
         buildSectionAction(
           onTap: onAdd,
-          // TODO: replace text
-          title: 'Manage seeds & accounts',
-          // title: AppLocalizations.of(context)!.add_seed,
+          title: localization.manage_seeds_accounts,
         ),
       );
     } else {

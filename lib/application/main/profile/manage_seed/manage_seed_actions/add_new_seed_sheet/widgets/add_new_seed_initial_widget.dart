@@ -41,6 +41,7 @@ class _AddNewSeedInitialWidgetState extends State<AddNewSeedInitialWidget> {
   @override
   Widget build(BuildContext context) {
     final themeStyle = context.themeStyle;
+    final localization = context.localization;
 
     return Stack(
       children: [
@@ -60,8 +61,7 @@ class _AddNewSeedInitialWidgetState extends State<AddNewSeedInitialWidget> {
             Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Text(
-                // TODO: replace text
-                'Add seed phrase',
+                localization.add_seed_phrase,
                 style: themeStyle.styles.sheetHeaderStyle,
               ),
             ),
@@ -71,8 +71,7 @@ class _AddNewSeedInitialWidgetState extends State<AddNewSeedInitialWidget> {
               child: BorderedInput(
                 controller: nameController,
                 validator: (_) => nameController.text.trim().isEmpty ? '' : null,
-                // TODO: replace text
-                label: 'Seed name',
+                label: localization.seed_name,
                 cursorColor: ColorsRes.text,
                 textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
                 textInputAction: TextInputAction.done,
@@ -112,8 +111,7 @@ extension AddNewSeedTypeX on AddNewSeedType {
       case AddNewSeedType.create:
         return context.localization.create_seed;
       case AddNewSeedType.import:
-        // TODO: replace text
-        return 'Import seed';
+        return context.localization.import_seed;
     }
   }
 }

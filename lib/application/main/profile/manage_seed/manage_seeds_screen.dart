@@ -54,16 +54,14 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                // TODO: replace text
-                'Manage seeds & subscriptions',
+                localization.manage_seeds_subscriptions,
                 style: themeStyle.styles.header3Style,
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                // TODO: replace text
-                'Seed phrases',
+                localization.seed_phrases,
                 style: themeStyle.styles.sectionCaption,
               ),
             ),
@@ -117,8 +115,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
             height: 46,
             alignment: Alignment.centerLeft,
             child: Text(
-              // TODO: replace text
-              '+ Add new seed phrase ',
+              localization.plus_add_new_seed,
               style: themeStyle.styles.basicStyle.copyWith(
                 color: ColorsRes.darkBlue,
                 fontWeight: FontWeight.w500,
@@ -143,8 +140,8 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
       onPressed: () => Navigator.of(context).push(
         SeedDetailScreenRoute(seed: seed, children: children, isSelected: isSelected),
       ),
-      // TODO: replace text and counting
-      subtitleText: '${children?.length ?? 0} public keys',
+      // TODO: replace counting
+      subtitleText: localization.children_public_keys(children?.length ?? 0),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -168,8 +165,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
     return MenuDropdown(
       items: [
         MenuDropdownData(
-          // TODO: replace text
-          title: 'Use this seed',
+          title: localization.use_this_seed,
           onTap: () => context.read<KeysRepository>().setCurrentKey(seed.publicKey),
         ),
         MenuDropdownData(
@@ -183,8 +179,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
           },
         ),
         MenuDropdownData(
-          // TODO: replace text
-          title: 'Export',
+          title: localization.export_word,
           onTap: () => AuthUtils.askPasswordBeforeExport(
             context: context,
             seed: seed,
@@ -208,8 +203,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
           ),
         ),
         MenuDropdownData(
-          // TODO: replace text
-          title: 'Change password',
+          title: localization.change_password,
           onTap: () => showEWBottomSheet<void>(
             context,
             title: localization.change_seed_password,
@@ -217,8 +211,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
           ),
         ),
         MenuDropdownData(
-          // TODO: replace text
-          title: 'Delete',
+          title: localization.delete_word,
           onTap: () => showSeedDeleteSheet(
             context: context,
             seed: seed,

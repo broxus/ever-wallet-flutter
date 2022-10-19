@@ -22,6 +22,7 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = context.themeStyle;
+    final localization = context.localization;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -45,8 +46,7 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      // TODO: replace text
-                      'Support of any token and access to the DApps of Everscale blockchain ecosystem',
+                      localization.support_token_and_access_everscale,
                       style: style.styles.basicStyle,
                     ),
                     const SizedBox(height: 32),
@@ -62,7 +62,7 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     PrimaryButton(
-                      text: 'Sign in with Ledger',
+                      text: localization.sign_with_ledger,
                       // TODO: change icon
                       icon: Assets.images.ledger.svg(
                         color: style.styles.secondaryButtonStyle.color,
@@ -75,13 +75,14 @@ class OnboardingScreen extends StatelessWidget {
                       TextSpan(
                         children: [
                           TextSpan(
-                            text: 'By proceeding, you accept EVER Wallet License Agreement. ',
+                            text: localization.by_processing_accept_license,
                             style: style.styles.basicStyle,
                           ),
                           TextSpan(
-                            text: 'Read here',
-                            style:
-                                style.styles.basicStyle.copyWith(color: ColorsRes.bluePrimary400),
+                            text: localization.read_here,
+                            style: style.styles.basicStyle.copyWith(
+                              color: ColorsRes.bluePrimary400,
+                            ),
                             recognizer: TapGestureRecognizer()..onTap = onLinkTap,
                           ),
                         ],

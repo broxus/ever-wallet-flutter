@@ -55,8 +55,7 @@ class OnboardingAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultAppBar(
-      // TODO: replace text
-      backText: 'Back',
+      backText: context.localization.back_word,
       backgroundColor: backgroundColor,
       closeType: closeType,
       actions: actions,

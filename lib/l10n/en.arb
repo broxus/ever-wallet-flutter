@@ -14,13 +14,19 @@
   "copy": "Copy",
   "cancel": "Cancel",
   "proceed": "Proceed",
+  "recommended_word": "Recommended",
   "share": "Share",
   "paste": "Paste",
   "clear": "Clear",
   "public_key": "Public key",
+  "keys_word": "Keys",
   "address": "Address",
   "type": "Type",
+  "delete_word": "Delete",
+  "hide_word": "Hide",
   "history": "History",
+  "seed_word": "Seed",
+  "export_word": "Export",
   "welcome_title": "Welcome to\nEVER Wallet",
   "welcome_subtitle": "Create a new wallet or sign in",
   "create_new_wallet": "Create a new wallet",
@@ -30,7 +36,7 @@
   "save_seed_phrase": "Save the seed phrase",
   "copy_words": "Copy all words",
   "confirm_seed_saved": "I wrote it down on paper",
-  "check_seed_phrase": "Let’s check the seed phrase",
+  "check_seed_phrase": "Check the phrase",
   "incorrect_word": "Incorrect word",
   "create_password": "Create a password",
   "create_password_description": "We will ask for it at each transaction. If you forget it, you will need to restore the wallet from the seed phrase",
@@ -64,7 +70,9 @@
   "profile": "Profile",
   "seeds": "Seeds",
   "add_seed": "Add seed",
+  "add_seed_phrase": "Add seed phrase",
   "current_seed_preferences": "Current seed preferences",
+  "seed_name": "Seed name",
   "export_seed": "Export seed phrase",
   "remove_seed": "Remove seed phrase",
   "change_seed_password": "Change seed phrase password",
@@ -74,7 +82,7 @@
   "logout_confirmation": "Logout confirmation",
   "logout": "Log out",
   "create_seed": "Create new seed",
-  "import_seed": "Import seed (12 words)",
+  "import_seed": "Import seed",
   "import_legacy_seed": "Import legacy seed (24 words)",
   "old_password": "Old password",
   "new_password": "New password",
@@ -178,7 +186,8 @@
   },
   "count": "Count",
   "transaction_required_confirms": "Any transaction requires the confirmation of:",
-  "select_wallet_type": "Select wallet type to create",
+  "select_wallet_type": "Select wallet type",
+  "depend_on_transactions": "Depends on the type of transactions you want to make",
   "wallet_deployed": "Wallet has been deployed successfully",
   "deploying": "Deploying",
   "n_of_k": "{n} of {k}",
@@ -336,5 +345,60 @@
   "bookmark_removed": "Bookmark has been removed",
   "undo": "Undo",
   "history_cleared": "History has been cleared",
-  "remove": "Remove"
+  "remove": "Remove",
+  "words_count": "{count} words",
+  "@words_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "paste_seed_into_first_box": "You can paste all the words from the clipboard into the first box",
+  "back_word": "Back",
+  "save_seed_warning": "It gives access to your wallet, don’t share it with anyone and store in a safe place. If you lose it, you will not be able to restore it.",
+  "copied_no_exclamation": "Copied",
+  "skip_take_risk": "Skip, I'll take the risk",
+  "skip_word": "Skip",
+  "check_seed_phrase_correctly": "Now let’s check that you wrote your seed phrase correctly. Please choose the correct words to continue.",
+  "seed_is_wrong": "The seed phrase is wrong",
+  "support_token_and_access_everscale": "Support of any token and access to the DApps of Everscale blockchain ecosystem",
+  "sign_with_ledger": "Sign in with Ledger",
+  "by_processing_accept_license": "By proceeding, you accept EVER Wallet License Agreement. ",
+  "read_here": "Read here",
+  "use_biometry_for_fast_login": "Use Biometry for fast login",
+  "create_wallet": "Create the wallet",
+  "advanced_wallet_types": "Advanced wallet types",
+  "current_seed_name_of_seed": "Current seed (name of seed)",
+  "all_seeds": "All seeds",
+  "manage_seeds_accounts": "Manage seeds & accounts",
+  "seeds_and_subscriptions": "Seeds & subscriptions",
+  "current_seed": "Current seed",
+  "seed_phrase_with_name": "{name} seed phrase",
+  "@seed_phrase_with_name": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "plus_add_key": "+ Add key",
+  "change_password": "Change password",
+  "copy_key": "Copy key",
+  "key_name_with_sub_count": "{name} {count} accounts",
+  "@key_name_with_sub_count": {
+    "placeholders": {
+      "name": {},
+      "count": {}
+    }
+  },
+  "manage_seeds_subscriptions": "Manage seeds & subscriptions",
+  "seed_phrases": "Seed phrases",
+  "plus_add_new_seed": "+ Add new seed phrase ",
+  "children_public_keys": "{count} public keys",
+  "@children_public_keys": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "use_this_seed": "Use this seed",
+  "delete_seed_phrase": "Delete seed phrase",
+  "after_deletion_seed_disappear": "After deletion seed phrase will disappear from your list. You will be able to get it back by importing.",
+  "key_name": "Key name"
 }

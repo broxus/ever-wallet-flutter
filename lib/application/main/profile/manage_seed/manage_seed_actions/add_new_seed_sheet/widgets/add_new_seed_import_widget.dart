@@ -77,8 +77,7 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
                       children: [
                         const Icon(Icons.arrow_back_ios, color: ColorsRes.darkBlue, size: 20),
                         Text(
-                          // TODO: replace text
-                          'Back',
+                          localization.back_word,
                           style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.darkBlue),
                         ),
                       ],

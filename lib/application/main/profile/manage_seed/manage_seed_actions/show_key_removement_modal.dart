@@ -9,6 +9,7 @@ import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 Future<void> showSeedDeleteSheet({
@@ -17,9 +18,7 @@ Future<void> showSeedDeleteSheet({
 }) {
   return showEWBottomSheet(
     context,
-    // TODO: replace text
-    title: 'Delete seed phrase',
-    // title: context.localization.remove_seed,
+    title: context.localization.delete_seed_phrase,
     body: (_) => SeedDeleteSheet(seed: seed),
   );
 }
@@ -35,7 +34,7 @@ class SeedDeleteSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeStyle = context.themeStyle;
-    // final localization = context.localization;
+    final localization = context.localization;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -44,14 +43,12 @@ class SeedDeleteSheet extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: Text(
-            // TODO: replace text
-            'After deletion seed phrase will disappear from your list. You will be able to get it back by importing.',
+            localization.after_deletion_seed_disappear,
             style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
           ),
         ),
         Text(
-          // TODO: replace text
-          'Seed',
+          localization.seed_word,
           style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.grey),
         ),
         const SizedBox(height: 8),
@@ -65,8 +62,7 @@ class SeedDeleteSheet extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
         ),
         Text(
-          // TODO: replace text
-          'Keys',
+          localization.keys_word,
           style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.grey),
         ),
         const SizedBox(height: 8),
@@ -76,14 +72,13 @@ class SeedDeleteSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: List.generate(1, (_) => _accountItem(themeStyle)),
+              children: List.generate(1, (_) => _accountItem(themeStyle, localization)),
             ),
           ),
         ),
         const SizedBox(height: 16),
         PrimaryElevatedButton(
-          // TODO: replace text
-          text: 'Delete',
+          text: localization.delete_word,
           onPressed: () {
             context.read<KeysRepository>().removeKey(seed.publicKey);
 
@@ -96,7 +91,7 @@ class SeedDeleteSheet extends StatelessWidget {
     );
   }
 
-  Widget _accountItem(ThemeStyle themeStyle) {
+  Widget _accountItem(ThemeStyle themeStyle, AppLocalizations localization) {
     return EWListTile(
       contentPadding: EdgeInsets.zero,
       leading: Container(
@@ -110,12 +105,11 @@ class SeedDeleteSheet extends StatelessWidget {
         child: Assets.images.key.svg(),
       ),
       titleWidget: Text(
-        // TODO: replace text
-        'Key name',
+        localization.key_name,
         style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
       ),
       // TODO: replace text
-      subtitleText: '0:9f9...1e0  3 accounts',
+      subtitleText: localization.key_name_with_sub_count('0:9f9...1e0', 3),
     );
   }
 }
