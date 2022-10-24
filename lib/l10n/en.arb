@@ -53,6 +53,7 @@
   "add_account_description": "You can create a new account or add created one",
   "add_asset": "Add asset",
   "external_account": "External account",
+  "external_accounts": "External Accounts",
   "transactions_empty": "History is empty",
   "assets": "Assets",
   "transactions": "Transactions",
@@ -78,6 +79,8 @@
   "change_seed_password": "Change seed phrase password",
   "derive_key": "Derive key",
   "rename_key": "Rename seed phrase",
+  "rename_account": "Rename account",
+  "account_renamed": "Account renamed",
   "wallet_preferences": "Wallet preferences",
   "logout_confirmation": "Logout confirmation",
   "logout": "Log out",
@@ -89,7 +92,7 @@
   "password_changed": "Password changed successfully",
   "remove_key": "Remove key",
   "remove_key_confirmation": "Are you sure you want to remove key?",
-  "derive_enter_password": "Enter password to derive",
+  "derive_enter_password": "Enter password to add key",
   "export_enter_password": "Enter password to export",
   "enable_biometry": "Enable biometry",
   "biometry": "Biometry",
@@ -164,6 +167,7 @@
   "decimals": "Decimals",
   "owner_address": "Owner address",
   "total_supply": "Total supply",
+  "total_balance": "Total balance",
   "account": "Account",
   "data": "Data",
   "source_public_key": "Source public key",
@@ -286,6 +290,7 @@
   "no_password": "No password",
   "not_granted": "Not granted",
   "no_accounts": "No accounts",
+  "accounts_word": "Accounts",
   "origin": "Origin",
   "account_address": "Account address",
   "account_public_key": "Account public key",
@@ -379,6 +384,7 @@
     }
   },
   "plus_add_key": "+ Add key",
+  "plus_add_account": "+ Add account",
   "change_password": "Change password",
   "copy_key": "Copy key",
   "key_name_with_sub_count": "{name} {count} accounts",
@@ -400,5 +406,20 @@
   "use_this_seed": "Use this seed",
   "delete_seed_phrase": "Delete seed phrase",
   "after_deletion_seed_disappear": "After deletion seed phrase will disappear from your list. You will be able to get it back by importing.",
-  "key_name": "Key name"
+  "key_name": "Key name",
+  "after_deletion_public_disappear": "After deletion public key will disappear from your list. You will be able to get it back by importing.",
+  "after_deletion_account_disappear": "After deletion account will disappear from your list. You will be able to get it back by importing.",
+  "public_key_copied": "{key} copied!",
+  "@public_key_copied": {
+    "placeholders": {
+      "key": {}
+    }
+  },
+  "my_accounts": "My Accounts",
+  "delete_account_title": "Delete {account_name}",
+  "@delete_account_title": {
+    "placeholders": {
+      "account_name": {}
+    }
+  }
 }

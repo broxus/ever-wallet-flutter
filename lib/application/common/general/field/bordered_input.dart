@@ -58,7 +58,7 @@ class BorderedInput extends StatefulWidget {
     this.errorText,
     this.textStyle,
     this.formatters,
-    this.cursorColor,
+    this.cursorColor = ColorsRes.black,
     this.autovalidateMode,
     this.needError = true,
   });

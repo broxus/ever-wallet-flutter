@@ -124,6 +124,21 @@ class StylesRes {
     letterSpacing: 0.1,
   );
 
+  static const bold18Body = TextStyle(
+    fontSize: 18,
+    height: 1.33,
+    fontWeight: FontWeight.w700,
+    fontFamily: FontFamily.pt,
+    letterSpacing: 0.5,
+  );
+  static const medium14Caption = TextStyle(
+    fontSize: 14,
+    height: 1.43,
+    fontWeight: FontWeight.w500,
+    fontFamily: FontFamily.pt,
+    letterSpacing: 0.75,
+  );
+
   /// Style for header in bottom sheet
   static const sheetHeaderText = TextStyle(
     fontWeight: FontWeight.w700,

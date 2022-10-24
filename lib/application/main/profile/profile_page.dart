@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_future_provider.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
@@ -7,13 +5,11 @@ import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/main/profile/biometry_modal_body.dart';
-import 'package:ever_wallet/application/main/profile/derive_key_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/export_seed_phrase_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/language_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/logout_modal/show_logout_modal.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seeds_screen.dart';
-import 'package:ever_wallet/application/main/profile/name_new_key_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/widgets/keys_builder.dart';
 import 'package:ever_wallet/application/util/auth_utils.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -95,76 +91,6 @@ class _ProfilePageState extends State<ProfilePage> {
         buildSection(
           title: localization.current_seed_name_of_seed.toUpperCase(),
           children: [
-            if (currentKey != null && currentKey.isNotLegacy && currentKey.isMaster)
-              buildSectionAction(
-                title: localization.derive_key,
-                onTap: keys.isNotEmpty
-                    ? () async {
-                        final name = await showEWBottomSheet<String?>(
-                          context,
-                          title: localization.name_new_key,
-                          body: (_) => const NameNewKeyModalBody(),
-                        );
-
-                        await Future<void>.delayed(const Duration(seconds: 1));
-
-                        if (name != null) {
-                          if (!mounted) return;
-
-                          final isEnabled = context.read<BiometryRepository>().status;
-                          final isAvailable = context.read<BiometryRepository>().availability;
-
-                          if (isAvailable && isEnabled) {
-                            try {
-                              final password =
-                                  await context.read<BiometryRepository>().getKeyPassword(
-                                        localizedReason:
-                                            AppLocalizations.of(context)!.authentication_reason,
-                                        publicKey: currentKey.publicKey,
-                                      );
-
-                              if (!mounted) return;
-
-                              await context.read<KeysRepository>().deriveKey(
-                                    name: name.isNotEmpty ? name : null,
-                                    publicKey: currentKey.publicKey,
-                                    accountId: context
-                                            .read<KeysRepository>()
-                                            .keys
-                                            .where((e) => e.masterKey == currentKey.publicKey)
-                                            .map((e) => e.accountId)
-                                            .reduce(max) +
-                                        1,
-                                    password: password,
-                                  );
-                            } catch (err) {
-                              if (!mounted) return;
-
-                              showEWBottomSheet<void>(
-                                context,
-                                title: localization.derive_enter_password,
-                                body: (_) => DeriveKeyModalBody(
-                                  publicKey: currentKey.publicKey,
-                                  name: name.isNotEmpty ? name : null,
-                                ),
-                              );
-                            }
-                          } else {
-                            if (!mounted) return;
-
-                            showEWBottomSheet<void>(
-                              context,
-                              title: localization.derive_enter_password,
-                              body: (_) => DeriveKeyModalBody(
-                                publicKey: currentKey.publicKey,
-                                name: name.isNotEmpty ? name : null,
-                              ),
-                            );
-                          }
-                        }
-                      }
-                    : null,
-              ),
             buildSectionAction(
               title: localization.export_seed,
               onTap: keys.isNotEmpty && currentKey != null

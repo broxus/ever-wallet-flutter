@@ -65,7 +65,7 @@ class KeysRepository {
 
   /// Equivalent of [currentKeyStream] but with blockchain representation of object
   Stream<KeyStoreEntry?> get currentKeyEntryStream =>
-      keysStream.map((keys) => keys.firstWhereOrNull((k) => k.publicKey == currentKey));
+      currentKeyStream.map((current) => keys.firstWhereOrNull((k) => k.publicKey == current));
 
   /// All keys mapped by: key - keyEntry that is master, value - list of sub keyEntries of master
   Stream<Map<KeyStoreEntry, List<KeyStoreEntry>?>> get mappedKeysStream => keysStream.map((e) {
@@ -166,22 +166,22 @@ class KeysRepository {
     return key;
   }
 
-  /// Create a sub(derived) key of [publicKey].
+  /// Create a sub(derived) key of [masterKey].
   /// Returns blockchain representation of key.
   Future<KeyStoreEntry> deriveKey({
     String? name,
-    required String publicKey,
+    required String masterKey,
     required int accountId,
     required String password,
   }) async {
-    final key = keys.firstWhere((e) => e.publicKey == publicKey);
+    final key = keys.firstWhere((e) => e.publicKey == masterKey);
 
     if (key.isLegacy || !key.isMaster) throw UnsupportedError('Key is not derivable');
 
     final createKeyInput = DerivedKeyCreateInput.derive(
       DerivedKeyCreateInputDerive(
         keyName: name,
-        masterKey: publicKey,
+        masterKey: masterKey,
         accountId: accountId,
         password: Password.explicit(
           PasswordExplicit(

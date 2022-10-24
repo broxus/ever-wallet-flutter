@@ -59,14 +59,15 @@ class _PasswordInputModalBodyState extends State<PasswordInputModalBody> {
             ],
             PasswordInputForm(
               onSubmit: (password) async {
-                final isEnabled = context.read<BiometryRepository>().status;
-                final isAvailable = context.read<BiometryRepository>().availability;
+                final biometryRepo = context.read<BiometryRepository>();
+                final isEnabled = biometryRepo.status;
+                final isAvailable = biometryRepo.availability;
 
                 if (isAvailable && isEnabled) {
-                  await context.read<BiometryRepository>().setKeyPassword(
-                        publicKey: widget.publicKey,
-                        password: password,
-                      );
+                  await biometryRepo.setKeyPassword(
+                    publicKey: widget.publicKey,
+                    password: password,
+                  );
                 }
 
                 widget.onSubmit(password);

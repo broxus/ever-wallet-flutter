@@ -1,3 +1,4 @@
+import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
@@ -5,6 +6,7 @@ import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
+import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
@@ -15,20 +17,23 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 Future<void> showSeedDeleteSheet({
   required BuildContext context,
   required KeyStoreEntry seed,
+  required List<KeyStoreEntry>? children,
 }) {
   return showEWBottomSheet(
     context,
     title: context.localization.delete_seed_phrase,
-    body: (_) => SeedDeleteSheet(seed: seed),
+    body: (_) => SeedDeleteSheet(seed: seed, children: children),
   );
 }
 
 class SeedDeleteSheet extends StatelessWidget {
   final KeyStoreEntry seed;
+  final List<KeyStoreEntry>? children;
 
   const SeedDeleteSheet({
     super.key,
     required this.seed,
+    required this.children,
   });
 
   @override
@@ -72,7 +77,17 @@ class SeedDeleteSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: List.generate(1, (_) => _accountItem(themeStyle, localization)),
+              children: children
+                      ?.map(
+                        (e) => _accountItem(
+                          e,
+                          themeStyle,
+                          localization,
+                          context.read<AccountsRepository>(),
+                        ),
+                      )
+                      .toList() ??
+                  [],
             ),
           ),
         ),
@@ -91,7 +106,13 @@ class SeedDeleteSheet extends StatelessWidget {
     );
   }
 
-  Widget _accountItem(ThemeStyle themeStyle, AppLocalizations localization) {
+  Widget _accountItem(
+    KeyStoreEntry key,
+    ThemeStyle themeStyle,
+    AppLocalizations localization,
+    AccountsRepository repo,
+  ) {
+    final accounts = repo.accountsFor(key.publicKey);
     return EWListTile(
       contentPadding: EdgeInsets.zero,
       leading: Container(
@@ -105,11 +126,13 @@ class SeedDeleteSheet extends StatelessWidget {
         child: Assets.images.key.svg(),
       ),
       titleWidget: Text(
-        localization.key_name,
+        key.name,
         style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
       ),
-      // TODO: replace text
-      subtitleText: localization.key_name_with_sub_count('0:9f9...1e0', 3),
+      subtitleText: localization.key_name_with_sub_count(
+        key.publicKey.ellipsePublicKey(),
+        accounts.length,
+      ),
     );
   }
 }

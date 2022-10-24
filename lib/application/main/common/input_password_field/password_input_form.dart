@@ -59,9 +59,7 @@ class _PasswordInputFormState extends State<PasswordInputForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             passwordField(),
-            const SizedBox(
-              height: 24,
-            ),
+            const SizedBox(height: 24),
             submitButton(),
           ],
         ),
@@ -78,18 +76,6 @@ class _PasswordInputFormState extends State<PasswordInputForm> {
             errorText: state.passwordFieldState.errorText,
             label: '${context.localization.enter_password}...',
           );
-          // CustomTextFormFieldWithDecoration(
-          //   controller: controller,
-          //   autofocus: true,
-          //   autocorrect: false,
-          //   enableSuggestions: false,
-          //   obscureText: true,
-          //   errorText: state.passwordFieldState.errorText,
-          //   hintText: '${AppLocalizations.of(context)!.enter_password}...',
-          //   suffixIcon: TextFieldClearButton(
-          //     controller: controller,
-          //   ),
-          // );
         },
       );
 

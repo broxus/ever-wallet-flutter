@@ -27,18 +27,17 @@ class _DeriveKeyModalBodyState extends State<DeriveKeyModalBody> {
   Widget build(BuildContext context) => PasswordInputModalBody(
         onSubmit: (password) async {
           try {
-            await context.read<KeysRepository>().deriveKey(
-                  name: widget.name,
-                  publicKey: widget.publicKey,
-                  accountId: context
-                          .read<KeysRepository>()
-                          .keys
-                          .where((e) => e.masterKey == widget.publicKey)
-                          .map((e) => e.accountId)
-                          .reduce(max) +
-                      1,
-                  password: password,
-                );
+            final keysRepo = context.read<KeysRepository>();
+            await keysRepo.deriveKey(
+              name: widget.name,
+              masterKey: widget.publicKey,
+              accountId: keysRepo.keys
+                      .where((e) => e.masterKey == widget.publicKey)
+                      .map((e) => e.accountId)
+                      .reduce(max) +
+                  1,
+              password: password,
+            );
 
             if (!mounted) return;
             Navigator.of(context).pop();

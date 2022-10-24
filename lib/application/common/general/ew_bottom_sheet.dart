@@ -45,7 +45,7 @@ Future<T?> showEWBottomSheet<T>(
                   if (title != null)
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 16) +
-                          const EdgeInsets.only(top: 16, right: 16),
+                          const EdgeInsets.only(top: 24, right: 16),
                       child: Text(title, style: themeStyle.styles.sheetHeaderStyle),
                     ),
                   Flexible(child: Padding(padding: padding, child: body(context))),

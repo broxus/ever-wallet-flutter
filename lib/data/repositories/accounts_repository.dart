@@ -62,9 +62,15 @@ class AccountsRepository {
 
   List<AssetsList> get accounts => _accountsStorage.entries;
 
+  /// Returns stream of the list of external accounts where key - publicKey, value - list of addresses
   Stream<Map<String, List<String>>> get externalAccountsStream =>
       _hiveSource.externalAccountsStream;
 
+  /// Returns stream of the list of addresses of [publicKey]
+  Stream<List<String>> externalAccountsForStream(String publicKey) =>
+      externalAccountsStream.map((accounts) => accounts[publicKey] ?? <String>[]);
+
+  /// Returns the list of external accounts where key - publicKey, value - list of addresses
   Map<String, List<String>> get externalAccounts => _hiveSource.externalAccounts;
 
   Stream<List<AssetsList>> get currentAccountsStream =>
@@ -79,6 +85,12 @@ class AccountsRepository {
 
   Tuple2<List<WalletType>, List<WalletType>> accountCreationOptions(String publicKey) =>
       accounts.toOptionsFor(publicKey);
+
+  List<AssetsList> accountsFor(String publicKey) =>
+      accounts.where((a) => a.publicKey == publicKey).toList();
+
+  Stream<List<AssetsList>> accountsForStream(String publicKey) =>
+      accountsStream.map((accounts) => accounts.where((a) => a.publicKey == publicKey).toList());
 
   Future<AssetsList> addAccount({
     String? name,

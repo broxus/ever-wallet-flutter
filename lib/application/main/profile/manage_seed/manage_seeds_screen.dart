@@ -9,7 +9,7 @@ import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_act
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/export_seed_phrase_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/rename_key_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
-import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_key_removement_modal.dart';
+import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_seed_delete_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/seed_detail_screen.dart';
 import 'package:ever_wallet/application/main/profile/widgets/keys_builder.dart';
 import 'package:ever_wallet/application/util/auth_utils.dart';
@@ -137,10 +137,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
     return EWListTile(
       leading: Assets.images.seed.svg(width: 32, height: 32),
       titleText: seed.name,
-      onPressed: () => Navigator.of(context).push(
-        SeedDetailScreenRoute(seed: seed, children: children, isSelected: isSelected),
-      ),
-      // TODO: replace counting
+      onPressed: () => Navigator.of(context).push(SeedDetailScreenRoute(seed: seed)),
       subtitleText: localization.children_public_keys(children?.length ?? 0),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -151,7 +148,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
               color: themeStyle.colors.primaryButtonTextColor,
               size: 20,
             ),
-          _seedDropdown(themeStyle, localization, seed),
+          _seedDropdown(themeStyle, localization, seed, children),
         ],
       ),
     );
@@ -161,6 +158,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
     ThemeStyle themeStyle,
     AppLocalizations localization,
     KeyStoreEntry seed,
+    List<KeyStoreEntry>? children,
   ) {
     return MenuDropdown(
       items: [
@@ -215,6 +213,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
           onTap: () => showSeedDeleteSheet(
             context: context,
             seed: seed,
+            children: children,
           ),
           textStyle: themeStyle.styles.basicStyle.copyWith(
             color: themeStyle.colors.errorTextColor,
