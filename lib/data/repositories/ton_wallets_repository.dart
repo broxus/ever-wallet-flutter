@@ -28,6 +28,23 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:tuple/tuple.dart';
 
+/// List of addressees that are used for subscription by address
+const _zeroStateAddresses = <String, List<String>>{
+  'mainnet': [
+    '-1:7777777777777777777777777777777777777777777777777777777777777777',
+    '-1:8888888888888888888888888888888888888888888888888888888888888888',
+    '-1:9999999999999999999999999999999999999999999999999999999999999999',
+  ],
+  'testnet': [
+    '-1:7777777777777777777777777777777777777777777777777777777777777777',
+  ],
+  'fld': [
+    '-1:7777777777777777777777777777777777777777777777777777777777777777',
+    '-1:8888888888888888888888888888888888888888888888888888888888888888',
+    '-1:9999999999999999999999999999999999999999999999999999999999999999',
+  ],
+};
+
 class TonWalletsRepository {
   final _lock = Lock();
   final Map<TonWalletPendingSubscriptionCollection, Completer<TonWalletSubscription>>
@@ -609,12 +626,20 @@ class TonWalletsRepository {
         return pendedEntry.value.future;
       }
     }
-    final tonWallet = await TonWallet.subscribe(
-      transport: transport,
-      workchain: tonWalletAsset.workchain,
-      publicKey: tonWalletAsset.publicKey,
-      contract: tonWalletAsset.contract,
-    );
+    TonWallet tonWallet;
+    if (isZeroState(transportGroup: transport.group, address: tonWalletAsset.address)) {
+      tonWallet = await TonWallet.subscribeByAddress(
+        transport: transport,
+        address: tonWalletAsset.address,
+      );
+    } else {
+      tonWallet = await TonWallet.subscribe(
+        transport: transport,
+        workchain: tonWalletAsset.workchain,
+        publicKey: tonWalletAsset.publicKey,
+        contract: tonWalletAsset.contract,
+      );
+    }
 
     final subscription = TonWalletSubscription.subscribe(
       tonWallet: tonWallet,
@@ -676,6 +701,13 @@ class TonWalletsRepository {
 
     return subscription;
   }
+
+  /// Check if address of token relates to giver
+  bool isZeroState({
+    required String transportGroup,
+    required String address,
+  }) =>
+      _zeroStateAddresses[transportGroup]?.contains(address) ?? false;
 
   Stream<TonWallet> _tonWallet(String address) => getTonWalletStream(address);
 
