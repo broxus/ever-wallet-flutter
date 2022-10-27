@@ -5,10 +5,10 @@ import 'package:ever_wallet/application/common/widgets/custom_text_form_field.da
 import 'package:ever_wallet/application/common/widgets/text_field_clear_button.dart';
 import 'package:ever_wallet/application/common/widgets/unfocusing_gesture_detector.dart';
 import 'package:ever_wallet/application/main/wallet/modals/add_account_flow/add_new_account_type_page.dart';
+import 'package:ever_wallet/application/util/colors.dart';
+import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class AddNewAccountNamePage extends StatefulWidget {
   final BuildContext modalContext;
@@ -40,7 +40,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
           appBar: AppBar(
             leading: const CustomBackButton(),
             title: Text(
-              AppLocalizations.of(context)!.new_account_name,
+              context.localization.new_account_name,
               style: const TextStyle(
                 color: Colors.black,
               ),
@@ -54,21 +54,11 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: ModalScrollController.of(context),
-                  physics: const ClampingScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      subtitle(),
-                      const Gap(16),
-                      field(),
-                    ],
-                  ),
-                ),
-              ),
+              subtitle(),
+              const Gap(16),
+              Expanded(child: field()),
               const Gap(16),
               submitButton(),
             ],
@@ -77,15 +67,16 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
       );
 
   Widget subtitle() => CrystalSubtitle(
-        text: AppLocalizations.of(context)!.new_account_description,
+        text: context.localization.new_account_description,
       );
 
   Widget field() => CustomTextFormField(
-        name: AppLocalizations.of(context)!.name,
+        name: context.localization.name,
         controller: controller,
         autocorrect: false,
+        cursorColor: ColorsRes.black,
         enableSuggestions: false,
-        hintText: '${AppLocalizations.of(context)!.name}...',
+        hintText: '${context.localization.name}...',
         suffixIcon: TextFieldClearButton(
           controller: controller,
         ),
@@ -93,7 +84,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
 
   Widget submitButton() => PrimaryElevatedButton(
         onPressed: onPressed,
-        text: AppLocalizations.of(context)!.next,
+        text: context.localization.next,
       );
 
   Future<void> onPressed() async {

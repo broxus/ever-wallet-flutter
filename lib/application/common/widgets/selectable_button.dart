@@ -1,14 +1,13 @@
+import 'package:ever_wallet/application/common/general/button/push_state_ink_widget.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:gap/gap.dart';
 
 class SelectableButton extends StatelessWidget {
   final SvgGenImage icon;
   final String text;
-  final void Function() onPressed;
+  final VoidCallback onPressed;
   final bool isSelected;
 
   const SelectableButton({
@@ -20,17 +19,9 @@ class SelectableButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => PlatformWidget(
-        cupertino: (_, __) => CupertinoButton(
-          padding: EdgeInsets.zero,
-          borderRadius: BorderRadius.zero,
-          onPressed: onPressed,
-          child: container(),
-        ),
-        material: (_, __) => RawMaterialButton(
-          onPressed: onPressed,
-          child: container(),
-        ),
+  Widget build(BuildContext context) => PushStateInkWidget(
+        onPressed: onPressed,
+        child: container(),
       );
 
   Widget container() => AnimatedContainer(

@@ -2,9 +2,9 @@ import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/main/wallet/modals/add_account_flow/start_add_account_flow.dart';
+import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 
@@ -76,7 +76,7 @@ class NewAccountCard extends StatelessWidget {
           _getAddButton(context),
           const Spacer(),
           Text(
-            AppLocalizations.of(context)!.add_account,
+            context.localization.add_account,
             style: style.copyWith(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -85,7 +85,7 @@ class NewAccountCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 4, 78, 24),
             child: Text(
-              AppLocalizations.of(context)!.add_account_description,
+              context.localization.add_account_description,
               style: style.copyWith(
                 fontWeight: FontWeight.w500,
                 fontSize: 14,

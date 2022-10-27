@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 Future<T?> showPlatformModalBottomSheet<T>({
@@ -27,12 +26,15 @@ Future<T?> showPlatformModalBottomSheet<T>({
     );
   }
 
-  final showModalBottomSheet =
-      isCupertino(context) ? showCupertinoModalBottomSheet : showMaterialModalBottomSheet;
-
-  return showModalBottomSheet<T>(
+  return showMaterialModalBottomSheet<T>(
     context: context,
     useRootNavigator: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(10),
+        topRight: Radius.circular(10),
+      ),
+    ),
     builder: (context) => constrainedBuilder(context),
   );
 }

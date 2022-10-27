@@ -6,11 +6,13 @@ import 'package:ever_wallet/application/common/general/button/primary_elevated_b
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
 import 'package:ever_wallet/application/common/widgets/unfocusing_gesture_detector.dart';
+import 'package:ever_wallet/application/util/colors.dart';
+import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
+import 'package:ever_wallet/application/util/styles.dart';
 import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:provider/provider.dart';
@@ -58,10 +60,8 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
           appBar: AppBar(
             leading: const CustomBackButton(),
             title: Text(
-              AppLocalizations.of(context)!.new_account_type,
-              style: const TextStyle(
-                color: Colors.black,
-              ),
+              context.localization.new_account_type,
+              style: StylesRes.header3Text.copyWith(color: ColorsRes.black),
             ),
           ),
           body: body(),
@@ -143,7 +143,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
         valueListenable: optionNotifier,
         builder: (context, value, child) => PrimaryElevatedButton(
           onPressed: value != null ? () => onPressed(value) : null,
-          text: AppLocalizations.of(context)!.confirm,
+          text: context.localization.confirm,
         ),
       );
 

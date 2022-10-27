@@ -530,11 +530,14 @@ class TonWalletsRepository {
       final transport = _transportSource.transport;
       final subscriptions = {..._tonWalletsSubject.value};
 
-      final tonWalletsForUnSubscription = subscriptions.keys.where(
-        (e) => !tonWallets.any((el) => el.address == e),
-      );
+      final tonWalletsForUnSubscription = subscriptions.keys
+          .where(
+            (e) => !tonWallets.any((el) => el.address == e),
+          )
+          .toList();
 
-      for (final address in tonWalletsForUnSubscription) {
+      for (var i = 0; i < tonWalletsForUnSubscription.length; i++) {
+        final address = tonWalletsForUnSubscription[i];
         subscriptions.remove(address)!.future.then((v) => v.dispose()).ignore();
         final pendedKey = _pendingTonWalletSubscriptions.keys
             .firstWhereOrNull((key) => key.asset.address == address);

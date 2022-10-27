@@ -22,6 +22,7 @@ class CustomTextFormField extends StatelessWidget {
   final int? maxLength;
   final Color? borderColor;
   final Color? errorBorderColor;
+  final Color? cursorColor;
 
   const CustomTextFormField({
     super.key,
@@ -44,6 +45,7 @@ class CustomTextFormField extends StatelessWidget {
     this.maxLength,
     this.borderColor,
     this.errorBorderColor,
+    this.cursorColor,
   });
 
   @override
@@ -70,6 +72,7 @@ class CustomTextFormField extends StatelessWidget {
           enabledBorder: border(),
           border: border(),
         ),
+        cursorColor: cursorColor,
         keyboardType: keyboardType,
         textInputAction: textInputAction,
         style: const TextStyle(

@@ -1,10 +1,11 @@
-import 'package:ever_wallet/application/common/widgets/crystal_title.dart';
-import 'package:ever_wallet/application/common/widgets/custom_close_button.dart';
+import 'package:ever_wallet/application/common/general/button/primary_icon_button.dart';
+import 'package:ever_wallet/application/util/colors.dart';
+import 'package:ever_wallet/application/util/styles.dart';
 import 'package:flutter/material.dart';
 
 class ModalHeader extends StatelessWidget {
   final String text;
-  final void Function()? onCloseButtonPressed;
+  final VoidCallback? onCloseButtonPressed;
 
   const ModalHeader({
     super.key,
@@ -19,11 +20,11 @@ class ModalHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: CrystalTitle(
-                text: text,
-              ),
+              child: Text(text, style: StylesRes.header3Text.copyWith(color: ColorsRes.black)),
             ),
-            CustomCloseButton(
+            PrimaryIconButton(
+              outerPadding: EdgeInsets.zero,
+              icon: const Icon(Icons.close, color: ColorsRes.black),
               onPressed: onCloseButtonPressed,
             ),
           ],

@@ -80,6 +80,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                     focusNode: passwordFocus,
                     label: localization.your_password,
                     onSubmitted: (_) => confirmFocus.requestFocus(),
+                    cursorColor: ColorsRes.white,
                     validator: (_) {
                       if (passwordController.text.length >= 8) {
                         return null;
@@ -95,6 +96,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                     focusNode: confirmFocus,
                     label: localization.confirm_password,
                     textInputAction: TextInputAction.done,
+                    cursorColor: ColorsRes.white,
                     onSubmitted: (_) => _nextAction(Navigator.of(context)),
                     validator: (_) {
                       if (confirmController.text == passwordController.text) {

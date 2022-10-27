@@ -15,6 +15,7 @@ import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_act
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_account_delete_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_key_delete_sheet.dart';
+import 'package:ever_wallet/application/main/wallet/modals/add_account_flow/start_add_account_flow.dart';
 import 'package:ever_wallet/application/util/auth_utils.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -151,7 +152,10 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                       const DefaultDivider(),
                       ...accounts.map((e) => _accountItem(themeStyle, localization, e)).toList(),
                       PushStateInkWidget(
-                        onPressed: () {},
+                        onPressed: () => startAddAccountFlow(
+                          context: context,
+                          publicKey: key.publicKey,
+                        ),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           height: 46,
