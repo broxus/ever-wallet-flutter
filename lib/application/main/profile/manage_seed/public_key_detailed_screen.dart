@@ -62,10 +62,22 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
         create: (context) => context.read<AccountsRepository>().accountsForStream(key.publicKey),
         builder: (context, child) {
           /// TODO: decide if there external accounts or only local
-          final accounts = context.watch<AsyncValue<List<AssetsList>>>().maybeWhen(
+          final allAccounts = context.watch<AsyncValue<List<AssetsList>>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => <AssetsList>[],
               );
+          final externalAccountsAddresses =
+              context.read<AccountsRepository>().externalAccounts[key.publicKey] ?? [];
+          final accounts = <AssetsList>[];
+          final externalAccounts = <AssetsList>[];
+
+          allAccounts.forEach((a) {
+            if (externalAccountsAddresses.contains(a.address)) {
+              externalAccounts.add(a);
+            } else {
+              accounts.add(a);
+            }
+          });
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,7 +107,7 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                   themeStyle,
                   localization,
                   key,
-                  accounts,
+                  allAccounts,
                 ),
               ),
               const SizedBox(height: 20),
@@ -178,6 +190,9 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                         ),
                       ),
                       const DefaultDivider(),
+                      ...externalAccounts
+                          .map((e) => _accountItem(themeStyle, localization, e, isExternal: true))
+                          .toList(),
                       PushStateInkWidget(
                         onPressed: () => startAddExternalAccountFlow(
                           context: context,

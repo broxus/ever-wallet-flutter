@@ -38,7 +38,15 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountNamePage> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            leading: const CustomBackButton(),
+            leading: CustomBackButton(
+              onPressed: () {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).maybePop();
+                } else {
+                  Navigator.of(widget.modalContext).maybePop();
+                }
+              },
+            ),
             title: Text(
               context.localization.new_account_name,
               style: const TextStyle(
