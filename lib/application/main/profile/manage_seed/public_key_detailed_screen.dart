@@ -152,7 +152,7 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                       const DefaultDivider(),
                       ...accounts.map((e) => _accountItem(themeStyle, localization, e)).toList(),
                       PushStateInkWidget(
-                        onPressed: () => startAddAccountFlow(
+                        onPressed: () => startAddLocalAccountFlow(
                           context: context,
                           publicKey: key.publicKey,
                         ),
@@ -179,7 +179,10 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                       ),
                       const DefaultDivider(),
                       PushStateInkWidget(
-                        onPressed: () {},
+                        onPressed: () => startAddExternalAccountFlow(
+                          context: context,
+                          publicKey: key.publicKey,
+                        ),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           height: 46,

@@ -11,7 +11,6 @@ import 'package:ever_wallet/application/util/extensions/context_extensions.dart'
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
-import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -189,10 +188,8 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
     Navigator.of(widget.modalContext).pop();
 
     try {
-      final currentKey = context.read<KeysRepository>().currentKey;
-
       await context.read<AccountsRepository>().addExternalAccount(
-            publicKey: currentKey!,
+            publicKey: widget.publicKey,
             address: addressController.text,
             name: name,
           );
