@@ -8,35 +8,39 @@ class CheckMarkWidget extends StatelessWidget {
     this.size = 18,
     this.hasError = false,
     this.isChecked = false,
+    this.fill = false,
     this.color,
+    this.checkMarkColor,
   });
 
   final bool hasError;
   final bool isChecked;
   final double size;
   final Color? color;
+  final Color? checkMarkColor;
+  final bool fill;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.themeStyle.colors;
+    final backColor = color ??
+        (hasError
+            ? colors.errorInputColor
+            : isChecked
+                ? colors.activeInputColor
+                : colors.inactiveInputColor);
 
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        border: Border.all(
-          color: color ??
-              (hasError
-                  ? colors.errorInputColor
-                  : isChecked
-                      ? colors.activeInputColor
-                      : colors.inactiveInputColor),
-        ),
+        border: Border.all(color: backColor),
+        color: fill ? backColor : null,
       ),
       child: isChecked
           ? Icon(
               Icons.check,
-              color: colors.activeInputColor,
+              color: checkMarkColor ?? colors.activeInputColor,
               size: size - 2,
             )
           : null,

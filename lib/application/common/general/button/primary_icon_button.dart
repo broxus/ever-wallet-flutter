@@ -11,6 +11,7 @@ class PrimaryIconButton extends StatelessWidget {
     this.outerPadding = const EdgeInsets.all(8),
     this.backgroundColor = Colors.transparent,
     this.presstateColor = ColorsRes.neutral750,
+    this.decoration,
   });
 
   final Widget icon;
@@ -24,6 +25,9 @@ class PrimaryIconButton extends StatelessWidget {
   /// Padding from outer widgets to edge of press state
   final EdgeInsets outerPadding;
 
+  /// Allow add some border
+  final BoxDecoration? decoration;
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -31,13 +35,16 @@ class PrimaryIconButton extends StatelessWidget {
       color: backgroundColor,
       child: Padding(
         padding: outerPadding,
-        child: PushStateInkWidget(
-          pressStateColor: presstateColor,
-          borderRadius: BorderRadius.circular(90),
-          onPressed: onPressed,
-          child: Padding(
-            padding: innerPadding,
-            child: icon,
+        child: DecoratedBox(
+          decoration: decoration ?? const BoxDecoration(),
+          child: PushStateInkWidget(
+            pressStateColor: presstateColor,
+            borderRadius: BorderRadius.circular(90),
+            onPressed: onPressed,
+            child: Padding(
+              padding: innerPadding,
+              child: icon,
+            ),
           ),
         ),
       ),

@@ -9,6 +9,7 @@ import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
 import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
+import 'package:ever_wallet/application/main/profile/manage_seed/account_detail_screen.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/export_seed_phrase_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/rename_account_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/rename_key_modal_body.dart';
@@ -267,6 +268,9 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
     bool isExternal = false,
   }) {
     return EWListTile(
+      onPressed: () => Navigator.of(context).push(
+        AccountDetailRoute(asset, isExternal, key.publicKey),
+      ),
       leading: Container(
         width: 32,
         height: 32,

@@ -421,5 +421,15 @@
     "placeholders": {
       "account_name": {}
     }
-  }
+  },
+  "linked_keys": "Linked keys",
+  "select_keys_you_need": "Select keys you need",
+  "keys_count_of": "Keys {count} of {total}",
+  "@keys_count_of": {
+    "placeholders": {
+      "count": {},
+      "total": {}
+    }
+  },
+  "key_word": "Key"
 }

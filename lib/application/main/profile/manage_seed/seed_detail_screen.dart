@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/menu_dropdown.dart';
@@ -10,11 +9,12 @@ import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
 import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
-import 'package:ever_wallet/application/main/profile/derive_key_modal_body.dart';
+import 'package:ever_wallet/application/main/common/password_input_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/change_seed_phrase_password_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/export_seed_phrase_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/rename_key_modal_body.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
+import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/select_derive_keys/select_derive_keys_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_key_delete_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_seed_delete_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/public_key_detailed_screen.dart';
@@ -287,7 +287,6 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
   Future<void> _deriveKey(BuildContext context) async {
     final localization = context.localization;
     final biometryRepo = context.read<BiometryRepository>();
-    final keysRepo = context.read<KeysRepository>();
 
     final isEnabled = biometryRepo.status;
     final isAvailable = biometryRepo.availability;
@@ -299,22 +298,24 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
           publicKey: seed.publicKey,
         );
 
-        await keysRepo.deriveKey(
-          masterKey: seed.publicKey,
-          accountId: keysRepo.keys
-                  .where((e) => e.masterKey == seed.publicKey)
-                  .map((e) => e.accountId)
-                  .reduce(max) +
-              1,
-          password: password,
-        );
+        await showSelectDeriveKeysSheet(context: context, password: password, seed: seed);
       } catch (err) {
         if (!mounted) return;
 
         showEWBottomSheet<void>(
           context,
           title: localization.derive_enter_password,
-          body: (_) => DeriveKeyModalBody(publicKey: seed.publicKey, name: null),
+          body: (c) => PasswordInputModalBody(
+            publicKey: seed.publicKey,
+            onSubmit: (password) {
+              Navigator.of(c).pop();
+              showSelectDeriveKeysSheet(
+                context: context,
+                password: password,
+                seed: seed,
+              );
+            },
+          ),
         );
       }
     } else {
@@ -323,7 +324,17 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
       showEWBottomSheet<void>(
         context,
         title: localization.derive_enter_password,
-        body: (_) => DeriveKeyModalBody(publicKey: seed.publicKey, name: null),
+        body: (c) => PasswordInputModalBody(
+          publicKey: seed.publicKey,
+          onSubmit: (password) {
+            Navigator.of(c).pop();
+            showSelectDeriveKeysSheet(
+              context: context,
+              password: password,
+              seed: seed,
+            );
+          },
+        ),
       );
     }
   }

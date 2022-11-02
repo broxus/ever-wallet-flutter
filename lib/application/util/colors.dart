@@ -95,6 +95,7 @@ class ColorsRes {
   static const green400 = Color(0xFF4AB44A);
   static const grey = Color(0xFF96A1A7);
   static const grey2 = Color(0xFFDDE1E2);
+  static const grey3 = Color(0xFFCED3D6);
   static const grey4 = Color(0xFF7D8B92);
   static const notWhite = Color(0xFFF8F9F9);
   static const greyLight = Color(0xFFEBEDEE);
