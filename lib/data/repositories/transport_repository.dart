@@ -21,11 +21,7 @@ class TransportRepository {
       networkId: 1,
       group: 'mainnet',
       endpoints: [
-        'https://eri01.main.everos.dev/graphql',
-        'https://gra01.main.everos.dev/graphql',
-        'https://gra02.main.everos.dev/graphql',
-        'https://lim01.main.everos.dev/graphql',
-        'https://rbx01.main.everos.dev/graphql',
+        'https://mainnet.evercloud.dev/89a3b8f46a484f2ea3bdd364ddaee3a3/graphql',
       ],
       timeout: 60000,
       local: false,
@@ -35,9 +31,7 @@ class TransportRepository {
       networkId: 2,
       group: 'testnet',
       endpoints: [
-        'https://eri01.net.everos.dev/graphql',
-        'https://rbx01.net.everos.dev/graphql',
-        'https://gra01.net.everos.dev/graphql',
+        'https://devnet.evercloud.dev/89a3b8f46a484f2ea3bdd364ddaee3a3/graphql',
       ],
       timeout: 60000,
       local: false,
