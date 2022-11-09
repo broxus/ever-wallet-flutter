@@ -27,6 +27,7 @@ class HiveSource {
   final _systemTokenContractAssetsBoxName = 'system_token_contract_assets_v1';
   final _customTokenContractAssetsBoxName = 'custom_token_contract_assets_v1';
   final _keyLabelsBoxName = 'public_keys_labels_v1';
+  final _hiddenAccountsKey = 'hidden_accounts_key';
   final _seedsBoxName = 'seeds_v1';
   final _nekotonFlutterBoxName = 'nekoton_flutter';
   final _preferencesBoxName = 'nekoton_preferences';
@@ -84,6 +85,8 @@ class HiveSource {
 
   Box<dynamic> get _browserTabsBox => Hive.box<dynamic>(_browserTabsKey);
 
+  Box<List<String>> get _hiddenAccountsBox => Hive.box<List<String>>(_hiddenAccountsKey);
+
   Stream<Map<String, String>> get seedsStream =>
       _seedsBox.watchAll<String>().map((e) => e.cast<String, String>());
 
@@ -108,6 +111,25 @@ class HiveSource {
         _currentKeyKey,
         publicKey,
       );
+
+  /// List of addresses of accounts
+  List<String> get hiddenAccounts => _hiddenAccountsBox.get(_hiddenAccountsKey) ?? <String>[];
+
+  /// Equivalent of [hiddenAccounts] but with stream
+  Stream<List<String>> get hiddenAccountsStream =>
+      _hiddenAccountsBox.watchKey(_hiddenAccountsKey).map((e) => e ?? <String>[]);
+
+  /// Hide or show account address
+  Future<void> toggleHiddenAccount(String address) {
+    final accounts = hiddenAccounts;
+    if (accounts.contains(address)) {
+      accounts.remove(address);
+    } else {
+      accounts.add(address);
+    }
+
+    return _hiddenAccountsBox.put(_hiddenAccountsKey, accounts);
+  }
 
   /// Equivalent stream of [keyLabels]
   Stream<Map<String, String>> get keyLabelsStream =>
@@ -420,6 +442,7 @@ class HiveSource {
     await Hive.openBox<CurrencyDto>(_currenciesBoxName);
     await Hive.openBox<bool>(_browserNeedKey);
     await Hive.openBox<dynamic>(_browserTabsKey);
+    await Hive.openBox<List<String>>(_hiddenAccountsKey);
 
     await _migrateStorage();
   }

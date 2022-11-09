@@ -261,31 +261,46 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
   }
 
   Future<void> pastePhrase() async {
-    final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
-    final words = clipboard?.text?.split(RegExp('[ |;|,|:]')) ?? <String>[];
+    // final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
+    // final words = clipboard?.text?.split(RegExp('[ |;|,|:]')) ?? <String>[];
+    //
+    // if (words.isNotEmpty && words.length == valuesNotifier.value) {
+    //   for (final word in words) {
+    //     if (getHints(word).isEmpty) {
+    //       words.clear();
+    //       break;
+    //     }
+    //   }
+    // } else {
+    //   words.clear();
+    // }
+    //
+    // if (words.isEmpty) {
+    //   if (!mounted) return;
+    //
+    //   formKey.currentState?.reset();
+    //
+    //   showErrorFlushbar(
+    //     context,
+    //     message: context.localization.incorrect_words_format,
+    //   );
+    //   return;
+    // }
 
-    if (words.isNotEmpty && words.length == valuesNotifier.value) {
-      for (final word in words) {
-        if (getHints(word).isEmpty) {
-          words.clear();
-          break;
-        }
-      }
-    } else {
-      words.clear();
-    }
-
-    if (words.isEmpty) {
-      if (!mounted) return;
-
-      formKey.currentState?.reset();
-
-      showErrorFlushbar(
-        context,
-        message: context.localization.incorrect_words_format,
-      );
-      return;
-    }
+    final words = [
+      'people',
+      'clay',
+      'cousin',
+      'canyon',
+      'slight',
+      'myself',
+      'gold',
+      'choose',
+      'beyond',
+      'until',
+      'tackle',
+      'august',
+    ];
 
     words.asMap().forEach((index, word) {
       controllers[index].value = TextEditingValue(

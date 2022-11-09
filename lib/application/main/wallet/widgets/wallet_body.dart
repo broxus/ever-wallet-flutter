@@ -57,7 +57,8 @@ class _WalletBodyState extends State<WalletBody> {
                 duration: const Duration(milliseconds: 250),
                 offset: const Offset(1, 0),
                 child: AsyncValueStreamProvider<List<AssetsList>>(
-                  create: (context) => context.read<AccountsRepository>().currentAccountsStream,
+                  create: (context) =>
+                      context.read<AccountsRepository>().currentAccountsStreamWithHidden,
                   builder: (context, child) {
                     final accounts = context.watch<AsyncValue<List<AssetsList>>>().maybeWhen(
                           ready: (value) => value,

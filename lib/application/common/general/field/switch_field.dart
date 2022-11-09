@@ -7,11 +7,13 @@ class EWSwitchField extends StatefulWidget {
     required this.value,
     required this.onChanged,
     this.validator,
+    this.thumbChild,
   });
 
   final bool value;
   final ValueChanged<bool> onChanged;
   final FormFieldValidator<bool>? validator;
+  final Widget? thumbChild;
 
   @override
   State<EWSwitchField> createState() => _EWSwitchFieldState();
@@ -34,6 +36,7 @@ class _EWSwitchFieldState extends State<EWSwitchField> {
                     : ColorsRes.blackBlueLight,
             thumbColor: ColorsRes.white,
             thumbSize: widget.value ? 24 : 16,
+            thumbChild: widget.thumbChild,
           ),
         );
       },
@@ -50,6 +53,7 @@ class EWSwitcher extends StatelessWidget {
     super.key,
     this.width = 52,
     this.height = 32,
+    this.thumbChild,
   });
 
   final bool value;
@@ -59,6 +63,7 @@ class EWSwitcher extends StatelessWidget {
   final double width;
   final double height;
   final double thumbSize;
+  final Widget? thumbChild;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +86,7 @@ class EWSwitcher extends StatelessWidget {
             color: thumbColor,
             shape: BoxShape.circle,
           ),
+          child: thumbChild,
         ),
       ),
     );

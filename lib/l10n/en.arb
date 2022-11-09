@@ -24,6 +24,7 @@
   "type": "Type",
   "delete_word": "Delete",
   "hide_word": "Hide",
+  "show_word": "Show",
   "history": "History",
   "seed_word": "Seed",
   "export_word": "Export",
@@ -432,5 +433,6 @@
     }
   },
   "key_word": "Key",
-  "empty_linked_keys": "Linked keys not found"
+  "empty_linked_keys": "Linked keys not found",
+  "display_on_main": "Display on the main screen"
 }

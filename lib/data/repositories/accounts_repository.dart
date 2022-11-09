@@ -76,6 +76,13 @@ class AccountsRepository {
   Stream<List<AssetsList>> get currentAccountsStream =>
       _currentAccountsSource.currentAccountsStream;
 
+  /// Same as [currentAccountsStream] but contains accounts that were not hidden in profile
+  Stream<List<AssetsList>> get currentAccountsStreamWithHidden => CombineLatestStream.combine2(
+        currentAccountsStream,
+        hiddenAccountsStream,
+        (accounts, hidden) => List.from(accounts)..removeWhere((a) => hidden.contains(a.address)),
+      );
+
   List<AssetsList> get currentAccounts => _currentAccountsSource.currentAccounts;
 
   Stream<Tuple2<List<WalletType>, List<WalletType>>> accountCreationOptionsStream(
@@ -91,6 +98,16 @@ class AccountsRepository {
 
   Stream<List<AssetsList>> accountsForStream(String publicKey) =>
       accountsStream.map((accounts) => accounts.where((a) => a.publicKey == publicKey).toList());
+
+  Stream<List<String>> get hiddenAccountsStream => _hiveSource.hiddenAccountsStream;
+
+  /// If account with [address] is hidden
+  Stream<bool> hiddenAccountByAddress(String address) =>
+      hiddenAccountsStream.map((hidden) => hidden.contains(address));
+
+  List<String> get hiddenAccounts => _hiveSource.hiddenAccounts;
+
+  Future<void> toggleHiddenAccount(String address) => _hiveSource.toggleHiddenAccount(address);
 
   Future<AssetsList> addAccount({
     String? name,

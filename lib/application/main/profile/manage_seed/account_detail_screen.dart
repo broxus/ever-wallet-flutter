@@ -9,6 +9,7 @@ import 'package:ever_wallet/application/common/general/button/push_state_scale_w
 import 'package:ever_wallet/application/common/general/default_appbar.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
+import 'package:ever_wallet/application/common/general/field/switch_field.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/rename_account_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_account_delete_sheet.dart';
@@ -174,6 +175,38 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    localization.display_on_main,
+                    style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                StreamBuilder<bool>(
+                  stream:
+                      context.read<AccountsRepository>().hiddenAccountByAddress(account.address),
+                  builder: (context, snapshot) {
+                    final isHidden = snapshot.data ?? false;
+                    return EWSwitchField(
+                      value: !isHidden,
+                      onChanged: (_) =>
+                          context.read<AccountsRepository>().toggleHiddenAccount(account.address),
+                      thumbChild: Icon(
+                        Icons.check,
+                        color: !isHidden ? ColorsRes.green400 : Colors.transparent,
+                        size: 18,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
           if (widget.isExternal)
             Expanded(
               child: SingleChildScrollView(

@@ -229,35 +229,53 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
     AssetsList asset, {
     bool isExternal = false,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: ColorsRes.darkBlue.withOpacity(0.2)),
-      ),
-      child: MenuDropdown(
-        buttonDecoration: const BoxDecoration(),
-        items: [
-          MenuDropdownData(
-            title: localization.hide_word,
-            onTap: () {},
-          ),
-          MenuDropdownData(
-            title: localization.rename,
-            onTap: () => showRenameAccountSheet(context: context, address: asset.address),
-          ),
-          MenuDropdownData(
-            title: localization.delete_word,
-            onTap: () => showAccountDeleteSheet(
-              context: context,
-              account: asset,
-              isExternal: isExternal,
-              linkedPublicKey: key.publicKey,
+    return StreamBuilder<bool>(
+      stream: context.read<AccountsRepository>().hiddenAccountByAddress(asset.address),
+      builder: (context, snapshot) {
+        final isHidden = snapshot.data ?? false;
+
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isHidden)
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Assets.images.closeEye.svg(),
+              ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: ColorsRes.darkBlue.withOpacity(0.2)),
+              ),
+              child: MenuDropdown(
+                buttonDecoration: const BoxDecoration(),
+                items: [
+                  MenuDropdownData(
+                    title: isHidden ? localization.show_word : localization.hide_word,
+                    onTap: () =>
+                        context.read<AccountsRepository>().toggleHiddenAccount(asset.address),
+                  ),
+                  MenuDropdownData(
+                    title: localization.rename,
+                    onTap: () => showRenameAccountSheet(context: context, address: asset.address),
+                  ),
+                  MenuDropdownData(
+                    title: localization.delete_word,
+                    onTap: () => showAccountDeleteSheet(
+                      context: context,
+                      account: asset,
+                      isExternal: isExternal,
+                      linkedPublicKey: key.publicKey,
+                    ),
+                    textStyle: themeStyle.styles.basicStyle.copyWith(
+                      color: themeStyle.colors.errorTextColor,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            textStyle: themeStyle.styles.basicStyle.copyWith(
-              color: themeStyle.colors.errorTextColor,
-            ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 
