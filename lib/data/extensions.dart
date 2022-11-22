@@ -33,27 +33,27 @@ extension IntX on int {
 
 extension WalletTypeX on WalletType {
   int toInt() => when(
-        walletV3: () => 3,
+        everWallet: () => 0,
+        walletV3: () => 1,
         multisig: (multisigType) {
           switch (multisigType) {
             case MultisigType.safeMultisigWallet:
-              return 4;
+              return 2;
             case MultisigType.safeMultisigWallet24h:
-              return 5;
+              return 3;
             case MultisigType.setcodeMultisigWallet:
-              return 6;
+              return 4;
             case MultisigType.setcodeMultisigWallet24h:
-              return 7;
+              return 5;
             case MultisigType.bridgeMultisigWallet:
-              return 8;
-            case MultisigType.surfWallet:
               return 6;
+            case MultisigType.surfWallet:
+              return 7;
             case MultisigType.multisig2:
               return 8;
           }
         },
-        everWallet: () => 9,
-        highloadWalletV2: () => 8,
+        highloadWalletV2: () => 9,
       );
 
   String get name => when(
