@@ -28,18 +28,18 @@ PODS:
     - MTBBarcodeScanner
   - share_plus (0.0.1):
     - Flutter
-  - sqlite3 (3.39.3):
-    - sqlite3/common (= 3.39.3)
-  - sqlite3/common (3.39.3)
-  - sqlite3/fts5 (3.39.3):
+  - sqlite3 (3.39.4):
+    - sqlite3/common (= 3.39.4)
+  - sqlite3/common (3.39.4)
+  - sqlite3/fts5 (3.39.4):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.39.3):
+  - sqlite3/perf-threadsafe (3.39.4):
     - sqlite3/common
-  - sqlite3/rtree (3.39.3):
+  - sqlite3/rtree (3.39.4):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
-    - sqlite3 (~> 3.39.3)
+    - sqlite3 (~> 3.39.4)
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
@@ -114,8 +114,8 @@ SPEC CHECKSUMS:
   permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
   qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
-  sqlite3: 50117e9e063a9ef2b865f7bdf2f2601e5d368e9a
-  sqlite3_flutter_libs: c6ab7f23670a98fef45a137159452004bc552168
+  sqlite3: 401936402fe5aa242c07f87fccfee5fc2b606f45
+  sqlite3_flutter_libs: 1b9a94dd1a4f53de2845ada6df16bc67e2d3a9cd
   url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
   webview_flutter_wkwebview: b7e70ef1ddded7e69c796c7390ee74180182971f
 

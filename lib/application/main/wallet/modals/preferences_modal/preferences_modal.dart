@@ -7,6 +7,7 @@ import 'package:ever_wallet/application/common/widgets/custom_text_form_field.da
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/common/widgets/text_field_clear_button.dart';
 import 'package:ever_wallet/application/common/widgets/text_suffix_icon_button.dart';
+import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/logger.dart';
@@ -117,8 +118,14 @@ class _PreferencesModalBodyState extends State<PreferencesModalBody> {
         ),
       );
 
-  Widget explorerButton() => CustomOutlinedButton(
-        onPressed: () => launchUrlString(accountExplorerLink(widget.address)),
-        text: AppLocalizations.of(context)!.see_in_the_explorer,
+  Widget explorerButton() => TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          final accountExplorerLink = isEver ? everAccountExplorerLink : venomAccountExplorerLink;
+
+          return CustomOutlinedButton(
+            onPressed: () => launchUrlString(accountExplorerLink(widget.address)),
+            text: AppLocalizations.of(context)!.see_in_the_explorer,
+          );
+        },
       );
 }

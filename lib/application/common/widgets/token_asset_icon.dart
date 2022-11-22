@@ -1,6 +1,6 @@
 import 'package:ever_wallet/application/common/widgets/token_asset_old_label.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 class TokenAssetIcon extends StatelessWidget {

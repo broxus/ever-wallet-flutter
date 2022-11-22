@@ -24,8 +24,10 @@ import 'package:rxdart/rxdart.dart';
 class HiveSource {
   final _keyPasswordsBoxName = 'keys_passwords_v1';
   final _userPreferencesBoxName = 'user_preferences_v1';
-  final _systemTokenContractAssetsBoxName = 'system_token_contract_assets_v1';
-  final _customTokenContractAssetsBoxName = 'custom_token_contract_assets_v1';
+  final _everSystemTokenContractAssetsBoxName = 'system_token_contract_assets_v1';
+  final _everCustomTokenContractAssetsBoxName = 'custom_token_contract_assets_v1';
+  final _venomSystemTokenContractAssetsBoxName = 'venom_system_token_contract_assets_v1';
+  final _venomCustomTokenContractAssetsBoxName = 'venom_custom_token_contract_assets_v1';
   final _keyLabelsBoxName = 'public_keys_labels_v1';
   final _hiddenAccountsKey = 'hidden_accounts_key';
   final _seedsBoxName = 'seeds_v1';
@@ -37,6 +39,7 @@ class HiveSource {
   final _searchHistoryBoxName = 'search_history_v2';
   final _siteMetaDataBoxName = 'site_meta_data_v1';
   final _currenciesBoxName = 'currencies_v1';
+  final _venomCurrenciesBoxName = 'venom_currencies_v1';
   final _biometryStatusKey = 'biometry_status';
   final _currentKeyKey = 'current_public_key';
   final _currentConnectionKey = 'current_connection';
@@ -57,11 +60,17 @@ class HiveSource {
 
   Box<Object?> get _userPreferencesBox => Hive.box<Object?>(_userPreferencesBoxName);
 
-  Box<TokenContractAssetDto> get _systemTokenContractAssetsBox =>
-      Hive.box<TokenContractAssetDto>(_systemTokenContractAssetsBoxName);
+  Box<TokenContractAssetDto> get _everSystemTokenContractAssetsBox =>
+      Hive.box<TokenContractAssetDto>(_everSystemTokenContractAssetsBoxName);
 
-  Box<TokenContractAssetDto> get _customTokenContractAssetsBox =>
-      Hive.box<TokenContractAssetDto>(_customTokenContractAssetsBoxName);
+  Box<TokenContractAssetDto> get _venomSystemTokenContractAssetsBox =>
+      Hive.box<TokenContractAssetDto>(_venomSystemTokenContractAssetsBoxName);
+
+  Box<TokenContractAssetDto> get _everCustomTokenContractAssetsBox =>
+      Hive.box<TokenContractAssetDto>(_everCustomTokenContractAssetsBoxName);
+
+  Box<TokenContractAssetDto> get _venomCustomTokenContractAssetsBox =>
+      Hive.box<TokenContractAssetDto>(_venomCustomTokenContractAssetsBoxName);
 
   Box<String> get _keyLabelsBox => Hive.box<String>(_keyLabelsBoxName);
 
@@ -81,7 +90,9 @@ class HiveSource {
 
   Box<SiteMetaDataDto> get _siteMetaDataBox => Hive.box<SiteMetaDataDto>(_siteMetaDataBoxName);
 
-  Box<CurrencyDto> get _currenciesBox => Hive.box<CurrencyDto>(_currenciesBoxName);
+  Box<CurrencyDto> get _everCurrenciesBox => Hive.box<CurrencyDto>(_currenciesBoxName);
+
+  Box<CurrencyDto> get _venomCurrenciesBox => Hive.box<CurrencyDto>(_venomCurrenciesBoxName);
 
   Box<dynamic> get _browserTabsBox => Hive.box<dynamic>(_browserTabsKey);
 
@@ -215,30 +226,66 @@ class HiveSource {
 
   Future<void> removeStorageData(String key) => _nekotonFlutterBox.delete(key);
 
-  Stream<List<TokenContractAsset>> get systemTokenContractAssetsStream =>
-      _systemTokenContractAssetsBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
+  Stream<List<TokenContractAsset>> get everSystemTokenContractAssetsStream =>
+      _everSystemTokenContractAssetsBox
+          .watchAllValues()
+          .map((e) => e.map((e) => e.toModel()).toList());
 
-  List<TokenContractAsset> get systemTokenContractAssets =>
-      _systemTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+  Stream<List<TokenContractAsset>> get venomSystemTokenContractAssetsStream =>
+      _venomSystemTokenContractAssetsBox
+          .watchAllValues()
+          .map((e) => e.map((e) => e.toModel()).toList());
 
-  Future<void> updateSystemTokenContractAssets(List<TokenContractAsset> assets) async {
-    await _systemTokenContractAssetsBox.clear();
-    await _systemTokenContractAssetsBox.addAll(assets.map((e) => e.toDto()));
+  List<TokenContractAsset> get everSystemTokenContractAssets =>
+      _everSystemTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+
+  List<TokenContractAsset> get venomSystemTokenContractAssets =>
+      _venomSystemTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+
+  Future<void> updateEverSystemTokenContractAssets(List<TokenContractAsset> assets) async {
+    await _everSystemTokenContractAssetsBox.clear();
+    await _everSystemTokenContractAssetsBox.addAll(assets.map((e) => e.toDto()));
   }
 
-  Stream<List<TokenContractAsset>> get customTokenContractAssetsStream =>
-      _customTokenContractAssetsBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
+  Future<void> updateVenomSystemTokenContractAssets(List<TokenContractAsset> assets) async {
+    await _venomSystemTokenContractAssetsBox.clear();
+    await _venomSystemTokenContractAssetsBox.addAll(assets.map((e) => e.toDto()));
+  }
 
-  List<TokenContractAsset> get customTokenContractAssets =>
-      _customTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+  Stream<List<TokenContractAsset>> get everCustomTokenContractAssetsStream =>
+      _everCustomTokenContractAssetsBox
+          .watchAllValues()
+          .map((e) => e.map((e) => e.toModel()).toList());
 
-  Future<void> addCustomTokenContractAsset(TokenContractAsset tokenContractAsset) =>
-      _customTokenContractAssetsBox.put(tokenContractAsset.address, tokenContractAsset.toDto());
+  Stream<List<TokenContractAsset>> get venomCustomTokenContractAssetsStream =>
+      _venomCustomTokenContractAssetsBox
+          .watchAllValues()
+          .map((e) => e.map((e) => e.toModel()).toList());
 
-  Future<void> removeCustomTokenContractAsset(String address) =>
-      _customTokenContractAssetsBox.delete(address);
+  List<TokenContractAsset> get everCustomTokenContractAssets =>
+      _everCustomTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
 
-  Future<void> clearCustomTokenContractAssets() => _customTokenContractAssetsBox.clear();
+  List<TokenContractAsset> get venomCustomTokenContractAssets =>
+      _venomCustomTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+
+  Future<void> addEverCustomTokenContractAsset(TokenContractAsset tokenContractAsset) =>
+      _everCustomTokenContractAssetsBox.put(tokenContractAsset.address, tokenContractAsset.toDto());
+
+  Future<void> addVenomCustomTokenContractAsset(TokenContractAsset tokenContractAsset) =>
+      _venomCustomTokenContractAssetsBox.put(
+        tokenContractAsset.address,
+        tokenContractAsset.toDto(),
+      );
+
+  Future<void> removeEverCustomTokenContractAsset(String address) =>
+      _everCustomTokenContractAssetsBox.delete(address);
+
+  Future<void> removeVenomCustomTokenContractAsset(String address) =>
+      _venomCustomTokenContractAssetsBox.delete(address);
+
+  Future<void> clearEverCustomTokenContractAssets() => _everCustomTokenContractAssetsBox.clear();
+
+  Future<void> clearVenomCustomTokenContractAssets() => _venomCustomTokenContractAssetsBox.clear();
 
   Stream<String?> get localeStream => _userPreferencesBox.watchKey(_localeKey).cast<String?>();
 
@@ -344,18 +391,32 @@ class HiveSource {
 
   Future<void> clearSitesMetaData() => _siteMetaDataBox.clear();
 
-  Stream<List<Currency>> get currenciesStream =>
-      _currenciesBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
+  Stream<List<Currency>> get everCurrenciesStream =>
+      _everCurrenciesBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
 
-  List<Currency> get currencies => _currenciesBox.values.map((e) => e.toModel()).toList();
+  Stream<List<Currency>> get venomCurrenciesStream =>
+      _venomCurrenciesBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
 
-  Future<void> saveCurrency({
+  List<Currency> get everCurrencies => _everCurrenciesBox.values.map((e) => e.toModel()).toList();
+
+  List<Currency> get venomCurrencies => _venomCurrenciesBox.values.map((e) => e.toModel()).toList();
+
+  Future<void> saveEverCurrency({
     required String address,
     required Currency currency,
   }) =>
-      _currenciesBox.put(address, currency.toDto());
+      _everCurrenciesBox.put(address, currency.toDto());
 
-  Future<void> clearCurrencies() => _currenciesBox.clear();
+  Future<void> saveVenomCurrency({
+    required String address,
+    required Currency currency,
+  }) =>
+      _venomCurrenciesBox.put(address, currency.toDto());
+
+  Future<void> clearCurrencies() async {
+    await _everCurrenciesBox.clear();
+    await _venomCurrenciesBox.clear();
+  }
 
   bool get getWhyNeedBrowser => _preferencesBox.get(_browserNeedKey) as bool? ?? false;
 
@@ -428,8 +489,10 @@ class HiveSource {
 
     await Hive.openBox<String>(_keyPasswordsBoxName, encryptionCipher: HiveAesCipher(key));
     await Hive.openBox<Object?>(_userPreferencesBoxName);
-    await Hive.openBox<TokenContractAssetDto>(_systemTokenContractAssetsBoxName);
-    await Hive.openBox<TokenContractAssetDto>(_customTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(_everSystemTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(_venomSystemTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(_everCustomTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(_venomCustomTokenContractAssetsBoxName);
     await Hive.openBox<String>(_keyLabelsBoxName);
     await Hive.openBox<String>(_seedsBoxName);
     await Hive.openBox<String>(_nekotonFlutterBoxName);
@@ -440,6 +503,7 @@ class HiveSource {
     await Hive.openBox<SearchHistoryDto>(_searchHistoryBoxName);
     await Hive.openBox<SiteMetaDataDto>(_siteMetaDataBoxName);
     await Hive.openBox<CurrencyDto>(_currenciesBoxName);
+    await Hive.openBox<CurrencyDto>(_venomCurrenciesBoxName);
     await Hive.openBox<bool>(_browserNeedKey);
     await Hive.openBox<dynamic>(_browserTabsKey);
     await Hive.openBox<List<String>>(_hiddenAccountsKey);

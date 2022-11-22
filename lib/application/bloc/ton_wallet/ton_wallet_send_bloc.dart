@@ -72,7 +72,7 @@ class TonWalletSendState with _$TonWalletSendState {
 
   const factory TonWalletSendState.loading() = _Loading;
 
-  const factory TonWalletSendState.ready(Transaction? transaction) = _Ready;
+  const factory TonWalletSendState.ready(Transaction transaction) = _Ready;
 
   const factory TonWalletSendState.error(String error) = _Error;
 }

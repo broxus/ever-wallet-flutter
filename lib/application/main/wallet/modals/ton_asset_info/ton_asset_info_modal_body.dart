@@ -8,6 +8,7 @@ import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/custom_close_button.dart';
 import 'package:ever_wallet/application/common/widgets/preload_transactions_listener.dart';
 import 'package:ever_wallet/application/common/widgets/ton_asset_icon.dart';
+import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/application/common/widgets/wallet_action_button.dart';
 import 'package:ever_wallet/application/main/wallet/map_ton_wallet_transactions_to_widgets.dart';
 import 'package:ever_wallet/application/main/wallet/modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
@@ -105,19 +106,27 @@ class _TonAssetInfoModalBodyState extends State<TonAssetInfoModalBody> {
         ],
       );
 
-  Widget balanceText(String balance) => Text(
-        '${balance.toTokens().removeZeroes().formatValue()} $kEverTicker',
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-        ),
+  Widget balanceText(String balance) => TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          return Text(
+            '${balance.toTokens().removeZeroes().formatValue()} ${isEver ? kEverTicker : kVenomTicker}',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          );
+        },
       );
 
-  Widget nameText() => const Text(
-        kEverNetworkName,
-        style: TextStyle(
-          fontSize: 16,
-        ),
+  Widget nameText() => TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          return Text(
+            isEver ? kEverNetworkName : kVenomNetworkName,
+            style: const TextStyle(
+              fontSize: 16,
+            ),
+          );
+        },
       );
 
   Widget actions(TonWallet tonWalletInfo) =>

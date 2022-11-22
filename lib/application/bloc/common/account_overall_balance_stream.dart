@@ -1,3 +1,4 @@
+import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/models/currency.dart';
@@ -33,12 +34,20 @@ Stream<double> accountOverallBalanceStream(
 
       final tonWalletBalanceStream = Rx.combineLatest2<String, Currency?, double>(
         tonWalletsRepository.contractStateStream(account.address).map((e) => e.balance),
-        tokenCurrenciesRepository.currenciesStream
-            .expand((e) => e)
-            .where((e) => e.address == kAddressForEverCurrency)
-            .cast<Currency?>()
-            .onErrorReturn(null)
-            .startWith(null),
+        Rx.combineLatest2<Map<String, List<Currency>>, Transport, List<Currency>>(
+          tokenCurrenciesRepository.currenciesStream,
+          transportRepository.transportStream,
+          (a, b) {
+            final isEver = !b.name.contains('Venom');
+            final result = a[isEver ? kEverNetworkName : kVenomNetworkName] ?? [];
+
+            return result
+                .where(
+                  (e) => e.address == (isEver ? kAddressForEverCurrency : kAddressForVenomCurrency),
+                )
+                .toList();
+          },
+        ).expand((e) => e).cast<Currency?>().onErrorReturn(null).startWith(null),
         (a, b) => b != null ? double.parse(a.toTokens()) * double.parse(b.price) : 0,
       );
 
@@ -52,7 +61,15 @@ Stream<double> accountOverallBalanceStream(
             owner: account.address,
             rootTokenContract: e,
           ),
-          tokenCurrenciesRepository.currenciesStream
+          Rx.combineLatest2<Map<String, List<Currency>>, Transport, List<Currency>>(
+            tokenCurrenciesRepository.currenciesStream,
+            transportRepository.transportStream,
+            (a, b) {
+              final isEver = !b.name.contains('Venom');
+              final result = a[isEver ? kEverNetworkName : kVenomNetworkName] ?? [];
+              return result;
+            },
+          )
               .expand((e) => e)
               .where((el) => el.address == e)
               .cast<Currency?>()

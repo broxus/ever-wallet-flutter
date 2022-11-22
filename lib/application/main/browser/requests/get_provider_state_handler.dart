@@ -37,6 +37,7 @@ Future<Map<String, dynamic>> getProviderStateHandler({
     final output = GetProviderStateOutput(
       version: version,
       numericVersion: numericVersion,
+      networkId: transport.networkId,
       selectedConnection: selectedConnection,
       supportedPermissions: supportedPermissions,
       permissions: permissions,

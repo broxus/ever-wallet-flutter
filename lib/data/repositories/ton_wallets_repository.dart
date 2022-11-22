@@ -516,7 +516,7 @@ class TonWalletsRepository {
       for (final tonWallet in _tonWalletsSubject.value.values) {
         if (tonWallet.isCompleted) {
           tonWallet.future.then((v) async {
-            if (v.tonWallet.pollingMethod == PollingMethod.manual) await v.tonWallet.refresh();
+            if (v.tonWallet.pollingMethod == PollingMethod.manual) v.tonWallet.refresh().ignore();
           }).ignore();
         }
       }

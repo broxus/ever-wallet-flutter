@@ -14,17 +14,22 @@ import 'package:ever_wallet/application/main/browser/requests/estimate_fees_hand
 import 'package:ever_wallet/application/main/browser/requests/extract_public_key_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/get_accounts_by_code_hash_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/get_boc_hash_handler.dart';
+import 'package:ever_wallet/application/main/browser/requests/get_code_salt_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/get_expected_address_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/get_full_contract_state_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/get_provider_state_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/get_transaction_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/get_transactions_handler.dart';
+import 'package:ever_wallet/application/main/browser/requests/merge_tvc_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/pack_into_cell_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/request_permissions_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/run_local_handler.dart';
+import 'package:ever_wallet/application/main/browser/requests/send_external_message_delayed_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/send_external_message_handler.dart';
+import 'package:ever_wallet/application/main/browser/requests/send_message_delayed_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/send_message_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/send_unsigned_external_message_handler.dart';
+import 'package:ever_wallet/application/main/browser/requests/set_code_salt_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/sign_data_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/sign_data_raw_handler.dart';
 import 'package:ever_wallet/application/main/browser/requests/split_tvc_handler.dart';
@@ -229,8 +234,35 @@ void browserControllerJavaScriptBind(
   );
 
   controller.addJavaScriptHandler(
+    handlerName: 'mergeTvc',
+    callback: (args) => mergeTvcHandler(
+      controller: controller,
+      args: args,
+      permissionsRepository: context.read<PermissionsRepository>(),
+    ),
+  );
+
+  controller.addJavaScriptHandler(
     handlerName: 'splitTvc',
     callback: (args) => splitTvcHandler(
+      controller: controller,
+      args: args,
+      permissionsRepository: context.read<PermissionsRepository>(),
+    ),
+  );
+
+  controller.addJavaScriptHandler(
+    handlerName: 'setCodeSalt',
+    callback: (args) => setCodeSaltHandler(
+      controller: controller,
+      args: args,
+      permissionsRepository: context.read<PermissionsRepository>(),
+    ),
+  );
+
+  controller.addJavaScriptHandler(
+    handlerName: 'getCodeSalt',
+    callback: (args) => getCodeSaltHandler(
       controller: controller,
       args: args,
       permissionsRepository: context.read<PermissionsRepository>(),
@@ -390,6 +422,18 @@ void browserControllerJavaScriptBind(
   );
 
   controller.addJavaScriptHandler(
+    handlerName: 'sendMessageDelayed',
+    callback: (args) => sendMessageDelayedHandler(
+      controller: controller,
+      args: args,
+      permissionsRepository: context.read<PermissionsRepository>(),
+      approvalsRepository: context.read<ApprovalsRepository>(),
+      keysRepository: context.read<KeysRepository>(),
+      tonWalletsRepository: context.read<TonWalletsRepository>(),
+    ),
+  );
+
+  controller.addJavaScriptHandler(
     handlerName: 'sendExternalMessage',
     callback: (args) => sendExternalMessageHandler(
       controller: controller,
@@ -398,6 +442,19 @@ void browserControllerJavaScriptBind(
       approvalsRepository: context.read<ApprovalsRepository>(),
       genericContractsRepository: context.read<GenericContractsRepository>(),
       keysRepository: context.read<KeysRepository>(),
+      tonWalletsRepository: context.read<TonWalletsRepository>(),
+    ),
+  );
+
+  controller.addJavaScriptHandler(
+    handlerName: 'sendExternalMessageDelayed',
+    callback: (args) => sendExternalMessageDelayedHandler(
+      controller: controller,
+      args: args,
+      permissionsRepository: context.read<PermissionsRepository>(),
+      approvalsRepository: context.read<ApprovalsRepository>(),
+      keysRepository: context.read<KeysRepository>(),
+      genericContractsRepository: context.read<GenericContractsRepository>(),
       tonWalletsRepository: context.read<TonWalletsRepository>(),
     ),
   );

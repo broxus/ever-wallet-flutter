@@ -119,16 +119,20 @@ extension DePoolReceiveAnswerNotificationX on DePoolReceiveAnswerNotification {
 }
 
 extension DePoolOnRoundCompleteNotificationX on DePoolOnRoundCompleteNotification {
-  Map<String, String> toRepresentableData(BuildContext context) => {
+  Map<String, String> toRepresentableData({
+    required BuildContext context,
+    required String ticker,
+  }) =>
+      {
         AppLocalizations.of(context)!.round_id: roundId,
         AppLocalizations.of(context)!.reward:
-            '${reward.toTokens().removeZeroes().formatValue()} $kEverTicker',
+            '${reward.toTokens().removeZeroes().formatValue()} $ticker',
         AppLocalizations.of(context)!.ordinary_stake:
-            '${ordinaryStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
+            '${ordinaryStake.toTokens().removeZeroes().formatValue()} $ticker',
         AppLocalizations.of(context)!.vesting_stake:
-            '${vestingStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
+            '${vestingStake.toTokens().removeZeroes().formatValue()} $ticker',
         AppLocalizations.of(context)!.lock_stake:
-            '${lockStake.toTokens().removeZeroes().formatValue()} $kEverTicker',
+            '${lockStake.toTokens().removeZeroes().formatValue()} $ticker',
         AppLocalizations.of(context)!.reinvest:
             reinvest ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no,
         AppLocalizations.of(context)!.reason: reason.toString(),

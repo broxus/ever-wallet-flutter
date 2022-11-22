@@ -64,6 +64,7 @@ class _EventsListenerState extends State<EventsListener> {
         .map(
           (e) => NetworkChangedEvent(
             selectedConnection: e.name,
+            networkId: e.networkId,
           ),
         )
         .listen(

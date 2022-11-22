@@ -9,6 +9,7 @@ import 'package:ever_wallet/application/main/wallet/modals/token_asset_info/show
 import 'package:ever_wallet/data/models/currency.dart';
 import 'package:ever_wallet/data/repositories/token_currencies_repository.dart';
 import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
+import 'package:ever_wallet/data/repositories/transport_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:provider/provider.dart';
@@ -52,6 +53,7 @@ class _TokenWalletAssetHolderState extends State<TokenWalletAssetHolder> {
           return AsyncValueStreamProvider<Currency?>(
             create: (context) => tokenCurrencyStream(
               context.read<TokenCurrenciesRepository>(),
+              context.read<TransportRepository>(),
               widget.rootTokenContract,
             ),
             builder: (context, child) {

@@ -9,6 +9,7 @@ import 'package:ever_wallet/application/common/widgets/custom_outlined_button.da
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
+import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/application/main/browser/common/selected_public_key_cubit.dart';
 import 'package:ever_wallet/application/main/common/extensions.dart';
 import 'package:ever_wallet/application/main/common/get_password_from_biometry.dart';
@@ -171,30 +172,40 @@ class _SendMessageModalState extends State<SendMessagePage> {
         isSelectable: true,
       );
 
-  Widget amount() => SectionedCardSection(
-        title: AppLocalizations.of(context)!.amount,
-        subtitle: '${widget.amount.toTokens().removeZeroes()} $kEverTicker',
-        isSelectable: true,
+  Widget amount() => TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          return SectionedCardSection(
+            title: AppLocalizations.of(context)!.amount,
+            subtitle:
+                '${widget.amount.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
+            isSelectable: true,
+          );
+        },
       );
 
-  Widget fee() => BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
-        builder: (context, state) {
-          final subtitle = state.when(
-            initial: () => null,
-            loading: () => null,
-            ready: (unsignedMessage, fees) => '${fees.toTokens().removeZeroes()} $kEverTicker',
-            error: (error) => error,
-          );
+  Widget fee() => TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          return BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
+            builder: (context, state) {
+              final subtitle = state.when(
+                initial: () => null,
+                loading: () => null,
+                ready: (unsignedMessage, fees) =>
+                    '${fees.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
+                error: (error) => error,
+              );
 
-          final hasError = state.maybeWhen(
-            error: (error) => true,
-            orElse: () => false,
-          );
+              final hasError = state.maybeWhen(
+                error: (error) => true,
+                orElse: () => false,
+              );
 
-          return SectionedCardSection(
-            title: AppLocalizations.of(context)!.blockchain_fee,
-            subtitle: subtitle,
-            hasError: hasError,
+              return SectionedCardSection(
+                title: AppLocalizations.of(context)!.blockchain_fee,
+                subtitle: subtitle,
+                hasError: hasError,
+              );
+            },
           );
         },
       );

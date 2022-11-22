@@ -244,6 +244,7 @@ class ApplicationInjection extends StatelessWidget {
           currentAccountsSource: context.read<CurrentAccountsSource>(),
           hiveSource: context.read<HiveSource>(),
           httpSource: context.read<HttpSource>(),
+          transportSource: context.read<TransportSource>(),
         ),
         dispose: (context, value) => value.dispose(),
       );

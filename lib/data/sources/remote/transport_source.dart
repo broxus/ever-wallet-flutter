@@ -16,6 +16,11 @@ class TransportSource {
 
   Transport get transport => _transportSubject.value;
 
+  /// Returns stream of bool where true means ever network, false means venom network
+  Stream<bool> get isEverTransport => transportStream.map((t) => !t.name.contains('Venom'));
+
+  bool get isEver => !transport.name.contains('Venom');
+
   Future<void> updateTransport(ConnectionData connectionData) async {
     final prevTransport = _transportSubject.valueOrNull;
 

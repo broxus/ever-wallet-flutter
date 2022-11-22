@@ -8,6 +8,7 @@ import 'package:ever_wallet/application/common/widgets/custom_elevated_button.da
 import 'package:ever_wallet/application/common/widgets/custom_outlined_button.dart';
 import 'package:ever_wallet/application/common/widgets/custom_radio.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
+import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/application/main/browser/common/grant_permissions_page.dart';
 import 'package:ever_wallet/application/main/browser/common/selected_account_cubit.dart';
 import 'package:ever_wallet/data/models/permission.dart';
@@ -142,12 +143,16 @@ class _RequestPermissionsModalState extends State<ChangeAccountPage> {
                 orElse: () => null,
               );
 
-          return Text(
-            '${balance?.toTokens().removeZeroes().formatValue() ?? '0'} $kEverTicker',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+          return TransportTypeBuilderWidget(
+            builder: (context, isEver) {
+              return Text(
+                '${balance?.toTokens().removeZeroes().formatValue() ?? '0'} ${isEver ? kEverTicker : kVenomTicker}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              );
+            },
           );
         },
       );

@@ -12,6 +12,7 @@ import 'package:ever_wallet/application/common/widgets/custom_text_form_field.da
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/common/widgets/text_field_clear_button.dart';
 import 'package:ever_wallet/application/common/widgets/text_suffix_icon_button.dart';
+import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/application/common/widgets/unfocusing_gesture_detector.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/check_camera_permission.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/parse_scan_result.dart';
@@ -221,25 +222,29 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         },
       );
 
-  Widget balance() => AsyncValueStreamProvider<String>(
-        create: (context) => context
-            .read<TonWalletsRepository>()
-            .contractStateStream(widget.address)
-            .map((e) => e.balance),
-        builder: (context, child) {
-          final balance = context.watch<AsyncValue<String>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => null,
-              );
+  Widget balance() => TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          return AsyncValueStreamProvider<String>(
+            create: (context) => context
+                .read<TonWalletsRepository>()
+                .contractStateStream(widget.address)
+                .map((e) => e.balance),
+            builder: (context, child) {
+              final balance = context.watch<AsyncValue<String>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => null,
+                  );
 
-          return Text(
-            AppLocalizations.of(context)!.balance(
-              balance?.toTokens().removeZeroes() ?? '0',
-              kEverTicker,
-            ),
-            style: const TextStyle(
-              color: Colors.black54,
-            ),
+              final ticker = isEver ? kEverTicker : kVenomTicker;
+
+              return Text(
+                AppLocalizations.of(context)!.balance(
+                  balance?.toTokens().removeZeroes() ?? '0',
+                  ticker,
+                ),
+                style: const TextStyle(color: Colors.black54),
+              );
+            },
           );
         },
       );

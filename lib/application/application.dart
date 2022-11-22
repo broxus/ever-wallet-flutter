@@ -36,6 +36,7 @@ class Application extends StatelessWidget {
               builder: (locale) => Portal(
                 child: Builder(
                   builder: (context) {
+                    // TODO: add subscription to networkTypeProvider
                     final navigatorKey = context.read<GlobalKey<NavigatorState>>();
 
                     return AppLifecycleWrapper(

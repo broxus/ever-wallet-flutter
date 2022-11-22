@@ -10,4 +10,6 @@ enum WalletContractType {
   surfWallet,
   walletV3,
   highloadWalletV2,
+  everWallet,
+  multisig2,
 }

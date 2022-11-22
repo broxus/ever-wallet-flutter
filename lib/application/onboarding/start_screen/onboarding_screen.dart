@@ -11,10 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-class OnboardingScreenRoute extends MaterialPageRoute<void> {
-  OnboardingScreenRoute() : super(builder: (_) => const OnboardingScreen());
-}
-
 /// Entry point in the app if user not authenticated
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});

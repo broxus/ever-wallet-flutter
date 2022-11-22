@@ -1,6 +1,7 @@
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/widgets/ton_asset_icon.dart';
+import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/widgets/address_title.dart';
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/widgets/date_title.dart';
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/widgets/fees_title.dart';
@@ -38,10 +39,14 @@ class TonWalletMultisigTransactionHolder extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: ValueTitle(
-                            value: transaction.value.toTokens().removeZeroes().formatValue(),
-                            currency: kEverTicker,
-                            isOutgoing: transaction.isOutgoing,
+                          child: TransportTypeBuilderWidget(
+                            builder: (context, isEver) {
+                              return ValueTitle(
+                                value: transaction.value.toTokens().removeZeroes().formatValue(),
+                                currency: isEver ? kEverTicker : kVenomTicker,
+                                isOutgoing: transaction.isOutgoing,
+                              );
+                            },
                           ),
                         ),
                         const IconForward(),

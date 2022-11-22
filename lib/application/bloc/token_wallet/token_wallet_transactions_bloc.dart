@@ -59,9 +59,8 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, TokenWalletTransactionsSt
     super.close();
   }
 
-  void _transactionsStreamListener(List<TokenWalletOrdinaryTransaction>? event) {
-    if (event != null) _InternalEvent.update(event);
-  }
+  void _transactionsStreamListener(List<TokenWalletOrdinaryTransaction> event) =>
+      _InternalEvent.update(event);
 }
 
 abstract class _Event {}

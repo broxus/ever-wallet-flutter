@@ -8,6 +8,7 @@ import 'package:ever_wallet/application/common/widgets/crystal_subtitle.dart';
 import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
+import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/password_enter_page/password_enter_page.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/send_result_page.dart';
 import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
@@ -113,41 +114,52 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
         ],
       );
 
-  Widget balance() => AsyncValueStreamProvider<String>(
-        create: (context) => context
-            .read<TonWalletsRepository>()
-            .contractStateStream(widget.address)
-            .map((e) => e.balance),
-        builder: (context, child) {
-          final balance = context.watch<AsyncValue<String>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => null,
-              );
+  Widget balance() => TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          return AsyncValueStreamProvider<String>(
+            create: (context) => context
+                .read<TonWalletsRepository>()
+                .contractStateStream(widget.address)
+                .map((e) => e.balance),
+            builder: (context, child) {
+              final balance = context.watch<AsyncValue<String>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => null,
+                  );
 
-          return SectionedCardSection(
-            title: AppLocalizations.of(context)!.account_balance,
-            subtitle: '${balance?.toTokens().removeZeroes()} $kEverTicker',
+              final ticker = isEver ? kEverTicker : kVenomTicker;
+
+              return SectionedCardSection(
+                title: AppLocalizations.of(context)!.account_balance,
+                subtitle: '${balance?.toTokens().removeZeroes()} $ticker',
+              );
+            },
           );
         },
       );
 
-  Widget fee() => BlocBuilder<TonWalletPrepareDeployBloc, TonWalletPrepareDeployState>(
-        builder: (context, state) {
-          final subtitle = state.maybeWhen(
-            ready: (unsignedMessage, fees) => '${fees.toTokens().removeZeroes()} $kEverTicker',
-            error: (error) => error,
-            orElse: () => null,
-          );
+  Widget fee() => TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          return BlocBuilder<TonWalletPrepareDeployBloc, TonWalletPrepareDeployState>(
+            builder: (context, state) {
+              final subtitle = state.maybeWhen(
+                ready: (unsignedMessage, fees) =>
+                    '${fees.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
+                error: (error) => error,
+                orElse: () => null,
+              );
 
-          final hasError = state.maybeWhen(
-            error: (error) => true,
-            orElse: () => false,
-          );
+              final hasError = state.maybeWhen(
+                error: (error) => true,
+                orElse: () => false,
+              );
 
-          return SectionedCardSection(
-            title: AppLocalizations.of(context)!.blockchain_fee,
-            subtitle: subtitle,
-            hasError: hasError,
+              return SectionedCardSection(
+                title: AppLocalizations.of(context)!.blockchain_fee,
+                subtitle: subtitle,
+                hasError: hasError,
+              );
+            },
           );
         },
       );

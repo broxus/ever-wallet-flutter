@@ -3,6 +3,7 @@ import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/utils.dart';
 import 'package:ever_wallet/application/common/widgets/custom_outlined_button.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
+import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/application/main/wallet/modals/utils.dart';
 import 'package:ever_wallet/data/models/token_wallet_ordinary_transaction.dart';
 import 'package:flutter/material.dart';
@@ -196,9 +197,15 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     required BuildContext context,
     required String fees,
   }) =>
-      item(
-        title: AppLocalizations.of(context)!.blockchain_fee,
-        subtitle: '$fees $kEverTicker',
+      TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          final ticker = isEver ? kEverTicker : kVenomTicker;
+
+          return item(
+            title: AppLocalizations.of(context)!.blockchain_fee,
+            subtitle: '$fees $ticker',
+          );
+        },
       );
 
   Widget typeItem({
@@ -214,8 +221,15 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     required BuildContext context,
     required String hash,
   }) =>
-      CustomOutlinedButton(
-        onPressed: () => launchUrlString(transactionExplorerLink(hash)),
-        text: AppLocalizations.of(context)!.see_in_the_explorer,
+      TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          final transactionExplorerLink =
+              isEver ? everTransactionExplorerLink : venomTransactionExplorerLink;
+
+          return CustomOutlinedButton(
+            onPressed: () => launchUrlString(transactionExplorerLink(hash)),
+            text: AppLocalizations.of(context)!.see_in_the_explorer,
+          );
+        },
       );
 }

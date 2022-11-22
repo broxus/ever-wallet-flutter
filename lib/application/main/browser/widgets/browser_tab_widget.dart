@@ -242,6 +242,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
               initialUrlRequest: URLRequest(url: Uri.parse(widget.tab.tab.url)),
               initialOptions: InAppWebViewGroupOptions(
                 crossPlatform: InAppWebViewOptions(
+                  applicationNameForUserAgent: 'EverWalletBrowser',
                   useShouldOverrideUrlLoading: true,
                   mediaPlaybackRequiresUserGesture: false,
                   transparentBackground: true,
@@ -400,7 +401,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
     logger.d(message.message, message.message);
   }
 
-  void _updateUrlControllerValue(Uri? url) {
+  void _updateUrlControllerValue(Uri url) {
     var text = url.toString();
 
     if (url == Uri.parse(aboutBlankPage)) {

@@ -26,7 +26,7 @@ Future<Map<String, dynamic>> getExpectedAddressHandler({
 
     if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
 
-    final address = getExpectedAddress(
+    final result = getExpectedAddress(
       tvc: input.tvc,
       contractAbi: input.abi,
       workchainId: input.workchain ?? kDefaultWorkchain,
@@ -34,7 +34,10 @@ Future<Map<String, dynamic>> getExpectedAddressHandler({
       initData: input.initParams,
     );
 
-    final output = GetExpectedAddressOutput(address: address.item1);
+    final output = GetExpectedAddressOutput(
+      address: result.item1,
+      stateInit: result.item2,
+    );
 
     final jsonOutput = output.toJson();
 

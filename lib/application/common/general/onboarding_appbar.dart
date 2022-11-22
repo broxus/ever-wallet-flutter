@@ -17,7 +17,6 @@ enum CloseType {
   none,
 }
 
-const kMinLeadingButtonWidth = 80.0;
 const kAppBarButtonSize = 32.0;
 const kAppBarButtonPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
 

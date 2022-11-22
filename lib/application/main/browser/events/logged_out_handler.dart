@@ -9,7 +9,7 @@ Future<void> loggedOutHandler({
   try {
     logger.d('LoggedOutEvent');
 
-    await controller.evaluateJavascript(source: 'window.__dartNotifications.loggedOut()');
+    await controller.evaluateJavascript(source: 'window.__dartNotifications.loggedOut({})');
   } catch (err, st) {
     logger.e(err, err, st);
     rethrow;

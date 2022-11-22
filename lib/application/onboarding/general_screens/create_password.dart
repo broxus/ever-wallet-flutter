@@ -2,15 +2,16 @@ import 'dart:async';
 
 import 'package:ever_wallet/application/application.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
+import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/general/dialog/default_dialog_controller.dart';
 import 'package:ever_wallet/application/common/general/field/bordered_input.dart';
 import 'package:ever_wallet/application/common/general/field/switch_field.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
-import 'package:ever_wallet/application/onboarding/sign_with_phrase/select_phrase_type_screen.dart';
 import 'package:ever_wallet/application/onboarding/widgets/onboarding_background.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
+import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
@@ -206,9 +207,15 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
           navigator.pushNamedAndRemoveUntil(AppRouter.main, (route) => false);
           sub.cancel();
         },
-        onDone: () {
+        onDone: () async {
+          await context.read<AccountsRepository>().addAccount(
+            name: passwordController.text,
+            publicKey: key.publicKey,
+            walletType: kDefaultWalletType,
+            workchain: kDefaultWorkchain,
+          );
           overlay.dismiss(animate: false);
-          navigator.push(SelectPhraseTypeRute(key.publicKey));
+          navigator.pushNamedAndRemoveUntil(AppRouter.main, (route) => false);
           sub.cancel();
         },
       );

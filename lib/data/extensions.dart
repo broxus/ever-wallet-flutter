@@ -33,23 +33,26 @@ extension IntX on int {
 
 extension WalletTypeX on WalletType {
   int toInt() => when(
+        walletV3: () => 3,
         multisig: (multisigType) {
           switch (multisigType) {
             case MultisigType.safeMultisigWallet:
-              return 1;
-            case MultisigType.safeMultisigWallet24h:
-              return 2;
-            case MultisigType.setcodeMultisigWallet:
-              return 3;
-            case MultisigType.setcodeMultisigWallet24h:
               return 4;
-            case MultisigType.bridgeMultisigWallet:
+            case MultisigType.safeMultisigWallet24h:
               return 5;
+            case MultisigType.setcodeMultisigWallet:
+              return 6;
+            case MultisigType.setcodeMultisigWallet24h:
+              return 7;
+            case MultisigType.bridgeMultisigWallet:
+              return 8;
             case MultisigType.surfWallet:
               return 6;
+            case MultisigType.multisig2:
+              return 8;
           }
         },
-        walletV3: () => 7,
+        everWallet: () => 9,
         highloadWalletV2: () => 8,
       );
 
@@ -68,8 +71,11 @@ extension WalletTypeX on WalletType {
               return 'BridgeMultisig';
             case MultisigType.surfWallet:
               return 'Surf';
+            case MultisigType.multisig2:
+              return 'Multisig2';
           }
         },
+        everWallet: () => 'EverWallet',
         walletV3: () => 'WalletV3',
         highloadWalletV2: () => 'HighloadWalletV2',
       );
@@ -92,8 +98,11 @@ extension WalletTypeX on WalletType {
             return localization.bridgeMultisigDescription;
           case MultisigType.surfWallet:
             return localization.surfDescription;
+          case MultisigType.multisig2:
+            return localization.multisig2Description;
         }
       },
+      everWallet: () => localization.everWalletDescription,
       walletV3: () => localization.walletV3Description,
       highloadWalletV2: () => 'HighloadWalletV2',
     );
