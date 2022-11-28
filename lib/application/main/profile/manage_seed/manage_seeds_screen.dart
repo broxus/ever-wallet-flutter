@@ -138,7 +138,8 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
       leading: Assets.images.seed.svg(width: 32, height: 32),
       titleText: seed.name,
       onPressed: () => Navigator.of(context).push(SeedDetailScreenRoute(seed: seed)),
-      subtitleText: localization.children_public_keys(children?.length ?? 0),
+      // +1 because seed is a public key itself
+      subtitleText: localization.children_public_keys((children?.length ?? 0) + 1),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
