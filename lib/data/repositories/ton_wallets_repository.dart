@@ -479,6 +479,12 @@ class TonWalletsRepository {
             .firstWhere((e) => e.address == address);
 
         await subscriptions[address]?.future.then((v) => v.dispose());
+        _pendingTonWalletSubscriptions.remove(
+          TonWalletPendingSubscriptionCollection(
+            asset: tonWallet,
+            transportCollection: transport.toEquatableCollection(),
+          ),
+        );
 
         final newCompleter = _subscribe(
           tonWalletAsset: tonWallet,

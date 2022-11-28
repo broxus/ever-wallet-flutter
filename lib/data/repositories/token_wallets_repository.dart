@@ -251,7 +251,7 @@ class TokenWalletsRepository {
 
       final tokenWalletsForSubscription = tokenWallets.where(
         (e) => !subscriptions.keys.any((el) => el == e),
-      );
+      ).toList();
 
       for (final e in tokenWalletsForSubscription) {
         final completer = _subscribe(
