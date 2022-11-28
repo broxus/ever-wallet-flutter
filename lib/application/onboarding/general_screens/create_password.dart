@@ -209,7 +209,6 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
         },
         onDone: () async {
           await context.read<AccountsRepository>().addAccount(
-            name: passwordController.text,
             publicKey: key.publicKey,
             walletType: kDefaultWalletType,
             workchain: kDefaultWorkchain,
