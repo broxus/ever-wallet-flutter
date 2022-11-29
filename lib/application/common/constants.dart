@@ -1,6 +1,6 @@
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-final kSeedSplitRegExp = RegExp('[ |;|,|:]');
+final kSeedSplitRegExp = RegExp(r'[ |;|,|:|\n]');
 
 const kDefaultWalletType = WalletType.everWallet();
 
