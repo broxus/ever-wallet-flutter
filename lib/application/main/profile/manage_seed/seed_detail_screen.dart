@@ -215,22 +215,26 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     AppLocalizations localization,
     KeyStoreEntry key,
   ) {
-    final accounts = context.read<AccountsRepository>().accountsFor(key.publicKey);
-    return EWListTile(
-      onPressed: () => Navigator.of(context).push(KeyDetailScreenRoute(keyEntry: key)),
-      leading: Container(
-        width: 32,
-        height: 32,
-        alignment: Alignment.center,
-        decoration: const BoxDecoration(color: ColorsRes.darkBlue, shape: BoxShape.circle),
-        child: Assets.images.key.svg(width: 18, height: 18),
-      ),
-      titleText: key.name,
-      subtitleText: localization.key_name_with_sub_count(
-        key.publicKey.ellipsePublicKey(),
-        accounts.length,
-      ),
-      trailing: _keyDropdown(themeStyle, localization, key),
+    return StreamBuilder<List<AssetsList>>(
+      stream: context.read<AccountsRepository>().accountsForStream(key.publicKey),
+      builder: (context, accounts) {
+        return EWListTile(
+          onPressed: () => Navigator.of(context).push(KeyDetailScreenRoute(keyEntry: key)),
+          leading: Container(
+            width: 32,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(color: ColorsRes.darkBlue, shape: BoxShape.circle),
+            child: Assets.images.key.svg(width: 18, height: 18),
+          ),
+          titleText: key.name,
+          subtitleText: localization.key_name_with_sub_count(
+            key.publicKey.ellipsePublicKey(),
+            accounts.data?.length ?? 0,
+          ),
+          trailing: _keyDropdown(themeStyle, localization, key),
+        );
+      },
     );
   }
 
