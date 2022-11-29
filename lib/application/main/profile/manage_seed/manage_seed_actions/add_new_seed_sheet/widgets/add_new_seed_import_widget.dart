@@ -1,13 +1,18 @@
+import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/field/seed_phrase_input.dart';
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
+import 'package:ever_wallet/application/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 class AddNewSeedImportWidget extends StatefulWidget {
   const AddNewSeedImportWidget({
@@ -30,6 +35,9 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
   late List<TextEditingController> controllers;
   late List<FocusNode> focuses;
 
+  /// Display paste only if there are no text(false) in fields else clear (true)
+  final isClearButtonState = ValueNotifier<bool>(false);
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +45,19 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
       12,
       (index) => TextEditingController(text: widget.savedPhrase?[index] ?? ''),
     );
+    controllers.forEach(
+      (c) => c.addListener(() {
+        final hasText = controllers.any((controller) => controller.text.isNotEmpty);
+        isClearButtonState.value = hasText;
+      }),
+    );
+    controllers[0].addListener(() {
+      /// Only for 1-st controller allow paste as button
+      /// It's some bug but Input's paste removes spaces so check with length
+      if (controllers[0].text.length > 15) {
+        _pastePhrase();
+      }
+    });
     focuses = List.generate(12, (_) => FocusNode());
     focuses.forEach(
       (f) => f.addListener(() {
@@ -86,14 +107,27 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
                 ),
               ),
             ),
-            Text(
-              localization.enter_seed_phrase,
-              style: themeStyle.styles.basicStyle.copyWith(
-                fontWeight: FontWeight.w700,
-                color: ColorsRes.text,
+            Flexible(
+              child: Text(
+                localization.enter_seed_phrase.overflow,
+                style: themeStyle.styles.basicStyle.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: ColorsRes.text,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Spacer(),
+            ValueListenableBuilder<bool>(
+              valueListenable: isClearButtonState,
+              builder: (_, isClear, __) {
+                return TextPrimaryButton.appBar(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  text: isClear ? localization.clear : localization.paste,
+                  style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.darkBlue),
+                  onPressed: isClear ? _clearFields : _pastePhrase,
+                );
+              },
+            ),
           ],
         ),
         const SizedBox(height: 30),
@@ -175,8 +209,51 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
 
   void _confirmAction() {
     if (formKey.currentState?.validate() ?? false) {
+      FocusManager.instance.primaryFocus?.unfocus();
       final phrase = controllers.map((e) => e.text).toList();
       widget.onPhraseEntered(phrase);
     }
+  }
+
+  void _clearFields() {
+    controllers.forEach((c) => c.clear());
+    formKey.currentState?.reset();
+  }
+
+  Future<void> _pastePhrase() async {
+    final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
+    final words = clipboard?.text?.split(kSeedSplitRegExp) ?? <String>[];
+
+    if (words.isNotEmpty && words.length == 12) {
+      for (final word in words) {
+        if (getHints(word).isEmpty) {
+          words.clear();
+          break;
+        }
+      }
+    } else {
+      words.clear();
+    }
+
+    if (words.isEmpty) {
+      if (!mounted) return;
+
+      formKey.currentState?.reset();
+
+      showErrorFlushbar(
+        context,
+        message: context.localization.incorrect_words_format,
+      );
+      return;
+    }
+
+    words.asMap().forEach((index, word) {
+      controllers[index].value = TextEditingValue(
+        text: word,
+        selection: TextSelection.fromPosition(TextPosition(offset: word.length)),
+      );
+    });
+    focuses.forEach((f) => f.unfocus());
+    formKey.currentState?.validate();
   }
 }

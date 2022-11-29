@@ -150,7 +150,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
                         return TextPrimaryButton.appBar(
                           onPressed: isClear ? clearFields : pastePhrase,
                           padding: const EdgeInsets.all(4),
-                          text: isClear ? 'Clear all' : 'Paste all',
+                          text: isClear ? localization.clear_all : localization.paste_all,
                           style: themeStyle.styles.basicBoldStyle,
                         );
                       },
@@ -229,6 +229,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
   void _confirmAction() {
     if (formKey.currentState?.validate() ?? false) {
       try {
+        FocusManager.instance.primaryFocus?.unfocus();
         final phrase = controllers.take(valuesNotifier.value).map((e) => e.text).toList();
         final mnemonicType = valuesNotifier.value == values.last
             ? const MnemonicType.legacy()
@@ -261,7 +262,7 @@ class _EnterSeedPhraseScreenState extends State<EnterSeedPhraseScreen> {
 
   Future<void> pastePhrase() async {
     final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
-    final words = clipboard?.text?.split(RegExp('[ |;|,|:]')) ?? <String>[];
+    final words = clipboard?.text?.split(kSeedSplitRegExp) ?? <String>[];
 
     if (words.isNotEmpty && words.length == valuesNotifier.value) {
       for (final word in words) {
