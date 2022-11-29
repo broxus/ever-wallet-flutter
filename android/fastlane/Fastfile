@@ -1,0 +1,23 @@
+$android_path="."
+
+default_platform(:android)
+
+platform :android do
+  desc "Deploy a new build to the Google Play Internal channel"
+  lane :deploy_google_play_internal do
+    Dir.chdir($android_path) do
+      # Let's build using flutter
+      # gradle(task: "clean assembleRelease")
+      sh "flutter build appbundle"+$buildNumberString.to_s
+      upload_to_play_store(
+        track: 'internal',
+        aab: '../build/app/outputs/bundle/release/app-release.aab',
+        skip_upload_metadata: true,
+        skip_upload_changelogs: true,
+        skip_upload_images: true,
+        skip_upload_screenshots: true,
+        changes_not_sent_for_review: true
+      )
+    end
+  end
+end

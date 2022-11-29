@@ -1,0 +1,43 @@
+$ios_path="."
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Deploy a new build to the TestFlight"
+  lane :deploy_testflight do
+    Dir.chdir($ios_path) do
+      api_key = app_store_connect_api_key(
+        key_id: "L4N29B6Z42",
+        issuer_id: "85296931-1453-4b5c-ab31-7df0851a233b",
+        key_filepath: "fastlane/AuthKey_L4N29B6Z42.p8",
+      )
+
+      # Let's build using flutter
+      # build_app(workspace: "Runner.xcworkspace", scheme: "Runner")
+
+      Dir.chdir("../..") do
+        sh "flutter build ipa --release --export-options-plist ios/export_options.plist" + $buildNumberString.to_s
+      end
+      upload_to_testflight(
+        ipa: '../build/ios/ipa/ever_wallet.ipa',
+        skip_waiting_for_build_processing: true,
+        api_key: api_key
+        )
+    end
+  end
+
+  desc "Assure there is correct iOS certs and profiles"
+  lane :match_assure do
+    Dir.chdir($ios_path) do
+      match(type: "appstore", readonly: is_ci)
+      match(type: "development", readonly: is_ci)
+      match(type: "adhoc", readonly: is_ci)
+    end
+  end
+
+  lane :pod_install do
+    Dir.chdir($ios_path) do
+      cocoapods()
+    end
+  end
+end

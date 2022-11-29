@@ -50,3 +50,14 @@ app.*.map.json
 # Private data
 GoogleService-Info.plist
 google-services.json
+GooglePlayServiceAccount.json
+AuthKey_*.p8
+FirebaseAPIKey.json
+
+# Fastlane related
+**/fastlane/report.xml
+
+
+# Node
+node_modules
+ios/fastlane/Fastfile

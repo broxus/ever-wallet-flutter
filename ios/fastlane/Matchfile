@@ -1,0 +1,3 @@
+git_url("git@gitlab.broxus.com:wallet/ios-provisioning.git")
+
+app_identifier("com.broxus.crystal.app")
