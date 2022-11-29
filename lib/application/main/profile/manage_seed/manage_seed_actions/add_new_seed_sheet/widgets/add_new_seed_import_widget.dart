@@ -86,34 +86,30 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
       children: [
         Row(
           children: [
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextPrimaryButton.appBar(
-                  onPressed: widget.backAction,
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.arrow_back_ios, color: ColorsRes.darkBlue, size: 20),
-                        Text(
-                          localization.back_word,
-                          style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.darkBlue),
-                        ),
-                      ],
+            TextPrimaryButton.appBar(
+              onPressed: widget.backAction,
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.arrow_back_ios, color: ColorsRes.darkBlue, size: 20),
+                    Text(
+                      localization.back_word,
+                      style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.darkBlue),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
-            Flexible(
+            Expanded(
               child: Text(
                 localization.enter_seed_phrase.overflow,
                 style: themeStyle.styles.basicStyle.copyWith(
                   fontWeight: FontWeight.w700,
                   color: ColorsRes.text,
                 ),
+                textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
               ),
             ),

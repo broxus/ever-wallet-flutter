@@ -78,6 +78,7 @@ class SeedPhraseInput extends StatelessWidget {
 
   List<String> suggestionsCallback() {
     final value = controller.value;
+    if (value.text.isEmpty) return [];
     final text = value.text.substring(0, value.selection.start);
     final hints = getHints(text);
     if (hints.length == 1 && hints[0] == value.text) {
