@@ -89,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       children: [
         buildSection(
-          title: localization.current_seed_name_of_seed.toUpperCase(),
+          title: localization.current_seed_with_name(currentKey?.name ?? '').toUpperCase(),
           children: [
             buildSectionAction(
               title: localization.export_seed,
