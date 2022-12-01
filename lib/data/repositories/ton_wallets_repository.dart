@@ -596,7 +596,7 @@ class TonWalletsRepository {
 
       /// Unsubscribe
       for (final key in assetsToRemove) {
-        _tonWalletsSubject.value[key.address]!.future.then((v) => v.dispose()).ignore();
+        _tonWalletsSubject.value.remove(key.address)?.future.then((v) => v.dispose()).ignore();
         _pendingTonWalletSubscriptions.remove(
           TonWalletPendingSubscriptionCollection(asset: key, transportCollection: []),
         );

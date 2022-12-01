@@ -6,7 +6,6 @@ import 'package:ever_wallet/application/onboarding/start_screen/widgets/sliding_
 import 'package:ever_wallet/application/onboarding/widgets/onboarding_background.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
-import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -56,16 +55,16 @@ class OnboardingScreen extends StatelessWidget {
                       onPressed: () => Navigator.of(context).push(EnterSeedPhraseRoute()),
                       isTransparent: true,
                     ),
-                    const SizedBox(height: 12),
-                    PrimaryButton(
-                      text: localization.sign_with_ledger,
-                      // TODO: change icon
-                      icon: Assets.images.ledger.svg(
-                        color: style.styles.secondaryButtonStyle.color,
-                      ),
-                      onPressed: () {},
-                      isTransparent: true,
-                    ),
+                    // const SizedBox(height: 12),
+                    // PrimaryButton(
+                    //   text: localization.sign_with_ledger,
+                    //   // TODO: change icon
+                    //   icon: Assets.images.ledger.svg(
+                    //     color: style.styles.secondaryButtonStyle.color,
+                    //   ),
+                    //   onPressed: () {},
+                    //   isTransparent: true,
+                    // ),
                     const SizedBox(height: 16),
                     Text.rich(
                       TextSpan(
