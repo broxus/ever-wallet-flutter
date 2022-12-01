@@ -246,6 +246,10 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     return MenuDropdown(
       items: [
         MenuDropdownData(
+          title: localization.use_this_seed,
+          onTap: () => context.read<KeysRepository>().setCurrentKey(seed.publicKey),
+        ),
+        MenuDropdownData(
           title: localization.hide_word,
           onTap: () {},
         ),

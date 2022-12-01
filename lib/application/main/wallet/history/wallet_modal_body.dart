@@ -76,10 +76,12 @@ class _WalletModalBodyState extends State<WalletModalBody> {
                         physics: const NeverScrollableScrollPhysics(),
                         children: [
                           AllAssetsLayout(
+                            key: ValueKey('AllAssetsLayout-${currentAccount.address}'),
                             address: currentAccount.address,
                             controller: widget.scrollController,
                           ),
                           TonWalletTransactionsLayout(
+                            key: ValueKey('TonWalletTransactionsLayout-${currentAccount.address}'),
                             address: currentAccount.address,
                             controller: widget.scrollController,
                           ),

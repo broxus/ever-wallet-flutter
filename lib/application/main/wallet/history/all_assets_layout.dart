@@ -11,7 +11,7 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-class AllAssetsLayout extends StatefulWidget {
+class AllAssetsLayout extends StatelessWidget {
   final String address;
   final ScrollController controller;
 
@@ -22,14 +22,9 @@ class AllAssetsLayout extends StatefulWidget {
   });
 
   @override
-  _AllAssetsLayoutState createState() => _AllAssetsLayoutState();
-}
-
-class _AllAssetsLayoutState extends State<AllAssetsLayout> {
-  @override
   Widget build(BuildContext context) =>
       AsyncValueStreamProvider<Tuple2<TonWalletAsset, List<TokenContractAsset>>>(
-        create: (context) => context.read<TonAssetsRepository>().accountAssets(widget.address),
+        create: (context) => context.read<TonAssetsRepository>().accountAssets(address),
         builder: (context, child) {
           final accountAssets = context
               .watch<AsyncValue<Tuple2<TonWalletAsset, List<TokenContractAsset>>>>()
@@ -70,7 +65,7 @@ class _AllAssetsLayoutState extends State<AllAssetsLayout> {
                 ? ListView.separated(
                     physics: const ClampingScrollPhysics(),
                     padding: EdgeInsets.zero,
-                    controller: widget.controller,
+                    controller: controller,
                     itemCount: list.length,
                     separatorBuilder: (_, __) => Container(
                       height: 1,

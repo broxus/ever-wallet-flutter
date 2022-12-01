@@ -15,7 +15,7 @@ import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class TonWalletAssetHolder extends StatefulWidget {
+class TonWalletAssetHolder extends StatelessWidget {
   final String address;
 
   const TonWalletAssetHolder({
@@ -24,16 +24,9 @@ class TonWalletAssetHolder extends StatefulWidget {
   });
 
   @override
-  _TonWalletAssetHolderState createState() => _TonWalletAssetHolderState();
-}
-
-class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
-  @override
   Widget build(BuildContext context) => AsyncValueStreamProvider<String>(
-        create: (context) => context
-            .read<TonWalletsRepository>()
-            .contractStateStream(widget.address)
-            .map((e) => e.balance),
+        create: (context) =>
+            context.read<TonWalletsRepository>().contractStateStream(address).map((e) => e.balance),
         builder: (context, child) {
           final balance = context.watch<AsyncValue<String>>().maybeWhen(
                 ready: (value) => value,
@@ -69,7 +62,7 @@ class _TonWalletAssetHolderState extends State<TonWalletAssetHolder> {
                     onTap: balance != null
                         ? () => showTonAssetInfo(
                               context: context,
-                              address: widget.address,
+                              address: address,
                             )
                         : () {},
                   );
