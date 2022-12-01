@@ -123,7 +123,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (keys.isNotEmpty)
                   buildSeedsList(
                     selectedSeed: currentKey,
-                    seeds: keys,
+                    seeds: keys.keys,
                     onAdd: () => Navigator.of(context).push(ManageSeedsRoute()),
                     onSelect: (seed) =>
                         context.read<KeysRepository>().setCurrentKey(seed.publicKey),
@@ -183,14 +183,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget buildSeedsList({
     KeyStoreEntry? selectedSeed,
-    required Map<KeyStoreEntry, List<KeyStoreEntry>?> seeds,
+    required Iterable<KeyStoreEntry> seeds,
     required void Function(KeyStoreEntry) onSelect,
     required void Function() onAdd,
     required bool showAddAction,
     required AppLocalizations localization,
   }) {
     final children = <Widget>[];
-    for (final seed in seeds.keys) {
+    for (final seed in seeds) {
       children.add(
         buildSeedItem(
           seed: seed,
@@ -198,18 +198,6 @@ class _ProfilePageState extends State<ProfilePage> {
           onSelect: seed == selectedSeed ? null : onSelect,
         ),
       );
-      if (seeds[seed] != null && seeds[seed]!.isNotEmpty) {
-        for (final key in seeds[seed]!) {
-          children.add(
-            buildSeedItem(
-              seed: key,
-              selectedSeed: selectedSeed,
-              onSelect: key == selectedSeed ? null : onSelect,
-              isChild: true,
-            ),
-          );
-        }
-      }
     }
 
     if (showAddAction) {
@@ -234,7 +222,6 @@ class _ProfilePageState extends State<ProfilePage> {
     KeyStoreEntry? selectedSeed,
     required KeyStoreEntry seed,
     required void Function(KeyStoreEntry)? onSelect,
-    bool isChild = false,
   }) {
     IconData? icon;
     final selected = seed.publicKey == selectedSeed?.publicKey;
@@ -253,7 +240,6 @@ class _ProfilePageState extends State<ProfilePage> {
             },
       title: seed.name,
       icon: icon,
-      isChild: isChild,
     );
   }
 
@@ -341,16 +327,14 @@ class _ProfilePageState extends State<ProfilePage> {
     required String title,
     IconData? icon,
     VoidCallback? onTap,
-    bool isChild = false,
   }) {
     final themeStyle = context.themeStyle;
 
     return Material(
-      color: isChild ? CrystalColor.divider.withOpacity(0.3) : Colors.white,
+      color: Colors.white,
       child: InkWell(
         onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.only(left: isChild ? 24 : 0),
+        child: SizedBox(
           height: 44,
           child: Row(
             children: [
