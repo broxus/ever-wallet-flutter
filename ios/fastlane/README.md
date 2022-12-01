@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Deploy a new build to the TestFlight
 
+### ios deploy_fad
+
+```sh
+[bundle exec] fastlane ios deploy_fad
+```
+
+Deploy a new build to the FAD
+
 ### ios match_assure
 
 ```sh

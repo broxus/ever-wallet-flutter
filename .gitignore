@@ -53,6 +53,7 @@ google-services.json
 GooglePlayServiceAccount.json
 AuthKey_*.p8
 FirebaseAPIKey.json
+FirebaseADKey.json
 
 # Fastlane related
 **/fastlane/report.xml
@@ -60,4 +61,4 @@ FirebaseAPIKey.json
 
 # Node
 node_modules
-ios/fastlane/Fastfile
+

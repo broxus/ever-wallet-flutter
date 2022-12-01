@@ -27,6 +27,7 @@ $ flutter gen-l10n
    * android/fastlane/GooglePlayServiceAccount.json // *Android deploy*
    * ios/fastlane/AuthKey_L4N29B6Z42.p8 // *iOS deploy*
    * fastlane/FirebaseAPIKey.json // *Firebase Realtime database, build number*
+   * fastlane/FirebaseADKey.json // *FAD deploy*
 
 2. Install fastlane:
 
@@ -37,7 +38,7 @@ brew install fastlane
 3. Install certificates for iOS deployment:
 
 ```sh
-fastlane ios match_assure
+./build.sh --ios_match_assure
 ```
 
 4. Install node modules (yeah, baby, node modules in the flutter project):
@@ -49,8 +50,21 @@ npm install
 5. Deploy apps to Testflight and Google Play Internale testing channel:
 
 ```sh
-fastlane deploy_store
+./build.sh --deploy_store
 ```
+
+6. Deploy apps to Firebase App Distribution
+
+```sh
+./build.sh --deploy_fad
+```
+
+### Invite links
+
+* Android: https://appdistribution.firebase.dev/i/ddd910d703ce28a4
+
+* iOS: https://appdistribution.firebase.dev/i/58596742aa793da2
+
 
 ## Working with Translations 🌐
 

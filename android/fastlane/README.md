@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Deploy a new build to the Google Play Internal channel
 
+### android deploy_fad
+
+```sh
+[bundle exec] fastlane android deploy_fad
+```
+
+Deploy a new build to the FAD
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

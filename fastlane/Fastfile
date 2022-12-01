@@ -8,34 +8,7 @@ add_extra_platforms(platforms: [:all])
 default_platform(:all)
 
 before_all do
-  # Will be killed after acquiring App Store Connect Key
-  ENV['FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD']= 'mbdt-uymn-yhkd-czrc'
-
   if is_ci
     update_fastlane
-  end
-end
-
-platform :all do
-  desc "Deploy a new build to Google Play Internal channel and Testflight"
-  lane :deploy_store do
-    getBuildNumber()
-    Dir.chdir("..") do
-      sh "flutter clean"
-      sh "flutter pub get"
-      sh "flutter pub run build_runner build --delete-conflicting-outputs"
-      sh "flutter gen-l10n"
-    end
-    Fastlane::LaneManager.cruise_lane("ios", "pod_install")
-    Fastlane::LaneManager.cruise_lane("ios", "deploy_testflight")
-    Fastlane::LaneManager.cruise_lane("android", "deploy_google_play_internal")
-  end
-
-  def getBuildNumber()
-    Dir.chdir("..") do
-      $build = sh "node build_number.js"
-      puts "✅  Build number is successfully incremented. Current build number is "+$build
-      $buildNumberString = " --build-number="+$build
-    end
   end
 end

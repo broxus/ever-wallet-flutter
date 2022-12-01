@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Deploy a new build to the Google Play Internal channel
 
+### android deploy_fad
+
+```sh
+[bundle exec] fastlane android deploy_fad
+```
+
+Deploy a new build to the FAD
+
 ----
 
 
@@ -36,6 +44,14 @@ Deploy a new build to the Google Play Internal channel
 
 Deploy a new build to the TestFlight
 
+### ios deploy_fad
+
+```sh
+[bundle exec] fastlane ios deploy_fad
+```
+
+Deploy a new build to the FAD
+
 ### ios match_assure
 
 ```sh
@@ -43,27 +59,6 @@ Deploy a new build to the TestFlight
 ```
 
 Assure there is correct iOS certs and profiles
-
-### ios pod_install
-
-```sh
-[bundle exec] fastlane ios pod_install
-```
-
-
-
-----
-
-
-## all
-
-### all deploy_store
-
-```sh
-[bundle exec] fastlane all deploy_store
-```
-
-Deploy a new build to Google Play Internal channel and Testflight
 
 ----
 
