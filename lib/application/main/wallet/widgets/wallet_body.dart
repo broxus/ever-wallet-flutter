@@ -94,7 +94,10 @@ class _WalletBodyState extends State<WalletBody> {
                   final currentAccount = state;
 
                   return currentAccount != null
-                      ? ProfileActions(address: currentAccount.address)
+                      ? ProfileActions(
+                          key: ValueKey(currentAccount.address),
+                          address: currentAccount.address,
+                        )
                       : const SizedBox();
                 },
               ),
