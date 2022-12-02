@@ -19,14 +19,15 @@ platform :android do
   end
 
   desc "Deploy a new build to the FAD"
-  lane :deploy_fad do
+  lane :deploy_fad do |options|
     Dir.chdir($android_path) do
       firebase_app_distribution(
         app: "1:1017783238389:android:23c9e07bee6cc2ef2e4fbc",
         groups: "qa",
         android_artifact_type: "APK",
         android_artifact_path: "../build/app/outputs/flutter-apk/app-release.apk",
-        service_credentials_file: "../fastlane/FirebaseADKey.json"
+        service_credentials_file: "../fastlane/FirebaseADKey.json",
+        release_notes: "#{options[:changelog_string]}"
       )
     end
   end

@@ -20,13 +20,14 @@ platform :ios do
   end
 
   desc "Deploy a new build to the FAD"
-  lane :deploy_fad do
+  lane :deploy_fad do |options|
     Dir.chdir($ios_path) do
       firebase_app_distribution(
         app: "1:1017783238389:ios:a0ab19a124c910702e4fbc",
         groups: "qa",
         ipa_path: "../build/ios/ipa/ever_wallet.ipa",
-        service_credentials_file: "../fastlane/FirebaseADKey.json"
+        service_credentials_file: "../fastlane/FirebaseADKey.json",
+        release_notes: "#{options[:changelog_string]}"
       )
     end
   end

@@ -17,6 +17,13 @@ get_build_number() {
   build_number_string="--build-number=$build_number"
 }
 
+get_changelog() {
+  echo "🌳  Getting changelog"
+  branch=`git branch | sed -n '/\* /s///p'`
+  log=`git log -n 10`
+  changelog_string="Branch: $branch "$'\n'"Changes: $log"
+}
+
 clean_and_install() {
   echo "🧹  Cleaning all"
   flutter clean
@@ -79,6 +86,7 @@ if [ $deploy_fad = true ]; then
 
   clean_and_install
   get_build_number
+  get_changelog
 
   echo "🔥🏗️  Build IPA"
   flutter build ipa --release --export-options-plist ios/export_options_adhoc.plist $build_number_string
@@ -87,10 +95,10 @@ if [ $deploy_fad = true ]; then
   flutter build apk $build_number_string
 
   echo "🔥  Deploy IPA"
-  fastlane ios deploy_fad
+  fastlane ios deploy_fad changelog_string:"$changelog_string"
 
   echo "🔥🤖  Deploy APK"
-  fastlane android deploy_fad
+  fastlane android deploy_fad changelog_string:"$changelog_string"
 
   echo "🔥  Deploy to FAD done, build number $build_number"
 fi
