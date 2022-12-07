@@ -184,7 +184,7 @@ extension SubjectX<T> on Subject<T> {
 
 extension ExpireAtToTimeout on int {
   Duration toTimeout() =>
-      DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(this * 1000));
+      DateTime.fromMillisecondsSinceEpoch(this * 1000).difference(DateTime.now());
 }
 
 extension FutureX<T> on Future<T> {

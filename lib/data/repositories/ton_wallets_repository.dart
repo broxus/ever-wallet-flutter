@@ -387,7 +387,10 @@ class TonWalletsRepository {
           .firstWhere((e) => e.item1 == pendingTransaction)
           .timeout(pendingTransaction.expireAt.toTimeout())
           .then((v) => completer.complete(v.item2))
-          .onError((err, st) => completer.completeError(err!));
+          .onError((err, st) {
+        logger.e('Ton wallet send transaction gql', err, st);
+        completer.completeError(err!);
+      });
 
       () async {
         while (tonWallet.pollingMethod == PollingMethod.reliable) {
@@ -434,7 +437,10 @@ class TonWalletsRepository {
           .firstWhere((e) => e.item1 == pendingTransaction)
           .timeout(pendingTransaction.expireAt.toTimeout())
           .then((v) => completer.complete(v.item2))
-          .onError((err, st) => completer.completeError(err!));
+          .onError((err, st) {
+        logger.e('Ton wallet send transaction jrpc', err, st);
+        completer.completeError(err!);
+      });
 
       () async {
         while (tonWallet.pollingMethod == PollingMethod.reliable) {

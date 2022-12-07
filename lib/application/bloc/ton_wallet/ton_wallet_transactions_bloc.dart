@@ -54,7 +54,7 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
   }
 
   void _transactionsStreamListener(List<TonWalletOrdinaryTransaction> event) =>
-      _InternalEvent.update(event);
+      add(_InternalEvent.update(event));
 }
 
 abstract class _Event {}
