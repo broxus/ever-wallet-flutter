@@ -33,6 +33,7 @@ class _ReceiveModalBodyState extends State<ReceiveModalBody> {
               children: [
                 ModalHeader(
                   text: AppLocalizations.of(context)!.address_receive_funds,
+                  onCloseButtonPressed: Navigator.of(context).pop,
                 ),
                 const Gap(16),
                 card(),

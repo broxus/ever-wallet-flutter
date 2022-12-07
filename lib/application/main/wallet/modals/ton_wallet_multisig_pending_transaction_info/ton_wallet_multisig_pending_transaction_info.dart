@@ -196,6 +196,7 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                       children: [
                         ModalHeader(
                           text: AppLocalizations.of(context)!.transaction_information,
+                          onCloseButtonPressed: Navigator.of(context).pop,
                         ),
                         const Gap(16),
                         label(context),

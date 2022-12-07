@@ -57,6 +57,7 @@ class _PreferencesModalBodyState extends State<PreferencesModalBody> {
               children: [
                 ModalHeader(
                   text: AppLocalizations.of(context)!.preferences,
+                  onCloseButtonPressed: Navigator.of(context).pop,
                 ),
                 const Gap(16),
                 field(),

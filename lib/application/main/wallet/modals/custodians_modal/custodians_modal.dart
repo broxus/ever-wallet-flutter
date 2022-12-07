@@ -64,6 +64,7 @@ class _CustodiansModalBodyState extends State<CustodiansModalBody> {
                         children: [
                           ModalHeader(
                             text: AppLocalizations.of(context)!.custodians,
+                            onCloseButtonPressed: Navigator.of(context).pop,
                           ),
                           const Gap(16),
                           Expanded(

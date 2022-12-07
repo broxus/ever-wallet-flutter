@@ -47,6 +47,7 @@ class _AddAssetModalBodyState extends State<AddAssetModalBody> with TickerProvid
                 padding: const EdgeInsets.all(16),
                 child: ModalHeader(
                   text: AppLocalizations.of(context)!.select_new_assets,
+                  onCloseButtonPressed: Navigator.of(context).pop,
                 ),
               ),
               tabs(),
