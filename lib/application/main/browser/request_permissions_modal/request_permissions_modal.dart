@@ -89,29 +89,33 @@ class _RequestPermissionsModalState extends State<RequestPermissionsPage> {
         },
       );
 
-  Widget accountTile(AssetsList account) => InkWell(
-        onTap: () => context.read<SelectedAccountCubit>().select(account),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 8,
-            horizontal: 4,
-          ),
-          child: Row(
-            children: [
-              radio(account),
-              AddressGeneratedIcon(address: account.address),
-              const Gap(16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+  Widget accountTile(AssetsList account) => Builder(
+        builder: (context) {
+          return InkWell(
+            onTap: () => context.read<SelectedAccountCubit>().select(account),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 8,
+                horizontal: 4,
+              ),
+              child: Row(
                 children: [
-                  name(account),
-                  const Gap(4),
-                  balance(account),
+                  radio(account),
+                  AddressGeneratedIcon(address: account.address),
+                  const Gap(16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      name(account),
+                      const Gap(4),
+                      balance(account),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       );
 
   Widget radio(AssetsList account) => AbsorbPointer(
