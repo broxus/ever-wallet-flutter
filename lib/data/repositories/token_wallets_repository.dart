@@ -238,7 +238,7 @@ class TokenWalletsRepository {
 
       final tokenWalletsForUnsubscription = subscriptions.keys.where(
         (e) => !tokenWallets.any((el) => el == e),
-      );
+      ).toList();
 
       for (final tuple in tokenWalletsForUnsubscription) {
         subscriptions.remove(tuple)!.future.then((v) => v.dispose()).ignore();

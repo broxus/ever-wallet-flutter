@@ -76,12 +76,15 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.only(bottom: 16),
         controller: scrollController,
         child: KeysBuilderWidget(
-          builder: (keys, current) => buildSettingsItemsList(keys: keys, currentKey: current),
+          builder: (keys, current) => buildSettingsItemsList(
+            seedKeys: keys.keys.toList(),
+            currentKey: current,
+          ),
         ),
       );
 
   Widget buildSettingsItemsList({
-    required Map<KeyStoreEntry, List<KeyStoreEntry>?> keys,
+    required List<KeyStoreEntry> seedKeys,
     KeyStoreEntry? currentKey,
   }) {
     final localization = context.localization;
@@ -93,7 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             buildSectionAction(
               title: localization.export_seed,
-              onTap: keys.isNotEmpty && currentKey != null
+              onTap: seedKeys.isNotEmpty && currentKey != null
                   ? () => AuthUtils.askPasswordBeforeExport(
                         context: context,
                         seed: currentKey,
@@ -118,18 +121,14 @@ class _ProfilePageState extends State<ProfilePage> {
                   : null,
             ),
             buildSection(
-              title: localization.all_seeds.toUpperCase(),
+              title: localization.recent_seeds.toUpperCase(),
               children: [
-                if (keys.isNotEmpty)
-                  buildSeedsList(
-                    selectedSeed: currentKey,
-                    seeds: keys.keys,
-                    onAdd: () => Navigator.of(context).push(ManageSeedsRoute()),
-                    onSelect: (seed) =>
-                        context.read<KeysRepository>().setCurrentKey(seed.publicKey),
-                    showAddAction: true,
-                    localization: localization,
-                  ),
+                buildSeedsList(
+                  selectedSeed: currentKey,
+                  onAdd: () => Navigator.of(context).push(ManageSeedsRoute()),
+                  onSelect: (seed) => context.read<KeysRepository>().setCurrentKey(seed.publicKey),
+                  localization: localization,
+                ),
               ],
             ),
           ],
@@ -183,38 +182,42 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget buildSeedsList({
     KeyStoreEntry? selectedSeed,
-    required Iterable<KeyStoreEntry> seeds,
     required void Function(KeyStoreEntry) onSelect,
     required void Function() onAdd,
-    required bool showAddAction,
     required AppLocalizations localization,
   }) {
-    final children = <Widget>[];
-    for (final seed in seeds) {
-      children.add(
-        buildSeedItem(
-          seed: seed,
-          selectedSeed: selectedSeed,
-          onSelect: seed == selectedSeed ? null : onSelect,
-        ),
-      );
-    }
+    return AsyncValueStreamProvider<List<KeyStoreEntry>>(
+      create: (BuildContext context) => context.read<KeysRepository>().lastViewedKeysStream(),
+      builder: (context, child) {
+        final seeds = context.watch<AsyncValue<List<KeyStoreEntry>>>().maybeWhen(
+              ready: (value) => value,
+              orElse: () => <KeyStoreEntry>[],
+            );
 
-    if (showAddAction) {
-      children.add(
-        buildSectionAction(
-          onTap: onAdd,
-          title: localization.manage_seeds_accounts,
-        ),
-      );
-    } else {
-      children.removeLast();
-    }
+        final children = <Widget>[];
+        for (final seed in seeds) {
+          children.add(
+            buildSeedItem(
+              seed: seed,
+              selectedSeed: selectedSeed,
+              onSelect: seed == selectedSeed ? null : onSelect,
+            ),
+          );
+        }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: children,
+        children.add(
+          buildSectionAction(
+            onTap: onAdd,
+            title: localization.manage_seeds_accounts,
+          ),
+        );
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        );
+      },
     );
   }
 

@@ -377,13 +377,14 @@
   "use_biometry_for_fast_login": "Use Biometry for fast login",
   "create_wallet": "Create the wallet",
   "advanced_wallet_types": "Advanced wallet types",
-  "current_seed_with_name": "Current seed {name}",
+  "current_seed_with_name": "Current seed ({name})",
   "@current_seed_with_name": {
     "placeholders": {
       "name": {}
     }
   },
   "all_seeds": "All seeds",
+  "recent_seeds": "Recent seeds",
   "manage_seeds_accounts": "Manage seeds & accounts",
   "seeds_and_subscriptions": "Seeds & subscriptions",
   "current_seed": "Current seed",

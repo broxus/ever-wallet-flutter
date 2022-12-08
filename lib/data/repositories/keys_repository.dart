@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/models/key_added_event.dart';
 import 'package:ever_wallet/data/models/key_removed_event.dart';
@@ -47,7 +49,7 @@ class KeysRepository {
   /// Equivalent of [seeds] with stream
   Stream<Map<String, String>> get seedsStream => _hiveSource.seedsStream;
 
-  /// Dictionary of keys where key - publicKey of master key, value - name of sub(derived) key
+  /// Dictionary of seed keys where key - public key of seed, value - its name (label)
   Map<String, String> get seeds => _hiveSource.seeds;
 
   /// Equivalent of [seedKeys] with stream
@@ -66,6 +68,31 @@ class KeysRepository {
   /// Equivalent of [currentKeyStream] but with blockchain representation of object
   Stream<KeyStoreEntry?> get currentKeyEntryStream =>
       currentKeyStream.map((current) => keys.firstWhereOrNull((k) => k.publicKey == current));
+
+  /// See [HiveSource.lastViewedSeedsStream]
+  Stream<List<KeyStoreEntry>> lastViewedKeysStream() => _hiveSource.lastViewedSeedsStream().map(
+        (viewed) => viewed
+            .map((v) => keys.firstWhereOrNull((k) => k.publicKey == v))
+            .whereNotNull()
+            .toList(),
+      );
+
+  /// See [HiveSource.lastViewedSeeds]
+  List<KeyStoreEntry> lastViewedKeys() => _hiveSource
+      .lastViewedSeeds()
+      .map((viewed) => keys.firstWhereOrNull((key) => viewed == key.publicKey))
+      .whereNotNull()
+      .toList();
+
+  /// Get master key of newly selected [publicKey], then put master key to 0 position in last viewed,
+  /// crop list and save.
+  Future<void> _updateLastViewed(String publicKey) {
+    final master = keys.masterFor(publicKey);
+    final viewed = lastViewedKeys()..insert(0, master);
+    return _hiveSource.updateLastViewedSeeds(
+      LinkedHashSet<KeyStoreEntry>.from(viewed).take(maxLastSelectedSeeds).map((e) => e.publicKey).toList(),
+    );
+  }
 
   /// All keys mapped by: key - keyEntry that is master, value - list of sub keyEntries of master
   Stream<Map<KeyStoreEntry, List<KeyStoreEntry>?>> get mappedKeysStream => keysStream.map((e) {
@@ -91,7 +118,10 @@ class KeysRepository {
       });
 
   /// Change currently active key
-  Future<void> setCurrentKey(String? publicKey) => _hiveSource.setCurrentKey(publicKey);
+  Future<void> setCurrentKey(String? publicKey) {
+    if (publicKey != null) _updateLastViewed(publicKey);
+    return _hiveSource.setCurrentKey(publicKey);
+  }
 
   /// Equivalent of [labels] with stream
   Stream<Map<String, String>> get labelsStream =>
@@ -557,4 +587,11 @@ extension on List<KeyStoreEntry> {
         firstWhere((e) => e.publicKey == masterKey),
         ...where((e) => e.masterKey == masterKey).toList(),
       ];
+
+  /// Returns master key of [publicKey]
+  KeyStoreEntry masterFor(String publicKey) {
+    final thisKey = firstWhere((key) => key.publicKey == publicKey);
+    if (thisKey.isMaster) return thisKey;
+    return firstWhere((key) => key.publicKey == thisKey.masterKey);
+  }
 }

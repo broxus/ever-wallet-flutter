@@ -1,5 +1,7 @@
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
+const maxLastSelectedSeeds = 4;
+
 const kIntensivePollingInterval = Duration(seconds: 2);
 
 const kNextBlockTimeout = Duration(seconds: 60);

@@ -1,7 +1,9 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/models/bookmark.dart';
 import 'package:ever_wallet/data/models/browser_tabs_dto.dart';
 import 'package:ever_wallet/data/models/currency.dart';
@@ -47,6 +49,7 @@ class HiveSource {
   final _browserNeedKey = 'browser_need_key';
   final _browserTabsKey = 'browser_tabs_key';
   final _browserTabsLastIndexKey = 'browser_tabs_last_index_key';
+  final _lastSelectedSeedsKey = 'last_selected_seeds_key';
 
   HiveSource._();
 
@@ -122,6 +125,23 @@ class HiveSource {
         _currentKeyKey,
         publicKey,
       );
+
+  /// Same as [lastViewedSeeds] but as stream
+  Stream<List<String>> lastViewedSeedsStream() =>
+      _preferencesBox.watchKey(_lastSelectedSeedsKey).cast<List<String>>();
+
+  /// Returns up to [maxLastSelectedSeeds] public keys of seeds that were used.
+  ///
+  /// After updating to application version with this list, it's filled with 4 (or less) random keys
+  /// with [currentKey] at 1-st place.
+  List<String> lastViewedSeeds() =>
+      (_preferencesBox.get(_lastSelectedSeedsKey) as List? ?? []).cast<String>();
+
+  /// Update seeds that were used by user.
+  /// There must be only master keys, if key is sub, then put its master.
+  /// Count of seeds must be less or equals to [maxLastSelectedSeeds] and cropped outside.
+  Future<void> updateLastViewedSeeds(List<String> seedsKeys) =>
+      _preferencesBox.put(_lastSelectedSeedsKey, seedsKeys);
 
   /// List of addresses of accounts
   List<String> get hiddenAccounts => _hiddenAccountsBox.get(_hiddenAccountsKey) ?? <String>[];
@@ -509,6 +529,7 @@ class HiveSource {
     await Hive.openBox<List<String>>(_hiddenAccountsKey);
 
     await _migrateStorage();
+    await _migrateLastViewedSeeds();
   }
 
   Future<void> _migrateStorage() async {
@@ -536,6 +557,17 @@ class HiveSource {
 
       await file.delete();
     } catch (_) {}
+  }
+
+  /// If app was initialized before seeds order was added, then create fake order with curretKey
+  /// at 1-st place.
+  Future<void> _migrateLastViewedSeeds() async {
+    final seedsKeys = seeds.keys.toList();
+    if (lastViewedSeeds().isEmpty && seedsKeys.isNotEmpty) {
+      if (currentKey != null) seedsKeys.insert(0, currentKey!);
+      final fakeViewed = LinkedHashSet<String>.from(seedsKeys).take(maxLastSelectedSeeds).toList();
+      return updateLastViewedSeeds(fakeViewed);
+    }
   }
 }
 
