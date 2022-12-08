@@ -3,11 +3,12 @@
 set -eo pipefail
 
 ios_match_assure=false
+ios_match_new_devices=false
 deploy_store=false
 deploy_fad=false
 
 usage() {
-  echo "Usage: $0 [--ios_match_assure] [--deploy_store] [--deploy_fad]"
+  echo "Usage: $0 [--ios_match_assure] [--ios_match_new_devices] [--deploy_store] [--deploy_fad]"
 }
 
 get_build_number() {
@@ -39,17 +40,19 @@ fi
 
 while [ "$1" != "" ]; do
     case $1 in
-        --ios_match_assure )      ios_match_assure=true
-                                  ;;
-        --deploy_store)           deploy_store=true
-                                  ;;
-        --deploy_fad )           deploy_fad=true
-                                  ;;
-        -h | --help )             usage
-                                  exit 0
-                                  ;;
-        * )                      echo Unknown param $1
-                                  ;;
+        --ios_match_assure )              ios_match_assure=true
+                                          ;;
+        --ios_match_new_devices )         ios_match_new_devices=true
+                                          ;;
+        --deploy_store )                  deploy_store=true
+                                          ;;
+        --deploy_fad )                    deploy_fad=true
+                                          ;;
+        -h | --help )                     usage
+                                          exit 0
+                                          ;;
+        * )                               echo Unknown param $1
+                                          ;;
     esac
     shift
 done
@@ -58,6 +61,12 @@ if [ $ios_match_assure = true ]; then
   echo "📜  Making sure the iOS certificates and profiles are installed"
 
   fastlane ios match_assure
+fi
+
+if [ $ios_match_new_devices = true ]; then
+  echo "📜  Registering new devices already added through devportal"
+
+  fastlane ios match_new_devices
 fi
 
 if [ $deploy_store = true ]; then

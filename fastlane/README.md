@@ -60,6 +60,14 @@ Deploy a new build to the FAD
 
 Assure there is correct iOS certs and profiles
 
+### ios match_new_devices
+
+```sh
+[bundle exec] fastlane ios match_new_devices
+```
+
+Register new devices already added through devportal to adhoc and development certs and profiles
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

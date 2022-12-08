@@ -59,6 +59,13 @@ npm install
 ./build.sh --deploy_fad
 ```
 
+### Adding new iOS devices for AdHoc and Development provisions (FAD builds)
+Register new devices throught [devportal](https://developer.apple.com/account/resources/devices/list), then execute:
+
+```sh
+./build.sh --ios_match_new_devices
+```
+
 ### Invite links
 
 * Android: https://appdistribution.firebase.dev/i/ddd910d703ce28a4
