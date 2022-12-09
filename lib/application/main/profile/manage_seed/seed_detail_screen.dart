@@ -88,7 +88,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                   themeStyle,
                   localization,
                   seed,
-                  children,
+                  [seed, ...?children],
                 ),
               ),
               const SizedBox(height: 16),
@@ -104,7 +104,9 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      ...?children?.map((e) => _keyItem(themeStyle, localization, e)).toList(),
+                      ...[seed, ...?children]
+                          .map((e) => _keyItem(themeStyle, localization, e))
+                          .toList(),
                       PushStateInkWidget(
                         onPressed: () => _deriveKey(context),
                         child: Container(
