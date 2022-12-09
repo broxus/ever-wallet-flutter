@@ -1,11 +1,13 @@
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/main/wallet/modals/add_asset_modal/show_add_asset_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
 import 'package:ever_wallet/application/main/wallet/modals/receive_modal/show_receive_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/send_transaction_flow/start_send_transaction_flow.dart';
 import 'package:ever_wallet/application/main/wallet/widgets/wallet_button.dart';
+import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
@@ -121,7 +123,11 @@ class ProfileActions extends StatelessWidget {
                                           address: address,
                                           publicKeys: localCustodians,
                                         )
-                                    : null,
+                                    : () => showFlushbar(
+                                          context,
+                                          message: context
+                                              .localization.add_custodians_to_send_via_multisig,
+                                        ),
                                 title: AppLocalizations.of(context)!.send,
                                 icon: Assets.images.iconSend.svg(
                                   color: CrystalColor.secondary,
