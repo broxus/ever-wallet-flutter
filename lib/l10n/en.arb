@@ -407,6 +407,7 @@
   },
   "manage_seeds_subscriptions": "Manage seeds & subscriptions",
   "seed_phrases": "Seed phrases",
+  "plus_add_new": "+ Add new",
   "plus_add_new_seed": "+ Add new seed phrase ",
   "children_public_keys": "{count} public keys",
   "@children_public_keys": {

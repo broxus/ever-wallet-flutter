@@ -1,5 +1,5 @@
 import 'package:ever_wallet/application/common/general/button/menu_dropdown.dart';
-import 'package:ever_wallet/application/common/general/button/push_state_ink_widget.dart';
+import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/default_appbar.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
@@ -60,9 +60,28 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                localization.seed_phrases,
-                style: themeStyle.styles.sectionCaption,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      localization.seed_phrases,
+                      style: themeStyle.styles.sectionCaption,
+                    ),
+                  ),
+                  TextPrimaryButton.appBar(
+                    text: localization.plus_add_new,
+                    style: themeStyle.styles.basicStyle.copyWith(
+                      color: ColorsRes.darkBlue,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    onPressed: () => showEWBottomSheet<void>(
+                      context,
+                      body: (_) => const AddNewSeedSheet(),
+                      needCloseButton: false,
+                      avoidBottomInsets: false,
+                    ),
+                  ),
+                ],
               ),
             ),
             const DefaultDivider(),
@@ -103,26 +122,6 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
       children: [
         ...seedsList,
         if (seedsList.isNotEmpty) const DefaultDivider(bothIndent: 16),
-        PushStateInkWidget(
-          onPressed: () => showEWBottomSheet<void>(
-            context,
-            body: (_) => const AddNewSeedSheet(),
-            needCloseButton: false,
-            avoidBottomInsets: false,
-          ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 46,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              localization.plus_add_new_seed,
-              style: themeStyle.styles.basicStyle.copyWith(
-                color: ColorsRes.darkBlue,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
