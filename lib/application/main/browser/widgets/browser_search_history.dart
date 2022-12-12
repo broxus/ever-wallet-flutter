@@ -173,7 +173,8 @@ class BrowserSearchHistory extends StatelessWidget {
                 ready: (value) => value,
                 orElse: () => <SearchHistoryDto>[],
               )
-              .reversed;
+              .reversed
+              .take(10);
 
           return CustomScrollView(
             physics: const ClampingScrollPhysics(),
