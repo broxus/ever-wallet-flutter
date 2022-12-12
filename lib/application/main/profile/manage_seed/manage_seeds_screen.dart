@@ -54,7 +54,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                localization.manage_seeds_subscriptions,
+                localization.manage_seeds_accounts,
                 style: themeStyle.styles.header3Style,
               ),
             ),
