@@ -29,7 +29,10 @@ class AddNewSeedBloc extends Bloc<AddNewSeedBlocEvent, AddNewSeedBlocState> {
           emit(AddNewSeedBlocState.saveSeed(_enteredPhrase!));
           break;
         case AddNewSeedType.import:
-          emit(const AddNewSeedBlocState.importSeed(null));
+          emit(const AddNewSeedBlocState.importSeed(null, false));
+          break;
+        case AddNewSeedType.importLegacy:
+          emit(const AddNewSeedBlocState.importSeed(null, true));
           break;
       }
     });
@@ -91,7 +94,7 @@ class AddNewSeedBlocState with _$AddNewSeedBlocState {
   const factory AddNewSeedBlocState.validateSeed(List<String> phrase) = _ValidateSeed;
 
   /// User wants to import external seed phrase
-  const factory AddNewSeedBlocState.importSeed(List<String>? phrase) = _ImportSeed;
+  const factory AddNewSeedBlocState.importSeed(List<String>? phrase, bool isLegacy) = _ImportSeed;
 
   /// User must enter password when name and seed are entered to finish adding new seed
   const factory AddNewSeedBlocState.enterPassword() = _EnterPassword;
@@ -133,4 +136,5 @@ class AddNewSeedBlocEvent with _$AddNewSeedBlocEvent {
 enum AddNewSeedType {
   create,
   import,
+  importLegacy,
 }

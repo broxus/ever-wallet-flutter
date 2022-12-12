@@ -66,9 +66,10 @@ class _AddNewSeedSheetState extends State<AddNewSeedSheet> {
         phrase: phrase,
       );
 
-  Widget _importSeedState(List<String>? phrase) => AddNewSeedImportWidget(
+  Widget _importSeedState(List<String>? phrase, bool isLegacy) => AddNewSeedImportWidget(
         backAction: () => bloc.add(const AddNewSeedBlocEvent.prevState()),
         savedPhrase: phrase,
+        isLegacy: isLegacy,
         onPhraseEntered: (phrase) => bloc.add(AddNewSeedBlocEvent.importSeed(phrase)),
       );
 

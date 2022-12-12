@@ -20,11 +20,13 @@ class AddNewSeedImportWidget extends StatefulWidget {
     required this.backAction,
     required this.savedPhrase,
     required this.onPhraseEntered,
+    required this.isLegacy,
   });
 
   final VoidCallback backAction;
   final List<String>? savedPhrase;
   final ValueChanged<List<String>> onPhraseEntered;
+  final bool isLegacy;
 
   @override
   State<AddNewSeedImportWidget> createState() => _AddNewSeedImportWidgetState();
@@ -38,11 +40,13 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
   /// Display paste only if there are no text(false) in fields else clear (true)
   final isClearButtonState = ValueNotifier<bool>(false);
 
+  int get wordsCount => widget.isLegacy ? 24 : 12;
+
   @override
   void initState() {
     super.initState();
     controllers = List.generate(
-      12,
+      wordsCount,
       (index) => TextEditingController(text: widget.savedPhrase?[index] ?? ''),
     );
     controllers.forEach(
@@ -58,7 +62,7 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
         _pastePhrase();
       }
     });
-    focuses = List.generate(12, (_) => FocusNode());
+    focuses = List.generate(wordsCount, (_) => FocusNode());
     focuses.forEach(
       (f) => f.addListener(() {
         if (f.hasFocus) {
@@ -127,7 +131,7 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
           ],
         ),
         const SizedBox(height: 30),
-        _buildPhrasesList(localization, themeStyle),
+        Flexible(child: _buildPhrasesList(localization, themeStyle)),
         SizedBox(
           height: bottomPadding < kPrimaryButtonHeight ? 0 : bottomPadding - kPrimaryButtonHeight,
         ),
@@ -220,7 +224,7 @@ class _AddNewSeedImportWidgetState extends State<AddNewSeedImportWidget> {
     final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
     final words = clipboard?.text?.split(kSeedSplitRegExp) ?? <String>[];
 
-    if (words.isNotEmpty && words.length == 12) {
+    if (words.isNotEmpty && words.length == wordsCount) {
       for (final word in words) {
         if (getHints(word).isEmpty) {
           words.clear();

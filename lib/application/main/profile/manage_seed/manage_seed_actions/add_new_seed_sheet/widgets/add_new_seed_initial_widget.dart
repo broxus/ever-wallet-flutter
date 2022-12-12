@@ -112,6 +112,8 @@ extension AddNewSeedTypeX on AddNewSeedType {
         return context.localization.create_seed;
       case AddNewSeedType.import:
         return context.localization.import_seed;
+      case AddNewSeedType.importLegacy:
+        return context.localization.import_legacy_seed;
     }
   }
 }

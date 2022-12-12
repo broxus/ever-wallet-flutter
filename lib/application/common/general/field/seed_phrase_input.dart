@@ -53,7 +53,7 @@ class SeedPhraseInput extends StatelessWidget {
       suggestionBackground: suggestionBackground,
       textStyle: textStyle,
       validator: (v) {
-        if (controller.text.isNotEmpty) {
+        if (controller.text.isNotEmpty && getHints(controller.text).length == 1) {
           return null;
         }
         return '';

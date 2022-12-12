@@ -114,21 +114,22 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                       ...[seed, ...?children]
                           .map((e) => _keyItem(themeStyle, localization, e))
                           .toList(),
-                      PushStateInkWidget(
-                        onPressed: () => _deriveKey(context),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          height: 46,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            localization.plus_add_key,
-                            style: themeStyle.styles.basicStyle.copyWith(
-                              color: ColorsRes.darkBlue,
-                              fontWeight: FontWeight.w500,
+                      if (!seed.isLegacy)
+                        PushStateInkWidget(
+                          onPressed: () => _deriveKey(context),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            height: 46,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              localization.plus_add_key,
+                              style: themeStyle.styles.basicStyle.copyWith(
+                                color: ColorsRes.darkBlue,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
