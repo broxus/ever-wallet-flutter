@@ -303,6 +303,7 @@ class TonWalletsRepository {
       amount: amount,
       bounce: bounce,
       expiration: kDefaultMessageExpiration,
+      body: body
     );
 
     final unsignedMessageWithAdditionalInfo = UnsignedMessageWithAdditionalInfo(
