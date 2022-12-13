@@ -8,7 +8,7 @@ import 'package:ever_wallet/application/util/extensions/context_extensions.dart'
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
-typedef AddNewSeedInitialAction = void Function(String name, AddNewSeedType type);
+typedef AddNewSeedInitialAction = void Function(String? name, AddNewSeedType type);
 
 class AddNewSeedInitialWidget extends StatefulWidget {
   const AddNewSeedInitialWidget({
@@ -29,7 +29,6 @@ class AddNewSeedInitialWidget extends StatefulWidget {
 class _AddNewSeedInitialWidgetState extends State<AddNewSeedInitialWidget> {
   late final optionNotifier = ValueNotifier(widget.savedType ?? AddNewSeedType.create);
   late final nameController = TextEditingController(text: widget.savedName ?? '');
-  final formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -66,16 +65,12 @@ class _AddNewSeedInitialWidgetState extends State<AddNewSeedInitialWidget> {
               ),
             ),
             const SizedBox(height: 32),
-            Form(
-              key: formKey,
-              child: BorderedInput(
-                controller: nameController,
-                validator: (_) => nameController.text.trim().isEmpty ? '' : null,
-                label: localization.seed_name,
-                cursorColor: ColorsRes.text,
-                textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
-                textInputAction: TextInputAction.done,
-              ),
+            BorderedInput(
+              controller: nameController,
+              label: localization.seed_name,
+              cursorColor: ColorsRes.text,
+              textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+              textInputAction: TextInputAction.done,
             ),
             ValueListenableBuilder<AddNewSeedType>(
               valueListenable: optionNotifier,
@@ -93,9 +88,8 @@ class _AddNewSeedInitialWidgetState extends State<AddNewSeedInitialWidget> {
             PrimaryElevatedButton(
               text: context.localization.next,
               onPressed: () {
-                if (formKey.currentState?.validate() ?? false) {
-                  widget.action(nameController.text.trim(), optionNotifier.value);
-                }
+                final trimmed = nameController.text.trim();
+                widget.action(trimmed.isEmpty ? null : trimmed, optionNotifier.value);
               },
             )
           ],

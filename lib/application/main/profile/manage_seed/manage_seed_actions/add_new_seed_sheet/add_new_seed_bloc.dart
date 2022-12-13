@@ -105,7 +105,7 @@ class AddNewSeedBlocEvent with _$AddNewSeedBlocEvent {
   /// User entered seed name and selected type of creation
   /// Current state: initial
   /// Next states: saveSeed or importSeed
-  const factory AddNewSeedBlocEvent.enterName(String name, AddNewSeedType type) = _InitialEvent;
+  const factory AddNewSeedBlocEvent.enterName(String? name, AddNewSeedType type) = _InitialEvent;
 
   /// User wrote down seed phrase
   /// Current state: saveSeed
