@@ -360,7 +360,7 @@ class TokenWalletsRepository {
         await _sqliteDatabase.tokenWalletDetailsDao.updateSymbol(
           networkId: tokenWallet.transport.networkId,
           group: tokenWallet.transport.group,
-          owner: tokenWallet.address,
+          owner: tokenWallet.owner,
           rootTokenContract: tokenWallet.symbol.rootTokenContract,
           symbol: tokenWallet.symbol,
         );
@@ -368,7 +368,7 @@ class TokenWalletsRepository {
         await _sqliteDatabase.tokenWalletDetailsDao.updateVersion(
           networkId: tokenWallet.transport.networkId,
           group: tokenWallet.transport.group,
-          owner: tokenWallet.address,
+          owner: tokenWallet.owner,
           rootTokenContract: tokenWallet.symbol.rootTokenContract,
           version: tokenWallet.version,
         );
@@ -376,7 +376,7 @@ class TokenWalletsRepository {
         await _sqliteDatabase.tokenWalletDetailsDao.updateBalance(
           networkId: tokenWallet.transport.networkId,
           group: tokenWallet.transport.group,
-          owner: tokenWallet.address,
+          owner: tokenWallet.owner,
           rootTokenContract: tokenWallet.symbol.rootTokenContract,
           balance: e,
         );
@@ -384,7 +384,7 @@ class TokenWalletsRepository {
         await _sqliteDatabase.tokenWalletDetailsDao.updateContractState(
           networkId: tokenWallet.transport.networkId,
           group: tokenWallet.transport.group,
-          owner: tokenWallet.address,
+          owner: tokenWallet.owner,
           rootTokenContract: tokenWallet.symbol.rootTokenContract,
           contractState: tokenWallet.contractState,
         );
@@ -393,7 +393,7 @@ class TokenWalletsRepository {
         await _sqliteDatabase.tokenWalletTransactionsDao.insertTransactions(
           networkId: tokenWallet.transport.networkId,
           group: tokenWallet.transport.group,
-          owner: tokenWallet.address,
+          owner: tokenWallet.owner,
           rootTokenContract: tokenWallet.symbol.rootTokenContract,
           transactions: e.item1,
         );
@@ -424,7 +424,7 @@ class TokenWalletsRepository {
     required TokenWallet tokenWallet,
     required List<TransactionWithData<TokenWalletTransaction?>> transactions,
   }) =>
-      transactions.map(
+      transactions.where((e) => e.data != null).map(
         (e) {
           final lt = e.transaction.id.lt;
 

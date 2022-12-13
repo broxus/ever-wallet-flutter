@@ -60,7 +60,7 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, TokenWalletTransactionsSt
   }
 
   void _transactionsStreamListener(List<TokenWalletOrdinaryTransaction> event) =>
-      _InternalEvent.update(event);
+      add(_InternalEvent.update(event..sort((a, b) => b.date.compareTo(a.date))));
 }
 
 abstract class _Event {}

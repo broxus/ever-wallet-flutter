@@ -3,6 +3,7 @@ import 'package:ever_wallet/application/bloc/token_wallet/token_wallet_transacti
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
+import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/custom_close_button.dart';
 import 'package:ever_wallet/application/common/widgets/preload_transactions_listener.dart';
@@ -12,6 +13,7 @@ import 'package:ever_wallet/application/common/widgets/wallet_action_button.dart
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/token_wallet_transaction_holder.dart';
 import 'package:ever_wallet/application/main/wallet/modals/receive_modal/show_receive_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/token_send_transaction_flow/start_token_send_transaction_flow.dart';
+import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/data/models/token_wallet_ordinary_transaction.dart';
 import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
@@ -197,7 +199,10 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
                         rootTokenContract: widget.rootTokenContract,
                         publicKeys: custodians,
                       )
-                  : null,
+                  : () => showFlushbar(
+                        context,
+                        message: context.localization.add_custodians_to_send_via_multisig,
+                      ),
             );
           }
 
