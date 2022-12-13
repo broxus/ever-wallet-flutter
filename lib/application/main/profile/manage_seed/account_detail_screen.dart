@@ -85,10 +85,18 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
               localization.account.toUpperCase(),
               style: themeStyle.styles.sectionCaption,
             ),
-            titleWidget: Text(
-              account.name,
-              maxLines: 2,
-              style: themeStyle.styles.header3Style,
+            titleWidget: StreamBuilder<List<AssetsList>>(
+              initialData: context.read<AccountsRepository>().accounts,
+              stream: context.read<AccountsRepository>().accountsStream,
+              builder: (context, accounts) {
+                final thisAccount =
+                    accounts.data?.firstWhereOrNull((a) => a.address == account.address);
+                return Text(
+                  thisAccount?.name ?? account.name,
+                  maxLines: 2,
+                  style: themeStyle.styles.header3Style,
+                );
+              },
             ),
             trailing: _accountDropDown(themeStyle, localization),
           ),

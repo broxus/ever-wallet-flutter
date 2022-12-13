@@ -23,6 +23,7 @@ import 'package:ever_wallet/application/util/extensions/context_extensions.dart'
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
+import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,7 +63,6 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
       body: AsyncValueStreamProvider(
         create: (context) => context.read<AccountsRepository>().accountsForStream(key.publicKey),
         builder: (context, child) {
-          /// TODO: decide if there external accounts or only local
           final allAccounts = context.watch<AsyncValue<List<AssetsList>>>().maybeWhen(
                 ready: (value) => value,
                 orElse: () => <AssetsList>[],
@@ -99,10 +99,17 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                   localization.public_key.toUpperCase(),
                   style: themeStyle.styles.sectionCaption,
                 ),
-                titleWidget: Text(
-                  key.name,
-                  maxLines: 2,
-                  style: themeStyle.styles.header3Style,
+                titleWidget: StreamBuilder<Map<String, String>>(
+                  initialData: context.read<KeysRepository>().labels,
+                  stream: context.read<KeysRepository>().labelsStream,
+                  builder: (context, labels) {
+                    final label = labels.data?[key.publicKey];
+                    return Text(
+                      label ?? key.name,
+                      maxLines: 2,
+                      style: themeStyle.styles.header3Style,
+                    );
+                  },
                 ),
                 trailing: _keyDropdown(
                   themeStyle,

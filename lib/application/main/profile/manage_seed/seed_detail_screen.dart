@@ -70,26 +70,33 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              EWListTile(
-                height: 87,
-                leading: Assets.images.seed.svg(width: 32, height: 32),
-                subtitleWidget: !isSelected
-                    ? null
-                    : Text(
-                        localization.current_seed.toUpperCase(),
-                        style: themeStyle.styles.sectionCaption,
-                      ),
-                titleWidget: Text(
-                  localization.seed_phrase_with_name(seed.name),
-                  maxLines: 2,
-                  style: themeStyle.styles.header3Style,
-                ),
-                trailing: _seedDropdown(
-                  themeStyle,
-                  localization,
-                  seed,
-                  [seed, ...?children],
-                ),
+              StreamBuilder<Map<String, String>>(
+                initialData: context.read<KeysRepository>().labels,
+                stream: context.read<KeysRepository>().labelsStream,
+                builder: (context, labels) {
+                  final label = labels.data?[seed.publicKey];
+                  return EWListTile(
+                    height: 87,
+                    leading: Assets.images.seed.svg(width: 32, height: 32),
+                    subtitleWidget: !isSelected
+                        ? null
+                        : Text(
+                            localization.current_seed.toUpperCase(),
+                            style: themeStyle.styles.sectionCaption,
+                          ),
+                    titleWidget: Text(
+                      label ?? seed.name,
+                      maxLines: 2,
+                      style: themeStyle.styles.header3Style,
+                    ),
+                    trailing: _seedDropdown(
+                      themeStyle,
+                      localization,
+                      seed,
+                      [seed, ...?children],
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
               Padding(

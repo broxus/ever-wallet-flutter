@@ -388,12 +388,6 @@
   "manage_seeds_accounts": "Manage seeds & accounts",
   "seeds_and_subscriptions": "Seeds & subscriptions",
   "current_seed": "Current seed",
-  "seed_phrase_with_name": "{name} seed phrase",
-  "@seed_phrase_with_name": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "plus_add_key": "+ Add key",
   "plus_add_account": "+ Add account",
   "change_password": "Change password",
