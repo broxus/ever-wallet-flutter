@@ -297,15 +297,13 @@ class TonWalletsRepository {
     final contractState = await tonWallet.transport.getContractState(address);
 
     final unsignedMessage = await tonWallet.prepareTransfer(
-      contractState: contractState,
-      publicKey: publicKey ?? tonWallet.publicKey,
-      destination: destination,
-      amount: amount,
-      bounce: bounce,
-      body: body,
-      expiration: kDefaultMessageExpiration,
-      body: body
-    );
+        contractState: contractState,
+        publicKey: publicKey ?? tonWallet.publicKey,
+        destination: destination,
+        amount: amount,
+        bounce: bounce,
+        body: body,
+        expiration: kDefaultMessageExpiration);
 
     final unsignedMessageWithAdditionalInfo = UnsignedMessageWithAdditionalInfo(
       message: unsignedMessage,
