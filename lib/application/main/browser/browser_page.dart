@@ -13,6 +13,7 @@ import 'package:ever_wallet/data/repositories/sites_meta_data_repository.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BrowserPage extends StatefulWidget {
@@ -48,23 +49,26 @@ class _BrowserPageState extends State<BrowserPage> {
   }
 
   @override
-  Widget build(BuildContext context) => ApprovalsListener(
-        child: BlocBuilder<BrowserTabsCubit, BrowserTabsCubitState>(
-          bloc: browserTabsCubit,
-          builder: (_, tabsState) {
-            final index = tabsState.when(
-              showTabs: (_, __, ___) => 0,
-              hideTabs: (_, __, ___) => 1,
-            );
+  Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: ApprovalsListener(
+          child: BlocBuilder<BrowserTabsCubit, BrowserTabsCubitState>(
+            bloc: browserTabsCubit,
+            builder: (_, tabsState) {
+              final index = tabsState.when(
+                showTabs: (_, __, ___) => 0,
+                hideTabs: (_, __, ___) => 1,
+              );
 
-            return IndexedStack(
-              index: index,
-              children: [
-                BrowserTabsViewerScreen(tabsCubit: browserTabsCubit),
-                _buildTabs(tabsState.tabs),
-              ],
-            );
-          },
+              return IndexedStack(
+                index: index,
+                children: [
+                  BrowserTabsViewerScreen(tabsCubit: browserTabsCubit),
+                  _buildTabs(tabsState.tabs),
+                ],
+              );
+            },
+          ),
         ),
       );
 

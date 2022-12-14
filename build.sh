@@ -2,13 +2,14 @@
 
 set -eo pipefail
 
+clean=false
 ios_match_assure=false
 ios_match_new_devices=false
 deploy_store=false
 deploy_fad=false
 
 usage() {
-  echo "Usage: $0 [--ios_match_assure] [--ios_match_new_devices] [--deploy_store] [--deploy_fad]"
+  echo "Usage: $0 [--clean] [--ios_match_assure] [--ios_match_new_devices] [--deploy_store] [--deploy_fad]"
 }
 
 get_build_number() {
@@ -40,6 +41,8 @@ fi
 
 while [ "$1" != "" ]; do
     case $1 in
+        --clean )                         clean=true
+                                          ;;
         --ios_match_assure )              ios_match_assure=true
                                           ;;
         --ios_match_new_devices )         ios_match_new_devices=true
@@ -69,10 +72,13 @@ if [ $ios_match_new_devices = true ]; then
   fastlane ios match_new_devices
 fi
 
+if [[ $clean = true || $deploy_store = true || $deploy_fad = true ]]; then
+  clean_and_install
+fi
+
 if [ $deploy_store = true ]; then
   echo "🛒  Deploy to stores"
 
-  clean_and_install
   get_build_number
 
   echo "🛒🏗️  Build IPA"
@@ -93,7 +99,6 @@ fi
 if [ $deploy_fad = true ]; then
   echo "🔥  Deploy to FAD"
 
-  clean_and_install
   get_build_number
   get_changelog
 

@@ -18,7 +18,7 @@ $ flutter packages pub run build_runner build --delete-conflicting-outputs
 $ flutter gen-l10n
 ```
 
-## Fastlane automation 🤖
+## Fastlane and automation 🤖
 
 1. Put creds/keys files:
 
@@ -64,6 +64,12 @@ Register new devices throught [devportal](https://developer.apple.com/account/re
 
 ```sh
 ./build.sh --ios_match_new_devices
+```
+
+### Cleaning all
+
+```sh
+./build.sh --clean
 ```
 
 ### Invite links

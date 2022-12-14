@@ -15,11 +15,9 @@ ThemeData materialTheme(BuildContext context, Brightness brightness) {
     fontFamily: FontFamily.pt,
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
-      // backgroundColor: palette.colors.primaryBackgroundColor,
       elevation: 0,
       iconTheme: IconThemeData(color: palette.colors.iconPrimaryButtonColor),
-      systemOverlayStyle:
-          brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      systemOverlayStyle: SystemUiOverlayStyle.light,
     ),
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: palette.colors.primaryTextColor,
@@ -28,7 +26,6 @@ ThemeData materialTheme(BuildContext context, Brightness brightness) {
     ),
     splashColor: isCupertino(context) ? Colors.transparent : null,
     scaffoldBackgroundColor: Colors.white,
-    // scaffoldBackgroundColor: palette.colors.primaryBackgroundColor,
   );
 }
 
