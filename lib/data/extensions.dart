@@ -51,9 +51,11 @@ extension WalletTypeX on WalletType {
               return 7;
             case MultisigType.multisig2:
               return 8;
+            case MultisigType.multisig2_1:
+              return 9;
           }
         },
-        highloadWalletV2: () => 9,
+        highloadWalletV2: () => 10,
       );
 
   String get name => when(
@@ -73,6 +75,8 @@ extension WalletTypeX on WalletType {
               return 'Surf';
             case MultisigType.multisig2:
               return 'Multisig2';
+            case MultisigType.multisig2_1:
+              return 'Multisig2.1';
           }
         },
         everWallet: () => 'EverWallet',
@@ -100,11 +104,13 @@ extension WalletTypeX on WalletType {
             return localization.surfDescription;
           case MultisigType.multisig2:
             return localization.multisig2Description;
+          case MultisigType.multisig2_1:
+            return localization.multisig2_1_Description;
         }
       },
       everWallet: () => localization.everWalletDescription,
       walletV3: () => localization.walletV3Description,
-      highloadWalletV2: () => 'HighloadWalletV2',
+      highloadWalletV2: () => localization.highloadWalletDescription,
     );
   }
 }

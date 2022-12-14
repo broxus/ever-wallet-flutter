@@ -12,4 +12,5 @@ enum WalletContractType {
   highloadWalletV2,
   everWallet,
   multisig2,
+  multisig2_1,
 }

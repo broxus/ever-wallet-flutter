@@ -27,6 +27,7 @@ const kDefaultMessageTimeout = 60;
 const kEverAvailableWallets = [
   WalletType.everWallet(),
   WalletType.multisig(MultisigType.multisig2),
+  WalletType.multisig(MultisigType.multisig2_1),
   WalletType.walletV3(),
   WalletType.multisig(MultisigType.safeMultisigWallet),
   WalletType.multisig(MultisigType.safeMultisigWallet24h),

@@ -25,6 +25,8 @@ enum WalletContractTypeDto {
   multisig2,
   @HiveField(9)
   everWallet,
+  @HiveField(10)
+  multisig2_1,
 }
 
 extension WalletContractTypeX on WalletContractType {
@@ -50,6 +52,8 @@ extension WalletContractTypeX on WalletContractType {
         return WalletContractTypeDto.multisig2;
       case WalletContractType.everWallet:
         return WalletContractTypeDto.everWallet;
+      case WalletContractType.multisig2_1:
+        return WalletContractTypeDto.multisig2_1;
     }
   }
 }
@@ -77,6 +81,8 @@ extension WalletContractTypeDtoX on WalletContractTypeDto {
         return WalletContractType.multisig2;
       case WalletContractTypeDto.everWallet:
         return WalletContractType.everWallet;
+      case WalletContractTypeDto.multisig2_1:
+        return WalletContractType.multisig2_1;
     }
   }
 }

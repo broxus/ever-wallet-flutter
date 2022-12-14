@@ -147,6 +147,8 @@ extension on WalletType {
               return WalletContractType.surfWallet;
             case MultisigType.multisig2:
               return WalletContractType.multisig2;
+            case MultisigType.multisig2_1:
+              return WalletContractType.multisig2_1;
           }
         },
         everWallet: () => WalletContractType.everWallet,
