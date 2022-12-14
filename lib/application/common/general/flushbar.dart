@@ -63,6 +63,7 @@ Future<void> showFlushbarWithAction({
   required String text,
   required String actionText,
   required VoidCallback action,
+  bool isOneLine = true,
   FlushbarPosition flushbarPosition = FlushbarPosition.BOTTOM,
   EdgeInsets margin = const EdgeInsets.symmetric(vertical: 8),
 }) async {
@@ -72,7 +73,7 @@ Future<void> showFlushbarWithAction({
     messageText: Text(
       text.overflow,
       style: StylesRes.regular16.copyWith(color: ColorsRes.black),
-      maxLines: 1,
+      maxLines: isOneLine ? 1 : null,
     ),
     mainButton: TextPrimaryButton(
       onPressed: () {

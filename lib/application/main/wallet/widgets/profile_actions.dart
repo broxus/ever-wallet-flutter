@@ -1,7 +1,9 @@
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
+import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/theme.dart';
+import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/add_new_seed_sheet/add_new_seed_sheet.dart';
 import 'package:ever_wallet/application/main/wallet/modals/add_asset_modal/show_add_asset_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
 import 'package:ever_wallet/application/main/wallet/modals/receive_modal/show_receive_modal.dart';
@@ -123,10 +125,18 @@ class ProfileActions extends StatelessWidget {
                                           address: address,
                                           publicKeys: localCustodians,
                                         )
-                                    : () => showFlushbar(
-                                          context,
-                                          message: context
+                                    : () => showFlushbarWithAction(
+                                          context: context,
+                                          text: context
                                               .localization.add_custodians_to_send_via_multisig,
+                                          actionText: context.localization.add_word,
+                                          isOneLine: false,
+                                          action: () => showEWBottomSheet<void>(
+                                            context,
+                                            body: (_) => const AddNewSeedSheet(),
+                                            needCloseButton: false,
+                                            avoidBottomInsets: false,
+                                          ),
                                         ),
                                 title: AppLocalizations.of(context)!.send,
                                 icon: Assets.images.iconSend.svg(

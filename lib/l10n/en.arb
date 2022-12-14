@@ -50,6 +50,7 @@
   "preferences": "Preferences",
   "custodians": "Custodians",
   "add_account": "Add account",
+  "add_word": "Add",
   "sign_data": "Sign data",
   "encrypt_data": "Encrypt data",
   "decrypt_data": "Decrypt data",

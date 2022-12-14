@@ -3,6 +3,7 @@ import 'package:ever_wallet/application/bloc/token_wallet/token_wallet_transacti
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
+import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/custom_close_button.dart';
@@ -10,6 +11,7 @@ import 'package:ever_wallet/application/common/widgets/preload_transactions_list
 import 'package:ever_wallet/application/common/widgets/token_address_generated_icon.dart';
 import 'package:ever_wallet/application/common/widgets/token_asset_icon.dart';
 import 'package:ever_wallet/application/common/widgets/wallet_action_button.dart';
+import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/add_new_seed_sheet/add_new_seed_sheet.dart';
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/token_wallet_transaction_holder.dart';
 import 'package:ever_wallet/application/main/wallet/modals/receive_modal/show_receive_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/token_send_transaction_flow/start_token_send_transaction_flow.dart';
@@ -199,9 +201,17 @@ class _TokenAssetInfoModalBodyState extends State<TokenAssetInfoModalBody> {
                         rootTokenContract: widget.rootTokenContract,
                         publicKeys: custodians,
                       )
-                  : () => showFlushbar(
-                        context,
-                        message: context.localization.add_custodians_to_send_via_multisig,
+                  : () => showFlushbarWithAction(
+                        context: context,
+                        text: context.localization.add_custodians_to_send_via_multisig,
+                        actionText: context.localization.add_word,
+                        isOneLine: false,
+                        action: () => showEWBottomSheet<void>(
+                          context,
+                          body: (_) => const AddNewSeedSheet(),
+                          needCloseButton: false,
+                          avoidBottomInsets: false,
+                        ),
                       ),
             );
           }
