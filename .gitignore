@@ -57,7 +57,7 @@ FirebaseADKey.json
 
 # Fastlane related
 **/fastlane/report.xml
-
+android/fastlane/metadata
 
 # Node
 node_modules

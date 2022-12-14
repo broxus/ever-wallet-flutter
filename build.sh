@@ -23,7 +23,9 @@ get_changelog() {
   echo "🌳  Getting changelog"
   branch=`git branch | sed -n '/\* /s///p'`
   log=`git log -n 10`
-  changelog_string="Branch: $branch "$'\n'"Changes: $log"
+  log_short=`git log -n 10 | grep -v "commit" | grep -v "Author:" | grep -v "Author:" | grep -v "Date:"`
+  changelog_string="Branch: $branch "$'\n\n'"$log"
+  changelog_string_short=$log_short
 }
 
 clean_and_install() {
@@ -80,6 +82,7 @@ if [ $deploy_store = true ]; then
   echo "🛒  Deploy to stores"
 
   get_build_number
+  get_changelog
 
   echo "🛒🏗️  Build IPA"
   flutter build ipa --release --export-options-plist ios/export_options_appstore.plist $build_number_string
@@ -87,11 +90,17 @@ if [ $deploy_store = true ]; then
   echo "🛒🏗️🤖  Build AAB"
   flutter build appbundle $build_number_string
 
-  echo "🛒  Deploy IPA"
-  fastlane ios deploy_testflight
+  echo "🛒🤖  Creating changelog for GP"
+  mkdir -p android/fastlane/metadata/android/en-US/changelogs
+  echo "${changelog_string_short:0:499}" > android/fastlane/metadata/android/en-US/changelogs/$build_number.txt
 
   echo "🛒🤖  Deploy AAB"
   fastlane android deploy_google_play_internal
+
+  # Moved to the end because skip_waiting_for_build_processing doesn't work with changelog,
+  # so we forced to wait until TF is processing our build
+  echo "🛒  Deploy IPA"
+  fastlane ios deploy_testflight changelog_string:"$changelog_string"
 
   echo "🛒  Deploy to stores done, build number $build_number"
 fi
