@@ -302,6 +302,7 @@ class TonWalletsRepository {
       destination: destination,
       amount: amount,
       bounce: bounce,
+      body: body,
       expiration: kDefaultMessageExpiration,
       body: body
     );
