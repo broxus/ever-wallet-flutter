@@ -27,6 +27,7 @@ import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,11 +61,11 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
 
     return Scaffold(
       appBar: DefaultAppBar(
-        backText: localization.seeds_and_subscriptions,
+        backText: localization.seeds_and_accounts,
       ),
       body: KeysBuilderWidget(
         builder: (keys, currentKey) {
-          final isSelected = seed.publicKey == currentKey?.publicKey;
+          final isSeedSelected = seed.publicKey == currentKey?.masterKey;
           final children = keys[seed];
 
           return Column(
@@ -78,7 +79,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                   return EWListTile(
                     height: 87,
                     leading: Assets.images.seed.svg(width: 32, height: 32),
-                    subtitleWidget: !isSelected
+                    subtitleWidget: !isSeedSelected
                         ? null
                         : Text(
                             localization.current_seed.toUpperCase(),
@@ -134,7 +135,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                   ),
                 ),
               ),
-              if (!isSelected)
+              if (!isSeedSelected)
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: PrimaryElevatedButton(
@@ -228,21 +229,40 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     return StreamBuilder<List<AssetsList>>(
       stream: context.read<AccountsRepository>().accountsForStream(key.publicKey),
       builder: (context, accounts) {
-        return EWListTile(
-          onPressed: () => Navigator.of(context).push(KeyDetailScreenRoute(keyEntry: key)),
-          leading: Container(
-            width: 32,
-            height: 32,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(color: ColorsRes.darkBlue, shape: BoxShape.circle),
-            child: Assets.images.key.svg(width: 18, height: 18),
-          ),
-          titleText: key.name,
-          subtitleText: localization.key_name_with_sub_count(
-            key.publicKey.ellipsePublicKey(),
-            accounts.data?.length ?? 0,
-          ),
-          trailing: _keyDropdown(themeStyle, localization, key),
+        return StreamBuilder<String?>(
+          initialData: context.read<KeysRepository>().currentKey,
+          stream: context.read<KeysRepository>().currentKeyStream,
+          builder: (context, snap) {
+            final currentKey = snap.data;
+
+            return EWListTile(
+              onPressed: () => Navigator.of(context).push(KeyDetailScreenRoute(keyEntry: key)),
+              leading: Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(color: ColorsRes.darkBlue, shape: BoxShape.circle),
+                child: Assets.images.key.svg(width: 18, height: 18),
+              ),
+              titleText: key.name,
+              subtitleText: localization.key_name_with_sub_count(
+                key.publicKey.ellipsePublicKey(),
+                accounts.data?.length ?? 0,
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (currentKey == key.publicKey)
+                    Icon(
+                      CupertinoIcons.checkmark_alt,
+                      color: themeStyle.colors.primaryButtonTextColor,
+                      size: 20,
+                    ),
+                  _keyDropdown(themeStyle, localization, key),
+                ],
+              ),
+            );
+          },
         );
       },
     );
@@ -256,7 +276,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     return MenuDropdown(
       items: [
         MenuDropdownData(
-          title: localization.use_this_seed,
+          title: localization.use_this_key,
           onTap: () => context.read<KeysRepository>().setCurrentKey(seed.publicKey),
         ),
         MenuDropdownData(

@@ -389,7 +389,7 @@
   "all_seeds": "All seeds",
   "recent_seeds": "Recent seeds",
   "manage_seeds_accounts": "Manage seeds & accounts",
-  "seeds_and_subscriptions": "Seeds & subscriptions",
+  "seeds_and_accounts": "Seeds & accounts",
   "current_seed": "Current seed",
   "plus_add_key": "+ Add key",
   "plus_add_account": "+ Add account",
@@ -412,6 +412,7 @@
     }
   },
   "use_this_seed": "Use this seed",
+  "use_this_key": "Use this key",
   "delete_seed_phrase": "Delete seed phrase",
   "after_deletion_seed_disappear": "After deletion seed phrase will disappear from your list. You will be able to get it back by importing.",
   "key_name": "Key name",
