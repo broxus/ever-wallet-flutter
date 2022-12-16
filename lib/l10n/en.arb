@@ -414,6 +414,7 @@
   "use_this_seed": "Use this seed",
   "use_this_key": "Use this key",
   "delete_seed_phrase": "Delete seed phrase",
+  "delete_key": "Delete key",
   "after_deletion_seed_disappear": "After deletion seed phrase will disappear from your list. You will be able to get it back by importing.",
   "key_name": "Key name",
   "after_deletion_public_disappear": "After deletion public key will disappear from your list. You will be able to get it back by importing.",

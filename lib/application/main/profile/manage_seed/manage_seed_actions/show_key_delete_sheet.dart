@@ -21,7 +21,7 @@ Future<void> showKeyDeleteSheet({
 }) {
   return showEWBottomSheet(
     context,
-    title: context.localization.delete_seed_phrase,
+    title: context.localization.delete_key,
     body: (_) => SeedKeySheet(seedKey: key, assets: assets),
   );
 }
@@ -127,7 +127,7 @@ class SeedKeySheet extends StatelessWidget {
         style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
       ),
       subtitleWidget: Text(
-        assets.publicKey.ellipsePublicKey(),
+        assets.address.ellipseAddress(),
         style: StylesRes.subtitleStyle.copyWith(color: ColorsRes.grey),
       ),
     );

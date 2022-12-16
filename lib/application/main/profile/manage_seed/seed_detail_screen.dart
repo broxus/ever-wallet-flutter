@@ -114,7 +114,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                   child: Column(
                     children: [
                       ...[seed, ...?children]
-                          .map((e) => _keyItem(themeStyle, localization, e))
+                          .map((e) => _keyItem(themeStyle, localization, e, isSeedSelected))
                           .toList(),
                       if (!seed.isLegacy)
                         PushStateInkWidget(
@@ -228,6 +228,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     ThemeStyle themeStyle,
     AppLocalizations localization,
     KeyStoreEntry key,
+    bool isSeedSelected,
   ) {
     return StreamBuilder<List<AssetsList>>(
       stream: context.read<AccountsRepository>().accountsForStream(key.publicKey),
@@ -262,7 +263,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                       color: themeStyle.colors.primaryButtonTextColor,
                       size: 20,
                     ),
-                  _keyDropdown(themeStyle, localization, key, key.isMaster && isSelected),
+                  _keyDropdown(themeStyle, localization, key, !(key.isMaster && isSeedSelected)),
                 ],
               ),
             );
@@ -276,7 +277,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     ThemeStyle themeStyle,
     AppLocalizations localization,
     KeyStoreEntry seed,
-    bool isMasterAndSelected,
+    bool allowDeleting,
   ) {
     return MenuDropdown(
       items: [
@@ -309,7 +310,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             );
           },
         ),
-        if (!isMasterAndSelected)
+        if (allowDeleting)
           MenuDropdownData(
             title: localization.delete_word,
             onTap: () {

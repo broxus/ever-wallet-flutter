@@ -90,7 +90,10 @@ class KeysRepository {
     final master = keys.masterFor(publicKey);
     final viewed = lastViewedKeys()..insert(0, master);
     return _hiveSource.updateLastViewedSeeds(
-      LinkedHashSet<KeyStoreEntry>.from(viewed).take(maxLastSelectedSeeds).map((e) => e.publicKey).toList(),
+      LinkedHashSet<KeyStoreEntry>.from(viewed)
+          .take(maxLastSelectedSeeds)
+          .map((e) => e.publicKey)
+          .toList(),
     );
   }
 
@@ -582,7 +585,7 @@ class KeysRepository {
   Future<void> _initialize() => _updateCurrentKey();
 }
 
-extension on List<KeyStoreEntry> {
+extension KeysExtension on List<KeyStoreEntry> {
   List<KeyStoreEntry> whereKeysFor(String masterKey) => [
         firstWhere((e) => e.publicKey == masterKey),
         ...where((e) => e.masterKey == masterKey).toList(),

@@ -16,6 +16,7 @@ import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_act
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/seed_phrase_export_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_account_delete_sheet.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/show_key_delete_sheet.dart';
+import 'package:ever_wallet/application/main/profile/widgets/keys_builder.dart';
 import 'package:ever_wallet/application/main/wallet/modals/add_account_flow/start_add_account_flow.dart';
 import 'package:ever_wallet/application/util/auth_utils.dart';
 import 'package:ever_wallet/application/util/colors.dart';
@@ -312,64 +313,71 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
   Widget _keyDropdown(
     ThemeStyle themeStyle,
     AppLocalizations localization,
-    KeyStoreEntry seed,
+    KeyStoreEntry key,
     List<AssetsList> accounts,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: ColorsRes.darkBlue.withOpacity(0.2)),
-      ),
-      child: MenuDropdown(
-        items: [
-          MenuDropdownData(
-            title: localization.export_word,
-            onTap: () => AuthUtils.askPasswordBeforeExport(
-              context: context,
-              seed: seed,
-              goExport: (phrase) {
-                if (!mounted) return;
-                showEWBottomSheet<void>(
-                  context,
-                  title: context.localization.save_seed_phrase,
-                  body: (_) => SeedPhraseExportSheet(phrase: phrase),
-                );
-              },
-              enterPassword: (seed) {
-                if (!mounted) return;
+    return KeysBuilderWidget(
+      builder: (_, currentKey) {
+        final isThisSeedSelected = currentKey?.masterKey == key.masterKey;
 
-                showEWBottomSheet<void>(
-                  context,
-                  title: context.localization.export_enter_password,
-                  body: (_) => ExportSeedPhraseModalBody(publicKey: seed.publicKey),
-                );
-              },
-            ),
+        return Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: ColorsRes.darkBlue.withOpacity(0.2)),
           ),
-          MenuDropdownData(
-            title: localization.rename,
-            onTap: () {
-              showEWBottomSheet<void>(
-                context,
-                title: localization.enter_new_name,
-                body: (_) => RenameKeyModalBody(publicKey: seed.publicKey),
-              );
-            },
+          child: MenuDropdown(
+            items: [
+              MenuDropdownData(
+                title: localization.export_word,
+                onTap: () => AuthUtils.askPasswordBeforeExport(
+                  context: context,
+                  seed: key,
+                  goExport: (phrase) {
+                    if (!mounted) return;
+                    showEWBottomSheet<void>(
+                      context,
+                      title: context.localization.save_seed_phrase,
+                      body: (_) => SeedPhraseExportSheet(phrase: phrase),
+                    );
+                  },
+                  enterPassword: (seed) {
+                    if (!mounted) return;
+
+                    showEWBottomSheet<void>(
+                      context,
+                      title: context.localization.export_enter_password,
+                      body: (_) => ExportSeedPhraseModalBody(publicKey: seed.publicKey),
+                    );
+                  },
+                ),
+              ),
+              MenuDropdownData(
+                title: localization.rename,
+                onTap: () {
+                  showEWBottomSheet<void>(
+                    context,
+                    title: localization.enter_new_name,
+                    body: (_) => RenameKeyModalBody(publicKey: key.publicKey),
+                  );
+                },
+              ),
+              if (!(isThisSeedSelected && key.isMaster))
+                MenuDropdownData(
+                  title: localization.delete_word,
+                  onTap: () {
+                    showKeyDeleteSheet(
+                      context: context,
+                      key: key,
+                      assets: accounts,
+                    );
+                  },
+                  textStyle: themeStyle.styles.basicStyle.copyWith(
+                    color: themeStyle.colors.errorTextColor,
+                  ),
+                ),
+            ],
           ),
-          MenuDropdownData(
-            title: localization.delete_word,
-            onTap: () {
-              showKeyDeleteSheet(
-                context: context,
-                key: seed,
-                assets: accounts,
-              );
-            },
-            textStyle: themeStyle.styles.basicStyle.copyWith(
-              color: themeStyle.colors.errorTextColor,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

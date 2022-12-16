@@ -77,17 +77,16 @@ class SeedDeleteSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: children
-                      ?.map(
-                        (e) => _accountItem(
-                          e,
-                          themeStyle,
-                          localization,
-                          context.read<AccountsRepository>(),
-                        ),
-                      )
-                      .toList() ??
-                  [],
+              children: [seed, ...?children]
+                  .map(
+                    (e) => _accountItem(
+                      e,
+                      themeStyle,
+                      localization,
+                      context.read<AccountsRepository>(),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ),
