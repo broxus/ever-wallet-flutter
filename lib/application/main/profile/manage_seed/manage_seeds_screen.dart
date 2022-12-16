@@ -112,7 +112,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
             localization,
             e,
             keys[e],
-            e.publicKey == currentKey?.publicKey,
+            e.publicKey == currentKey?.masterKey,
           ),
         )
         .separated(const DefaultDivider(bothIndent: 16));
@@ -148,7 +148,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
               color: themeStyle.colors.primaryButtonTextColor,
               size: 20,
             ),
-          _seedDropdown(themeStyle, localization, seed, children),
+          _seedDropdown(themeStyle, localization, seed, children, isSelected),
         ],
       ),
     );
@@ -159,6 +159,7 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
     AppLocalizations localization,
     KeyStoreEntry seed,
     List<KeyStoreEntry>? children,
+    bool isSelected,
   ) {
     return MenuDropdown(
       items: [
@@ -208,17 +209,18 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
             body: (_) => ChangeSeedPhrasePasswordModalBody(publicKey: seed.publicKey),
           ),
         ),
-        MenuDropdownData(
-          title: localization.delete_word,
-          onTap: () => showSeedDeleteSheet(
-            context: context,
-            seed: seed,
-            children: children,
+        if (!isSelected)
+          MenuDropdownData(
+            title: localization.delete_word,
+            onTap: () => showSeedDeleteSheet(
+              context: context,
+              seed: seed,
+              children: children,
+            ),
+            textStyle: themeStyle.styles.basicStyle.copyWith(
+              color: themeStyle.colors.errorTextColor,
+            ),
           ),
-          textStyle: themeStyle.styles.basicStyle.copyWith(
-            color: themeStyle.colors.errorTextColor,
-          ),
-        ),
       ],
     );
   }

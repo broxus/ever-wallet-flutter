@@ -95,6 +95,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                       localization,
                       seed,
                       [seed, ...?children],
+                      isSeedSelected,
                     ),
                   );
                 },
@@ -155,6 +156,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     AppLocalizations localization,
     KeyStoreEntry seed,
     List<KeyStoreEntry>? children,
+    bool isSelected,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -205,17 +207,18 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
               body: (_) => ChangeSeedPhrasePasswordModalBody(publicKey: seed.publicKey),
             ),
           ),
-          MenuDropdownData(
-            title: localization.delete_word,
-            onTap: () => showSeedDeleteSheet(
-              context: context,
-              seed: seed,
-              children: children,
+          if (!isSelected)
+            MenuDropdownData(
+              title: localization.delete_word,
+              onTap: () => showSeedDeleteSheet(
+                context: context,
+                seed: seed,
+                children: children,
+              ),
+              textStyle: themeStyle.styles.basicStyle.copyWith(
+                color: themeStyle.colors.errorTextColor,
+              ),
             ),
-            textStyle: themeStyle.styles.basicStyle.copyWith(
-              color: themeStyle.colors.errorTextColor,
-            ),
-          ),
         ],
       ),
     );
@@ -234,6 +237,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
           stream: context.read<KeysRepository>().currentKeyStream,
           builder: (context, snap) {
             final currentKey = snap.data;
+            final isSelected = currentKey == key.publicKey;
 
             return EWListTile(
               onPressed: () => Navigator.of(context).push(KeyDetailScreenRoute(keyEntry: key)),
@@ -252,13 +256,13 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (currentKey == key.publicKey)
+                  if (isSelected)
                     Icon(
                       CupertinoIcons.checkmark_alt,
                       color: themeStyle.colors.primaryButtonTextColor,
                       size: 20,
                     ),
-                  _keyDropdown(themeStyle, localization, key),
+                  _keyDropdown(themeStyle, localization, key, key.isMaster && isSelected),
                 ],
               ),
             );
@@ -272,6 +276,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     ThemeStyle themeStyle,
     AppLocalizations localization,
     KeyStoreEntry seed,
+    bool isMasterAndSelected,
   ) {
     return MenuDropdown(
       items: [
@@ -304,20 +309,21 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             );
           },
         ),
-        MenuDropdownData(
-          title: localization.delete_word,
-          onTap: () {
-            final accounts = context.read<AccountsRepository>().accountsFor(seed.publicKey);
-            showKeyDeleteSheet(
-              context: context,
-              key: seed,
-              assets: accounts,
-            );
-          },
-          textStyle: themeStyle.styles.basicStyle.copyWith(
-            color: themeStyle.colors.errorTextColor,
+        if (!isMasterAndSelected)
+          MenuDropdownData(
+            title: localization.delete_word,
+            onTap: () {
+              final accounts = context.read<AccountsRepository>().accountsFor(seed.publicKey);
+              showKeyDeleteSheet(
+                context: context,
+                key: seed,
+                assets: accounts,
+              );
+            },
+            textStyle: themeStyle.styles.basicStyle.copyWith(
+              color: themeStyle.colors.errorTextColor,
+            ),
           ),
-        ),
       ],
     );
   }

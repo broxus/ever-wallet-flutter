@@ -230,7 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
     required void Function(KeyStoreEntry)? onSelect,
   }) {
     IconData? icon;
-    final selected = seed.publicKey == selectedSeed?.publicKey;
+    final selected = seed.publicKey == selectedSeed?.masterKey;
     if (selected) {
       icon = CupertinoIcons.checkmark_alt;
     }
