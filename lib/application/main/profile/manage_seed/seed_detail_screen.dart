@@ -94,7 +94,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                       themeStyle,
                       localization,
                       seed,
-                      [seed, ...?children],
+                      children,
                       isSeedSelected,
                     ),
                   );
