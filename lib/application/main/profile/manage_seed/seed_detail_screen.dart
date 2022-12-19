@@ -52,8 +52,6 @@ class SeedDetailScreen extends StatefulWidget {
 }
 
 class _SeedDetailScreenState extends State<SeedDetailScreen> {
-  KeyStoreEntry get seed => widget.seed;
-
   @override
   Widget build(BuildContext context) {
     final localization = context.localization;
@@ -65,6 +63,10 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
       ),
       body: KeysBuilderWidget(
         builder: (keys, currentKey) {
+          final seed = context
+              .read<KeysRepository>()
+              .keys
+              .firstWhere((k) => k.publicKey == widget.seed.publicKey);
           final isSeedSelected = seed.publicKey == currentKey?.masterKey;
           final children = keys[seed];
 
@@ -118,7 +120,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                           .toList(),
                       if (!seed.isLegacy)
                         PushStateInkWidget(
-                          onPressed: () => _deriveKey(context),
+                          onPressed: () => _deriveKey(context, seed),
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             height: 46,
@@ -329,7 +331,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     );
   }
 
-  Future<void> _deriveKey(BuildContext context) async {
+  Future<void> _deriveKey(BuildContext context, KeyStoreEntry seed) async {
     final localization = context.localization;
     final biometryRepo = context.read<BiometryRepository>();
 
