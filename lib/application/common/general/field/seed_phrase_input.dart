@@ -61,7 +61,7 @@ class SeedPhraseInput extends StatelessWidget {
       },
       onSubmitted: (_) => _nextOrConfirm(),
       prefixIcon: Padding(
-        padding: const EdgeInsets.only(left: 16, top: 11),
+        padding: const EdgeInsets.only(left: 16, top: 11, right: 4),
         child: Text(
           prefixText,
           style: themeStyle.styles.basicStyle.copyWith(
