@@ -101,6 +101,7 @@
   "enable_biometry": "Enable biometry",
   "biometry": "Biometry",
   "seed_phrase_renamed": "Seed phrase renamed successfully",
+  "key_renamed": "Key renamed successfully",
   "rename": "Rename",
   "enter_new_name": "Enter new name",
   "browser": "Browser",

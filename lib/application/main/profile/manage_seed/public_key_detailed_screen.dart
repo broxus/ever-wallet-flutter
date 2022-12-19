@@ -101,8 +101,8 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                   style: themeStyle.styles.sectionCaption,
                 ),
                 titleWidget: StreamBuilder<Map<String, String>>(
-                  initialData: context.read<KeysRepository>().labels,
-                  stream: context.read<KeysRepository>().labelsStream,
+                  initialData: context.read<KeysRepository>().keyLabels,
+                  stream: context.read<KeysRepository>().keyLabelsStream,
                   builder: (context, labels) {
                     final label = labels.data?[key.publicKey];
                     return Text(
@@ -356,7 +356,10 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                   showEWBottomSheet<void>(
                     context,
                     title: localization.enter_new_name,
-                    body: (_) => RenameKeyModalBody(publicKey: key.publicKey),
+                    body: (_) => RenameKeyModalBody(
+                      publicKey: key.publicKey,
+                      type: RenameModalBodyType.key,
+                    ),
                   );
                 },
               ),

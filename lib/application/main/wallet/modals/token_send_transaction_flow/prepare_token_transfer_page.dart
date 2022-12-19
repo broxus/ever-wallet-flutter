@@ -166,7 +166,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
   }
 
   Widget dropdownButton() => AsyncValueStreamProvider<Map<String, String>>(
-        create: (context) => context.read<KeysRepository>().labelsStream,
+        create: (context) => context.read<KeysRepository>().keyLabelsStream,
         builder: (context, child) {
           final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
                 ready: (value) => value,

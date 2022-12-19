@@ -1,3 +1,4 @@
+import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/menu_dropdown.dart';
 import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/default_appbar.dart';
@@ -133,24 +134,32 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
     List<KeyStoreEntry>? children,
     bool isSelected,
   ) {
-    return EWListTile(
-      leading: Assets.images.seed.svg(width: 32, height: 32),
-      titleText: seed.name,
-      onPressed: () => Navigator.of(context).push(SeedDetailScreenRoute(seed: seed)),
-      // +1 because seed is a public key itself
-      subtitleText: localization.children_public_keys((children?.length ?? 0) + 1),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isSelected)
-            Icon(
-              CupertinoIcons.checkmark_alt,
-              color: themeStyle.colors.primaryButtonTextColor,
-              size: 20,
-            ),
-          _seedDropdown(themeStyle, localization, seed, children, isSelected),
-        ],
-      ),
+    return StreamBuilder<Map<String, String>>(
+      initialData: context.read<KeysRepository>().seeds,
+      stream: context.read<KeysRepository>().seedsStream,
+      builder: (context, labels) {
+        final label = labels.data?[seed.publicKey];
+
+        return EWListTile(
+          leading: Assets.images.seed.svg(width: 32, height: 32),
+          titleText: label ?? seed.publicKey.ellipsePublicKey(),
+          onPressed: () => Navigator.of(context).push(SeedDetailScreenRoute(seed: seed)),
+          // +1 because seed is a public key itself
+          subtitleText: localization.children_public_keys((children?.length ?? 0) + 1),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isSelected)
+                Icon(
+                  CupertinoIcons.checkmark_alt,
+                  color: themeStyle.colors.primaryButtonTextColor,
+                  size: 20,
+                ),
+              _seedDropdown(themeStyle, localization, seed, children, isSelected),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -173,7 +182,10 @@ class _ManageSeedsScreenState extends State<ManageSeedsScreen> {
             showEWBottomSheet<void>(
               context,
               title: localization.enter_new_name,
-              body: (_) => RenameKeyModalBody(publicKey: seed.publicKey),
+              body: (_) => RenameKeyModalBody(
+                publicKey: seed.publicKey,
+                type: RenameModalBodyType.seed,
+              ),
             );
           },
         ),

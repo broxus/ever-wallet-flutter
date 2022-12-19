@@ -1,6 +1,7 @@
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_future_provider.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
+import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
 import 'package:ever_wallet/application/common/theme.dart';
@@ -189,36 +190,45 @@ class _ProfilePageState extends State<ProfilePage> {
     required void Function() onAdd,
     required AppLocalizations localization,
   }) {
-    return AsyncValueStreamProvider<List<KeyStoreEntry>>(
-      create: (BuildContext context) => context.read<KeysRepository>().lastViewedKeysStream(),
-      builder: (context, child) {
-        final seeds = context.watch<AsyncValue<List<KeyStoreEntry>>>().maybeWhen(
-              ready: (value) => value,
-              orElse: () => <KeyStoreEntry>[],
+    return StreamBuilder<Map<String, String>>(
+      initialData: context.read<KeysRepository>().seeds,
+      stream: context.read<KeysRepository>().seedsStream,
+      builder: (context, seedNamesSnap) {
+        final seedNames = seedNamesSnap.data ?? {};
+
+        return AsyncValueStreamProvider<List<KeyStoreEntry>>(
+          create: (BuildContext context) => context.read<KeysRepository>().lastViewedKeysStream(),
+          builder: (context, child) {
+            final seeds = context.watch<AsyncValue<List<KeyStoreEntry>>>().maybeWhen(
+                  ready: (value) => value,
+                  orElse: () => <KeyStoreEntry>[],
+                );
+
+            final children = <Widget>[];
+            for (final seed in seeds) {
+              children.add(
+                buildSeedItem(
+                  seed: seed,
+                  selectedSeed: selectedSeed,
+                  onSelect: seed == selectedSeed ? null : onSelect,
+                  seedNames: seedNames,
+                ),
+              );
+            }
+
+            children.add(
+              buildSectionAction(
+                onTap: onAdd,
+                title: localization.manage_seeds_accounts,
+              ),
             );
 
-        final children = <Widget>[];
-        for (final seed in seeds) {
-          children.add(
-            buildSeedItem(
-              seed: seed,
-              selectedSeed: selectedSeed,
-              onSelect: seed == selectedSeed ? null : onSelect,
-            ),
-          );
-        }
-
-        children.add(
-          buildSectionAction(
-            onTap: onAdd,
-            title: localization.manage_seeds_accounts,
-          ),
-        );
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            );
+          },
         );
       },
     );
@@ -228,6 +238,7 @@ class _ProfilePageState extends State<ProfilePage> {
     KeyStoreEntry? selectedSeed,
     required KeyStoreEntry seed,
     required void Function(KeyStoreEntry)? onSelect,
+    required Map<String, String> seedNames,
   }) {
     IconData? icon;
     final selected = seed.publicKey == selectedSeed?.masterKey;
@@ -244,7 +255,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 onSelect(seed);
               }
             },
-      title: seed.name,
+      title: seedNames[seed.publicKey] ?? seed.publicKey.ellipsePublicKey(),
       icon: icon,
     );
   }

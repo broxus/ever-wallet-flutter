@@ -74,10 +74,11 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               StreamBuilder<Map<String, String>>(
-                initialData: context.read<KeysRepository>().labels,
-                stream: context.read<KeysRepository>().labelsStream,
+                initialData: context.read<KeysRepository>().seeds,
+                stream: context.read<KeysRepository>().seedsStream,
                 builder: (context, labels) {
                   final label = labels.data?[seed.publicKey];
+
                   return EWListTile(
                     height: 87,
                     leading: Assets.images.seed.svg(width: 32, height: 32),
@@ -88,7 +89,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                             style: themeStyle.styles.sectionCaption,
                           ),
                     titleWidget: Text(
-                      label ?? seed.name,
+                      label ?? seed.publicKey.ellipsePublicKey(),
                       maxLines: 2,
                       style: themeStyle.styles.header3Style,
                     ),
@@ -173,7 +174,10 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
               showEWBottomSheet<void>(
                 context,
                 title: localization.enter_new_name,
-                body: (_) => RenameKeyModalBody(publicKey: seed.publicKey),
+                body: (_) => RenameKeyModalBody(
+                  publicKey: seed.publicKey,
+                  type: RenameModalBodyType.seed,
+                ),
               );
             },
           ),
@@ -232,42 +236,56 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     KeyStoreEntry key,
     bool isSeedSelected,
   ) {
-    return StreamBuilder<List<AssetsList>>(
-      stream: context.read<AccountsRepository>().accountsForStream(key.publicKey),
-      builder: (context, accounts) {
-        return StreamBuilder<String?>(
-          initialData: context.read<KeysRepository>().currentKey,
-          stream: context.read<KeysRepository>().currentKeyStream,
-          builder: (context, snap) {
-            final currentKey = snap.data;
-            final isSelected = currentKey == key.publicKey;
+    return StreamBuilder<Map<String, String>>(
+      initialData: context.read<KeysRepository>().keyLabels,
+      stream: context.read<KeysRepository>().keyLabelsStream,
+      builder: (context, labels) {
+        final label = labels.data?[key.publicKey];
 
-            return EWListTile(
-              onPressed: () => Navigator.of(context).push(KeyDetailScreenRoute(keyEntry: key)),
-              leading: Container(
-                width: 32,
-                height: 32,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(color: ColorsRes.darkBlue, shape: BoxShape.circle),
-                child: Assets.images.key.svg(width: 18, height: 18),
-              ),
-              titleText: key.name,
-              subtitleText: localization.key_name_with_sub_count(
-                key.publicKey.ellipsePublicKey(),
-                accounts.data?.length ?? 0,
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isSelected)
-                    Icon(
-                      CupertinoIcons.checkmark_alt,
-                      color: themeStyle.colors.primaryButtonTextColor,
-                      size: 20,
-                    ),
-                  _keyDropdown(themeStyle, localization, key, !(key.isMaster && isSeedSelected)),
-                ],
-              ),
+        return StreamBuilder<List<AssetsList>>(
+          stream: context.read<AccountsRepository>().accountsForStream(key.publicKey),
+          builder: (context, accounts) {
+            return StreamBuilder<String?>(
+              initialData: context.read<KeysRepository>().currentKey,
+              stream: context.read<KeysRepository>().currentKeyStream,
+              builder: (context, snap) {
+                final currentKey = snap.data;
+                final isSelected = currentKey == key.publicKey;
+
+                return EWListTile(
+                  onPressed: () => Navigator.of(context).push(KeyDetailScreenRoute(keyEntry: key)),
+                  leading: Container(
+                    width: 32,
+                    height: 32,
+                    alignment: Alignment.center,
+                    decoration:
+                        const BoxDecoration(color: ColorsRes.darkBlue, shape: BoxShape.circle),
+                    child: Assets.images.key.svg(width: 18, height: 18),
+                  ),
+                  titleText: label ?? key.name,
+                  subtitleText: localization.key_name_with_sub_count(
+                    key.publicKey.ellipsePublicKey(),
+                    accounts.data?.length ?? 0,
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isSelected)
+                        Icon(
+                          CupertinoIcons.checkmark_alt,
+                          color: themeStyle.colors.primaryButtonTextColor,
+                          size: 20,
+                        ),
+                      _keyDropdown(
+                        themeStyle,
+                        localization,
+                        key,
+                        !(key.isMaster && isSeedSelected),
+                      ),
+                    ],
+                  ),
+                );
+              },
             );
           },
         );
@@ -297,7 +315,10 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
             showEWBottomSheet<void>(
               context,
               title: localization.enter_new_name,
-              body: (_) => RenameKeyModalBody(publicKey: seed.publicKey),
+              body: (_) => RenameKeyModalBody(
+                publicKey: seed.publicKey,
+                type: RenameModalBodyType.key,
+              ),
             );
           },
         ),

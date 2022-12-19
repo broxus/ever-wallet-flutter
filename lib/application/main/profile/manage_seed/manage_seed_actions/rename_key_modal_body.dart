@@ -10,12 +10,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+enum RenameModalBodyType { key, seed }
+
 class RenameKeyModalBody extends StatefulWidget {
   final String publicKey;
+  final RenameModalBodyType type;
 
   const RenameKeyModalBody({
     super.key,
     required this.publicKey,
+    required this.type,
   });
 
   @override
@@ -60,17 +64,26 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
                   : () async {
                       try {
                         Navigator.of(context).pop();
+                        String flushTitle;
 
-                        await context
-                            .read<KeysRepository>()
-                            .renameKey(publicKey: widget.publicKey, name: value.text.trim());
+                        switch (widget.type) {
+                          case RenameModalBodyType.key:
+                            await context
+                                .read<KeysRepository>()
+                                .renameKey(publicKey: widget.publicKey, name: value.text.trim());
+                            flushTitle = localization.key_renamed;
+                            break;
+                          case RenameModalBodyType.seed:
+                            await context
+                                .read<KeysRepository>()
+                                .renameSeed(publicKey: widget.publicKey, name: value.text.trim());
+                            flushTitle = localization.seed_phrase_renamed;
+                            break;
+                        }
 
                         if (!mounted) return;
 
-                        await showFlushbar(
-                          context,
-                          message: localization.seed_phrase_renamed,
-                        );
+                        await showFlushbar(context, message: flushTitle);
                       } catch (err, st) {
                         logger.e(err, err, st);
 

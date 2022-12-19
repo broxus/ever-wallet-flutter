@@ -10,7 +10,6 @@ import 'package:ever_wallet/data/models/key_removed_event.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:ever_wallet/data/utils.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
-import 'package:rxdart/rxdart.dart';
 
 /// Repository that stores, manipulate and provide information about keys/seeds
 class KeysRepository {
@@ -126,19 +125,12 @@ class KeysRepository {
     return _hiveSource.setCurrentKey(publicKey);
   }
 
-  /// Equivalent of [labels] with stream
-  Stream<Map<String, String>> get labelsStream =>
-      Rx.combineLatest2<Map<String, String>, Map<String, String>, Map<String, String>>(
-        _hiveSource.keyLabelsStream,
-        keysStream.map((e) => {for (final v in e) v.publicKey: v.name}),
-        (a, b) => {...a, ...b},
-      );
+  /// Equivalent of [keyLabels] with stream
+  Stream<Map<String, String>> get keyLabelsStream =>
+      keysStream.map((e) => {for (final v in e) v.publicKey: v.name});
 
-  /// Dictionary of publicKey - key label
-  Map<String, String> get labels => {
-        ..._hiveSource.keyLabels,
-        ...{for (final v in keys) v.publicKey: v.name}
-      };
+  /// Dictionary of publicKey (key) - key label
+  Map<String, String> get keyLabels => {for (final v in keys) v.publicKey: v.name};
 
   /// Create key by seed phrase and save information about it in local store.
   /// Returns blockchain representation of key.
@@ -182,17 +174,15 @@ class KeysRepository {
 
     final key = await _keystore.addKey(createKeyInput);
 
-    await _hiveSource.addSeed(
+    await _hiveSource.addSeedOrRename(
       masterKey: key.publicKey,
-      name: name ?? defaultSeedName(keys.length + 1),
+      name: name ?? key.publicKey,
     );
 
     await _savePassword(
       publicKey: key.publicKey,
       password: password,
     );
-
-    await _hiveSource.removeKeyLabel(key.publicKey);
 
     _eventBus.fire(KeyAddedEvent(key));
 
@@ -231,8 +221,6 @@ class KeysRepository {
       publicKey: derivedKey.publicKey,
       password: password,
     );
-
-    await _hiveSource.removeKeyLabel(derivedKey.publicKey);
 
     _eventBus.fire(KeyAddedEvent(derivedKey));
 
@@ -298,21 +286,22 @@ class KeysRepository {
     return updatedKey;
   }
 
+  /// Change name of seed by [publicKey]. This affects [seedLabels] and mustn't be used for keys
+  Future<void> renameSeed({
+    required String publicKey,
+    required String name,
+  }) =>
+      _hiveSource.addSeedOrRename(masterKey: publicKey, name: name);
+
   /// Change the label of key (local operation)
+  /// This operation renames seed and change its instance inside [keys].
   Future<void> renameKey({
     required String publicKey,
     required String name,
   }) async {
     final key = keys.firstWhereOrNull((e) => e.publicKey == publicKey);
 
-    if (key == null) {
-      await _hiveSource.setKeyLabel(
-        publicKey: publicKey,
-        label: name,
-      );
-
-      return;
-    }
+    if (key == null) return;
 
     final UpdateKeyInput updateKeyInput;
 
@@ -559,7 +548,6 @@ class KeysRepository {
 
     await _hiveSource.clearSeeds();
     await _hiveSource.clearKeyPasswords();
-    await _hiveSource.clearKeyLabels();
   }
 
   Future<void> dispose() => _keystore.dispose();

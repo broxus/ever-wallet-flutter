@@ -30,7 +30,6 @@ class HiveSource {
   final _everCustomTokenContractAssetsBoxName = 'custom_token_contract_assets_v1';
   final _venomSystemTokenContractAssetsBoxName = 'venom_system_token_contract_assets_v1';
   final _venomCustomTokenContractAssetsBoxName = 'venom_custom_token_contract_assets_v1';
-  final _keyLabelsBoxName = 'public_keys_labels_v1';
   final _hiddenAccountsKey = 'hidden_accounts_key';
   final _seedsBoxName = 'seeds_v1';
   final _nekotonFlutterBoxName = 'nekoton_flutter';
@@ -75,8 +74,6 @@ class HiveSource {
   Box<TokenContractAssetDto> get _venomCustomTokenContractAssetsBox =>
       Hive.box<TokenContractAssetDto>(_venomCustomTokenContractAssetsBoxName);
 
-  Box<String> get _keyLabelsBox => Hive.box<String>(_keyLabelsBoxName);
-
   Box<String> get _seedsBox => Hive.box<String>(_seedsBoxName);
 
   Box<String> get _nekotonFlutterBox => Hive.box<String>(_nekotonFlutterBoxName);
@@ -106,7 +103,7 @@ class HiveSource {
 
   Map<String, String> get seeds => _seedsBox.toMap().cast<String, String>();
 
-  Future<void> addSeed({
+  Future<void> addSeedOrRename({
     required String masterKey,
     required String name,
   }) =>
@@ -161,23 +158,6 @@ class HiveSource {
 
     return _hiddenAccountsBox.put(_hiddenAccountsKey, accounts);
   }
-
-  /// Equivalent stream of [keyLabels]
-  Stream<Map<String, String>> get keyLabelsStream =>
-      _keyLabelsBox.watchAll<String>().map((e) => e.cast<String, String>());
-
-  /// Public keys and their labels (names) that are displayed to user
-  Map<String, String> get keyLabels => _keyLabelsBox.toMap().cast<String, String>();
-
-  Future<void> setKeyLabel({
-    required String publicKey,
-    required String label,
-  }) =>
-      _keyLabelsBox.put(publicKey, label);
-
-  Future<void> removeKeyLabel(String publicKey) => _keyLabelsBox.delete(publicKey);
-
-  Future<void> clearKeyLabels() => _keyLabelsBox.clear();
 
   String? getKeyPassword(String publicKey) => _keyPasswordsBox.get(publicKey);
 
@@ -513,7 +493,6 @@ class HiveSource {
     await Hive.openBox<TokenContractAssetDto>(_venomSystemTokenContractAssetsBoxName);
     await Hive.openBox<TokenContractAssetDto>(_everCustomTokenContractAssetsBoxName);
     await Hive.openBox<TokenContractAssetDto>(_venomCustomTokenContractAssetsBoxName);
-    await Hive.openBox<String>(_keyLabelsBoxName);
     await Hive.openBox<String>(_seedsBoxName);
     await Hive.openBox<String>(_nekotonFlutterBoxName);
     await Hive.openBox<dynamic>(_preferencesBoxName);

@@ -16,7 +16,7 @@ Future<void> showEditCustodianLabelDialog({
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) => AsyncValueStreamProvider<Map<String, String>>(
-        create: (context) => context.read<KeysRepository>().labelsStream,
+        create: (context) => context.read<KeysRepository>().keyLabelsStream,
         builder: (context, child) {
           final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
                 ready: (value) => value,
