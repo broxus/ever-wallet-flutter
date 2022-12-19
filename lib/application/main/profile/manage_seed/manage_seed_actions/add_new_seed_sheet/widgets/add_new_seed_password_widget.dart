@@ -84,9 +84,11 @@ class _AddNewSeedPasswordWidgetState extends State<AddNewSeedPasswordWidget> {
             cursorColor: ColorsRes.text,
             validator: (_) =>
                 passwordController.text.length < 8 ? localization.password_length : null,
+            textInputType: TextInputType.visiblePassword,
             onSubmitted: (_) => confirmFocus.requestFocus(),
             textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
           ),
+          const SizedBox(height: 16),
           BorderedInput(
             height: kPasswordInputHeight,
             obscureText: true,
@@ -97,6 +99,7 @@ class _AddNewSeedPasswordWidgetState extends State<AddNewSeedPasswordWidget> {
                 : localization.passwords_match,
             label: localization.confirm_password,
             cursorColor: ColorsRes.text,
+            textInputType: TextInputType.visiblePassword,
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _nextAction(),
             textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
@@ -104,6 +107,7 @@ class _AddNewSeedPasswordWidgetState extends State<AddNewSeedPasswordWidget> {
           SizedBox(
             height: bottomPadding < kPrimaryButtonHeight ? 0 : bottomPadding - kPrimaryButtonHeight,
           ),
+          const SizedBox(height: 16),
           PrimaryElevatedButton(
             onPressed: _nextAction,
             text: localization.confirm,
