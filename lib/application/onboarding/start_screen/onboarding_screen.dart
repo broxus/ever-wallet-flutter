@@ -50,12 +50,12 @@ class OnboardingScreen extends StatelessWidget {
                       const SizedBox(height: 32),
                       PrimaryButton(
                         text: context.localization.create_new_wallet,
-                        onPressed: () => Navigator.of(context).push(SaveSeedPhraseRoute()),
+                        onPressed: () => Navigator.of(context).push(SaveSeedPhraseOnboardingRoute()),
                       ),
                       const SizedBox(height: 12),
                       PrimaryButton(
                         text: context.localization.sign_in,
-                        onPressed: () => Navigator.of(context).push(EnterSeedPhraseRoute()),
+                        onPressed: () => Navigator.of(context).push(EnterOnboardingSeedPhraseRoute()),
                         isTransparent: true,
                       ),
                       // const SizedBox(height: 12),

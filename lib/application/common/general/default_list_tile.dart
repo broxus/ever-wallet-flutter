@@ -43,7 +43,7 @@ class EWListTile extends StatelessWidget {
     final themeStyle = context.themeStyle;
 
     return Material(
-      color: themeStyle.colors.secondaryBackgroundColor,
+      color: backgroundColor ?? themeStyle.colors.secondaryBackgroundColor,
       borderRadius: BorderRadius.zero,
       child: PushStateInkWidget(
         onPressed: onPressed,

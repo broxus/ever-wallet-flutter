@@ -371,7 +371,11 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                       context: context,
                       key: key,
                       assets: accounts,
-                    );
+                    ).then((deleted) {
+                      if (deleted ?? false) {
+                        Navigator.of(context).pop();
+                      }
+                    });
                   },
                   textStyle: themeStyle.styles.basicStyle.copyWith(
                     color: themeStyle.colors.errorTextColor,

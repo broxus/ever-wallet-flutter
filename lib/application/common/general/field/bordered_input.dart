@@ -35,6 +35,10 @@ class BorderedInput extends StatefulWidget {
   final Color? cursorColor;
   final AutovalidateMode? autovalidateMode;
 
+  final Color? inactiveBorderColor;
+  final Color? activeBorderColor;
+  final Color? errorColor;
+
   /// If error must not be displayed (to avoid bottom space) set false
   final bool needError;
 
@@ -61,6 +65,9 @@ class BorderedInput extends StatefulWidget {
     this.cursorColor = ColorsRes.black,
     this.autovalidateMode,
     this.needError = true,
+    this.inactiveBorderColor,
+    this.activeBorderColor,
+    this.errorColor,
   });
 
   @override
@@ -150,7 +157,7 @@ class _BorderedInputState extends State<BorderedInput> {
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
-                      color: themeStyle.colors.inactiveInputColor,
+                      color: widget.inactiveBorderColor ?? themeStyle.colors.inactiveInputColor,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
@@ -162,21 +169,21 @@ class _BorderedInputState extends State<BorderedInput> {
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
-                      color: themeStyle.colors.activeInputColor,
+                      color: widget.activeBorderColor ?? themeStyle.colors.activeInputColor,
                     ),
                   ),
                   errorBorder: OutlineInputBorder(
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
-                      color: themeStyle.colors.errorInputColor,
+                      color: widget.errorColor ?? themeStyle.colors.errorInputColor,
                     ),
                   ),
                   focusedErrorBorder: OutlineInputBorder(
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
-                      color: themeStyle.colors.errorInputColor,
+                      color: widget.errorColor ?? themeStyle.colors.errorInputColor,
                     ),
                   ),
                 ),
@@ -186,7 +193,9 @@ class _BorderedInputState extends State<BorderedInput> {
               if (state.hasError && state.errorText!.isNotEmpty || widget.errorText != null)
                 Text(
                   widget.errorText ?? state.errorText!,
-                  style: errorStyle.copyWith(color: themeStyle.colors.errorTextColor),
+                  style: errorStyle.copyWith(
+                    color: widget.errorColor ?? themeStyle.colors.errorTextColor,
+                  ),
                 )
               else
                 SizedBox(height: errorStyle.fontSize! * errorStyle.height!),

@@ -70,7 +70,10 @@ class ColorsRes {
   const ColorsRes._();
 
   static const bluePrimary400 = Color(0xFF2B63F1);
+  static const neutral400 = Color(0xFF8B909A);
   static const neutral500 = Color(0xFF999DA6);
+  static const neutral600 = Color(0xFFA6AAB2);
+  static const neutral700 = Color(0xFFB7BAC2);
   static const neutral750 = Color(0xFFF7F7F9);
   static const neutral900 = Color(0xFFF0F1F5);
   static const neutral950 = Color(0xFFF7F7F9);

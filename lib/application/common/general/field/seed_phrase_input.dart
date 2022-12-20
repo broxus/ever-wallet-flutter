@@ -22,6 +22,8 @@ class SeedPhraseInput extends StatelessWidget {
   final Color? suggestionBackground;
   final TextStyle? textStyle;
   final Color? enabledBorderColor;
+  final Color? inactiveBorderColor;
+  final Color? errorColor;
 
   const SeedPhraseInput({
     super.key,
@@ -35,6 +37,8 @@ class SeedPhraseInput extends StatelessWidget {
     this.suggestionBackground,
     this.textStyle,
     this.enabledBorderColor,
+    this.inactiveBorderColor,
+    this.errorColor,
   });
 
   @override
@@ -47,6 +51,8 @@ class SeedPhraseInput extends StatelessWidget {
       suggestionsCallback: (_) => suggestionsCallback(),
       key: Key('SeedPhrase_$prefixText'),
       enabledBorderColor: enabledBorderColor,
+      inactiveBorderColor: inactiveBorderColor,
+      errorColor: errorColor,
       controller: controller,
       focusNode: focus,
       textInputAction: textInputAction,

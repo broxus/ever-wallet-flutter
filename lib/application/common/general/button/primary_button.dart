@@ -26,6 +26,7 @@ class PrimaryButton extends StatelessWidget {
     this.padding,
     this.fillWidth = true,
     this.presstateColor,
+    this.border,
   });
 
   final String? text;
@@ -42,6 +43,7 @@ class PrimaryButton extends StatelessWidget {
   final Color? backgroundColor;
   final Color? presstateColor;
   final bool fillWidth;
+  final BoxBorder? border;
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +84,7 @@ class PrimaryButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: radius ?? BorderRadius.zero,
+          border: border,
         ),
         child: Material(
           color: Colors.transparent,

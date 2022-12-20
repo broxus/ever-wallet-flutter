@@ -138,6 +138,12 @@ class StylesRes {
     fontFamily: FontFamily.pt,
     letterSpacing: 0.75,
   );
+  static const medium16 = TextStyle(
+    fontSize: 16,
+    height: 1.375,
+    fontWeight: FontWeight.w500,
+    fontFamily: FontFamily.pt,
+  );
 
   /// Style for header in bottom sheet
   static const sheetHeaderText = TextStyle(
@@ -145,6 +151,13 @@ class StylesRes {
     fontSize: 28,
     height: 1.21,
     fontFamily: FontFamily.pt,
+  );
+
+  static const sheetHeaderTextFaktum = TextStyle(
+    fontWeight: FontWeight.w600,
+    fontSize: 28,
+    height: 1.14,
+    fontFamily: FontFamily.faktum,
   );
 
   /// Biggest text for some titles on screen

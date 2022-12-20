@@ -22,13 +22,13 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 /// Show sheet to delete local or external account.
 /// if account is external, then [linkedPublicKey] must be specified, for local not needed
-Future<void> showAccountDeleteSheet({
+Future<bool?> showAccountDeleteSheet({
   required BuildContext context,
   required AssetsList account,
   required bool isExternal,
   required String linkedPublicKey,
 }) {
-  return showEWBottomSheet(
+  return showEWBottomSheet<bool>(
     context,
     title: context.localization.delete_account_title(account.name),
     body: (_) => AccountDeleteSheet(
@@ -131,6 +131,8 @@ class AccountDeleteSheet extends StatelessWidget {
         PrimaryElevatedButton(
           text: localization.delete_word,
           onPressed: () {
+            Navigator.of(context).pop(true);
+
             if (isExternal) {
               context.read<AccountsRepository>().removeAccount(account.address);
             } else {
@@ -139,7 +141,6 @@ class AccountDeleteSheet extends StatelessWidget {
                     publicKey: linkedPublicKey,
                   );
             }
-            Navigator.of(context).pop();
           },
           isDestructive: true,
         ),

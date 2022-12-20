@@ -25,6 +25,8 @@ class EWTypeAheadField extends StatefulWidget {
   final ItemBuilder<String> itemBuilder;
   final SuggestionSelectionCallback<String> onSuggestionSelected;
   final Color? enabledBorderColor;
+  final Color? inactiveBorderColor;
+  final Color? errorColor;
 
   /// Callback to add button to clear field
   final VoidCallback? onClearField;
@@ -57,6 +59,8 @@ class EWTypeAheadField extends StatefulWidget {
     this.suggestionBackground,
     this.textStyle,
     this.enabledBorderColor,
+    this.inactiveBorderColor,
+    this.errorColor,
   });
 
   @override
@@ -147,13 +151,14 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
-                      color: themeStyle.colors.inactiveInputColor,
+                      color: widget.inactiveBorderColor ?? themeStyle.colors.inactiveInputColor,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
-                    borderSide: BorderSide(color: widget.enabledBorderColor ?? ColorsRes.greyLight),
+                    borderSide:
+                        BorderSide(color: widget.inactiveBorderColor ?? ColorsRes.greyLight),
                   ),
                   focusedBorder: OutlineInputBorder(
                     gapPadding: 1,
@@ -166,14 +171,14 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
-                      color: themeStyle.colors.errorInputColor,
+                      color: widget.errorColor ?? themeStyle.colors.errorInputColor,
                     ),
                   ),
                   focusedErrorBorder: OutlineInputBorder(
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
-                      color: themeStyle.colors.errorInputColor,
+                      color: widget.errorColor ?? themeStyle.colors.errorInputColor,
                     ),
                   ),
                 ),
@@ -206,7 +211,8 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
         padding: const EdgeInsets.only(left: 8.0),
         child: Center(
           child: Assets.images.iconCross.svg(
-            color: context.themeStyle.colors.inactiveInputColor,
+            color: widget.textStyle?.color?.withOpacity(0.45) ??
+                context.themeStyle.colors.inactiveInputColor,
           ),
         ),
       ),

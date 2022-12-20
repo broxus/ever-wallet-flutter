@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/models/key_added_event.dart';
@@ -176,7 +177,7 @@ class KeysRepository {
 
     await _hiveSource.addSeedOrRename(
       masterKey: key.publicKey,
-      name: name ?? key.publicKey,
+      name: name ?? key.publicKey.ellipsePublicKey(),
     );
 
     await _savePassword(

@@ -29,6 +29,7 @@ class OnboardingAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.closeType = CloseType.leading,
     this.backgroundColor = Colors.transparent,
+    this.backColor,
     super.key,
   });
 
@@ -51,6 +52,8 @@ class OnboardingAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   final Color? backgroundColor;
 
+  final Color? backColor;
+
   @override
   Widget build(BuildContext context) {
     return DefaultAppBar(
@@ -62,7 +65,7 @@ class OnboardingAppBar extends StatelessWidget implements PreferredSizeWidget {
       onActionsClosePressed: onActionsClosePressed,
       onClosePressed: onClosePressed,
       needDivider: false,
-      backColor: context.themeStyle.colors.primaryButtonColor,
+      backColor: backColor ?? context.themeStyle.colors.primaryButtonColor,
     );
   }
 }

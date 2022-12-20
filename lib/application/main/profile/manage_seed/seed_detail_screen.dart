@@ -220,7 +220,11 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                 context: context,
                 seed: seed,
                 children: children,
-              ),
+              ).then((deleted) {
+                if (deleted ?? false) {
+                  Navigator.of(context).pop();
+                }
+              }),
               textStyle: themeStyle.styles.basicStyle.copyWith(
                 color: themeStyle.colors.errorTextColor,
               ),

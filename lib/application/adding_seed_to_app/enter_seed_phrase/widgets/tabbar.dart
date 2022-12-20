@@ -10,18 +10,19 @@ class EWTabBar<T> extends StatelessWidget {
   final ValueChanged<T> onChanged;
   final T selectedValue;
 
+  final Color selectedColor;
+
   const EWTabBar({
     required this.values,
     required this.builder,
     required this.selectedValue,
     required this.onChanged,
+    required this.selectedColor,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.themeStyle.colors;
-
     return Row(
       children: values
           .map(
@@ -31,7 +32,7 @@ class EWTabBar<T> extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: v == selectedValue ? colors.primaryButtonColor : Colors.transparent,
+                    color: v == selectedValue ? selectedColor : Colors.transparent,
                   ),
                 ),
               ),

@@ -14,12 +14,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-Future<void> showSeedDeleteSheet({
+Future<bool?> showSeedDeleteSheet({
   required BuildContext context,
   required KeyStoreEntry seed,
   required List<KeyStoreEntry>? children,
 }) {
-  return showEWBottomSheet(
+  return showEWBottomSheet<bool>(
     context,
     title: context.localization.delete_seed_phrase,
     body: (_) => SeedDeleteSheet(seed: seed, children: children),
@@ -94,9 +94,9 @@ class SeedDeleteSheet extends StatelessWidget {
         PrimaryElevatedButton(
           text: localization.delete_word,
           onPressed: () {
-            context.read<KeysRepository>().removeKey(seed.publicKey);
+            Navigator.of(context).pop(true);
 
-            Navigator.of(context).pop();
+            context.read<KeysRepository>().removeKey(seed.publicKey);
           },
           isDestructive: true,
         ),

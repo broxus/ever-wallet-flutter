@@ -274,7 +274,11 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
               account: account,
               isExternal: widget.isExternal,
               linkedPublicKey: widget.linkedPublicKey,
-            ),
+            ).then((deleted) {
+              if (deleted ?? false) {
+                Navigator.of(context).pop();
+              }
+            }),
             textStyle: StylesRes.basicText.copyWith(color: ColorsRes.redLight),
           ),
         ],
