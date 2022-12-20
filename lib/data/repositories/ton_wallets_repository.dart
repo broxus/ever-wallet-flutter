@@ -215,19 +215,21 @@ class TonWalletsRepository {
                 ),
           );
 
-  Stream<ContractState> contractStateStream(String address) =>
-      _tonWallet(address).flatMap((v) => v.onStateChangedStream.startWith(v.contractState));
+  Stream<ContractState> contractStateStream(String address) => _tonWallet(address).flatMap(
+        (v) => v.fieldUpdatesController.map((_) => v.contractState).startWith(v.contractState),
+      );
 
   Future<ContractState> contractState(String address) => contractStateStream(address).first;
 
   Stream<TonWalletDetails> detailsStream(String address) => _tonWallet(address)
-      .flatMap((v) => v.onStateChangedStream.map((_) => v.details).startWith(v.details));
+      .flatMap((v) => v.fieldUpdatesController.map((_) => v.details).startWith(v.details));
 
-  Stream<List<String>?> custodiansStream(String address) =>
-      _tonWallet(address).flatMap((v) => v.custodiansStream);
+  Stream<List<String>?> custodiansStream(String address) => _tonWallet(address)
+      .flatMap((v) => v.fieldUpdatesController.map((_) => v.custodians).startWith(v.custodians));
 
-  Stream<List<String>?> localCustodiansStream(String address) =>
-      _tonWallet(address).flatMap((v) => v.custodiansStream).map((e) {
+  Stream<List<String>?> localCustodiansStream(String address) => _tonWallet(address)
+          .flatMap((v) => v.fieldUpdatesController.map((_) => v.custodians).startWith(v.custodians))
+          .map((e) {
         final custodians = e;
 
         if (custodians == null) return null;
@@ -1461,5 +1463,5 @@ extension on TransactionWithData<TransactionAdditionalInfo?> {
 
 extension on TonWallet {
   Stream<List<MultisigPendingTransaction>> get unconfirmedTransactionsStream =>
-      onStateChangedStream.map((_) => unconfirmedTransactions);
+      fieldUpdatesController.map((_) => unconfirmedTransactions).startWith(unconfirmedTransactions);
 }
