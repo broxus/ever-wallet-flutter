@@ -71,7 +71,7 @@ Future<void> showFlushbarWithAction({
 
   _previousFlushbar = Flushbar(
     messageText: Text(
-      text.overflow,
+      isOneLine ? text.overflow : text,
       style: StylesRes.regular16.copyWith(color: ColorsRes.black),
       maxLines: isOneLine ? 1 : null,
     ),
