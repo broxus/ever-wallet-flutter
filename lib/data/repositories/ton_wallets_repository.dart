@@ -223,34 +223,29 @@ class TonWalletsRepository {
   Stream<TonWalletDetails> detailsStream(String address) => _tonWallet(address)
       .flatMap((v) => v.onStateChangedStream.map((_) => v.details).startWith(v.details));
 
-  Future<TonWalletDetails> details(String address) => detailsStream(address).first;
+  Stream<List<String>?> custodiansStream(String address) =>
+      _tonWallet(address).flatMap((v) => v.custodiansStream);
 
-  Stream<List<String>?> custodiansStream(String address) => _tonWallet(address)
-      .flatMap((v) => v.onStateChangedStream.map((_) => v.custodians).startWith(v.custodians));
+  Stream<List<String>?> localCustodiansStream(String address) =>
+      _tonWallet(address).flatMap((v) => v.custodiansStream).map((e) {
+        final custodians = e;
 
-  Future<List<String>?> custodians(String address) => custodiansStream(address).first;
+        if (custodians == null) return null;
 
-  Stream<List<String>?> localCustodiansStream(String address) => _tonWallet(address).flatMap(
-        (v) => v.onStateChangedStream.map((_) => v.custodians).startWith(v.custodians).map((e) {
-          final custodians = e;
+        final localCustodians = _keystore.entries
+            .map((e) => e.publicKey)
+            .where((e) => custodians.any((el) => el == e))
+            .toList();
 
-          if (custodians == null) return null;
+        final initiatorKey = localCustodians.firstWhereOrNull((e) => e == _hiveSource.currentKey);
 
-          final localCustodians = _keystore.entries
-              .map((e) => e.publicKey)
-              .where((e) => custodians.any((el) => el == e))
-              .toList();
+        final sortedLocalCustodians = [
+          if (initiatorKey != null) initiatorKey,
+          ...localCustodians.where((e) => e != initiatorKey),
+        ];
 
-          final initiatorKey = localCustodians.firstWhereOrNull((e) => e == _hiveSource.currentKey);
-
-          final sortedLocalCustodians = [
-            if (initiatorKey != null) initiatorKey,
-            ...localCustodians.where((e) => e != initiatorKey),
-          ];
-
-          return sortedLocalCustodians;
-        }),
-      );
+        return sortedLocalCustodians;
+      });
 
   Future<List<String>?> localCustodians(String address) => localCustodiansStream(address).first;
 
@@ -297,13 +292,14 @@ class TonWalletsRepository {
     final contractState = await tonWallet.transport.getContractState(address);
 
     final unsignedMessage = await tonWallet.prepareTransfer(
-        contractState: contractState,
-        publicKey: publicKey ?? tonWallet.publicKey,
-        destination: destination,
-        amount: amount,
-        bounce: bounce,
-        body: body,
-        expiration: kDefaultMessageExpiration);
+      contractState: contractState,
+      publicKey: publicKey ?? tonWallet.publicKey,
+      destination: destination,
+      amount: amount,
+      bounce: bounce,
+      body: body,
+      expiration: kDefaultMessageExpiration,
+    );
 
     final unsignedMessageWithAdditionalInfo = UnsignedMessageWithAdditionalInfo(
       message: unsignedMessage,
