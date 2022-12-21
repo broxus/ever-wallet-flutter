@@ -538,6 +538,27 @@ class HiveSource {
     } catch (_) {}
   }
 
+  /// If [keyNames] and [_seedsBox] contains same publicKey, then update name inside [_seedsBox]
+  /// with the name in [keyNames].
+  /// This can happens only one time after app upgrading when there were old box with names.
+  ///
+  /// Function is public because names of keys were stored in keystore, not in box.
+  Future<void> migrateSeedsNames(Map<String, String> keyNames) async {
+    const labelsBoxName = 'public_keys_labels_v1';
+    if (await Hive.boxExists(labelsBoxName)) {
+      final box = await Hive.openBox<String>(labelsBoxName);
+      final seedNames = _seedsBox.toMap().cast<String, String>();
+
+      for (final publicKey in keyNames.keys) {
+        if (seedNames.containsKey(publicKey)) {
+          await _seedsBox.put(publicKey, keyNames[publicKey]!);
+        }
+      }
+
+      await box.deleteFromDisk();
+    }
+  }
+
   /// If app was initialized before seeds order was added, then create fake order with curretKey
   /// at 1-st place.
   Future<void> _migrateLastViewedSeeds() async {
