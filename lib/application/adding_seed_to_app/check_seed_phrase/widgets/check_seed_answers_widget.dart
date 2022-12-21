@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:ever_wallet/application/common/general/button/push_state_ink_widget.dart';
 import 'package:ever_wallet/application/adding_seed_to_app/check_seed_phrase/check_seed_phrase_cubit.dart';
+import 'package:ever_wallet/application/common/general/button/push_state_ink_widget.dart';
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:flutter/material.dart';

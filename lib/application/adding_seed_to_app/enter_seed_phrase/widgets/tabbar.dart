@@ -1,5 +1,4 @@
 import 'package:ever_wallet/application/common/general/button/push_state_scale_widget.dart';
-import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 
 typedef EWTabBarBuilder<T> = Widget Function(BuildContext context, T value, bool isActive);

@@ -111,11 +111,22 @@ class AccountsRepository {
   Tuple2<List<WalletType>, List<WalletType>> accountCreationOptions(String publicKey) =>
       accounts.toOptionsFor(publicKey, _transportSource.isEver);
 
-  List<AssetsList> accountsFor(String publicKey) =>
-      accounts.where((a) => a.publicKey == publicKey).toList();
+  List<AssetsList> accountsFor(String publicKey) => accounts
+      .where(
+        (a) =>
+            a.publicKey == publicKey || (externalAccounts[publicKey]?.contains(a.address) ?? false),
+      )
+      .toList();
 
-  Stream<List<AssetsList>> accountsForStream(String publicKey) =>
-      accountsStream.map((accounts) => accounts.where((a) => a.publicKey == publicKey).toList());
+  Stream<List<AssetsList>> accountsForStream(String publicKey) => accountsStream.map(
+        (accounts) => accounts
+            .where(
+              (a) =>
+                  a.publicKey == publicKey ||
+                  (externalAccounts[publicKey]?.contains(a.address) ?? false),
+            )
+            .toList(),
+      );
 
   Stream<List<String>> get hiddenAccountsStream => _hiveSource.hiddenAccountsStream;
 
@@ -132,6 +143,7 @@ class AccountsRepository {
     required String publicKey,
     required WalletType walletType,
     required int workchain,
+    String? explicitAddress,
   }) =>
       _accountsStorage.addAccount(
         AccountToAdd(
@@ -139,6 +151,7 @@ class AccountsRepository {
           publicKey: publicKey,
           contract: walletType,
           workchain: workchain,
+          explicitAddress: explicitAddress,
         ),
       );
 
@@ -171,6 +184,7 @@ class AccountsRepository {
         publicKey: existingWalletInfo.publicKey,
         walletType: existingWalletInfo.walletType,
         workchain: existingWalletInfo.address.workchain,
+        explicitAddress: address,
       );
     }
 

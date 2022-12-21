@@ -69,185 +69,184 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
 
     return Scaffold(
       appBar: DefaultAppBar(backText: localization.key_word),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          EWListTile(
-            height: 87,
-            leading: Container(
-              height: 32,
-              width: 32,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(shape: BoxShape.circle),
-              child: Assets.images.account.svg(width: 32, height: 32),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            EWListTile(
+              height: 87,
+              leading: Container(
+                height: 32,
+                width: 32,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(shape: BoxShape.circle),
+                child: Assets.images.account.svg(width: 32, height: 32),
+              ),
+              subtitleWidget: Text(
+                localization.account.toUpperCase(),
+                style: themeStyle.styles.sectionCaption,
+              ),
+              titleWidget: StreamBuilder<List<AssetsList>>(
+                initialData: context.read<AccountsRepository>().accounts,
+                stream: context.read<AccountsRepository>().accountsStream,
+                builder: (context, accounts) {
+                  final thisAccount =
+                      accounts.data?.firstWhereOrNull((a) => a.address == account.address);
+                  return Text(
+                    thisAccount?.name ?? account.name,
+                    maxLines: 2,
+                    style: themeStyle.styles.header3Style,
+                  );
+                },
+              ),
+              trailing: _accountDropDown(themeStyle, localization),
             ),
-            subtitleWidget: Text(
-              localization.account.toUpperCase(),
-              style: themeStyle.styles.sectionCaption,
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+              child: Text(
+                localization.public_key,
+                style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
+              ),
             ),
-            titleWidget: StreamBuilder<List<AssetsList>>(
-              initialData: context.read<AccountsRepository>().accounts,
-              stream: context.read<AccountsRepository>().accountsStream,
-              builder: (context, accounts) {
-                final thisAccount =
-                    accounts.data?.firstWhereOrNull((a) => a.address == account.address);
-                return Text(
-                  thisAccount?.name ?? account.name,
-                  maxLines: 2,
-                  style: themeStyle.styles.header3Style,
-                );
-              },
-            ),
-            trailing: _accountDropDown(themeStyle, localization),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-            child: Text(
-              localization.public_key,
-              style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: PushStateScaleWidget(
-              onLongPress: () {
-                Clipboard.setData(ClipboardData(text: account.address));
-                showFlushbar(
-                  context,
-                  message: localization.public_key_copied(account.address.ellipseAddress()),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: ColorsRes.notWhite,
-                  border: Border.all(color: ColorsRes.grey2),
-                ),
-                child: Row(
-                  children: [
-                    QrImage(
-                      size: 100,
-                      data: account.address,
-                    ),
-                    Expanded(
-                      child: Text(
-                        account.address,
-                        style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: PushStateScaleWidget(
+                onLongPress: () {
+                  Clipboard.setData(ClipboardData(text: account.address));
+                  showFlushbar(
+                    context,
+                    message: localization.public_key_copied(account.address.ellipseAddress()),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: ColorsRes.notWhite,
+                    border: Border.all(color: ColorsRes.grey2),
+                  ),
+                  child: Row(
+                    children: [
+                      QrImage(
+                        size: 100,
+                        data: account.address,
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: Text(
+                          account.address,
+                          style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Text(
-                  localization.total_balance,
-                  style: StylesRes.regular16.copyWith(color: ColorsRes.black),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: AsyncValueStreamProvider<double>(
-                    create: (context) => accountOverallBalanceStream(
-                      context.read<AccountsRepository>(),
-                      context.read<TransportRepository>(),
-                      context.read<TonWalletsRepository>(),
-                      context.read<TokenWalletsRepository>(),
-                      context.read<TokenCurrenciesRepository>(),
-                      account.address,
-                    ),
-                    builder: (context, child) {
-                      final balanceUsdt = context.watch<AsyncValue<double>>().maybeWhen(
-                            ready: (value) => value,
-                            orElse: () => null,
-                          );
-
-                      return balanceUsdt != null
-                          ? balance(
-                              balanceUsdt
-                                  .truncateToDecimalPlaces(4)
-                                  .toStringAsFixed(4)
-                                  .removeZeroes()
-                                  .formatValue(),
-                            )
-                          : balance('0');
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    localization.display_on_main,
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Text(
+                    localization.total_balance,
                     style: StylesRes.regular16.copyWith(color: ColorsRes.black),
                   ),
-                ),
-                const SizedBox(width: 16),
-                StreamBuilder<bool>(
-                  stream:
-                      context.read<AccountsRepository>().hiddenAccountByAddress(account.address),
-                  builder: (context, snapshot) {
-                    final isHidden = snapshot.data ?? false;
-                    return EWSwitchField(
-                      value: !isHidden,
-                      onChanged: (_) =>
-                          context.read<AccountsRepository>().toggleHiddenAccount(account.address),
-                      thumbChild: Icon(
-                        Icons.check,
-                        color: !isHidden ? ColorsRes.green400 : Colors.transparent,
-                        size: 18,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: AsyncValueStreamProvider<double>(
+                      create: (context) => accountOverallBalanceStream(
+                        context.read<AccountsRepository>(),
+                        context.read<TransportRepository>(),
+                        context.read<TonWalletsRepository>(),
+                        context.read<TokenWalletsRepository>(),
+                        context.read<TokenCurrenciesRepository>(),
+                        account.address,
                       ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          if (widget.isExternal)
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Text(
-                        localization.linked_keys,
-                        style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
-                      ),
-                    ),
-                    AsyncValueStreamProvider<List<String>?>(
-                      create: (context) =>
-                          context.read<TonWalletsRepository>().custodiansStream(account.address),
-                      builder: (_, __) {
-                        final publicKeys = context.watch<AsyncValue<List<String>?>>().maybeWhen(
+                      builder: (context, child) {
+                        final balanceUsdt = context.watch<AsyncValue<double>>().maybeWhen(
                               ready: (value) => value,
                               orElse: () => null,
                             );
-                        if (publicKeys == null) return _emptyLinkedKeys();
 
-                        return Column(
-                          children: publicKeys.map(_linkedKey).separated(const DefaultDivider()),
-                        );
+                        return balanceUsdt != null
+                            ? balance(
+                                balanceUsdt
+                                    .truncateToDecimalPlaces(4)
+                                    .toStringAsFixed(4)
+                                    .removeZeroes()
+                                    .formatValue(),
+                              )
+                            : balance('0');
                       },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-        ],
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      localization.display_on_main,
+                      style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  StreamBuilder<bool>(
+                    stream:
+                        context.read<AccountsRepository>().hiddenAccountByAddress(account.address),
+                    builder: (context, snapshot) {
+                      final isHidden = snapshot.data ?? false;
+                      return EWSwitchField(
+                        value: !isHidden,
+                        onChanged: (_) =>
+                            context.read<AccountsRepository>().toggleHiddenAccount(account.address),
+                        thumbChild: Icon(
+                          Icons.check,
+                          color: !isHidden ? ColorsRes.green400 : Colors.transparent,
+                          size: 18,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (widget.isExternal)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text(
+                      localization.linked_keys,
+                      style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
+                    ),
+                  ),
+                  AsyncValueStreamProvider<List<String>?>(
+                    create: (context) =>
+                        context.read<TonWalletsRepository>().custodiansStream(account.address),
+                    builder: (context, __) {
+                      final publicKeys = context.watch<AsyncValue<List<String>?>>().maybeWhen(
+                            ready: (value) => value,
+                            orElse: () => null,
+                          );
+                      if (publicKeys == null) return _emptyLinkedKeys();
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: publicKeys.map(_linkedKey).separated(const DefaultDivider()),
+                      );
+                    },
+                  ),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }
