@@ -310,10 +310,6 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
           onTap: () => context.read<KeysRepository>().setCurrentKey(seed.publicKey),
         ),
         MenuDropdownData(
-          title: localization.hide_word,
-          onTap: () {},
-        ),
-        MenuDropdownData(
           title: localization.rename,
           onTap: () {
             showEWBottomSheet<void>(
