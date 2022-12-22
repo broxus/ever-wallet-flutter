@@ -134,12 +134,12 @@ class AccountDeleteSheet extends StatelessWidget {
             Navigator.of(context).pop(true);
 
             if (isExternal) {
-              context.read<AccountsRepository>().removeAccount(account.address);
-            } else {
               context.read<AccountsRepository>().removeExternalAccount(
                     address: account.address,
                     publicKey: linkedPublicKey,
                   );
+            } else {
+              context.read<AccountsRepository>().removeAccount(account.address);
             }
           },
           isDestructive: true,
