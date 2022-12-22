@@ -55,7 +55,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
   );
   final webViewScrollController = StreamController<int>();
   late StreamSubscription subscription;
-  final browserListener = BrowserAppBarScrollListener();
+  late final browserListener = BrowserAppBarScrollListener(pullToRefreshController);
   final urlTextController = TextEditingController();
 
   /// If controller is null (starting page is aboutPage) then url will be changed by [BrowserTabsCubit]
@@ -135,8 +135,6 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
         if (!wasOpened) return const SizedBox();
 
         return Listener(
-          onPointerDown: (_) => browserListener.startHolding(),
-          onPointerUp: (_) => browserListener.stopHolding(),
           child: BlocProvider<BackButtonEnabledCubit>(
             create: (context) => BackButtonEnabledCubit(),
             child: BlocProvider<ForwardButtonEnabledCubit>(
@@ -155,9 +153,10 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
                           builder: (_, show, __) {
                             final size = MediaQuery.of(context).size;
 
-                            return Positioned(
+                            return AnimatedPositioned(
                               top: show,
                               width: size.width,
+                              duration: const Duration(milliseconds: 300),
                               child: appBar(),
                             );
                           },
@@ -209,7 +208,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
           valueListenable: browserListener,
           builder: (_, show, child) => AnimatedPadding(
             padding: EdgeInsets.only(top: BrowserAppBarScrollListener.appBarHeight + show),
-            duration: const Duration(milliseconds: 10),
+            duration: const Duration(milliseconds: 300),
             child: child,
           ),
           child: IndexedStack(
