@@ -519,29 +519,26 @@ class KeysRepository {
   Future<KeyStoreEntry> removeKey(String publicKey) async {
     final key = keys.firstWhere((e) => e.publicKey == publicKey);
 
-    final removedKeys = <KeyStoreEntry>[];
+    final keysForRemove = <KeyStoreEntry>[key];
 
     if (key.isNotLegacy && key.isMaster) {
       final derivedKeys = keys.where((e) => e.masterKey == publicKey);
 
-      removedKeys.addAll(await _keystore.removeKeys(derivedKeys.map((e) => e.publicKey).toList()));
+      keysForRemove.addAll(keys.where((k) => derivedKeys.contains(k)));
     }
 
-    final removedKey = (await _keystore.removeKey(key.publicKey))!;
-
-    removedKeys.add(removedKey);
-
-    for (final removedKey in removedKeys) {
+    for (final removedKey in keysForRemove) {
+      await _keystore.removeKey(removedKey.publicKey);
       await _hiveSource.removeKeyPassword(removedKey.publicKey);
 
       _eventBus.fire(KeyRemovedEvent(removedKey));
     }
 
-    if (removedKey.isMaster) await _hiveSource.removeSeed(key.publicKey);
+    if (key.isMaster) await _hiveSource.removeSeed(key.publicKey);
 
     await _updateCurrentKey();
 
-    return removedKey;
+    return key;
   }
 
   /// Clear all local data

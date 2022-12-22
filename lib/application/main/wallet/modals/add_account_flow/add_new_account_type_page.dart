@@ -5,6 +5,7 @@ import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
+import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/application/common/widgets/unfocusing_gesture_detector.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -114,16 +115,21 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
 
           final list = [...added, ...available]..sort((a, b) => a.toInt().compareTo(b.toInt()));
 
-          return ListView.builder(
-            itemCount: list.length,
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemBuilder: (BuildContext context, int index) => item(
-              list: list,
-              index: index,
-              added: added,
-              available: available,
-            ),
+          return TransportTypeBuilderWidget(
+            builder: (context, isEver) {
+              return ListView.builder(
+                itemCount: list.length,
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) => item(
+                  list: list,
+                  index: index,
+                  added: added,
+                  available: available,
+                  isEver: isEver,
+                ),
+              );
+            },
           );
         },
       );
@@ -133,6 +139,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
     required int index,
     required List<WalletType> added,
     required List<WalletType> available,
+    required bool isEver,
   }) =>
       ValueListenableBuilder<WalletType?>(
         valueListenable: optionNotifier,
@@ -142,7 +149,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
           onChanged: !added.contains(list[index]) ? (value) => optionNotifier.value = value : null,
           activeColor: CrystalColor.accent,
           title: Text(
-            '${list[index].name}${list[index] == kDefaultWalletType ? ' (default)' : ""}',
+            '${list[index].name}${list[index] == getDefaultWalletType(isEver) ? ' (default)' : ""}',
           ),
         ),
       );
