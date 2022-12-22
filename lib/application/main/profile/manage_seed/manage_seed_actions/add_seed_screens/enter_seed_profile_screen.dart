@@ -26,6 +26,7 @@ class EnterSeedProfileScreen extends StatelessWidget {
         primaryColor: ColorsRes.bluePrimary400,
         defaultTextColor: ColorsRes.black,
         buttonTextColor: ColorsRes.white,
+        suggestionBackgroundColor: ColorsRes.white,
       ),
     );
   }

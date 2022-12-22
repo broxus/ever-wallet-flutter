@@ -26,6 +26,7 @@ class EnterSeedPhraseWidget extends StatefulWidget {
     required this.inactiveBorderColor,
     required this.errorColor,
     required this.buttonTextColor,
+    required this.suggestionBackgroundColor,
     super.key,
   });
 
@@ -37,6 +38,7 @@ class EnterSeedPhraseWidget extends StatefulWidget {
   final Color inactiveBorderColor;
   final Color errorColor;
   final Color buttonTextColor;
+  final Color suggestionBackgroundColor;
 
   @override
   State<EnterSeedPhraseWidget> createState() => _EnterSeedPhraseWidgetState();
@@ -231,10 +233,12 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
       child: SeedPhraseInput(
         controller: controller,
         focus: focus,
+        suggestionBackground: widget.suggestionBackgroundColor,
         enabledBorderColor: widget.primaryColor,
         inactiveBorderColor: widget.inactiveBorderColor,
         errorColor: widget.errorColor,
         textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
+        suggestionStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
         prefixText: '$index.',
         requestNextField: () => focuses[index].requestFocus(),
         textInputAction:

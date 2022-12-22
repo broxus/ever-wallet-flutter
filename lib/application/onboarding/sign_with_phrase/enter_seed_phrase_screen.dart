@@ -24,6 +24,7 @@ class EnterOnboardingSeedPhraseScreen extends StatelessWidget {
         primaryColor: ColorsRes.lightBlue,
         defaultTextColor: ColorsRes.white,
         buttonTextColor: ColorsRes.black,
+        suggestionBackgroundColor: ColorsRes.black.withOpacity(0.9),
       ),
     );
   }
