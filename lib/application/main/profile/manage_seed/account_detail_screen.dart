@@ -105,7 +105,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
               child: Text(
-                localization.public_key,
+                localization.address,
                 style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
               ),
             ),
