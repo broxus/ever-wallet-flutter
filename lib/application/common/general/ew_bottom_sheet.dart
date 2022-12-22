@@ -32,51 +32,54 @@ Future<T?> showEWBottomSheet<T>(
     builder: (context) {
       final themeStyle = context.themeStyle;
 
-      return Material(
-        color: themeStyle.colors.secondaryBackgroundColor,
-        child: Padding(
-          padding: avoidBottomInsets ? MediaQuery.of(context).viewInsets : EdgeInsets.zero,
-          child: Stack(
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  if (title != null)
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16) +
-                          const EdgeInsets.only(top: 24, right: 16),
-                      child: Text(title, style: themeStyle.styles.sheetHeaderStyle),
-                    ),
-                  Flexible(child: Padding(padding: padding, child: body(context))),
-                ],
-              ),
-              if (needCloseButton)
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: closeButton ?? _getCloseButton(),
+      return SafeArea(
+        minimum: const EdgeInsets.only(bottom: 16),
+        child: Material(
+          color: themeStyle.colors.secondaryBackgroundColor,
+          child: Padding(
+            padding: avoidBottomInsets ? MediaQuery.of(context).viewInsets : EdgeInsets.zero,
+            child: Stack(
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    if (title != null)
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16) +
+                            const EdgeInsets.only(top: 24, right: 16),
+                        child: Text(title, style: themeStyle.styles.sheetHeaderStyle),
+                      ),
+                    Flexible(child: Padding(padding: padding, child: body(context))),
+                  ],
                 ),
-              if (draggable)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      height: 3,
-                      width: 48,
-                      margin: const EdgeInsets.only(top: 6, bottom: 6),
-                      decoration: const ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                if (needCloseButton)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: closeButton ?? _getCloseButton(),
+                  ),
+                if (draggable)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        height: 3,
+                        width: 48,
+                        margin: const EdgeInsets.only(top: 6, bottom: 6),
+                        decoration: const ShapeDecoration(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          color: ColorsRes.black,
                         ),
-                        color: ColorsRes.black,
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       );
