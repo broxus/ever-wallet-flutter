@@ -32,10 +32,10 @@ Future<T?> showEWBottomSheet<T>(
     builder: (context) {
       final themeStyle = context.themeStyle;
 
-      return SafeArea(
-        minimum: const EdgeInsets.only(bottom: 16),
-        child: Material(
-          color: themeStyle.colors.secondaryBackgroundColor,
+      return Material(
+        color: themeStyle.colors.secondaryBackgroundColor,
+        child: SafeArea(
+          minimum: const EdgeInsets.only(bottom: 16),
           child: Padding(
             padding: avoidBottomInsets ? MediaQuery.of(context).viewInsets : EdgeInsets.zero,
             child: Stack(

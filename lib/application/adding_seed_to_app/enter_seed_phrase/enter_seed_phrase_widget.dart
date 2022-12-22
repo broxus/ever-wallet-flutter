@@ -2,7 +2,6 @@ import 'package:ever_wallet/application/adding_seed_to_app/enter_seed_phrase/wid
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/general/button/text_button.dart';
-import 'package:ever_wallet/application/common/general/dialog/default_dialog_controller.dart';
 import 'package:ever_wallet/application/common/general/field/seed_phrase_input.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
@@ -10,6 +9,7 @@ import 'package:ever_wallet/application/util/extensions/context_extensions.dart'
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
+import 'package:ever_wallet/data/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -49,6 +49,8 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
   final controllers = List.generate(24, (_) => TextEditingController());
   final focuses = List.generate(24, (_) => FocusNode());
   final values = const <int>[12, 24];
+
+  final formErrorNotifier = ValueNotifier<String?>(null);
 
   /// Display paste only if there are no text(false) in fields else clear (true)
   final isClearButtonState = ValueNotifier<bool>(false);
@@ -213,6 +215,27 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
                     ),
                   ],
                 ),
+                ValueListenableBuilder<String?>(
+                  valueListenable: formErrorNotifier,
+                  builder: (context, error, __) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+                        if (error == null)
+                          SizedBox(
+                            height: StylesRes.regular16.fontSize! * StylesRes.regular16.height!,
+                          )
+                        else
+                          Text(
+                            error,
+                            style: StylesRes.regular16.copyWith(color: widget.errorColor),
+                          ),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  },
+                ),
               ],
             );
           },
@@ -249,7 +272,7 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
   }
 
   void _confirmAction() {
-    if (formKey.currentState?.validate() ?? false) {
+    if (_validateFormWithError()) {
       try {
         FocusManager.instance.primaryFocus?.unfocus();
         final phrase = controllers.take(valuesNotifier.value).map((e) => e.text).toList();
@@ -262,13 +285,10 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
           mnemonicType: mnemonicType,
         );
         widget.callback(context, phrase);
+      } on Exception catch (e) {
+        formErrorNotifier.value = e.toUiMessage();
       } on Object catch (e) {
-        DefaultDialogController.showAlertDialog<void>(
-          context: context,
-          title: e.toString(),
-          onAgreeClicked: (ctx) => Navigator.of(ctx).pop(),
-          onDisagreeClicked: (ctx) => Navigator.of(ctx).pop(),
-        );
+        formErrorNotifier.value = e.toString();
       }
     }
   }
@@ -279,7 +299,7 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
         ..text = ''
         ..selection = const TextSelection.collapsed(offset: 0),
     );
-    formKey.currentState?.reset();
+    _resetFormWithError();
   }
 
   Future<void> pastePhrase() async {
@@ -300,8 +320,7 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
 
     if (words.isEmpty) {
       if (!mounted) return;
-
-      formKey.currentState?.reset();
+      _resetFormWithError();
 
       showErrorFlushbar(
         context,
@@ -316,7 +335,7 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
         selection: TextSelection.fromPosition(TextPosition(offset: word.length)),
       );
     });
-    formKey.currentState?.validate();
+    _validateFormWithError();
   }
 
   void _checkDebugPhraseGenerating() {
@@ -330,7 +349,23 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
         controllers[i].text = text;
         controllers[i].selection = TextSelection.fromPosition(TextPosition(offset: text.length));
       }
-      formKey.currentState?.validate();
+      _validateFormWithError();
     }
+  }
+
+  /// Validate form and return its status
+  bool _validateFormWithError() {
+    final isValid = formKey.currentState?.validate() ?? false;
+    if (!isValid) {
+      formErrorNotifier.value = context.localization.seed_is_wrong;
+    } else {
+      formErrorNotifier.value = null;
+    }
+    return isValid;
+  }
+
+  void _resetFormWithError() {
+    formKey.currentState?.reset();
+    formErrorNotifier.value = null;
   }
 }
