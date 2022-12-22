@@ -1,6 +1,6 @@
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
-final kSeedSplitRegExp = RegExp(r'[ |;|,|:|\n]');
+final kSeedSplitRegExp = RegExp(r'[ |;|,|:|\n|.]');
 
 /// This wallet types depends on kEverAvailableWallets and kVenomAvailableWallets
 const kDefaultEverWalletType = WalletType.everWallet();

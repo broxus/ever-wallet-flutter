@@ -72,7 +72,7 @@ class CustomTextFormField extends StatelessWidget {
           enabledBorder: border(),
           border: border(),
         ),
-        cursorColor: cursorColor,
+        cursorColor: cursorColor ?? Colors.black,
         keyboardType: keyboardType,
         textInputAction: textInputAction,
         style: const TextStyle(
@@ -181,6 +181,7 @@ class CustomTextFormFieldWithDecoration extends StatelessWidget {
           border: border(),
         ),
         keyboardType: keyboardType,
+        cursorColor: Colors.black,
         textInputAction: textInputAction,
         style: const TextStyle(
           color: Colors.black,

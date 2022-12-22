@@ -284,7 +284,8 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
 
   Future<void> pastePhrase() async {
     final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
-    final words = clipboard?.text?.split(kSeedSplitRegExp) ?? <String>[];
+    final words =
+        clipboard?.text?.replaceAll(RegExp('\\s+'), ' ').split(kSeedSplitRegExp) ?? <String>[];
 
     if (words.isNotEmpty && words.length == valuesNotifier.value) {
       for (final word in words) {
