@@ -32,7 +32,7 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.1.1
   flutter_form_builder: ^7.6.0
-  flutter_inappwebview: 5.4.3+8
+  flutter_inappwebview: 6.0.0-beta.22
   flutter_link_previewer: ^2.6.6
   flutter_localizations:
     sdk: flutter

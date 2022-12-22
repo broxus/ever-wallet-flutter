@@ -22,6 +22,7 @@ import 'package:ever_wallet/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
@@ -239,21 +240,14 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
                 webViewScrollController.add(y);
                 browserListener.webViewScrolled(y);
               },
-              initialUrlRequest: URLRequest(url: Uri.parse(widget.tab.tab.url)),
-              initialOptions: InAppWebViewGroupOptions(
-                crossPlatform: InAppWebViewOptions(
-                  applicationNameForUserAgent: 'EverWalletBrowser',
-                  useShouldOverrideUrlLoading: true,
-                  mediaPlaybackRequiresUserGesture: false,
-                  transparentBackground: true,
-                ),
-                android: AndroidInAppWebViewOptions(
-                  disableDefaultErrorPage: true,
-                  useHybridComposition: true,
-                ),
-                ios: IOSInAppWebViewOptions(
-                  allowsInlineMediaPlayback: true,
-                ),
+              initialUrlRequest: URLRequest(url: WebUri(widget.tab.tab.url)),
+              initialSettings: InAppWebViewSettings(
+                applicationNameForUserAgent: 'EverWalletBrowser',
+                useShouldOverrideUrlLoading: true,
+                mediaPlaybackRequiresUserGesture: false,
+                transparentBackground: true,
+                disableDefaultErrorPage: true,
+                allowsInlineMediaPlayback: true,
               ),
               initialUserScripts: UnmodifiableListView<UserScript>([
                 UserScript(
@@ -269,11 +263,11 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
               onWebViewCreated: (c) => onWebViewCreated(context, c),
               onLoadStart: onLoadStart,
               onLoadStop: (controller, url) => onLoadStop(controller, url, context),
-              onLoadError: onLoadError,
-              onLoadHttpError: onLoadError,
+              onReceivedError: (c, r, e) => onReceivedError(c, r, e, context),
+              onReceivedHttpError: (c, r, e) => onReceivedHttpError(c, r, e, context),
               onProgressChanged: (c, p) => onProgressChanged(c, p, context),
               onUpdateVisitedHistory: onUpdateVisitedHistory,
-              androidOnPermissionRequest: androidOnPermissionRequest,
+              onPermissionRequest: onPermissionRequest,
               shouldOverrideUrlLoading: shouldOverrideUrlLoading,
               onConsoleMessage: onConsoleMessage,
             ),
@@ -333,20 +327,52 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
     _updateCurrentUrl(url?.toString(), true);
   }
 
-  Future<void> onLoadError(
+  Future<void> onReceivedError(
     InAppWebViewController controller,
-    Uri? url,
-    int code,
-    String message,
+    WebResourceRequest request,
+    WebResourceError error,
+    BuildContext context,
   ) async {
-    if (Platform.isIOS && code == -999) return;
+    _handleError(
+      controller,
+      request,
+      error.description,
+      context,
+    );
+  }
 
-    final errorUrl = url ?? Uri.parse(aboutBlankPage);
+  Future<void> onReceivedHttpError(
+    InAppWebViewController controller,
+    WebResourceRequest request,
+    WebResourceResponse errorResponse,
+    BuildContext context,
+  ) async {
+    _handleError(
+      controller,
+      request,
+      errorResponse.reasonPhrase,
+      context,
+    );
+  }
+
+  void _handleError(
+    InAppWebViewController controller,
+    WebResourceRequest request,
+    String? message,
+    BuildContext context,
+  ) {
+    // Skip subrequests
+    if (request.isForMainFrame != true) return;
+
+    final webUri = request.url.isValidUri ? request.url : WebUri(aboutBlankPage);
 
     controller.loadData(
-      data: getErrorPage(url: errorUrl, message: message),
-      baseUrl: errorUrl,
-      historyUrl: errorUrl,
+      data: getErrorPage(
+        url: webUri,
+        message: message ?? AppLocalizations.of(context)!.network_error,
+      ),
+      baseUrl: webUri,
+      historyUrl: webUri,
     );
   }
 
@@ -366,14 +392,13 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
   ) =>
       _updateCurrentUrl(url?.toString(), true);
 
-  Future<PermissionRequestResponse?> androidOnPermissionRequest(
+  Future<PermissionResponse?> onPermissionRequest(
     InAppWebViewController controller,
-    String origin,
-    List<String> resources,
+    PermissionRequest permissionRequest,
   ) async =>
-      PermissionRequestResponse(
-        resources: resources,
-        action: PermissionRequestResponseAction.GRANT,
+      PermissionResponse(
+        resources: permissionRequest.resources,
+        action: PermissionResponseAction.GRANT,
       );
 
   Future<NavigationActionPolicy?> shouldOverrideUrlLoading(
@@ -426,13 +451,13 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
 
   void pause() {
     if (Platform.isAndroid) {
-      controller?.android.pause();
+      controller?.pause();
     }
   }
 
   void resume() {
     if (Platform.isAndroid) {
-      controller?.android.resume();
+      controller?.resume();
     }
   }
 

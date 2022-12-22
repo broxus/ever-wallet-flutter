@@ -16,7 +16,7 @@ extension InAppWebViewControllerX on InAppWebViewController {
     return origin;
   }
 
-  Future<void> goHome() => loadUrl(urlRequest: URLRequest(url: Uri.parse(aboutBlankPage)));
+  Future<void> goHome() => loadUrl(urlRequest: URLRequest(url: WebUri(aboutBlankPage)));
 
   Future<void> refresh() async {
     if (Platform.isAndroid) {
@@ -30,15 +30,15 @@ extension InAppWebViewControllerX on InAppWebViewController {
     final trimmed = url.trim();
 
     if (isURL(trimmed)) {
-      var siteUrl = Uri.parse(trimmed);
+      var siteUrl = WebUri(trimmed);
 
-      if (!siteUrl.hasScheme) siteUrl = Uri.parse('http://$siteUrl');
+      if (!siteUrl.hasScheme) siteUrl = WebUri('http://$siteUrl');
 
       await loadUrl(
         urlRequest: URLRequest(url: siteUrl),
       );
     } else {
-      final searchUrl = Uri.parse(getDuckDuckGoSearchLink(trimmed));
+      final searchUrl = WebUri(getDuckDuckGoSearchLink(trimmed));
 
       await loadUrl(
         urlRequest: URLRequest(url: searchUrl),
