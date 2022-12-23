@@ -57,12 +57,12 @@ class _BrowserHomeState extends State<BrowserHome> {
       image: Assets.images.everLogo,
     ),
     PopularResources(
-      name: 'Coinmarketcap',
+      name: 'CoinMarketCap',
       url: 'https://coinmarketcap.com',
       image: Assets.images.browser.coinmarketcap,
     ),
     PopularResources(
-      name: 'Coingecko',
+      name: 'CoinGecko',
       url: 'https://www.coingecko.com',
       image: Assets.images.browser.coingecko,
     ),

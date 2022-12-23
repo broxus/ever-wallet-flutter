@@ -53,7 +53,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
   late final pullToRefreshController = PullToRefreshController(
     onRefresh: () => controller?.refresh(),
   );
-  final webViewScrollController = StreamController<int>();
+  final webViewUpdateController = StreamController<int?>();
   late StreamSubscription subscription;
   late final browserListener = BrowserAppBarScrollListener(pullToRefreshController);
   final urlTextController = TextEditingController();
@@ -69,31 +69,32 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
 
     WidgetsBinding.instance.addObserver(this);
 
-    subscription = webViewScrollController.stream
-        .throttleTime(const Duration(seconds: 10))
+    subscription = webViewUpdateController.stream
+        .throttleTime(const Duration(seconds: 1))
         .listen((scroll) async {
-      if (isCurrentTabActive) {
-        final size = MediaQuery.of(context).size;
-        final screenshot = await controller!.takeScreenshot(
-          screenshotConfiguration: ScreenshotConfiguration(
-            quality: 5,
-            compressFormat: CompressFormat.JPEG,
-            rect: InAppWebViewRect(
-              height: size.height,
-              width: size.width,
-              x: 0,
-              y: 0,
-            ),
-          ),
-        );
-        // average size of image ~10-20kb
-        widget.tabsCubit.updateCurrentTabData(scroll, screenshot);
-      }
+      _updateTabData(scroll: scroll);
     });
 
     widget.tab.addListener(_tabChangedListener);
     _tabChangedListener();
     super.initState();
+  }
+
+  Future<void> _updateTabData({int? scroll = 0}) async {
+    if (isCurrentTabActive) {
+      final screehshot = await _takeScreenshot();
+      widget.tabsCubit.updateCurrentTabData(scroll, screehshot);
+    }
+  }
+
+  Future<Uint8List?> _takeScreenshot() async {
+    return controller!.takeScreenshot(
+      screenshotConfiguration: ScreenshotConfiguration(
+        snapshotWidth: 300,
+        quality: 5,
+        compressFormat: CompressFormat.JPEG,
+      ),
+    );
   }
 
   void _tabChangedListener() {
@@ -121,7 +122,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
     WidgetsBinding.instance.removeObserver(this);
     widget.tab.removeListener(_tabChangedListener);
     subscription.cancel();
-    webViewScrollController.close();
+    webViewUpdateController.close();
     browserListener.dispose();
     urlTextController.dispose();
     super.dispose();
@@ -236,7 +237,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
       builder: (context, child) => context.watch<AsyncValue<String>>().maybeWhen(
             ready: (value) => InAppWebView(
               onScrollChanged: (_, __, y) {
-                webViewScrollController.add(y);
+                webViewUpdateController.add(y);
                 browserListener.webViewScrolled(y);
               },
               initialUrlRequest: URLRequest(url: WebUri(widget.tab.tab.url)),
@@ -262,6 +263,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
               onWebViewCreated: (c) => onWebViewCreated(context, c),
               onLoadStart: onLoadStart,
               onLoadStop: (controller, url) => onLoadStop(controller, url, context),
+              onLoadResource: onLoadResource,
               onReceivedError: (c, r, e) => onReceivedError(c, r, e, context),
               onReceivedHttpError: (c, r, e) => onReceivedHttpError(c, r, e, context),
               onProgressChanged: (c, p) => onProgressChanged(c, p, context),
@@ -322,8 +324,12 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
     context.read<BackButtonEnabledCubit>().setIsEnabled(canGoBack);
     context.read<ForwardButtonEnabledCubit>().setIsEnabled(canGoForward);
 
-    webViewScrollController.add(0);
+    webViewUpdateController.add(null);
     _updateCurrentUrl(url?.toString(), true);
+  }
+
+  void onLoadResource(InAppWebViewController controller, LoadedResource loadedResource) {
+    webViewUpdateController.add(null);
   }
 
   Future<void> onReceivedError(

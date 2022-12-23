@@ -86,7 +86,7 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
 
   /// Data updates when user scrolls web page, but not every tick.
   /// Mustn't be called at home page.
-  Future<void> updateCurrentTabData(int scrollPosition, Uint8List? screenshot) async {
+  Future<void> updateCurrentTabData(int? scrollPosition, Uint8List? screenshot) async {
     if (activeTabIndex == -1) return;
     _tabsDto.updateCurrentTabData(scrollPosition, screenshot);
     _saveTabs();

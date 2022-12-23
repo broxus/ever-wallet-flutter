@@ -29,9 +29,9 @@ class BrowserTabsList {
   void updateCurrentTab(BrowserTab newTabData) =>
       _tabs[lastActiveIndex]._updateTabWithNotification(newTabData);
 
-  void updateCurrentTabData(int scrollPosition, Uint8List? screenshot) {
+  void updateCurrentTabData(int? scrollPosition, Uint8List? screenshot) {
     _tabs[lastActiveIndex].tab = _tabs[lastActiveIndex].tab.copyWith(
-          lastScrollPosition: scrollPosition,
+          lastScrollPosition: scrollPosition ?? _tabs[lastActiveIndex].tab.lastScrollPosition,
           screenshot: screenshot,
         );
   }
