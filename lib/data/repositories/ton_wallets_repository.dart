@@ -899,6 +899,7 @@ class TonWalletsRepository {
       transactions
           .where(
         (e) => e.isOrdinaryTransaction(
+          details: tonWallet.details,
           transactions: transactions,
           pendingTransactions: multisigPendingTransactions,
         ),
@@ -1206,6 +1207,7 @@ class TonWalletsRepository {
       transactions
           .where(
         (e) => e.isExpiredTransaction(
+          details: tonWallet.details,
           transactions: transactions,
           pendingTransactions: multisigPendingTransactions,
         ),
@@ -1356,6 +1358,7 @@ extension on TransactionWithData<TransactionAdditionalInfo?> {
       );
 
   bool isOrdinaryTransaction({
+    required TonWalletDetails details,
     required List<TransactionWithData<TransactionAdditionalInfo?>> transactions,
     required List<MultisigPendingTransaction> pendingTransactions,
   }) =>
@@ -1365,10 +1368,7 @@ extension on TransactionWithData<TransactionAdditionalInfo?> {
           multisig: (data) => data.maybeWhen(
             submit: (data) =>
                 pendingTransactions.every((e) => e.id != data.transId) &&
-                (transaction.outMessages.isNotEmpty ||
-                    transactions
-                        .where((e) => e.isConfirmTransaction(data.transId))
-                        .any((e) => e.transaction.outMessages.isNotEmpty)),
+                isEnoughSubscribers(data.transId, details, transactions),
             orElse: () => false,
           ),
           orElse: () => false,
@@ -1417,6 +1417,7 @@ extension on TransactionWithData<TransactionAdditionalInfo?> {
       );
 
   bool isExpiredTransaction({
+    required TonWalletDetails details,
     required List<TransactionWithData<TransactionAdditionalInfo?>> transactions,
     required List<MultisigPendingTransaction> pendingTransactions,
   }) =>
@@ -1426,16 +1427,31 @@ extension on TransactionWithData<TransactionAdditionalInfo?> {
           multisig: (data) => data.maybeWhen(
             submit: (data) =>
                 pendingTransactions.every((e) => e.id != data.transId) &&
-                (transaction.outMessages.isEmpty ||
-                    transactions
-                        .where((e) => e.isConfirmTransaction(data.transId))
-                        .any((e) => e.transaction.outMessages.isEmpty)),
+                !isEnoughSubscribers(data.transId, details, transactions) &&
+                isExpiredByTime(details),
             orElse: () => false,
           ),
           orElse: () => false,
         ),
         orElse: () => false,
       );
+
+  /// More or equals to required confirmations were achieved
+  bool isEnoughSubscribers(
+    String transId,
+    TonWalletDetails details,
+    List<TransactionWithData<TransactionAdditionalInfo?>> transactions,
+  ) {
+    if (details.requiredConfirmations == null) return true;
+
+    final foundConfirms = transactions.where((e) => e.isConfirmTransaction(transId)).length;
+    // -1 because 1-st submit transaction is confirmation itself
+    return foundConfirms >= details.requiredConfirmations! - 1;
+  }
+
+  bool isExpiredByTime(TonWalletDetails details) {
+    return (transaction.createdAt + details.expirationTime).toDateTime().isBefore(DateTime.now());
+  }
 
   MultisigSubmitTransaction get multisigSubmitTransaction => data!.maybeWhen(
         walletInteraction: (data) => data.method.maybeWhen(
