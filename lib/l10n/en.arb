@@ -448,5 +448,8 @@
   "empty_linked_keys": "Linked keys not found",
   "display_on_main": "Display on the main screen",
   "add_custodians_to_send_via_multisig": "To send funds via multisig, you need to add a custodian",
-  "network_error": "Network error"
+  "network_error": "Network error",
+  "bookmarks": "Bookmarks",
+  "bookmarks_placeholder": "Your bookmarks will appear here",
+  "popular_resources": "Popular Resources"
 }

@@ -13,6 +13,7 @@ import 'package:ever_wallet/data/repositories/bookmarks_repository.dart';
 import 'package:ever_wallet/data/repositories/sites_meta_data_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -91,7 +92,7 @@ class _BrowserHomeState extends State<BrowserHome> {
 
           final children = <List<Widget>>[
             _sectionBuilder(
-              'Popular Resources',
+              AppLocalizations.of(context)!.popular_resources,
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverGrid(
@@ -108,13 +109,13 @@ class _BrowserHomeState extends State<BrowserHome> {
               ),
             ),
             _sectionBuilder(
-              'Bookmarks',
+              AppLocalizations.of(context)!.bookmarks,
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: bookmarks.isEmpty
                     ? SliverToBoxAdapter(
                         child: Text(
-                          'Your bookmarks will appear here',
+                          AppLocalizations.of(context)!.bookmarks_placeholder,
                           style: StylesRes.captionText.copyWith(color: ColorsRes.black),
                         ),
                       )
@@ -237,7 +238,11 @@ class _BrowserHomeState extends State<BrowserHome> {
                   ? const SizedBox.shrink()
                   : CircleAvatar(
                       child: image.endsWith('svg')
-                          ? SvgPicture.network(image, width: 32, height: 32)
+                          ? SvgPicture.network(
+                              image,
+                              width: 32,
+                              height: 32,
+                            )
                           : Image.network(
                               meta!.image!,
                               width: 32,

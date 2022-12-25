@@ -218,16 +218,16 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        EWListTile(
-          // TODO: implement changing accounts
-          onPressed: () {},
-          leading: Assets.images.wallet.svg(color: ColorsRes.bluePrimary400),
-          titleWidget: Text(
-            localization.change_account,
-            style: StylesRes.regular16.copyWith(color: ColorsRes.black),
-          ),
-        ),
-        const DefaultDivider(),
+        // EWListTile(
+        //   // TODO: implement changing accounts
+        //   onPressed: () {},
+        //   leading: Assets.images.wallet.svg(color: ColorsRes.bluePrimary400),
+        //   titleWidget: Text(
+        //     localization.change_account,
+        //     style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+        //   ),
+        // ),
+        // const DefaultDivider(),
         EWListTile(
           onPressed: () {
             widget.controller.future.then((c) => c.refresh());
