@@ -16,6 +16,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+
+const _stakingUrl =
+    'https://broxus.medium.com/introducing-stever-and-the-new-era-of-liquid-staking-on-ever-dao-a52e77f48a85';
+
+const _farmingUrl = 'https://docs.flatqube.io/use/farming/new-farming/how-to';
 
 class BrowserHome extends StatefulWidget {
   final ValueChanged<String> changeUrl;
@@ -150,6 +156,7 @@ class _BrowserHomeState extends State<BrowserHome> {
                             Color(0xFF7479E5),
                             Color(0xFF2B63F1),
                           ],
+                          url: _stakingUrl,
                         ),
                         infoTile(
                           title: localization.farming_title,
@@ -159,6 +166,7 @@ class _BrowserHomeState extends State<BrowserHome> {
                             Color(0xFF3466F0),
                             Color(0xFF882DE2),
                           ],
+                          url: _farmingUrl,
                         ),
                       ],
                     ),
@@ -277,40 +285,44 @@ class _BrowserHomeState extends State<BrowserHome> {
     required String description,
     required Widget icon,
     required List<Color> gradientColors,
+    required String url,
   }) {
     assert(gradientColors.length == 2);
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          stops: const [0.5, 0.8],
-          colors: gradientColors,
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: StylesRes.bold20.copyWith(color: ColorsRes.white),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: StylesRes.regular14.copyWith(color: ColorsRes.white),
-                ),
-              ],
-            ),
+    return InkWell(
+      onTap: () => launchUrlString(url),
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            stops: const [0.5, 0.8],
+            colors: gradientColors,
           ),
-          icon,
-        ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: StylesRes.bold20.copyWith(color: ColorsRes.white),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    style: StylesRes.regular14.copyWith(color: ColorsRes.white),
+                  ),
+                ],
+              ),
+            ),
+            icon,
+          ],
+        ),
       ),
     );
   }
