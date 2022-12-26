@@ -118,13 +118,12 @@ class AccountsRepository {
       )
       .toList();
 
-  Stream<List<AssetsList>> accountsForStream(String publicKey) => accountsStream.map(
-        (accounts) => accounts
-            .where(
-              (a) =>
-                  a.publicKey == publicKey ||
-                  (externalAccounts[publicKey]?.contains(a.address) ?? false),
-            )
+  Stream<List<AssetsList>> accountsForStream(String publicKey) =>
+      Rx.combineLatest2<List<AssetsList>, List<String>, List<AssetsList>>(
+        accountsStream,
+        externalAccountsForStream(publicKey),
+        (accounts, external) => accounts
+            .where((a) => a.publicKey == publicKey || (external.contains(a.address)))
             .toList(),
       );
 
