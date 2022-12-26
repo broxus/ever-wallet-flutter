@@ -6,14 +6,16 @@ import 'package:flutter/material.dart';
 
 class PrimaryElevatedButton extends StatelessWidget {
   final VoidCallback? onPressed;
-  final String text;
+  final String? text;
+  final Widget? child;
 
   final bool isDestructive;
 
   const PrimaryElevatedButton({
     super.key,
     required this.onPressed,
-    required this.text,
+    this.text,
+    this.child,
     this.isDestructive = false,
   });
 
@@ -28,6 +30,7 @@ class PrimaryElevatedButton extends StatelessWidget {
       onPressed: onPressed,
       style: themeStyle.styles.primaryButtonStyle.copyWith(color: ColorsRes.white),
       backgroundColor: onPressed != null ? enabledColor : disabledColor,
+      child: child,
     );
   }
 }

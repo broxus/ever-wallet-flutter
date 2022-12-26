@@ -43,19 +43,19 @@ class TonAssetsRepository {
     _updateVenomSystemTokenContractAssets().onError((err, st) => logger.e(err, err, st));
   }
 
-  Stream<List<TokenContractAsset>> get systemAssetsStream => _transportSource.isEver
+  Stream<List<TokenContractAsset>> get systemAssetsStream => _transportSource.isEverTransport
       ? _hiveSource.everSystemTokenContractAssetsStream
       : _hiveSource.venomSystemTokenContractAssetsStream;
 
-  List<TokenContractAsset> get systemAssets => _transportSource.isEver
+  List<TokenContractAsset> get systemAssets => _transportSource.isEverTransport
       ? _hiveSource.everSystemTokenContractAssets
       : _hiveSource.venomSystemTokenContractAssets;
 
-  Stream<List<TokenContractAsset>> get customAssetsStream => _transportSource.isEver
+  Stream<List<TokenContractAsset>> get customAssetsStream => _transportSource.isEverTransport
       ? _hiveSource.everCustomTokenContractAssetsStream
       : _hiveSource.venomCustomTokenContractAssetsStream;
 
-  List<TokenContractAsset> get customAssets => _transportSource.isEver
+  List<TokenContractAsset> get customAssets => _transportSource.isEverTransport
       ? _hiveSource.everCustomTokenContractAssets
       : _hiveSource.venomCustomTokenContractAssets;
 
@@ -165,7 +165,7 @@ class TonAssetsRepository {
       version: tokenRootDetails.version.toInt(),
     );
 
-    final isEver = _transportSource.isEver;
+    final isEver = _transportSource.isEverTransport;
 
     if (isEver) {
       await _hiveSource.addEverCustomTokenContractAsset(asset);
@@ -199,7 +199,7 @@ class TonAssetsRepository {
     Tuple2<List<TokenContractAsset>, List<TokenContractAsset>> event,
   ) async {
     try {
-      final isEver = _transportSource.isEver;
+      final isEver = _transportSource.isEverTransport;
 
       final systemAssets = event.item1;
       final customAssets = event.item2;

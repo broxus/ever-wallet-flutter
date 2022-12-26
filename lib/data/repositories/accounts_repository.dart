@@ -80,7 +80,7 @@ class AccountsRepository {
         (a, b) {
           return a.where(
             (account) {
-              return _transportSource.isEver
+              return _transportSource.isEverTransport
                   ? kEverAvailableWallets.contains(account.tonWallet.contract)
                   : kVenomAvailableWallets.contains(account.tonWallet.contract);
             },
@@ -90,7 +90,7 @@ class AccountsRepository {
 
   List<AssetsList> get currentAccounts => _currentAccountsSource.currentAccounts.where(
         (account) {
-          return _transportSource.isEver
+          return _transportSource.isEverTransport
               ? kEverAvailableWallets.contains(account.tonWallet.contract)
               : kVenomAvailableWallets.contains(account.tonWallet.contract);
         },
@@ -106,10 +106,10 @@ class AccountsRepository {
   Stream<Tuple2<List<WalletType>, List<WalletType>>> accountCreationOptionsStream(
     String publicKey,
   ) =>
-      accountsStream.map((e) => e.toOptionsFor(publicKey, _transportSource.isEver));
+      accountsStream.map((e) => e.toOptionsFor(publicKey, _transportSource.isEverTransport));
 
   Tuple2<List<WalletType>, List<WalletType>> accountCreationOptions(String publicKey) =>
-      accounts.toOptionsFor(publicKey, _transportSource.isEver);
+      accounts.toOptionsFor(publicKey, _transportSource.isEverTransport);
 
   List<AssetsList> accountsFor(String publicKey) => accounts
       .where(
@@ -322,7 +322,7 @@ class AccountsRepository {
         transport: transport,
         publicKey: addedKey.publicKey,
         workchainId: kDefaultWorkchain,
-        walletTypes: _transportSource.isEver ? kEverAvailableWallets : kVenomAvailableWallets,
+        walletTypes: _transportSource.isEverTransport ? kEverAvailableWallets : kVenomAvailableWallets,
       );
 
       final activeWallets = wallets.where((e) => e.isActive);

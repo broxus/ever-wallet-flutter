@@ -226,9 +226,6 @@ class _CreateSeedPasswordWidgetState extends State<CreateSeedPasswordWidget> {
 
       final overlay = DefaultDialogController.showFullScreenLoader();
 
-      /// wait until all streams complete sending data
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-
       /// Waits for founding any accounts. If no accounts found - start creating a new one
       late StreamSubscription sub;
       sub = accountsRepo

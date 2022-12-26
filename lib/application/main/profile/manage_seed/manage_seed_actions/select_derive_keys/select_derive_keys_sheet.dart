@@ -11,7 +11,9 @@ import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
+import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
+import 'package:ever_wallet/data/repositories/transport_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -57,6 +59,8 @@ class _SelectDeriveKeysSheetState extends State<SelectDeriveKeysSheet> {
       widget.password,
       context.read<Keystore>(),
       context.read<KeysRepository>(),
+      context.read<AccountsRepository>(),
+      context.read<TransportRepository>(),
       () {
         if (mounted) Navigator.of(context).pop();
       },
@@ -227,6 +231,7 @@ class _SelectDeriveKeysSheetState extends State<SelectDeriveKeysSheet> {
         PrimaryElevatedButton(
           onPressed: isLoading ? null : () => cubit.selectAll(),
           text: context.localization.select,
+          child: isLoading ? const CircularProgressIndicator(color: ColorsRes.white) : null,
         ),
         const SizedBox(height: 16),
       ],

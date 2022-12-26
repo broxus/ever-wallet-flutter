@@ -16,8 +16,8 @@ class TransportTypeBuilderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<bool>(
-     initialData: true,
-      stream: context.read<TransportRepository>().isEverTransport,
+     initialData: context.read<TransportRepository>().isEverTransport,
+      stream: context.read<TransportRepository>().isEverTransportStream,
       builder: (context, snapshot) {
         return builder(context, snapshot.data!);
       },

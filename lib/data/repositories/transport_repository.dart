@@ -97,7 +97,10 @@ class TransportRepository {
   Stream<Transport> get transportStream => _transportSource.transportStream;
 
   /// Returns stream of bool where true means ever network, false means venom network
-  Stream<bool> get isEverTransport => _transportSource.isEverTransport;
+  Stream<bool> get isEverTransportStream => _transportSource.isEverTransportStream;
+
+  /// Whether current network is ever or not
+  bool get isEverTransport => _transportSource.isEverTransport;
 
   Transport get transport => _transportSource.transport;
 

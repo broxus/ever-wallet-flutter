@@ -1,5 +1,11 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
+import 'package:ever_wallet/application/common/constants.dart';
+import 'package:ever_wallet/data/constants.dart';
+import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
+import 'package:ever_wallet/data/repositories/transport_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
@@ -13,6 +19,8 @@ class SelectDeriveKeysCubit extends Cubit<SelectDeriveKeysCubitState> {
   final KeyStoreEntry key;
   final String _password;
   final KeysRepository _keysRepository;
+  final AccountsRepository _accountsRepo;
+  final TransportRepository _transportRepo;
 
   final VoidCallback onFinish;
 
@@ -21,6 +29,8 @@ class SelectDeriveKeysCubit extends Cubit<SelectDeriveKeysCubitState> {
     this._password,
     this._keystore,
     this._keysRepository,
+    this._accountsRepo,
+    this._transportRepo,
     this.onFinish,
   ) : super(const SelectDeriveKeysCubitState.init()) {
     _init();
@@ -107,14 +117,42 @@ class SelectDeriveKeysCubit extends Cubit<SelectDeriveKeysCubitState> {
         ),
       );
       for (final k in selectedKeys) {
-        await _keysRepository.deriveKey(
+        final derived = await _keysRepository.deriveKey(
           masterKey: key.publicKey,
           accountId: publicKeys.indexOf(k),
           password: _password,
         );
+        await _findOrCreateAccounts(derived.publicKey);
       }
       onFinish();
     }
+  }
+
+  Future<void> _findOrCreateAccounts(String publicKey) async {
+    final completer = Completer<void>();
+
+    /// Waits for founding any accounts. If no accounts found - start creating a new one
+    late StreamSubscription sub;
+    sub = _accountsRepo
+        .accountsForStream(publicKey)
+        .where((event) => event.isNotEmpty)
+        .timeout(const Duration(seconds: 1), onTimeout: (c) => c.close())
+        .listen(
+      (accounts) {
+        completer.complete();
+        sub.cancel();
+      },
+      onDone: () async {
+        await _accountsRepo.addAccount(
+          publicKey: publicKey,
+          walletType: getDefaultWalletType(_transportRepo.isEverTransport),
+          workchain: kDefaultWorkchain,
+        );
+        completer.complete();
+        sub.cancel();
+      },
+    );
+    return completer.future;
   }
 }
 
