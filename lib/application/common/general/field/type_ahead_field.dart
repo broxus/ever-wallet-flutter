@@ -90,6 +90,12 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _handleInput();
+  }
+
+  @override
   void didUpdateWidget(covariant EWTypeAheadField oldWidget) {
     if (widget.controller != null && widget.controller != _controller) {
       _controller.removeListener(_handleInput);
