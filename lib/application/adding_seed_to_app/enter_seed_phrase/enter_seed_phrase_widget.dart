@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:string_extensions/string_extensions.dart';
 
 typedef EnterPhraseNavigationCallback = void Function(BuildContext context, List<String> phrase);
 
@@ -228,7 +229,7 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
                           )
                         else
                           Text(
-                            error,
+                            error.capitalize!,
                             style: StylesRes.regular16.copyWith(color: widget.errorColor),
                           ),
                         const SizedBox(height: 16),
