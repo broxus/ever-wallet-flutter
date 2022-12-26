@@ -2,8 +2,8 @@ import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/menu_dropdown.dart';
-import 'package:ever_wallet/application/common/general/button/push_state_ink_widget.dart';
 import 'package:ever_wallet/application/common/general/button/push_state_scale_widget.dart';
+import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/default_appbar.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
@@ -165,61 +165,61 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Text(
-                          localization.my_accounts,
-                          style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                localization.my_accounts,
+                                style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
+                              ),
+                            ),
+                            TextPrimaryButton.appBar(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              text: localization.plus_add_new,
+                              style: themeStyle.styles.basicStyle.copyWith(
+                                color: ColorsRes.darkBlue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              onPressed: () => startAddLocalAccountFlow(
+                                context: context,
+                                publicKey: key.publicKey,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const DefaultDivider(),
                       ...accounts.map((e) => _accountItem(themeStyle, localization, e)).toList(),
-                      PushStateInkWidget(
-                        onPressed: () => startAddLocalAccountFlow(
-                          context: context,
-                          publicKey: key.publicKey,
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          height: 46,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            localization.plus_add_account,
-                            style: themeStyle.styles.basicStyle.copyWith(
-                              color: ColorsRes.darkBlue,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
                       const SizedBox(height: 32),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Text(
-                          localization.external_accounts,
-                          style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                localization.external_accounts,
+                                style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
+                              ),
+                            ),
+                            TextPrimaryButton.appBar(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              text: localization.plus_add_new,
+                              style: themeStyle.styles.basicStyle.copyWith(
+                                color: ColorsRes.darkBlue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              onPressed: () => startAddExternalAccountFlow(
+                                context: context,
+                                publicKey: key.publicKey,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const DefaultDivider(),
                       ...externalAccounts
                           .map((e) => _accountItem(themeStyle, localization, e, isExternal: true))
                           .toList(),
-                      PushStateInkWidget(
-                        onPressed: () => startAddExternalAccountFlow(
-                          context: context,
-                          publicKey: key.publicKey,
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          height: 46,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            localization.plus_add_account,
-                            style: themeStyle.styles.basicStyle.copyWith(
-                              color: ColorsRes.darkBlue,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
