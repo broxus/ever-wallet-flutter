@@ -48,7 +48,12 @@ extension TokensConvert on String {
     final lead = number ~/ radix;
     final leadStr = lead.toString();
 
+    if (decimals == 0) {
+      return leadStr;
+    }
+
     final trail = number % radix;
+
     var trailStr = trail.toString();
 
     if (trailStr.length > decimals) {
