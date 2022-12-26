@@ -189,7 +189,7 @@ class BrowserSearchHistory extends StatelessWidget {
                         builder: (context, clip) {
                           if (clip.data?.text != null && clip.data!.text!.isNotEmpty) {
                             return EWListTile(
-                              onPressed: () => changeUrl(clip.data!.text!),
+                              onPressed: () => _changeUrl(context, clip.data!.text!),
                               leading: Assets.images.copy.svg(
                                 color: ColorsRes.neutral500,
                                 width: 24,
@@ -221,21 +221,23 @@ class BrowserSearchHistory extends StatelessWidget {
         },
       );
 
+  void _changeUrl(BuildContext context, String url) {
+    final isUrl = isURL(url);
+    if (isUrl) {
+      changeUrl(url);
+    } else {
+      changeUrl(getDuckDuckGoSearchLink(url));
+    }
+    Navigator.of(context).pop();
+  }
+
   Widget tile({
     required BuildContext context,
     required SearchHistoryDto entry,
   }) {
-    final isUrl = isURL(entry.url);
     return EWListTile(
-      onPressed: () {
-        if (isUrl) {
-          changeUrl(entry.url);
-        } else {
-          changeUrl(getDuckDuckGoSearchLink(entry.url));
-        }
-        Navigator.of(context).pop();
-      },
-      leading: !isUrl
+      onPressed: () => _changeUrl(context, entry.url),
+      leading: !isURL(entry.url)
           ? Assets.images.iconSearch.svg(width: 24, height: 24)
           : FutureBuilder<fav.Favicon?>(
               future: fav.FaviconFinder.getBest(entry.url),
