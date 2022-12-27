@@ -79,7 +79,7 @@ extension WalletTypeX on WalletType {
               return 'Multisig2.1';
           }
         },
-        everWallet: () => 'EverWallet',
+        everWallet: () => 'EVER Wallet',
         walletV3: () => 'WalletV3',
         highloadWalletV2: () => 'HighloadWalletV2',
       );
