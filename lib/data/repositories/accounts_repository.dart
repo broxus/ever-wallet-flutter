@@ -221,6 +221,8 @@ class AccountsRepository {
     }
 
     final removedAccount = (await _accountsStorage.removeAccount(address))!;
+    await _hiveSource.removeHiddenIfPossible(address);
+    await _hiveSource.deletePermissionsForAccount(address);
 
     _eventBus.fire(AccountRemovedEvent(removedAccount));
 
@@ -322,7 +324,8 @@ class AccountsRepository {
         transport: transport,
         publicKey: addedKey.publicKey,
         workchainId: kDefaultWorkchain,
-        walletTypes: _transportSource.isEverTransport ? kEverAvailableWallets : kVenomAvailableWallets,
+        walletTypes:
+            _transportSource.isEverTransport ? kEverAvailableWallets : kVenomAvailableWallets,
       );
 
       final activeWallets = wallets.where((e) => e.isActive);

@@ -159,6 +159,13 @@ class HiveSource {
     return _hiddenAccountsBox.put(_hiddenAccountsKey, accounts);
   }
 
+  /// Remove information about hidden account (make it visible)
+  Future<void> removeHiddenIfPossible(String address) {
+    final accounts = hiddenAccounts;
+    accounts.remove(address);
+    return _hiddenAccountsBox.put(_hiddenAccountsKey, accounts);
+  }
+
   String? getKeyPassword(String publicKey) => _keyPasswordsBox.get(publicKey);
 
   Future<void> setKeyPassword({
