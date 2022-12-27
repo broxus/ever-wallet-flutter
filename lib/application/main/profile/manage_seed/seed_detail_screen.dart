@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/menu_dropdown.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
-import 'package:ever_wallet/application/common/general/button/push_state_ink_widget.dart';
+import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/default_appbar.dart';
 import 'package:ever_wallet/application/common/general/default_divider.dart';
 import 'package:ever_wallet/application/common/general/default_list_tile.dart';
@@ -106,9 +106,28 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text(
-                  localization.keys_word,
-                  style: themeStyle.styles.sectionCaption,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        localization.keys_word,
+                        style: themeStyle.styles.sectionCaption,
+                      ),
+                    ),
+                    if (!seed.isLegacy)
+                      TextPrimaryButton.appBar(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        text: localization.plus_add_key,
+                        style: themeStyle.styles.basicStyle.copyWith(
+                          color: ColorsRes.darkBlue,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        onPressed: () => _deriveKey(
+                          context,
+                          seed,
+                        ),
+                      ),
+                  ],
                 ),
               ),
               const DefaultDivider(),
@@ -119,22 +138,6 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                       ...[seed, ...?children]
                           .map((e) => _keyItem(themeStyle, localization, e, isSeedSelected))
                           .toList(),
-                      if (!seed.isLegacy)
-                        PushStateInkWidget(
-                          onPressed: () => _deriveKey(context, seed),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            height: 46,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              localization.plus_add_key,
-                              style: themeStyle.styles.basicStyle.copyWith(
-                                color: ColorsRes.darkBlue,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ),
