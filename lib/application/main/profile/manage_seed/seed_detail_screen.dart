@@ -103,9 +103,8 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                   );
                 },
               ),
-              const SizedBox(height: 16),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
                     Expanded(

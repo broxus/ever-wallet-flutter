@@ -65,70 +65,73 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
         margin: EdgeInsets.only(top: mq.padding.top + 5),
         height: preferredSize.height,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: leading ??
-                        (_showLeadingClose
-                            ? TextPrimaryButton.appBar(
-                                onPressed: onClosePressed ?? () => Navigator.of(context).maybePop(),
-                                child: Padding(
-                                  padding: kAppBarButtonPadding,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.arrow_back_ios,
-                                        color: backColor ??
-                                            themeStyle.colors.textPrimaryTextButtonColor,
-                                        size: 20,
-                                      ),
-                                      if (backText != null)
-                                        Text(
-                                          backText!,
-                                          style: themeStyle.styles.basicStyle.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: backColor ??
-                                                themeStyle.colors.textPrimaryTextButtonColor,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            : const SizedBox(width: kAppBarButtonSize)),
-                  ),
-                  if (_hasActionsAll)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     Flexible(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: _hasActions
-                            ? actions!
-                            : [
-                                if (_showActionsClose)
-                                  TextPrimaryButton(
-                                    onPressed: onActionsClosePressed ??
-                                        onClosePressed ??
-                                        () => Navigator.of(context).maybePop(),
+                      child: leading ??
+                          (_showLeadingClose
+                              ? TextPrimaryButton.appBar(
+                                  onPressed:
+                                      onClosePressed ?? () => Navigator.of(context).maybePop(),
+                                  child: Padding(
                                     padding: kAppBarButtonPadding,
-                                    child: Icon(
-                                      Icons.close,
-                                      color: themeStyle.colors.primaryButtonColor,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.arrow_back_ios,
+                                          color: backColor ??
+                                              themeStyle.colors.textPrimaryTextButtonColor,
+                                          size: 20,
+                                        ),
+                                        if (backText != null)
+                                          Text(
+                                            backText!,
+                                            style: themeStyle.styles.basicStyle.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: backColor ??
+                                                  themeStyle.colors.textPrimaryTextButtonColor,
+                                            ),
+                                          ),
+                                      ],
                                     ),
-                                  )
-                                else
-                                  const SizedBox(width: kAppBarButtonSize)
-                              ],
-                      ),
+                                  ),
+                                )
+                              : const SizedBox(width: kAppBarButtonSize)),
                     ),
-                ],
+                    if (_hasActionsAll)
+                      Flexible(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: _hasActions
+                              ? actions!
+                              : [
+                                  if (_showActionsClose)
+                                    TextPrimaryButton(
+                                      onPressed: onActionsClosePressed ??
+                                          onClosePressed ??
+                                          () => Navigator.of(context).maybePop(),
+                                      padding: kAppBarButtonPadding,
+                                      child: Icon(
+                                        Icons.close,
+                                        color: themeStyle.colors.primaryButtonColor,
+                                      ),
+                                    )
+                                  else
+                                    const SizedBox(width: kAppBarButtonSize)
+                                ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 6),
             if (needDivider) const DefaultDivider(),
           ],
         ),

@@ -50,15 +50,12 @@ class _ProfilePageState extends State<ProfilePage> {
         value: SystemUiOverlayStyle.dark,
         child: Scaffold(
           resizeToAvoidBottomInset: false,
-          body: Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                buildTitle(),
-                Expanded(child: buildBody()),
-              ],
-            ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              buildTitle(),
+              Expanded(child: buildBody()),
+            ],
           ),
         ),
       );

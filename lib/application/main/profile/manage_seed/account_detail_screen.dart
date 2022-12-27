@@ -101,7 +101,6 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
               ),
               trailing: _accountDropDown(themeStyle, localization),
             ),
-            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
               child: Text(

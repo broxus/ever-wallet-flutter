@@ -119,7 +119,6 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                   allAccounts,
                 ),
               ),
-              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
                 child: Text(
@@ -190,7 +189,6 @@ class _KeyDetailScreenState extends State<KeyDetailScreen> {
                       ),
                       const DefaultDivider(),
                       ...accounts.map((e) => _accountItem(themeStyle, localization, e)).toList(),
-                      const SizedBox(height: 32),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: Row(
