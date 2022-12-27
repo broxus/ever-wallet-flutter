@@ -59,7 +59,9 @@ class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            leading: const CustomBackButton(),
+            leading: CustomBackButton(
+              onPressed: () => Navigator.of(widget.modalContext).pop(),
+            ),
             title: Text(
               AppLocalizations.of(context)!.confirm_transaction,
               style: const TextStyle(
