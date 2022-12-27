@@ -73,78 +73,80 @@ class _CreateSeedPasswordWidgetState extends State<CreateSeedPasswordWidget> {
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.transparent,
         appBar: OnboardingAppBar(backColor: widget.primaryColor),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: formKey,
-            child: TransportTypeBuilderWidget(
-              builder: (context, isEver) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      localization.create_password,
-                      style:
-                          StylesRes.sheetHeaderTextFaktum.copyWith(color: widget.defaultTextColor),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      localization.create_password_description,
-                      style:
-                          themeStyle.styles.basicStyle.copyWith(color: widget.secondaryTextColor),
-                    ),
-                    const SizedBox(height: 32),
-                    BorderedInput(
-                      obscureText: true,
-                      height: kPasswordInputHeight,
-                      controller: passwordController,
-                      textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
-                      focusNode: passwordFocus,
-                      label: localization.your_password,
-                      cursorColor: widget.defaultTextColor,
-                      activeBorderColor: widget.primaryColor,
-                      inactiveBorderColor: widget.secondaryTextColor,
-                      onSubmitted: (_) => confirmFocus.requestFocus(),
-                      validator: (_) {
-                        if (passwordController.text.length >= 8) {
-                          return null;
-                        }
-                        return localization.password_length;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    BorderedInput(
-                      obscureText: true,
-                      height: kPasswordInputHeight,
-                      controller: confirmController,
-                      focusNode: confirmFocus,
-                      label: localization.confirm_password,
-                      textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
-                      textInputAction: TextInputAction.done,
-                      cursorColor: widget.defaultTextColor,
-                      activeBorderColor: widget.primaryColor,
-                      inactiveBorderColor: widget.secondaryTextColor,
-                      onSubmitted: (_) => _nextAction(isEver),
-                      validator: (_) {
-                        if (confirmController.text == passwordController.text) {
-                          return null;
-                        }
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: formKey,
+              child: TransportTypeBuilderWidget(
+                builder: (context, isEver) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        localization.create_password,
+                        style: StylesRes.sheetHeaderTextFaktum
+                            .copyWith(color: widget.defaultTextColor),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        localization.create_password_description,
+                        style:
+                            themeStyle.styles.basicStyle.copyWith(color: widget.secondaryTextColor),
+                      ),
+                      const SizedBox(height: 32),
+                      BorderedInput(
+                        obscureText: true,
+                        height: kPasswordInputHeight,
+                        controller: passwordController,
+                        textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
+                        focusNode: passwordFocus,
+                        label: localization.your_password,
+                        cursorColor: widget.defaultTextColor,
+                        activeBorderColor: widget.primaryColor,
+                        inactiveBorderColor: widget.secondaryTextColor,
+                        onSubmitted: (_) => confirmFocus.requestFocus(),
+                        validator: (_) {
+                          if (passwordController.text.length >= 8) {
+                            return null;
+                          }
+                          return localization.password_length;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      BorderedInput(
+                        obscureText: true,
+                        height: kPasswordInputHeight,
+                        controller: confirmController,
+                        focusNode: confirmFocus,
+                        label: localization.confirm_password,
+                        textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
+                        textInputAction: TextInputAction.done,
+                        cursorColor: widget.defaultTextColor,
+                        activeBorderColor: widget.primaryColor,
+                        inactiveBorderColor: widget.secondaryTextColor,
+                        onSubmitted: (_) => _nextAction(isEver),
+                        validator: (_) {
+                          if (confirmController.text == passwordController.text) {
+                            return null;
+                          }
 
-                        return localization.passwords_match;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    if (widget.needBiometryIfPossible) getBiometricSwitcher(),
-                    const Spacer(),
-                    PrimaryButton(
-                      text: localization.next,
-                      backgroundColor: widget.primaryColor,
-                      style: StylesRes.buttonText.copyWith(color: widget.buttonTextColor),
-                      onPressed: () => _nextAction(isEver),
-                    ),
-                  ],
-                );
-              },
+                          return localization.passwords_match;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      if (widget.needBiometryIfPossible) getBiometricSwitcher(),
+                      const Spacer(),
+                      PrimaryButton(
+                        text: localization.next,
+                        backgroundColor: widget.primaryColor,
+                        style: StylesRes.buttonText.copyWith(color: widget.buttonTextColor),
+                        onPressed: () => _nextAction(isEver),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

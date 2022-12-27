@@ -58,123 +58,126 @@ class _CreateSeedWidgetState extends State<CreateSeedWidget> {
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       appBar: OnboardingAppBar(backColor: widget.primaryColor),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              localization.save_seed_phrase,
-              style: StylesRes.sheetHeaderTextFaktum.copyWith(color: widget.defaultTextColor),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              localization.save_seed_warning,
-              style: themeStyle.styles.basicStyle.copyWith(color: widget.secondaryTextColor),
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: Stack(
-                children: [
-                  SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          color: widget.phraseBackgroundColor,
-                          padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  children: words
-                                      .getRange(0, 6)
-                                      .mapIndex((word, i) => _textPair(word, i + 1, themeStyle))
-                                      .toList(),
-                                ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  children: words
-                                      .getRange(6, 12)
-                                      .mapIndex((word, i) => _textPair(word, i + 7, themeStyle))
-                                      .toList(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        ValueListenableBuilder<bool>(
-                          valueListenable: isCopied,
-                          builder: (_, copied, __) {
-                            if (copied) {
-                              return SizedBox(
-                                height: kPrimaryButtonHeight,
-                                child: Align(
-                                  child: Text(
-                                    localization.copied_no_exclamation,
-                                    style: themeStyle.styles.basicStyle
-                                        .copyWith(color: ColorsRes.green400),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                localization.save_seed_phrase,
+                style: StylesRes.sheetHeaderTextFaktum.copyWith(color: widget.defaultTextColor),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                localization.save_seed_warning,
+                style: themeStyle.styles.basicStyle.copyWith(color: widget.secondaryTextColor),
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            color: widget.phraseBackgroundColor,
+                            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    children: words
+                                        .getRange(0, 6)
+                                        .mapIndex((word, i) => _textPair(word, i + 1, themeStyle))
+                                        .toList(),
                                   ),
                                 ),
-                              );
-                            }
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                TextPrimaryButton(
-                                  icon: Assets.images.copy.svg(color: widget.primaryColor),
-                                  fillWidth: false,
-                                  text: localization.copy_words,
-                                  style: themeStyle.styles.basicStyle
-                                      .copyWith(color: widget.primaryColor),
-                                  onPressed: () {
-                                    Clipboard.setData(ClipboardData(text: words.join(' ')));
-                                    isCopied.value = true;
-                                    Future.delayed(const Duration(seconds: 2), () {
-                                      isCopied.value = false;
-                                    });
-                                  },
+                                Expanded(
+                                  child: Column(
+                                    children: words
+                                        .getRange(6, 12)
+                                        .mapIndex((word, i) => _textPair(word, i + 7, themeStyle))
+                                        .toList(),
+                                  ),
                                 ),
                               ],
-                            );
-                          },
-                        ),
-                        // To allow scroll above buttons
-                        const SizedBox(height: kPrimaryButtonHeight * 2 + 12),
-                      ],
+                            ),
+                          ),
+                          ValueListenableBuilder<bool>(
+                            valueListenable: isCopied,
+                            builder: (_, copied, __) {
+                              if (copied) {
+                                return SizedBox(
+                                  height: kPrimaryButtonHeight,
+                                  child: Align(
+                                    child: Text(
+                                      localization.copied_no_exclamation,
+                                      style: themeStyle.styles.basicStyle
+                                          .copyWith(color: ColorsRes.green400),
+                                    ),
+                                  ),
+                                );
+                              }
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TextPrimaryButton(
+                                    icon: Assets.images.copy.svg(color: widget.primaryColor),
+                                    fillWidth: false,
+                                    text: localization.copy_words,
+                                    style: themeStyle.styles.basicStyle
+                                        .copyWith(color: widget.primaryColor),
+                                    onPressed: () {
+                                      Clipboard.setData(ClipboardData(text: words.join(' ')));
+                                      isCopied.value = true;
+                                      Future.delayed(const Duration(seconds: 2), () {
+                                        isCopied.value = false;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          // To allow scroll above buttons
+                          const SizedBox(height: kPrimaryButtonHeight * 2 + 12),
+                        ],
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Column(
-                      children: [
-                        PrimaryButton(
-                          text: localization.check_seed_phrase,
-                          style: StylesRes.buttonText.copyWith(color: widget.checkButtonTextColor),
-                          backgroundColor: widget.primaryColor,
-                          onPressed: () => widget.checkCallback(context, words),
-                        ),
-                        const SizedBox(height: 12),
-                        PrimaryButton(
-                          backgroundColor: widget.skipButtonColor,
-                          style: StylesRes.buttonText.copyWith(color: widget.primaryColor),
-                          text: localization.skip_take_risk,
-                          onPressed: () => widget.skipCallback(context, words),
-                          border: !widget.needSkipButtonBorder
-                              ? null
-                              : Border.all(color: widget.primaryColor),
-                          isTransparent: true,
-                        ),
-                      ],
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Column(
+                        children: [
+                          PrimaryButton(
+                            text: localization.check_seed_phrase,
+                            style:
+                                StylesRes.buttonText.copyWith(color: widget.checkButtonTextColor),
+                            backgroundColor: widget.primaryColor,
+                            onPressed: () => widget.checkCallback(context, words),
+                          ),
+                          const SizedBox(height: 12),
+                          PrimaryButton(
+                            backgroundColor: widget.skipButtonColor,
+                            style: StylesRes.buttonText.copyWith(color: widget.primaryColor),
+                            text: localization.skip_take_risk,
+                            onPressed: () => widget.skipCallback(context, words),
+                            border: !widget.needSkipButtonBorder
+                                ? null
+                                : Border.all(color: widget.primaryColor),
+                            isTransparent: true,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -77,46 +77,48 @@ class _CheckSeedPhraseWidgetState extends State<CheckSeedPhraseWidget> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              localization.check_seed_phrase,
-              style: themeStyle.styles.appbarStyle.copyWith(color: widget.defaultTextColor),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              localization.check_seed_phrase_correctly,
-              style: themeStyle.styles.basicStyle.copyWith(color: widget.secondaryTextColor),
-            ),
-            const SizedBox(height: 32),
-            Expanded(
-              child: BlocBuilder<CheckSeedPhraseCubit, CheckSeedPhraseCubitState>(
-                bloc: cubit,
-                builder: (context, state) => state.when(
-                  answer: (available, user, index) => _buildCheckBody(
-                    available,
-                    user,
-                    localization,
-                    currentIndex: index,
-                  ),
-                  correct: (available, user) => _buildCheckBody(
-                    available,
-                    user,
-                    localization,
-                  ),
-                  error: (available, user) => _buildCheckBody(
-                    available,
-                    user,
-                    localization,
-                    isError: true,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                localization.check_seed_phrase,
+                style: themeStyle.styles.appbarStyle.copyWith(color: widget.defaultTextColor),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                localization.check_seed_phrase_correctly,
+                style: themeStyle.styles.basicStyle.copyWith(color: widget.secondaryTextColor),
+              ),
+              const SizedBox(height: 32),
+              Expanded(
+                child: BlocBuilder<CheckSeedPhraseCubit, CheckSeedPhraseCubitState>(
+                  bloc: cubit,
+                  builder: (context, state) => state.when(
+                    answer: (available, user, index) => _buildCheckBody(
+                      available,
+                      user,
+                      localization,
+                      currentIndex: index,
+                    ),
+                    correct: (available, user) => _buildCheckBody(
+                      available,
+                      user,
+                      localization,
+                    ),
+                    error: (available, user) => _buildCheckBody(
+                      available,
+                      user,
+                      localization,
+                      isError: true,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

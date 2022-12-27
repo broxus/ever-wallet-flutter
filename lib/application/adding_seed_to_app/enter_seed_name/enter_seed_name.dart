@@ -48,39 +48,41 @@ class _EnterSeedNameWidgetState extends State<EnterSeedNameWidget> {
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.transparent,
         appBar: OnboardingAppBar(backColor: widget.primaryColor),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                localization.seed_phrase_name_title,
-                style: StylesRes.sheetHeaderTextFaktum.copyWith(color: widget.defaultTextColor),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                localization.seed_phrase_name_description,
-                style: themeStyle.styles.basicStyle.copyWith(color: widget.secondaryTextColor),
-              ),
-              const SizedBox(height: 20),
-              BorderedInput(
-                controller: nameController,
-                height: 52,
-                textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
-                label: localization.seed_name,
-                cursorColor: widget.defaultTextColor,
-                activeBorderColor: widget.primaryColor,
-                inactiveBorderColor: widget.secondaryTextColor,
-                onSubmitted: (_) => _nextAction(),
-              ),
-              const Spacer(),
-              PrimaryButton(
-                backgroundColor: widget.primaryColor,
-                style: StylesRes.buttonText.copyWith(color: widget.buttonTextColor),
-                text: localization.continue_word,
-                onPressed: _nextAction,
-              ),
-            ],
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  localization.seed_phrase_name_title,
+                  style: StylesRes.sheetHeaderTextFaktum.copyWith(color: widget.defaultTextColor),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  localization.seed_phrase_name_description,
+                  style: themeStyle.styles.basicStyle.copyWith(color: widget.secondaryTextColor),
+                ),
+                const SizedBox(height: 20),
+                BorderedInput(
+                  controller: nameController,
+                  height: 52,
+                  textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
+                  label: localization.seed_name,
+                  cursorColor: widget.defaultTextColor,
+                  activeBorderColor: widget.primaryColor,
+                  inactiveBorderColor: widget.secondaryTextColor,
+                  onSubmitted: (_) => _nextAction(),
+                ),
+                const Spacer(),
+                PrimaryButton(
+                  backgroundColor: widget.primaryColor,
+                  style: StylesRes.buttonText.copyWith(color: widget.buttonTextColor),
+                  text: localization.continue_word,
+                  onPressed: _nextAction,
+                ),
+              ],
+            ),
           ),
         ),
       ),

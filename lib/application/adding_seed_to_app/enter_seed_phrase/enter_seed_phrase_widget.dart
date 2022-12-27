@@ -96,24 +96,27 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.transparent,
         appBar: OnboardingAppBar(backColor: widget.primaryColor),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Column(
-            children: [
-              Expanded(
-                child: _buildPhrasesList(localization, themeStyle),
-              ),
-              SizedBox(
-                height:
-                    bottomPadding < kPrimaryButtonHeight ? 0 : bottomPadding - kPrimaryButtonHeight,
-              ),
-              PrimaryButton(
-                text: localization.confirm,
-                onPressed: _confirmAction,
-                style: StylesRes.buttonText.copyWith(color: widget.buttonTextColor),
-                backgroundColor: widget.primaryColor,
-              ),
-            ],
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Column(
+              children: [
+                Expanded(
+                  child: _buildPhrasesList(localization, themeStyle),
+                ),
+                SizedBox(
+                  height: bottomPadding < kPrimaryButtonHeight
+                      ? 0
+                      : bottomPadding - kPrimaryButtonHeight,
+                ),
+                PrimaryButton(
+                  text: localization.confirm,
+                  onPressed: _confirmAction,
+                  style: StylesRes.buttonText.copyWith(color: widget.buttonTextColor),
+                  backgroundColor: widget.primaryColor,
+                ),
+              ],
+            ),
           ),
         ),
       ),
