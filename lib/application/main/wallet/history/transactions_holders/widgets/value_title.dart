@@ -17,7 +17,7 @@ class ValueTitle extends StatelessWidget {
   Widget build(BuildContext context) => Text(
         '${isOutgoing ? '-' : ''}$value $currency',
         style: TextStyle(
-          color: isOutgoing ? CrystalColor.error : CrystalColor.success,
+          color: isOutgoing ? CrystalColor.fontDark : CrystalColor.success,
           fontWeight: FontWeight.w600,
         ),
       );
