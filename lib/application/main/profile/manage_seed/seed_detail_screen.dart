@@ -136,7 +136,15 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                   child: Column(
                     children: [
                       ...[seed, ...?children]
-                          .map((e) => _keyItem(themeStyle, localization, e, isSeedSelected))
+                          .map(
+                            (e) => _keyItem(
+                              themeStyle,
+                              localization,
+                              e,
+                              [seed, ...?children],
+                              isSeedSelected,
+                            ),
+                          )
                           .toList(),
                     ],
                   ),
@@ -241,6 +249,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
     ThemeStyle themeStyle,
     AppLocalizations localization,
     KeyStoreEntry key,
+    List<KeyStoreEntry>? children,
     bool isSeedSelected,
   ) {
     return StreamBuilder<Map<String, String>>(
@@ -287,6 +296,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
                         themeStyle,
                         localization,
                         key,
+                        children,
                         !(key.isMaster && isSeedSelected),
                       ),
                     ],
@@ -303,14 +313,15 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
   Widget _keyDropdown(
     ThemeStyle themeStyle,
     AppLocalizations localization,
-    KeyStoreEntry seed,
+    KeyStoreEntry key,
+    List<KeyStoreEntry>? children,
     bool allowDeleting,
   ) {
     return MenuDropdown(
       items: [
         MenuDropdownData(
           title: localization.use_this_key,
-          onTap: () => context.read<KeysRepository>().setCurrentKey(seed.publicKey),
+          onTap: () => context.read<KeysRepository>().setCurrentKey(key.publicKey),
         ),
         MenuDropdownData(
           title: localization.rename,
@@ -319,7 +330,7 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
               context,
               title: localization.enter_new_name,
               body: (_) => RenameKeyModalBody(
-                publicKey: seed.publicKey,
+                publicKey: key.publicKey,
                 type: RenameModalBodyType.key,
               ),
             );
@@ -328,11 +339,11 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
         MenuDropdownData(
           title: localization.copy_key,
           onTap: () async {
-            await Clipboard.setData(ClipboardData(text: seed.publicKey));
+            await Clipboard.setData(ClipboardData(text: key.publicKey));
             if (!mounted) return;
             showFlushbar(
               context,
-              message: context.localization.public_key_copied(seed.publicKey.ellipsePublicKey()),
+              message: context.localization.public_key_copied(key.publicKey.ellipsePublicKey()),
             );
           },
         ),
@@ -340,12 +351,17 @@ class _SeedDetailScreenState extends State<SeedDetailScreen> {
           MenuDropdownData(
             title: localization.delete_word,
             onTap: () {
-              final accounts = context.read<AccountsRepository>().accountsFor(seed.publicKey);
+              final accounts = context.read<AccountsRepository>().accountsFor(key.publicKey);
               showKeyDeleteSheet(
                 context: context,
-                key: seed,
+                key: key,
                 assets: accounts,
-              );
+              ).then((value) {
+                if ((value ?? false) && children?.length == 1 ||
+                    key.publicKey == widget.seed.publicKey) {
+                  Navigator.of(context).pop();
+                }
+              });
             },
             textStyle: themeStyle.styles.basicStyle.copyWith(
               color: themeStyle.colors.errorTextColor,
