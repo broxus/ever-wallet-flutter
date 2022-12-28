@@ -571,8 +571,9 @@ class KeysRepository {
 
   Future<void> _initialize() => _updateCurrentKey();
 
-  Future<void> _tryNamesMigration() async => _hiveSource
-      .migrateSeedsNames(Map.fromEntries(keys.map((e) => MapEntry(e.publicKey, e.name))));
+  Future<void> _tryNamesMigration() async => _hiveSource.migrateSeedsNames(
+        Map.fromEntries(keys.where((k) => k.isMaster).map((e) => MapEntry(e.publicKey, e.name))),
+      );
 }
 
 extension KeysExtension on List<KeyStoreEntry> {

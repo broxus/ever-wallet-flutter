@@ -545,21 +545,17 @@ class HiveSource {
     } catch (_) {}
   }
 
-  /// If [keyNames] and [_seedsBox] contains same publicKey, then update name inside [_seedsBox]
-  /// with the name in [keyNames].
-  /// This can happens only one time after app upgrading when there were old box with names.
+  /// Put all master names from [masterKeysNames] into [_seedsBox]
+  ///  This can happens only one time after app upgrading when there were old box with names.
   ///
   /// Function is public because names of keys were stored in keystore, not in box.
-  Future<void> migrateSeedsNames(Map<String, String> keyNames) async {
+  Future<void> migrateSeedsNames(Map<String, String> masterKeysNames) async {
     const labelsBoxName = 'public_keys_labels_v1';
     if (await Hive.boxExists(labelsBoxName)) {
       final box = await Hive.openBox<String>(labelsBoxName);
-      final seedNames = _seedsBox.toMap().cast<String, String>();
 
-      for (final publicKey in keyNames.keys) {
-        if (seedNames.containsKey(publicKey)) {
-          await _seedsBox.put(publicKey, keyNames[publicKey]!);
-        }
+      for (final publicKey in masterKeysNames.keys) {
+        await _seedsBox.put(publicKey, masterKeysNames[publicKey]!);
       }
 
       await box.deleteFromDisk();
