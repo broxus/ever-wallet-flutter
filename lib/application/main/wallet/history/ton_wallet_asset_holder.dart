@@ -49,10 +49,15 @@ class TonWalletAssetHolder extends StatelessWidget {
                 builder: (context, isEver) {
                   final ticker = isEver ? kEverTicker : kVenomTicker;
                   return WalletAssetHolder(
-                    icon: Assets.images.ever.svg(
-                      width: 36,
-                      height: 36,
-                    ),
+                    icon: isEver
+                        ? Assets.images.ever.svg(
+                            width: 36,
+                            height: 36,
+                          )
+                        : Assets.images.venom.svg(
+                            width: 36,
+                            height: 36,
+                          ),
                     balance: balance != null
                         ? '${balance.toTokens().removeZeroes().formatValue()} $ticker'
                         : '0 $ticker',
