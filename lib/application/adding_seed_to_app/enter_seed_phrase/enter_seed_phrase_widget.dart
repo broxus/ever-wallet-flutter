@@ -10,8 +10,10 @@ import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
 import 'package:ever_wallet/data/extensions.dart';
+import 'package:ever_wallet/data/repositories/transport_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:string_extensions/string_extensions.dart';
@@ -49,7 +51,8 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
   final formKey = GlobalKey<FormState>();
   final controllers = List.generate(24, (_) => TextEditingController());
   final focuses = List.generate(24, (_) => FocusNode());
-  final values = const <int>[12, 24];
+  final possibleValues = const <int>[12, 24];
+  late List<int> values;
 
   final formErrorNotifier = ValueNotifier<String?>(null);
 
@@ -60,6 +63,11 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
   @override
   void initState() {
     super.initState();
+    if (context.read<TransportRepository>().isEverTransport) {
+      values = possibleValues;
+    } else {
+      values = [possibleValues.first];
+    }
     controllers.forEach(
       (c) => c.addListener(() {
         final hasText = controllers.any((controller) => controller.text.isNotEmpty);
@@ -280,7 +288,7 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
       try {
         FocusManager.instance.primaryFocus?.unfocus();
         final phrase = controllers.take(valuesNotifier.value).map((e) => e.text).toList();
-        final mnemonicType = valuesNotifier.value == values.last
+        final mnemonicType = valuesNotifier.value == possibleValues.last
             ? const MnemonicType.legacy()
             : kDefaultMnemonicType;
 
@@ -345,7 +353,9 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
   void _checkDebugPhraseGenerating() {
     if (controllers.any((e) => e.text == 'speakfriendandenter')) {
       final key = generateKey(
-        valuesNotifier.value == values.last ? const MnemonicType.legacy() : kDefaultMnemonicType,
+        valuesNotifier.value == possibleValues.last
+            ? const MnemonicType.legacy()
+            : kDefaultMnemonicType,
       );
 
       for (var i = 0; i < controllers.take(valuesNotifier.value).length; i++) {
