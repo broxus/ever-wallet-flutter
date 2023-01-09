@@ -480,7 +480,7 @@ class HiveSource {
       ],
     );
 
-    await Hive.initFlutter();
+    final usedAdapters = [1, 2, 3, 4, 55, 56, 221, 222, 223];
 
     Hive
       ..tryRegisterAdapter(TokenContractAssetDtoAdapter())
@@ -489,10 +489,17 @@ class HiveSource {
       ..tryRegisterAdapter(AccountInteractionDtoAdapter())
       ..tryRegisterAdapter(BookmarkDtoAdapter())
       ..tryRegisterAdapter(SiteMetaDataDtoAdapter())
-      ..tryRegisterAdapter(CurrencyDtoAdapter())
       ..tryRegisterAdapter(BrowserTabAdapter())
       ..tryRegisterAdapter(SearchHistoryDtoAdapter())
       ..tryRegisterAdapter(CurrencyDtoAdapter());
+
+    for (var i = 1; i < 224; i++) {
+      if (!usedAdapters.contains(i)) {
+        Hive.ignoreTypeId<Object>(i);
+      }
+    }
+
+    await Hive.initFlutter();
 
     await Hive.openBox<String>(_keyPasswordsBoxName, encryptionCipher: HiveAesCipher(key));
     await Hive.openBox<Object?>(_userPreferencesBoxName);
