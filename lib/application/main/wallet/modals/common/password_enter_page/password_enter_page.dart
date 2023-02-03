@@ -8,6 +8,7 @@ import 'package:ever_wallet/application/common/widgets/unfocusing_gesture_detect
 import 'package:ever_wallet/application/main/common/input_password_field/password_input_form_bloc.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
+import 'package:ever_wallet/data/sources/remote/transport_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -40,6 +41,7 @@ class _NewSelectWalletTypePageState extends State<PasswordEnterPage> {
     passwordInputFormBloc = PasswordInputFormBloc(
       context.read<KeysRepository>(),
       widget.publicKey,
+      context.read<TransportSource>(),
     );
     controller.addListener(
       () => passwordInputFormBloc.add(PasswordInputFormEvent.onPasswordChange(controller.text)),

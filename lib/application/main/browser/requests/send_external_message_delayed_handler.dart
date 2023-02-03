@@ -65,11 +65,14 @@ Future<Map<String, dynamic>> sendExternalMessageDelayedHandler({
     await unsignedMessage.refreshTimeout();
 
     final hash = unsignedMessage.hash;
+    final transport =
+        genericContractsRepository.genericContractByAddress(repackedRecipient).transport;
 
     final signature = await keysRepository.sign(
       data: hash,
       publicKey: input.publicKey,
       password: password,
+      signatureId: await transport.getSignatureId(),
     );
 
     final signedMessage = await unsignedMessage.sign(signature);

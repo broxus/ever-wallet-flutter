@@ -5,6 +5,7 @@ import 'package:ever_wallet/application/main/browser/requests/models/sign_data_i
 import 'package:ever_wallet/data/repositories/approvals_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/permissions_repository.dart';
+import 'package:ever_wallet/data/sources/remote/transport_source.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -13,6 +14,7 @@ Future<Map<String, dynamic>> signDataHandler({
   required List<dynamic> args,
   required PermissionsRepository permissionsRepository,
   required ApprovalsRepository approvalsRepository,
+  required TransportSource transportSource,
   required KeysRepository keysRepository,
 }) async {
   try {
@@ -38,11 +40,13 @@ Future<Map<String, dynamic>> signDataHandler({
       publicKey: input.publicKey,
       data: input.data,
     );
+    final signatureId = await transportSource.transport.getSignatureId();
 
     final signedData = await keysRepository.signData(
       data: input.data,
       publicKey: input.publicKey,
       password: password,
+      signatureId: signatureId,
     );
 
     final jsonOutput = signedData.toJson();

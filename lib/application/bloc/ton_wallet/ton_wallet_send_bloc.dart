@@ -27,11 +27,14 @@ class TonWalletSendBloc extends Bloc<TonWalletSendEvent, TonWalletSendState> {
           await event.unsignedMessage.message.refreshTimeout();
 
           final hash = event.unsignedMessage.message.hash;
+          final transport =
+              (await _tonWalletsRepository.getTonWalletStream(_address).first).transport;
 
           final signature = await _keysRepository.sign(
             data: hash,
             publicKey: event.publicKey,
             password: event.password,
+            signatureId: await transport.getSignatureId(),
           );
 
           final signedMessage = await event.unsignedMessage.message.sign(signature);

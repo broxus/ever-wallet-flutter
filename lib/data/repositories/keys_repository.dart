@@ -433,6 +433,7 @@ class KeysRepository {
     required String data,
     required String publicKey,
     required String password,
+    required String? signatureId,
   }) async {
     final key = keys.firstWhere((e) => e.publicKey == publicKey);
 
@@ -441,6 +442,7 @@ class KeysRepository {
     final signature = await _keystore.sign(
       data: data,
       input: input,
+      signatureId: signatureId,
     );
 
     await _savePassword(
@@ -456,6 +458,7 @@ class KeysRepository {
     required String data,
     required String publicKey,
     required String password,
+    required String? signatureId,
   }) async {
     final key = keys.firstWhere((e) => e.publicKey == publicKey);
 
@@ -464,6 +467,7 @@ class KeysRepository {
     final signedData = await _keystore.signData(
       data: data,
       input: input,
+      signatureId: signatureId,
     );
 
     await _savePassword(
@@ -479,6 +483,7 @@ class KeysRepository {
     required String data,
     required String publicKey,
     required String password,
+    required String? signatureId,
   }) async {
     final key = keys.firstWhere((e) => e.publicKey == publicKey);
 
@@ -487,6 +492,7 @@ class KeysRepository {
     final signedData = await _keystore.signDataRaw(
       data: data,
       input: input,
+      signatureId: signatureId,
     );
 
     await _savePassword(
@@ -501,13 +507,14 @@ class KeysRepository {
   Future<bool> checkKeyPassword({
     required String publicKey,
     required String password,
+    required String? signatureId,
   }) async {
     final key = keys.firstWhere((e) => e.publicKey == publicKey);
 
     final input = key.signInput(password);
 
     try {
-      await _keystore.sign(data: fakeSignature(), input: input);
+      await _keystore.sign(data: fakeSignature(), input: input, signatureId: signatureId);
 
       return true;
     } catch (_) {

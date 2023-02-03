@@ -6,6 +6,7 @@ import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
+import 'package:ever_wallet/data/sources/remote/transport_source.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -159,6 +160,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
     final isCorrect = await context.read<KeysRepository>().checkKeyPassword(
           publicKey: widget.publicKey,
           password: oldPassword,
+          signatureId: await context.read<TransportSource>().transport.getSignatureId(),
         );
 
     if (isCorrect) {

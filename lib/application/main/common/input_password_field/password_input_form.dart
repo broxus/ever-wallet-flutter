@@ -5,6 +5,7 @@ import 'package:ever_wallet/application/main/common/input_password_field/passwor
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
+import 'package:ever_wallet/data/sources/remote/transport_source.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,6 +40,7 @@ class _PasswordInputFormState extends State<PasswordInputForm> {
     passwordInputFormBloc = PasswordInputFormBloc(
       context.read<KeysRepository>(),
       widget.publicKey,
+      context.read<TransportSource>(),
     );
     controller.addListener(
       () => passwordInputFormBloc.add(PasswordInputFormEvent.onPasswordChange(controller.text)),

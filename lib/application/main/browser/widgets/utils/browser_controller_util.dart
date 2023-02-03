@@ -45,6 +45,7 @@ import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/permissions_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:ever_wallet/data/repositories/transport_repository.dart';
+import 'package:ever_wallet/data/sources/remote/transport_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -363,6 +364,7 @@ void browserControllerJavaScriptBind(
       permissionsRepository: context.read<PermissionsRepository>(),
       approvalsRepository: context.read<ApprovalsRepository>(),
       keysRepository: context.read<KeysRepository>(),
+      transportSource: context.read<TransportSource>(),
     ),
   );
 
@@ -374,6 +376,7 @@ void browserControllerJavaScriptBind(
       permissionsRepository: context.read<PermissionsRepository>(),
       approvalsRepository: context.read<ApprovalsRepository>(),
       keysRepository: context.read<KeysRepository>(),
+      transportSource: context.read<TransportSource>(),
     ),
   );
 

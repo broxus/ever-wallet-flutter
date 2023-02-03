@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:ever_wallet/application/bloc/utils.dart';
 import 'package:ever_wallet/application/common/form/ew_field_state.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
+import 'package:ever_wallet/data/sources/remote/transport_source.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'password_input_form_bloc.freezed.dart';
@@ -9,10 +10,12 @@ part 'password_input_form_bloc.freezed.dart';
 class PasswordInputFormBloc extends Bloc<PasswordInputFormEvent, PasswordInputFormState> {
   final KeysRepository _keysRepository;
   final String _publicKey;
+  final TransportSource _transportSource;
 
   PasswordInputFormBloc(
     this._keysRepository,
     this._publicKey,
+    this._transportSource,
   ) : super(PasswordInputFormState.empty()) {
     on<_OnPasswordChange>(
       (event, emit) async {
@@ -24,6 +27,7 @@ class PasswordInputFormBloc extends Bloc<PasswordInputFormEvent, PasswordInputFo
         final isCorrect = await _keysRepository.checkKeyPassword(
           publicKey: _publicKey,
           password: event.value,
+          signatureId: await _transportSource.transport.getSignatureId(),
         );
 
         if (isCorrect) {

@@ -89,7 +89,7 @@ class GenericContractsRepository {
     required SignedMessage signedMessage,
     required TransactionExecutionOptions options,
   }) async {
-    final genericContract = _genericContract(address);
+    final genericContract = genericContractByAddress(address);
 
     final transaction = await genericContract.executeTransactionLocally(
       signedMessage: signedMessage,
@@ -103,7 +103,7 @@ class GenericContractsRepository {
     required String address,
     required SignedMessage signedMessage,
   }) async {
-    final genericContract = _genericContract(address);
+    final genericContract = genericContractByAddress(address);
 
     final transport = genericContract.transport;
 
@@ -313,6 +313,6 @@ class GenericContractsRepository {
     }
   }
 
-  GenericContract _genericContract(String address) =>
+  GenericContract genericContractByAddress(String address) =>
       _genericContractsSubject.value.firstWhere((e) => e.address == address);
 }

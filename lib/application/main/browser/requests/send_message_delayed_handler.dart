@@ -81,11 +81,13 @@ Future<Map<String, dynamic>> sendMessageDelayedHandler({
     await unsignedMessage.message.refreshTimeout();
 
     final hash = unsignedMessage.message.hash;
+    final transport = (await tonWalletsRepository.getTonWalletStream(input.sender).first).transport;
 
     final signature = await keysRepository.sign(
       data: hash,
       publicKey: publicKey,
       password: password,
+      signatureId: await transport.getSignatureId(),
     );
 
     final signedMessage = await unsignedMessage.message.sign(signature);
