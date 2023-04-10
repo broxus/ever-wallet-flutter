@@ -4,6 +4,7 @@ import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart
 import 'package:ever_wallet/data/models/browser_tabs_dto.dart';
 import 'package:ever_wallet/data/repositories/sites_meta_data_repository.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
+import 'package:ever_wallet/logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -76,9 +77,15 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
   Future<void> updateCurrentTab(String url) async {
     if (activeTabIndex != -1 && _activeTab.url == url) return;
 
-    final meta = await metaDataRepository.getSiteMetaData(url);
-    final image = meta.image;
-    final title = meta.title;
+    String? title;
+    String? image;
+    try {
+      final meta = await metaDataRepository.getSiteMetaData(url);
+      image = meta.image;
+      title = meta.title;
+    } catch (e, t) {
+      logger.e('Failed to load tab MetaData', e, t);
+    }
     final tab = BrowserTab(url: url, image: image, title: title, lastScrollPosition: 0);
     _tabsDto.updateCurrentTab(tab);
     _saveTabs();
