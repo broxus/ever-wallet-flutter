@@ -146,7 +146,7 @@ class AccountsRepository {
   }) =>
       _accountsStorage.addAccount(
         AccountToAdd(
-          name: name ?? walletType.name,
+          name: name ?? walletType.name(_transportSource.isEverTransport),
           publicKey: publicKey,
           contract: walletType,
           workchain: workchain,
@@ -371,6 +371,8 @@ extension on List<AssetsList> {
     final available = (isEver ? kEverAvailableWallets : kVenomAvailableWallets)
         .where((e) => !added.contains(e))
         .toList();
+
+    available.sort((a, b) => a.toInt().compareTo(b.toInt()));
 
     return Tuple2(
       added,

@@ -33,6 +33,8 @@ import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 import 'package:validators/validators.dart';
 
+final addressFilter = FilteringTextInputFormatter.deny(RegExp(r'\s'));
+
 class PrepareTransferPage extends StatefulWidget {
   final BuildContext modalContext;
   final String address;
@@ -266,9 +268,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
           ],
         ),
         onSubmitted: (value) => commentFocusNode.requestFocus(),
-        inputFormatters: [
-          FilteringTextInputFormatter.deny(RegExp(r'\s')),
-        ],
+        inputFormatters: [addressFilter],
         validator: (value) {
           if (value == null || value.isEmpty) {
             return null;
@@ -285,9 +285,14 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         onPressed: () async {
           final data = await Clipboard.getData(Clipboard.kTextPlain);
 
-          destinationController.text = data?.text ?? '';
-          destinationController.selection =
-              TextSelection.fromPosition(TextPosition(offset: destinationController.text.length));
+          final text = data?.text ?? '';
+          destinationController.value = addressFilter.formatEditUpdate(
+            destinationController.value,
+            TextEditingValue(
+              text: text,
+              selection: TextSelection.fromPosition(TextPosition(offset: text.length)),
+            ),
+          );
 
           if (!mounted) return;
 

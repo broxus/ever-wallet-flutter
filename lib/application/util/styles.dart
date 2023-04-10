@@ -106,6 +106,7 @@ class StylesRes {
     fontSize: 24,
     height: 1.16,
     fontWeight: FontWeight.w600,
+    fontFamily: FontFamily.faktum,
   );
 
   /// Style for headers under appbar
@@ -131,6 +132,20 @@ class StylesRes {
     fontFamily: FontFamily.pt,
     letterSpacing: 0.5,
   );
+  static const medium12 = TextStyle(
+    fontSize: 12,
+    height: 1.33,
+    fontWeight: FontWeight.w500,
+    fontFamily: FontFamily.pt,
+    letterSpacing: 0.2,
+  );
+  static const medium14 = TextStyle(
+    fontSize: 14,
+    height: 1.43,
+    fontWeight: FontWeight.w500,
+    fontFamily: FontFamily.pt,
+    letterSpacing: 0.1,
+  );
   static const medium14Caption = TextStyle(
     fontSize: 14,
     height: 1.43,
@@ -143,6 +158,20 @@ class StylesRes {
     height: 1.375,
     fontWeight: FontWeight.w500,
     fontFamily: FontFamily.pt,
+  );
+  static const medium18 = TextStyle(
+    fontSize: 18,
+    height: 1.33,
+    fontWeight: FontWeight.w500,
+    fontFamily: FontFamily.pt,
+    letterSpacing: 0.3,
+  );
+  static const medium24 = TextStyle(
+    fontSize: 24,
+    height: 1.16,
+    fontWeight: FontWeight.w500,
+    fontFamily: FontFamily.pt,
+    letterSpacing: 0.25,
   );
 
   /// Style for header in bottom sheet

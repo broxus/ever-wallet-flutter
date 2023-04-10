@@ -38,6 +38,6 @@ const kEverAvailableWallets = [
 ];
 
 const kVenomAvailableWallets = [
-  WalletType.walletV3(),
-  WalletType.multisig(MultisigType.bridgeMultisigWallet),
+  WalletType.everWallet(),
+  WalletType.multisig(MultisigType.multisig2_1),
 ];

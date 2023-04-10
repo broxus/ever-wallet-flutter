@@ -32,6 +32,8 @@ import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 import 'package:validators/validators.dart';
 
+final addressFilter = FilteringTextInputFormatter.deny(RegExp(r'\s'));
+
 class PrepareTokenTransferPage extends StatefulWidget {
   final BuildContext modalContext;
   final String owner;
@@ -309,9 +311,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
           ],
         ),
         onSubmitted: (value) => commentFocusNode.requestFocus(),
-        inputFormatters: [
-          FilteringTextInputFormatter.deny(RegExp(r'\s')),
-        ],
+        inputFormatters: [addressFilter],
         validator: (value) {
           if (value == null || value.isEmpty) {
             return null;
@@ -327,10 +327,14 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
   Widget pasteButton() => SuffixIconButton(
         onPressed: () async {
           final data = await Clipboard.getData(Clipboard.kTextPlain);
-
-          destinationController.text = data?.text ?? '';
-          destinationController.selection =
-              TextSelection.fromPosition(TextPosition(offset: destinationController.text.length));
+          final text = data?.text ?? '';
+          destinationController.value = addressFilter.formatEditUpdate(
+            destinationController.value,
+            TextEditingValue(
+              text: text,
+              selection: TextSelection.fromPosition(TextPosition(offset: text.length)),
+            ),
+          );
 
           if (!mounted) return;
 

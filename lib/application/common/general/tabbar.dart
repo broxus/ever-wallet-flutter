@@ -10,6 +10,9 @@ class EWTabBar<T> extends StatelessWidget {
   final T selectedValue;
 
   final Color selectedColor;
+  final Color unselectedColor;
+
+  final bool expanded;
 
   const EWTabBar({
     required this.values,
@@ -17,7 +20,9 @@ class EWTabBar<T> extends StatelessWidget {
     required this.selectedValue,
     required this.onChanged,
     required this.selectedColor,
+    this.expanded = false,
     super.key,
+    this.unselectedColor = Colors.transparent,
   });
 
   @override
@@ -25,23 +30,27 @@ class EWTabBar<T> extends StatelessWidget {
     return Row(
       children: values
           .map(
-            (v) => Container(
-              height: 43,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: v == selectedValue ? selectedColor : Colors.transparent,
-                  ),
-                ),
-              ),
-              child: PushStateScaleWidget(
-                onPressed: () => onChanged(v),
-                child: builder(context, v, selectedValue == v),
-              ),
-            ),
+            (v) => expanded ? Expanded(child: _item(context, v)) : _item(context, v),
           )
           .toList(),
+    );
+  }
+
+  Widget _item(BuildContext context, T v) {
+    return Container(
+      height: 43,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: v == selectedValue ? selectedColor : unselectedColor,
+          ),
+        ),
+      ),
+      child: PushStateScaleWidget(
+        onPressed: () => onChanged(v),
+        child: builder(context, v, selectedValue == v),
+      ),
     );
   }
 }

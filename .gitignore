@@ -62,3 +62,5 @@ android/fastlane/metadata
 # Node
 node_modules
 
+
+.fvm/

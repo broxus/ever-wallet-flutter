@@ -16,6 +16,7 @@ import 'package:ever_wallet/data/repositories/locale_repository.dart';
 import 'package:ever_wallet/data/repositories/permissions_repository.dart';
 import 'package:ever_wallet/data/repositories/search_history_repository.dart';
 import 'package:ever_wallet/data/repositories/sites_meta_data_repository.dart';
+import 'package:ever_wallet/data/repositories/stever_repository.dart';
 import 'package:ever_wallet/data/repositories/token_currencies_repository.dart';
 import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_assets_repository.dart';
@@ -30,6 +31,7 @@ import 'package:ever_wallet/data/sources/remote/http_source.dart';
 import 'package:ever_wallet/data/sources/remote/transport_source.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -78,7 +80,9 @@ class ApplicationInjection extends StatelessWidget {
                   ],
                   builder: (context, child) => biometryRepositoryProvider(
                     child: keysRepositoryProvider(
-                      child: this.child,
+                      child: stEverRepositoryProvider(
+                        child: this.child,
+                      ),
                     ),
                   ),
                 ),
@@ -337,6 +341,19 @@ class ApplicationInjection extends StatelessWidget {
         ),
         dispose: (context, value) => value.dispose(),
         child: child,
+      );
+
+  Widget stEverRepositoryProvider({
+    required Widget child,
+  }) =>
+      asyncValueProvider<StEverRepository>(
+        child: child,
+        create: (context) => StEverRepository.create(
+          contractsRepository: context.read<GenericContractsRepository>(),
+          transportSource: context.read<TransportSource>(),
+          tonWalletsRepository: context.read<TonWalletsRepository>(),
+          abiLoader: (path) => rootBundle.loadString(path),
+        ),
       );
 
   Widget asyncValueProvider<T>({

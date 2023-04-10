@@ -451,5 +451,41 @@
   "network_error": "Network error",
   "bookmarks": "Bookmarks",
   "bookmarks_placeholder": "Your bookmarks will appear here",
-  "popular_resources": "Popular Resources"
+  "popular_resources": "Popular Resources",
+  "stake_word": "Stake",
+  "unstake_word": "Unstake",
+  "unstake_amount": "Unstake amount",
+  "stake_earn_promo": "Earn up to 12% returns on assets you can move anytime",
+  "how_staking_works": "How liquid staking works",
+  "stake_ever_title": "Stake EVER",
+  "stake_ever_subtitle": "Select the amount of EVER you want to stake in liquid staking.",
+  "receive_stever_title": "Receive stEVER",
+  "receive_stever_subtitle": "Receive the stEVER token in return, the amount is determined by the current exchange rate in the pool.",
+  "earn_on_prices_title": "Earn on price increases",
+  "earn_on_prices_subtitle": "The price of stEVER is constantly changing, but the APY is a constant 12%",
+  "use_stever_title": "Use stEVER to earn extra money",
+  "use_stever_subtitle": "With stEVER you can earn more from staking and also participate in DAO voting.",
+  "simple_staking_title": "Simple Liquid Staking",
+  "stake_ever_recieve_stever": "Stake EVER, receive stEVER.",
+  "how_it_works": "How it works",
+  "staking_progress": "Staking in progress",
+  "unstaking_progress": "Unstaking in progress",
+  "stever_apper_in_minutes": "stEVER will appear in your account within a couple of minutes",
+  "stever_return_in_minutes": "stEVER will be returned in your account within a couple of minutes",
+  "withdraw_36_hours_note": "Your tokens will be withdrawn from staking within 36 hours, once the staking round is complete.",
+  "withdraw_36_hours_progress": "EVER will appear in your account within 36 hours",
+  "cancel_unstaking": "Cancel unstaking",
+  "unstaking_cancelled": "Unstaking has been cancelled",
+  "cancel_unstaking_note": "You can cancel unstaking, then stEVER will be returned to your account",
+  "balance_with_amount": "Balance: {amount}",
+  "@balance_with_amount": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "exchange_rate": "Exchange rate",
+  "attached_amount": "Attached amount",
+  "current_apy": "Current APY",
+  "status_word": "Status",
+  "new_word": "New"
 }

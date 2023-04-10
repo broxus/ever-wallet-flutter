@@ -16,6 +16,7 @@ Future<T?> showEWBottomSheet<T>(
   bool dismissible = true,
   bool wrapIntoAnimatedSize = true,
   bool avoidBottomInsets = true,
+  bool openFullScreen = false,
   Color barrierColor = ColorsRes.modalBarrier,
 }) {
   return showCustomModalBottomSheet<T>(
@@ -31,6 +32,19 @@ Future<T?> showEWBottomSheet<T>(
     ),
     builder: (context) {
       final themeStyle = context.themeStyle;
+      final bodyWidget = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          if (title != null)
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16) +
+                  const EdgeInsets.only(top: 24, right: 16),
+              child: Text(title, style: themeStyle.styles.sheetHeaderStyle),
+            ),
+          Flexible(child: Padding(padding: padding, child: body(context))),
+        ],
+      );
 
       return Material(
         color: themeStyle.colors.secondaryBackgroundColor,
@@ -40,19 +54,7 @@ Future<T?> showEWBottomSheet<T>(
             padding: avoidBottomInsets ? MediaQuery.of(context).viewInsets : EdgeInsets.zero,
             child: Stack(
               children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    if (title != null)
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16) +
-                            const EdgeInsets.only(top: 24, right: 16),
-                        child: Text(title, style: themeStyle.styles.sheetHeaderStyle),
-                      ),
-                    Flexible(child: Padding(padding: padding, child: body(context))),
-                  ],
-                ),
+                if (openFullScreen) Positioned.fill(child: bodyWidget) else bodyWidget,
                 if (needCloseButton)
                   Positioned(
                     top: 0,

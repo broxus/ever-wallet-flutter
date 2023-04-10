@@ -1,10 +1,10 @@
-import 'package:ever_wallet/application/adding_seed_to_app/enter_seed_phrase/widgets/tabbar.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/general/button/text_button.dart';
 import 'package:ever_wallet/application/common/general/field/seed_phrase_input.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
+import 'package:ever_wallet/application/common/general/tabbar.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';

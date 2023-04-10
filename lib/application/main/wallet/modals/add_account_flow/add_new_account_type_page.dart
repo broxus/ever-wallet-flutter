@@ -149,22 +149,26 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
           onChanged: !added.contains(list[index]) ? (value) => optionNotifier.value = value : null,
           activeColor: CrystalColor.accent,
           title: Text(
-            '${list[index].name}${list[index] == getDefaultWalletType(isEver) ? ' (default)' : ""}',
+            '${list[index].name(isEver)}${list[index] == getDefaultWalletType(isEver) ? ' (default)' : ""}',
           ),
         ),
       );
 
-  Widget submitButton() => ValueListenableBuilder<WalletType?>(
-        valueListenable: optionNotifier,
-        builder: (context, value, child) => PrimaryElevatedButton(
-          onPressed: value != null ? () => onPressed(value) : null,
-          text: context.localization.confirm,
-        ),
+  Widget submitButton() => TransportTypeBuilderWidget(
+        builder: (context, isEver) {
+          return ValueListenableBuilder<WalletType?>(
+            valueListenable: optionNotifier,
+            builder: (context, value, child) => PrimaryElevatedButton(
+              onPressed: value != null ? () => onPressed(value, isEver) : null,
+              text: context.localization.confirm,
+            ),
+          );
+        },
       );
 
-  Future<void> onPressed(WalletType value) async {
+  Future<void> onPressed(WalletType value, bool isEver) async {
     await context.read<AccountsRepository>().addAccount(
-          name: widget.name ?? value.name,
+          name: widget.name ?? value.name(isEver),
           publicKey: widget.publicKey,
           walletType: value,
           workchain: kDefaultWorkchain,

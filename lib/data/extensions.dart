@@ -34,31 +34,31 @@ extension IntX on int {
 extension WalletTypeX on WalletType {
   int toInt() => when(
         everWallet: () => 0,
-        walletV3: () => 1,
+        walletV3: () => 3,
         multisig: (multisigType) {
           switch (multisigType) {
-            case MultisigType.safeMultisigWallet:
-              return 2;
-            case MultisigType.safeMultisigWallet24h:
-              return 3;
-            case MultisigType.setcodeMultisigWallet:
-              return 4;
-            case MultisigType.setcodeMultisigWallet24h:
-              return 5;
-            case MultisigType.bridgeMultisigWallet:
-              return 6;
-            case MultisigType.surfWallet:
-              return 7;
-            case MultisigType.multisig2:
-              return 8;
             case MultisigType.multisig2_1:
+              return 1;
+            case MultisigType.surfWallet:
+              return 2;
+            case MultisigType.safeMultisigWallet:
+              return 4;
+            case MultisigType.safeMultisigWallet24h:
+              return 5;
+            case MultisigType.setcodeMultisigWallet:
+              return 6;
+            case MultisigType.setcodeMultisigWallet24h:
+              return 7;
+            case MultisigType.bridgeMultisigWallet:
+              return 8;
+            case MultisigType.multisig2:
               return 9;
           }
         },
         highloadWalletV2: () => 10,
       );
 
-  String get name => when(
+  String name(bool isEver) => when(
         multisig: (multisigType) {
           switch (multisigType) {
             case MultisigType.safeMultisigWallet:
@@ -70,17 +70,17 @@ extension WalletTypeX on WalletType {
             case MultisigType.setcodeMultisigWallet24h:
               return 'SetcodeMultisig24';
             case MultisigType.bridgeMultisigWallet:
-              return 'BridgeMultisig';
+              return isEver ? 'BridgeMultisig' : 'Legacy Multisignature';
             case MultisigType.surfWallet:
               return 'Surf';
             case MultisigType.multisig2:
               return 'Multisig2';
             case MultisigType.multisig2_1:
-              return 'Multisig2.1';
+              return isEver ? 'Multisig2.1' : 'Multisignature';
           }
         },
-        everWallet: () => 'EVER Wallet',
-        walletV3: () => 'WalletV3',
+        everWallet: () => isEver ? 'EVER Wallet' : 'Default',
+        walletV3: () => isEver ? 'WalletV3' : 'Legacy',
         highloadWalletV2: () => 'HighloadWalletV2',
       );
 

@@ -3,6 +3,7 @@ import 'package:ever_wallet/application/bloc/utils.dart';
 import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
+import 'package:ever_wallet/logger.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
@@ -55,7 +56,8 @@ class TonWalletPrepareTransferBloc
               fees: fees,
             ),
           );
-        } catch (err) {
+        } catch (err, t) {
+          logger.e('Sending EVER', err, t);
           emit(TonWalletPrepareTransferState.error(err.toString()));
         }
       },

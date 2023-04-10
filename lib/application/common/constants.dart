@@ -4,7 +4,7 @@ final kSeedSplitRegExp = RegExp(r'[ |;|,|:|\n|.]');
 
 /// This wallet types depends on kEverAvailableWallets and kVenomAvailableWallets
 const kDefaultEverWalletType = WalletType.everWallet();
-const kDefaultVenomWalletType = WalletType.walletV3();
+const kDefaultVenomWalletType = WalletType.everWallet();
 
 WalletType getDefaultWalletType(bool isEver) =>
     isEver ? kDefaultEverWalletType : kDefaultVenomWalletType;
@@ -19,6 +19,7 @@ const kTonDecimals = 9;
 const kNonBreakingHyphen = '\u2011';
 
 const kEverTicker = 'EVER';
+const kStEverTicker = 'stEVER';
 const kVenomTicker = 'VENOM';
 
 const kEverNetworkName = 'Everscale';

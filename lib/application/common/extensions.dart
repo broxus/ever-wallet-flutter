@@ -40,6 +40,19 @@ extension Ellipse on String {
 }
 
 extension TokensConvert on String {
+  String toTokensFull([int decimals = kTonDecimals]) {
+    return toTokens(decimals).removeZeroes().formatValue();
+  }
+
+  /// Convert [this] balance of tokens to $ equivalent with [price] for 1 token
+  String balanceAsPrice(String price, [int dotFixedLength = 4]) {
+    return (double.parse(toTokens()) * double.parse(price))
+        .truncateToDecimalPlaces(4)
+        .toStringAsFixed(dotFixedLength)
+        .removeZeroes()
+        .formatValue();
+  }
+
   String toTokens([int decimals = kTonDecimals]) {
     final radix = BigInt.from(pow(10, decimals));
 

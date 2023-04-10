@@ -190,6 +190,17 @@ class TokenWalletsRepository {
         _tokenWalletsSubject.add(subscriptions);
       });
 
+  /// Create subscription to token if it's absent
+  Future<void> updateSubscriptionIfAbsent({
+    required String owner,
+    required String rootTokenContract,
+  }) async {
+    final tuple = Tuple2(owner, rootTokenContract);
+    if (_tokenWalletsSubject.value[tuple] == null) {
+      return updateSubscription(owner: owner, rootTokenContract: rootTokenContract);
+    }
+  }
+
   Future<void> dispose() async {
     _pollingTimer.cancel();
 
@@ -236,9 +247,11 @@ class TokenWalletsRepository {
           .whereNotNull()
           .expand((e) => e);
 
-      final tokenWalletsForUnsubscription = subscriptions.keys.where(
-        (e) => !tokenWallets.any((el) => el == e),
-      ).toList();
+      final tokenWalletsForUnsubscription = subscriptions.keys
+          .where(
+            (e) => !tokenWallets.any((el) => el == e),
+          )
+          .toList();
 
       for (final tuple in tokenWalletsForUnsubscription) {
         subscriptions.remove(tuple)!.future.then((v) => v.dispose()).ignore();
@@ -249,9 +262,11 @@ class TokenWalletsRepository {
         }
       }
 
-      final tokenWalletsForSubscription = tokenWallets.where(
-        (e) => !subscriptions.keys.any((el) => el == e),
-      ).toList();
+      final tokenWalletsForSubscription = tokenWallets
+          .where(
+            (e) => !subscriptions.keys.any((el) => el == e),
+          )
+          .toList();
 
       for (final e in tokenWalletsForSubscription) {
         final completer = _subscribe(

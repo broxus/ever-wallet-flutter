@@ -4,6 +4,7 @@ import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
 import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
+import 'package:ever_wallet/logger.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
@@ -16,11 +17,15 @@ class TokenWalletPrepareTransferBloc
   final String _owner;
   final String _rootTokenContract;
 
+  /// Amount of EVERS we want to attach to transaction (in nano-tokens)
+  final String? _attachedAmount;
+
   TokenWalletPrepareTransferBloc(
     this._tokenWalletsRepository,
     this._tonWalletsRepository,
     this._owner,
     this._rootTokenContract,
+    this._attachedAmount,
   ) : super(const TokenWalletPrepareTransferState.initial()) {
     on<_PrepareTransfer>(
       (event, emit) async {
@@ -38,13 +43,14 @@ class TokenWalletPrepareTransferBloc
             payload: event.payload,
           );
 
-          final amountValue = int.parse(internalMessage.amount);
+          final amountValue =
+              BigInt.parse(internalMessage.amount) + BigInt.parse(_attachedAmount ?? '0');
 
           final unsignedMessage = await _tonWalletsRepository.prepareTransfer(
             address: _owner,
             publicKey: event.publicKey,
             destination: internalMessage.destination,
-            amount: internalMessage.amount,
+            amount: amountValue.toString(),
             body: internalMessage.body,
             bounce: kMessageBounce,
           );
@@ -53,11 +59,11 @@ class TokenWalletPrepareTransferBloc
             address: _owner,
             unsignedMessageWithAdditionalInfo: unsignedMessage,
           );
-          final feesValue = int.parse(fees);
+          final feesValue = BigInt.parse(fees);
 
           final balance =
               await _tonWalletsRepository.contractState(_owner).then((value) => value.balance);
-          final balanceValue = int.parse(balance);
+          final balanceValue = BigInt.parse(balance);
 
           final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);
 
@@ -69,7 +75,8 @@ class TokenWalletPrepareTransferBloc
               fees: fees,
             ),
           );
-        } catch (err) {
+        } catch (err, t) {
+          logger.e('Sending TOKEN', err, t);
           emit(TokenWalletPrepareTransferState.error(err.toString()));
         }
       },

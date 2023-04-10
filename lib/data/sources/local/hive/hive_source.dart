@@ -48,6 +48,7 @@ class HiveSource {
   final _browserNeedKey = 'browser_need_key';
   final _browserTabsKey = 'browser_tabs_key';
   final _browserTabsLastIndexKey = 'browser_tabs_last_index_key';
+  final _wasStEverOpenedKey = 'was_stever_opened_key';
   final _lastSelectedSeedsKey = 'last_selected_seeds_key';
 
   HiveSource._();
@@ -428,6 +429,10 @@ class HiveSource {
   bool get getWhyNeedBrowser => _preferencesBox.get(_browserNeedKey) as bool? ?? false;
 
   Future<void> saveWhyNeedBrowser() => _preferencesBox.put(_browserNeedKey, true);
+
+  bool get wasStEverOpened => _preferencesBox.get(_wasStEverOpenedKey) as bool? ?? false;
+
+  Future<void> saveWasStEverOpened() => _preferencesBox.put(_wasStEverOpenedKey, true);
 
   List<BrowserTab> get browserTabs =>
       (_browserTabsBox.get(_browserTabsKey) as List<dynamic>?)?.cast<BrowserTab>() ??

@@ -29,20 +29,23 @@ import 'package:synchronized/synchronized.dart';
 import 'package:tuple/tuple.dart';
 
 /// List of addressees that are used for subscription by address
-const _zeroStateAddresses = <String, List<String>>{
-  'mainnet': [
-    '-1:7777777777777777777777777777777777777777777777777777777777777777',
-    '-1:8888888888888888888888888888888888888888888888888888888888888888',
-    '-1:9999999999999999999999999999999999999999999999999999999999999999',
-  ],
-  'testnet': [
-    '-1:7777777777777777777777777777777777777777777777777777777777777777',
-  ],
-  'fld': [
-    '-1:7777777777777777777777777777777777777777777777777777777777777777',
-    '-1:8888888888888888888888888888888888888888888888888888888888888888',
-    '-1:9999999999999999999999999999999999999999999999999999999999999999',
-  ],
+const _zeroStateAddresses = <String>{
+  '-1:0000000000000000000000000000000000000000000000000000000000000000',
+  '-1:1111111111111111111111111111111111111111111111111111111111111111',
+  '-1:2222222222222222222222222222222222222222222222222222222222222222',
+  '-1:3333333333333333333333333333333333333333333333333333333333333333',
+  '-1:4444444444444444444444444444444444444444444444444444444444444444',
+  '-1:5555555555555555555555555555555555555555555555555555555555555555',
+  '-1:6666666666666666666666666666666666666666666666666666666666666666',
+  '-1:7777777777777777777777777777777777777777777777777777777777777777',
+  '-1:8888888888888888888888888888888888888888888888888888888888888888',
+  '-1:9999999999999999999999999999999999999999999999999999999999999999',
+  '-1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  '-1:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+  '-1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+  '-1:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
+  '-1:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+  '-1:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
 };
 
 class TonWalletsRepository {
@@ -640,7 +643,7 @@ class TonWalletsRepository {
       }
     }
     TonWallet tonWallet;
-    if (isZeroState(transportGroup: transport.group, address: tonWalletAsset.address)) {
+    if (isZeroState(address: tonWalletAsset.address)) {
       tonWallet = await TonWallet.subscribeByAddress(
         transport: transport,
         address: tonWalletAsset.address,
@@ -716,11 +719,7 @@ class TonWalletsRepository {
   }
 
   /// Check if address of token relates to giver
-  bool isZeroState({
-    required String transportGroup,
-    required String address,
-  }) =>
-      _zeroStateAddresses[transportGroup]?.contains(address) ?? false;
+  bool isZeroState({required String address}) => _zeroStateAddresses.contains(address);
 
   Stream<TonWallet> _tonWallet(String address) => getTonWalletStream(address);
 

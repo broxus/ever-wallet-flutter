@@ -5,6 +5,7 @@ import 'package:ever_wallet/application/common/async_value_stream_provider.dart'
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/animated_appearance.dart';
+import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/application/common/widgets/wallet_card_selectable_field.dart';
 import 'package:ever_wallet/application/main/wallet/widgets/more_button.dart';
 import 'package:ever_wallet/data/extensions.dart';
@@ -176,10 +177,14 @@ class WalletCard extends StatelessWidget {
                         name: AppLocalizations.of(context)!.address,
                       ),
                     if (tonWalletInfo != null)
-                      namedField(
-                        name: AppLocalizations.of(context)!.type,
-                        value: tonWalletInfo.walletType.name,
-                        isSelectable: false,
+                      TransportTypeBuilderWidget(
+                        builder: (context, isEver) {
+                          return namedField(
+                            name: AppLocalizations.of(context)!.type,
+                            value: tonWalletInfo.walletType.name(isEver),
+                            isSelectable: false,
+                          );
+                        },
                       )
                     else
                       namedField(

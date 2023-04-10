@@ -52,6 +52,20 @@ class TokenCurrenciesRepository {
         kVenomNetworkName: _hiveSource.venomCurrencies,
       };
 
+  Future<Currency?> getCurrencyForContract(Transport transport, String rootContract) async {
+    final isEver = !transport.name.contains('Venom');
+
+    try {
+      final currency = isEver
+          ? await _httpSource.getEverCurrency(rootContract)
+          : await _httpSource.getVenomCurrency(rootContract);
+      return currency;
+    } catch (e, st) {
+      logger.e('getCurrencyForContract', e, st);
+      return null;
+    }
+  }
+
   Future<void> clear() => _hiveSource.clearCurrencies();
 
   Future<void> dispose() => _currentAccountsStreamSubscription.cancel();

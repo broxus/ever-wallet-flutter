@@ -11,7 +11,7 @@ class TransportRepository {
   final TransportSource _transportSource;
   final _networkPresets = const <ConnectionData>[
     ConnectionData.jrpc(
-      name: 'Mainnet (ADNL)',
+      name: 'Mainnet (JRPC)',
       networkId: 1,
       group: 'mainnet',
       endpoint: 'https://jrpc.everwallet.net/rpc',
@@ -36,11 +36,18 @@ class TransportRepository {
       timeout: 60000,
       local: false,
     ),
+    // venom is in test, uncomment it later
+    // ConnectionData.jrpc(
+    //   name: 'Mainnet Venom (JRPC)',
+    //   networkId: 1000,
+    //   group: 'venom_mainnet',
+    //   endpoint: 'https://jrpc.venom.foundation/rpc',
+    // ),
     ConnectionData.jrpc(
-      name: 'Mainnet Venom (ADNL)',
-      networkId: 1000,
-      group: 'venom_mainnet',
-      endpoint: 'https://jrpc.venom.foundation/rpc',
+      name: 'Testnet Venom',
+      networkId: 1010,
+      group: 'testnet',
+      endpoint: 'https://jrpc-testnet.venom.foundation/rpc',
     ),
     ConnectionData.gql(
       name: 'fld.ton.dev',

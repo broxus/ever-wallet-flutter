@@ -22,6 +22,9 @@ class TokenSendResultPage extends StatefulWidget {
   final String sendingText;
   final String successText;
 
+  /// Widget that will be built as a body
+  final Widget Function(BuildContext modalContext)? resultBuilder;
+
   const TokenSendResultPage({
     super.key,
     required this.modalContext,
@@ -32,6 +35,7 @@ class TokenSendResultPage extends StatefulWidget {
     required this.password,
     required this.sendingText,
     required this.successText,
+    this.resultBuilder,
   });
 
   @override
@@ -56,38 +60,39 @@ class _NewSelectWalletTypePageState extends State<TokenSendResultPage> {
         child: BlocBuilder<TonWalletSendBloc, TonWalletSendState>(
           builder: (context, state) => Scaffold(
             resizeToAvoidBottomInset: false,
-            body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    SingleChildScrollView(
-                      controller: ModalScrollController.of(context),
-                      physics: const ClampingScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          title(state),
-                          const Gap(16),
-                          card(state),
-                          const Gap(64),
-                        ],
-                      ),
+            body: widget.resultBuilder?.call(widget.modalContext) ??
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        SingleChildScrollView(
+                          controller: ModalScrollController.of(context),
+                          physics: const ClampingScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              title(state),
+                              const Gap(16),
+                              card(state),
+                              const Gap(64),
+                            ],
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              submitButton(),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          submitButton(),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
           ),
         ),
       );

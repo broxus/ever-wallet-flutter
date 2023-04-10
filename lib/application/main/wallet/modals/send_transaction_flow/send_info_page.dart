@@ -25,6 +25,8 @@ class SendInfoPage extends StatefulWidget {
   final String amount;
   final String? comment;
 
+  final Widget Function(BuildContext modalContext)? resultBuilder;
+
   const SendInfoPage({
     super.key,
     required this.modalContext,
@@ -33,6 +35,7 @@ class SendInfoPage extends StatefulWidget {
     required this.destination,
     required this.amount,
     this.comment,
+    this.resultBuilder,
   });
 
   @override
@@ -57,7 +60,15 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            leading: const CustomBackButton(),
+            leading: CustomBackButton(
+              onPressed: () {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                } else if (Navigator.of(context, rootNavigator: true).canPop()) {
+                  Navigator.of(context, rootNavigator: true).pop();
+                }
+              },
+            ),
             title: Text(
               AppLocalizations.of(context)!.confirm_transaction,
               style: const TextStyle(
@@ -236,6 +247,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
             password: password,
             sendingText: AppLocalizations.of(context)!.message_sending,
             successText: AppLocalizations.of(context)!.message_sent,
+            resultBuilder: widget.resultBuilder,
           ),
         ),
         (_) => false,

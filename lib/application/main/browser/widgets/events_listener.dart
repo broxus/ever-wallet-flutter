@@ -21,11 +21,13 @@ import 'package:tuple/tuple.dart';
 class EventsListener extends StatefulWidget {
   final Completer<InAppWebViewController> controller;
   final Widget child;
+  final int tabId;
 
   const EventsListener({
     super.key,
     required this.controller,
     required this.child,
+    required this.tabId,
   });
 
   @override
@@ -43,7 +45,7 @@ class _EventsListenerState extends State<EventsListener> {
   @override
   void initState() {
     genericContractsTransactionsSubscription =
-        context.read<GenericContractsRepository>().tabTransactionsStream(0).listen(
+        context.read<GenericContractsRepository>().tabTransactionsStream(widget.tabId).listen(
               (event) async => transactionsFoundHandler(
                 controller: await widget.controller.future,
                 event: event,
@@ -51,7 +53,7 @@ class _EventsListenerState extends State<EventsListener> {
             );
 
     genericContractsStateChangesSubscription =
-        context.read<GenericContractsRepository>().tabStateChangesStream(0).listen(
+        context.read<GenericContractsRepository>().tabStateChangesStream(widget.tabId).listen(
               (event) async => contractStateChangedHandler(
                 controller: await widget.controller.future,
                 event: event,
@@ -62,15 +64,15 @@ class _EventsListenerState extends State<EventsListener> {
         .read<TransportRepository>()
         .transportStream
         .map(
-          (e) => NetworkChangedEvent(
+          (e) async => NetworkChangedEvent(
             selectedConnection: e.name,
-            networkId: e.networkId,
+            networkId: await e.getNetworkId(),
           ),
         )
         .listen(
           (event) async => networkChangedHandler(
             controller: await widget.controller.future,
-            event: event,
+            event: await event,
           ),
         );
 

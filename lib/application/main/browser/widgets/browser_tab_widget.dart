@@ -216,6 +216,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
             index: isShow ? 0 : 1,
             children: [
               EventsListener(
+                tabId: widget.tab.currentIndex,
                 controller: _controllerCompleter,
                 child: _webViewBuilder(),
               ),

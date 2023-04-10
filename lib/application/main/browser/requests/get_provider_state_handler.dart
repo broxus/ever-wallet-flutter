@@ -33,11 +33,12 @@ Future<Map<String, dynamic>> getProviderStateHandler({
     const supportedPermissions = Permission.values;
     final permissions = permissionsRepository.permissions[origin] ?? const Permissions();
     final subscriptions = genericContractsRepository.tabSubscriptions(tabId);
+    final networkId = await transport.getNetworkId();
 
     final output = GetProviderStateOutput(
       version: version,
       numericVersion: numericVersion,
-      networkId: transport.networkId,
+      networkId: networkId,
       selectedConnection: selectedConnection,
       supportedPermissions: supportedPermissions,
       permissions: permissions,

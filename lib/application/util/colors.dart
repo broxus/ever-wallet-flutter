@@ -75,8 +75,11 @@ class ColorsRes {
   static const neutral600 = Color(0xFFA6AAB2);
   static const neutral700 = Color(0xFFB7BAC2);
   static const neutral750 = Color(0xFFF7F7F9);
+  static const neutral800 = Color(0xFFD4D7DC);
   static const neutral900 = Color(0xFFF0F1F5);
   static const neutral950 = Color(0xFFF7F7F9);
+  static const blue600 = Color(0xFF648DF5);
+  static const blue900 = Color(0xFFDAE4FD);
   static const blue950 = Color(0xFFECF1FE);
   static const blue970 = Color(0xFFF9FAFF);
   static const red400Primary = Color(0xFFD83F5A);
@@ -106,4 +109,5 @@ class ColorsRes {
   static const greyBlue = Color(0xFF838699);
   static const redDark = Color(0xFF9A325C);
   static const redLight = Color(0xFFEB4361);
+  static const caution = Color(0xFFE6AC00);
 }
