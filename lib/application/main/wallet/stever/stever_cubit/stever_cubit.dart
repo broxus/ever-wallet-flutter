@@ -282,7 +282,7 @@ class StEverCubit extends Cubit<StEverCubitState> {
                 attachedAmount: stakeWithdrawAttachedFee,
                 resultBuilder: (modalContext) => StEverResultScreen(
                   title: context.localization.unstaking_progress,
-                  subtitle: context.localization.withdraw_36_hours_progress,
+                  subtitle: context.localization.withdraw_72_hours_progress,
                   modalContext: modalContext,
                 ),
               ),

@@ -39,7 +39,7 @@ class StEverCancelUnstakingSheet extends StatelessWidget {
             color: ColorsRes.blue950,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              localization.withdraw_36_hours_note,
+              localization.withdraw_72_hours_note,
               style: StylesRes.regular14.copyWith(color: Colors.black),
             ),
           ),

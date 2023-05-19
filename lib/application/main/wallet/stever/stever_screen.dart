@@ -424,7 +424,7 @@ class _StEverScreenState extends State<StEverScreen> {
         padding: const EdgeInsets.all(12),
         color: ColorsRes.blue950,
         child: Text(
-          context.localization.withdraw_36_hours_note,
+          context.localization.withdraw_72_hours_note,
           style: StylesRes.medium14.copyWith(color: ColorsRes.black),
         ),
       ),
