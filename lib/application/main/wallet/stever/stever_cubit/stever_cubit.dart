@@ -203,6 +203,7 @@ class StEverCubit extends Cubit<StEverCubitState> {
     inputController.text = _getPureAmount(max);
   }
 
+  /// To delimit integer part and float part, DOT is used, comma just to separate thousands
   String _getPureAmount([String? value]) {
     final delimitersReg = RegExp(r'(,|\.)');
     final amount = value ?? inputController.text;
@@ -215,7 +216,7 @@ class StEverCubit extends Cubit<StEverCubitState> {
           .replaceAll('|', '.');
     } else {
       /// only one delimiter, just avoid comma
-      return amount.replaceAll(',', '.');
+      return amount.replaceAll(',', '');
     }
   }
 

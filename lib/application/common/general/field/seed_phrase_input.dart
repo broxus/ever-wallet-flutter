@@ -1,4 +1,3 @@
-import 'package:ever_wallet/application/common/general/field/suggestion_formatter.dart';
 import 'package:ever_wallet/application/common/general/field/type_ahead_field.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
@@ -78,7 +77,7 @@ class SeedPhraseInput extends StatelessWidget {
       inputFormatters: [
         FilteringTextInputFormatter.deny(RegExp(r'\s')),
         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]')),
-        SuggestionFormatter(suggestions: getHints),
+        // SuggestionFormatter(suggestions: getHints),
       ],
     );
   }
