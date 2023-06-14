@@ -47,11 +47,6 @@ class StEverHowItWorksSheet extends StatelessWidget {
                     subtitle: localization.receive_stever_subtitle,
                   ),
                   _step(
-                    icon: Assets.images.stever.steverEarn.svg(width: 48, height: 48),
-                    title: localization.earn_on_prices_title,
-                    subtitle: localization.earn_on_prices_subtitle,
-                  ),
-                  _step(
                     icon: Assets.images.stever.steverDefi.svg(width: 48, height: 48),
                     title: localization.use_stever_title,
                     subtitle: localization.use_stever_subtitle,

@@ -52,6 +52,8 @@ class StEverCubit extends Cubit<StEverCubitState> {
   /// Public key that is related to [accountAddress]
   String accountPublicKey = '';
 
+  String apy = '0';
+
   StEverCubit({
     required this.stEverRepository,
     required this.accountAddress,
@@ -86,6 +88,8 @@ class StEverCubit extends Cubit<StEverCubitState> {
 
       _stEverWalletCurrency = await currencyLoader(stEverRootContract);
       _everWalletCurrency = await currencyLoader(kAddressForEverCurrency);
+      final loadedApy = await stEverRepository.getAverageAPY();
+      apy = (loadedApy * 100).toStringAsFixed(2);
       final details = await stEverRepository.getStEverDetails();
       exchangeRate = double.parse(details.totalAssets) / double.parse(details.stEverSupply);
       accountPublicKey =
@@ -177,6 +181,7 @@ class StEverCubit extends Cubit<StEverCubitState> {
       requests: _requests,
       receive: receiveAmount?.toTokensFull(),
       canPressButton: canPress,
+      apy: apy,
     );
   }
 
@@ -314,6 +319,7 @@ class StEverCubitState with _$StEverCubitState {
     double? exchangeRate,
     String? attachedAmount,
     String? receive,
+    String? apy,
     List<StEverWithdrawRequest>? requests,
     bool? canPressButton,
   }) = _StState;

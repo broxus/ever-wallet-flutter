@@ -313,11 +313,178 @@
     "invalid_data": "잘못된 데이터",
     "language": "언어",
     "link": "링크",
-    "safeMultisigDescription": "A multisig wallet with several custodians. If the required number of signatures is not reached in 1 hour, the transaction will expire. ",
-    "safeMultisig24Description": "Like SafeMultisig, but wallet custodian confirmations take up to 24 hours.",
-    "setcodeMultisigDescription": "A multisig wallet with the possibility to change codes and custodians. If the required number of signatures is not reached in 1 hour, the transaction will expire.",
-    "setcodeMultisig24Description": "Like SetCodeMultisigWallet, but wallet custodian confirmations take up to 24 hours.",
-    "bridgeMultisigDescription": "This kind of wallet does not have payload limits. Wallet custodian confirmations take up to 1 hour. If you want to use a multisig wallet with 3 or more custodians on Broxus DeFi platforms, be sure to use this type.",
-    "surfDescription": "Like SetCodeMultisig, but you should use this kind of wallet to import your Ever Surf wallet.",
-    "walletV3Description": "Simple wallet for basic operations with lowest comission. Сhoose this one if you don't know which one you need."
+
+    "recommended_word": "추천",
+    "paste_all": "전체 붙여넣기",
+    "clear_all": "모두 지우기",
+    "keys_word": "키",
+    "delete_word": "삭제",
+    "hide_word": "숨기기",
+    "show_word": "보이기",
+    "seed_word": "시드",
+    "export_word": "내보내기",
+    "add_word": "추가",
+    "external_accounts": "외부계정",
+    "add_seed_phrase": "시드키 추가",
+    "seed_name": "시드키 이름",
+    "rename_account": "계정이름 변경",
+    "account_renamed": "계정이름이 변경되었습니다",
+    "key_renamed": "키의 이름이 성공적으로 변경되었습니다.",
+    "total_balance": "총 잔고",
+    "depend_on_transactions": "원하시는 거래유형에 따라 달라집니다",
+    "accounts_word": "계정",
+    "seed_phrase_name_title": "시드키의 이름을 기입하세요",
+    "continue_word": "계속하기",
+    "safeMultisigDescription": "다수의 관리인이 있는 멀티시그(다중서명) 지갑입니다. 1시간 이내로 필요한 서명 수를 확보하지 못하면 거래시한이 만료됩니다.",
+    "safeMultisig24Description": "SafeMultisig와 유사하지만 지갑 관리인이 확인하는 데에 최대 24시간이 소요됩니다.",
+    "setcodeMultisigDescription": "코드와 관리인을 변경할 수 있는 멀티시그(다중서명)지갑입니다. 1시간 이내로 필요한 서명 수를 확보하지 못하면 거래시한이 만료됩니다.",
+    "setcodeMultisig24Description": "SetCodeMultisigWallet과 비슷하지만 지갑 관리인 확인에 최대 24시간이 소요됩니다.",
+    "bridgeMultisigDescription": "이런 종류의 지갑에는 페이로드 제한이 없습니다. 지갑의 관리자 확인에는 최대 1시간이 소요됩니다. 브록서스의 디파이(DeFi) 플랫폼에서 관리인이 3명 이상인 멀티시그(다중서명) 지갑을 사용하려면 반드시 이 유형을 사용하십시오.",
+    "surfDescription": "SetCodeMultisig와 비슷하지만 에버서프(EVER Surf)지갑을 가져오려면 이런 종류의 지갑을 사용해야 합니다.",
+    "walletV3Description": "가장 낮은 수수료로 기본 작업을 하기 위한 간단한 지갑입니다. 어떤 것이 필요한지 모른다면 이것을 선택하십시오.",
+    "multisig2Description": "여러 관리인이 있는 멀티시그(다중서명) 지갑입니다. 1시간 이내로 필요한 서명 수를 확보하지 못하 거래가 취소됩니다.",
+    "multisig2_1_Description": "",
+    "everWalletDescription": "가장 낮은 수수료로 기본적 사용이 가능한 간단한 지갑.",
+    "highloadWalletDescription": "한 명의 관리인과 고급 재생보호 기능을 갖춘 소규모 레거시 계약으로 자동 배포됩니다.",
+    "farming_title": "파밍(Farming)",
+    "farming_description": "여러분의 자산을 빌려주고 파밍(farming)에서 최대 200% 연이율을 얻으세요",
+    "staking_title": "스테이킹",
+    "staking_description": "EVER DAO에서 stEVER와 유동 스테이킹의 새로운 시대를 소개합니다",
+    "got_it": "알겠습니다",
+    "why_need_browser": "왜 빌트인 브라우저가 필요한가요?",
+    "whe_need_browser_description": "브라우저를 사용하여 지갑이 필요할 수 있는 다른 앱 및 웹사이트를 열 수 있습니다.",
+    "done": "완료",
+    "close_all": "전체 닫기",
+    "history_will_appear_here": "사용내역이 이곳에 나타납니다.",
+    "clear_all_data": "Clear All Data",
+    "add_to_bookmarks": "즐겨찾기 추가",
+    "site_added_to_bookmarks": "즐겨찾기에 사이트가 추가되었습니다",
+    "bookmark_removed": "즐겨찾기에서 제거되었습니다",
+    "undo": "되돌리기",
+    "history_cleared": "기록이 삭제되었습니다",
+    "remove": "제거",
+    "words_count": "{count} 단어",
+    "@words_count": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "paste_seed_into_first_box": "클립보드의 모든 단어를 첫 번째 상자에 붙여넣을 수 있습니다.",
+    "back_word": "뒤로",
+    "save_seed_warning": "이는 귀하에게 지갑에 대한 접근권한을 부여합니다. 누구와도 공유하지 말고 안전한 장소에 보관하십시오. 잃어버리면 복구할 수 없습니다.",
+    "copied_no_exclamation": "복사됨",
+    "skip_take_risk": "생략합니다. 위험을 감수하겠습니다.",
+    "skip_word": "생략",
+    "check_seed_phrase_correctly": "이제 시드키가 올바르게 보관되었는지 확인하겠습니다. 계속하려면 맞는 단어를 선택하십시오.",
+    "seed_is_wrong": "시드키가 잘못되었습니다",
+    "support_token_and_access_everscale": "모든 토큰 지원 및 에버스케일 생태계의 탈중앙앱에 대한 접근권한",
+    "sign_with_ledger": "레저(Ledger)로 로그인",
+    "by_processing_accept_license": "진행함으로서 귀하는 에버월렛의 사용자 라이센스에 동의하게 됩니다. ",
+    "read_here": "여기 읽기",
+    "use_biometry_for_fast_login": "빠른 로그인을 위한 생체인식",
+    "create_wallet": "지갑 생성",
+    "advanced_wallet_types": "고급 지갑 유형",
+    "current_seed_with_name": "현재 시드 ({name})",
+    "@current_seed_with_name": {
+        "placeholders": {
+            "name": {}
+        }
+    },
+    "all_seeds": "모든 시드",
+    "recent_seeds": "최근 시드",
+    "manage_seeds_accounts": "시드키 및 계정 관리",
+    "seeds_and_accounts": "시드키 & 계정",
+    "current_seed": "현재 시드",
+    "plus_add_key": "+ 키 추가",
+    "plus_add_account": "+ 계정추가",
+    "change_password": "암호변경",
+    "copy_key": "키 복사",
+    "key_name_with_sub_count": "{name} {count} 계정",
+    "@key_name_with_sub_count": {
+        "placeholders": {
+            "name": {},
+            "count": {}
+        }
+    },
+    "seed_phrases": "시드키",
+    "plus_add_new": "+ 새로 추가",
+    "plus_add_new_seed": "+ 새 시드키 추가 ",
+    "children_public_keys": "{count} 공개키",
+    "@children_public_keys": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "use_this_seed": "이 시드키를 이용합니다",
+    "use_this_key": "이 키를 이용합니다",
+    "delete_seed_phrase": "시드키를 목록에서 삭제",
+    "delete_key": "키 삭제",
+    "after_deletion_seed_disappear": "삭제 후 시드키는 목록에서 사라집니다. 가져오기를 통해 다시 가져올 수 있습니다.",
+    "key_name": "키 이름",
+    "after_deletion_public_disappear": "삭제 후 공개키가 목록에서 사라집니다. 이는 가져오기를 통해 다시 가져올 수 있습니다.",
+    "after_deletion_account_disappear": "삭제 후 계정이 목록에서 사라집니다. 이는 가져오기를 통해 다시 가져올 수 있습니다.",
+    "public_key_copied": "{key} 복사되었습니다!",
+    "@public_key_copied": {
+        "placeholders": {
+            "key": {}
+        }
+    },
+    "my_accounts": "내 계정",
+    "delete_account_title": "삭제 {account_name}",
+    "@delete_account_title": {
+        "placeholders": {
+            "account_name": {}
+        }
+    },
+    "linked_keys": "연결된 키",
+    "select_keys_you_need": "필요한 키를 선택하세요",
+    "keys_count_of": "총{total}키 중 {count}개",
+    "@keys_count_of": {
+        "placeholders": {
+            "count": {},
+            "total": {}
+        }
+    },
+    "key_word": "키키",
+    "empty_linked_keys": "연결된 키를 찾지 못했습니다",
+    "display_on_main": "메인 화면에 표시",
+    "add_custodians_to_send_via_multisig": "멀티시그(다중서명)를 통해 자금을 보내려면 관리인을 추가해야 합니다.",
+    "network_error": "네트워크 에러",
+    "bookmarks": "북마크",
+    "bookmarks_placeholder": "귀하의 북마크가 이곳에 나타날 것입니다",
+    "popular_resources": "인기있는 리소스",
+    "stake_word": "스테이킹",
+    "unstake_word": "스테이킹 해제",
+    "unstake_amount": "스테이킹 해제금액",
+    "stake_earn_promo": "언제든지 인출 가능한 자산에 대해 최대 12%의 수익을 얻습니다.",
+    "how_staking_works": "유동 스테이킹의 작동원리",
+    "stake_ever_title": "EVER를 스테이킹하세요",
+    "stake_ever_subtitle": "유동 스테이킹에 스테이킹하려는 EVER의 양을 선택하십시오.",
+    "receive_stever_title": "StEVER를 수령하세요",
+    "receive_stever_subtitle": "대가로 stEVER 토큰을 받으며 해당금액은 풀의 현재 환율에 따라 결정됩니다.",
+    "use_stever_title": "stEVER로 부가소득을 올리세요",
+    "use_stever_subtitle": "stEVER를 사용하면 스테이킹에서 더 많은 수익을 올릴 수 있을 뿐 아니라 DAO 투표에도 참여할 수 있습니다.",
+    "simple_staking_title": "간단한 유동 스테이킹",
+    "stake_ever_recieve_stever": "EVER를 스테이킹하시고 StEVER를 받으세요.",
+    "how_it_works": "작동원리",
+    "staking_progress": "스테이킹이 진행 중입니다",
+    "unstaking_progress": "스테이킹 해제가 진행 중입니다",
+    "stever_apper_in_minutes": "몇 분 안에 귀하의 계정에 stEVER가 나타납니다.",
+    "stever_return_in_minutes": "stEVER가 몇 분 안에 귀하의 계정으로 반환됩니다.",
+    "withdraw_72_hours_note": "스테이킹 라운드가 완료되면 72시간 이내에 귀하의 토큰이 스테이킹에서 인출됩니다.",
+    "withdraw_72_hours_progress": "EVER가 72시간 내로 귀하의 계정에 나타납니다",
+    "cancel_unstaking": "스테이킹 해제 취소",
+    "unstaking_cancelled": "스테이킹 해제가 취소되었습니다",
+    "cancel_unstaking_note": "스테이킹 해제를 취소하면 stEVER가 귀하의 계정으로 반환됩니다",
+    "balance_with_amount": "잔고: {amount}",
+    "@balance_with_amount": {
+        "placeholders": {
+            "amount": {}
+        }
+    },
+    "exchange_rate": "환율",
+    "attached_amount": "첨부액수",
+    "average_apy": "평균 연이익률(APY)",
+    "status_word": "상태",
+    "new_word": "New"
 }

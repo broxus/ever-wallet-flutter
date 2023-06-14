@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/main/browser/requests/models/send_message_input.dart';
 import 'package:ever_wallet/data/models/stever/st_ever_details.dart';
 import 'package:ever_wallet/data/models/stever/stever_withdraw_request.dart';
-import 'package:ever_wallet/data/repositories/generic_contracts_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
+import 'package:ever_wallet/data/sources/remote/http_source.dart';
 import 'package:ever_wallet/data/sources/remote/transport_source.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -23,15 +24,16 @@ const stEverRootContract = '0:6d42d0bc4a6568120ea88bf642edb653d727cfbd35868c4787
 const stakeDepositAttachedFee = '2000000000'; // 2 EVER
 const stakeRemovePendingWithdrawFee = '2000000000'; // 2 EVER
 const stakeWithdrawAttachedFee = '3000000000'; // 3 EVER
+const steverAPYLink = 'https://staking.everwallet.net/v1/strategies/main';
 
 typedef ContractAbiLoader = Future<String> Function(String path);
 
 /// Repository that allows to communicate with StEver functionality from mobile app.
 /// It allows stake/unstake tokens.
 class StEverRepository {
-  final GenericContractsRepository contractsRepository;
   final TonWalletsRepository tonWalletsRepository;
   final TransportSource transportSource;
+  final HttpSource httpSource;
 
   /// Json strings of contract abi that sends in requests
   final String stEverAbi;
@@ -47,28 +49,28 @@ class StEverRepository {
   StreamSubscription? _walletChangesSubscription;
 
   static Future<StEverRepository> create({
-    required GenericContractsRepository contractsRepository,
     required TransportSource transportSource,
     required TonWalletsRepository tonWalletsRepository,
     required ContractAbiLoader abiLoader,
+    required HttpSource httpSource,
   }) async {
     final instance = StEverRepository._(
-      contractsRepository: contractsRepository,
       transportSource: transportSource,
       stEverAbi: await abiLoader(_stEverAbiPath),
       stEverAccountAbi: await abiLoader(_stEverAccountAbiPath),
       tonWalletsRepository: tonWalletsRepository,
+      httpSource: httpSource,
     );
 
     return instance;
   }
 
   StEverRepository._({
-    required this.contractsRepository,
     required this.transportSource,
     required this.stEverAbi,
     required this.stEverAccountAbi,
     required this.tonWalletsRepository,
+    required this.httpSource,
   });
 
   /// Update withdraw requests list every time, stever contract get any transactions
@@ -255,5 +257,14 @@ class StEverRepository {
   /// Remember cancelled withdraw request and don't show it in [userAvailableWithdraw]
   void acceptCancelledWithdraw(StEverWithdrawRequest request) {
     _cancelledWithdraw.add(request.nonce);
+  }
+
+  /// Load average apy from stever website.
+  /// This returns value from 0 to 1. Multiply by 100 to get percent.
+  Future<double> getAverageAPY() async {
+    final encoded = await httpSource.getTransportData(steverAPYLink);
+    final decoded = jsonDecode(encoded) as Map<String, dynamic>;
+    // ignore: avoid_dynamic_calls
+    return double.parse(decoded['data']?['apy'] as String? ?? '0.0');
   }
 }

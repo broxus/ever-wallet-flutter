@@ -461,8 +461,6 @@
   "stake_ever_subtitle": "Select the amount of EVER you want to stake in liquid staking.",
   "receive_stever_title": "Receive stEVER",
   "receive_stever_subtitle": "Receive the stEVER token in return, the amount is determined by the current exchange rate in the pool.",
-  "earn_on_prices_title": "Earn on price increases",
-  "earn_on_prices_subtitle": "The price of stEVER is constantly changing, but the APY is a constant 12%",
   "use_stever_title": "Use stEVER to earn extra money",
   "use_stever_subtitle": "With stEVER you can earn more from staking and also participate in DAO voting.",
   "simple_staking_title": "Simple Liquid Staking",
@@ -485,7 +483,7 @@
   },
   "exchange_rate": "Exchange rate",
   "attached_amount": "Attached amount",
-  "current_apy": "Current APY",
+  "average_apy": "Average APY",
   "status_word": "Status",
   "new_word": "New"
 }

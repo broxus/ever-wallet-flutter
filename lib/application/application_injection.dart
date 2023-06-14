@@ -349,10 +349,10 @@ class ApplicationInjection extends StatelessWidget {
       asyncValueProvider<StEverRepository>(
         child: child,
         create: (context) => StEverRepository.create(
-          contractsRepository: context.read<GenericContractsRepository>(),
           transportSource: context.read<TransportSource>(),
           tonWalletsRepository: context.read<TonWalletsRepository>(),
           abiLoader: (path) => rootBundle.loadString(path),
+          httpSource: context.read<HttpSource>(),
         ),
       );
 

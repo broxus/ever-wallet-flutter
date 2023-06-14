@@ -246,6 +246,7 @@ class _StEverScreenState extends State<StEverScreen> {
           receive: state.receive,
           type: state.type,
           exchangeRate: state.exchangeRate,
+          apy: state.apy,
         ),
       ],
     );
@@ -367,6 +368,7 @@ class _StEverScreenState extends State<StEverScreen> {
     required String? attachedAmount,
     required String? receive,
     required double? exchangeRate,
+    required String? apy,
   }) {
     final localization = context.localization;
     return Column(
@@ -386,7 +388,8 @@ class _StEverScreenState extends State<StEverScreen> {
           value: '${receive ?? '0'} ${type.swapTicker}',
           isBold: true,
         ),
-        if (type == StakeType.stake) _infoItem(title: localization.current_apy, value: '12%'),
+        if (type == StakeType.stake)
+          _infoItem(title: localization.average_apy, value: '${apy ?? '0'}%'),
         if (type == StakeType.unstake) _unstakeNote(),
       ],
     );
