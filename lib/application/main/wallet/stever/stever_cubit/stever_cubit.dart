@@ -26,6 +26,8 @@ enum StakeType { stake, unstake, inProgress }
 
 typedef CurrencyLoader = Future<Currency?> Function(String rootContract);
 
+const _defaultWithdrawTime = 36;
+
 /// Basic class to stake/unstake ever from account
 class StEverCubit extends Cubit<StEverCubitState> {
   final StEverRepository stEverRepository;
@@ -46,6 +48,11 @@ class StEverCubit extends Cubit<StEverCubitState> {
   TokenWallet? _stEverWallet;
   Currency? _stEverWalletCurrency;
   double? exchangeRate;
+
+  /// Withdraw time of stever in hours.
+  /// if original time from 0 to 24, we add 36
+  /// if original time > 24, we add 18
+  int withdrawTime = _defaultWithdrawTime;
   List<StEverWithdrawRequest>? _requests;
   StreamSubscription? _requestsSub;
 
@@ -62,7 +69,12 @@ class StEverCubit extends Cubit<StEverCubitState> {
     required this.currencyLoader,
     required this.navigator,
   }) : super(
-          const StEverCubitState(enteredValue: '', type: StakeType.stake, canPressButton: false),
+          const StEverCubitState(
+            enteredValue: '',
+            type: StakeType.stake,
+            canPressButton: false,
+            withdrawTimeHours: _defaultWithdrawTime,
+          ),
         ) {
     inputController.addListener(() => _updateValue(inputController.text));
     _getTokensAndCurrencies();
@@ -92,6 +104,12 @@ class StEverCubit extends Cubit<StEverCubitState> {
       apy = (loadedApy * 100).toStringAsFixed(2);
       final details = await stEverRepository.getStEverDetails();
       exchangeRate = double.parse(details.totalAssets) / double.parse(details.stEverSupply);
+      final time = Duration(seconds: int.tryParse(details.withdrawHoldTime) ?? 0).inHours;
+      if (0 <= time && time <= 24) {
+        withdrawTime = time + 36;
+      } else {
+        withdrawTime = time + 18;
+      }
       accountPublicKey =
           (await tonWalletsRepository.localCustodiansStream(accountAddress).first)?.first ?? '';
 
@@ -181,6 +199,7 @@ class StEverCubit extends Cubit<StEverCubitState> {
       requests: _requests,
       receive: receiveAmount?.toTokensFull(),
       canPressButton: canPress,
+      withdrawTimeHours: withdrawTime,
       apy: apy,
     );
   }
@@ -288,7 +307,7 @@ class StEverCubit extends Cubit<StEverCubitState> {
                 attachedAmount: stakeWithdrawAttachedFee,
                 resultBuilder: (modalContext) => StEverResultScreen(
                   title: context.localization.unstaking_progress,
-                  subtitle: context.localization.withdraw_72_hours_progress,
+                  subtitle: context.localization.withdraw_hours_progress(withdrawTime),
                   modalContext: modalContext,
                 ),
               ),
@@ -313,6 +332,7 @@ class StEverCubitState with _$StEverCubitState {
   const factory StEverCubitState({
     required String enteredValue,
     required StakeType type,
+    required int withdrawTimeHours,
     bool? isLoading,
     String? enteredPrice,
     String? balance,

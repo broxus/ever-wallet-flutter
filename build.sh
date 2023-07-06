@@ -30,10 +30,10 @@ get_changelog() {
 
 clean_and_install() {
   echo "🧹  Cleaning all"
-  flutter clean
-  flutter pub get
-  flutter pub run build_runner build --delete-conflicting-outputs
-  flutter gen-l10n
+  fvm flutter clean
+  fvm flutter pub get
+  fvm flutter pub run build_runner build --delete-conflicting-outputs
+  fvm flutter gen-l10n
 }
 
 if [ $# -eq 0 ]
@@ -85,10 +85,10 @@ if [ $deploy_store = true ]; then
   get_changelog
 
   echo "🛒🏗️  Build IPA"
-  flutter build ipa --release --export-options-plist ios/export_options_appstore.plist $build_number_string
+  fvm flutter build ipa --release --export-options-plist ios/export_options_appstore.plist $build_number_string
 
   echo "🛒🏗️🤖  Build AAB"
-  flutter build appbundle $build_number_string
+  fvm flutter build appbundle $build_number_string
 
   echo "🛒🤖  Creating changelog for GP"
   mkdir -p android/fastlane/metadata/android/en-US/changelogs
@@ -112,10 +112,10 @@ if [ $deploy_fad = true ]; then
   get_changelog
 
   echo "🔥🏗️  Build IPA"
-  flutter build ipa --release --export-options-plist ios/export_options_adhoc.plist $build_number_string
+  fvm flutter build ipa --release --export-options-plist ios/export_options_adhoc.plist $build_number_string
 
   echo "🔥🏗️🤖  Build APK"
-  flutter build apk $build_number_string
+  fvm flutter build apk $build_number_string
 
   echo "🔥  Deploy IPA"
   fastlane ios deploy_fad changelog_string:"$changelog_string"

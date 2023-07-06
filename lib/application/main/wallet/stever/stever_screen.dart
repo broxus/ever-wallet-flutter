@@ -247,6 +247,7 @@ class _StEverScreenState extends State<StEverScreen> {
           type: state.type,
           exchangeRate: state.exchangeRate,
           apy: state.apy,
+          withdrawHours: state.withdrawTimeHours,
         ),
       ],
     );
@@ -369,6 +370,7 @@ class _StEverScreenState extends State<StEverScreen> {
     required String? receive,
     required double? exchangeRate,
     required String? apy,
+    required int withdrawHours,
   }) {
     final localization = context.localization;
     return Column(
@@ -390,7 +392,7 @@ class _StEverScreenState extends State<StEverScreen> {
         ),
         if (type == StakeType.stake)
           _infoItem(title: localization.average_apy, value: '${apy ?? '0'}%'),
-        if (type == StakeType.unstake) _unstakeNote(),
+        if (type == StakeType.unstake) _unstakeNote(withdrawHours),
       ],
     );
   }
@@ -421,13 +423,13 @@ class _StEverScreenState extends State<StEverScreen> {
     );
   }
 
-  Widget _unstakeNote() {
+  Widget _unstakeNote(int hours) {
     return Builder(
       builder: (context) => Container(
         padding: const EdgeInsets.all(12),
         color: ColorsRes.blue950,
         child: Text(
-          context.localization.withdraw_72_hours_note,
+          context.localization.withdraw_hours_note(hours),
           style: StylesRes.medium14.copyWith(color: ColorsRes.black),
         ),
       ),
@@ -444,6 +446,7 @@ class _StEverScreenState extends State<StEverScreen> {
           request: request,
           exchangeRate: state.exchangeRate ?? 1.0,
           publicKey: cubit.accountPublicKey,
+          withdrawHors: state.withdrawTimeHours,
         ),
       ),
       child: Column(

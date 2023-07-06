@@ -471,8 +471,18 @@
     "unstaking_progress": "스테이킹 해제가 진행 중입니다",
     "stever_apper_in_minutes": "몇 분 안에 귀하의 계정에 stEVER가 나타납니다.",
     "stever_return_in_minutes": "stEVER가 몇 분 안에 귀하의 계정으로 반환됩니다.",
-    "withdraw_72_hours_note": "스테이킹 라운드가 완료되면 72시간 이내에 귀하의 토큰이 스테이킹에서 인출됩니다.",
-    "withdraw_72_hours_progress": "EVER가 72시간 내로 귀하의 계정에 나타납니다",
+    "withdraw_hours_note": "스테이킹 라운드가 완료되면 {hours}시간 이내에 귀하의 토큰이 스테이킹에서 인출됩니다.",
+    "@withdraw_hours_note": {
+        "placeholders": {
+            "hours": {}
+        }
+    },
+    "withdraw_hours_progress": "EVER가 {hours}시간 내로 귀하의 계정에 나타납니다",
+    "@withdraw_hours_progress": {
+        "placeholders": {
+            "hours": {}
+        }
+    },
     "cancel_unstaking": "스테이킹 해제 취소",
     "unstaking_cancelled": "스테이킹 해제가 취소되었습니다",
     "cancel_unstaking_note": "스테이킹 해제를 취소하면 stEVER가 귀하의 계정으로 반환됩니다",

@@ -20,12 +20,14 @@ class StEverCancelUnstakingSheet extends StatelessWidget {
     required this.request,
     required this.exchangeRate,
     required this.publicKey,
+    required this.withdrawHors,
     super.key,
   });
 
   final String publicKey;
   final StEverWithdrawRequest request;
   final double exchangeRate;
+  final int withdrawHors;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,7 @@ class StEverCancelUnstakingSheet extends StatelessWidget {
             color: ColorsRes.blue950,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              localization.withdraw_72_hours_note,
+              localization.withdraw_hours_note(withdrawHors),
               style: StylesRes.regular14.copyWith(color: Colors.black),
             ),
           ),
