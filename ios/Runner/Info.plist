@@ -60,6 +60,9 @@
 		<array>
 			<string>https</string>
 			<string>http</string>
+			<string>metamask</string>
+			<string>wc</string>
+			<string>trust</string>
 		</array>
 		<key>NSAppTransportSecurity</key>
 		<dict>
