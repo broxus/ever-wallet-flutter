@@ -76,13 +76,7 @@ class OnboardingScreen extends StatelessWidget {
                               text: localization.by_processing_accept_license,
                               style: style.styles.basicStyle,
                             ),
-                            TextSpan(
-                              text: localization.read_here,
-                              style: style.styles.basicStyle.copyWith(
-                                color: ColorsRes.bluePrimary400,
-                              ),
-                              recognizer: TapGestureRecognizer()..onTap = onLinkTap,
-                            ),
+                            ..._buildTermsAndPrivacy(context),
                           ],
                         ),
                       ),
@@ -97,5 +91,42 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 
-  void onLinkTap() => launchUrlString(decentralizationPolicyLink);
+  Iterable<TextSpan> _buildTermsAndPrivacy(BuildContext context) {
+    final style = context.themeStyle;
+    final localization = context.localization;
+
+    return localization.review_terms_of_use_and_privacy_policy
+        .split(':')
+        .map((text) {
+      if (text == 'terms_of_use') {
+        return TextSpan(
+          text: localization.terms_of_use,
+          style: style.styles.basicStyle.copyWith(
+            color: ColorsRes.bluePrimary400,
+          ),
+          recognizer: TapGestureRecognizer()..onTap = onTermsLinkTap,
+        );
+      }
+      if (text == 'privacy_policy') {
+        return TextSpan(
+          text: localization.privacy_policy,
+          style: style.styles.basicStyle.copyWith(
+            color: ColorsRes.bluePrimary400,
+          ),
+          recognizer: TapGestureRecognizer()..onTap = onPrivacyLinkTap,
+        );
+      }
+
+      return TextSpan(
+        text: text,
+        style: style.styles.basicStyle,
+      );
+    });
+  }
+
+  void onTermsLinkTap() =>
+      launchUrlString(termsOfUseLink, mode: LaunchMode.externalApplication);
+
+  void onPrivacyLinkTap() =>
+      launchUrlString(privacyPolicyLink, mode: LaunchMode.externalApplication);
 }
