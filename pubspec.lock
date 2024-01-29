@@ -642,10 +642,10 @@ packages:
     dependency: "direct main"
     description:
       name: gap
-      sha256: "17a51ee49227c32472473de8c65c8a22f7fb5afb13d6dc5367926096aa55f2d0"
+      sha256: f19387d4e32f849394758b91377f9153a1b41d79513ef7668c088c77dbc6955d
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "3.0.1"
   glob:
     dependency: transitive
     description:
@@ -1708,4 +1708,4 @@ packages:
     version: "3.1.1"
 sdks:
   dart: ">=2.18.0 <3.0.0"
-  flutter: ">=3.3.0"
+  flutter: ">=3.7.0"

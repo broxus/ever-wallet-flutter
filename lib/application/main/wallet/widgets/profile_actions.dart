@@ -3,6 +3,7 @@ import 'package:ever_wallet/application/common/async_value_stream_provider.dart'
 import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/theme.dart';
+import 'package:ever_wallet/application/common/utils.dart';
 import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/add_new_seed_sheet/add_new_seed_sheet.dart';
 import 'package:ever_wallet/application/main/wallet/modals/add_asset_modal/show_add_asset_modal.dart';
@@ -23,6 +24,7 @@ import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class ProfileActions extends StatelessWidget {
   final String address;
@@ -39,7 +41,7 @@ class ProfileActions extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               WalletButton(
-                onTap: () async => showAddAssetModal(
+                onTap: () => showAddAssetModal(
                   context: context,
                   address: address,
                 ),
@@ -50,6 +52,21 @@ class ProfileActions extends StatelessWidget {
                   child: Center(
                     child: Icon(
                       Icons.add,
+                      size: 30,
+                      color: CrystalColor.secondary,
+                    ),
+                  ),
+                ),
+              ),
+              WalletButton(
+                onTap: () => launchUrlString(buyEverLink),
+                title: context.localization.buy_ever,
+                icon: const OverflowBox(
+                  maxHeight: 30,
+                  maxWidth: 30,
+                  child: Center(
+                    child: Icon(
+                      Icons.credit_card,
                       size: 30,
                       color: CrystalColor.secondary,
                     ),
