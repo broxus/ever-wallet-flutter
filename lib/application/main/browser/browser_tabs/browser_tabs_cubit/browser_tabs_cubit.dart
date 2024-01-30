@@ -2,12 +2,14 @@ import 'package:ever_wallet/application/main/browser/browser_tabs/browser_tabs_c
 import 'package:ever_wallet/application/main/browser/utils.dart';
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/data/models/browser_tabs_dto.dart';
+import 'package:ever_wallet/data/models/site_meta_data.dart';
 import 'package:ever_wallet/data/repositories/sites_meta_data_repository.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tuple/tuple.dart';
 
 part 'browser_tabs_cubit.freezed.dart';
 
@@ -49,7 +51,10 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
 
   int get activeTabIndex => _tabsDto.lastActiveIndex;
 
-  BrowserTab get _activeTab => tabs[activeTabIndex];
+  BrowserTab? get activeTab =>
+      activeTabIndex >= 0 && activeTabIndex < tabs.length
+          ? tabs[activeTabIndex]
+          : null;
 
   void showTabs() => emit(
         BrowserTabsCubitState.showTabs(_tabsDto, _tabsDto.lastActiveIndex, _tabsDto.tabs.length),
@@ -65,28 +70,27 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
     hideTabs();
   }
 
-  void openNewTab() {
-    _tabsDto.addTab(
-      const BrowserTab(url: aboutBlankPage, image: '', title: '', lastScrollPosition: 0),
-    );
+  Future<void> openNewTab([String? url]) async {
+    late final BrowserTab tab;
+
+    if (url == null) {
+      tab = const BrowserTab(url: aboutBlankPage, image: '', title: '', lastScrollPosition: 0);
+    } else {
+      final meta = await _getSiteMetaData(url);
+      tab = BrowserTab(url: url, image: meta.image, title: meta.title, lastScrollPosition: 0);
+    }
+
+    _tabsDto.addTab(tab);
     _saveTabs();
     _saveIndex();
     hideTabs();
   }
 
   Future<void> updateCurrentTab(String url) async {
-    if (activeTabIndex != -1 && _activeTab.url == url) return;
+    if (activeTab?.url == url) return;
 
-    String? title;
-    String? image;
-    try {
-      final meta = await metaDataRepository.getSiteMetaData(url);
-      image = meta.image;
-      title = meta.title;
-    } catch (e, t) {
-      logger.e('Failed to load tab MetaData', e, t);
-    }
-    final tab = BrowserTab(url: url, image: image, title: title, lastScrollPosition: 0);
+    final meta = await _getSiteMetaData(url);
+    final tab = BrowserTab(url: url, image: meta.image, title: meta.title, lastScrollPosition: 0);
     _tabsDto.updateCurrentTab(tab);
     _saveTabs();
   }
@@ -119,6 +123,17 @@ class BrowserTabsCubit extends Cubit<BrowserTabsCubitState> {
   void _saveTabs() => _hiveSource.saveBrowserTabs(tabs);
 
   void _saveIndex() => _hiveSource.saveBrowserTabsLastIndex(activeTabIndex);
+
+  Future<SiteMetaData> _getSiteMetaData(String url) async {
+    try {
+      final meta = await metaDataRepository.getSiteMetaData(url);
+      return meta;
+    } catch (e, t) {
+      logger.e('Failed to load tab MetaData', e, t);
+    }
+
+    return SiteMetaData(url: url);
+  }
 }
 
 @freezed

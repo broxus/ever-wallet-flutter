@@ -88,7 +88,7 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
   }
 
   Future<Uint8List?> _takeScreenshot() async {
-    return controller!.takeScreenshot(
+    return controller?.takeScreenshot(
       screenshotConfiguration: ScreenshotConfiguration(
         snapshotWidth: 300,
         quality: 5,
@@ -111,7 +111,8 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
     if (isCurrentTabActive) {
       resumeAll();
     } else {
-      pauseAll();
+      // it somehow causes all tabs pause
+      // pauseAll();
     }
   }
 
@@ -136,35 +137,33 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
         if (!wasOpened) return const SizedBox();
 
         return Listener(
-          child: BlocProvider<BackButtonEnabledCubit>(
-            create: (context) => BackButtonEnabledCubit(),
-            child: BlocProvider<ForwardButtonEnabledCubit>(
-              create: (context) => ForwardButtonEnabledCubit(),
-              child: BlocProvider<ProgressCubit>(
-                create: (context) => ProgressCubit(),
-                child: Scaffold(
-                  resizeToAvoidBottomInset: false,
-                  backgroundColor: ColorsRes.white,
-                  body: SafeArea(
-                    child: Stack(
-                      children: [
-                        Positioned.fill(child: body()),
-                        ValueListenableBuilder<double>(
-                          valueListenable: browserListener,
-                          builder: (_, show, __) {
-                            final size = MediaQuery.of(context).size;
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider<BackButtonEnabledCubit>(create: (_) => BackButtonEnabledCubit()),
+              BlocProvider<ForwardButtonEnabledCubit>(create: (_) => ForwardButtonEnabledCubit()),
+              BlocProvider<ProgressCubit>(create: (_) => ProgressCubit())
+            ],
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              backgroundColor: ColorsRes.white,
+              body: SafeArea(
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: body()),
+                    ValueListenableBuilder<double>(
+                      valueListenable: browserListener,
+                      builder: (_, show, __) {
+                        final size = MediaQuery.of(context).size;
 
-                            return AnimatedPositioned(
-                              top: show,
-                              width: size.width,
-                              duration: const Duration(milliseconds: 300),
-                              child: appBar(),
-                            );
-                          },
-                        ),
-                      ],
+                        return AnimatedPositioned(
+                          top: show,
+                          width: size.width,
+                          duration: const Duration(milliseconds: 300),
+                          child: appBar(),
+                        );
+                      },
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
