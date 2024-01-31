@@ -45,7 +45,7 @@ class Application extends StatelessWidget {
                         scrollBehavior: NoGlowBehavior(),
                         debugShowCheckedModeBanner: false,
                         onGenerateTitle: (context) => context.localization.application_title,
-                        locale: locale?.toLocale(),
+                        locale: Locale('ko'), //locale?.toLocale(),
                         localizationsDelegates: AppLocalizations.localizationsDelegates,
                         supportedLocales: AppLocalizations.supportedLocales,
                         themeMode: ThemeMode.light,
