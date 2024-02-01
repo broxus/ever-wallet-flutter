@@ -72,10 +72,6 @@ class OnboardingScreen extends StatelessWidget {
                       Text.rich(
                         TextSpan(
                           children: [
-                            TextSpan(
-                              text: localization.by_processing_accept_license,
-                              style: style.styles.basicStyle,
-                            ),
                             ..._buildTermsAndPrivacy(context),
                           ],
                         ),
@@ -95,7 +91,7 @@ class OnboardingScreen extends StatelessWidget {
     final style = context.themeStyle;
     final localization = context.localization;
 
-    return localization.review_terms_of_use_and_privacy_policy
+    return localization.by_processing_accept_license
         .split(':')
         .map((text) {
       if (text == 'terms_of_use') {

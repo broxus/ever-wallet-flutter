@@ -15,7 +15,7 @@ Future<void> networkChangedHandler({
     final jsonOutput = jsonEncode(event.toJson());
 
     await controller.evaluateJavascript(
-      source: "window.__dartNotifications.networkChanged('$jsonOutput')",
+      source: "window.__dartNotifications?.networkChanged('$jsonOutput')",
     );
   } catch (err, st) {
     logger.e(err, err, st);

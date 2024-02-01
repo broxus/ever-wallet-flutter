@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ever_wallet/application/common/general/button/primary_button.dart';
 import 'package:ever_wallet/application/common/general/button/primary_icon_button.dart';
 import 'package:ever_wallet/application/main/browser/browser_tabs/browser_tabs_cubit/browser_tabs_cubit.dart';
@@ -9,6 +11,7 @@ import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
+import 'package:ever_wallet/data/repositories/browser_navigation_repository.dart';
 import 'package:ever_wallet/data/repositories/sites_meta_data_repository.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
@@ -25,12 +28,15 @@ class BrowserPage extends StatefulWidget {
 
 class _BrowserPageState extends State<BrowserPage> {
   late final BrowserTabsCubit browserTabsCubit;
+  late final BrowserNavigationRepository navigationRepository;
+  late final StreamSubscription<BrowserNavigation> navigationSubscription;
 
   late bool showedWhyNeedBrowser;
 
   @override
   void initState() {
     super.initState();
+    final navigationRepository = context.read<BrowserNavigationRepository>();
     final source = context.read<HiveSource>();
     showedWhyNeedBrowser = source.getWhyNeedBrowser;
     browserTabsCubit = BrowserTabsCubit(
@@ -40,11 +46,14 @@ class _BrowserPageState extends State<BrowserPage> {
     if (!showedWhyNeedBrowser) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _showWhyNeedBrowserDialog());
     }
+
+    navigationSubscription = navigationRepository.navigationStream.listen(_onBrowserNavigation);
   }
 
   @override
   void dispose() {
     browserTabsCubit.close();
+    navigationSubscription.cancel();
     super.dispose();
   }
 
@@ -142,5 +151,10 @@ class _BrowserPageState extends State<BrowserPage> {
         );
       },
     ).then((_) => context.read<HiveSource>().saveWhyNeedBrowser());
+  }
+
+  void _onBrowserNavigation(BrowserNavigation? value) {
+    if (value == null) return;
+    browserTabsCubit.openNewTab(value.url);
   }
 }

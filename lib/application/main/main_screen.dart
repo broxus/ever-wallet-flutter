@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:ever_wallet/application/main/browser/browser_page.dart';
 import 'package:ever_wallet/application/main/profile/profile_page.dart';
 import 'package:ever_wallet/application/main/wallet/wallet_screen.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
+import 'package:ever_wallet/data/repositories/browser_navigation_repository.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,11 +26,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
+  late final StreamSubscription<BrowserNavigation> navigationSubscription;
+
   final controller = CupertinoTabController();
 
-  late final keysList = List<GlobalKey<NavigatorState>>.generate(3, (_) => GlobalKey());
+  final keysList = List<GlobalKey<NavigatorState>>.generate(3, (_) => GlobalKey());
 
-  late final pages = <Widget>[
+  final pages = <Widget>[
     const WalletScreen(),
     const BrowserPage(),
     const ProfilePage(),
@@ -44,6 +49,21 @@ class MainScreenState extends State<MainScreen> {
       return false;
     }
     return true;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    navigationSubscription = context
+        .read<BrowserNavigationRepository>()
+        .navigationStream
+        .listen(_onBrowserNavigation);
+  }
+
+  @override
+  Future<void> dispose() async {
+    await navigationSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -98,4 +118,8 @@ class MainScreenState extends State<MainScreen> {
         ),
         label: label,
       );
+
+  void _onBrowserNavigation(BrowserNavigation value) {
+    controller.index = 1;
+  }
 }
