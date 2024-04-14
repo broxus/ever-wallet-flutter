@@ -9,7 +9,7 @@ class HttpSource {
       Uri.parse('https://raw.githubusercontent.com/broxus/ton-assets/master/manifest.json');
 
   Uri _venomTonAssetsManifestRoute() =>
-      Uri.parse('https://raw.githubusercontent.com/BVFDT/venom-assets/master/manifest.json');
+      Uri.parse('https://cdn.venom.foundation/assets/mainnet/manifest.json');
 
   Uri _everCurrenciesRoute(String address) =>
       Uri.parse('https://api.flatqube.io/v1/currencies/$address');
