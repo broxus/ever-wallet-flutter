@@ -10,6 +10,7 @@ import 'package:ever_wallet/data/repositories/app_lifecycle_state_repository.dar
 import 'package:ever_wallet/data/repositories/approvals_repository.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
 import 'package:ever_wallet/data/repositories/bookmarks_repository.dart';
+import 'package:ever_wallet/data/repositories/browser_navigation_repository.dart';
 import 'package:ever_wallet/data/repositories/generic_contracts_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/locale_repository.dart';
@@ -77,6 +78,7 @@ class ApplicationInjection extends StatelessWidget {
                     tonAssetsRepositoryProvider(),
                     navigatorKeyProvider(),
                     mainNavigatorKeyProvider(),
+                    browserNavigationProvider(),
                   ],
                   builder: (context, child) => biometryRepositoryProvider(
                     child: keysRepositoryProvider(
@@ -381,4 +383,9 @@ class ApplicationInjection extends StatelessWidget {
   Provider mainNavigatorKeyProvider() => Provider<GlobalKey<MainScreenState>>(
         create: (context) => GlobalKey(),
       );
+
+  Provider<BrowserNavigationRepository> browserNavigationProvider() => Provider<BrowserNavigationRepository>(
+    create: (context) => BrowserNavigationRepository(),
+    dispose: (context, value) => value.dispose(),
+  );
 }
