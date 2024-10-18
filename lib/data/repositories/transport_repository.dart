@@ -36,48 +36,17 @@ class TransportRepository {
       timeout: 60000,
       local: false,
     ),
-    // venom is in test, uncomment it later
-    // ConnectionData.jrpc(
-    //   name: 'Mainnet Venom (JRPC)',
-    //   networkId: 1000,
-    //   group: 'venom_mainnet',
-    //   endpoint: 'https://jrpc.venom.foundation/rpc',
-    // ),
+    ConnectionData.jrpc(
+      name: 'Mainnet Venom',
+      networkId: 1000,
+      group: 'venom_mainnet',
+      endpoint: 'https://jrpc.venom.foundation/rpc',
+    ),
     ConnectionData.jrpc(
       name: 'Testnet Venom',
       networkId: 1010,
-      group: 'testnet',
+      group: 'venom_testnet',
       endpoint: 'https://jrpc-testnet.venom.foundation/rpc',
-    ),
-    ConnectionData.gql(
-      name: 'fld.ton.dev',
-      networkId: 10,
-      group: 'fld',
-      endpoints: [
-        'https://gql.custler.net/graphql',
-      ],
-      timeout: 60000,
-      local: false,
-    ),
-    ConnectionData.gql(
-      name: 'Gosh',
-      networkId: 30,
-      group: 'gosh',
-      endpoints: [
-        'https://network.gosh.sh',
-      ],
-      timeout: 60000,
-      local: false,
-    ),
-    ConnectionData.gql(
-      name: 'Local node',
-      networkId: 31337,
-      group: 'localnet',
-      endpoints: [
-        'https://127.0.0.1',
-      ],
-      timeout: 60000,
-      local: false,
     ),
   ];
 
