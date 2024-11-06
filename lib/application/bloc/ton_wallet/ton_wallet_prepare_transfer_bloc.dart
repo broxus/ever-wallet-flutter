@@ -42,11 +42,18 @@ class TonWalletPrepareTransferBloc
           );
           final feesValue = int.parse(fees);
 
-          final balance =
-              await _tonWalletsRepository.contractState(_address).then((value) => value.balance);
+          final txErrors = await _tonWalletsRepository.simulateTransactionTree(
+            address: _address,
+            message: unsignedMessage.message,
+          );
+
+          final balance = await _tonWalletsRepository
+              .contractState(_address)
+              .then((value) => value.balance);
           final balanceValue = int.parse(balance);
 
-          final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);
+          final isPossibleToSendMessage =
+              balanceValue > (feesValue + amountValue);
 
           if (!isPossibleToSendMessage) throw Exception('Insufficient funds');
 
@@ -54,6 +61,7 @@ class TonWalletPrepareTransferBloc
             TonWalletPrepareTransferState.ready(
               unsignedMessage: unsignedMessage,
               fees: fees,
+              txErrors: txErrors,
             ),
           );
         } catch (err, t) {
@@ -85,6 +93,7 @@ class TonWalletPrepareTransferState with _$TonWalletPrepareTransferState {
   const factory TonWalletPrepareTransferState.ready({
     required UnsignedMessageWithAdditionalInfo unsignedMessage,
     required String fees,
+    required List<TxTreeSimulationErrorItem> txErrors,
   }) = _Ready;
 
   const factory TonWalletPrepareTransferState.error(String error) = _Error;

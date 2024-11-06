@@ -83,6 +83,7 @@ class ColorsRes {
   static const blue950 = Color(0xFFECF1FE);
   static const blue970 = Color(0xFFF9FAFF);
   static const red400Primary = Color(0xFFD83F5A);
+  static const redBackground = Color(0x1AD83F5A);
 
   static const blackBlue = Color(0xFF182768);
   static const blackBlueLight = Color(0xFF555B7A);

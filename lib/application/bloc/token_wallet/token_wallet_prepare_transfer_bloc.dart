@@ -10,8 +10,8 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 part 'token_wallet_prepare_transfer_bloc.freezed.dart';
 
-class TokenWalletPrepareTransferBloc
-    extends Bloc<TokenWalletPrepareTransferEvent, TokenWalletPrepareTransferState> {
+class TokenWalletPrepareTransferBloc extends Bloc<
+    TokenWalletPrepareTransferEvent, TokenWalletPrepareTransferState> {
   final TokenWalletsRepository _tokenWalletsRepository;
   final TonWalletsRepository _tonWalletsRepository;
   final String _owner;
@@ -43,8 +43,8 @@ class TokenWalletPrepareTransferBloc
             payload: event.payload,
           );
 
-          final amountValue =
-              BigInt.parse(internalMessage.amount) + BigInt.parse(_attachedAmount ?? '0');
+          final amountValue = BigInt.parse(internalMessage.amount) +
+              BigInt.parse(_attachedAmount ?? '0');
 
           final unsignedMessage = await _tonWalletsRepository.prepareTransfer(
             address: _owner,
@@ -61,11 +61,18 @@ class TokenWalletPrepareTransferBloc
           );
           final feesValue = BigInt.parse(fees);
 
-          final balance =
-              await _tonWalletsRepository.contractState(_owner).then((value) => value.balance);
+          final txErrors = await _tonWalletsRepository.simulateTransactionTree(
+            address: _owner,
+            message: unsignedMessage.message,
+          );
+
+          final balance = await _tonWalletsRepository
+              .contractState(_owner)
+              .then((value) => value.balance);
           final balanceValue = BigInt.parse(balance);
 
-          final isPossibleToSendMessage = balanceValue > (feesValue + amountValue);
+          final isPossibleToSendMessage =
+              balanceValue > (feesValue + amountValue);
 
           if (!isPossibleToSendMessage) throw Exception('Insufficient funds');
 
@@ -73,6 +80,7 @@ class TokenWalletPrepareTransferBloc
             TokenWalletPrepareTransferState.ready(
               unsignedMessage: unsignedMessage,
               fees: fees,
+              txErrors: txErrors,
             ),
           );
         } catch (err, t) {
@@ -105,6 +113,7 @@ class TokenWalletPrepareTransferState with _$TokenWalletPrepareTransferState {
   const factory TokenWalletPrepareTransferState.ready({
     required UnsignedMessageWithAdditionalInfo unsignedMessage,
     required String fees,
+    required List<TxTreeSimulationErrorItem> txErrors,
   }) = _Ready;
 
   const factory TokenWalletPrepareTransferState.error(String error) = _Error;

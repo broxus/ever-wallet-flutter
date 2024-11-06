@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:ever_wallet/data/models/connection_data.dart';
 import 'package:ever_wallet/data/sources/remote/constants.dart';
 import 'package:ever_wallet/data/sources/remote/http_source.dart';
-import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart' hide ConnectionData;
 import 'package:rxdart/rxdart.dart';
 
 class TransportSource {

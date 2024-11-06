@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
@@ -19,7 +20,8 @@ import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.da
 import 'package:ever_wallet/data/sources/local/app_lifecycle_state_source.dart';
 import 'package:ever_wallet/data/sources/local/current_accounts_source.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
-import 'package:ever_wallet/data/sources/local/sqlite/sqlite_database.dart' as sql;
+import 'package:ever_wallet/data/sources/local/sqlite/sqlite_database.dart'
+    as sql;
 import 'package:ever_wallet/data/sources/remote/transport_source.dart';
 import 'package:ever_wallet/data/utils.dart';
 import 'package:ever_wallet/logger.dart';
@@ -50,8 +52,8 @@ const _zeroStateAddresses = <String>{
 
 class TonWalletsRepository {
   final _lock = Lock();
-  final Map<TonWalletPendingSubscriptionCollection, Completer<TonWalletSubscription>>
-      _pendingTonWalletSubscriptions = {};
+  final Map<TonWalletPendingSubscriptionCollection,
+      Completer<TonWalletSubscription>> _pendingTonWalletSubscriptions = {};
   final Keystore _keystore;
   final sql.SqliteDatabase _sqliteDatabase;
   final HiveSource _hiveSource;
@@ -77,16 +79,19 @@ class TonWalletsRepository {
         _transportSource = transportSource,
         _currentAccountsSource = currentAccountsSource,
         _appLifecycleStateSource = appLifecycleStateSource {
-    _pollingTimer = Timer.periodic(kSubscriptionRefreshTimeout, _pollingTimerCallback);
+    _pollingTimer =
+        Timer.periodic(kSubscriptionRefreshTimeout, _pollingTimerCallback);
 
-    _currentAccountsStreamSubscription = _currentAccountsSource.currentAccountsStream
-        .listen((e) => _lock.synchronized(() => _currentAccountsStreamListener(e)));
+    _currentAccountsStreamSubscription =
+        _currentAccountsSource.currentAccountsStream.listen(
+            (e) => _lock.synchronized(() => _currentAccountsStreamListener(e)));
 
     _transportStreamSubscription = _transportSource.transportStream
         .listen((e) => _lock.synchronized(() => _transportStreamListener(e)));
   }
 
-  Stream<List<TonWalletOrdinaryTransaction>> ordinaryTransactionsStream(String address) =>
+  Stream<List<TonWalletOrdinaryTransaction>> ordinaryTransactionsStream(
+          String address) =>
       _tonWalletsSubject.map((e) => e[address]).whereNotNull().flatMap(
             (e) => e.future.asStream().flatMap(
                   (e) => _sqliteDatabase.tonWalletTransactionsDao
@@ -96,12 +101,14 @@ class TonWalletsRepository {
                         address: e.tonWallet.address,
                       )
                       .map(
-                        (el) => _mapOrdinaryTransactions(tonWallet: e.tonWallet, transactions: el),
+                        (el) => _mapOrdinaryTransactions(
+                            tonWallet: e.tonWallet, transactions: el),
                       ),
                 ),
           );
 
-  Stream<List<TonWalletPendingTransaction>> pendingTransactionsStream(String address) =>
+  Stream<List<TonWalletPendingTransaction>> pendingTransactionsStream(
+          String address) =>
       _tonWalletsSubject.map((e) => e[address]).whereNotNull().flatMap(
             (e) => e.future.asStream().flatMap(
                   (e) => _sqliteDatabase.tonWalletPendingTransactionsDao
@@ -119,7 +126,8 @@ class TonWalletsRepository {
                 ),
           );
 
-  Stream<List<TonWalletExpiredTransaction>> expiredTransactionsStream(String address) =>
+  Stream<List<TonWalletExpiredTransaction>> expiredTransactionsStream(
+          String address) =>
       _tonWalletsSubject.map((e) => e[address]).whereNotNull().flatMap(
             (e) => e.future.asStream().flatMap(
                   (e) => _sqliteDatabase.tonWalletExpiredTransactionsDao
@@ -137,101 +145,123 @@ class TonWalletsRepository {
                 ),
           );
 
-  Stream<List<TonWalletMultisigOrdinaryTransaction>> multisigOrdinaryTransactionsStream(
+  Stream<List<TonWalletMultisigOrdinaryTransaction>>
+      multisigOrdinaryTransactionsStream(
     String address,
   ) =>
-      _tonWalletsSubject.map((e) => e[address]).whereNotNull().flatMap(
-            (e) => e.future.asStream().flatMap(
-                  (e) => Rx.combineLatest2<
-                      List<TransactionWithData<TransactionAdditionalInfo?>>,
-                      List<MultisigPendingTransaction>,
-                      Tuple2<List<TransactionWithData<TransactionAdditionalInfo?>>,
-                          List<MultisigPendingTransaction>>>(
-                    _sqliteDatabase.tonWalletTransactionsDao.transactions(
-                      networkId: e.tonWallet.transport.networkId,
-                      group: e.tonWallet.transport.group,
-                      address: e.tonWallet.address,
+          _tonWalletsSubject.map((e) => e[address]).whereNotNull().flatMap(
+                (e) => e.future.asStream().flatMap(
+                      (e) => Rx.combineLatest2<
+                          List<TransactionWithData<TransactionAdditionalInfo?>>,
+                          List<MultisigPendingTransaction>,
+                          Tuple2<
+                              List<
+                                  TransactionWithData<
+                                      TransactionAdditionalInfo?>>,
+                              List<MultisigPendingTransaction>>>(
+                        _sqliteDatabase.tonWalletTransactionsDao.transactions(
+                          networkId: e.tonWallet.transport.networkId,
+                          group: e.tonWallet.transport.group,
+                          address: e.tonWallet.address,
+                        ),
+                        e.tonWallet.unconfirmedTransactionsStream,
+                        (a, b) => Tuple2(a, b),
+                      ).map(
+                        (el) => _mapMultisigOrdinaryTransactions(
+                          tonWallet: e.tonWallet,
+                          transactions: el.item1,
+                          multisigPendingTransactions: el.item2,
+                        ),
+                      ),
                     ),
-                    e.tonWallet.unconfirmedTransactionsStream,
-                    (a, b) => Tuple2(a, b),
-                  ).map(
-                    (el) => _mapMultisigOrdinaryTransactions(
-                      tonWallet: e.tonWallet,
-                      transactions: el.item1,
-                      multisigPendingTransactions: el.item2,
-                    ),
-                  ),
-                ),
-          );
+              );
 
-  Stream<List<TonWalletMultisigPendingTransaction>> multisigPendingTransactionsStream(
+  Stream<List<TonWalletMultisigPendingTransaction>>
+      multisigPendingTransactionsStream(
     String address,
   ) =>
-      _tonWalletsSubject.map((e) => e[address]).whereNotNull().flatMap(
-            (e) => e.future.asStream().flatMap(
-                  (e) => Rx.combineLatest2<
-                      List<TransactionWithData<TransactionAdditionalInfo?>>,
-                      List<MultisigPendingTransaction>,
-                      Tuple2<List<TransactionWithData<TransactionAdditionalInfo?>>,
-                          List<MultisigPendingTransaction>>>(
-                    _sqliteDatabase.tonWalletTransactionsDao.transactions(
-                      networkId: e.tonWallet.transport.networkId,
-                      group: e.tonWallet.transport.group,
-                      address: e.tonWallet.address,
+          _tonWalletsSubject.map((e) => e[address]).whereNotNull().flatMap(
+                (e) => e.future.asStream().flatMap(
+                      (e) => Rx.combineLatest2<
+                          List<TransactionWithData<TransactionAdditionalInfo?>>,
+                          List<MultisigPendingTransaction>,
+                          Tuple2<
+                              List<
+                                  TransactionWithData<
+                                      TransactionAdditionalInfo?>>,
+                              List<MultisigPendingTransaction>>>(
+                        _sqliteDatabase.tonWalletTransactionsDao.transactions(
+                          networkId: e.tonWallet.transport.networkId,
+                          group: e.tonWallet.transport.group,
+                          address: e.tonWallet.address,
+                        ),
+                        e.tonWallet.unconfirmedTransactionsStream,
+                        (a, b) => Tuple2(a, b),
+                      ).map(
+                        (el) => _mapMultisigPendingTransactions(
+                          tonWallet: e.tonWallet,
+                          transactions: el.item1,
+                          multisigPendingTransactions: el.item2,
+                        ),
+                      ),
                     ),
-                    e.tonWallet.unconfirmedTransactionsStream,
-                    (a, b) => Tuple2(a, b),
-                  ).map(
-                    (el) => _mapMultisigPendingTransactions(
-                      tonWallet: e.tonWallet,
-                      transactions: el.item1,
-                      multisigPendingTransactions: el.item2,
-                    ),
-                  ),
-                ),
-          );
+              );
 
-  Stream<List<TonWalletMultisigExpiredTransaction>> multisigExpiredTransactionsStream(
+  Stream<List<TonWalletMultisigExpiredTransaction>>
+      multisigExpiredTransactionsStream(
     String address,
   ) =>
-      _tonWalletsSubject.map((e) => e[address]).whereNotNull().flatMap(
-            (e) => e.future.asStream().flatMap(
-                  (e) => Rx.combineLatest2<
-                      List<TransactionWithData<TransactionAdditionalInfo?>>,
-                      List<MultisigPendingTransaction>,
-                      Tuple2<List<TransactionWithData<TransactionAdditionalInfo?>>,
-                          List<MultisigPendingTransaction>>>(
-                    _sqliteDatabase.tonWalletTransactionsDao.transactions(
-                      networkId: e.tonWallet.transport.networkId,
-                      group: e.tonWallet.transport.group,
-                      address: e.tonWallet.address,
+          _tonWalletsSubject.map((e) => e[address]).whereNotNull().flatMap(
+                (e) => e.future.asStream().flatMap(
+                      (e) => Rx.combineLatest2<
+                          List<TransactionWithData<TransactionAdditionalInfo?>>,
+                          List<MultisigPendingTransaction>,
+                          Tuple2<
+                              List<
+                                  TransactionWithData<
+                                      TransactionAdditionalInfo?>>,
+                              List<MultisigPendingTransaction>>>(
+                        _sqliteDatabase.tonWalletTransactionsDao.transactions(
+                          networkId: e.tonWallet.transport.networkId,
+                          group: e.tonWallet.transport.group,
+                          address: e.tonWallet.address,
+                        ),
+                        e.tonWallet.unconfirmedTransactionsStream,
+                        (a, b) => Tuple2(a, b),
+                      ).map(
+                        (el) => _mapMultisigExpiredTransactions(
+                          tonWallet: e.tonWallet,
+                          transactions: el.item1,
+                          multisigPendingTransactions: el.item2,
+                        ),
+                      ),
                     ),
-                    e.tonWallet.unconfirmedTransactionsStream,
-                    (a, b) => Tuple2(a, b),
-                  ).map(
-                    (el) => _mapMultisigExpiredTransactions(
-                      tonWallet: e.tonWallet,
-                      transactions: el.item1,
-                      multisigPendingTransactions: el.item2,
-                    ),
-                  ),
-                ),
-          );
+              );
 
-  Stream<ContractState> contractStateStream(String address) => _tonWallet(address).flatMap(
-        (v) => v.fieldUpdatesController.map((_) => v.contractState).startWith(v.contractState),
+  Stream<ContractState> contractStateStream(String address) =>
+      _tonWallet(address).flatMap(
+        (v) => v.fieldUpdatesController
+            .map((_) => v.contractState)
+            .startWith(v.contractState),
       );
 
-  Future<ContractState> contractState(String address) => contractStateStream(address).first;
+  Future<ContractState> contractState(String address) =>
+      contractStateStream(address).first;
 
-  Stream<TonWalletDetails> detailsStream(String address) => _tonWallet(address)
-      .flatMap((v) => v.fieldUpdatesController.map((_) => v.details).startWith(v.details));
+  Stream<TonWalletDetails> detailsStream(String address) =>
+      _tonWallet(address).flatMap((v) =>
+          v.fieldUpdatesController.map((_) => v.details).startWith(v.details));
 
-  Stream<List<String>?> custodiansStream(String address) => _tonWallet(address)
-      .flatMap((v) => v.fieldUpdatesController.map((_) => v.custodians).startWith(v.custodians));
+  Stream<List<String>?> custodiansStream(String address) =>
+      _tonWallet(address).flatMap((v) => v.fieldUpdatesController
+          .map((_) => v.custodians)
+          .startWith(v.custodians));
 
-  Stream<List<String>?> localCustodiansStream(String address) => _tonWallet(address)
-          .flatMap((v) => v.fieldUpdatesController.map((_) => v.custodians).startWith(v.custodians))
+  Stream<List<String>?> localCustodiansStream(String address) =>
+      _tonWallet(address)
+          .flatMap((v) => v.fieldUpdatesController
+              .map((_) => v.custodians)
+              .startWith(v.custodians))
           .map((e) {
         final custodians = e;
 
@@ -242,7 +272,8 @@ class TonWalletsRepository {
             .where((e) => custodians.any((el) => el == e))
             .toList();
 
-        final initiatorKey = localCustodians.firstWhereOrNull((e) => e == _hiveSource.currentKey);
+        final initiatorKey = localCustodians
+            .firstWhereOrNull((e) => e == _hiveSource.currentKey);
 
         final sortedLocalCustodians = [
           if (initiatorKey != null) initiatorKey,
@@ -252,12 +283,15 @@ class TonWalletsRepository {
         return sortedLocalCustodians;
       });
 
-  Future<List<String>?> localCustodians(String address) => localCustodiansStream(address).first;
+  Future<List<String>?> localCustodians(String address) =>
+      localCustodiansStream(address).first;
 
-  Future<UnsignedMessageWithAdditionalInfo> prepareDeploy(String address) async {
+  Future<UnsignedMessageWithAdditionalInfo> prepareDeploy(
+      String address) async {
     final tonWallet = await getTonWalletStream(address).first;
 
-    final unsignedMessage = await tonWallet.prepareDeploy(kDefaultMessageExpiration);
+    final unsignedMessage =
+        await tonWallet.prepareDeploy(kDefaultMessageExpiration);
 
     final unsignedMessageWithAdditionalInfo =
         UnsignedMessageWithAdditionalInfo(message: unsignedMessage);
@@ -339,7 +373,8 @@ class TonWalletsRepository {
 
   Future<String> estimateFees({
     required String address,
-    required UnsignedMessageWithAdditionalInfo unsignedMessageWithAdditionalInfo,
+    required UnsignedMessageWithAdditionalInfo
+        unsignedMessageWithAdditionalInfo,
   }) async {
     final tonWallet = await getTonWalletStream(address).first;
 
@@ -368,7 +403,8 @@ class TonWalletsRepository {
 
       final pendingTransaction = await tonWallet.send(signedMessage);
 
-      final pendingTransactionWithAdditionalInfo = PendingTransactionWithAdditionalInfo(
+      final pendingTransactionWithAdditionalInfo =
+          PendingTransactionWithAdditionalInfo(
         transaction: pendingTransaction,
         createdAt: DateTime.now().secondsSinceEpoch,
         dst: signedMessageWithAdditionalInfo.dst,
@@ -418,7 +454,8 @@ class TonWalletsRepository {
     } else if (transport is JrpcTransport) {
       final pendingTransaction = await tonWallet.send(signedMessage);
 
-      final pendingTransactionWithAdditionalInfo = PendingTransactionWithAdditionalInfo(
+      final pendingTransactionWithAdditionalInfo =
+          PendingTransactionWithAdditionalInfo(
         transaction: pendingTransaction,
         createdAt: DateTime.now().secondsSinceEpoch,
         dst: signedMessageWithAdditionalInfo.dst,
@@ -477,7 +514,8 @@ class TonWalletsRepository {
   }
 
   /// Update subscriptions by adding a new one with [address] and return it
-  Future<void> updateSubscription(String address) => _lock.synchronized(() async {
+  Future<void> updateSubscription(String address) =>
+      _lock.synchronized(() async {
         final transport = _transportSource.transport;
         final subscriptions = {..._tonWalletsSubject.value};
 
@@ -520,6 +558,25 @@ class TonWalletsRepository {
     }
   }
 
+  Future<List<TxTreeSimulationErrorItem>> simulateTransactionTree({
+    required String address,
+    required UnsignedMessage message,
+  }) async {
+    final tonWallet = await getTonWalletStream(address).first;
+
+    await message.refreshTimeout();
+
+    final signedMessage = await message.signFake();
+    final errors = await tonWallet.transport.simulateTransactionTree(
+      signedMessage: signedMessage,
+      ignoredComputePhaseCodes: Int32List.fromList([0, 1, 60, 100]),
+      ignoredActionPhaseCodes: Int32List.fromList([0, 1]),
+    );
+
+    // remove duplicate errors
+    return errors.toSet().toList();
+  }
+
   void _pollingTimerCallback(Timer timer) {
     final appLifecycleState = _appLifecycleStateSource.appLifecycleState;
     final appIsActive = appLifecycleState == AppLifecycleState.resumed ||
@@ -529,7 +586,8 @@ class TonWalletsRepository {
       for (final tonWallet in _tonWalletsSubject.value.values) {
         if (tonWallet.isCompleted) {
           tonWallet.future.then((v) async {
-            if (v.tonWallet.pollingMethod == PollingMethod.manual) v.tonWallet.refresh().ignore();
+            if (v.tonWallet.pollingMethod == PollingMethod.manual)
+              v.tonWallet.refresh().ignore();
           }).ignore();
         }
       }
@@ -584,7 +642,8 @@ class TonWalletsRepository {
     try {
       final transport = event;
 
-      final tonWallets = _currentAccountsSource.currentAccounts.map((e) => e.tonWallet);
+      final tonWallets =
+          _currentAccountsSource.currentAccounts.map((e) => e.tonWallet);
 
       /// contains assets where transport is different to new one
       final assetsToRemove = tonWallets.where((asset) {
@@ -592,10 +651,12 @@ class TonWalletsRepository {
           asset: asset,
           transportCollection: transport.toEquatableCollection(),
         );
-        final pendedEntry =
-            _pendingTonWalletSubscriptions.entries.where((e) => e.key == pendingKey).firstOrNull;
+        final pendedEntry = _pendingTonWalletSubscriptions.entries
+            .where((e) => e.key == pendingKey)
+            .firstOrNull;
         if (pendedEntry != null &&
-            pendedEntry.key.isSameTransport(transport.toEquatableCollection())) {
+            pendedEntry.key
+                .isSameTransport(transport.toEquatableCollection())) {
           return false;
         }
         return true;
@@ -603,9 +664,14 @@ class TonWalletsRepository {
 
       /// Unsubscribe
       for (final key in assetsToRemove) {
-        _tonWalletsSubject.value.remove(key.address)?.future.then((v) => v.dispose()).ignore();
+        _tonWalletsSubject.value
+            .remove(key.address)
+            ?.future
+            .then((v) => v.dispose())
+            .ignore();
         _pendingTonWalletSubscriptions.remove(
-          TonWalletPendingSubscriptionCollection(asset: key, transportCollection: []),
+          TonWalletPendingSubscriptionCollection(
+              asset: key, transportCollection: []),
         );
       }
 
@@ -635,8 +701,9 @@ class TonWalletsRepository {
       asset: tonWalletAsset,
       transportCollection: transport.toEquatableCollection(),
     );
-    final pendedEntry =
-        _pendingTonWalletSubscriptions.entries.where((e) => e.key == pendingKey).firstOrNull;
+    final pendedEntry = _pendingTonWalletSubscriptions.entries
+        .where((e) => e.key == pendingKey)
+        .firstOrNull;
     if (pendedEntry != null) {
       if (pendedEntry.key.isSameTransport(pendingKey.transportCollection)) {
         return pendedEntry.value.future;
@@ -668,8 +735,9 @@ class TonWalletsRepository {
         );
       },
       onMessageExpired: (e) async {
-        final expiredTransaction =
-            await _sqliteDatabase.tonWalletPendingTransactionsDao.deleteTransaction(
+        final expiredTransaction = await _sqliteDatabase
+            .tonWalletPendingTransactionsDao
+            .deleteTransaction(
           networkId: tonWallet.transport.networkId,
           group: tonWallet.transport.group,
           address: tonWallet.address,
@@ -719,13 +787,15 @@ class TonWalletsRepository {
   }
 
   /// Check if address of token relates to giver
-  bool isZeroState({required String address}) => _zeroStateAddresses.contains(address);
+  bool isZeroState({required String address}) =>
+      _zeroStateAddresses.contains(address);
 
   Stream<TonWallet> _tonWallet(String address) => getTonWalletStream(address);
 
-  Stream<TonWallet> getTonWalletStream(String address) => _tonWalletsSubject.stream
-      .where((v) => v[address] != null)
-      .flatMap((value) => value[address]!.future.then((v) => v.tonWallet).asStream());
+  Stream<TonWallet> getTonWalletStream(String address) =>
+      _tonWalletsSubject.stream.where((v) => v[address] != null).flatMap(
+          (value) =>
+              value[address]!.future.then((v) => v.tonWallet).asStream());
 
   List<TonWalletOrdinaryTransaction> _mapOrdinaryTransactions({
     required TonWallet tonWallet,
@@ -793,7 +863,8 @@ class TonWalletsRepository {
 
           final value = dataValue ?? msgValue;
 
-          final address = (isOutgoing ? recipient : sender) ?? tonWallet.address;
+          final address =
+              (isOutgoing ? recipient : sender) ?? tonWallet.address;
 
           final date = e.transaction.createdAt.toDateTime();
 
@@ -836,7 +907,8 @@ class TonWalletsRepository {
             fees: fees,
             hash: hash,
             comment: comment,
-            dePoolOnRoundCompleteNotification: dePoolOnRoundCompleteNotification,
+            dePoolOnRoundCompleteNotification:
+                dePoolOnRoundCompleteNotification,
             dePoolReceiveAnswerNotification: dePoolReceiveAnswerNotification,
             tokenWalletDeployedNotification: tokenWalletDeployedNotification,
             walletInteractionInfo: walletInteractionInfo,
@@ -976,7 +1048,8 @@ class TonWalletsRepository {
 
           final value = dataValue ?? msgValue;
 
-          final address = (isOutgoing ? recipient : sender) ?? tonWallet.address;
+          final address =
+              (isOutgoing ? recipient : sender) ?? tonWallet.address;
 
           final date = e.transaction.createdAt.toDateTime();
 
@@ -1022,7 +1095,8 @@ class TonWalletsRepository {
             fees: fees,
             hash: hash,
             comment: comment,
-            dePoolOnRoundCompleteNotification: dePoolOnRoundCompleteNotification,
+            dePoolOnRoundCompleteNotification:
+                dePoolOnRoundCompleteNotification,
             dePoolReceiveAnswerNotification: dePoolReceiveAnswerNotification,
             tokenWalletDeployedNotification: tokenWalletDeployedNotification,
             walletInteractionInfo: walletInteractionInfo,
@@ -1037,7 +1111,9 @@ class TonWalletsRepository {
     required List<TransactionWithData<TransactionAdditionalInfo?>> transactions,
     required List<MultisigPendingTransaction> multisigPendingTransactions,
   }) =>
-      transactions.where((e) => e.isPendingTransaction(multisigPendingTransactions)).map(
+      transactions
+          .where((e) => e.isPendingTransaction(multisigPendingTransactions))
+          .map(
         (e) {
           final lt = e.transaction.id.lt;
 
@@ -1104,7 +1180,8 @@ class TonWalletsRepository {
 
           final value = dataValue ?? msgValue;
 
-          final address = (isOutgoing ? recipient : sender) ?? tonWallet.address;
+          final address =
+              (isOutgoing ? recipient : sender) ?? tonWallet.address;
 
           final date = e.transaction.createdAt.toDateTime();
 
@@ -1146,25 +1223,29 @@ class TonWalletsRepository {
           final transactionId = multisigPendingTransaction.id;
 
           final localCustodians = _keystore.entries
-              .where((e) => tonWallet.custodians!.any((el) => el == e.publicKey))
+              .where(
+                  (e) => tonWallet.custodians!.any((el) => el == e.publicKey))
               .toList();
 
-          final initiatorKey =
-              localCustodians.firstWhereOrNull((e) => e.publicKey == tonWallet.publicKey);
+          final initiatorKey = localCustodians
+              .firstWhereOrNull((e) => e.publicKey == tonWallet.publicKey);
 
           final listOfKeys = [
             if (initiatorKey != null) initiatorKey,
-            ...localCustodians.where((e) => e.publicKey != initiatorKey?.publicKey),
+            ...localCustodians
+                .where((e) => e.publicKey != initiatorKey?.publicKey),
           ];
 
-          final nonConfirmedLocalCustodians =
-              listOfKeys.where((e) => confirmations.every((el) => el != e.publicKey));
+          final nonConfirmedLocalCustodians = listOfKeys
+              .where((e) => confirmations.every((el) => el != e.publicKey));
 
-          final publicKeys = nonConfirmedLocalCustodians.map((e) => e.publicKey).toList();
+          final publicKeys =
+              nonConfirmedLocalCustodians.map((e) => e.publicKey).toList();
 
           final canConfirm = publicKeys.isNotEmpty;
 
-          final timeForConfirmation = Duration(seconds: tonWallet.details.expirationTime);
+          final timeForConfirmation =
+              Duration(seconds: tonWallet.details.expirationTime);
 
           final expireAt = date.add(timeForConfirmation);
 
@@ -1182,7 +1263,8 @@ class TonWalletsRepository {
             fees: fees,
             hash: hash,
             comment: comment,
-            dePoolOnRoundCompleteNotification: dePoolOnRoundCompleteNotification,
+            dePoolOnRoundCompleteNotification:
+                dePoolOnRoundCompleteNotification,
             dePoolReceiveAnswerNotification: dePoolReceiveAnswerNotification,
             tokenWalletDeployedNotification: tokenWalletDeployedNotification,
             walletInteractionInfo: walletInteractionInfo,
@@ -1284,7 +1366,8 @@ class TonWalletsRepository {
 
           final value = dataValue ?? msgValue;
 
-          final address = (isOutgoing ? recipient : sender) ?? tonWallet.address;
+          final address =
+              (isOutgoing ? recipient : sender) ?? tonWallet.address;
 
           final date = e.transaction.createdAt.toDateTime();
 
@@ -1330,7 +1413,8 @@ class TonWalletsRepository {
             fees: fees,
             hash: hash,
             comment: comment,
-            dePoolOnRoundCompleteNotification: dePoolOnRoundCompleteNotification,
+            dePoolOnRoundCompleteNotification:
+                dePoolOnRoundCompleteNotification,
             dePoolReceiveAnswerNotification: dePoolReceiveAnswerNotification,
             tokenWalletDeployedNotification: tokenWalletDeployedNotification,
             walletInteractionInfo: walletInteractionInfo,
@@ -1402,12 +1486,14 @@ extension on TransactionWithData<TransactionAdditionalInfo?> {
         orElse: () => false,
       );
 
-  bool isPendingTransaction(List<MultisigPendingTransaction> pendingTransactions) =>
+  bool isPendingTransaction(
+          List<MultisigPendingTransaction> pendingTransactions) =>
       data != null &&
       data!.maybeWhen(
         walletInteraction: (data) => data.method.maybeWhen(
           multisig: (data) => data.maybeWhen(
-            submit: (data) => pendingTransactions.any((e) => e.id == data.transId),
+            submit: (data) =>
+                pendingTransactions.any((e) => e.id == data.transId),
             orElse: () => false,
           ),
           orElse: () => false,
@@ -1443,13 +1529,16 @@ extension on TransactionWithData<TransactionAdditionalInfo?> {
   ) {
     if (details.requiredConfirmations == null) return true;
 
-    final foundConfirms = transactions.where((e) => e.isConfirmTransaction(transId)).length;
+    final foundConfirms =
+        transactions.where((e) => e.isConfirmTransaction(transId)).length;
     // -1 because 1-st submit transaction is confirmation itself
     return foundConfirms >= details.requiredConfirmations! - 1;
   }
 
   bool isExpiredByTime(TonWalletDetails details) {
-    return (transaction.createdAt + details.expirationTime).toDateTime().isBefore(DateTime.now());
+    return (transaction.createdAt + details.expirationTime)
+        .toDateTime()
+        .isBefore(DateTime.now());
   }
 
   MultisigSubmitTransaction get multisigSubmitTransaction => data!.maybeWhen(
@@ -1478,5 +1567,7 @@ extension on TransactionWithData<TransactionAdditionalInfo?> {
 
 extension on TonWallet {
   Stream<List<MultisigPendingTransaction>> get unconfirmedTransactionsStream =>
-      fieldUpdatesController.map((_) => unconfirmedTransactions).startWith(unconfirmedTransactions);
+      fieldUpdatesController
+          .map((_) => unconfirmedTransactions)
+          .startWith(unconfirmedTransactions);
 }
