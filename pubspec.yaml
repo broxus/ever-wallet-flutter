@@ -92,6 +92,11 @@ dev_dependencies:
 
 dependency_overrides:
   modal_bottom_sheet: ^3.0.0-pre
+  flutter_inappwebview_ios:
+    git:
+      url: https://github.com/andychucs/flutter_inappwebview.git
+      ref: master
+      path: flutter_inappwebview_ios
 
 flutter_icons:
   image_path_android: "assets/images/icon-1024x1024.png"
