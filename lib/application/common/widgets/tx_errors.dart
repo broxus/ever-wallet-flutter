@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TxErrors extends StatelessWidget {
   const TxErrors({
@@ -51,20 +52,39 @@ class TxErrors extends StatelessWidget {
                   const SizedBox(height: 8),
                   for (final item in errors) _ErrorMessage(item: item),
                   const SizedBox(height: 8),
-                  if (canFixTxError)
-                    Text(
-                      'Send 0.2 ${isEver ? kEverTicker : kVenomTicker} to this address or contact technical support.',
+                  RichText(
+                    text: TextSpan(
                       style: StylesRes.captionText.copyWith(
                         color: ColorsRes.red400Primary,
                       ),
-                    )
-                  else
-                    Text(
-                      'Contact technical support.',
-                      style: StylesRes.captionText.copyWith(
-                        color: ColorsRes.red400Primary,
-                      ),
+                      children: [
+                        if (canFixTxError)
+                          TextSpan(
+                            text:
+                                'Send 0.2 ${isEver ? kEverTicker : kVenomTicker} to this address or contact ',
+                          )
+                        else
+                          const TextSpan(
+                            text: 'Contact ',
+                          ),
+                        TextSpan(
+                          text: 'technical support',
+                          style: StylesRes.captionText.copyWith(
+                            color: ColorsRes.bluePrimary400,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              await launchUrl(
+                                Uri.parse(kBroxusSupportLink),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            },
+                        ),
+                        const TextSpan(text: '.'),
+                      ],
                     ),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [

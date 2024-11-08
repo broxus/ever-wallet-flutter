@@ -24,3 +24,5 @@ const kVenomTicker = 'VENOM';
 
 const kEverNetworkName = 'Everscale';
 const kVenomNetworkName = 'Venom';
+
+const kBroxusSupportLink = 'https://t.me/broxus_chat';

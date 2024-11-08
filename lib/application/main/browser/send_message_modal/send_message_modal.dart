@@ -258,21 +258,21 @@ class _SendMessageModalState extends State<SendMessagePage> {
         .toList();
   }
 
-  Widget buttons() => Row(
+  Widget buttons() => Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: rejectButton(),
-          ),
-          const Gap(16),
-          Expanded(
-            flex: 2,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                txError(),
-                submitButton(),
-              ],
-            ),
+          txError(),
+          Row(
+            children: [
+              Expanded(
+                child: rejectButton(),
+              ),
+              const Gap(16),
+              Expanded(
+                flex: 2,
+                child: submitButton(),
+              ),
+            ],
           ),
         ],
       );
@@ -321,7 +321,7 @@ class _SendMessageModalState extends State<SendMessagePage> {
               return CustomElevatedButton(
                 onPressed: selectedPublicKey != null &&
                         result != null &&
-                        result.item3.isEmpty
+                        (result.item3.isEmpty || isConfirmed)
                     ? () => onSubmitPressed(selectedPublicKey)
                     : null,
                 text: AppLocalizations.of(context)!.send,
