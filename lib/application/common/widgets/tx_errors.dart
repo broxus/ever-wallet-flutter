@@ -118,6 +118,7 @@ class _ErrorMessageState extends State<_ErrorMessage> {
       text: widget.item.address.ellipseAddress(),
       style: StylesRes.captionText.copyWith(
         color: ColorsRes.red400Primary,
+        fontWeight: FontWeight.w600,
       ),
       recognizer: TapGestureRecognizer()..onTap = _onTap,
     );
