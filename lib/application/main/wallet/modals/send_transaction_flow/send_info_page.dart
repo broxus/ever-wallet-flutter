@@ -6,6 +6,7 @@ import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
 import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/tx_errors.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/password_enter_page/password_enter_page.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/send_result_page.dart';
 import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
@@ -39,12 +40,16 @@ class SendInfoPage extends StatefulWidget {
   });
 
   @override
-  _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
+  _NewSelectWalletTypePageState createState() =>
+      _NewSelectWalletTypePageState();
 }
 
 class _NewSelectWalletTypePageState extends State<SendInfoPage> {
+  bool isConfirmed = false;
+
   @override
-  Widget build(BuildContext context) => BlocProvider<TonWalletPrepareTransferBloc>(
+  Widget build(BuildContext context) =>
+      BlocProvider<TonWalletPrepareTransferBloc>(
         key: ValueKey(widget.address),
         create: (context) => TonWalletPrepareTransferBloc(
           context.read<TonWalletsRepository>(),
@@ -64,7 +69,8 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
               onPressed: () {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
-                } else if (Navigator.of(context, rootNavigator: true).canPop()) {
+                } else if (Navigator.of(context, rootNavigator: true)
+                    .canPop()) {
                   Navigator.of(context, rootNavigator: true).pop();
                 }
               },
@@ -102,6 +108,7 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    txError(),
                     submitButton(),
                   ],
                 ),
@@ -139,10 +146,11 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
 
   Widget fee() => TransportTypeBuilderWidget(
         builder: (context, isEver) {
-          return BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
+          return BlocBuilder<TonWalletPrepareTransferBloc,
+              TonWalletPrepareTransferState>(
             builder: (context, state) {
               final subtitle = state.maybeWhen(
-                ready: (unsignedMessage, fees) =>
+                ready: (_, fees, __) =>
                     '${fees.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
                 error: (error) => error,
                 orElse: () => null,
@@ -163,18 +171,43 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
         },
       );
 
+  Widget txError() =>
+      BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
+        builder: (context, state) {
+          final txErrors = state.maybeWhen(
+            ready: (_, __, txErrors) => txErrors,
+            orElse: () => null,
+          );
+
+          if (txErrors == null || txErrors.isEmpty) return const SizedBox();
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: TxErrors(
+              errors: txErrors,
+              isConfirmed: isConfirmed,
+              onConfirm: (value) => setState(() => isConfirmed = value),
+            ),
+          );
+        },
+      );
+
   Widget comment() => SectionedCardSection(
         title: AppLocalizations.of(context)!.comment,
         subtitle: widget.comment,
       );
 
-  Widget submitButton() => BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
+  Widget submitButton() =>
+      BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
         builder: (context, state) => PrimaryElevatedButton(
           onPressed: state.maybeWhen(
-            ready: (unsignedMessage, fees) => () => onPressed(
-                  message: unsignedMessage,
-                  publicKey: widget.publicKey,
-                ),
+            ready: (unsignedMessage, fees, txErrors) {
+              if (txErrors.isNotEmpty && !isConfirmed) return null;
+              return () => onPressed(
+                    message: unsignedMessage,
+                    publicKey: widget.publicKey,
+                  );
+            },
             orElse: () => null,
           ),
           text: AppLocalizations.of(context)!.send,
@@ -222,7 +255,8 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
   Future<String?> getPasswordFromBiometry(String publicKey) async {
     try {
       final password = await context.read<BiometryRepository>().getKeyPassword(
-            localizedReason: AppLocalizations.of(context)!.authentication_reason,
+            localizedReason:
+                AppLocalizations.of(context)!.authentication_reason,
             publicKey: publicKey,
           );
 

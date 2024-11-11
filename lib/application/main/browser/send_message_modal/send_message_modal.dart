@@ -10,6 +10,7 @@ import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
 import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/tx_errors.dart';
 import 'package:ever_wallet/application/main/browser/common/selected_public_key_cubit.dart';
 import 'package:ever_wallet/application/main/common/extensions.dart';
 import 'package:ever_wallet/application/main/common/get_password_from_biometry.dart';
@@ -53,28 +54,32 @@ class SendMessagePage extends StatefulWidget {
 }
 
 class _SendMessageModalState extends State<SendMessagePage> {
+  bool isConfirmed = false;
+
   @override
   Widget build(BuildContext context) => BlocProvider<SelectedPublicKeyCubit>(
         create: (context) => SelectedPublicKeyCubit(widget.publicKeys.first),
         child: BlocProvider<TonWalletPrepareTransferBloc>(
           key: ValueKey(widget.sender),
-          create: (context) =>
-              TonWalletPrepareTransferBloc(context.read<TonWalletsRepository>(), widget.sender)
-                ..add(
-                  TonWalletPrepareTransferEvent.prepareTransfer(
-                    publicKey: widget.publicKeys.first,
-                    destination: widget.recipient,
-                    amount: widget.amount,
-                  ),
-                ),
+          create: (context) => TonWalletPrepareTransferBloc(
+            context.read<TonWalletsRepository>(),
+            widget.sender,
+          )..add(
+              TonWalletPrepareTransferEvent.prepareTransfer(
+                publicKey: widget.publicKeys.first,
+                destination: widget.recipient,
+                amount: widget.amount,
+              ),
+            ),
           child: BlocListener<SelectedPublicKeyCubit, String>(
-            listener: (context, state) => context.read<TonWalletPrepareTransferBloc>().add(
-                  TonWalletPrepareTransferEvent.prepareTransfer(
-                    publicKey: state,
-                    destination: widget.recipient,
-                    amount: widget.amount,
-                  ),
-                ),
+            listener: (context, state) =>
+                context.read<TonWalletPrepareTransferBloc>().add(
+                      TonWalletPrepareTransferEvent.prepareTransfer(
+                        publicKey: state,
+                        destination: widget.recipient,
+                        amount: widget.amount,
+                      ),
+                    ),
             child: Scaffold(
               resizeToAvoidBottomInset: false,
               body: SafeArea(
@@ -84,7 +89,8 @@ class _SendMessageModalState extends State<SendMessagePage> {
                     children: [
                       ModalHeader(
                         text: AppLocalizations.of(context)!.send_message,
-                        onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
+                        onCloseButtonPressed:
+                            Navigator.of(widget.modalContext).pop,
                       ),
                       const Gap(16),
                       if (widget.publicKeys.length > 1) ...[
@@ -116,18 +122,26 @@ class _SendMessageModalState extends State<SendMessagePage> {
           return AsyncValueStreamProvider<Map<String, String>>(
             create: (context) => context.read<KeysRepository>().keyLabelsStream,
             builder: (context, child) {
-              final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
-                    ready: (value) => value,
-                    orElse: () => <String, String>{},
-                  );
+              final publicKeysLabels =
+                  context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
+                        ready: (value) => value,
+                        orElse: () => <String, String>{},
+                      );
 
               return CustomDropdownButton<String>(
                 items: widget.publicKeys
-                    .map((e) => Tuple2(e, publicKeysLabels[e] ?? e.ellipsePublicKey()))
+                    .map(
+                      (e) => Tuple2(
+                        e,
+                        publicKeysLabels[e] ?? e.ellipsePublicKey(),
+                      ),
+                    )
                     .toList(),
                 value: state,
                 onChanged: (value) {
-                  if (value != null) context.read<SelectedPublicKeyCubit>().select(value);
+                  if (value != null) {
+                    context.read<SelectedPublicKeyCubit>().select(value);
+                  }
                 },
               );
             },
@@ -185,12 +199,13 @@ class _SendMessageModalState extends State<SendMessagePage> {
 
   Widget fee() => TransportTypeBuilderWidget(
         builder: (context, isEver) {
-          return BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
+          return BlocBuilder<TonWalletPrepareTransferBloc,
+              TonWalletPrepareTransferState>(
             builder: (context, state) {
               final subtitle = state.when(
                 initial: () => null,
                 loading: () => null,
-                ready: (unsignedMessage, fees) =>
+                ready: (unsignedMessage, fees, txErrors) =>
                     '${fees.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
                 error: (error) => error,
               );
@@ -212,8 +227,9 @@ class _SendMessageModalState extends State<SendMessagePage> {
 
   Widget bounce() => SectionedCardSection(
         title: AppLocalizations.of(context)!.bounce,
-        subtitle:
-            widget.bounce ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no,
+        subtitle: widget.bounce
+            ? AppLocalizations.of(context)!.yes
+            : AppLocalizations.of(context)!.no,
         isSelectable: true,
       );
 
@@ -242,17 +258,44 @@ class _SendMessageModalState extends State<SendMessagePage> {
         .toList();
   }
 
-  Widget buttons() => Row(
+  Widget buttons() => Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: rejectButton(),
-          ),
-          const Gap(16),
-          Expanded(
-            flex: 2,
-            child: submitButton(),
+          txError(),
+          Row(
+            children: [
+              Expanded(
+                child: rejectButton(),
+              ),
+              const Gap(16),
+              Expanded(
+                flex: 2,
+                child: submitButton(),
+              ),
+            ],
           ),
         ],
+      );
+
+  Widget txError() =>
+      BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
+        builder: (context, state) {
+          final txErrors = state.maybeWhen(
+            ready: (_, __, txErrors) => txErrors,
+            orElse: () => null,
+          );
+
+          if (txErrors == null || txErrors.isEmpty) return const SizedBox();
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: TxErrors(
+              errors: txErrors,
+              isConfirmed: isConfirmed,
+              onConfirm: (value) => setState(() => isConfirmed = value),
+            ),
+          );
+        },
       );
 
   Widget rejectButton() => CustomOutlinedButton(
@@ -264,20 +307,23 @@ class _SendMessageModalState extends State<SendMessagePage> {
         builder: (context, state) {
           final selectedPublicKey = state;
 
-          return BlocBuilder<TonWalletPrepareTransferBloc, TonWalletPrepareTransferState>(
+          return BlocBuilder<TonWalletPrepareTransferBloc,
+              TonWalletPrepareTransferState>(
             builder: (context, state) {
               final result = state.when(
                 initial: () => null,
                 loading: () => null,
-                ready: (unsignedMessage, fees) => Tuple2(unsignedMessage, fees),
+                ready: (unsignedMessage, fees, txErrors) =>
+                    Tuple3(unsignedMessage, fees, txErrors),
                 error: (error) => null,
               );
 
               return CustomElevatedButton(
-                onPressed:
-                    selectedPublicKey != null && result?.item1 != null && result?.item2 != null
-                        ? () => onSubmitPressed(selectedPublicKey)
-                        : null,
+                onPressed: selectedPublicKey != null &&
+                        result != null &&
+                        (result.item3.isEmpty || isConfirmed)
+                    ? () => onSubmitPressed(selectedPublicKey)
+                    : null,
                 text: AppLocalizations.of(context)!.send,
               );
             },
@@ -294,15 +340,16 @@ class _SendMessageModalState extends State<SendMessagePage> {
     if (!mounted) return;
 
     if (password != null) {
-      Navigator.of(widget.modalContext).pop(Tuple2(selectedPublicKey, password));
+      Navigator.of(widget.modalContext)
+          .pop(Tuple2(selectedPublicKey, password));
     } else {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (context) => PasswordEnterPage(
             modalContext: widget.modalContext,
             publicKey: selectedPublicKey,
-            onSubmit: (password) =>
-                Navigator.of(widget.modalContext).pop(Tuple2(selectedPublicKey, password)),
+            onSubmit: (password) => Navigator.of(widget.modalContext)
+                .pop(Tuple2(selectedPublicKey, password)),
           ),
         ),
       );

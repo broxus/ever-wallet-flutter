@@ -8,6 +8,7 @@ import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
 import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/tx_errors.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/password_enter_page/password_enter_page.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/token_send_result_page.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -50,12 +51,16 @@ class TokenSendInfoPage extends StatefulWidget {
   });
 
   @override
-  _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
+  _NewSelectWalletTypePageState createState() =>
+      _NewSelectWalletTypePageState();
 }
 
 class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
+  bool isConfirmed = false;
+
   @override
-  Widget build(BuildContext context) => BlocProvider<TokenWalletPrepareTransferBloc>(
+  Widget build(BuildContext context) =>
+      BlocProvider<TokenWalletPrepareTransferBloc>(
         key: ValueKey('${widget.owner}_${widget.rootTokenContract}'),
         create: (context) => TokenWalletPrepareTransferBloc(
           context.read<TokenWalletsRepository>(),
@@ -79,7 +84,8 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
               onPressed: () {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
-                } else if (Navigator.of(context, rootNavigator: true).canPop()) {
+                } else if (Navigator.of(context, rootNavigator: true)
+                    .canPop()) {
                   Navigator.of(context, rootNavigator: true).pop();
                 }
               },
@@ -117,6 +123,7 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    txError(),
                     submitButton(),
                   ],
                 ),
@@ -144,15 +151,17 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
       );
 
   Widget amount() => AsyncValueStreamProvider<TokenWallet?>(
-        create: (context) => context.read<TokenWalletsRepository>().tokenWalletStream(
-              owner: widget.owner,
-              rootTokenContract: widget.rootTokenContract,
-            ),
+        create: (context) =>
+            context.read<TokenWalletsRepository>().tokenWalletStream(
+                  owner: widget.owner,
+                  rootTokenContract: widget.rootTokenContract,
+                ),
         builder: (context, child) {
-          final tokenWalletInfo = context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => null,
-              );
+          final tokenWalletInfo =
+              context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => null,
+                  );
 
           return SectionedCardSection(
             title: context.localization.amount,
@@ -167,15 +176,17 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
     if (widget.attachedAmount == null) return const SizedBox.shrink();
 
     return AsyncValueStreamProvider<TokenWallet?>(
-      create: (context) => context.read<TokenWalletsRepository>().tokenWalletStream(
-            owner: widget.owner,
-            rootTokenContract: widget.rootTokenContract,
-          ),
+      create: (context) =>
+          context.read<TokenWalletsRepository>().tokenWalletStream(
+                owner: widget.owner,
+                rootTokenContract: widget.rootTokenContract,
+              ),
       builder: (context, child) {
-        final tokenWalletInfo = context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
-              ready: (value) => value,
-              orElse: () => null,
-            );
+        final tokenWalletInfo =
+            context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
+                  ready: (value) => value,
+                  orElse: () => null,
+                );
 
         return TransportTypeBuilderWidget(
           builder: (context, isEver) {
@@ -193,10 +204,11 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
 
   Widget fee() => TransportTypeBuilderWidget(
         builder: (context, isEver) {
-          return BlocBuilder<TokenWalletPrepareTransferBloc, TokenWalletPrepareTransferState>(
+          return BlocBuilder<TokenWalletPrepareTransferBloc,
+              TokenWalletPrepareTransferState>(
             builder: (context, state) {
               final subtitle = state.maybeWhen(
-                ready: (unsignedMessage, fees) =>
+                ready: (_, fees, __) =>
                     '${fees.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
                 error: (error) => error,
                 orElse: () => null,
@@ -217,6 +229,27 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
         },
       );
 
+  Widget txError() => BlocBuilder<TokenWalletPrepareTransferBloc,
+          TokenWalletPrepareTransferState>(
+        builder: (context, state) {
+          final txErrors = state.maybeWhen(
+            ready: (_, __, txErrors) => txErrors,
+            orElse: () => null,
+          );
+
+          if (txErrors == null || txErrors.isEmpty) return const SizedBox();
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: TxErrors(
+              errors: txErrors,
+              isConfirmed: isConfirmed,
+              onConfirm: (value) => setState(() => isConfirmed = value),
+            ),
+          );
+        },
+      );
+
   Widget comment() => SectionedCardSection(
         title: context.localization.comment,
         subtitle: widget.comment,
@@ -224,17 +257,22 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
 
   Widget notifyReceiver() => SectionedCardSection(
         title: context.localization.notify_receiver,
-        subtitle: widget.notifyReceiver ? context.localization.yes : context.localization.no,
+        subtitle: widget.notifyReceiver
+            ? context.localization.yes
+            : context.localization.no,
       );
 
-  Widget submitButton() =>
-      BlocBuilder<TokenWalletPrepareTransferBloc, TokenWalletPrepareTransferState>(
+  Widget submitButton() => BlocBuilder<TokenWalletPrepareTransferBloc,
+          TokenWalletPrepareTransferState>(
         builder: (context, state) => PrimaryElevatedButton(
           onPressed: state.maybeWhen(
-            ready: (unsignedMessage, fees) => () => onPressed(
-                  message: unsignedMessage,
-                  publicKey: widget.publicKey,
-                ),
+            ready: (unsignedMessage, fees, txErrors) {
+              if (txErrors.isNotEmpty && !isConfirmed) return null;
+              return () => onPressed(
+                    message: unsignedMessage,
+                    publicKey: widget.publicKey,
+                  );
+            },
             orElse: () => null,
           ),
           text: context.localization.send,
