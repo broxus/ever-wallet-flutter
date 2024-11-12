@@ -4,7 +4,7 @@ import 'package:ever_wallet/application/common/general/ew_bottom_sheet.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/utils.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/main/profile/manage_seed/manage_seed_actions/add_new_seed_sheet/add_new_seed_sheet.dart';
 import 'package:ever_wallet/application/main/wallet/modals/add_asset_modal/show_add_asset_modal.dart';
 import 'package:ever_wallet/application/main/wallet/modals/deploy_wallet_flow/start_deploy_wallet_flow.dart';
@@ -15,6 +15,7 @@ import 'package:ever_wallet/application/main/wallet/widgets/wallet_button.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
+import 'package:ever_wallet/data/models/network_type.dart';
 import 'package:ever_wallet/data/models/stever/stever_withdraw_request.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/browser_navigation_repository.dart';
@@ -37,8 +38,8 @@ class ProfileActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repository = context.read<BrowserNavigationRepository>();
-    return TransportTypeBuilderWidget(
-      builder: (context, isEver) {
+    return TransportBuilderWidget(
+      builder: (context, data) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -86,13 +87,15 @@ class ProfileActions extends StatelessWidget {
               ),
             ),
             AsyncValueStreamProvider<List<String>?>(
-              create: (context) =>
-                  context.read<TonWalletsRepository>().localCustodiansStream(address),
+              create: (context) => context
+                  .read<TonWalletsRepository>()
+                  .localCustodiansStream(address),
               builder: (context, child) {
-                final localCustodians = context.watch<AsyncValue<List<String>?>>().maybeWhen(
-                  ready: (value) => value,
-                  orElse: () => null,
-                );
+                final localCustodians =
+                    context.watch<AsyncValue<List<String>?>>().maybeWhen(
+                          ready: (value) => value,
+                          orElse: () => null,
+                        );
 
                 return AsyncValueStreamProvider<AssetsList>(
                   create: (context) => context
@@ -101,32 +104,41 @@ class ProfileActions extends StatelessWidget {
                       .expand((e) => e)
                       .where((e) => e.address == address),
                   builder: (context, child) {
-                    final account = context.watch<AsyncValue<AssetsList>>().maybeWhen(
-                      ready: (value) => value,
-                      orElse: () => null,
-                    );
-
-                    return AsyncValueStreamProvider<TonWalletDetails>(
-                      create: (context) =>
-                          context.read<TonWalletsRepository>().detailsStream(address),
-                      builder: (context, child) {
-                        final details = context.watch<AsyncValue<TonWalletDetails>>().maybeWhen(
-                          ready: (value) => value,
-                          orElse: () => null,
-                        );
-
-                        return AsyncValueStreamProvider<ContractState>(
-                          create: (context) =>
-                              context.read<TonWalletsRepository>().contractStateStream(address),
-                          builder: (context, child) {
-                            final contractState =
-                            context.watch<AsyncValue<ContractState>>().maybeWhen(
+                    final account =
+                        context.watch<AsyncValue<AssetsList>>().maybeWhen(
                               ready: (value) => value,
                               orElse: () => null,
                             );
 
-                            if (account != null && details != null && contractState != null) {
-                              final requiresSeparateDeploy = details.requiresSeparateDeploy;
+                    return AsyncValueStreamProvider<TonWalletDetails>(
+                      create: (context) => context
+                          .read<TonWalletsRepository>()
+                          .detailsStream(address),
+                      builder: (context, child) {
+                        final details = context
+                            .watch<AsyncValue<TonWalletDetails>>()
+                            .maybeWhen(
+                              ready: (value) => value,
+                              orElse: () => null,
+                            );
+
+                        return AsyncValueStreamProvider<ContractState>(
+                          create: (context) => context
+                              .read<TonWalletsRepository>()
+                              .contractStateStream(address),
+                          builder: (context, child) {
+                            final contractState = context
+                                .watch<AsyncValue<ContractState>>()
+                                .maybeWhen(
+                                  ready: (value) => value,
+                                  orElse: () => null,
+                                );
+
+                            if (account != null &&
+                                details != null &&
+                                contractState != null) {
+                              final requiresSeparateDeploy =
+                                  details.requiresSeparateDeploy;
 
                               if (!requiresSeparateDeploy) {
                                 return WalletButton(
@@ -146,25 +158,29 @@ class ProfileActions extends StatelessWidget {
 
                               if (isDeployed) {
                                 return WalletButton(
-                                  onTap: localCustodians != null && localCustodians.isNotEmpty
+                                  onTap: localCustodians != null &&
+                                          localCustodians.isNotEmpty
                                       ? () => startSendTransactionFlow(
-                                    context: context,
-                                    address: address,
-                                    publicKeys: localCustodians,
-                                  )
+                                            context: context,
+                                            address: address,
+                                            publicKeys: localCustodians,
+                                          )
                                       : () => showFlushbarWithAction(
-                                    context: context,
-                                    text: context
-                                        .localization.add_custodians_to_send_via_multisig,
-                                    actionText: context.localization.add_word,
-                                    isOneLine: false,
-                                    action: () => showEWBottomSheet<void>(
-                                      context,
-                                      body: (_) => const AddNewSeedSheet(),
-                                      needCloseButton: false,
-                                      avoidBottomInsets: false,
-                                    ),
-                                  ),
+                                            context: context,
+                                            text: context.localization
+                                                .add_custodians_to_send_via_multisig,
+                                            actionText:
+                                                context.localization.add_word,
+                                            isOneLine: false,
+                                            action: () =>
+                                                showEWBottomSheet<void>(
+                                              context,
+                                              body: (_) =>
+                                                  const AddNewSeedSheet(),
+                                              needCloseButton: false,
+                                              avoidBottomInsets: false,
+                                            ),
+                                          ),
                                   title: context.localization.send,
                                   icon: Assets.images.iconSend.svg(
                                     color: CrystalColor.secondary,
@@ -199,9 +215,11 @@ class ProfileActions extends StatelessWidget {
                 );
               },
             ),
-            if (isEver)
+            if (data.type == NetworkType.everscale)
               StreamBuilder<List<StEverWithdrawRequest>>(
-                stream: context.read<StEverRepository>().withdrawRequestsStream(address),
+                stream: context
+                    .read<StEverRepository>()
+                    .withdrawRequestsStream(address),
                 builder: (context, snap) {
                   final requests = snap.data ?? [];
                   final wasOpened = context.read<HiveSource>().wasStEverOpened;
@@ -226,14 +244,18 @@ class ProfileActions extends StatelessWidget {
                           top: -10,
                           child: Container(
                             alignment: Alignment.center,
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: ColorsRes.bluePrimary400,
                               borderRadius: BorderRadius.circular(13),
                             ),
                             child: Text(
                               context.localization.new_word,
-                              style: StylesRes.medium12.copyWith(color: ColorsRes.white),
+                              style: StylesRes.medium12
+                                  .copyWith(color: ColorsRes.white),
                             ),
                           ),
                         ),

@@ -18,7 +18,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:string_extensions/string_extensions.dart';
 
-typedef EnterPhraseNavigationCallback = void Function(BuildContext context, List<String> phrase);
+typedef EnterPhraseNavigationCallback = void Function(
+  BuildContext context,
+  List<String> phrase,
+);
 
 class EnterSeedPhraseWidget extends StatefulWidget {
   const EnterSeedPhraseWidget({
@@ -63,14 +66,17 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
   @override
   void initState() {
     super.initState();
-    if (context.read<TransportRepository>().isEverTransport) {
-      values = possibleValues;
-    } else {
-      values = [possibleValues.first];
-    }
+
+    values = context.read<TransportRepository>().networkType.when(
+          everscale: () => possibleValues,
+          venom: () => [possibleValues.first],
+          tycho: () => possibleValues,
+        );
+
     controllers.forEach(
       (c) => c.addListener(() {
-        final hasText = controllers.any((controller) => controller.text.isNotEmpty);
+        final hasText =
+            controllers.any((controller) => controller.text.isNotEmpty);
         isClearButtonState.value = hasText;
         _checkDebugPhraseGenerating();
       }),
@@ -120,7 +126,8 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
                 PrimaryButton(
                   text: localization.confirm,
                   onPressed: _confirmAction,
-                  style: StylesRes.buttonText.copyWith(color: widget.buttonTextColor),
+                  style: StylesRes.buttonText
+                      .copyWith(color: widget.buttonTextColor),
                   backgroundColor: widget.primaryColor,
                 ),
               ],
@@ -131,7 +138,10 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
     );
   }
 
-  Widget _buildPhrasesList(AppLocalizations localization, ThemeStyle themeStyle) {
+  Widget _buildPhrasesList(
+    AppLocalizations localization,
+    ThemeStyle themeStyle,
+  ) {
     return SingleChildScrollView(
       child: Form(
         key: formKey,
@@ -145,7 +155,8 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
               children: [
                 Text(
                   localization.enter_seed_phrase,
-                  style: StylesRes.sheetHeaderTextFaktum.copyWith(color: widget.defaultTextColor),
+                  style: StylesRes.sheetHeaderTextFaktum
+                      .copyWith(color: widget.defaultTextColor),
                 ),
                 const SizedBox(height: 28),
                 Row(
@@ -166,7 +177,9 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
                               localization.words_count(v),
                               style: themeStyle.styles.basicStyle.copyWith(
                                 fontWeight: FontWeight.w500,
-                                color: isActive ? widget.primaryColor : widget.secondaryTextColor,
+                                color: isActive
+                                    ? widget.primaryColor
+                                    : widget.secondaryTextColor,
                               ),
                             ),
                           );
@@ -179,7 +192,9 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
                         return TextPrimaryButton.appBar(
                           onPressed: isClear ? clearFields : pastePhrase,
                           padding: const EdgeInsets.all(4),
-                          text: isClear ? localization.clear_all : localization.paste_all,
+                          text: isClear
+                              ? localization.clear_all
+                              : localization.paste_all,
                           style: themeStyle.styles.basicBoldStyle.copyWith(
                             color: widget.primaryColor,
                           ),
@@ -217,10 +232,17 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
-                        children: activeControllers.getRange(value ~/ 2, value).mapIndex(
+                        children: activeControllers
+                            .getRange(value ~/ 2, value)
+                            .mapIndex(
                           (c, index) {
                             final i = index + value ~/ 2;
-                            return _inputBuild(c, focuses[i], i + 1, themeStyle);
+                            return _inputBuild(
+                              c,
+                              focuses[i],
+                              i + 1,
+                              themeStyle,
+                            );
                           },
                         ).toList(),
                       ),
@@ -236,12 +258,14 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
                         const SizedBox(height: 8),
                         if (error == null)
                           SizedBox(
-                            height: StylesRes.regular16.fontSize! * StylesRes.regular16.height!,
+                            height: StylesRes.regular16.fontSize! *
+                                StylesRes.regular16.height!,
                           )
                         else
                           Text(
                             error.capitalize!,
-                            style: StylesRes.regular16.copyWith(color: widget.errorColor),
+                            style: StylesRes.regular16
+                                .copyWith(color: widget.errorColor),
                           ),
                         const SizedBox(height: 16),
                       ],
@@ -273,11 +297,13 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
         inactiveBorderColor: widget.inactiveBorderColor,
         errorColor: widget.errorColor,
         textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
-        suggestionStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
+        suggestionStyle:
+            StylesRes.basicText.copyWith(color: widget.defaultTextColor),
         prefixText: '$index.',
         requestNextField: () => focuses[index].requestFocus(),
-        textInputAction:
-            index == valuesNotifier.value ? TextInputAction.done : TextInputAction.next,
+        textInputAction: index == valuesNotifier.value
+            ? TextInputAction.done
+            : TextInputAction.next,
         confirmAction: _confirmAction,
       ),
     );
@@ -287,7 +313,8 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
     if (_validateFormWithError()) {
       try {
         FocusManager.instance.primaryFocus?.unfocus();
-        final phrase = controllers.take(valuesNotifier.value).map((e) => e.text).toList();
+        final phrase =
+            controllers.take(valuesNotifier.value).map((e) => e.text).toList();
         final mnemonicType = valuesNotifier.value == possibleValues.last
             ? const MnemonicType.legacy()
             : kDefaultMnemonicType;
@@ -316,8 +343,10 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
 
   Future<void> pastePhrase() async {
     final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
-    final words =
-        clipboard?.text?.replaceAll(RegExp('\\s+'), ' ').split(kSeedSplitRegExp) ?? <String>[];
+    final words = clipboard?.text
+            ?.replaceAll(RegExp('\\s+'), ' ')
+            .split(kSeedSplitRegExp) ??
+        <String>[];
 
     if (words.isNotEmpty && words.length == valuesNotifier.value) {
       for (final word in words) {
@@ -344,7 +373,8 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
     words.asMap().forEach((index, word) {
       controllers[index].value = TextEditingValue(
         text: word,
-        selection: TextSelection.fromPosition(TextPosition(offset: word.length)),
+        selection:
+            TextSelection.fromPosition(TextPosition(offset: word.length)),
       );
     });
     _validateFormWithError();
@@ -361,7 +391,8 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
       for (var i = 0; i < controllers.take(valuesNotifier.value).length; i++) {
         final text = key.words[i];
         controllers[i].text = text;
-        controllers[i].selection = TextSelection.fromPosition(TextPosition(offset: text.length));
+        controllers[i].selection =
+            TextSelection.fromPosition(TextPosition(offset: text.length));
       }
       _validateFormWithError();
     }

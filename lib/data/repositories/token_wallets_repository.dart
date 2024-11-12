@@ -317,7 +317,6 @@ class TokenWalletsRepository {
   void _transportStreamListener(Transport event) {
     try {
       final transport = event;
-
       final networkGroup = transport.group;
 
       final tokenWallets = _currentAccountsSource.currentAccounts
@@ -330,10 +329,12 @@ class TokenWalletsRepository {
             ),
           )
           .whereNotNull()
-          .expand((e) => e);
+          .expand((e) => e)
+          .toList();
 
       /// contains assets where transport is different to new one
-      final assetsToRemove = tokenWallets.where((asset) {
+      final currentTokenWallets = _tokenWalletsSubject.value.keys.toList();
+      final assetsToRemove = currentTokenWallets.where((asset) {
         final pendingKey = TokenWalletPendingSubscriptionCollection(
           asset: asset,
           transportCollection: transport.toEquatableCollection(),
@@ -347,16 +348,18 @@ class TokenWalletsRepository {
           return false;
         }
         return true;
-      });
+      }).toList();
 
       /// Unsubscribe
       for (final key in assetsToRemove) {
-        _tokenWalletsSubject.value[key]!.future
+        _tokenWalletsSubject.value[key]?.future
             .then((v) => v.dispose())
             .ignore();
         _pendingTokenWalletSubscriptions.remove(
           TokenWalletPendingSubscriptionCollection(
-              asset: key, transportCollection: []),
+            asset: key,
+            transportCollection: [],
+          ),
         );
       }
 

@@ -1,13 +1,12 @@
 import 'package:ever_wallet/application/bloc/token_wallet/token_wallet_prepare_transfer_bloc.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
-import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/common/widgets/tx_errors.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/password_enter_page/password_enter_page.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/token_send_result_page.dart';
@@ -172,9 +171,9 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
         },
       );
 
-  Widget attachedAmount() => TransportTypeBuilderWidget(
-        builder: (context, isEver) => BlocBuilder<
-            TokenWalletPrepareTransferBloc, TokenWalletPrepareTransferState>(
+  Widget attachedAmount() => TransportBuilderWidget(
+        builder: (context, data) => BlocBuilder<TokenWalletPrepareTransferBloc,
+            TokenWalletPrepareTransferState>(
           builder: (context, state) {
             final attachedAmount = widget.attachedAmount ??
                 state.maybeWhen(
@@ -184,21 +183,21 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
             return SectionedCardSection(
               title: context.localization.attached_amount,
               subtitle: attachedAmount != null
-                  ? '${attachedAmount.toTokensFull()} ${isEver ? kEverTicker : kVenomTicker}'
+                  ? '${attachedAmount.toTokensFull()} ${data.config.symbol}'
                   : null,
             );
           },
         ),
       );
 
-  Widget fee() => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
+  Widget fee() => TransportBuilderWidget(
+        builder: (context, data) {
           return BlocBuilder<TokenWalletPrepareTransferBloc,
               TokenWalletPrepareTransferState>(
             builder: (context, state) {
               final subtitle = state.maybeWhen(
                 ready: (_, fees, __) =>
-                    '${fees.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
+                    '${fees.toTokens().removeZeroes()} ${data.config.symbol}',
                 error: (error) => error,
                 orElse: () => null,
               );

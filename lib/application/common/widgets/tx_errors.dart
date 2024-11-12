@@ -2,7 +2,7 @@ import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/field/switch_field.dart';
 import 'package:ever_wallet/application/common/general/flushbar.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:flutter/gestures.dart';
@@ -26,8 +26,8 @@ class TxErrors extends StatelessWidget {
   final ValueChanged<bool> onConfirm;
 
   @override
-  Widget build(BuildContext context) => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
+  Widget build(BuildContext context) => TransportBuilderWidget(
+        builder: (context, data) {
           final canFixTxError = errors.any(
             (item) => item.error.code == -14 || item.error.code == -37,
           );
@@ -61,7 +61,7 @@ class TxErrors extends StatelessWidget {
                         if (canFixTxError)
                           TextSpan(
                             text:
-                                'Send 0.2 ${isEver ? kEverTicker : kVenomTicker} to this address or contact ',
+                                'Send 0.2 ${data.config.symbol} to this address or contact ',
                           )
                         else
                           const TextSpan(

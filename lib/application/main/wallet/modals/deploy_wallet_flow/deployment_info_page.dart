@@ -1,14 +1,13 @@
 import 'package:ever_wallet/application/bloc/ton_wallet/ton_wallet_prepare_deploy_bloc.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
-import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/widgets/crystal_subtitle.dart';
 import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/password_enter_page/password_enter_page.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/send_result_page.dart';
 import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
@@ -37,12 +36,14 @@ class DeploymentInfoPage extends StatefulWidget {
   });
 
   @override
-  _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
+  _NewSelectWalletTypePageState createState() =>
+      _NewSelectWalletTypePageState();
 }
 
 class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
   @override
-  Widget build(BuildContext context) => BlocProvider<TonWalletPrepareDeployBloc>(
+  Widget build(BuildContext context) =>
+      BlocProvider<TonWalletPrepareDeployBloc>(
         key: ValueKey(widget.address),
         create: (context) => TonWalletPrepareDeployBloc(
           context.read<TonWalletsRepository>(),
@@ -114,8 +115,8 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
         ],
       );
 
-  Widget balance() => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
+  Widget balance() => TransportBuilderWidget(
+        builder: (context, data) {
           return AsyncValueStreamProvider<String>(
             create: (context) => context
                 .read<TonWalletsRepository>()
@@ -127,7 +128,7 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
                     orElse: () => null,
                   );
 
-              final ticker = isEver ? kEverTicker : kVenomTicker;
+              final ticker = data.config.symbol;
 
               return SectionedCardSection(
                 title: AppLocalizations.of(context)!.account_balance,
@@ -138,13 +139,14 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
         },
       );
 
-  Widget fee() => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
-          return BlocBuilder<TonWalletPrepareDeployBloc, TonWalletPrepareDeployState>(
+  Widget fee() => TransportBuilderWidget(
+        builder: (context, data) {
+          return BlocBuilder<TonWalletPrepareDeployBloc,
+              TonWalletPrepareDeployState>(
             builder: (context, state) {
               final subtitle = state.maybeWhen(
                 ready: (unsignedMessage, fees) =>
-                    '${fees.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
+                    '${fees.toTokens().removeZeroes()} ${data.config.symbol}',
                 error: (error) => error,
                 orElse: () => null,
               );
@@ -184,7 +186,8 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
         ),
       );
 
-  Widget submitButton() => BlocBuilder<TonWalletPrepareDeployBloc, TonWalletPrepareDeployState>(
+  Widget submitButton() =>
+      BlocBuilder<TonWalletPrepareDeployBloc, TonWalletPrepareDeployState>(
         builder: (context, state) => PrimaryElevatedButton(
           onPressed: state.maybeWhen(
             ready: (unsignedMessage, fees) => () => onPressed(
@@ -238,7 +241,8 @@ class _NewSelectWalletTypePageState extends State<DeploymentInfoPage> {
   Future<String?> getPasswordFromBiometry(String publicKey) async {
     try {
       final password = await context.read<BiometryRepository>().getKeyPassword(
-            localizedReason: AppLocalizations.of(context)!.authentication_reason,
+            localizedReason:
+                AppLocalizations.of(context)!.authentication_reason,
             publicKey: publicKey,
           );
 

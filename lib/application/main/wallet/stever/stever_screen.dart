@@ -19,7 +19,6 @@ import 'package:ever_wallet/data/repositories/stever_repository.dart';
 import 'package:ever_wallet/data/repositories/token_currencies_repository.dart';
 import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
-import 'package:ever_wallet/data/repositories/transport_repository.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/gestures.dart';
@@ -60,14 +59,15 @@ class _StEverScreenState extends State<StEverScreen> {
       tonWalletsRepository: context.read<TonWalletsRepository>(),
       currencyLoader: (contract) => context
           .read<TokenCurrenciesRepository>()
-          .getCurrencyForContract(context.read<TransportRepository>().transport, contract),
+          .getCurrencyForContract(contract),
       navigator: Navigator.of(context),
     );
 
     final wasOpened = context.read<HiveSource>().wasStEverOpened;
     if (!wasOpened) {
       context.read<HiveSource>().saveWasStEverOpened();
-      WidgetsBinding.instance.addPostFrameCallback((_) => showStEverHowItWorksSheet(context));
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => showStEverHowItWorksSheet(context));
     }
   }
 
@@ -93,11 +93,15 @@ class _StEverScreenState extends State<StEverScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(localization.simple_staking_title, style: StylesRes.header2Faktum),
+                    Text(
+                      localization.simple_staking_title,
+                      style: StylesRes.header2Faktum,
+                    ),
                     const SizedBox(height: 4),
                     Text.rich(
                       TextSpan(
@@ -108,10 +112,11 @@ class _StEverScreenState extends State<StEverScreen> {
                           ),
                           TextSpan(
                             text: localization.how_it_works,
-                            style:
-                                StylesRes.medium14Caption.copyWith(color: ColorsRes.bluePrimary400),
+                            style: StylesRes.medium14Caption
+                                .copyWith(color: ColorsRes.bluePrimary400),
                             recognizer: TapGestureRecognizer()
-                              ..onTap = () => showStEverHowItWorksSheet(context),
+                              ..onTap =
+                                  () => showStEverHowItWorksSheet(context),
                           ),
                         ],
                       ),
@@ -146,7 +151,8 @@ class _StEverScreenState extends State<StEverScreen> {
                                             : ColorsRes.neutral800,
                                       ),
                                     ),
-                                    if (v == StakeType.inProgress && requests != null) ...[
+                                    if (v == StakeType.inProgress &&
+                                        requests != null) ...[
                                       const SizedBox(width: 8),
                                       Container(
                                         width: 20,
@@ -193,16 +199,22 @@ class _StEverScreenState extends State<StEverScreen> {
               bloc: cubit,
               builder: (context, state) {
                 final buttonText = state.type.title(context);
-                if (state.type == StakeType.inProgress) return const SizedBox.shrink();
+                if (state.type == StakeType.inProgress)
+                  return const SizedBox.shrink();
 
-                final isInactive = (state.isLoading ?? false) || !(state.canPressButton ?? true);
+                final isInactive = (state.isLoading ?? false) ||
+                    !(state.canPressButton ?? true);
                 return SafeArea(
-                  minimum: const EdgeInsets.only(left: 16, bottom: 16, right: 16),
+                  minimum:
+                      const EdgeInsets.only(left: 16, bottom: 16, right: 16),
                   child: PrimaryButton(
                     text: buttonText,
                     onPressed: isInactive ? null : () => cubit.doAction(),
-                    backgroundColor: isInactive ? ColorsRes.blue900 : ColorsRes.bluePrimary400,
-                    style: StylesRes.buttonText.copyWith(color: ColorsRes.white),
+                    backgroundColor: isInactive
+                        ? ColorsRes.blue900
+                        : ColorsRes.bluePrimary400,
+                    style:
+                        StylesRes.buttonText.copyWith(color: ColorsRes.white),
                   ),
                 );
               },
@@ -277,7 +289,9 @@ class _StEverScreenState extends State<StEverScreen> {
         return Container(
           decoration: BoxDecoration(
             border: Border.all(
-              color: inputFocus.hasFocus ? ColorsRes.bluePrimary400 : ColorsRes.neutral750,
+              color: inputFocus.hasFocus
+                  ? ColorsRes.bluePrimary400
+                  : ColorsRes.neutral750,
             ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -291,21 +305,26 @@ class _StEverScreenState extends State<StEverScreen> {
                       controller: cubit.inputController,
                       focusNode: inputFocus,
                       keyboardType: const TextInputType.numberWithOptions(
-                        signed: true, // this allows displaying text keyboard on ios
+                        signed:
+                            true, // this allows displaying text keyboard on ios
                         decimal: true,
                       ),
-                      style: StylesRes.medium24.copyWith(color: ColorsRes.black),
+                      style:
+                          StylesRes.medium24.copyWith(color: ColorsRes.black),
                       cursorColor: ColorsRes.black,
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
                         constraints: const BoxConstraints(maxHeight: 30),
-                        hintStyle: StylesRes.medium24.copyWith(color: ColorsRes.neutral600),
+                        hintStyle: StylesRes.medium24
+                            .copyWith(color: ColorsRes.neutral600),
                         hintText: '0.0',
                       ),
                       inputFormatters: [
                         // allow only float numbers
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d*'),
+                        ),
                       ],
                     ),
                   ),
@@ -318,7 +337,8 @@ class _StEverScreenState extends State<StEverScreen> {
                       const SizedBox(width: 6),
                       Text(
                         ticker,
-                        style: StylesRes.medium18.copyWith(color: ColorsRes.black),
+                        style:
+                            StylesRes.medium18.copyWith(color: ColorsRes.black),
                       )
                     ],
                   ),
@@ -330,7 +350,8 @@ class _StEverScreenState extends State<StEverScreen> {
                   Expanded(
                     child: Text(
                       '\$${enteredPrice ?? '0'}',
-                      style: StylesRes.regular14.copyWith(color: ColorsRes.neutral400),
+                      style: StylesRes.regular14
+                          .copyWith(color: ColorsRes.neutral400),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -341,16 +362,22 @@ class _StEverScreenState extends State<StEverScreen> {
                       PrimaryButton(
                         fillWidth: false,
                         height: 25,
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 2,
+                        ),
                         backgroundColor: ColorsRes.blue950,
                         text: context.localization.max.toUpperCase(),
-                        style: StylesRes.medium14.copyWith(color: ColorsRes.bluePrimary400),
+                        style: StylesRes.medium14
+                            .copyWith(color: ColorsRes.bluePrimary400),
                         onPressed: () => cubit.selectMax(),
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        context.localization.balance_with_amount(balance ?? '0.0'),
-                        style: StylesRes.regular14.copyWith(color: ColorsRes.neutral400),
+                        context.localization
+                            .balance_with_amount(balance ?? '0.0'),
+                        style: StylesRes.regular14
+                            .copyWith(color: ColorsRes.neutral400),
                       )
                     ],
                   ),
@@ -377,7 +404,8 @@ class _StEverScreenState extends State<StEverScreen> {
       children: [
         _infoItem(
           title: localization.exchange_rate,
-          value: '1 $kStEverTicker ≈ ${(exchangeRate ?? 1.0).toStringAsFixed(4)} $kEverTicker',
+          value:
+              '1 $kStEverTicker ≈ ${(exchangeRate ?? 1.0).toStringAsFixed(4)} $kEverTicker',
         ),
         _infoItem(
           title: localization.attached_amount,
@@ -409,7 +437,8 @@ class _StEverScreenState extends State<StEverScreen> {
         children: [
           Text(
             title,
-            style: StylesRes.regular16.copyWith(color: ColorsRes.neutral400, letterSpacing: 0.25),
+            style: StylesRes.regular16
+                .copyWith(color: ColorsRes.neutral400, letterSpacing: 0.25),
           ),
           Text(
             value,
@@ -441,7 +470,8 @@ class _StEverScreenState extends State<StEverScreen> {
       onTap: () => showEWBottomSheet<void>(
         context,
         openFullScreen: true,
-        title: transactionTextLongTimeFormat.format(int.parse(request.data.timestamp).toDateTime()),
+        title: transactionTextLongTimeFormat
+            .format(int.parse(request.data.timestamp).toDateTime()),
         body: (_) => StEverCancelUnstakingSheet(
           request: request,
           exchangeRate: state.exchangeRate ?? 1.0,
@@ -462,7 +492,10 @@ class _StEverScreenState extends State<StEverScreen> {
                   style: StylesRes.medium14.copyWith(color: ColorsRes.black),
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios_rounded, color: ColorsRes.neutral600),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: ColorsRes.neutral600,
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -476,18 +509,23 @@ class _StEverScreenState extends State<StEverScreen> {
                   children: [
                     Text(
                       request.accountAddress.ellipseAddress(),
-                      style: StylesRes.regular14.copyWith(color: ColorsRes.black),
+                      style:
+                          StylesRes.regular14.copyWith(color: ColorsRes.black),
                     ),
                     const SizedBox(height: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(2),
                         color: ColorsRes.caution.withOpacity(0.1),
                       ),
                       child: Text(
                         context.localization.unstaking_progress,
-                        style: StylesRes.captionText.copyWith(color: ColorsRes.caution),
+                        style: StylesRes.captionText
+                            .copyWith(color: ColorsRes.caution),
                       ),
                     ),
                   ],

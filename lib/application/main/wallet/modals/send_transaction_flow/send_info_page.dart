@@ -1,11 +1,10 @@
 import 'package:ever_wallet/application/bloc/ton_wallet/ton_wallet_prepare_transfer_bloc.dart';
-import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/common/widgets/tx_errors.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/password_enter_page/password_enter_page.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/send_result_page.dart';
@@ -133,9 +132,9 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
         isSelectable: true,
       );
 
-  Widget amount() => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
-          final ticker = isEver ? kEverTicker : kVenomTicker;
+  Widget amount() => TransportBuilderWidget(
+        builder: (context, data) {
+          final ticker = data.config.symbol;
 
           return SectionedCardSection(
             title: AppLocalizations.of(context)!.amount,
@@ -144,14 +143,14 @@ class _NewSelectWalletTypePageState extends State<SendInfoPage> {
         },
       );
 
-  Widget fee() => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
+  Widget fee() => TransportBuilderWidget(
+        builder: (context, data) {
           return BlocBuilder<TonWalletPrepareTransferBloc,
               TonWalletPrepareTransferState>(
             builder: (context, state) {
               final subtitle = state.maybeWhen(
                 ready: (_, fees, __) =>
-                    '${fees.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
+                    '${fees.toTokens().removeZeroes()} ${data.config.symbol}',
                 error: (error) => error,
                 orElse: () => null,
               );

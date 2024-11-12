@@ -7,11 +7,12 @@ import 'package:ever_wallet/application/common/general/dialog/default_dialog_con
 import 'package:ever_wallet/application/common/general/field/bordered_input.dart';
 import 'package:ever_wallet/application/common/general/field/switch_field.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:ever_wallet/data/constants.dart';
+import 'package:ever_wallet/data/models/network_type.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/biometry_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
@@ -20,7 +21,8 @@ import 'package:provider/provider.dart';
 
 const kPasswordInputHeight = 52.0;
 
-typedef CreatePasswordWidgetNavigationCallback = void Function(BuildContext context);
+typedef CreatePasswordWidgetNavigationCallback = void Function(
+    BuildContext context);
 
 class CreateSeedPasswordWidget extends StatefulWidget {
   const CreateSeedPasswordWidget({
@@ -50,7 +52,8 @@ class CreateSeedPasswordWidget extends StatefulWidget {
   final bool needBiometryIfPossible;
 
   @override
-  State<CreateSeedPasswordWidget> createState() => _CreateSeedPasswordWidgetState();
+  State<CreateSeedPasswordWidget> createState() =>
+      _CreateSeedPasswordWidgetState();
 }
 
 class _CreateSeedPasswordWidgetState extends State<CreateSeedPasswordWidget> {
@@ -78,8 +81,8 @@ class _CreateSeedPasswordWidgetState extends State<CreateSeedPasswordWidget> {
             padding: const EdgeInsets.all(16),
             child: Form(
               key: formKey,
-              child: TransportTypeBuilderWidget(
-                builder: (context, isEver) {
+              child: TransportBuilderWidget(
+                builder: (context, data) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -91,15 +94,16 @@ class _CreateSeedPasswordWidgetState extends State<CreateSeedPasswordWidget> {
                       const SizedBox(height: 16),
                       Text(
                         localization.create_password_description,
-                        style:
-                            themeStyle.styles.basicStyle.copyWith(color: widget.secondaryTextColor),
+                        style: themeStyle.styles.basicStyle
+                            .copyWith(color: widget.secondaryTextColor),
                       ),
                       const SizedBox(height: 32),
                       BorderedInput(
                         obscureText: true,
                         height: kPasswordInputHeight,
                         controller: passwordController,
-                        textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
+                        textStyle: StylesRes.basicText
+                            .copyWith(color: widget.defaultTextColor),
                         focusNode: passwordFocus,
                         label: localization.your_password,
                         cursorColor: widget.defaultTextColor,
@@ -120,14 +124,16 @@ class _CreateSeedPasswordWidgetState extends State<CreateSeedPasswordWidget> {
                         controller: confirmController,
                         focusNode: confirmFocus,
                         label: localization.confirm_password,
-                        textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
+                        textStyle: StylesRes.basicText
+                            .copyWith(color: widget.defaultTextColor),
                         textInputAction: TextInputAction.done,
                         cursorColor: widget.defaultTextColor,
                         activeBorderColor: widget.primaryColor,
                         inactiveBorderColor: widget.secondaryTextColor,
-                        onSubmitted: (_) => _nextAction(isEver),
+                        onSubmitted: (_) => _nextAction(data.type),
                         validator: (_) {
-                          if (confirmController.text == passwordController.text) {
+                          if (confirmController.text ==
+                              passwordController.text) {
                             return null;
                           }
 
@@ -140,8 +146,9 @@ class _CreateSeedPasswordWidgetState extends State<CreateSeedPasswordWidget> {
                       PrimaryButton(
                         text: localization.next,
                         backgroundColor: widget.primaryColor,
-                        style: StylesRes.buttonText.copyWith(color: widget.buttonTextColor),
-                        onPressed: () => _nextAction(isEver),
+                        style: StylesRes.buttonText
+                            .copyWith(color: widget.buttonTextColor),
+                        onPressed: () => _nextAction(data.type),
                       ),
                     ],
                   );
@@ -193,17 +200,20 @@ class _CreateSeedPasswordWidgetState extends State<CreateSeedPasswordWidget> {
                       initialData: const AsyncValue.loading(),
                       catchError: (context, error) => AsyncValue.error(error),
                       builder: (context, child) {
-                        final isEnabled = context.watch<AsyncValue<bool>>().maybeWhen(
-                              ready: (value) => value,
-                              orElse: () => false,
-                            );
+                        final isEnabled =
+                            context.watch<AsyncValue<bool>>().maybeWhen(
+                                  ready: (value) => value,
+                                  orElse: () => false,
+                                );
 
                         return EWSwitchField(
                           value: isEnabled,
-                          onChanged: (value) => context.read<BiometryRepository>().setStatus(
-                                localizedReason: context.localization.authentication_reason,
-                                isEnabled: !isEnabled,
-                              ),
+                          onChanged: (value) =>
+                              context.read<BiometryRepository>().setStatus(
+                                    localizedReason: context
+                                        .localization.authentication_reason,
+                                    isEnabled: !isEnabled,
+                                  ),
                         );
                       },
                     ),
@@ -214,7 +224,7 @@ class _CreateSeedPasswordWidgetState extends State<CreateSeedPasswordWidget> {
     );
   }
 
-  Future<void> _nextAction(bool isEver) async {
+  Future<void> _nextAction(NetworkType networkType) async {
     if (formKey.currentState?.validate() ?? false) {
       final keyRepo = context.read<KeysRepository>();
       final accountsRepo = context.read<AccountsRepository>();
@@ -243,7 +253,7 @@ class _CreateSeedPasswordWidgetState extends State<CreateSeedPasswordWidget> {
         onDone: () async {
           await context.read<AccountsRepository>().addAccount(
                 publicKey: key.publicKey,
-                walletType: getDefaultWalletType(isEver),
+                walletType: getDefaultWalletType(networkType),
                 workchain: kDefaultWorkchain,
               );
           overlay.dismiss(animate: false);

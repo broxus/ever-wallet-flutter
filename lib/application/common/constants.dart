@@ -1,3 +1,4 @@
+import 'package:ever_wallet/data/models/network_type.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 final kSeedSplitRegExp = RegExp(r'[ |;|,|:|\n|.]');
@@ -5,9 +6,13 @@ final kSeedSplitRegExp = RegExp(r'[ |;|,|:|\n|.]');
 /// This wallet types depends on kEverAvailableWallets and kVenomAvailableWallets
 const kDefaultEverWalletType = WalletType.everWallet();
 const kDefaultVenomWalletType = WalletType.everWallet();
+const kDefaultTychoWalletType = WalletType.everWallet();
 
-WalletType getDefaultWalletType(bool isEver) =>
-    isEver ? kDefaultEverWalletType : kDefaultVenomWalletType;
+WalletType getDefaultWalletType(NetworkType type) => type.when(
+      everscale: () => kDefaultEverWalletType,
+      venom: () => kDefaultVenomWalletType,
+      tycho: () => kDefaultTychoWalletType,
+    );
 
 const kDefaultMnemonicType = MnemonicType.labs(0);
 
@@ -24,5 +29,6 @@ const kVenomTicker = 'VENOM';
 
 const kEverNetworkName = 'Everscale';
 const kVenomNetworkName = 'Venom';
+const kTychoNetworkName = 'Tycho';
 
 const kBroxusSupportLink = 'https://t.me/broxus_chat';
