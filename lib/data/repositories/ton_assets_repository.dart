@@ -48,15 +48,10 @@ class TonAssetsRepository {
           (e) => _lock.synchronized(() => _systemAssetsStreamListener(e)),
         );
 
-    _transportSource.transportWithDataStream
-        .listen((e) => _updateSystemTokenContractAssets(e.item2));
-
-    // _updateEverSystemTokenContractAssets()
-    //     .onError((err, st) => logger.e(err, err, st));
-    // _updateVenomSystemTokenContractAssets()
-    //     .onError((err, st) => logger.e(err, err, st));
-    // _updateTychoSystemTokenContractAssets()
-    //     .onError((err, st) => logger.e(err, err, st));
+    _transportSource.transportWithDataStream.listen(
+      (e) =>
+          _lock.synchronized(() => _updateSystemTokenContractAssets(e.item2)),
+    );
   }
 
   Stream<List<TokenContractAsset>> get systemAssetsStream {
