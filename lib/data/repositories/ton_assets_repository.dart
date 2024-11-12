@@ -200,14 +200,23 @@ class TonAssetsRepository {
   Future<TokenContractAsset> getTokenContractAsset(
     String rootTokenContract,
   ) async {
-    var asset = _hiveSource.venomSystemTokenContractAssets
-            .firstWhereOrNull((e) => e.address == rootTokenContract) ??
-        _hiveSource.everSystemTokenContractAssets
-            .firstWhereOrNull((e) => e.address == rootTokenContract) ??
-        _hiveSource.venomCustomTokenContractAssets
-            .firstWhereOrNull((e) => e.address == rootTokenContract) ??
-        _hiveSource.everCustomTokenContractAssets
-            .firstWhereOrNull((e) => e.address == rootTokenContract);
+    var asset = _transportSource.networkType
+        .when(
+          everscale: () => [
+            _hiveSource.everSystemTokenContractAssets,
+            _hiveSource.everCustomTokenContractAssets,
+          ],
+          venom: () => [
+            _hiveSource.venomSystemTokenContractAssets,
+            _hiveSource.venomCustomTokenContractAssets,
+          ],
+          tycho: () => [
+            _hiveSource.tychoSystemTokenContractAssets,
+            _hiveSource.tychoCustomTokenContractAssets,
+          ],
+        )
+        .flattened
+        .firstWhereOrNull((e) => e.address == rootTokenContract);
 
     if (asset != null) return asset;
 
