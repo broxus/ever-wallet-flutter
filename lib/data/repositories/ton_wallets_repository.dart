@@ -562,19 +562,24 @@ class TonWalletsRepository {
     required String address,
     required UnsignedMessage message,
   }) async {
-    final tonWallet = await getTonWalletStream(address).first;
+    try {
+      final tonWallet = await getTonWalletStream(address).first;
 
-    await message.refreshTimeout();
+      await message.refreshTimeout();
 
-    final signedMessage = await message.signFake();
-    final errors = await tonWallet.transport.simulateTransactionTree(
-      signedMessage: signedMessage,
-      ignoredComputePhaseCodes: Int32List.fromList([0, 1, 60, 100]),
-      ignoredActionPhaseCodes: Int32List.fromList([0, 1]),
-    );
+      final signedMessage = await message.signFake();
+      final errors = await tonWallet.transport.simulateTransactionTree(
+        signedMessage: signedMessage,
+        ignoredComputePhaseCodes: Int32List.fromList([0, 1, 60, 100]),
+        ignoredActionPhaseCodes: Int32List.fromList([0, 1]),
+      );
 
-    // remove duplicate errors
-    return errors.toSet().toList();
+      // remove duplicate errors
+      return errors.toSet().toList();
+    } catch (err, st) {
+      logger.e('Error simulateTransactionTree', err, st);
+      return [];
+    }
   }
 
   void _pollingTimerCallback(Timer timer) {

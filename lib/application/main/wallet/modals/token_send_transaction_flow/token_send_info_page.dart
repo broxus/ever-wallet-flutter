@@ -172,35 +172,24 @@ class _NewSelectWalletTypePageState extends State<TokenSendInfoPage> {
         },
       );
 
-  Widget attachedAmount() {
-    if (widget.attachedAmount == null) return const SizedBox.shrink();
-
-    return AsyncValueStreamProvider<TokenWallet?>(
-      create: (context) =>
-          context.read<TokenWalletsRepository>().tokenWalletStream(
-                owner: widget.owner,
-                rootTokenContract: widget.rootTokenContract,
-              ),
-      builder: (context, child) {
-        final tokenWalletInfo =
-            context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
-                  ready: (value) => value,
+  Widget attachedAmount() => TransportTypeBuilderWidget(
+        builder: (context, isEver) => BlocBuilder<
+            TokenWalletPrepareTransferBloc, TokenWalletPrepareTransferState>(
+          builder: (context, state) {
+            final attachedAmount = widget.attachedAmount ??
+                state.maybeWhen(
+                  ready: (unsignedMessage, _, __) => unsignedMessage.amount,
                   orElse: () => null,
                 );
-
-        return TransportTypeBuilderWidget(
-          builder: (context, isEver) {
             return SectionedCardSection(
               title: context.localization.attached_amount,
-              subtitle: tokenWalletInfo != null
-                  ? '${widget.attachedAmount!.toTokensFull()} ${isEver ? kEverTicker : kVenomTicker}'
+              subtitle: attachedAmount != null
+                  ? '${attachedAmount.toTokensFull()} ${isEver ? kEverTicker : kVenomTicker}'
                   : null,
             );
           },
-        );
-      },
-    );
-  }
+        ),
+      );
 
   Widget fee() => TransportTypeBuilderWidget(
         builder: (context, isEver) {
