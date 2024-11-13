@@ -57,7 +57,7 @@ class TokenWalletPrepareTransferBloc extends Bloc<
 
           final fees = await _tonWalletsRepository.estimateFees(
             address: _owner,
-            unsignedMessageWithAdditionalInfo: unsignedMessage,
+            message: unsignedMessage.message,
           );
           final feesValue = BigInt.parse(fees);
 

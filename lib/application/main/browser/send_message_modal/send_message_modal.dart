@@ -68,6 +68,14 @@ class _SendMessageModalState extends State<SendMessagePage> {
                 publicKey: widget.publicKeys.first,
                 destination: widget.recipient,
                 amount: widget.amount,
+                body: widget.payload != null
+                    ? encodeInternalInput(
+                        contractAbi: widget.payload!.abi,
+                        method: widget.payload!.method,
+                        input: widget.payload!.params,
+                      )
+                    : null,
+                bounce: false,
               ),
             ),
           child: BlocListener<SelectedPublicKeyCubit, String>(

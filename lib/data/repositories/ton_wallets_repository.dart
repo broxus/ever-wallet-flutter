@@ -373,17 +373,13 @@ class TonWalletsRepository {
 
   Future<String> estimateFees({
     required String address,
-    required UnsignedMessageWithAdditionalInfo
-        unsignedMessageWithAdditionalInfo,
+    required UnsignedMessage message,
   }) async {
     final tonWallet = await getTonWalletStream(address).first;
 
-    final unsignedMessage = unsignedMessageWithAdditionalInfo.message;
+    await message.refreshTimeout();
 
-    await unsignedMessage.refreshTimeout();
-
-    final signedMessage = await unsignedMessage.sign(fakeSignature());
-
+    final signedMessage = await message.signFake();
     final fees = await tonWallet.estimateFees(signedMessage);
 
     return fees;

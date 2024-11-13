@@ -56,7 +56,7 @@ Future<Map<String, dynamic>> estimateFeesHandler({
 
     final fees = await tonWalletsRepository.estimateFees(
       address: input.sender,
-      unsignedMessageWithAdditionalInfo: unsignedMessage,
+      message: unsignedMessage.message,
     );
 
     final output = EstimateFeesOutput(fees: fees);

@@ -33,12 +33,12 @@ class TonWalletPrepareTransferBloc
             destination: repackedDestination,
             amount: event.amount,
             body: event.body,
-            bounce: kMessageBounce,
+            bounce: event.bounce ?? kMessageBounce,
           );
 
           final fees = await _tonWalletsRepository.estimateFees(
             address: _address,
-            unsignedMessageWithAdditionalInfo: unsignedMessage,
+            message: unsignedMessage.message,
           );
           final feesValue = int.parse(fees);
 
@@ -81,6 +81,7 @@ class TonWalletPrepareTransferEvent with _$TonWalletPrepareTransferEvent {
     required String destination,
     required String amount,
     String? body,
+    bool? bounce,
   }) = _PrepareTransfer;
 }
 
