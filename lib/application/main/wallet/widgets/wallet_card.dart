@@ -5,10 +5,11 @@ import 'package:ever_wallet/application/common/async_value_stream_provider.dart'
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/animated_appearance.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/common/widgets/wallet_card_selectable_field.dart';
 import 'package:ever_wallet/application/main/wallet/widgets/more_button.dart';
 import 'package:ever_wallet/data/extensions.dart';
+import 'package:ever_wallet/data/models/network_type.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/token_currencies_repository.dart';
 import 'package:ever_wallet/data/repositories/token_wallets_repository.dart';
@@ -41,7 +42,8 @@ class WalletCard extends StatelessWidget {
             Container(
               height: 200,
               decoration: const ShapeDecoration(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(6))),
                 gradient: LinearGradient(
                   begin: Alignment.bottomLeft,
                   end: Alignment.topRight,
@@ -120,10 +122,11 @@ class WalletCard extends StatelessWidget {
                   .expand((e) => e)
                   .where((e) => e.address == address),
               builder: (context, child) {
-                final accountInfo = context.watch<AsyncValue<AssetsList>>().maybeWhen(
-                      ready: (value) => value,
-                      orElse: () => null,
-                    );
+                final accountInfo =
+                    context.watch<AsyncValue<AssetsList>>().maybeWhen(
+                          ready: (value) => value,
+                          orElse: () => null,
+                        );
 
                 return accountInfo != null
                     ? AutoSizeText(
@@ -148,10 +151,11 @@ class WalletCard extends StatelessWidget {
               initialData: const AsyncValue.loading(),
               catchError: (context, error) => AsyncValue.error(error),
               builder: (context, child) {
-                final tonWalletInfo = context.watch<AsyncValue<TonWallet?>>().maybeWhen(
-                      ready: (value) => value,
-                      orElse: () => null,
-                    );
+                final tonWalletInfo =
+                    context.watch<AsyncValue<TonWallet?>>().maybeWhen(
+                          ready: (value) => value,
+                          orElse: () => null,
+                        );
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +164,8 @@ class WalletCard extends StatelessWidget {
                       namedField(
                         name: AppLocalizations.of(context)!.public_key,
                         value: tonWalletInfo.publicKey,
-                        ellipsedValue: tonWalletInfo.publicKey.ellipsePublicKey(),
+                        ellipsedValue:
+                            tonWalletInfo.publicKey.ellipsePublicKey(),
                       )
                     else
                       namedField(
@@ -177,11 +182,13 @@ class WalletCard extends StatelessWidget {
                         name: AppLocalizations.of(context)!.address,
                       ),
                     if (tonWalletInfo != null)
-                      TransportTypeBuilderWidget(
-                        builder: (context, isEver) {
+                      TransportBuilderWidget(
+                        builder: (context, data) {
                           return namedField(
                             name: AppLocalizations.of(context)!.type,
-                            value: tonWalletInfo.walletType.name(isEver),
+                            value: tonWalletInfo.walletType.name(
+                              data.type != NetworkType.venom,
+                            ),
                             isSelectable: false,
                           );
                         },
@@ -200,14 +207,17 @@ class WalletCard extends StatelessWidget {
               create: (context) => context
                   .read<AccountsRepository>()
                   .externalAccountsStream
-                  .map((e) => e.values.expand((e) => e).any((e) => e == address)),
+                  .map((e) =>
+                      e.values.expand((e) => e).any((e) => e == address)),
               builder: (context, child) {
                 final isExternal = context.watch<AsyncValue<bool>>().maybeWhen(
                       ready: (value) => value,
                       orElse: () => false,
                     );
 
-                return isExternal ? externalAccountLabel(context) : const SizedBox();
+                return isExternal
+                    ? externalAccountLabel(context)
+                    : const SizedBox();
               },
             ),
             const Spacer(flex: 2),
@@ -221,10 +231,11 @@ class WalletCard extends StatelessWidget {
                 address,
               ),
               builder: (context, child) {
-                final balanceUsdt = context.watch<AsyncValue<double>>().maybeWhen(
-                      ready: (value) => value,
-                      orElse: () => null,
-                    );
+                final balanceUsdt =
+                    context.watch<AsyncValue<double>>().maybeWhen(
+                          ready: (value) => value,
+                          orElse: () => null,
+                        );
 
                 return balanceUsdt != null
                     ? Padding(
@@ -277,7 +288,8 @@ class WalletCard extends StatelessWidget {
           Flexible(
             child: value == null && ellipsedValue == null
                 ? Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                     child: shimmer(),
                   )
                 : isSelectable
@@ -341,7 +353,8 @@ class WalletCard extends StatelessWidget {
       Container(
         constraints: BoxConstraints(maxHeight: height, maxWidth: width),
         clipBehavior: Clip.antiAlias,
-        decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(2))),
+        decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(2))),
         child: Shimmer.fromColors(
           baseColor: CrystalColor.shimmerBackground,
           highlightColor: CrystalColor.shimmerHighlight,

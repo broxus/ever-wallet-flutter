@@ -1,9 +1,8 @@
-import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/ton_asset_icon.dart';
 import 'package:ever_wallet/application/common/widgets/transaction_type_label.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/widgets/address_title.dart';
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/widgets/confirmation_time_counter.dart';
 import 'package:ever_wallet/application/main/wallet/history/transactions_holders/widgets/confirms_title.dart';
@@ -44,11 +43,14 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: TransportTypeBuilderWidget(
-                            builder: (context, isEver) {
+                          child: TransportBuilderWidget(
+                            builder: (context, data) {
                               return ValueTitle(
-                                value: transaction.value.toTokens().removeZeroes().formatValue(),
-                                currency: isEver ? kEverTicker : kVenomTicker,
+                                value: transaction.value
+                                    .toTokens()
+                                    .removeZeroes()
+                                    .formatValue(),
+                                currency: data.config.symbol,
                                 isOutgoing: transaction.isOutgoing,
                               );
                             },
@@ -58,7 +60,12 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
                       ],
                     ),
                     const Gap(4),
-                    FeesTitle(fees: transaction.fees.toTokens().removeZeroes().formatValue()),
+                    FeesTitle(
+                      fees: transaction.fees
+                          .toTokens()
+                          .removeZeroes()
+                          .formatValue(),
+                    ),
                     const Gap(4),
                     Row(
                       children: [
@@ -70,7 +77,8 @@ class TonWalletMultisigPendingTransactionHolder extends StatelessWidget {
                     ),
                     const Gap(4),
                     TransactionTypeLabel(
-                      text: AppLocalizations.of(context)!.waiting_for_confirmation,
+                      text: AppLocalizations.of(context)!
+                          .waiting_for_confirmation,
                       color: CrystalColor.error,
                     ),
                     const Gap(4),

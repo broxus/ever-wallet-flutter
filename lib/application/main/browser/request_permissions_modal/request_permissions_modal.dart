@@ -1,14 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
-import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/widgets/address_generated_icon.dart';
 import 'package:ever_wallet/application/common/widgets/custom_elevated_button.dart';
 import 'package:ever_wallet/application/common/widgets/custom_outlined_button.dart';
 import 'package:ever_wallet/application/common/widgets/custom_radio.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/main/browser/common/grant_permissions_page.dart';
 import 'package:ever_wallet/application/main/browser/common/selected_account_cubit.dart';
 import 'package:ever_wallet/data/models/permission.dart';
@@ -33,14 +32,15 @@ class RequestPermissionsPage extends StatefulWidget {
   });
 
   @override
-  _RequestPermissionsModalState createState() => _RequestPermissionsModalState();
+  _RequestPermissionsModalState createState() =>
+      _RequestPermissionsModalState();
 }
 
 class _RequestPermissionsModalState extends State<RequestPermissionsPage> {
   @override
   Widget build(BuildContext context) => BlocProvider<SelectedAccountCubit>(
-        create: (context) =>
-            SelectedAccountCubit(context.read<AccountsRepository>().currentAccounts.firstOrNull),
+        create: (context) => SelectedAccountCubit(
+            context.read<AccountsRepository>().currentAccounts.firstOrNull),
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           body: SafeArea(
@@ -69,12 +69,14 @@ class _RequestPermissionsModalState extends State<RequestPermissionsPage> {
       );
 
   Widget accounts() => AsyncValueStreamProvider<List<AssetsList>>(
-        create: (context) => context.read<AccountsRepository>().currentAccountsStream,
+        create: (context) =>
+            context.read<AccountsRepository>().currentAccountsStream,
         builder: (context, child) {
-          final accounts = context.watch<AsyncValue<List<AssetsList>>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => <AssetsList>[],
-              );
+          final accounts =
+              context.watch<AsyncValue<List<AssetsList>>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => <AssetsList>[],
+                  );
 
           return ListView.separated(
             shrinkWrap: true,
@@ -147,10 +149,10 @@ class _RequestPermissionsModalState extends State<RequestPermissionsPage> {
                 orElse: () => null,
               );
 
-          return TransportTypeBuilderWidget(
-            builder: (context, isEver) {
+          return TransportBuilderWidget(
+            builder: (context, data) {
               return Text(
-                '${balance?.toTokens().removeZeroes().formatValue() ?? '0'} ${isEver ? kEverTicker : kVenomTicker}',
+                '${balance?.toTokens().removeZeroes().formatValue() ?? '0'} ${data.config.symbol}',
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
@@ -186,14 +188,16 @@ class _RequestPermissionsModalState extends State<RequestPermissionsPage> {
         ),
       );
 
-  Future<void> onSubmitPressed(AssetsList account) async => Navigator.of(context).push(
+  Future<void> onSubmitPressed(AssetsList account) async =>
+      Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (context) => GrantPermissionsPage(
             modalContext: widget.modalContext,
             origin: widget.origin,
             account: account,
             permissions: widget.permissions,
-            onSubmit: (permissions) => Navigator.of(widget.modalContext).pop(permissions),
+            onSubmit: (permissions) =>
+                Navigator.of(widget.modalContext).pop(permissions),
           ),
         ),
       );

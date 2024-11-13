@@ -1,11 +1,10 @@
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
-import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/ew_dropdown_button.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/main/wallet/modals/confirm_transaction_flow/confirm_transaction_info_page.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
@@ -37,10 +36,12 @@ class PrepareConfirmTransactionPage extends StatefulWidget {
   });
 
   @override
-  _PrepareConfirmTransactionPageState createState() => _PrepareConfirmTransactionPageState();
+  _PrepareConfirmTransactionPageState createState() =>
+      _PrepareConfirmTransactionPageState();
 }
 
-class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactionPage> {
+class _PrepareConfirmTransactionPageState
+    extends State<PrepareConfirmTransactionPage> {
   late final ValueNotifier<String> publicKeyNotifier;
 
   @override
@@ -68,7 +69,8 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
                   children: [
                     ModalHeader(
                       text: AppLocalizations.of(context)!.confirm_transaction,
-                      onCloseButtonPressed: Navigator.of(widget.modalContext).pop,
+                      onCloseButtonPressed:
+                          Navigator.of(widget.modalContext).pop,
                     ),
                     const Gap(16),
                     Expanded(
@@ -106,10 +108,11 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
   Widget dropdownButton() => AsyncValueStreamProvider<Map<String, String>>(
         create: (context) => context.read<KeysRepository>().keyLabelsStream,
         builder: (context, child) {
-          final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => <String, String>{},
-              );
+          final publicKeysLabels =
+              context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => <String, String>{},
+                  );
 
           return ValueListenableBuilder<String>(
             valueListenable: publicKeyNotifier,
@@ -135,8 +138,8 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
         },
       );
 
-  Widget balance() => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
+  Widget balance() => TransportBuilderWidget(
+        builder: (context, data) {
           return AsyncValueStreamProvider<String>(
             create: (context) => context
                 .read<TonWalletsRepository>()
@@ -148,7 +151,7 @@ class _PrepareConfirmTransactionPageState extends State<PrepareConfirmTransactio
                     orElse: () => null,
                   );
 
-              final ticker = isEver ? kEverTicker : kVenomTicker;
+              final ticker = data.config.symbol;
 
               return Text(
                 AppLocalizations.of(context)!.balance(

@@ -1,4 +1,4 @@
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,9 +9,13 @@ class TonAssetIcon extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
-          final icon = isEver ? Assets.images.ever : Assets.images.venom;
+  Widget build(BuildContext context) => TransportBuilderWidget(
+        builder: (context, data) {
+          final icon = data.type.when(
+            everscale: () => Assets.images.ever,
+            venom: () => Assets.images.venom,
+            tycho: () => Assets.images.tycho,
+          );
 
           return ClipOval(
             child: SizedBox(

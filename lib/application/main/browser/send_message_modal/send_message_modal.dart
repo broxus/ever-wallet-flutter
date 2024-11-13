@@ -1,7 +1,6 @@
 import 'package:ever_wallet/application/bloc/ton_wallet/ton_wallet_prepare_transfer_bloc.dart';
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
-import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/widgets/custom_dropdown_button.dart';
 import 'package:ever_wallet/application/common/widgets/custom_elevated_button.dart';
@@ -9,7 +8,7 @@ import 'package:ever_wallet/application/common/widgets/custom_outlined_button.da
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/common/widgets/tx_errors.dart';
 import 'package:ever_wallet/application/main/browser/common/selected_public_key_cubit.dart';
 import 'package:ever_wallet/application/main/common/extensions.dart';
@@ -186,19 +185,19 @@ class _SendMessageModalState extends State<SendMessagePage> {
         isSelectable: true,
       );
 
-  Widget amount() => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
+  Widget amount() => TransportBuilderWidget(
+        builder: (context, data) {
           return SectionedCardSection(
             title: AppLocalizations.of(context)!.amount,
             subtitle:
-                '${widget.amount.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
+                '${widget.amount.toTokens().removeZeroes()} ${data.config.symbol}',
             isSelectable: true,
           );
         },
       );
 
-  Widget fee() => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
+  Widget fee() => TransportBuilderWidget(
+        builder: (context, data) {
           return BlocBuilder<TonWalletPrepareTransferBloc,
               TonWalletPrepareTransferState>(
             builder: (context, state) {
@@ -206,7 +205,7 @@ class _SendMessageModalState extends State<SendMessagePage> {
                 initial: () => null,
                 loading: () => null,
                 ready: (unsignedMessage, fees, txErrors) =>
-                    '${fees.toTokens().removeZeroes()} ${isEver ? kEverTicker : kVenomTicker}',
+                    '${fees.toTokens().removeZeroes()} ${data.config.symbol}',
                 error: (error) => error,
               );
 

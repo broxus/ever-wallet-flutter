@@ -1,6 +1,5 @@
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
-import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/utils.dart';
@@ -8,7 +7,7 @@ import 'package:ever_wallet/application/common/widgets/custom_elevated_button.da
 import 'package:ever_wallet/application/common/widgets/custom_outlined_button.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/common/widgets/transaction_type_label.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/main/common/extensions.dart';
 import 'package:ever_wallet/application/main/wallet/modals/confirm_transaction_flow/start_confirm_transaction_flow.dart';
 import 'package:ever_wallet/application/main/wallet/modals/utils.dart';
@@ -29,30 +28,34 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
+  Widget build(BuildContext context) => TransportBuilderWidget(
+        builder: (context, data) {
           return AsyncValueStreamProvider<Map<String, String>>(
             create: (context) => context.read<KeysRepository>().keyLabelsStream,
             builder: (context, child) {
-              final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
-                    ready: (value) => value,
-                    orElse: () => <String, String>{},
-                  );
+              final publicKeysLabels =
+                  context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
+                        ready: (value) => value,
+                        orElse: () => <String, String>{},
+                      );
 
-              final dePoolOnRoundComplete =
-                  transaction.dePoolOnRoundCompleteNotification?.toRepresentableData(
+              final dePoolOnRoundComplete = transaction
+                  .dePoolOnRoundCompleteNotification
+                  ?.toRepresentableData(
                 context: context,
-                ticker: isEver ? kEverTicker : kVenomTicker,
+                ticker: data.config.symbol,
               );
 
-              final dePoolReceiveAnswer =
-                  transaction.dePoolReceiveAnswerNotification?.toRepresentableData(context);
+              final dePoolReceiveAnswer = transaction
+                  .dePoolReceiveAnswerNotification
+                  ?.toRepresentableData(context);
 
-              final tokenWalletDeployed =
-                  transaction.tokenWalletDeployedNotification?.toRepresentableData(context);
+              final tokenWalletDeployed = transaction
+                  .tokenWalletDeployedNotification
+                  ?.toRepresentableData(context);
 
-              final walletInteraction =
-                  transaction.walletInteractionInfo?.toRepresentableData(context);
+              final walletInteraction = transaction.walletInteractionInfo
+                  ?.toRepresentableData(context);
 
               final sections = [
                 section(
@@ -77,15 +80,22 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                     amountItem(
                       context: context,
                       isOutgoing: transaction.isOutgoing,
-                      value: transaction.value.toTokens().removeZeroes().formatValue(),
+                      value: transaction.value
+                          .toTokens()
+                          .removeZeroes()
+                          .formatValue(),
                     ),
                     feeItem(
                       context: context,
-                      fees: transaction.fees.toTokens().removeZeroes().formatValue(),
+                      fees: transaction.fees
+                          .toTokens()
+                          .removeZeroes()
+                          .formatValue(),
                     ),
                   ],
                 ),
-                if (transaction.comment != null && transaction.comment!.isNotEmpty)
+                if (transaction.comment != null &&
+                    transaction.comment!.isNotEmpty)
                   section(
                     [
                       item(
@@ -99,7 +109,8 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                     [
                       typeItem(
                         context: context,
-                        type: AppLocalizations.of(context)!.de_pool_on_round_complete,
+                        type: AppLocalizations.of(context)!
+                            .de_pool_on_round_complete,
                       ),
                       ...dePoolOnRoundComplete.entries
                           .map(
@@ -116,7 +127,8 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                     [
                       typeItem(
                         context: context,
-                        type: AppLocalizations.of(context)!.de_pool_receive_answer,
+                        type: AppLocalizations.of(context)!
+                            .de_pool_receive_answer,
                       ),
                       ...dePoolReceiveAnswer.entries
                           .map(
@@ -133,7 +145,8 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                     [
                       typeItem(
                         context: context,
-                        type: AppLocalizations.of(context)!.token_wallet_deployed,
+                        type:
+                            AppLocalizations.of(context)!.token_wallet_deployed,
                       ),
                       ...tokenWalletDeployed.entries
                           .map(
@@ -172,7 +185,8 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                     ...transaction.custodians.asMap().entries.map(
                       (e) {
                         final title = publicKeysLabels[e.value] ??
-                            AppLocalizations.of(context)!.custodian_n('${e.key + 1}');
+                            AppLocalizations.of(context)!
+                                .custodian_n('${e.key + 1}');
 
                         return custodiansItem(
                           context: context,
@@ -195,7 +209,8 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
                     child: Column(
                       children: [
                         ModalHeader(
-                          text: AppLocalizations.of(context)!.transaction_information,
+                          text: AppLocalizations.of(context)!
+                              .transaction_information,
                           onCloseButtonPressed: Navigator.of(context).pop,
                         ),
                         const Gap(16),
@@ -329,9 +344,9 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
     required bool isOutgoing,
     required String value,
   }) =>
-      TransportTypeBuilderWidget(
-        builder: (context, isEver) {
-          final ticker = isEver ? kEverTicker : kVenomTicker;
+      TransportBuilderWidget(
+        builder: (context, data) {
+          final ticker = data.config.symbol;
 
           return item(
             title: AppLocalizations.of(context)!.amount,
@@ -344,9 +359,9 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
     required BuildContext context,
     required String fees,
   }) =>
-      TransportTypeBuilderWidget(
-        builder: (context, isEver) {
-          final ticker = isEver ? kEverTicker : kVenomTicker;
+      TransportBuilderWidget(
+        builder: (context, data) {
+          final ticker = data.config.symbol;
 
           return item(
             title: AppLocalizations.of(context)!.blockchain_fee,
@@ -371,8 +386,8 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
   }) =>
       item(
         title: AppLocalizations.of(context)!.signatures,
-        subtitle:
-            AppLocalizations.of(context)!.n_of_k_signatures_collected('$received', '$required'),
+        subtitle: AppLocalizations.of(context)!
+            .n_of_k_signatures_collected('$received', '$required'),
       );
 
   Widget custodiansItem({
@@ -434,13 +449,15 @@ class TonWalletMultisigPendingTransactionInfoModalBody extends StatelessWidget {
     required BuildContext context,
     required String hash,
   }) =>
-      TransportTypeBuilderWidget(
-        builder: (context, isEver) {
-          final transactionExplorerLink =
-              isEver ? everTransactionExplorerLink : venomTransactionExplorerLink;
-
+      TransportBuilderWidget(
+        builder: (context, data) {
           return CustomOutlinedButton(
-            onPressed: () => launchUrlString(transactionExplorerLink(hash)),
+            onPressed: () => launchUrlString(
+              transactionExplorerLink(
+                id: hash,
+                explorerBaseUrl: data.config.explorerBaseUrl,
+              ),
+            ),
             text: AppLocalizations.of(context)!.see_in_the_explorer,
           );
         },

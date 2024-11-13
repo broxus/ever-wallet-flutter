@@ -7,6 +7,7 @@ import 'package:ever_wallet/data/extensions.dart';
 import 'package:ever_wallet/data/models/account_removed_event.dart';
 import 'package:ever_wallet/data/models/key_added_event.dart';
 import 'package:ever_wallet/data/models/key_removed_event.dart';
+import 'package:ever_wallet/data/models/network_type.dart';
 import 'package:ever_wallet/data/sources/local/current_accounts_source.dart';
 import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:ever_wallet/data/sources/remote/transport_source.dart';
@@ -41,8 +42,8 @@ class AccountsRepository {
         _transportSource = transportSource,
         _currentAccountsSource = currentAccountsSource,
         _eventBus = eventBus {
-    _currentAccountsStreamSubscription =
-        Rx.combineLatest3<String?, List<AssetsList>, Map<String, List<String>>, List<AssetsList>>(
+    _currentAccountsStreamSubscription = Rx.combineLatest3<String?,
+        List<AssetsList>, Map<String, List<String>>, List<AssetsList>>(
       _hiveSource.currentKeyStream,
       accountsStream,
       externalAccountsStream,
@@ -68,53 +69,79 @@ class AccountsRepository {
 
   /// Returns stream of the list of addresses of [publicKey]
   Stream<List<String>> externalAccountsForStream(String publicKey) =>
-      externalAccountsStream.map((accounts) => accounts[publicKey] ?? <String>[]);
+      externalAccountsStream
+          .map((accounts) => accounts[publicKey] ?? <String>[]);
 
   /// Returns the list of external accounts where key - publicKey, value - list of addresses
-  Map<String, List<String>> get externalAccounts => _hiveSource.externalAccounts;
+  Map<String, List<String>> get externalAccounts =>
+      _hiveSource.externalAccounts;
 
-  Stream<List<AssetsList>> get currentAccountsStream =>
-      Rx.combineLatest2<List<AssetsList>, Transport, List<AssetsList>>(
+  Stream<List<AssetsList>> get currentAccountsStream => Rx.combineLatest2(
         _currentAccountsSource.currentAccountsStream,
-        _transportSource.transportStream,
-        (a, b) {
+        _transportSource.networkTypeStream,
+        (a, networkType) {
           return a.where(
             (account) {
-              return _transportSource.isEverTransport
-                  ? kEverAvailableWallets.contains(account.tonWallet.contract)
-                  : kVenomAvailableWallets.contains(account.tonWallet.contract);
+              return networkType.when(
+                everscale: () =>
+                    kEverAvailableWallets.contains(account.tonWallet.contract),
+                venom: () =>
+                    kVenomAvailableWallets.contains(account.tonWallet.contract),
+                tycho: () =>
+                    kEverAvailableWallets.contains(account.tonWallet.contract),
+              );
             },
           ).toList();
         },
       );
 
-  List<AssetsList> get currentAccounts => _currentAccountsSource.currentAccounts.where(
+  List<AssetsList> get currentAccounts =>
+      _currentAccountsSource.currentAccounts.where(
         (account) {
-          return _transportSource.isEverTransport
-              ? kEverAvailableWallets.contains(account.tonWallet.contract)
-              : kVenomAvailableWallets.contains(account.tonWallet.contract);
+          return _transportSource.networkType.when(
+            everscale: () =>
+                kEverAvailableWallets.contains(account.tonWallet.contract),
+            venom: () =>
+                kVenomAvailableWallets.contains(account.tonWallet.contract),
+            tycho: () =>
+                kEverAvailableWallets.contains(account.tonWallet.contract),
+          );
         },
       ).toList();
 
   /// Same as [currentAccountsStream] but contains accounts that were not hidden in profile
-  Stream<List<AssetsList>> get currentAccountsStreamWithHidden => CombineLatestStream.combine2(
+  Stream<List<AssetsList>> get currentAccountsStreamWithHidden =>
+      CombineLatestStream.combine2(
         currentAccountsStream,
         hiddenAccountsStream,
-        (accounts, hidden) => List.from(accounts)..removeWhere((a) => hidden.contains(a.address)),
+        (accounts, hidden) =>
+            List.from(accounts)..removeWhere((a) => hidden.contains(a.address)),
       );
 
-  Stream<Tuple2<List<WalletType>, List<WalletType>>> accountCreationOptionsStream(
+  Stream<Tuple2<List<WalletType>, List<WalletType>>>
+      accountCreationOptionsStream(
     String publicKey,
   ) =>
-      accountsStream.map((e) => e.toOptionsFor(publicKey, _transportSource.isEverTransport));
+          accountsStream.map(
+            (e) => e.toOptionsFor(
+              publicKey,
+              _transportSource.networkType != NetworkType.venom,
+            ),
+          );
 
-  Tuple2<List<WalletType>, List<WalletType>> accountCreationOptions(String publicKey) =>
-      accounts.toOptionsFor(publicKey, _transportSource.isEverTransport);
+  Tuple2<List<WalletType>, List<WalletType>> accountCreationOptions(
+    String publicKey,
+  ) =>
+      accounts.toOptionsFor(
+        publicKey,
+        _transportSource.networkType != NetworkType.venom,
+      );
 
   List<AssetsList> accountsFor(String publicKey) => accounts
       .where(
         (a) =>
-            a.publicKey == publicKey || (externalAccounts[publicKey]?.contains(a.address) ?? false),
+            a.publicKey == publicKey ||
+            (externalAccounts[publicKey]?.contains(a.address) ?? false),
       )
       .toList();
 
@@ -123,11 +150,14 @@ class AccountsRepository {
         accountsStream,
         externalAccountsForStream(publicKey),
         (accounts, external) => accounts
-            .where((a) => a.publicKey == publicKey || (external.contains(a.address)))
+            .where(
+              (a) => a.publicKey == publicKey || (external.contains(a.address)),
+            )
             .toList(),
       );
 
-  Stream<List<String>> get hiddenAccountsStream => _hiveSource.hiddenAccountsStream;
+  Stream<List<String>> get hiddenAccountsStream =>
+      _hiveSource.hiddenAccountsStream;
 
   /// If account with [address] is hidden
   Stream<bool> hiddenAccountByAddress(String address) =>
@@ -135,7 +165,8 @@ class AccountsRepository {
 
   List<String> get hiddenAccounts => _hiveSource.hiddenAccounts;
 
-  Future<void> toggleHiddenAccount(String address) => _hiveSource.toggleHiddenAccount(address);
+  Future<void> toggleHiddenAccount(String address) =>
+      _hiveSource.toggleHiddenAccount(address);
 
   Future<AssetsList> addAccount({
     String? name,
@@ -146,7 +177,10 @@ class AccountsRepository {
   }) =>
       _accountsStorage.addAccount(
         AccountToAdd(
-          name: name ?? walletType.name(_transportSource.isEverTransport),
+          name: name ??
+              walletType.name(
+                _transportSource.networkType != NetworkType.venom,
+              ),
           publicKey: publicKey,
           contract: walletType,
           workchain: workchain,
@@ -210,7 +244,11 @@ class AccountsRepository {
     final externalAccounts = this
         .externalAccounts
         .entries
-        .map((e) => e.value.where((e) => e == account.address).map((el) => Tuple2(e.key, el)))
+        .map(
+          (e) => e.value
+              .where((e) => e == account.address)
+              .map((el) => Tuple2(e.key, el)),
+        )
         .expand((e) => e);
 
     for (final externalAccount in externalAccounts) {
@@ -240,8 +278,10 @@ class AccountsRepository {
       address: address,
     );
 
-    final isStillExternal = externalAccounts.values.expand((e) => e).contains(account.address);
-    final isLocal = _keystore.entries.map((e) => e.publicKey).contains(account.publicKey);
+    final isStillExternal =
+        externalAccounts.values.expand((e) => e).contains(account.address);
+    final isLocal =
+        _keystore.entries.map((e) => e.publicKey).contains(account.publicKey);
 
     if (!isStillExternal && !isLocal) {
       final removedAccount = await removeAccount(account.address);
@@ -304,7 +344,8 @@ class AccountsRepository {
     final externalAddresses = c[a] ?? [];
 
     final internalAccounts = b.where((e) => e.publicKey == a);
-    final externalAccounts = b.where((e) => externalAddresses.contains(e.address));
+    final externalAccounts =
+        b.where((e) => externalAddresses.contains(e.address));
 
     final list = [
       ...internalAccounts,
@@ -324,8 +365,9 @@ class AccountsRepository {
         transport: transport,
         publicKey: addedKey.publicKey,
         workchainId: kDefaultWorkchain,
-        walletTypes:
-            _transportSource.isEverTransport ? kEverAvailableWallets : kVenomAvailableWallets,
+        walletTypes: _transportSource.networkType != NetworkType.venom
+            ? kEverAvailableWallets
+            : kVenomAvailableWallets,
       );
 
       final activeWallets = wallets.where((e) => e.isActive);
@@ -366,8 +408,13 @@ class AccountsRepository {
 }
 
 extension on List<AssetsList> {
-  Tuple2<List<WalletType>, List<WalletType>> toOptionsFor(String publicKey, bool isEver) {
-    final added = where((e) => e.publicKey == publicKey).map((e) => e.tonWallet.contract).toList();
+  Tuple2<List<WalletType>, List<WalletType>> toOptionsFor(
+    String publicKey,
+    bool isEver,
+  ) {
+    final added = where((e) => e.publicKey == publicKey)
+        .map((e) => e.tonWallet.contract)
+        .toList();
     final available = (isEver ? kEverAvailableWallets : kVenomAvailableWallets)
         .where((e) => !added.contains(e))
         .toList();

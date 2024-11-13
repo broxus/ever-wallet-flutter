@@ -5,13 +5,14 @@ import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
 import 'package:ever_wallet/application/common/theme.dart';
 import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/common/widgets/unfocusing_gesture_detector.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/extensions.dart';
+import 'package:ever_wallet/data/models/network_type.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -32,7 +33,8 @@ class AddNewAccountTypePage extends StatefulWidget {
   });
 
   @override
-  _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
+  _NewSelectWalletTypePageState createState() =>
+      _NewSelectWalletTypePageState();
 }
 
 class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
@@ -100,23 +102,27 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
         ),
       );
 
-  Widget list() => AsyncValueStreamProvider<Tuple2<List<WalletType>, List<WalletType>>>(
-        create: (context) =>
-            context.read<AccountsRepository>().accountCreationOptionsStream(widget.publicKey),
+  Widget list() =>
+      AsyncValueStreamProvider<Tuple2<List<WalletType>, List<WalletType>>>(
+        create: (context) => context
+            .read<AccountsRepository>()
+            .accountCreationOptionsStream(widget.publicKey),
         builder: (context, child) {
-          final options =
-              context.watch<AsyncValue<Tuple2<List<WalletType>, List<WalletType>>>>().maybeWhen(
-                    ready: (value) => value,
-                    orElse: () => null,
-                  );
+          final options = context
+              .watch<AsyncValue<Tuple2<List<WalletType>, List<WalletType>>>>()
+              .maybeWhen(
+                ready: (value) => value,
+                orElse: () => null,
+              );
 
           final added = options?.item1 ?? [];
           final available = options?.item2 ?? [];
 
-          final list = [...added, ...available]..sort((a, b) => a.toInt().compareTo(b.toInt()));
+          final list = [...added, ...available]
+            ..sort((a, b) => a.toInt().compareTo(b.toInt()));
 
-          return TransportTypeBuilderWidget(
-            builder: (context, isEver) {
+          return TransportBuilderWidget(
+            builder: (context, data) {
               return ListView.builder(
                 itemCount: list.length,
                 physics: const NeverScrollableScrollPhysics(),
@@ -126,7 +132,7 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
                   index: index,
                   added: added,
                   available: available,
-                  isEver: isEver,
+                  networkType: data.type,
                 ),
               );
             },
@@ -139,27 +145,31 @@ class _NewSelectWalletTypePageState extends State<AddNewAccountTypePage> {
     required int index,
     required List<WalletType> added,
     required List<WalletType> available,
-    required bool isEver,
+    required NetworkType networkType,
   }) =>
       ValueListenableBuilder<WalletType?>(
         valueListenable: optionNotifier,
         builder: (context, value, child) => RadioListTile<WalletType>(
           value: list[index],
           groupValue: value,
-          onChanged: !added.contains(list[index]) ? (value) => optionNotifier.value = value : null,
+          onChanged: !added.contains(list[index])
+              ? (value) => optionNotifier.value = value
+              : null,
           activeColor: CrystalColor.accent,
           title: Text(
-            '${list[index].name(isEver)}${list[index] == getDefaultWalletType(isEver) ? ' (default)' : ""}',
+            '${list[index].name(networkType != NetworkType.venom)}${list[index] == getDefaultWalletType(networkType) ? ' (default)' : ""}',
           ),
         ),
       );
 
-  Widget submitButton() => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
+  Widget submitButton() => TransportBuilderWidget(
+        builder: (context, data) {
           return ValueListenableBuilder<WalletType?>(
             valueListenable: optionNotifier,
             builder: (context, value, child) => PrimaryElevatedButton(
-              onPressed: value != null ? () => onPressed(value, isEver) : null,
+              onPressed: value != null
+                  ? () => onPressed(value, data.type != NetworkType.venom)
+                  : null,
               text: context.localization.confirm,
             ),
           );

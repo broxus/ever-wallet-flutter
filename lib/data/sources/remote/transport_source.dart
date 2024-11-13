@@ -1,49 +1,63 @@
 import 'dart:async';
 
 import 'package:ever_wallet/data/models/connection_data.dart';
+import 'package:ever_wallet/data/models/network_type.dart';
 import 'package:ever_wallet/data/sources/remote/constants.dart';
 import 'package:ever_wallet/data/sources/remote/http_source.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart' hide ConnectionData;
 import 'package:rxdart/rxdart.dart';
+import 'package:tuple/tuple.dart';
 
 class TransportSource {
   final HttpSource _httpSource;
-  final _transportSubject = BehaviorSubject<Transport>();
+  final _transportSubject =
+      BehaviorSubject<Tuple2<Transport, ConnectionData>>();
 
   TransportSource(this._httpSource);
 
-  Stream<Transport> get transportStream => _transportSubject;
+  Stream<Tuple2<Transport, ConnectionData>> get transportWithDataStream =>
+      _transportSubject;
 
-  Transport get transport => _transportSubject.value;
+  Stream<Transport> get transportStream =>
+      _transportSubject.map((event) => event.item1);
 
-  /// Returns stream of bool where true means ever network, false means venom network
-  Stream<bool> get isEverTransportStream => transportStream.map((t) => !t.name.contains('Venom'));
+  Stream<NetworkType> get networkTypeStream =>
+      _transportSubject.map((e) => e.item2.type);
 
-  bool get isEverTransport => !transport.name.contains('Venom');
+  Tuple2<Transport, ConnectionData> get transportWithData =>
+      _transportSubject.value;
+
+  Transport get transport => _transportSubject.value.item1;
+
+  NetworkType get networkType => _transportSubject.value.item2.type;
 
   Future<void> updateTransport(ConnectionData connectionData) async {
     final prevTransport = _transportSubject.valueOrNull;
 
-    _transportSubject.add(_createTransport(connectionData));
+    _transportSubject.add(
+      Tuple2(_createTransport(connectionData), connectionData),
+    );
 
-    await prevTransport?.dispose();
+    await prevTransport?.item1.dispose();
   }
 
   Future<void> dispose() async {
     await _transportSubject.close();
 
-    await _transportSubject.valueOrNull?.dispose();
+    await _transportSubject.valueOrNull?.item1.dispose();
   }
 
-  Transport _createTransport(ConnectionData connectionData) => connectionData.when(
-        gql: (name, networkId, group, endpoints, timeout, local) => _createGqlTransport(
+  Transport _createTransport(ConnectionData connectionData) =>
+      connectionData.when(
+        gql: (name, networkId, group, endpoints, _, local, __, ___) =>
+            _createGqlTransport(
           name: name,
           networkId: networkId,
           group: group,
           endpoints: endpoints,
           local: local,
         ),
-        jrpc: (name, networkId, group, endpoint) => _createJrpcTransport(
+        jrpc: (name, networkId, group, endpoint, _, __) => _createJrpcTransport(
           name: name,
           networkId: networkId,
           group: group,

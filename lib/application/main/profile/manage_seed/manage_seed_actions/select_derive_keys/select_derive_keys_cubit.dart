@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/data/constants.dart';
+import 'package:ever_wallet/data/models/network_type.dart';
 import 'package:ever_wallet/data/repositories/accounts_repository.dart';
 import 'package:ever_wallet/data/repositories/keys_repository.dart';
 import 'package:ever_wallet/data/repositories/transport_repository.dart';
@@ -63,7 +64,8 @@ class SelectDeriveKeysCubit extends Cubit<SelectDeriveKeysCubitState> {
       ),
     );
     publicKeys.addAll(adr);
-    final subKeys = _keysRepository.keys.where((k) => k.masterKey == key.publicKey);
+    final subKeys =
+        _keysRepository.keys.where((k) => k.masterKey == key.publicKey);
     initialKeys.addAll(subKeys.map((e) => e.publicKey));
 
     emit(
@@ -145,7 +147,7 @@ class SelectDeriveKeysCubit extends Cubit<SelectDeriveKeysCubitState> {
       onDone: () async {
         await _accountsRepo.addAccount(
           publicKey: publicKey,
-          walletType: getDefaultWalletType(_transportRepo.isEverTransport),
+          walletType: getDefaultWalletType(_transportRepo.networkType),
           workchain: kDefaultWorkchain,
         );
         completer.complete();

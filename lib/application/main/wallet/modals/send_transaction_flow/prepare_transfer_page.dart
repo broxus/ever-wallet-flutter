@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:ever_wallet/application/common/async_value.dart';
 import 'package:ever_wallet/application/common/async_value_stream_provider.dart';
-import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/general/button/ew_dropdown_button.dart';
 import 'package:ever_wallet/application/common/general/button/primary_elevated_button.dart';
@@ -12,7 +11,7 @@ import 'package:ever_wallet/application/common/widgets/custom_text_form_field.da
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
 import 'package:ever_wallet/application/common/widgets/text_field_clear_button.dart';
 import 'package:ever_wallet/application/common/widgets/text_suffix_icon_button.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/common/widgets/unfocusing_gesture_detector.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/check_camera_permission.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/parse_scan_result.dart';
@@ -165,10 +164,11 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
   Widget dropdownButton() => AsyncValueStreamProvider<Map<String, String>>(
         create: (context) => context.read<KeysRepository>().keyLabelsStream,
         builder: (context, child) {
-          final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => <String, String>{},
-              );
+          final publicKeysLabels =
+              context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => <String, String>{},
+                  );
 
           return ValueListenableBuilder<String>(
             valueListenable: publicKeyNotifier,
@@ -224,8 +224,8 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         },
       );
 
-  Widget balance() => TransportTypeBuilderWidget(
-        builder: (context, isEver) {
+  Widget balance() => TransportBuilderWidget(
+        builder: (context, data) {
           return AsyncValueStreamProvider<String>(
             create: (context) => context
                 .read<TonWalletsRepository>()
@@ -237,7 +237,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
                     orElse: () => null,
                   );
 
-              final ticker = isEver ? kEverTicker : kVenomTicker;
+              final ticker = data.config.symbol;
 
               return Text(
                 AppLocalizations.of(context)!.balance(
@@ -290,7 +290,8 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
             destinationController.value,
             TextEditingValue(
               text: text,
-              selection: TextSelection.fromPosition(TextPosition(offset: text.length)),
+              selection:
+                  TextSelection.fromPosition(TextPosition(offset: text.length)),
             ),
           );
 
@@ -379,7 +380,8 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
   void onPressed() {
     final destination = destinationController.text;
     final amount = amountController.text.toNanoTokens();
-    final comment = commentController.text.isNotEmpty ? commentController.text : null;
+    final comment =
+        commentController.text.isNotEmpty ? commentController.text : null;
     final publicKey = publicKeyNotifier.value;
 
     Navigator.of(context).push(

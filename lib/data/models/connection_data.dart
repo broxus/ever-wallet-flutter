@@ -1,3 +1,5 @@
+import 'package:ever_wallet/data/models/network_config.dart';
+import 'package:ever_wallet/data/models/network_type.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'connection_data.freezed.dart';
@@ -11,6 +13,8 @@ class ConnectionData with _$ConnectionData {
     required List<String> endpoints,
     required int timeout,
     required bool local,
+    required NetworkConfig config,
+    required NetworkType type,
   }) = _ConnectionDataGql;
 
   const factory ConnectionData.jrpc({
@@ -18,5 +22,7 @@ class ConnectionData with _$ConnectionData {
     required int networkId,
     required String group,
     required String endpoint,
+    required NetworkConfig config,
+    required NetworkType type,
   }) = _ConnectionDataJrpc;
 }

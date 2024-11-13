@@ -26,10 +26,18 @@ import 'package:rxdart/rxdart.dart';
 class HiveSource {
   final _keyPasswordsBoxName = 'keys_passwords_v1';
   final _userPreferencesBoxName = 'user_preferences_v1';
-  final _everSystemTokenContractAssetsBoxName = 'system_token_contract_assets_v1';
-  final _everCustomTokenContractAssetsBoxName = 'custom_token_contract_assets_v1';
-  final _venomSystemTokenContractAssetsBoxName = 'venom_system_token_contract_assets_v1';
-  final _venomCustomTokenContractAssetsBoxName = 'venom_custom_token_contract_assets_v1';
+  final _everSystemTokenContractAssetsBoxName =
+      'system_token_contract_assets_v1';
+  final _everCustomTokenContractAssetsBoxName =
+      'custom_token_contract_assets_v1';
+  final _venomSystemTokenContractAssetsBoxName =
+      'venom_system_token_contract_assets_v1';
+  final _venomCustomTokenContractAssetsBoxName =
+      'venom_custom_token_contract_assets_v1';
+  final _tychoSystemTokenContractAssetsBoxName =
+      'tycho_system_token_contract_assets_v1';
+  final _tychoCustomTokenContractAssetsBoxName =
+      'tycho_custom_token_contract_assets_v1';
   final _hiddenAccountsKey = 'hidden_accounts_key';
   final _seedsBoxName = 'seeds_v1';
   final _nekotonFlutterBoxName = 'nekoton_flutter';
@@ -41,6 +49,7 @@ class HiveSource {
   final _siteMetaDataBoxName = 'site_meta_data_v1';
   final _currenciesBoxName = 'currencies_v1';
   final _venomCurrenciesBoxName = 'venom_currencies_v1';
+  final _tychoCurrenciesBoxName = 'tycho_currencies_v1';
   final _biometryStatusKey = 'biometry_status';
   final _currentKeyKey = 'current_public_key';
   final _currentConnectionKey = 'current_connection';
@@ -61,7 +70,8 @@ class HiveSource {
 
   Box<String> get _keyPasswordsBox => Hive.box<String>(_keyPasswordsBoxName);
 
-  Box<Object?> get _userPreferencesBox => Hive.box<Object?>(_userPreferencesBoxName);
+  Box<Object?> get _userPreferencesBox =>
+      Hive.box<Object?>(_userPreferencesBoxName);
 
   Box<TokenContractAssetDto> get _everSystemTokenContractAssetsBox =>
       Hive.box<TokenContractAssetDto>(_everSystemTokenContractAssetsBoxName);
@@ -69,35 +79,53 @@ class HiveSource {
   Box<TokenContractAssetDto> get _venomSystemTokenContractAssetsBox =>
       Hive.box<TokenContractAssetDto>(_venomSystemTokenContractAssetsBoxName);
 
+  Box<TokenContractAssetDto> get _tychoSystemTokenContractAssetsBox =>
+      Hive.box<TokenContractAssetDto>(_tychoSystemTokenContractAssetsBoxName);
+
   Box<TokenContractAssetDto> get _everCustomTokenContractAssetsBox =>
       Hive.box<TokenContractAssetDto>(_everCustomTokenContractAssetsBoxName);
 
   Box<TokenContractAssetDto> get _venomCustomTokenContractAssetsBox =>
       Hive.box<TokenContractAssetDto>(_venomCustomTokenContractAssetsBoxName);
 
+  Box<TokenContractAssetDto> get _tychoCustomTokenContractAssetsBox =>
+      Hive.box<TokenContractAssetDto>(_tychoCustomTokenContractAssetsBoxName);
+
   Box<String> get _seedsBox => Hive.box<String>(_seedsBoxName);
 
-  Box<String> get _nekotonFlutterBox => Hive.box<String>(_nekotonFlutterBoxName);
+  Box<String> get _nekotonFlutterBox =>
+      Hive.box<String>(_nekotonFlutterBoxName);
 
   Box<dynamic> get _preferencesBox => Hive.box<dynamic>(_preferencesBoxName);
 
-  Box<PermissionsDto> get _permissionsBox => Hive.box<PermissionsDto>(_permissionsBoxName);
+  Box<PermissionsDto> get _permissionsBox =>
+      Hive.box<PermissionsDto>(_permissionsBoxName);
 
-  Box<List> get _externalAccountsBox => Hive.box<List>(_externalAccountsBoxName);
+  Box<List> get _externalAccountsBox =>
+      Hive.box<List>(_externalAccountsBoxName);
 
-  Box<BookmarkDto> get _bookmarksBox => Hive.box<BookmarkDto>(_bookmarksBoxName);
+  Box<BookmarkDto> get _bookmarksBox =>
+      Hive.box<BookmarkDto>(_bookmarksBoxName);
 
-  Box<SearchHistoryDto> get _searchHistoryBox => Hive.box<SearchHistoryDto>(_searchHistoryBoxName);
+  Box<SearchHistoryDto> get _searchHistoryBox =>
+      Hive.box<SearchHistoryDto>(_searchHistoryBoxName);
 
-  Box<SiteMetaDataDto> get _siteMetaDataBox => Hive.box<SiteMetaDataDto>(_siteMetaDataBoxName);
+  Box<SiteMetaDataDto> get _siteMetaDataBox =>
+      Hive.box<SiteMetaDataDto>(_siteMetaDataBoxName);
 
-  Box<CurrencyDto> get _everCurrenciesBox => Hive.box<CurrencyDto>(_currenciesBoxName);
+  Box<CurrencyDto> get _everCurrenciesBox =>
+      Hive.box<CurrencyDto>(_currenciesBoxName);
 
-  Box<CurrencyDto> get _venomCurrenciesBox => Hive.box<CurrencyDto>(_venomCurrenciesBoxName);
+  Box<CurrencyDto> get _venomCurrenciesBox =>
+      Hive.box<CurrencyDto>(_venomCurrenciesBoxName);
+
+  Box<CurrencyDto> get _tychoCurrenciesBox =>
+      Hive.box<CurrencyDto>(_tychoCurrenciesBoxName);
 
   Box<dynamic> get _browserTabsBox => Hive.box<dynamic>(_browserTabsKey);
 
-  Box<List<String>> get _hiddenAccountsBox => Hive.box<List<String>>(_hiddenAccountsKey);
+  Box<List<String>> get _hiddenAccountsBox =>
+      Hive.box<List<String>>(_hiddenAccountsKey);
 
   Stream<Map<String, String>> get seedsStream =>
       _seedsBox.watchAll<String>().map((e) => e.cast<String, String>());
@@ -114,7 +142,8 @@ class HiveSource {
 
   Future<void> clearSeeds() => _seedsBox.clear();
 
-  Stream<String?> get currentKeyStream => _preferencesBox.watchKey(_currentKeyKey).cast<String?>();
+  Stream<String?> get currentKeyStream =>
+      _preferencesBox.watchKey(_currentKeyKey).cast<String?>();
 
   String? get currentKey => _preferencesBox.get(_currentKeyKey) as String?;
 
@@ -133,7 +162,8 @@ class HiveSource {
   /// After updating to application version with this list, it's filled with 4 (or less) random keys
   /// with [currentKey] at 1-st place.
   List<String> lastViewedSeeds() =>
-      (_preferencesBox.get(_lastSelectedSeedsKey) as List? ?? []).cast<String>();
+      (_preferencesBox.get(_lastSelectedSeedsKey) as List? ?? [])
+          .cast<String>();
 
   /// Update seeds that were used by user.
   /// There must be only master keys, if key is sub, then put its master.
@@ -142,11 +172,13 @@ class HiveSource {
       _preferencesBox.put(_lastSelectedSeedsKey, seedsKeys);
 
   /// List of addresses of accounts
-  List<String> get hiddenAccounts => _hiddenAccountsBox.get(_hiddenAccountsKey) ?? <String>[];
+  List<String> get hiddenAccounts =>
+      _hiddenAccountsBox.get(_hiddenAccountsKey) ?? <String>[];
 
   /// Equivalent of [hiddenAccounts] but with stream
-  Stream<List<String>> get hiddenAccountsStream =>
-      _hiddenAccountsBox.watchKey(_hiddenAccountsKey).map((e) => e ?? <String>[]);
+  Stream<List<String>> get hiddenAccountsStream => _hiddenAccountsBox
+      .watchKey(_hiddenAccountsKey)
+      .map((e) => e ?? <String>[]);
 
   /// Hide or show account address
   Future<void> toggleHiddenAccount(String address) {
@@ -175,24 +207,30 @@ class HiveSource {
   }) =>
       _keyPasswordsBox.put(publicKey, password);
 
-  Future<void> removeKeyPassword(String publicKey) => _keyPasswordsBox.delete(publicKey);
+  Future<void> removeKeyPassword(String publicKey) =>
+      _keyPasswordsBox.delete(publicKey);
 
   Future<void> clearKeyPasswords() => _keyPasswordsBox.clear();
 
-  Stream<Map<String, List<String>>> get externalAccountsStream => _externalAccountsBox
-      .watchAll<String>()
-      .map((e) => e.map((k, v) => MapEntry(k, v.cast<String>())));
+  Stream<Map<String, List<String>>> get externalAccountsStream =>
+      _externalAccountsBox
+          .watchAll<String>()
+          .map((e) => e.map((k, v) => MapEntry(k, v.cast<String>())));
 
-  Map<String, List<String>> get externalAccounts =>
-      _externalAccountsBox.toMap().map((k, v) => MapEntry(k as String, v.cast<String>()));
+  Map<String, List<String>> get externalAccounts => _externalAccountsBox
+      .toMap()
+      .map((k, v) => MapEntry(k as String, v.cast<String>()));
 
   Future<void> addExternalAccount({
     required String publicKey,
     required String address,
   }) async {
-    final list =
-        _externalAccountsBox.get(publicKey)?.cast<String>().where((e) => e != address).toList() ??
-            [];
+    final list = _externalAccountsBox
+            .get(publicKey)
+            ?.cast<String>()
+            .where((e) => e != address)
+            .toList() ??
+        [];
 
     list.add(address);
 
@@ -203,8 +241,11 @@ class HiveSource {
     required String publicKey,
     required String address,
   }) async {
-    final list =
-        _externalAccountsBox.get(publicKey)?.cast<String>().where((e) => e != address).toList();
+    final list = _externalAccountsBox
+        .get(publicKey)
+        ?.cast<String>()
+        .where((e) => e != address)
+        .toList();
 
     if (list == null) return;
 
@@ -217,14 +258,17 @@ class HiveSource {
 
   Future<void> clearExternalAccounts() => _externalAccountsBox.clear();
 
-  String? get currentConnection => _preferencesBox.get(_currentConnectionKey) as String?;
+  String? get currentConnection =>
+      _preferencesBox.get(_currentConnectionKey) as String?;
 
-  Future<void> setCurrentConnection(String currentConnection) => _preferencesBox.put(
+  Future<void> setCurrentConnection(String currentConnection) =>
+      _preferencesBox.put(
         _currentConnectionKey,
         currentConnection,
       );
 
-  Future<String?> getStorageData(String key) async => _nekotonFlutterBox.get(key);
+  Future<String?> getStorageData(String key) async =>
+      _nekotonFlutterBox.get(key);
 
   Future<void> setStorageData({
     required String key,
@@ -244,20 +288,43 @@ class HiveSource {
           .watchAllValues()
           .map((e) => e.map((e) => e.toModel()).toList());
 
+  Stream<List<TokenContractAsset>> get tychoSystemTokenContractAssetsStream =>
+      _tychoSystemTokenContractAssetsBox
+          .watchAllValues()
+          .map((e) => e.map((e) => e.toModel()).toList());
+
   List<TokenContractAsset> get everSystemTokenContractAssets =>
       _everSystemTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
 
   List<TokenContractAsset> get venomSystemTokenContractAssets =>
-      _venomSystemTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+      _venomSystemTokenContractAssetsBox.values
+          .map((e) => e.toModel())
+          .toList();
 
-  Future<void> updateEverSystemTokenContractAssets(List<TokenContractAsset> assets) async {
+  List<TokenContractAsset> get tychoSystemTokenContractAssets =>
+      _tychoSystemTokenContractAssetsBox.values
+          .map((e) => e.toModel())
+          .toList();
+
+  Future<void> updateEverSystemTokenContractAssets(
+      List<TokenContractAsset> assets) async {
     await _everSystemTokenContractAssetsBox.clear();
-    await _everSystemTokenContractAssetsBox.addAll(assets.map((e) => e.toDto()));
+    await _everSystemTokenContractAssetsBox
+        .addAll(assets.map((e) => e.toDto()));
   }
 
-  Future<void> updateVenomSystemTokenContractAssets(List<TokenContractAsset> assets) async {
+  Future<void> updateVenomSystemTokenContractAssets(
+      List<TokenContractAsset> assets) async {
     await _venomSystemTokenContractAssetsBox.clear();
-    await _venomSystemTokenContractAssetsBox.addAll(assets.map((e) => e.toDto()));
+    await _venomSystemTokenContractAssetsBox
+        .addAll(assets.map((e) => e.toDto()));
+  }
+
+  Future<void> updateTychoSystemTokenContractAssets(
+      List<TokenContractAsset> assets) async {
+    await _tychoSystemTokenContractAssetsBox.clear();
+    await _tychoSystemTokenContractAssetsBox
+        .addAll(assets.map((e) => e.toDto()));
   }
 
   Stream<List<TokenContractAsset>> get everCustomTokenContractAssetsStream =>
@@ -270,17 +337,39 @@ class HiveSource {
           .watchAllValues()
           .map((e) => e.map((e) => e.toModel()).toList());
 
+  Stream<List<TokenContractAsset>> get tychoCustomTokenContractAssetsStream =>
+      _tychoCustomTokenContractAssetsBox
+          .watchAllValues()
+          .map((e) => e.map((e) => e.toModel()).toList());
+
   List<TokenContractAsset> get everCustomTokenContractAssets =>
       _everCustomTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
 
   List<TokenContractAsset> get venomCustomTokenContractAssets =>
-      _venomCustomTokenContractAssetsBox.values.map((e) => e.toModel()).toList();
+      _venomCustomTokenContractAssetsBox.values
+          .map((e) => e.toModel())
+          .toList();
 
-  Future<void> addEverCustomTokenContractAsset(TokenContractAsset tokenContractAsset) =>
-      _everCustomTokenContractAssetsBox.put(tokenContractAsset.address, tokenContractAsset.toDto());
+  List<TokenContractAsset> get tychoCustomTokenContractAssets =>
+      _tychoCustomTokenContractAssetsBox.values
+          .map((e) => e.toModel())
+          .toList();
 
-  Future<void> addVenomCustomTokenContractAsset(TokenContractAsset tokenContractAsset) =>
+  Future<void> addEverCustomTokenContractAsset(
+          TokenContractAsset tokenContractAsset) =>
+      _everCustomTokenContractAssetsBox.put(
+          tokenContractAsset.address, tokenContractAsset.toDto());
+
+  Future<void> addVenomCustomTokenContractAsset(
+          TokenContractAsset tokenContractAsset) =>
       _venomCustomTokenContractAssetsBox.put(
+        tokenContractAsset.address,
+        tokenContractAsset.toDto(),
+      );
+
+  Future<void> addTychoCustomTokenContractAsset(
+          TokenContractAsset tokenContractAsset) =>
+      _tychoCustomTokenContractAssetsBox.put(
         tokenContractAsset.address,
         tokenContractAsset.toDto(),
       );
@@ -291,27 +380,41 @@ class HiveSource {
   Future<void> removeVenomCustomTokenContractAsset(String address) =>
       _venomCustomTokenContractAssetsBox.delete(address);
 
-  Future<void> clearEverCustomTokenContractAssets() => _everCustomTokenContractAssetsBox.clear();
+  Future<void> removeTychoCustomTokenContractAsset(String address) =>
+      _tychoCustomTokenContractAssetsBox.delete(address);
 
-  Future<void> clearVenomCustomTokenContractAssets() => _venomCustomTokenContractAssetsBox.clear();
+  Future<void> clearEverCustomTokenContractAssets() =>
+      _everCustomTokenContractAssetsBox.clear();
 
-  Stream<String?> get localeStream => _userPreferencesBox.watchKey(_localeKey).cast<String?>();
+  Future<void> clearVenomCustomTokenContractAssets() =>
+      _venomCustomTokenContractAssetsBox.clear();
+
+  Future<void> clearTychoCustomTokenContractAssets() =>
+      _tychoCustomTokenContractAssetsBox.clear();
+
+  Stream<String?> get localeStream =>
+      _userPreferencesBox.watchKey(_localeKey).cast<String?>();
 
   String? get locale => _userPreferencesBox.get(_localeKey) as String?;
 
-  Future<void> setLocale(String locale) => _userPreferencesBox.put(_localeKey, locale);
+  Future<void> setLocale(String locale) =>
+      _userPreferencesBox.put(_localeKey, locale);
 
   Future<void> clearLocale() => _userPreferencesBox.delete(_localeKey);
 
-  Stream<bool> get isBiometryEnabledStream =>
-      _userPreferencesBox.watchKey(_biometryStatusKey).cast<bool?>().map((e) => e ?? false);
+  Stream<bool> get isBiometryEnabledStream => _userPreferencesBox
+      .watchKey(_biometryStatusKey)
+      .cast<bool?>()
+      .map((e) => e ?? false);
 
-  bool get isBiometryEnabled => _userPreferencesBox.get(_biometryStatusKey) as bool? ?? false;
+  bool get isBiometryEnabled =>
+      _userPreferencesBox.get(_biometryStatusKey) as bool? ?? false;
 
   Future<void> setIsBiometryEnabled(bool isEnabled) =>
       _userPreferencesBox.put(_biometryStatusKey, isEnabled);
 
-  Future<void> clearIsBiometryEnabled() => _userPreferencesBox.delete(_biometryStatusKey);
+  Future<void> clearIsBiometryEnabled() =>
+      _userPreferencesBox.delete(_biometryStatusKey);
 
   Stream<Map<String, Permissions>> get permissionsStream => _permissionsBox
       .watchAll<String>()
@@ -329,7 +432,8 @@ class HiveSource {
   }) =>
       _permissionsBox.put(origin, permissions.toDto());
 
-  Future<void> deletePermissionsForOrigin(String origin) => _permissionsBox.delete(origin);
+  Future<void> deletePermissionsForOrigin(String origin) =>
+      _permissionsBox.delete(origin);
 
   Future<void> deletePermissionsForAccount(String address) async {
     final origins = permissions.entries
@@ -337,18 +441,22 @@ class HiveSource {
         .map((e) => e.key);
 
     for (final origin in origins) {
-      final permissions = _permissionsBox.get(origin)!.copyWith(accountInteraction: null);
+      final permissions =
+          _permissionsBox.get(origin)!.copyWith(accountInteraction: null);
 
       await _permissionsBox.put(origin, permissions);
     }
   }
 
-  Stream<List<Bookmark>> get bookmarksStream =>
-      _bookmarksBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
+  Stream<List<Bookmark>> get bookmarksStream => _bookmarksBox
+      .watchAllValues()
+      .map((e) => e.map((e) => e.toModel()).toList());
 
-  List<Bookmark> get bookmarks => _bookmarksBox.values.map((e) => e.toModel()).toList();
+  List<Bookmark> get bookmarks =>
+      _bookmarksBox.values.map((e) => e.toModel()).toList();
 
-  Future<void> addBookmark(Bookmark bookmark) => _bookmarksBox.put(bookmark.id, bookmark.toDto());
+  Future<void> addBookmark(Bookmark bookmark) =>
+      _bookmarksBox.put(bookmark.id, bookmark.toDto());
 
   Future<void> deleteBookmark(int id) => _bookmarksBox.delete(id);
 
@@ -360,7 +468,8 @@ class HiveSource {
   List<SearchHistoryDto> get searchHistory => _searchHistoryBox.values.toList();
 
   Future<void> addSearchHistoryEntry(SearchHistoryDto entry) async {
-    var list = _searchHistoryBox.toMap().cast<String, SearchHistoryDto>().entries;
+    var list =
+        _searchHistoryBox.toMap().cast<String, SearchHistoryDto>().entries;
 
     list = list.where((e) => e.value.url != entry.url);
 
@@ -389,7 +498,8 @@ class HiveSource {
 
   Future<void> clearSearchHistory() => _searchHistoryBox.clear();
 
-  SiteMetaData? getSiteMetaData(String url) => _siteMetaDataBox.get(url)?.toModel();
+  SiteMetaData? getSiteMetaData(String url) =>
+      _siteMetaDataBox.get(url)?.toModel();
 
   Future<void> cacheSiteMetaData({
     required String url,
@@ -399,15 +509,26 @@ class HiveSource {
 
   Future<void> clearSitesMetaData() => _siteMetaDataBox.clear();
 
-  Stream<List<Currency>> get everCurrenciesStream =>
-      _everCurrenciesBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
+  Stream<List<Currency>> get everCurrenciesStream => _everCurrenciesBox
+      .watchAllValues()
+      .map((e) => e.map((e) => e.toModel()).toList());
 
-  Stream<List<Currency>> get venomCurrenciesStream =>
-      _venomCurrenciesBox.watchAllValues().map((e) => e.map((e) => e.toModel()).toList());
+  Stream<List<Currency>> get venomCurrenciesStream => _venomCurrenciesBox
+      .watchAllValues()
+      .map((e) => e.map((e) => e.toModel()).toList());
 
-  List<Currency> get everCurrencies => _everCurrenciesBox.values.map((e) => e.toModel()).toList();
+  Stream<List<Currency>> get tychoCurrenciesStream => _tychoCurrenciesBox
+      .watchAllValues()
+      .map((e) => e.map((e) => e.toModel()).toList());
 
-  List<Currency> get venomCurrencies => _venomCurrenciesBox.values.map((e) => e.toModel()).toList();
+  List<Currency> get everCurrencies =>
+      _everCurrenciesBox.values.map((e) => e.toModel()).toList();
+
+  List<Currency> get venomCurrencies =>
+      _venomCurrenciesBox.values.map((e) => e.toModel()).toList();
+
+  List<Currency> get tychoCurrencies =>
+      _tychoCurrenciesBox.values.map((e) => e.toModel()).toList();
 
   Future<void> saveEverCurrency({
     required String address,
@@ -421,26 +542,40 @@ class HiveSource {
   }) =>
       _venomCurrenciesBox.put(address, currency.toDto());
 
+  Future<void> saveTychoCurrency({
+    required String address,
+    required Currency currency,
+  }) =>
+      _tychoCurrenciesBox.put(address, currency.toDto());
+
   Future<void> clearCurrencies() async {
     await _everCurrenciesBox.clear();
     await _venomCurrenciesBox.clear();
+    await _tychoCurrenciesBox.clear();
   }
 
-  bool get getWhyNeedBrowser => _preferencesBox.get(_browserNeedKey) as bool? ?? false;
+  bool get getWhyNeedBrowser =>
+      _preferencesBox.get(_browserNeedKey) as bool? ?? false;
 
-  Future<void> saveWhyNeedBrowser() => _preferencesBox.put(_browserNeedKey, true);
+  Future<void> saveWhyNeedBrowser() =>
+      _preferencesBox.put(_browserNeedKey, true);
 
-  bool get wasStEverOpened => _preferencesBox.get(_wasStEverOpenedKey) as bool? ?? false;
+  bool get wasStEverOpened =>
+      _preferencesBox.get(_wasStEverOpenedKey) as bool? ?? false;
 
-  Future<void> saveWasStEverOpened() => _preferencesBox.put(_wasStEverOpenedKey, true);
+  Future<void> saveWasStEverOpened() =>
+      _preferencesBox.put(_wasStEverOpenedKey, true);
 
   List<BrowserTab> get browserTabs =>
-      (_browserTabsBox.get(_browserTabsKey) as List<dynamic>?)?.cast<BrowserTab>() ??
+      (_browserTabsBox.get(_browserTabsKey) as List<dynamic>?)
+          ?.cast<BrowserTab>() ??
       <BrowserTab>[];
 
-  int get browserTabsLastIndex => _browserTabsBox.get(_browserTabsLastIndexKey) as int? ?? -1;
+  int get browserTabsLastIndex =>
+      _browserTabsBox.get(_browserTabsLastIndexKey) as int? ?? -1;
 
-  Future<void> saveBrowserTabs(List<BrowserTab> dto) => _browserTabsBox.put(_browserTabsKey, dto);
+  Future<void> saveBrowserTabs(List<BrowserTab> dto) =>
+      _browserTabsBox.put(_browserTabsKey, dto);
 
   Future<void> saveBrowserTabsLastIndex(int lastIndex) =>
       _browserTabsBox.put(_browserTabsLastIndexKey, lastIndex);
@@ -506,12 +641,21 @@ class HiveSource {
 
     await Hive.initFlutter();
 
-    await Hive.openBox<String>(_keyPasswordsBoxName, encryptionCipher: HiveAesCipher(key));
+    await Hive.openBox<String>(_keyPasswordsBoxName,
+        encryptionCipher: HiveAesCipher(key));
     await Hive.openBox<Object?>(_userPreferencesBoxName);
-    await Hive.openBox<TokenContractAssetDto>(_everSystemTokenContractAssetsBoxName);
-    await Hive.openBox<TokenContractAssetDto>(_venomSystemTokenContractAssetsBoxName);
-    await Hive.openBox<TokenContractAssetDto>(_everCustomTokenContractAssetsBoxName);
-    await Hive.openBox<TokenContractAssetDto>(_venomCustomTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(
+        _everSystemTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(
+        _venomSystemTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(
+        _tychoSystemTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(
+        _everCustomTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(
+        _venomCustomTokenContractAssetsBoxName);
+    await Hive.openBox<TokenContractAssetDto>(
+        _tychoCustomTokenContractAssetsBoxName);
     await Hive.openBox<String>(_seedsBoxName);
     await Hive.openBox<String>(_nekotonFlutterBoxName);
     await Hive.openBox<dynamic>(_preferencesBoxName);
@@ -522,6 +666,7 @@ class HiveSource {
     await Hive.openBox<SiteMetaDataDto>(_siteMetaDataBoxName);
     await Hive.openBox<CurrencyDto>(_currenciesBoxName);
     await Hive.openBox<CurrencyDto>(_venomCurrenciesBoxName);
+    await Hive.openBox<CurrencyDto>(_tychoCurrenciesBoxName);
     await Hive.openBox<bool>(_browserNeedKey);
     await Hive.openBox<dynamic>(_browserTabsKey);
     await Hive.openBox<List<String>>(_hiddenAccountsKey);
@@ -539,7 +684,8 @@ class HiveSource {
       final content = await file.readAsString();
 
       final json = jsonDecode(content) as List<dynamic>;
-      final map = json.cast<Map<String, dynamic>>().first.cast<String, String>();
+      final map =
+          json.cast<Map<String, dynamic>>().first.cast<String, String>();
       final keystoreDataStr = map[kKeystoreStorageKey];
       final accountsStorageDataStr = map[kAccountsStorageKey];
 
@@ -549,7 +695,8 @@ class HiveSource {
       }
 
       if (accountsStorageDataStr != null) {
-        final accountsStorageData = jsonDecode(accountsStorageDataStr) as String;
+        final accountsStorageData =
+            jsonDecode(accountsStorageDataStr) as String;
         await _nekotonFlutterBox.put(kAccountsStorageKey, accountsStorageData);
       }
 
@@ -580,7 +727,9 @@ class HiveSource {
     final seedsKeys = seeds.keys.toList();
     if (lastViewedSeeds().isEmpty && seedsKeys.isNotEmpty) {
       if (currentKey != null) seedsKeys.insert(0, currentKey!);
-      final fakeViewed = LinkedHashSet<String>.from(seedsKeys).take(maxLastSelectedSeeds).toList();
+      final fakeViewed = LinkedHashSet<String>.from(seedsKeys)
+          .take(maxLastSelectedSeeds)
+          .toList();
       return updateLastViewedSeeds(fakeViewed);
     }
   }
@@ -593,7 +742,8 @@ extension<T> on Box<T> {
   Stream<Map<K, T>> watchAll<K>() =>
       watch().map((_) => toMap().cast<K, T>()).startWith(toMap().cast<K, T>());
 
-  Stream<Iterable<T>> watchAllValues() => watch().map((_) => values).startWith(values);
+  Stream<Iterable<T>> watchAllValues() =>
+      watch().map((_) => values).startWith(values);
 }
 
 extension on HiveInterface {

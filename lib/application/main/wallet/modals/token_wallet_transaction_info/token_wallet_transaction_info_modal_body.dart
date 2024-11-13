@@ -1,9 +1,8 @@
-import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/application/common/utils.dart';
 import 'package:ever_wallet/application/common/widgets/custom_outlined_button.dart';
 import 'package:ever_wallet/application/common/widgets/modal_header.dart';
-import 'package:ever_wallet/application/common/widgets/transport_type_builder.dart';
+import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
 import 'package:ever_wallet/application/main/wallet/modals/utils.dart';
 import 'package:ever_wallet/data/models/token_wallet_ordinary_transaction.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +34,8 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
       type = AppLocalizations.of(context)!.token_outgoing_transfer;
     }
 
-    if (transaction.swapBack != null) type = AppLocalizations.of(context)!.swap_back;
+    if (transaction.swapBack != null)
+      type = AppLocalizations.of(context)!.swap_back;
 
     if (transaction.accept != null) type = AppLocalizations.of(context)!.accept;
 
@@ -70,7 +70,10 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
           amountItem(
             context: context,
             isOutgoing: transaction.isOutgoing,
-            value: transaction.value.toTokens(decimals).removeZeroes().formatValue(),
+            value: transaction.value
+                .toTokens(decimals)
+                .removeZeroes()
+                .formatValue(),
           ),
           feeItem(
             context: context,
@@ -198,9 +201,9 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     required BuildContext context,
     required String fees,
   }) =>
-      TransportTypeBuilderWidget(
-        builder: (context, isEver) {
-          final ticker = isEver ? kEverTicker : kVenomTicker;
+      TransportBuilderWidget(
+        builder: (context, data) {
+          final ticker = data.config.symbol;
 
           return item(
             title: AppLocalizations.of(context)!.blockchain_fee,
@@ -222,13 +225,15 @@ class TokenWalletTransactionInfoModalBody extends StatelessWidget {
     required BuildContext context,
     required String hash,
   }) =>
-      TransportTypeBuilderWidget(
-        builder: (context, isEver) {
-          final transactionExplorerLink =
-              isEver ? everTransactionExplorerLink : venomTransactionExplorerLink;
-
+      TransportBuilderWidget(
+        builder: (context, data) {
           return CustomOutlinedButton(
-            onPressed: () => launchUrlString(transactionExplorerLink(hash)),
+            onPressed: () => launchUrlString(
+              transactionExplorerLink(
+                id: hash,
+                explorerBaseUrl: data.config.explorerBaseUrl,
+              ),
+            ),
             text: AppLocalizations.of(context)!.see_in_the_explorer,
           );
         },
