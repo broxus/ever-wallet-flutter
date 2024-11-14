@@ -6,8 +6,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'ton_wallet_prepare_confirm_transaction_bloc.freezed.dart';
 
-class TonWalletPrepareConfirmTransactionBloc
-    extends Bloc<TonWalletPrepareConfirmTransactionEvent, TonWalletPrepareConfirmTransactionState> {
+class TonWalletPrepareConfirmTransactionBloc extends Bloc<
+    TonWalletPrepareConfirmTransactionEvent,
+    TonWalletPrepareConfirmTransactionState> {
   final TonWalletsRepository _tonWalletsRepository;
   final String _address;
 
@@ -20,7 +21,8 @@ class TonWalletPrepareConfirmTransactionBloc
         emit(const TonWalletPrepareConfirmTransactionState.loading());
 
         try {
-          final unsignedMessage = await _tonWalletsRepository.prepareConfirmTransaction(
+          final unsignedMessage =
+              await _tonWalletsRepository.prepareConfirmTransaction(
             address: _address,
             publicKey: event.publicKey,
             transactionId: event.transactionId,
@@ -28,12 +30,13 @@ class TonWalletPrepareConfirmTransactionBloc
 
           final fees = await _tonWalletsRepository.estimateFees(
             address: _address,
-            unsignedMessageWithAdditionalInfo: unsignedMessage,
+            message: unsignedMessage.message,
           );
           final feesValue = int.parse(fees);
 
-          final balance =
-              await _tonWalletsRepository.contractState(_address).then((value) => value.balance);
+          final balance = await _tonWalletsRepository
+              .contractState(_address)
+              .then((value) => value.balance);
           final balanceValue = int.parse(balance);
 
           final isPossibleToSendMessage = balanceValue > feesValue;
@@ -56,7 +59,8 @@ class TonWalletPrepareConfirmTransactionBloc
 }
 
 @freezed
-class TonWalletPrepareConfirmTransactionEvent with _$TonWalletPrepareConfirmTransactionEvent {
+class TonWalletPrepareConfirmTransactionEvent
+    with _$TonWalletPrepareConfirmTransactionEvent {
   const factory TonWalletPrepareConfirmTransactionEvent.prepareConfirmTransaction({
     required String publicKey,
     required String transactionId,
@@ -64,7 +68,8 @@ class TonWalletPrepareConfirmTransactionEvent with _$TonWalletPrepareConfirmTran
 }
 
 @freezed
-class TonWalletPrepareConfirmTransactionState with _$TonWalletPrepareConfirmTransactionState {
+class TonWalletPrepareConfirmTransactionState
+    with _$TonWalletPrepareConfirmTransactionState {
   const factory TonWalletPrepareConfirmTransactionState.initial() = _Initial;
 
   const factory TonWalletPrepareConfirmTransactionState.loading() = _Loading;
@@ -74,5 +79,6 @@ class TonWalletPrepareConfirmTransactionState with _$TonWalletPrepareConfirmTran
     required String fees,
   }) = _Ready;
 
-  const factory TonWalletPrepareConfirmTransactionState.error(String error) = _Error;
+  const factory TonWalletPrepareConfirmTransactionState.error(String error) =
+      _Error;
 }

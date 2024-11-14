@@ -23,23 +23,26 @@ class TonWalletPrepareDeployBloc
           late final UnsignedMessageWithAdditionalInfo unsignedMessage;
 
           if (event.custodians != null && event.reqConfirms != null) {
-            unsignedMessage = await _tonWalletsRepository.prepareDeployWithMultipleOwners(
+            unsignedMessage =
+                await _tonWalletsRepository.prepareDeployWithMultipleOwners(
               address: _address,
               custodians: event.custodians!,
               reqConfirms: event.reqConfirms!,
             );
           } else {
-            unsignedMessage = await _tonWalletsRepository.prepareDeploy(_address);
+            unsignedMessage =
+                await _tonWalletsRepository.prepareDeploy(_address);
           }
 
           final fees = await _tonWalletsRepository.estimateFees(
             address: _address,
-            unsignedMessageWithAdditionalInfo: unsignedMessage,
+            message: unsignedMessage.message,
           );
           final feesValue = int.parse(fees);
 
-          final balance =
-              await _tonWalletsRepository.contractState(_address).then((value) => value.balance);
+          final balance = await _tonWalletsRepository
+              .contractState(_address)
+              .then((value) => value.balance);
           final balanceValue = int.parse(balance);
 
           final isPossibleToSendMessage = balanceValue > feesValue;
