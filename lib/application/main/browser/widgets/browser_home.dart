@@ -76,7 +76,8 @@ class _BrowserHomeState extends State<BrowserHome> {
   ];
 
   @override
-  Widget build(BuildContext context) => StreamProvider<AsyncValue<List<Bookmark>>>(
+  Widget build(BuildContext context) =>
+      StreamProvider<AsyncValue<List<Bookmark>>>(
         create: (context) => context
             .read<BookmarksRepository>()
             .bookmarksStream
@@ -84,10 +85,11 @@ class _BrowserHomeState extends State<BrowserHome> {
         initialData: const AsyncValue.loading(),
         catchError: (context, error) => AsyncValue.error(error),
         builder: (context, child) {
-          final bookmarks = context.watch<AsyncValue<List<Bookmark>>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => <Bookmark>[],
-              );
+          final bookmarks =
+              context.watch<AsyncValue<List<Bookmark>>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => <Bookmark>[],
+                  );
           final localization = context.localization;
 
           final children = <List<Widget>>[
@@ -116,17 +118,20 @@ class _BrowserHomeState extends State<BrowserHome> {
                     ? SliverToBoxAdapter(
                         child: Text(
                           AppLocalizations.of(context)!.bookmarks_placeholder,
-                          style: StylesRes.captionText.copyWith(color: ColorsRes.black),
+                          style: StylesRes.captionText
+                              .copyWith(color: ColorsRes.black),
                         ),
                       )
                     : SliverGrid(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           childAspectRatio: 160 / 56,
                           mainAxisSpacing: 12,
                           crossAxisSpacing: 8,
                         ),
-                        delegate: SliverChildListDelegate(bookmarks.map(_bookmarkTile).toList()),
+                        delegate: SliverChildListDelegate(
+                            bookmarks.map(_bookmarkTile).toList()),
                       ),
               ),
             ),
@@ -141,39 +146,6 @@ class _BrowserHomeState extends State<BrowserHome> {
                 ...children[1],
                 ...children[0]
               ],
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: SizedBox(
-                    height: 124,
-                    child: PageView(
-                      controller: pageController,
-                      children: [
-                        infoTile(
-                          title: localization.staking_title,
-                          description: localization.staking_description,
-                          icon: Assets.images.browser.stakingIcon.svg(),
-                          gradientColors: const [
-                            Color(0xFF7479E5),
-                            Color(0xFF2B63F1),
-                          ],
-                          url: _stakingUrl,
-                        ),
-                        infoTile(
-                          title: localization.farming_title,
-                          description: localization.farming_description,
-                          icon: Assets.images.browser.farmingIcon.svg(),
-                          gradientColors: const [
-                            Color(0xFF3466F0),
-                            Color(0xFF882DE2),
-                          ],
-                          url: _farmingUrl,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
             ],
           );
         },
@@ -215,7 +187,8 @@ class _BrowserHomeState extends State<BrowserHome> {
     );
   }
 
-  Widget _bookmarkTile(Bookmark bookmark) => FutureProvider<AsyncValue<SiteMetaData>>(
+  Widget _bookmarkTile(Bookmark bookmark) =>
+      FutureProvider<AsyncValue<SiteMetaData>>(
         key: ValueKey(bookmark.id),
         create: (context) => context
             .read<SitesMetaDataRepository>()
@@ -233,7 +206,9 @@ class _BrowserHomeState extends State<BrowserHome> {
           return LongTapFocusableWidget(
             backgroundColor: ColorsRes.blue970,
             child: _tileContent(
-              bookmark.name.isEmpty ? (meta?.title ?? bookmark.name) : bookmark.name,
+              bookmark.name.isEmpty
+                  ? (meta?.title ?? bookmark.name)
+                  : bookmark.name,
               image == null
                   ? const SizedBox.shrink()
                   : CircleAvatar(
@@ -359,7 +334,8 @@ class _BrowserHomeState extends State<BrowserHome> {
             style: StylesRes.regular16.copyWith(color: ColorsRes.red400Primary),
           ),
           onPressed: () {
-            final bookRepo = context.read<BookmarksRepository>()..deleteBookmark(bookmarkId);
+            final bookRepo = context.read<BookmarksRepository>()
+              ..deleteBookmark(bookmarkId);
             Navigator.of(context).pop();
             showFlushbarWithAction(
               context: this.context,
