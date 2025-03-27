@@ -7,6 +7,7 @@ import 'package:ever_wallet/application/common/widgets/custom_back_button.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card.dart';
 import 'package:ever_wallet/application/common/widgets/sectioned_card_section.dart';
 import 'package:ever_wallet/application/common/widgets/transport_builder.dart';
+import 'package:ever_wallet/application/common/widgets/tx_errors.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/password_enter_page/password_enter_page.dart';
 import 'package:ever_wallet/application/main/wallet/modals/common/send_result_page.dart';
 import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
@@ -44,6 +45,8 @@ class ConfirmTransactionInfoPage extends StatefulWidget {
 }
 
 class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
+  bool isConfirmed = false;
+
   @override
   Widget build(BuildContext context) =>
       BlocProvider<TonWalletPrepareConfirmTransactionBloc>(
@@ -96,6 +99,7 @@ class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    txError(),
                     submitButton(),
                   ],
                 ),
@@ -138,7 +142,7 @@ class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
               TonWalletPrepareConfirmTransactionState>(
             builder: (context, state) {
               final subtitle = state.maybeWhen(
-                ready: (unsignedMessage, fees) =>
+                ready: (unsignedMessage, fees, txErrors) =>
                     '${fees.toTokens().removeZeroes()} ${data.config.symbol}',
                 error: (error) => error,
                 orElse: () => null,
@@ -159,6 +163,27 @@ class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
         },
       );
 
+  Widget txError() => BlocBuilder<TonWalletPrepareConfirmTransactionBloc,
+          TonWalletPrepareConfirmTransactionState>(
+        builder: (context, state) {
+          final txErrors = state.maybeWhen(
+            ready: (_, __, txErrors) => txErrors,
+            orElse: () => null,
+          );
+
+          if (txErrors == null || txErrors.isEmpty) return const SizedBox();
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: TxErrors(
+              errors: txErrors,
+              isConfirmed: isConfirmed,
+              onConfirm: (value) => setState(() => isConfirmed = value),
+            ),
+          );
+        },
+      );
+
   Widget comment() => SectionedCardSection(
         title: AppLocalizations.of(context)!.comment,
         subtitle: widget.comment,
@@ -168,10 +193,13 @@ class _NewSelectWalletTypePageState extends State<ConfirmTransactionInfoPage> {
           TonWalletPrepareConfirmTransactionState>(
         builder: (context, state) => PrimaryElevatedButton(
           onPressed: state.maybeWhen(
-            ready: (unsignedMessage, fees) => () => onPressed(
-                  message: unsignedMessage,
-                  publicKey: widget.publicKey,
-                ),
+            ready: (unsignedMessage, fees, txErrors) {
+              if (txErrors.isNotEmpty && !isConfirmed) return null;
+              return () => onPressed(
+                    message: unsignedMessage,
+                    publicKey: widget.publicKey,
+                  );
+            },
             orElse: () => null,
           ),
           text: AppLocalizations.of(context)!.send,
