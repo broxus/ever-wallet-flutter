@@ -3,6 +3,7 @@ import 'package:ever_wallet/application/bloc/utils.dart';
 import 'package:ever_wallet/data/models/unsigned_message_with_additional_info.dart';
 import 'package:ever_wallet/data/repositories/ton_wallets_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:nekoton_flutter/nekoton_flutter.dart';
 
 part 'ton_wallet_prepare_confirm_transaction_bloc.freezed.dart';
 
@@ -34,6 +35,11 @@ class TonWalletPrepareConfirmTransactionBloc extends Bloc<
           );
           final feesValue = int.parse(fees);
 
+          final txErrors = await _tonWalletsRepository.simulateTransactionTree(
+            address: _address,
+            message: unsignedMessage.message,
+          );
+
           final balance = await _tonWalletsRepository
               .contractState(_address)
               .then((value) => value.balance);
@@ -47,6 +53,7 @@ class TonWalletPrepareConfirmTransactionBloc extends Bloc<
             TonWalletPrepareConfirmTransactionState.ready(
               unsignedMessage: unsignedMessage,
               fees: fees,
+              txErrors: txErrors,
             ),
           );
         } catch (err) {
@@ -77,6 +84,7 @@ class TonWalletPrepareConfirmTransactionState
   const factory TonWalletPrepareConfirmTransactionState.ready({
     required UnsignedMessageWithAdditionalInfo unsignedMessage,
     required String fees,
+    required List<TxTreeSimulationErrorItem> txErrors,
   }) = _Ready;
 
   const factory TonWalletPrepareConfirmTransactionState.error(String error) =

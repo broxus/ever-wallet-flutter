@@ -17,7 +17,7 @@ const kAddressForVenomCurrency =
     '0:28237a5d5abb32413a79b5f98573074d3b39b72121305d9c9c97912fc06d843c';
 
 const kAddressForTychoCurrency =
-    '0:6b3355b19c6aedc65be291c00abbf6e5061c07e1926a3fd543863c7a8d06cc79';
+    '0:8233ae1a3a94f77a9b12ab9b07f37923144fb78a7a8c582a5e3e2ed86cb40ced';
 
 const kDefaultWorkchain = 0;
 
