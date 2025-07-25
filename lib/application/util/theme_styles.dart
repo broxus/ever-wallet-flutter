@@ -18,7 +18,7 @@ final darkStyle = ThemeStyle(
     textSecondaryTextButtonColor: ColorsRes.grey,
     iconPrimaryButtonColor: ColorsRes.darkBlue,
     iconSecondaryButtonColor: ColorsRes.greyBlue,
-    activeInputColor: ColorsRes.lightBlueOpacity,
+    activeInputColor: ColorsRes.bluePrimary400,
     inactiveInputColor: ColorsRes.whiteOpacityLight,
     primaryPressStateColor: ColorsRes.whiteOpacity,
     secondaryPressStateColor: ColorsRes.neutral750,
@@ -27,7 +27,8 @@ final darkStyle = ThemeStyle(
   ),
   styles: StylesPalette(
     primaryButtonStyle: StylesRes.buttonText.copyWith(color: ColorsRes.text),
-    secondaryButtonStyle: StylesRes.buttonText.copyWith(color: ColorsRes.lightBlue),
+    secondaryButtonStyle:
+        StylesRes.buttonText.copyWith(color: ColorsRes.lightBlue),
     appbarStyle: StylesRes.headerText.copyWith(color: ColorsRes.white),
     basicStyle: StylesRes.basicText.copyWith(color: ColorsRes.white),
     basicBoldStyle: StylesRes.basicText.copyWith(
@@ -61,7 +62,7 @@ final lightStyle = ThemeStyle(
     textSecondaryTextButtonColor: ColorsRes.grey,
     iconPrimaryButtonColor: ColorsRes.darkBlue,
     iconSecondaryButtonColor: ColorsRes.greyBlue,
-    activeInputColor: ColorsRes.lightBlueOpacity,
+    activeInputColor: ColorsRes.bluePrimary400,
     inactiveInputColor: ColorsRes.whiteOpacityLight,
     primaryPressStateColor: ColorsRes.whiteOpacity,
     secondaryPressStateColor: ColorsRes.neutral750,
@@ -70,7 +71,8 @@ final lightStyle = ThemeStyle(
   ),
   styles: StylesPalette(
     primaryButtonStyle: StylesRes.buttonText.copyWith(color: ColorsRes.text),
-    secondaryButtonStyle: StylesRes.buttonText.copyWith(color: ColorsRes.lightBlue),
+    secondaryButtonStyle:
+        StylesRes.buttonText.copyWith(color: ColorsRes.lightBlue),
     appbarStyle: StylesRes.headerText.copyWith(color: ColorsRes.white),
     basicStyle: StylesRes.basicText.copyWith(color: ColorsRes.white),
     basicBoldStyle: StylesRes.basicText.copyWith(
@@ -102,5 +104,7 @@ class ThemeStyle extends ThemeExtension<ThemeStyle> {
 
   /// Do not supported
   @override
-  ThemeExtension<ThemeStyle> lerp(ThemeExtension<ThemeStyle>? other, double t) => this;
+  ThemeExtension<ThemeStyle> lerp(
+          ThemeExtension<ThemeStyle>? other, double t) =>
+      this;
 }

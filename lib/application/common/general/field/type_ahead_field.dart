@@ -142,10 +142,21 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
               focusNode: widget.focusNode,
               suggestionsCallback: widget.suggestionsCallback,
               itemBuilder: widget.itemBuilder,
-              // suggestionsBoxDecoration: SuggestionsBoxDecoration(
-              //   color: widget.suggestionBackground ?? ColorsRes.black.withOpacity(0.9),
-              // ),
               onSelected: widget.onSuggestionSelected,
+              decorationBuilder: (context, child) => ScrollConfiguration(
+                behavior:
+                    ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 168),
+                  child: Material(
+                    type: MaterialType.card,
+                    elevation: 6.0,
+                    color: widget.suggestionBackground ??
+                        ColorsRes.black.withOpacity(0.9),
+                    child: child,
+                  ),
+                ),
+              ),
               builder: (context, controller, focusNode) => TextField(
                 style: widget.textStyle ?? themeStyle.styles.basicStyle,
                 controller: controller,
@@ -185,7 +196,7 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
                         color:
-                            widget.inactiveBorderColor ?? ColorsRes.greyLight),
+                            widget.inactiveBorderColor ?? ColorsRes.neutral700),
                   ),
                   focusedBorder: OutlineInputBorder(
                     gapPadding: 1,
