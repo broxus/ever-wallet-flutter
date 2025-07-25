@@ -21,7 +21,7 @@ Future<Map<String, dynamic>> addAssetHandler({
   required ApprovalsRepository approvalsRepository,
 }) async {
   try {
-    logger.d('addAsset', args);
+    logger.d('addAsset, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = AddAssetInput.fromJson(jsonInput);
@@ -88,7 +88,7 @@ Future<Map<String, dynamic>> addAssetHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('addAsset', err, st);
+    logger.e('addAsset', error: err, stackTrace: st);
     rethrow;
   }
 }

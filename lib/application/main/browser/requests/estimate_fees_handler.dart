@@ -17,7 +17,7 @@ Future<Map<String, dynamic>> estimateFeesHandler({
   required TonWalletsRepository tonWalletsRepository,
 }) async {
   try {
-    logger.d('estimateFees', args);
+    logger.d('estimateFees, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = EstimateFeesInput.fromJson(jsonInput);
@@ -65,7 +65,7 @@ Future<Map<String, dynamic>> estimateFeesHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('estimateFees', err, st);
+    logger.e('estimateFees', error: err, stackTrace: st);
     rethrow;
   }
 }

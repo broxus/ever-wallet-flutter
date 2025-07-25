@@ -49,7 +49,8 @@ class PrepareTokenTransferPage extends StatefulWidget {
   });
 
   @override
-  _PrepareTokenTransferPageState createState() => _PrepareTokenTransferPageState();
+  _PrepareTokenTransferPageState createState() =>
+      _PrepareTokenTransferPageState();
 }
 
 class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
@@ -170,10 +171,11 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
   Widget dropdownButton() => AsyncValueStreamProvider<Map<String, String>>(
         create: (context) => context.read<KeysRepository>().keyLabelsStream,
         builder: (context, child) {
-          final publicKeysLabels = context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => <String, String>{},
-              );
+          final publicKeysLabels =
+              context.watch<AsyncValue<Map<String, String>>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => <String, String>{},
+                  );
 
           return ValueListenableBuilder<String>(
             valueListenable: publicKeyNotifier,
@@ -236,15 +238,17 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
       );
 
   Widget maxButton() => AsyncValueStreamProvider<TokenWallet?>(
-        create: (context) => context.read<TokenWalletsRepository>().tokenWalletStream(
-              owner: widget.owner,
-              rootTokenContract: widget.rootTokenContract,
-            ),
+        create: (context) =>
+            context.read<TokenWalletsRepository>().tokenWalletStream(
+                  owner: widget.owner,
+                  rootTokenContract: widget.rootTokenContract,
+                ),
         builder: (context, child) {
-          final tokenWalletInfo = context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => null,
-              );
+          final tokenWalletInfo =
+              context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => null,
+                  );
 
           return SuffixIconButton(
             onPressed: () async {
@@ -252,8 +256,8 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
                       .toTokens(tokenWalletInfo.symbol.decimals)
                       .removeZeroes() ??
                   '0';
-              amountController.selection =
-                  TextSelection.fromPosition(TextPosition(offset: amountController.text.length));
+              amountController.selection = TextSelection.fromPosition(
+                  TextPosition(offset: amountController.text.length));
 
               Form.of(context)?.validate();
             },
@@ -271,19 +275,23 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
       );
 
   Widget balance() => AsyncValueStreamProvider<TokenWallet?>(
-        create: (context) => context.read<TokenWalletsRepository>().tokenWalletStream(
-              owner: widget.owner,
-              rootTokenContract: widget.rootTokenContract,
-            ),
+        create: (context) =>
+            context.read<TokenWalletsRepository>().tokenWalletStream(
+                  owner: widget.owner,
+                  rootTokenContract: widget.rootTokenContract,
+                ),
         builder: (context, child) {
-          final tokenWalletInfo = context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => null,
-              );
+          final tokenWalletInfo =
+              context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => null,
+                  );
 
           return Text(
             AppLocalizations.of(context)!.balance(
-              tokenWalletInfo?.balance.toTokens(tokenWalletInfo.symbol.decimals).removeZeroes() ??
+              tokenWalletInfo?.balance
+                      .toTokens(tokenWalletInfo.symbol.decimals)
+                      .removeZeroes() ??
                   '0',
               tokenWalletInfo?.symbol.name ?? '',
             ),
@@ -332,7 +340,8 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
             destinationController.value,
             TextEditingValue(
               text: text,
-              selection: TextSelection.fromPosition(TextPosition(offset: text.length)),
+              selection:
+                  TextSelection.fromPosition(TextPosition(offset: text.length)),
             ),
           );
 
@@ -387,7 +396,7 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
         destinationController.text = parsed.item1;
         if (parsed.item2 != null) amountController.text = parsed.item2!;
       } catch (err, st) {
-        logger.e(err, err, st);
+        logger.e(err, error: err, stackTrace: st);
 
         if (!mounted) return;
 
@@ -415,7 +424,8 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
             valueListenable: notifyReceiverNotifier,
             builder: (context, value, child) => CustomCheckbox(
               value: value,
-              onChanged: (value) => notifyReceiverNotifier.value = value ?? false,
+              onChanged: (value) =>
+                  notifyReceiverNotifier.value = value ?? false,
             ),
           ),
           Expanded(
@@ -425,15 +435,17 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
       );
 
   Widget submitButton() => AsyncValueStreamProvider<TokenWallet?>(
-        create: (context) => context.read<TokenWalletsRepository>().tokenWalletStream(
-              owner: widget.owner,
-              rootTokenContract: widget.rootTokenContract,
-            ),
+        create: (context) =>
+            context.read<TokenWalletsRepository>().tokenWalletStream(
+                  owner: widget.owner,
+                  rootTokenContract: widget.rootTokenContract,
+                ),
         builder: (context, child) {
-          final tokenWalletInfo = context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
-                ready: (value) => value,
-                orElse: () => null,
-              );
+          final tokenWalletInfo =
+              context.watch<AsyncValue<TokenWallet?>>().maybeWhen(
+                    ready: (value) => value,
+                    orElse: () => null,
+                  );
 
           return ValueListenableBuilder<bool>(
             valueListenable: formValidityNotifier,
@@ -451,7 +463,8 @@ class _PrepareTokenTransferPageState extends State<PrepareTokenTransferPage> {
     final destination = destinationController.text;
     final amount = amountController.text.toNanoTokens(decimals);
     final notifyReceiver = notifyReceiverNotifier.value;
-    final comment = commentController.text.isNotEmpty ? commentController.text : null;
+    final comment =
+        commentController.text.isNotEmpty ? commentController.text : null;
     final publicKey = publicKeyNotifier.value;
 
     Navigator.of(context).push(

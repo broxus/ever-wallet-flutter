@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> unpackFromCellHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('unpackFromCell', args);
+    logger.d('unpackFromCell, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = UnpackFromCellInput.fromJson(jsonInput);
@@ -23,7 +23,8 @@ Future<Map<String, dynamic>> unpackFromCellHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final data = unpackFromCell(
       params: input.structure,
@@ -39,7 +40,7 @@ Future<Map<String, dynamic>> unpackFromCellHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('unpackFromCell', err, st);
+    logger.e('unpackFromCell', error: err, stackTrace: st);
     rethrow;
   }
 }

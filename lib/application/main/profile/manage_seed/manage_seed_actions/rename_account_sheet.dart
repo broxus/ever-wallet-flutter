@@ -60,7 +60,8 @@ class _RenameAccountSheetState extends State<RenameAccountSheet> {
             autofocus: true,
             formatters: [LengthLimitingTextInputFormatter(50)],
             label: localization.name,
-            textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+            textStyle:
+                themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
             cursorColor: ColorsRes.text,
           ),
           const SizedBox(height: 24),
@@ -73,9 +74,8 @@ class _RenameAccountSheetState extends State<RenameAccountSheet> {
                       try {
                         Navigator.of(context).pop();
 
-                        await context
-                            .read<AccountsRepository>()
-                            .renameAccount(address: widget.address, name: value.text.trim());
+                        await context.read<AccountsRepository>().renameAccount(
+                            address: widget.address, name: value.text.trim());
 
                         if (!mounted) return;
 
@@ -84,7 +84,7 @@ class _RenameAccountSheetState extends State<RenameAccountSheet> {
                           message: localization.account_renamed,
                         );
                       } catch (err, st) {
-                        logger.e(err, err, st);
+                        logger.e(err, error: err, stackTrace: st);
 
                         if (!mounted) return;
 

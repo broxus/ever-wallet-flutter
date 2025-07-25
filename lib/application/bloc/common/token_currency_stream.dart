@@ -22,4 +22,6 @@ Stream<Currency> tokenCurrencyStream(
             );
         return a[networkType]?.firstWhereOrNull((e) => e.address == address);
       },
-    ).whereNotNull().doOnError((err, st) => logger.e(err, err, st));
+    )
+        .whereNotNull()
+        .doOnError((err, st) => logger.e(err, error: err, stackTrace: st));

@@ -10,7 +10,7 @@ Future<void> contractStateChangedHandler({
   required ContractStateChangedEvent event,
 }) async {
   try {
-    logger.d('ContractStateChangedEvent', event);
+    logger.d('ContractStateChangedEvent, $event');
 
     final jsonOutput = jsonEncode(event.toJson());
 
@@ -18,7 +18,7 @@ Future<void> contractStateChangedHandler({
       source: "window.__dartNotifications.contractStateChanged('$jsonOutput')",
     );
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e(err, error: err, stackTrace: st);
     rethrow;
   }
 }

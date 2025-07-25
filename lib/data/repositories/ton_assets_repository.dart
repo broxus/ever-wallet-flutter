@@ -150,7 +150,7 @@ class TonAssetsRepository {
         added,
         available,
       );
-    }).doOnError((err, st) => logger.e(err, err, st));
+    }).doOnError((err, st) => logger.e(err, error: err, stackTrace: st));
   }
 
   Stream<Tuple2<TonWalletAsset, List<TokenContractAsset>>> accountAssets(
@@ -189,7 +189,7 @@ class TonAssetsRepository {
         tonWalletAsset,
         tokenWalletAssets,
       );
-    }).doOnError((err, st) => logger.e(err, err, st));
+    }).doOnError((err, st) => logger.e(err, error: err, stackTrace: st));
   }
 
   Future<TokenContractAsset> getTokenContractAsset(
@@ -322,7 +322,7 @@ class TonAssetsRepository {
         }
       }
     } catch (err, st) {
-      logger.e(err, err, st);
+      logger.e(err, error: err, stackTrace: st);
     }
   }
 }

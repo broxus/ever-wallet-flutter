@@ -347,7 +347,7 @@ class _PrepareTransferPageState extends State<PrepareTransferPage> {
         if (parsed.item2 != null) amountController.text = parsed.item2!;
         if (parsed.item3 != null) commentController.text = parsed.item3!;
       } catch (err, st) {
-        logger.e(err, err, st);
+        logger.e(err, error: err, stackTrace: st);
 
         if (!mounted) return;
 

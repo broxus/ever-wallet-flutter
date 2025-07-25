@@ -68,7 +68,7 @@ class TokenCurrenciesRepository {
 
       return currency;
     } catch (e, st) {
-      logger.e('getCurrencyForContract', e, st);
+      logger.e('getCurrencyForContract', error: e, stackTrace: st);
       return null;
     }
   }
@@ -124,11 +124,11 @@ class TokenCurrenciesRepository {
               );
           }
         } catch (err) {
-          // logger.e(err, err, st);
+          // logger.e(err, error: err, stackTrace: st);
         }
       }
     } catch (err, st) {
-      logger.e(err, err, st);
+      logger.e(err, error: err, stackTrace: st);
     }
   }
 }

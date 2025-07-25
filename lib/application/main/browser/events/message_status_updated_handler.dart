@@ -10,7 +10,7 @@ Future<void> messageStatusUpdatedHandler({
   required MessageStatusUpdatedEvent event,
 }) async {
   try {
-    logger.d('MessageStatusUpdatedEvent', event);
+    logger.d('MessageStatusUpdatedEvent, $event');
 
     final jsonOutput = jsonEncode(event.toJson());
 
@@ -18,7 +18,7 @@ Future<void> messageStatusUpdatedHandler({
       source: "window.__dartNotifications.messageStatusUpdated('$jsonOutput')",
     );
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e(err, error: err, stackTrace: st);
     rethrow;
   }
 }

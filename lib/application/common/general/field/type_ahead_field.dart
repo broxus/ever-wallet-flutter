@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ever_wallet/application/common/general/field/bordered_input.dart';
 import 'package:ever_wallet/application/util/colors.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
@@ -5,6 +7,13 @@ import 'package:ever_wallet/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+
+typedef SuggestionsCallback<T> = FutureOr<List<T>?> Function(String search);
+
+typedef SuggestionsItemBuilder<T> = Widget Function(
+  BuildContext context,
+  T value,
+);
 
 class EWTypeAheadField extends StatefulWidget {
   final double? height;
@@ -22,8 +31,8 @@ class EWTypeAheadField extends StatefulWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final SuggestionsCallback<String> suggestionsCallback;
-  final ItemBuilder<String> itemBuilder;
-  final SuggestionSelectionCallback<String> onSuggestionSelected;
+  final SuggestionsItemBuilder<String> itemBuilder;
+  final ValueSetter<String> onSuggestionSelected;
   final Color? enabledBorderColor;
   final Color? inactiveBorderColor;
   final Color? errorColor;
@@ -129,15 +138,24 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
               hideOnEmpty: true,
               hideOnError: true,
               hideOnLoading: true,
-              textFieldConfiguration: TextFieldConfiguration(
+              controller: _controller,
+              focusNode: widget.focusNode,
+              suggestionsCallback: widget.suggestionsCallback,
+              itemBuilder: widget.itemBuilder,
+              // suggestionsBoxDecoration: SuggestionsBoxDecoration(
+              //   color: widget.suggestionBackground ?? ColorsRes.black.withOpacity(0.9),
+              // ),
+              onSelected: widget.onSuggestionSelected,
+              builder: (context, controller, focusNode) => TextField(
                 style: widget.textStyle ?? themeStyle.styles.basicStyle,
-                controller: _controller,
-                focusNode: widget.focusNode,
+                controller: controller,
+                focusNode: focusNode,
                 keyboardType: widget.keyboardType ?? TextInputType.text,
                 onChanged: widget.onChanged,
                 textInputAction: widget.textInputAction ?? TextInputAction.next,
                 cursorWidth: 1,
-                cursorColor: widget.textStyle?.color ?? themeStyle.styles.basicStyle.color,
+                cursorColor: widget.textStyle?.color ??
+                    themeStyle.styles.basicStyle.color,
                 onSubmitted: widget.onSubmitted,
                 autocorrect: widget.autocorrect,
                 enableSuggestions: widget.enableSuggestions,
@@ -151,20 +169,23 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
                   suffixIcon: _buildSuffixIcon(),
                   prefixIconConstraints: widget.prefixIcon == null
                       ? const BoxConstraints(maxHeight: 0, maxWidth: 16)
-                      : const BoxConstraints(minHeight: kBorderedInputHeight, minWidth: 35),
+                      : const BoxConstraints(
+                          minHeight: kBorderedInputHeight, minWidth: 35),
                   prefixIcon: widget.prefixIcon ?? const SizedBox(width: 16),
                   border: OutlineInputBorder(
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
-                      color: widget.inactiveBorderColor ?? themeStyle.colors.inactiveInputColor,
+                      color: widget.inactiveBorderColor ??
+                          themeStyle.colors.inactiveInputColor,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
-                    borderSide:
-                        BorderSide(color: widget.inactiveBorderColor ?? ColorsRes.greyLight),
+                    borderSide: BorderSide(
+                        color:
+                            widget.inactiveBorderColor ?? ColorsRes.greyLight),
                   ),
                   focusedBorder: OutlineInputBorder(
                     gapPadding: 1,
@@ -177,24 +198,20 @@ class _EWTypeAheadFieldState extends State<EWTypeAheadField> {
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
-                      color: widget.errorColor ?? themeStyle.colors.errorInputColor,
+                      color: widget.errorColor ??
+                          themeStyle.colors.errorInputColor,
                     ),
                   ),
                   focusedErrorBorder: OutlineInputBorder(
                     gapPadding: 1,
                     borderRadius: BorderRadius.circular(0),
                     borderSide: BorderSide(
-                      color: widget.errorColor ?? themeStyle.colors.errorInputColor,
+                      color: widget.errorColor ??
+                          themeStyle.colors.errorInputColor,
                     ),
                   ),
                 ),
               ),
-              suggestionsCallback: widget.suggestionsCallback,
-              itemBuilder: widget.itemBuilder,
-              suggestionsBoxDecoration: SuggestionsBoxDecoration(
-                color: widget.suggestionBackground ?? ColorsRes.black.withOpacity(0.9),
-              ),
-              onSuggestionSelected: widget.onSuggestionSelected,
             ),
           );
         },

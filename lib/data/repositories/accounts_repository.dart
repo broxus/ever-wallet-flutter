@@ -384,7 +384,7 @@ class AccountsRepository {
         }
       }
     } catch (err, st) {
-      logger.e('Finding existing wallets error', err, st);
+      logger.e('Finding existing wallets error', error: err, stackTrace: st);
     }
   }
 
@@ -402,7 +402,7 @@ class AccountsRepository {
         await removeAccount(account.address);
       }
     } catch (err, st) {
-      logger.e('Removing unused accounts error', err, st);
+      logger.e('Removing unused accounts error', error: err, stackTrace: st);
     }
   }
 }

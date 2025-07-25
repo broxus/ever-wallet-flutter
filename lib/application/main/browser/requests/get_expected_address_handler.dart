@@ -15,7 +15,7 @@ Future<Map<String, dynamic>> getExpectedAddressHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('getExpectedAddress', args);
+    logger.d('getExpectedAddress, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = GetExpectedAddressInput.fromJson(jsonInput);
@@ -24,7 +24,8 @@ Future<Map<String, dynamic>> getExpectedAddressHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final result = getExpectedAddress(
       tvc: input.tvc,
@@ -43,7 +44,7 @@ Future<Map<String, dynamic>> getExpectedAddressHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('getExpectedAddress', err, st);
+    logger.e('getExpectedAddress', error: err, stackTrace: st);
     rethrow;
   }
 }

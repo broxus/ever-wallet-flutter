@@ -14,7 +14,7 @@ Future<Map<String, dynamic>?> decodeTransactionEventsHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('decodeTransactionEvents', args);
+    logger.d('decodeTransactionEvents, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = DecodeTransactionEventsInput.fromJson(jsonInput);
@@ -23,7 +23,8 @@ Future<Map<String, dynamic>?> decodeTransactionEventsHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final events = decodeTransactionEvents(
       transaction: input.transaction,
@@ -38,7 +39,7 @@ Future<Map<String, dynamic>?> decodeTransactionEventsHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('decodeTransactionEvents', err, st);
+    logger.e('decodeTransactionEvents', error: err, stackTrace: st);
     rethrow;
   }
 }

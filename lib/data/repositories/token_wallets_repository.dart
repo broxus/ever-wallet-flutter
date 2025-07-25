@@ -310,7 +310,7 @@ class TokenWalletsRepository {
       }
       _tokenWalletsSubject.add({...subscriptions});
     } catch (err, st) {
-      logger.e(err, err, st);
+      logger.e(err, error: err, stackTrace: st);
     }
   }
 
@@ -380,7 +380,7 @@ class TokenWalletsRepository {
       }
       _tokenWalletsSubject.add(subscriptions);
     } catch (err, st) {
-      logger.e(err, err, st);
+      logger.e(err, error: err, stackTrace: st);
     }
   }
 

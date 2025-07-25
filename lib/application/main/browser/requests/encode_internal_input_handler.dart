@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> encodeInternalInputHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('encodeInternalInput', args);
+    logger.d('encodeInternalInput, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = EncodeInternalInputInput.fromJson(jsonInput);
@@ -23,7 +23,8 @@ Future<Map<String, dynamic>> encodeInternalInputHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final boc = encodeInternalInput(
       contractAbi: input.abi,
@@ -39,7 +40,7 @@ Future<Map<String, dynamic>> encodeInternalInputHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('encodeInternalInput', err, st);
+    logger.e('encodeInternalInput', error: err, stackTrace: st);
     rethrow;
   }
 }

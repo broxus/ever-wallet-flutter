@@ -1,0 +1,2 @@
+/Users/egor/Projects/everwallet/ever-wallet-flutter/android/app/.cxx/Debug/36q305q2/x86_64/CMakeFiles/edit_cache.dir
+/Users/egor/Projects/everwallet/ever-wallet-flutter/android/app/.cxx/Debug/36q305q2/x86_64/CMakeFiles/rebuild_cache.dir

@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> getCodeSaltHandler({
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('getCodeSalt', args);
+    logger.d('getCodeSalt, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = GetCodeSaltInput.fromJson(jsonInput);
@@ -23,7 +23,8 @@ Future<Map<String, dynamic>> getCodeSaltHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final code = getCodeSalt(input.code);
 
@@ -35,7 +36,7 @@ Future<Map<String, dynamic>> getCodeSaltHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('getCodeSalt', err, st);
+    logger.e('getCodeSalt', error: err, stackTrace: st);
     rethrow;
   }
 }

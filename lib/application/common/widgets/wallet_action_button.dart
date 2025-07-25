@@ -38,7 +38,8 @@ class WalletActionButton extends StatelessWidget {
                   title,
                   style: TextStyle(
                     color: CrystalColor.actionButtonDark,
-                    fontFamily: Theme.of(context).textTheme.button?.fontFamily,
+                    fontFamily:
+                        Theme.of(context).textTheme.labelLarge?.fontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),
@@ -53,7 +54,8 @@ class WalletActionButton extends StatelessWidget {
             padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
             elevation: MaterialStateProperty.all(0),
             shape: MaterialStateProperty.all(const BeveledRectangleBorder()),
-            foregroundColor: MaterialStateProperty.all(CrystalColor.actionButtonDark),
+            foregroundColor:
+                MaterialStateProperty.all(CrystalColor.actionButtonDark),
             backgroundColor: MaterialStateProperty.resolveWith(
               (Set<MaterialState> states) {
                 if (states.contains(MaterialState.disabled)) {

@@ -13,7 +13,7 @@ Future<Map<String, dynamic>?> decodeInputHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('decodeInput', args);
+    logger.d('decodeInput, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = DecodeInputInput.fromJson(jsonInput);
@@ -22,7 +22,8 @@ Future<Map<String, dynamic>?> decodeInputHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final output = decodeInput(
       messageBody: input.body,
@@ -35,7 +36,7 @@ Future<Map<String, dynamic>?> decodeInputHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('decodeInput', err, st);
+    logger.e('decodeInput', error: err, stackTrace: st);
     rethrow;
   }
 }

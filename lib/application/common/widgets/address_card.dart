@@ -19,7 +19,7 @@ class _AddressCardState extends State<AddressCard> {
   @override
   Widget build(BuildContext context) => Row(
         children: [
-          QrImage(
+          QrImageView(
             size: MediaQuery.of(context).size.shortestSide / 2.5,
             data: widget.address,
           ),

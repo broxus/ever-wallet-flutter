@@ -25,7 +25,8 @@ class ChangeSeedPhrasePasswordModalBody extends StatefulWidget {
       _ChangeSeedPhrasePasswordModalBodyState();
 }
 
-class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePasswordModalBody> {
+class _ChangeSeedPhrasePasswordModalBodyState
+    extends State<ChangeSeedPhrasePasswordModalBody> {
   final formKey = GlobalKey<FormState>();
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
@@ -129,7 +130,8 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
         validator: validator,
         textInputAction: inputAction,
         autovalidateMode: AutovalidateMode.onUserInteraction,
-        textStyle: context.themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+        textStyle: context.themeStyle.styles.basicStyle
+            .copyWith(color: ColorsRes.text),
       );
 
   Widget buildValidationText() => ValueListenableBuilder<String?>(
@@ -160,14 +162,16 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
     final isCorrect = await context.read<KeysRepository>().checkKeyPassword(
           publicKey: widget.publicKey,
           password: oldPassword,
-          signatureId: await context.read<TransportSource>().transport.getSignatureId(),
+          signatureId:
+              await context.read<TransportSource>().transport.getSignatureId(),
         );
 
     if (isCorrect) {
       incorrectPasswordNotifier.value = false;
       final newPassword = newPasswordController.text.trim();
 
-      if (newPassword.isNotEmpty && (formKey.currentState?.validate() ?? false)) {
+      if (newPassword.isNotEmpty &&
+          (formKey.currentState?.validate() ?? false)) {
         try {
           if (!mounted) return;
           Navigator.of(context).pop();
@@ -185,7 +189,7 @@ class _ChangeSeedPhrasePasswordModalBodyState extends State<ChangeSeedPhrasePass
             message: context.localization.password_changed,
           );
         } catch (err, st) {
-          logger.e(err, err, st);
+          logger.e(err, error: err, stackTrace: st);
 
           if (!mounted) return;
           Navigator.of(context).pop();

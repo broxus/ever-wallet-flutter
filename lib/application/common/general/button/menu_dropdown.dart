@@ -36,8 +36,16 @@ class MenuDropdown extends StatelessWidget {
     final themeStyle = context.themeStyle;
 
     return DropdownButton2<int>(
-      dropdownDecoration: BoxDecoration(
-        color: themeStyle.colors.secondaryBackgroundColor,
+      dropdownStyleData: DropdownStyleData(
+        width: 200,
+        elevation: 6,
+        decoration: BoxDecoration(
+          color: themeStyle.colors.secondaryBackgroundColor,
+        ),
+      ),
+      buttonStyleData: ButtonStyleData(
+        decoration: buttonDecoration ??
+            BoxDecoration(borderRadius: BorderRadius.circular(90)),
       ),
       items: items.mapIndex((v, index) {
         return DropdownMenuItem(
@@ -45,7 +53,8 @@ class MenuDropdown extends StatelessWidget {
           onTap: v.onTap,
           child: Text(
             v.title,
-            style: v.textStyle ?? themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+            style: v.textStyle ??
+                themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
           ),
         );
       }).toList(),
@@ -53,11 +62,8 @@ class MenuDropdown extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         child: Icon(Icons.more_horiz, color: iconColor, size: 20),
       ),
-      dropdownWidth: 200,
-      buttonDecoration: buttonDecoration ?? BoxDecoration(borderRadius: BorderRadius.circular(90)),
       underline: const SizedBox.shrink(),
       onChanged: (_) {},
-      dropdownElevation: 6,
     );
   }
 }

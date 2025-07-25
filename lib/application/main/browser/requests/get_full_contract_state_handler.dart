@@ -15,7 +15,7 @@ Future<Map<String, dynamic>> getFullContractStateHandler({
   required TransportRepository transportRepository,
 }) async {
   try {
-    logger.d('getFullContractState', args);
+    logger.d('getFullContractState, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = GetFullContractStateInput.fromJson(jsonInput);
@@ -24,11 +24,13 @@ Future<Map<String, dynamic>> getFullContractStateHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final transport = transportRepository.transport;
 
-    final fullContractState = await transport.getFullContractState(input.address);
+    final fullContractState =
+        await transport.getFullContractState(input.address);
 
     final output = GetFullContractStateOutput(
       state: fullContractState,
@@ -38,7 +40,7 @@ Future<Map<String, dynamic>> getFullContractStateHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('getFullContractState', err, st);
+    logger.e('getFullContractState', error: err, stackTrace: st);
     rethrow;
   }
 }

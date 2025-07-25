@@ -57,8 +57,10 @@ class CheckSeedAvailableAnswersWidget extends StatelessWidget {
         pressStateColor: pressColor,
         onPressed: isSelected ? null : () => selectAnswer(answer),
         child: DottedBorder(
-          dashPattern: isSelected ? const [4, 4] : const [1, 0],
-          color: borderColor,
+          options: RectDottedBorderOptions(
+            color: borderColor,
+            dashPattern: isSelected ? const [4, 4] : const [1, 0],
+          ),
           child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),

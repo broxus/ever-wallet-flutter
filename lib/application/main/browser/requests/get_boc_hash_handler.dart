@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> getBocHashHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('getBocHash', args);
+    logger.d('getBocHash, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = GetBocHashInput.fromJson(jsonInput);
@@ -23,7 +23,8 @@ Future<Map<String, dynamic>> getBocHashHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final hash = getBocHash(input.boc);
 
@@ -35,7 +36,7 @@ Future<Map<String, dynamic>> getBocHashHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('getBocHash', err, st);
+    logger.e('getBocHash', error: err, stackTrace: st);
     rethrow;
   }
 }

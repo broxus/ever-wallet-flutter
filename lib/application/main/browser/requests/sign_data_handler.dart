@@ -18,7 +18,7 @@ Future<Map<String, dynamic>> signDataHandler({
   required KeysRepository keysRepository,
 }) async {
   try {
-    logger.d('signData', args);
+    logger.d('signData, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = SignDataInput.fromJson(jsonInput);
@@ -53,7 +53,7 @@ Future<Map<String, dynamic>> signDataHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('signData', err, st);
+    logger.e('signData', error: err, stackTrace: st);
     rethrow;
   }
 }

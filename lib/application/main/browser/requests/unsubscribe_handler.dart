@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> unsubscribeHandler({
   required GenericContractsRepository genericContractsRepository,
 }) async {
   try {
-    logger.d('unsubscribe', args);
+    logger.d('unsubscribe, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = UnsubscribeInput.fromJson(jsonInput);
@@ -33,7 +33,7 @@ Future<Map<String, dynamic>> unsubscribeHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('unsubscribe', err, st);
+    logger.e('unsubscribe', error: err, stackTrace: st);
     rethrow;
   }
 }

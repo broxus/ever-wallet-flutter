@@ -23,7 +23,7 @@ Future<Map<String, dynamic>> sendExternalMessageHandler({
   required TonWalletsRepository tonWalletsRepository,
 }) async {
   try {
-    logger.d('sendExternalMessage', args);
+    logger.d('sendExternalMessage, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = SendExternalMessageInput.fromJson(jsonInput);
@@ -62,8 +62,9 @@ Future<Map<String, dynamic>> sendExternalMessageHandler({
     await unsignedMessage.refreshTimeout();
 
     final hash = unsignedMessage.hash;
-    final transport =
-        genericContractsRepository.genericContractByAddress(repackedRecipient).transport;
+    final transport = genericContractsRepository
+        .genericContractByAddress(repackedRecipient)
+        .transport;
 
     final signature = await keysRepository.sign(
       data: hash,
@@ -80,7 +81,8 @@ Future<Map<String, dynamic>> sendExternalMessageHandler({
       transaction = await genericContractsRepository.executeTransactionLocally(
         address: repackedRecipient,
         signedMessage: signedMessage,
-        options: const TransactionExecutionOptions(disableSignatureCheck: false),
+        options:
+            const TransactionExecutionOptions(disableSignatureCheck: false),
       );
     } else {
       transaction = await genericContractsRepository.send(
@@ -108,7 +110,7 @@ Future<Map<String, dynamic>> sendExternalMessageHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('sendExternalMessage', err, st);
+    logger.e('sendExternalMessage', error: err, stackTrace: st);
     rethrow;
   }
 }

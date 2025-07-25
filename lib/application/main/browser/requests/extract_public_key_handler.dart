@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> extractPublicKeyHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('extractPublicKey', args);
+    logger.d('extractPublicKey, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = ExtractPublicKeyInput.fromJson(jsonInput);
@@ -23,7 +23,8 @@ Future<Map<String, dynamic>> extractPublicKeyHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final publicKey = extractPublicKey(input.boc);
 
@@ -35,7 +36,7 @@ Future<Map<String, dynamic>> extractPublicKeyHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('extractPublicKey', err, st);
+    logger.e('extractPublicKey', error: err, stackTrace: st);
     rethrow;
   }
 }

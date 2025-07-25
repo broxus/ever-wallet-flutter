@@ -17,7 +17,7 @@ Future<Map<String, dynamic>> disconnectHandler({
   required GenericContractsRepository genericContractsRepository,
 }) async {
   try {
-    logger.d('disconnect', args);
+    logger.d('disconnect, $args');
 
     final origin = await controller.getOrigin();
 
@@ -35,7 +35,7 @@ Future<Map<String, dynamic>> disconnectHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('disconnect', err, st);
+    logger.e('disconnect', error: err, stackTrace: st);
     rethrow;
   }
 }

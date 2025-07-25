@@ -19,7 +19,7 @@ Future<Map<String, dynamic>> sendUnsignedExternalMessageHandler({
   required GenericContractsRepository contractsRepository,
 }) async {
   try {
-    logger.d('sendUnsignedExternalMessage', args);
+    logger.d('sendUnsignedExternalMessage, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = SendUnsignedExternalMessageInput.fromJson(jsonInput);
@@ -56,7 +56,8 @@ Future<Map<String, dynamic>> sendUnsignedExternalMessageHandler({
       if (input.local == true) {
         transaction = await genericContract.executeTransactionLocally(
           signedMessage: signedMessage,
-          options: const TransactionExecutionOptions(disableSignatureCheck: false),
+          options:
+              const TransactionExecutionOptions(disableSignatureCheck: false),
         );
       } else {
         final sent = await contractsRepository.send(
@@ -89,7 +90,7 @@ Future<Map<String, dynamic>> sendUnsignedExternalMessageHandler({
       genericContract.dispose();
     }
   } catch (err, st) {
-    logger.e('sendUnsignedExternalMessage', err, st);
+    logger.e('sendUnsignedExternalMessage', error: err, stackTrace: st);
     rethrow;
   }
 }
