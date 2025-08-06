@@ -14,7 +14,13 @@ WalletType getDefaultWalletType(NetworkType type) => type.when(
       tycho: () => kDefaultTychoWalletType,
     );
 
-const kDefaultMnemonicType = MnemonicType.labs(0);
+const kDefaultMnemonicType = MnemonicType.bip39(
+  Bip39MnemonicData(
+    accountId: 0,
+    path: Bip39Path.ever,
+    entropy: Bip39Entropy.bits128,
+  ),
+);
 
 const kDefaultWordsToCheckAmount = 3;
 const kDefaultCheckAnswersAmount = 9;

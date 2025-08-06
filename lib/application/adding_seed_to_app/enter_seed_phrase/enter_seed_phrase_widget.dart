@@ -263,7 +263,7 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
                           )
                         else
                           Text(
-                            error.capitalize!,
+                            error.capitalize,
                             style: StylesRes.regular16
                                 .copyWith(color: widget.errorColor),
                           ),

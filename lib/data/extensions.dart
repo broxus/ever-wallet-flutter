@@ -24,6 +24,7 @@ extension IntX on int {
       case 4:
         return TokenWalletVersion.oldTip3v4;
       case 5:
+      case 6:
         return TokenWalletVersion.tip3;
       default:
         throw Exception('Invalid token wallet version');
@@ -118,7 +119,8 @@ extension WalletTypeX on WalletType {
 extension ExistingWalletInfoX on ExistingWalletInfo {
   bool get isActive {
     final isDeployed = contractState.isDeployed;
-    final balanceIsGreaterThanZero = BigInt.parse(contractState.balance) > BigInt.zero;
+    final balanceIsGreaterThanZero =
+        BigInt.parse(contractState.balance) > BigInt.zero;
 
     return isDeployed || balanceIsGreaterThanZero;
   }
@@ -179,7 +181,8 @@ extension IterableX<T> on Iterable<T> {
 }
 
 extension ExceptionX on Exception {
-  String toUiMessage() => toString().replaceAllMapped('Exception: ', (match) => '');
+  String toUiMessage() =>
+      toString().replaceAllMapped('Exception: ', (match) => '');
 }
 
 extension SubjectX<T> on Subject<T> {
@@ -189,8 +192,8 @@ extension SubjectX<T> on Subject<T> {
 }
 
 extension ExpireAtToTimeout on int {
-  Duration toTimeout() =>
-      DateTime.fromMillisecondsSinceEpoch(this * 1000).difference(DateTime.now());
+  Duration toTimeout() => DateTime.fromMillisecondsSinceEpoch(this * 1000)
+      .difference(DateTime.now());
 }
 
 extension FutureX<T> on Future<T> {

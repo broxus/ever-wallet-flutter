@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:ever_wallet/application/common/constants.dart';
 import 'package:ever_wallet/application/common/extensions.dart';
 import 'package:ever_wallet/data/constants.dart';
 import 'package:ever_wallet/data/extensions.dart';
@@ -58,7 +59,8 @@ class KeysRepository {
       keysStream.map((e) => e.whereKeysFor(masterKey));
 
   /// Get list of sub(derived) keys from [masterKey]
-  List<KeyStoreEntry> seedKeys(String masterKey) => keys.whereKeysFor(masterKey);
+  List<KeyStoreEntry> seedKeys(String masterKey) =>
+      keys.whereKeysFor(masterKey);
 
   /// Equivalent of [currentKey] with stream
   Stream<String?> get currentKeyStream => _hiveSource.currentKeyStream;
@@ -67,16 +69,17 @@ class KeysRepository {
   String? get currentKey => _hiveSource.currentKey;
 
   /// Equivalent of [currentKeyStream] but with blockchain representation of object
-  Stream<KeyStoreEntry?> get currentKeyEntryStream =>
-      currentKeyStream.map((current) => keys.firstWhereOrNull((k) => k.publicKey == current));
+  Stream<KeyStoreEntry?> get currentKeyEntryStream => currentKeyStream
+      .map((current) => keys.firstWhereOrNull((k) => k.publicKey == current));
 
   /// See [HiveSource.lastViewedSeedsStream]
-  Stream<List<KeyStoreEntry>> lastViewedKeysStream() => _hiveSource.lastViewedSeedsStream().map(
-        (viewed) => viewed
-            .map((v) => keys.firstWhereOrNull((k) => k.publicKey == v))
-            .whereNotNull()
-            .toList(),
-      );
+  Stream<List<KeyStoreEntry>> lastViewedKeysStream() =>
+      _hiveSource.lastViewedSeedsStream().map(
+            (viewed) => viewed
+                .map((v) => keys.firstWhereOrNull((k) => k.publicKey == v))
+                .whereNotNull()
+                .toList(),
+          );
 
   /// See [HiveSource.lastViewedSeeds]
   List<KeyStoreEntry> lastViewedKeys() => _hiveSource
@@ -99,14 +102,16 @@ class KeysRepository {
   }
 
   /// All keys mapped by: key - keyEntry that is master, value - list of sub keyEntries of master
-  Stream<Map<KeyStoreEntry, List<KeyStoreEntry>?>> get mappedKeysStream => keysStream.map((e) {
+  Stream<Map<KeyStoreEntry, List<KeyStoreEntry>?>> get mappedKeysStream =>
+      keysStream.map((e) {
         final map = <KeyStoreEntry, List<KeyStoreEntry>?>{};
 
         for (final key in e) {
           if (key.publicKey == key.masterKey) {
             if (!map.containsKey(key)) map[key] = null;
           } else {
-            final parentKey = e.firstWhereOrNull((e) => e.publicKey == key.masterKey);
+            final parentKey =
+                e.firstWhereOrNull((e) => e.publicKey == key.masterKey);
 
             if (parentKey != null) {
               if (map[parentKey] != null) {
@@ -132,7 +137,8 @@ class KeysRepository {
       keysStream.map((e) => {for (final v in e) v.publicKey: v.name});
 
   /// Dictionary of publicKey (key) - key label
-  Map<String, String> get keyLabels => {for (final v in keys) v.publicKey: v.name};
+  Map<String, String> get keyLabels =>
+      {for (final v in keys) v.publicKey: v.name};
 
   /// Create key by seed phrase and save information about it in local store.
   /// Returns blockchain representation of key.
@@ -142,7 +148,8 @@ class KeysRepository {
     required String password,
   }) async {
     final isLegacy = phrase.length == 24;
-    final mnemonicType = isLegacy ? const MnemonicType.legacy() : const MnemonicType.labs(0);
+    final mnemonicType =
+        isLegacy ? const MnemonicType.legacy() : kDefaultMnemonicType;
     final phraseStr = phrase.join(' ');
 
     final CreateKeyInput createKeyInput;
@@ -201,7 +208,8 @@ class KeysRepository {
   }) async {
     final key = keys.firstWhere((e) => e.publicKey == masterKey);
 
-    if (key.isLegacy || !key.isMaster) throw UnsupportedError('Key is not derivable');
+    if (key.isLegacy || !key.isMaster)
+      throw UnsupportedError('Key is not derivable');
 
     final createKeyInput = DerivedKeyCreateInput.derive(
       DerivedKeyCreateInputDerive(
@@ -514,7 +522,8 @@ class KeysRepository {
     final input = key.signInput(password);
 
     try {
-      await _keystore.sign(data: fakeSignature(), input: input, signatureId: signatureId);
+      await _keystore.sign(
+          data: fakeSignature(), input: input, signatureId: signatureId);
 
       return true;
     } catch (_) {
@@ -579,7 +588,9 @@ class KeysRepository {
   Future<void> _initialize() => _updateCurrentKey();
 
   Future<void> _tryNamesMigration() async => _hiveSource.migrateSeedsNames(
-        Map.fromEntries(keys.where((k) => k.isMaster).map((e) => MapEntry(e.publicKey, e.name))),
+        Map.fromEntries(keys
+            .where((k) => k.isMaster)
+            .map((e) => MapEntry(e.publicKey, e.name))),
       );
 }
 
