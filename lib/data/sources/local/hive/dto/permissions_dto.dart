@@ -7,8 +7,8 @@ part 'permissions_dto.freezed.dart';
 part 'permissions_dto.g.dart';
 
 @freezed
+@HiveType(typeId: 223)
 class PermissionsDto with _$PermissionsDto {
-  @HiveType(typeId: 223)
   const factory PermissionsDto({
     @HiveField(0) bool? basic,
     @HiveField(1) AccountInteractionDto? accountInteraction,

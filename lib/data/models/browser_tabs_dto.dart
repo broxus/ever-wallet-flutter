@@ -8,8 +8,8 @@ part 'browser_tabs_dto.freezed.dart';
 part 'browser_tabs_dto.g.dart';
 
 @freezed
+@HiveType(typeId: 55)
 class BrowserTab with _$BrowserTab {
-  @HiveType(typeId: 55)
   const factory BrowserTab({
     @HiveField(0) required String url,
     @HiveField(1) required String? image,

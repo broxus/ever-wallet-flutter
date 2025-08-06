@@ -35,11 +35,11 @@ class TransportRepository {
   final HiveSource _hiveSource;
   final TransportSource _transportSource;
   final _networkPresets = const <ConnectionData>[
-    ConnectionData.jrpc(
+    ConnectionData.proto(
       name: 'Mainnet (JRPC)',
       networkId: 1,
       group: 'mainnet',
-      endpoint: 'https://jrpc.everwallet.net/rpc',
+      endpoint: 'https://jrpc.everwallet.net',
       config: _everConfig,
       type: NetworkType.everscale,
     ),
@@ -55,15 +55,15 @@ class TransportRepository {
       config: _everConfig,
       type: NetworkType.everscale,
     ),
-    ConnectionData.jrpc(
+    ConnectionData.proto(
       name: 'Venom',
       networkId: 1000,
       group: 'venom_mainnet',
-      endpoint: 'https://jrpc.venom.foundation/rpc',
+      endpoint: 'https://jrpc.venom.foundation',
       config: _venomConfig,
       type: NetworkType.venom,
     ),
-    ConnectionData.jrpc(
+    ConnectionData.proto(
       name: 'Tycho Testnet',
       networkId: 2000,
       group: 'tycho_testnet',

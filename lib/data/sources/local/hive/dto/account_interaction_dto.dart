@@ -7,8 +7,8 @@ part 'account_interaction_dto.freezed.dart';
 part 'account_interaction_dto.g.dart';
 
 @freezed
+@HiveType(typeId: 222)
 class AccountInteractionDto with _$AccountInteractionDto {
-  @HiveType(typeId: 222)
   const factory AccountInteractionDto({
     @HiveField(0) required String address,
     @HiveField(1) required String publicKey,

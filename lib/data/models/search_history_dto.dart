@@ -7,8 +7,8 @@ part 'search_history_dto.g.dart';
 
 /// Title and image are taken via SiteMetaData with SitesMetaDataRepository
 @freezed
+@HiveType(typeId: 56)
 class SearchHistoryDto with _$SearchHistoryDto {
-  @HiveType(typeId: 56)
   const factory SearchHistoryDto({
     @HiveField(0) required String url,
     @HiveField(1) required DateTime openTime,

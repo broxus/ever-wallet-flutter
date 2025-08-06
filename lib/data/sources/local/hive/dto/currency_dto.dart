@@ -6,8 +6,8 @@ part 'currency_dto.freezed.dart';
 part 'currency_dto.g.dart';
 
 @freezed
+@HiveType(typeId: 4)
 class CurrencyDto with _$CurrencyDto {
-  @HiveType(typeId: 4)
   const factory CurrencyDto({
     @HiveField(0) required String currency,
     @HiveField(1) required String address,

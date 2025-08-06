@@ -8,7 +8,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'token_wallet_transactions_bloc.freezed.dart';
 
-class TokenWalletTransactionsBloc extends Bloc<_Event, TokenWalletTransactionsState> {
+class TokenWalletTransactionsBloc
+    extends Bloc<_Event, TokenWalletTransactionsState> {
   final TokenWalletsRepository _tokenWalletsRepository;
   final String _owner;
   final String _rootTokenContract;
@@ -59,21 +60,25 @@ class TokenWalletTransactionsBloc extends Bloc<_Event, TokenWalletTransactionsSt
     super.close();
   }
 
-  void _transactionsStreamListener(List<TokenWalletOrdinaryTransaction> event) =>
-      add(_InternalEvent.update(event..sort((a, b) => b.date.compareTo(a.date))));
+  void _transactionsStreamListener(
+          List<TokenWalletOrdinaryTransaction> event) =>
+      add(_InternalEvent.update(
+          event..sort((a, b) => b.date.compareTo(a.date))));
 }
 
 abstract class _Event {}
 
 @freezed
-class _InternalEvent with _$_InternalEvent implements _Event {
+class _InternalEvent with _$InternalEvent implements _Event {
   const factory _InternalEvent.update(
     List<TokenWalletOrdinaryTransaction> transactions,
   ) = _Update;
 }
 
 @freezed
-class TokenWalletTransactionsEvent with _$TokenWalletTransactionsEvent implements _Event {
+class TokenWalletTransactionsEvent
+    with _$TokenWalletTransactionsEvent
+    implements _Event {
   const factory TokenWalletTransactionsEvent.preload(String from) = _Preload;
 }
 
