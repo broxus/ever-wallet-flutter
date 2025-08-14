@@ -23,7 +23,6 @@ import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:ever_wallet/data/sources/local/sqlite/sqlite_database.dart'
     as sql;
 import 'package:ever_wallet/data/sources/remote/transport_source.dart';
-import 'package:ever_wallet/data/utils.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -447,7 +446,7 @@ class TonWalletsRepository {
       }();
 
       return completer.future;
-    } else if (transport is JrpcTransport) {
+    } else if (transport is JrpcTransport || transport is ProtoTransport) {
       final pendingTransaction = await tonWallet.send(signedMessage);
 
       final pendingTransactionWithAdditionalInfo =

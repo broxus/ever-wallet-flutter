@@ -146,7 +146,7 @@ class GenericContractsRepository {
       }();
 
       return completer.future;
-    } else if (transport is JrpcTransport) {
+    } else if (transport is JrpcTransport || transport is ProtoTransport) {
       final pendingTransaction = await genericContract.send(signedMessage);
 
       final completer = Completer<Transaction>();
