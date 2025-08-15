@@ -14,7 +14,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class MainScreenRoute extends MaterialPageRoute<void> {
   MainScreenRoute()
       : super(
-          builder: (context) => MainScreen(key: context.read<GlobalKey<MainScreenState>>()),
+          builder: (context) =>
+              MainScreen(key: context.read<GlobalKey<MainScreenState>>()),
         );
 }
 
@@ -30,7 +31,8 @@ class MainScreenState extends State<MainScreen> {
 
   final controller = CupertinoTabController();
 
-  final keysList = List<GlobalKey<NavigatorState>>.generate(3, (_) => GlobalKey());
+  final keysList =
+      List<GlobalKey<NavigatorState>>.generate(3, (_) => GlobalKey());
 
   final pages = <Widget>[
     const WalletScreen(),
@@ -62,8 +64,8 @@ class MainScreenState extends State<MainScreen> {
 
   @override
   Future<void> dispose() async {
-    await navigationSubscription.cancel();
     super.dispose();
+    await navigationSubscription.cancel();
   }
 
   @override

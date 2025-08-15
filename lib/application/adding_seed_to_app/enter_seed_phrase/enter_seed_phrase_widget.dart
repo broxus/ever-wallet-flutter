@@ -6,7 +6,6 @@ import 'package:ever_wallet/application/common/general/flushbar.dart';
 import 'package:ever_wallet/application/common/general/onboarding_appbar.dart';
 import 'package:ever_wallet/application/common/general/tabbar.dart';
 import 'package:ever_wallet/application/util/extensions/context_extensions.dart';
-import 'package:ever_wallet/application/util/extensions/iterable_extensions.dart';
 import 'package:ever_wallet/application/util/styles.dart';
 import 'package:ever_wallet/application/util/theme_styles.dart';
 import 'package:ever_wallet/data/extensions.dart';
@@ -142,169 +141,123 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
     AppLocalizations localization,
     ThemeStyle themeStyle,
   ) {
-    return SingleChildScrollView(
-      child: Form(
-        key: formKey,
-        child: ValueListenableBuilder<int>(
-          valueListenable: valuesNotifier,
-          builder: (_, value, __) {
-            final activeControllers = controllers.take(value).toList();
+    return Form(
+      key: formKey,
+      child: ValueListenableBuilder<int>(
+        valueListenable: valuesNotifier,
+        builder: (_, value, __) {
+          final activeControllers = controllers.take(value).toList();
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  localization.enter_seed_phrase,
-                  style: StylesRes.sheetHeaderTextFaktum
-                      .copyWith(color: widget.defaultTextColor),
-                ),
-                const SizedBox(height: 28),
-                Row(
-                  children: [
-                    Expanded(
-                      child: EWTabBar<int>(
-                        values: values,
-                        selectedColor: widget.primaryColor,
-                        selectedValue: value,
-                        onChanged: (v) {
-                          formKey.currentState?.reset();
-                          valuesNotifier.value = v;
-                        },
-                        builder: (_, v, isActive) {
-                          return Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Text(
-                              localization.words_count(v),
-                              style: themeStyle.styles.basicStyle.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: isActive
-                                    ? widget.primaryColor
-                                    : widget.secondaryTextColor,
-                              ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                localization.enter_seed_phrase,
+                style: StylesRes.sheetHeaderTextFaktum
+                    .copyWith(color: widget.defaultTextColor),
+              ),
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  Expanded(
+                    child: EWTabBar<int>(
+                      values: values,
+                      selectedColor: widget.primaryColor,
+                      selectedValue: value,
+                      onChanged: (v) {
+                        formKey.currentState?.reset();
+                        valuesNotifier.value = v;
+                      },
+                      builder: (_, v, isActive) {
+                        return Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            localization.words_count(v),
+                            style: themeStyle.styles.basicStyle.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: isActive
+                                  ? widget.primaryColor
+                                  : widget.secondaryTextColor,
                             ),
-                          );
-                        },
-                      ),
-                    ),
-                    ValueListenableBuilder<bool>(
-                      valueListenable: isClearButtonState,
-                      builder: (_, isClear, __) {
-                        return TextPrimaryButton.appBar(
-                          onPressed: isClear ? clearFields : pastePhrase,
-                          padding: const EdgeInsets.all(4),
-                          text: isClear
-                              ? localization.clear_all
-                              : localization.paste_all,
-                          style: themeStyle.styles.basicBoldStyle.copyWith(
-                            color: widget.primaryColor,
                           ),
                         );
                       },
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  localization.paste_seed_into_first_box,
-                  style: themeStyle.styles.captionStyle.copyWith(
-                    color: widget.secondaryTextColor,
-                    letterSpacing: 0.1,
                   ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: isClearButtonState,
+                    builder: (_, isClear, __) {
+                      return TextPrimaryButton.appBar(
+                        onPressed: isClear ? clearFields : pastePhrase,
+                        padding: const EdgeInsets.all(4),
+                        text: isClear
+                            ? localization.clear_all
+                            : localization.paste_all,
+                        style: themeStyle.styles.basicBoldStyle.copyWith(
+                          color: widget.primaryColor,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                localization.paste_seed_into_first_box,
+                style: themeStyle.styles.captionStyle.copyWith(
+                  color: widget.secondaryTextColor,
+                  letterSpacing: 0.1,
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: activeControllers
-                            .getRange(0, value ~/ 2)
-                            .mapIndex(
-                              (c, index) => _inputBuild(
-                                c,
-                                focuses[index],
-                                index + 1,
-                                themeStyle,
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        children: activeControllers
-                            .getRange(value ~/ 2, value)
-                            .mapIndex(
-                          (c, index) {
-                            final i = index + value ~/ 2;
-                            return _inputBuild(
-                              c,
-                              focuses[i],
-                              i + 1,
-                              themeStyle,
-                            );
-                          },
-                        ).toList(),
-                      ),
-                    ),
-                  ],
-                ),
-                ValueListenableBuilder<String?>(
-                  valueListenable: formErrorNotifier,
-                  builder: (context, error, __) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 8),
-                        if (error == null)
-                          SizedBox(
-                            height: StylesRes.regular16.fontSize! *
-                                StylesRes.regular16.height!,
-                          )
-                        else
-                          Text(
-                            error.capitalize,
-                            style: StylesRes.regular16
-                                .copyWith(color: widget.errorColor),
-                          ),
-                        const SizedBox(height: 16),
-                      ],
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: ListView.builder(
+                  // shrinkWrap: true,
+                  // physics: const NeverScrollableScrollPhysics(),
+                  itemCount: activeControllers.length,
+                  itemBuilder: (_, index) {
+                    return _Input(
+                      key: ValueKey(index),
+                      controller: activeControllers[index],
+                      focus: focuses[index],
+                      index: index + 1,
+                      isLastField: index == valuesNotifier.value,
+                      defaultTextColor: widget.defaultTextColor,
+                      errorColor: widget.errorColor,
+                      inactiveBorderColor: widget.inactiveBorderColor,
+                      primaryColor: widget.primaryColor,
+                      suggestionBackgroundColor:
+                          widget.suggestionBackgroundColor,
+                      onConfirm: _confirmAction,
+                      onRequestNextField: () => focuses[index].requestFocus(),
                     );
                   },
                 ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  /// [index] start with 1
-  Widget _inputBuild(
-    TextEditingController controller,
-    FocusNode focus,
-    int index,
-    ThemeStyle themeStyle,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: SeedPhraseInput(
-        controller: controller,
-        focus: focus,
-        suggestionBackground: widget.suggestionBackgroundColor,
-        enabledBorderColor: widget.primaryColor,
-        inactiveBorderColor: widget.inactiveBorderColor,
-        errorColor: widget.errorColor,
-        textStyle: StylesRes.basicText.copyWith(color: widget.defaultTextColor),
-        suggestionStyle:
-            StylesRes.basicText.copyWith(color: widget.defaultTextColor),
-        prefixText: '$index.',
-        requestNextField: () => focuses[index].requestFocus(),
-        textInputAction: index == valuesNotifier.value
-            ? TextInputAction.done
-            : TextInputAction.next,
-        confirmAction: _confirmAction,
+              ),
+              ValueListenableBuilder<String?>(
+                valueListenable: formErrorNotifier,
+                builder: (_, error, __) {
+                  if (error == null || error.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 8),
+                      Text(
+                        error.capitalize,
+                        style: StylesRes.regular16
+                            .copyWith(color: widget.errorColor),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          );
+        },
       ),
     );
   }
@@ -412,5 +365,56 @@ class _EnterSeedPhraseWidgetState extends State<EnterSeedPhraseWidget> {
   void _resetFormWithError() {
     formKey.currentState?.reset();
     formErrorNotifier.value = null;
+  }
+}
+
+class _Input extends StatelessWidget {
+  const _Input({
+    required this.controller,
+    required this.focus,
+    required this.index,
+    required this.primaryColor,
+    required this.defaultTextColor,
+    required this.inactiveBorderColor,
+    required this.errorColor,
+    required this.suggestionBackgroundColor,
+    required this.isLastField,
+    required this.onConfirm,
+    required this.onRequestNextField,
+    super.key,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focus;
+  final int index;
+  final Color primaryColor;
+  final Color defaultTextColor;
+  final Color inactiveBorderColor;
+  final Color errorColor;
+  final Color suggestionBackgroundColor;
+  final bool isLastField;
+  final VoidCallback onConfirm;
+  final VoidCallback onRequestNextField;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: SeedPhraseInput(
+        controller: controller,
+        focus: focus,
+        suggestionBackground: suggestionBackgroundColor,
+        enabledBorderColor: primaryColor,
+        inactiveBorderColor: inactiveBorderColor,
+        errorColor: errorColor,
+        textStyle: StylesRes.basicText.copyWith(color: defaultTextColor),
+        suggestionStyle: StylesRes.basicText.copyWith(color: defaultTextColor),
+        prefixText: '$index.',
+        requestNextField: onRequestNextField,
+        textInputAction:
+            isLastField ? TextInputAction.done : TextInputAction.next,
+        confirmAction: onConfirm,
+      ),
+    );
   }
 }
