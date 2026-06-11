@@ -25,7 +25,7 @@ $ flutter gen-l10n
    * android/crystal.keystore // *Android signing*
    * android/key.properties // *Android signing*
    * android/fastlane/GooglePlayServiceAccount.json // *Android deploy*
-   * ios/fastlane/AuthKey_L4N29B6Z42.p8 // *iOS deploy*
+   * ios/fastlane/AuthKey_Z9SXC3WYGA.p8 // *iOS deploy*
    * fastlane/FirebaseAPIKey.json // *Firebase Realtime database, build number*
    * fastlane/FirebaseADKey.json // *FAD deploy*
 
