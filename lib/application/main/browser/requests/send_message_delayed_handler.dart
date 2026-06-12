@@ -25,7 +25,7 @@ Future<Map<String, dynamic>> sendMessageDelayedHandler({
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('sendMessageDelayed', args);
+    logger.d('sendMessageDelayed, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = SendMessageDelayedInput.fromJson(jsonInput);
@@ -81,7 +81,9 @@ Future<Map<String, dynamic>> sendMessageDelayedHandler({
     await unsignedMessage.message.refreshTimeout();
 
     final hash = unsignedMessage.message.hash;
-    final transport = (await tonWalletsRepository.getTonWalletStream(input.sender).first).transport;
+    final transport =
+        (await tonWalletsRepository.getTonWalletStream(input.sender).first)
+            .transport;
 
     final signature = await keysRepository.sign(
       data: hash,
@@ -125,7 +127,7 @@ Future<Map<String, dynamic>> sendMessageDelayedHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('sendMessageDelayed', err, st);
+    logger.e('sendMessageDelayed', error: err, stackTrace: st);
     rethrow;
   }
 }

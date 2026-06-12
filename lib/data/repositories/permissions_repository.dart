@@ -20,10 +20,12 @@ class PermissionsRepository {
         _eventBus = eventBus {
     _accountRemovedStreamSubscription = _eventBus
         .on<AccountRemovedEvent>()
-        .listen((e) => _lock.synchronized(() => _accountRemovedStreamListener(e)));
+        .listen(
+            (e) => _lock.synchronized(() => _accountRemovedStreamListener(e)));
   }
 
-  Stream<Map<String, Permissions>> get permissionsStream => _hiveSource.permissionsStream;
+  Stream<Map<String, Permissions>> get permissionsStream =>
+      _hiveSource.permissionsStream;
 
   Map<String, Permissions> get permissions => _hiveSource.permissions;
 
@@ -48,7 +50,7 @@ class PermissionsRepository {
     try {
       await deletePermissionsForAccount(event.account.address);
     } catch (err, st) {
-      logger.e(err, err, st);
+      logger.e(err, error: err, stackTrace: st);
     }
   }
 }

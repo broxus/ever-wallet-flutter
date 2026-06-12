@@ -10,7 +10,7 @@ Future<void> transactionsFoundHandler({
   required TransactionsFoundEvent event,
 }) async {
   try {
-    logger.d('TransactionsFoundEvent', event);
+    logger.d('TransactionsFoundEvent, $event');
 
     final jsonOutput = jsonEncode(event.toJson());
 
@@ -18,7 +18,7 @@ Future<void> transactionsFoundHandler({
       source: "window.__dartNotifications.transactionsFound('$jsonOutput')",
     );
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e(err, error: err, stackTrace: st);
     rethrow;
   }
 }

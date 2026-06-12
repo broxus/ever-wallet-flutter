@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> verifySignatureHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('verifySignature', args);
+    logger.d('verifySignature, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = VerifySignatureInput.fromJson(jsonInput);
@@ -23,7 +23,8 @@ Future<Map<String, dynamic>> verifySignatureHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final isValid = verifySignature(
       publicKey: input.publicKey,
@@ -39,7 +40,7 @@ Future<Map<String, dynamic>> verifySignatureHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('verifySignature', err, st);
+    logger.e('verifySignature', error: err, stackTrace: st);
     rethrow;
   }
 }

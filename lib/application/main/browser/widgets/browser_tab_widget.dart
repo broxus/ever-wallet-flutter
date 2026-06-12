@@ -43,7 +43,8 @@ class BrowserTabWidget extends StatefulWidget {
   State<BrowserTabWidget> createState() => _BrowserTabWidgetState();
 }
 
-class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBindingObserver {
+class _BrowserTabWidgetState extends State<BrowserTabWidget>
+    with WidgetsBindingObserver {
   /// This flag allows to avoid loading all tabs simultaneously.
   /// This flag rising only when tab was loaded with focus or user opened it by clicking in
   /// tabViewer
@@ -55,7 +56,8 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
   );
   final webViewUpdateController = StreamController<int?>();
   late StreamSubscription subscription;
-  late final browserListener = BrowserAppBarScrollListener(pullToRefreshController);
+  late final browserListener =
+      BrowserAppBarScrollListener(pullToRefreshController);
   final urlTextController = TextEditingController();
 
   /// If controller is null (starting page is aboutPage) then url will be changed by [BrowserTabsCubit]
@@ -139,8 +141,10 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
         return Listener(
           child: MultiBlocProvider(
             providers: [
-              BlocProvider<BackButtonEnabledCubit>(create: (_) => BackButtonEnabledCubit()),
-              BlocProvider<ForwardButtonEnabledCubit>(create: (_) => ForwardButtonEnabledCubit()),
+              BlocProvider<BackButtonEnabledCubit>(
+                  create: (_) => BackButtonEnabledCubit()),
+              BlocProvider<ForwardButtonEnabledCubit>(
+                  create: (_) => ForwardButtonEnabledCubit()),
               BlocProvider<ProgressCubit>(create: (_) => ProgressCubit())
             ],
             child: Scaffold(
@@ -185,9 +189,8 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
     widget.tabsCubit.updateCurrentTab(url);
 
     if (url != aboutBlankPage) {
-      context
-          .read<SearchHistoryRepository>()
-          .addSearchHistoryEntry(SearchHistoryDto(url: url, openTime: DateTime.now()));
+      context.read<SearchHistoryRepository>().addSearchHistoryEntry(
+          SearchHistoryDto(url: url, openTime: DateTime.now()));
     }
   }
 
@@ -207,7 +210,8 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
         return ValueListenableBuilder<double>(
           valueListenable: browserListener,
           builder: (_, show, child) => AnimatedPadding(
-            padding: EdgeInsets.only(top: BrowserAppBarScrollListener.appBarHeight + show),
+            padding: EdgeInsets.only(
+                top: BrowserAppBarScrollListener.appBarHeight + show),
             duration: const Duration(milliseconds: 300),
             child: child,
           ),
@@ -234,7 +238,9 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
           .then((value) => AsyncValue.ready(value)),
       initialData: const AsyncValue.loading(),
       catchError: (context, error) => AsyncValue.error(error),
-      builder: (context, child) => context.watch<AsyncValue<String>>().maybeWhen(
+      builder: (context, child) => context
+          .watch<AsyncValue<String>>()
+          .maybeWhen(
             ready: (value) => InAppWebView(
               onScrollChanged: (_, __, y) {
                 webViewUpdateController.add(y);
@@ -255,17 +261,20 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
                   injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
                 ),
                 UserScript(
-                  source: 'window.scrollBy(0, ${widget.tab.tab.lastScrollPosition});',
+                  source:
+                      'window.scrollBy(0, ${widget.tab.tab.lastScrollPosition});',
                   injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
                 ),
               ]),
               pullToRefreshController: pullToRefreshController,
               onWebViewCreated: (c) => onWebViewCreated(context, c),
               onLoadStart: onLoadStart,
-              onLoadStop: (controller, url) => onLoadStop(controller, url, context),
+              onLoadStop: (controller, url) =>
+                  onLoadStop(controller, url, context),
               onLoadResource: onLoadResource,
               onReceivedError: (c, r, e) => onReceivedError(c, r, e, context),
-              onReceivedHttpError: (c, r, e) => onReceivedHttpError(c, r, e, context),
+              onReceivedHttpError: (c, r, e) =>
+                  onReceivedHttpError(c, r, e, context),
               onProgressChanged: (c, p) => onProgressChanged(c, p, context),
               onUpdateVisitedHistory: onUpdateVisitedHistory,
               onPermissionRequest: onPermissionRequest,
@@ -296,8 +305,10 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
     }
   }
 
-  void onWebViewCreated(BuildContext context, InAppWebViewController controller) {
-    browserControllerJavaScriptBind(context, controller, widget.tab.currentIndex);
+  void onWebViewCreated(
+      BuildContext context, InAppWebViewController controller) {
+    browserControllerJavaScriptBind(
+        context, controller, widget.tab.currentIndex);
     this.controller = controller;
     _controllerCompleter.complete(controller);
   }
@@ -328,7 +339,8 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
     _updateCurrentUrl(url?.toString(), true);
   }
 
-  void onLoadResource(InAppWebViewController controller, LoadedResource loadedResource) {
+  void onLoadResource(
+      InAppWebViewController controller, LoadedResource loadedResource) {
     webViewUpdateController.add(null);
   }
 
@@ -369,7 +381,8 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
     // Skip subrequests
     if (request.isForMainFrame != true) return;
 
-    final webUri = request.url.isValidUri ? request.url : WebUri(aboutBlankPage);
+    final webUri =
+        request.url.isValidUri ? request.url : WebUri(aboutBlankPage);
 
     controller.loadData(
       data: getErrorPage(
@@ -412,7 +425,8 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
   ) async {
     final uri = navigationAction.request.url!;
 
-    if (!['http', 'https', 'file', 'chrome', 'data', 'javascript', 'about'].contains(uri.scheme)) {
+    if (!['http', 'https', 'file', 'chrome', 'data', 'javascript', 'about']
+        .contains(uri.scheme)) {
       final url = uri.toString();
 
       if (await canLaunchUrlString(url)) {
@@ -425,10 +439,12 @@ class _BrowserTabWidgetState extends State<BrowserTabWidget> with WidgetsBinding
     return NavigationActionPolicy.ALLOW;
   }
 
-  void onConsoleMessage(InAppWebViewController controller, ConsoleMessage message) {
-    if (message.message == 'JavaScript execution returned a result of an unsupported type') return;
+  void onConsoleMessage(
+      InAppWebViewController controller, ConsoleMessage message) {
+    if (message.message ==
+        'JavaScript execution returned a result of an unsupported type') return;
 
-    logger.d(message.message, message.message);
+    logger.d(message.message);
   }
 
   void _updateUrlControllerValue(Uri url) {

@@ -17,7 +17,7 @@ Future<Map<String, dynamic>> subscribeHandler({
   required GenericContractsRepository genericContractsRepository,
 }) async {
   try {
-    logger.d('subscribe', args);
+    logger.d('subscribe, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = SubscribeInput.fromJson(jsonInput);
@@ -26,7 +26,8 @@ Future<Map<String, dynamic>> subscribeHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     if (!validateAddress(input.address)) throw Exception('Invalid address');
 
@@ -46,7 +47,7 @@ Future<Map<String, dynamic>> subscribeHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('subscribe', err, st);
+    logger.e('subscribe', error: err, stackTrace: st);
     rethrow;
   }
 }

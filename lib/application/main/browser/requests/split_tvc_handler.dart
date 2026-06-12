@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> splitTvcHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('splitTvc', args);
+    logger.d('splitTvc, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = SplitTvcInput.fromJson(jsonInput);
@@ -23,7 +23,8 @@ Future<Map<String, dynamic>> splitTvcHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final result = splitTvc(input.tvc);
 
@@ -36,7 +37,7 @@ Future<Map<String, dynamic>> splitTvcHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('splitTvc', err, st);
+    logger.e('splitTvc', error: err, stackTrace: st);
     rethrow;
   }
 }

@@ -102,7 +102,7 @@ class _PreferencesModalBodyState extends State<PreferencesModalBody> {
                     message: AppLocalizations.of(context)!.wallet_renamed,
                   );
                 } catch (err, st) {
-                  logger.e(err, err, st);
+                  logger.e(err, error: err, stackTrace: st);
 
                   if (!mounted) return;
 

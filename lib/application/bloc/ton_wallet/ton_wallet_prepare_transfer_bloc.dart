@@ -65,7 +65,7 @@ class TonWalletPrepareTransferBloc
             ),
           );
         } catch (err, t) {
-          logger.e('Sending EVER', err, t);
+          logger.e('Sending EVER', error: err, stackTrace: t);
           emit(TonWalletPrepareTransferState.error(err.toString()));
         }
       },

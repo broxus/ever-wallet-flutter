@@ -21,7 +21,7 @@ Future<Map<String, dynamic>> getProviderStateHandler({
   required GenericContractsRepository genericContractsRepository,
 }) async {
   try {
-    logger.d('getProviderState', args);
+    logger.d('getProviderState, $args');
 
     final origin = await controller.getOrigin();
 
@@ -31,7 +31,8 @@ Future<Map<String, dynamic>> getProviderStateHandler({
     final numericVersion = kProviderVersion.toInt();
     final selectedConnection = transport.group;
     const supportedPermissions = Permission.values;
-    final permissions = permissionsRepository.permissions[origin] ?? const Permissions();
+    final permissions =
+        permissionsRepository.permissions[origin] ?? const Permissions();
     final subscriptions = genericContractsRepository.tabSubscriptions(tabId);
     final networkId = await transport.getNetworkId();
 
@@ -49,7 +50,7 @@ Future<Map<String, dynamic>> getProviderStateHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('getProviderState', err, st);
+    logger.e('getProviderState', error: err, stackTrace: st);
     rethrow;
   }
 }

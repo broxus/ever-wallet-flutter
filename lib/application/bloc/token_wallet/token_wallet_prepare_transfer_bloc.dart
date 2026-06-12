@@ -84,7 +84,7 @@ class TokenWalletPrepareTransferBloc extends Bloc<
             ),
           );
         } catch (err, t) {
-          logger.e('Sending TOKEN', err, t);
+          logger.e('Sending TOKEN', error: err, stackTrace: t);
           emit(TokenWalletPrepareTransferState.error(err.toString()));
         }
       },

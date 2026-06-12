@@ -5,7 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'connection_data.freezed.dart';
 
 @freezed
-class ConnectionData with _$ConnectionData {
+sealed class ConnectionData with _$ConnectionData {
   const factory ConnectionData.gql({
     required String name,
     required int networkId,
@@ -25,4 +25,13 @@ class ConnectionData with _$ConnectionData {
     required NetworkConfig config,
     required NetworkType type,
   }) = _ConnectionDataJrpc;
+
+  const factory ConnectionData.proto({
+    required String name,
+    required int networkId,
+    required String group,
+    required String endpoint,
+    required NetworkConfig config,
+    required NetworkType type,
+  }) = _ConnectionDataProto;
 }

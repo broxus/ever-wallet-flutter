@@ -19,11 +19,12 @@ Future<Map<String, dynamic>> requestPermissionsHandler({
   required ApprovalsRepository approvalsRepository,
 }) async {
   try {
-    logger.d('requestPermissions', args);
+    logger.d('requestPermissions, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final fixedJsonInput =
-        jsonDecode(jsonEncode(jsonInput).replaceAll('tonClient', 'basic')) as Map<String, dynamic>;
+        jsonDecode(jsonEncode(jsonInput).replaceAll('tonClient', 'basic'))
+            as Map<String, dynamic>;
     final input = RequestPermissionsInput.fromJson(fixedJsonInput);
 
     final origin = await controller.getOrigin();
@@ -35,7 +36,8 @@ Future<Map<String, dynamic>> requestPermissionsHandler({
 
     if (existingPermissions != null) {
       final newPermissions = [
-        if (requiredPermissions.contains(Permission.basic) && existingPermissions.basic == null)
+        if (requiredPermissions.contains(Permission.basic) &&
+            existingPermissions.basic == null)
           Permission.basic,
         if (requiredPermissions.contains(Permission.accountInteraction) &&
             existingPermissions.accountInteraction == null)
@@ -78,7 +80,7 @@ Future<Map<String, dynamic>> requestPermissionsHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('requestPermissions', err, st);
+    logger.e('requestPermissions', error: err, stackTrace: st);
     rethrow;
   }
 }

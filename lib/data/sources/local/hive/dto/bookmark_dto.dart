@@ -6,8 +6,8 @@ part 'bookmark_dto.freezed.dart';
 part 'bookmark_dto.g.dart';
 
 @freezed
+@HiveType(typeId: 3)
 class BookmarkDto with _$BookmarkDto {
-  @HiveType(typeId: 3)
   const factory BookmarkDto({
     @HiveField(0) required int id,
     @HiveField(1) required String name,

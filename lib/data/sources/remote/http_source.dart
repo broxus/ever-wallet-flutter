@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:ever_wallet/data/models/currency.dart';
 import 'package:ever_wallet/data/models/ton_assets_manifest.dart';
@@ -17,6 +18,20 @@ class HttpSource {
     );
 
     return response.body;
+  }
+
+  Future<Uint8List> postTransportBinaryData({
+    required String endpoint,
+    required Map<String, String> headers,
+    required List<int> data,
+  }) async {
+    final response = await http.post(
+      Uri.parse(endpoint),
+      headers: headers,
+      body: data,
+    );
+
+    return response.bodyBytes;
   }
 
   Future<String> getTransportData(String endpoint) async {

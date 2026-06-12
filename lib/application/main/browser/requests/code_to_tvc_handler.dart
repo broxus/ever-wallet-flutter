@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> codeToTvcHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('codeToTvc', args);
+    logger.d('codeToTvc, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = CodeToTvcInput.fromJson(jsonInput);
@@ -23,7 +23,8 @@ Future<Map<String, dynamic>> codeToTvcHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final tvc = codeToTvc(input.code);
 
@@ -35,7 +36,7 @@ Future<Map<String, dynamic>> codeToTvcHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('codeToTvc', err, st);
+    logger.e('codeToTvc', error: err, stackTrace: st);
     rethrow;
   }
 }

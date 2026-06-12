@@ -30,7 +30,8 @@ class EWDropdownButton<T> extends StatelessWidget {
                 value: e.item1,
                 child: Text(
                   e.item2,
-                  style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+                  style: themeStyle.styles.basicStyle
+                      .copyWith(color: ColorsRes.text),
                 ),
               ),
             )
@@ -39,12 +40,21 @@ class EWDropdownButton<T> extends StatelessWidget {
         onChanged: onChanged,
         style: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
         underline: const SizedBox(),
-        icon: const Icon(Icons.arrow_drop_down, color: ColorsRes.text),
+        iconStyleData: const IconStyleData(
+          icon: Icon(Icons.arrow_drop_down, color: ColorsRes.text),
+        ),
         isExpanded: true,
-        offset: Offset.zero,
-        dropdownPadding: EdgeInsets.zero,
-        buttonDecoration: BoxDecoration(color: themeStyle.colors.secondaryBackgroundColor),
-        dropdownDecoration: BoxDecoration(color: themeStyle.colors.secondaryBackgroundColor),
+        dropdownStyleData: DropdownStyleData(
+          padding: EdgeInsets.zero,
+          decoration: BoxDecoration(
+            color: themeStyle.colors.secondaryBackgroundColor,
+          ),
+        ),
+        buttonStyleData: ButtonStyleData(
+          decoration: BoxDecoration(
+            color: themeStyle.colors.secondaryBackgroundColor,
+          ),
+        ),
       ),
     );
   }

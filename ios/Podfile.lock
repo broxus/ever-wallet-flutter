@@ -9,38 +9,49 @@ PODS:
     - OrderedSet (~> 5.0)
   - flutter_keyboard_visibility (0.0.1):
     - Flutter
-  - flutter_native_splash (0.0.1):
+  - flutter_native_splash (2.4.3):
     - Flutter
-  - local_auth_ios (0.0.1):
+  - local_auth_darwin (0.0.1):
     - Flutter
+    - FlutterMacOS
   - MTBBarcodeScanner (5.0.11)
   - nekoton_flutter (0.0.2):
     - Flutter
   - OrderedSet (5.0.0)
   - package_info_plus (0.4.5):
     - Flutter
-  - path_provider_ios (0.0.1):
+  - path_provider_foundation (0.0.1):
     - Flutter
-  - permission_handler_apple (9.0.4):
+    - FlutterMacOS
+  - permission_handler_apple (9.3.0):
     - Flutter
-  - qr_code_scanner (0.2.0):
+  - pointer_interceptor_ios (0.0.1):
+    - Flutter
+  - qr_code_scanner_plus (0.2.6):
     - Flutter
     - MTBBarcodeScanner
   - share_plus (0.0.1):
     - Flutter
-  - sqlite3 (3.39.4):
-    - sqlite3/common (= 3.39.4)
-  - sqlite3/common (3.39.4)
-  - sqlite3/fts5 (3.39.4):
+  - sqlite3 (3.50.3):
+    - sqlite3/common (= 3.50.3)
+  - sqlite3/common (3.50.3)
+  - sqlite3/dbstatvtab (3.50.3):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.39.4):
+  - sqlite3/fts5 (3.50.3):
     - sqlite3/common
-  - sqlite3/rtree (3.39.4):
+  - sqlite3/math (3.50.3):
+    - sqlite3/common
+  - sqlite3/perf-threadsafe (3.50.3):
+    - sqlite3/common
+  - sqlite3/rtree (3.50.3):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
-    - sqlite3 (~> 3.39.4)
+    - FlutterMacOS
+    - sqlite3 (~> 3.50.3)
+    - sqlite3/dbstatvtab
     - sqlite3/fts5
+    - sqlite3/math
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
   - url_launcher_ios (0.0.1):
@@ -51,14 +62,15 @@ DEPENDENCIES:
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
-  - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
+  - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - nekoton_flutter (from `.symlinks/plugins/nekoton_flutter/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
-  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
-  - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
+  - pointer_interceptor_ios (from `.symlinks/plugins/pointer_interceptor_ios/ios`)
+  - qr_code_scanner_plus (from `.symlinks/plugins/qr_code_scanner_plus/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
-  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
+  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
@@ -76,42 +88,45 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_keyboard_visibility/ios"
   flutter_native_splash:
     :path: ".symlinks/plugins/flutter_native_splash/ios"
-  local_auth_ios:
-    :path: ".symlinks/plugins/local_auth_ios/ios"
+  local_auth_darwin:
+    :path: ".symlinks/plugins/local_auth_darwin/darwin"
   nekoton_flutter:
     :path: ".symlinks/plugins/nekoton_flutter/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
-  path_provider_ios:
-    :path: ".symlinks/plugins/path_provider_ios/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
-  qr_code_scanner:
-    :path: ".symlinks/plugins/qr_code_scanner/ios"
+  pointer_interceptor_ios:
+    :path: ".symlinks/plugins/pointer_interceptor_ios/ios"
+  qr_code_scanner_plus:
+    :path: ".symlinks/plugins/qr_code_scanner_plus/ios"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
   sqlite3_flutter_libs:
-    :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
+    :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_inappwebview_ios: 25b61a1b550d1068e4ddaf490fc1d03c2ce6828d
   flutter_keyboard_visibility: 4625131e43015dbbe759d9b20daaf77e0e3f6619
-  flutter_native_splash: 9e672d3818957718ee006a491730c09deeecace9
-  local_auth_ios: 9cc9ff07e1cb8d572fcc5caa225a8392f51dc714
+  flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
+  local_auth_darwin: d2e8c53ef0c4f43c646462e3415432c4dab3ae19
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   nekoton_flutter: 4cf1e4b6aeef45fccb352c69a5e841c597bb254c
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
-  package_info_plus: ae4a63389b62b5be8544b36bfc5b069617938813
-  path_provider_ios: 025d0bdaa9f9ab016700ac1e07ff63415cf638e9
-  permission_handler_apple: 08f8206adee3b28ea33966c224b7228eabaaf6a9
-  qr_code_scanner: d77f94ecc9abf96d9b9b8fc04ef13f611e5a147a
-  share_plus: 4dfe6f47fc3248e89b3eea0be59a95d0433ebe1a
-  sqlite3: 401936402fe5aa242c07f87fccfee5fc2b606f45
-  sqlite3_flutter_libs: 46ffe2913602891a5fc67521545e7870bfa362d1
-  url_launcher_ios: 2d16952b3a69ce3f0b2c7b12d38ba18ff5177fc0
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  pointer_interceptor_ios: ec847ef8b0915778bed2b2cef636f4d177fa8eed
+  qr_code_scanner_plus: 7e087021bc69873140e0754750eb87d867bed755
+  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
+  sqlite3: 83105acd294c9137c026e2da1931c30b4588ab81
+  sqlite3_flutter_libs: ce0522d143cee6ef5e16587acfce8f476316e005
+  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
 PODFILE CHECKSUM: 28874c547c24781a74d8ad24df0c6e189da74b5b
 

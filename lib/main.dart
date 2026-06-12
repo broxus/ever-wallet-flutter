@@ -11,20 +11,22 @@ Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    logger.e('FlutterError', details.exception, details.stack);
+    logger.e('FlutterError',
+        error: details.exception, stackTrace: details.stack);
   };
 
   PlatformDispatcher.instance.onError = (error, stack) {
-    logger.e('PlatformDispatcher', error, stack);
+    logger.e('PlatformDispatcher', error: error, stackTrace: stack);
     return true;
   };
 
   FlutterError.onError = (FlutterErrorDetails details) => logger.e(
         details.library,
-        details.exception,
-        details.stack,
+        error: details.exception,
+        stackTrace: details.stack,
       );
-  ErrorWidget.builder = (details) => ErrorSplashScreen(text: details.exception.toString());
+  ErrorWidget.builder =
+      (details) => ErrorSplashScreen(text: details.exception.toString());
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 

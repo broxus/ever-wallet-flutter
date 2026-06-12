@@ -17,7 +17,7 @@ Future<Map<String, dynamic>> encryptDataHandler({
   required KeysRepository keysRepository,
 }) async {
   try {
-    logger.d('encryptData', args);
+    logger.d('encryptData, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = EncryptDataInput.fromJson(jsonInput);
@@ -54,7 +54,7 @@ Future<Map<String, dynamic>> encryptDataHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('encryptData', err, st);
+    logger.e('encryptData', error: err, stackTrace: st);
     rethrow;
   }
 }

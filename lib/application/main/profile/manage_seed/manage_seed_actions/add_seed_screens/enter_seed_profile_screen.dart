@@ -4,7 +4,8 @@ import 'package:ever_wallet/application/util/colors.dart';
 import 'package:flutter/material.dart';
 
 class EnterSeedProfileRoute extends MaterialPageRoute<void> {
-  EnterSeedProfileRoute(String? name) : super(builder: (_) => EnterSeedProfileScreen(name: name));
+  EnterSeedProfileRoute(String? name)
+      : super(builder: (_) => EnterSeedProfileScreen(name: name));
 }
 
 class EnterSeedProfileScreen extends StatelessWidget {
@@ -21,8 +22,8 @@ class EnterSeedProfileScreen extends StatelessWidget {
           Navigator.of(context).push(CreatePasswordProfileRoute(phrase, name));
         },
         errorColor: ColorsRes.red400Primary,
-        inactiveBorderColor: ColorsRes.neutral750,
-        secondaryTextColor: ColorsRes.neutral700,
+        inactiveBorderColor: ColorsRes.neutral700,
+        secondaryTextColor: ColorsRes.neutral400,
         primaryColor: ColorsRes.bluePrimary400,
         defaultTextColor: ColorsRes.black,
         buttonTextColor: ColorsRes.white,

@@ -63,6 +63,13 @@ class TransportSource {
           group: group,
           endpoint: endpoint,
         ),
+        proto: (name, networkId, group, endpoint, _, __) =>
+            _createProtoTransport(
+          name: name,
+          networkId: networkId,
+          group: group,
+          endpoint: endpoint,
+        ),
       );
 
   GqlTransport _createGqlTransport({
@@ -85,13 +92,13 @@ class TransportSource {
         required endpoint,
         required headers,
         required data,
-      }) async =>
+      }) =>
           _httpSource.postTransportData(
         endpoint: endpoint,
         headers: headers,
         data: data,
       ),
-      get: (endpoint) async => _httpSource.getTransportData(endpoint),
+      get: (endpoint) => _httpSource.getTransportData(endpoint),
       name: name,
       networkId: networkId,
       group: group,
@@ -116,7 +123,7 @@ class TransportSource {
         required endpoint,
         required headers,
         required data,
-      }) async =>
+      }) =>
           _httpSource.postTransportData(
         endpoint: endpoint,
         headers: headers,
@@ -129,6 +136,36 @@ class TransportSource {
     );
 
     final transport = JrpcTransport(connection);
+
+    return transport;
+  }
+
+  ProtoTransport _createProtoTransport({
+    required String name,
+    required int networkId,
+    required String group,
+    required String endpoint,
+  }) {
+    final settings = ProtoNetworkSettings(endpoint: endpoint);
+
+    final connection = ProtoConnection(
+      post: ({
+        required endpoint,
+        required headers,
+        required data,
+      }) =>
+          _httpSource.postTransportBinaryData(
+        endpoint: endpoint,
+        headers: headers,
+        data: data,
+      ),
+      name: name,
+      networkId: networkId,
+      group: group,
+      settings: settings,
+    );
+
+    final transport = ProtoTransport(connection);
 
     return transport;
   }

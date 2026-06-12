@@ -33,7 +33,8 @@ import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class AccountDetailRoute extends MaterialPageRoute<void> {
-  AccountDetailRoute(AssetsList account, bool isExternal, String linkedPublicKey)
+  AccountDetailRoute(
+      AssetsList account, bool isExternal, String linkedPublicKey)
       : super(
           builder: (_) => AccountDetailScreen(
             account: account,
@@ -90,8 +91,8 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                 initialData: context.read<AccountsRepository>().accounts,
                 stream: context.read<AccountsRepository>().accountsStream,
                 builder: (context, accounts) {
-                  final thisAccount =
-                      accounts.data?.firstWhereOrNull((a) => a.address == account.address);
+                  final thisAccount = accounts.data
+                      ?.firstWhereOrNull((a) => a.address == account.address);
                   return Text(
                     thisAccount?.name ?? account.name,
                     maxLines: 2,
@@ -105,7 +106,8 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
               child: Text(
                 localization.address,
-                style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
+                style:
+                    StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
               ),
             ),
             Padding(
@@ -115,7 +117,8 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                   Clipboard.setData(ClipboardData(text: account.address));
                   showFlushbar(
                     context,
-                    message: localization.public_key_copied(account.address.ellipseAddress()),
+                    message: localization
+                        .public_key_copied(account.address.ellipseAddress()),
                   );
                 },
                 child: Container(
@@ -126,14 +129,15 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                   ),
                   child: Row(
                     children: [
-                      QrImage(
+                      QrImageView(
                         size: 100,
                         data: account.address,
                       ),
                       Expanded(
                         child: Text(
                           account.address,
-                          style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+                          style: StylesRes.regular16
+                              .copyWith(color: ColorsRes.black),
                         ),
                       ),
                     ],
@@ -162,10 +166,11 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                         account.address,
                       ),
                       builder: (context, child) {
-                        final balanceUsdt = context.watch<AsyncValue<double>>().maybeWhen(
-                              ready: (value) => value,
-                              orElse: () => null,
-                            );
+                        final balanceUsdt =
+                            context.watch<AsyncValue<double>>().maybeWhen(
+                                  ready: (value) => value,
+                                  orElse: () => null,
+                                );
 
                         return balanceUsdt != null
                             ? balance(
@@ -190,22 +195,27 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                   Expanded(
                     child: Text(
                       localization.display_on_main,
-                      style: StylesRes.regular16.copyWith(color: ColorsRes.black),
+                      style:
+                          StylesRes.regular16.copyWith(color: ColorsRes.black),
                     ),
                   ),
                   const SizedBox(width: 16),
                   StreamBuilder<bool>(
-                    stream:
-                        context.read<AccountsRepository>().hiddenAccountByAddress(account.address),
+                    stream: context
+                        .read<AccountsRepository>()
+                        .hiddenAccountByAddress(account.address),
                     builder: (context, snapshot) {
                       final isHidden = snapshot.data ?? false;
                       return EWSwitchField(
                         value: !isHidden,
-                        onChanged: (_) =>
-                            context.read<AccountsRepository>().toggleHiddenAccount(account.address),
+                        onChanged: (_) => context
+                            .read<AccountsRepository>()
+                            .toggleHiddenAccount(account.address),
                         thumbChild: Icon(
                           Icons.check,
-                          color: !isHidden ? ColorsRes.green400 : Colors.transparent,
+                          color: !isHidden
+                              ? ColorsRes.green400
+                              : Colors.transparent,
                           size: 18,
                         ),
                       );
@@ -220,25 +230,31 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Text(
                       localization.linked_keys,
-                      style: StylesRes.medium14Caption.copyWith(color: ColorsRes.grey4),
+                      style: StylesRes.medium14Caption
+                          .copyWith(color: ColorsRes.grey4),
                     ),
                   ),
                   AsyncValueStreamProvider<List<String>?>(
-                    create: (context) =>
-                        context.read<TonWalletsRepository>().custodiansStream(account.address),
+                    create: (context) => context
+                        .read<TonWalletsRepository>()
+                        .custodiansStream(account.address),
                     builder: (context, __) {
-                      final publicKeys = context.watch<AsyncValue<List<String>?>>().maybeWhen(
-                            ready: (value) => value,
-                            orElse: () => null,
-                          );
+                      final publicKeys =
+                          context.watch<AsyncValue<List<String>?>>().maybeWhen(
+                                ready: (value) => value,
+                                orElse: () => null,
+                              );
                       if (publicKeys == null) return _emptyLinkedKeys();
 
                       return Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: publicKeys.map(_linkedKey).separated(const DefaultDivider()),
+                        children: publicKeys
+                            .map(_linkedKey)
+                            .separated(const DefaultDivider()),
                       );
                     },
                   ),
@@ -263,7 +279,8 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
         items: [
           MenuDropdownData(
             title: localization.rename,
-            onTap: () => showRenameAccountSheet(context: context, address: account.address),
+            onTap: () => showRenameAccountSheet(
+                context: context, address: account.address),
           ),
           MenuDropdownData(
             title: localization.delete_word,
@@ -317,8 +334,10 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
   }
 
   Widget _linkedKey(String publicKey) {
-    final key =
-        context.read<KeysRepository>().keys.firstWhereOrNull((k) => k.publicKey == publicKey);
+    final key = context
+        .read<KeysRepository>()
+        .keys
+        .firstWhereOrNull((k) => k.publicKey == publicKey);
     final accounts = context.read<AccountsRepository>().accountsFor(publicKey);
 
     return EWListTile(

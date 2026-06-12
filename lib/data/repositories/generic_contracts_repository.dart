@@ -19,9 +19,11 @@ class GenericContractsRepository {
   final _lock = Lock();
   final TransportSource _transportSource;
   final AppLifecycleStateSource _appLifecycleStateSource;
-  final _genericContractsSubject = BehaviorSubject<List<GenericContract>>.seeded([]);
-  final _contractUpdatesSubscriptionsSubject =
-      BehaviorSubject<List<Tuple4<int, String, String, ContractUpdatesSubscription>>>.seeded([]);
+  final _genericContractsSubject =
+      BehaviorSubject<List<GenericContract>>.seeded([]);
+  final _contractUpdatesSubscriptionsSubject = BehaviorSubject<
+      List<
+          Tuple4<int, String, String, ContractUpdatesSubscription>>>.seeded([]);
   late final Timer _pollingTimer;
   late final StreamSubscription _transportStreamSubscription;
 
@@ -30,14 +32,16 @@ class GenericContractsRepository {
     required AppLifecycleStateSource appLifecycleStateSource,
   })  : _transportSource = transportSource,
         _appLifecycleStateSource = appLifecycleStateSource {
-    _pollingTimer = Timer.periodic(kSubscriptionRefreshTimeout, _pollingTimerCallback);
+    _pollingTimer =
+        Timer.periodic(kSubscriptionRefreshTimeout, _pollingTimerCallback);
 
     _transportStreamSubscription = _transportSource.transportStream
         .listen((e) => _lock.synchronized(() => _transportStreamListener(e)));
   }
 
   Map<String, ContractUpdatesSubscription>? tabSubscriptions(int tabId) => {
-        for (final v in _contractUpdatesSubscriptionsSubject.value.where((e) => e.item1 == tabId))
+        for (final v in _contractUpdatesSubscriptionsSubject.value
+            .where((e) => e.item1 == tabId))
           v.item3: v.item4,
       };
 
@@ -135,14 +139,14 @@ class GenericContractsRepository {
 
             currentBlockId = nextBlockId;
           } catch (err, st) {
-            logger.e('Reliable polling error', err, st);
+            logger.e('Reliable polling error', error: err, stackTrace: st);
             break;
           }
         }
       }();
 
       return completer.future;
-    } else if (transport is JrpcTransport) {
+    } else if (transport is JrpcTransport || transport is ProtoTransport) {
       final pendingTransaction = await genericContract.send(signedMessage);
 
       final completer = Completer<Transaction>();
@@ -159,7 +163,7 @@ class GenericContractsRepository {
             await genericContract.refresh();
             await Future<void>.delayed(kIntensivePollingInterval);
           } catch (err, st) {
-            logger.e('Reliable polling error', err, st);
+            logger.e('Reliable polling error', error: err, stackTrace: st);
             break;
           }
         }
@@ -179,8 +183,8 @@ class GenericContractsRepository {
   }) async {
     final transport = _transportSource.transport;
 
-    var genericContract =
-        _genericContractsSubject.value.firstWhereOrNull((e) => e.address == address);
+    var genericContract = _genericContractsSubject.value
+        .firstWhereOrNull((e) => e.address == address);
 
     if (genericContract == null) {
       genericContract = await GenericContract.subscribe(
@@ -198,8 +202,8 @@ class GenericContractsRepository {
     }
 
     final contractUpdatesSubscriptions = [
-      ..._contractUpdatesSubscriptionsSubject.value
-          .where((e) => e.item1 != tabId && e.item2 != origin && e.item3 != address),
+      ..._contractUpdatesSubscriptionsSubject.value.where(
+          (e) => e.item1 != tabId && e.item2 != origin && e.item3 != address),
       Tuple4(tabId, origin, address, contractUpdatesSubscription),
     ];
 
@@ -212,13 +216,13 @@ class GenericContractsRepository {
     required String address,
   }) async {
     final contractUpdatesSubscriptions = [
-      ..._contractUpdatesSubscriptionsSubject.value
-          .where((e) => e.item1 != tabId && e.item2 != origin && e.item3 != address),
+      ..._contractUpdatesSubscriptionsSubject.value.where(
+          (e) => e.item1 != tabId && e.item2 != origin && e.item3 != address),
     ];
 
     if (!contractUpdatesSubscriptions.any((e) => e.item3 == address)) {
-      final genericContract =
-          _genericContractsSubject.value.firstWhere((e) => e.address == address);
+      final genericContract = _genericContractsSubject.value
+          .firstWhere((e) => e.address == address);
 
       final genericContracts = [
         ..._genericContractsSubject.value.where((e) => e != genericContract),
@@ -234,7 +238,8 @@ class GenericContractsRepository {
 
   Future<void> unsubscribeTab(int tabId) async {
     final contractUpdatesSubscriptions = [
-      ..._contractUpdatesSubscriptionsSubject.value.where((e) => e.item1 != tabId),
+      ..._contractUpdatesSubscriptionsSubject.value
+          .where((e) => e.item1 != tabId),
     ];
 
     _contractUpdatesSubscriptionsSubject.add(contractUpdatesSubscriptions);
@@ -244,7 +249,8 @@ class GenericContractsRepository {
 
   Future<void> unsubscribeOrigin(String origin) async {
     final contractUpdatesSubscriptions = [
-      ..._contractUpdatesSubscriptionsSubject.value.where((e) => e.item2 != origin),
+      ..._contractUpdatesSubscriptionsSubject.value
+          .where((e) => e.item2 != origin),
     ];
 
     _contractUpdatesSubscriptionsSubject.add(contractUpdatesSubscriptions);
@@ -280,15 +286,19 @@ class GenericContractsRepository {
   }
 
   Future<void> _unsubscribeUnused() async {
-    final contractUpdatesSubscriptions = [..._contractUpdatesSubscriptionsSubject.value];
+    final contractUpdatesSubscriptions = [
+      ..._contractUpdatesSubscriptionsSubject.value
+    ];
 
     final genericContracts = [..._genericContractsSubject.value];
 
     final genericContractsForUnsubscription = genericContracts
-        .where((e) => !contractUpdatesSubscriptions.any((el) => el.item3 == e.address))
+        .where((e) =>
+            !contractUpdatesSubscriptions.any((el) => el.item3 == e.address))
         .toList();
 
-    genericContracts.removeWhere((e) => genericContractsForUnsubscription.contains(e));
+    genericContracts
+        .removeWhere((e) => genericContractsForUnsubscription.contains(e));
 
     _genericContractsSubject.add(genericContracts);
 
@@ -309,7 +319,7 @@ class GenericContractsRepository {
 
       _genericContractsSubject.add([]);
     } catch (err, st) {
-      logger.e(err, err, st);
+      logger.e(err, error: err, stackTrace: st);
     }
   }
 

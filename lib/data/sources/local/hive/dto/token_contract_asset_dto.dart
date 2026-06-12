@@ -6,8 +6,8 @@ part 'token_contract_asset_dto.freezed.dart';
 part 'token_contract_asset_dto.g.dart';
 
 @freezed
-class TokenContractAssetDto with _$TokenContractAssetDto {
-  @HiveType(typeId: 1)
+@HiveType(typeId: 1)
+abstract class TokenContractAssetDto with _$TokenContractAssetDto {
   const factory TokenContractAssetDto({
     @HiveField(0) required String name,
     @HiveField(1) int? chainId,

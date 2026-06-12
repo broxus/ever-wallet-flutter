@@ -26,13 +26,17 @@ class CustomElevatedButton extends StatelessWidget {
               onPressed: onPressed,
               child: Container(
                 padding: const EdgeInsets.all(12),
-                color:
-                    onPressed != null ? CrystalColor.accent : CrystalColor.accent.withOpacity(0.5),
+                color: onPressed != null
+                    ? CrystalColor.accent
+                    : CrystalColor.accent.withOpacity(0.5),
                 width: double.infinity,
                 alignment: Alignment.center,
                 child: Text(
                   text,
-                  style: Theme.of(context).textTheme.button?.copyWith(color: Colors.white),
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(color: Colors.white),
                 ),
               ),
             ),
@@ -41,7 +45,8 @@ class CustomElevatedButton extends StatelessWidget {
               style: ButtonStyle(
                 padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
                 elevation: MaterialStateProperty.all(0),
-                shape: MaterialStateProperty.all(const BeveledRectangleBorder()),
+                shape:
+                    MaterialStateProperty.all(const BeveledRectangleBorder()),
                 foregroundColor: MaterialStateProperty.all(Colors.white),
                 backgroundColor: MaterialStateProperty.resolveWith(
                   (Set<MaterialState> states) {

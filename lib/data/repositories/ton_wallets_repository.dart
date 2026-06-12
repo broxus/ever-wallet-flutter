@@ -23,7 +23,6 @@ import 'package:ever_wallet/data/sources/local/hive/hive_source.dart';
 import 'package:ever_wallet/data/sources/local/sqlite/sqlite_database.dart'
     as sql;
 import 'package:ever_wallet/data/sources/remote/transport_source.dart';
-import 'package:ever_wallet/data/utils.dart';
 import 'package:ever_wallet/logger.dart';
 import 'package:nekoton_flutter/nekoton_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -421,7 +420,7 @@ class TonWalletsRepository {
           .timeout(pendingTransaction.expireAt.toTimeout())
           .then((v) => completer.complete(v.item2))
           .onError((err, st) {
-        logger.e('Ton wallet send transaction gql', err, st);
+        logger.e('Ton wallet send transaction gql', error: err, stackTrace: st);
         completer.completeError(err!);
       });
 
@@ -440,14 +439,14 @@ class TonWalletsRepository {
 
             currentBlockId = nextBlockId;
           } catch (err, st) {
-            logger.e('Reliable polling error', err, st);
+            logger.e('Reliable polling error', error: err, stackTrace: st);
             break;
           }
         }
       }();
 
       return completer.future;
-    } else if (transport is JrpcTransport) {
+    } else if (transport is JrpcTransport || transport is ProtoTransport) {
       final pendingTransaction = await tonWallet.send(signedMessage);
 
       final pendingTransactionWithAdditionalInfo =
@@ -472,7 +471,8 @@ class TonWalletsRepository {
           .timeout(pendingTransaction.expireAt.toTimeout())
           .then((v) => completer.complete(v.item2))
           .onError((err, st) {
-        logger.e('Ton wallet send transaction jrpc', err, st);
+        logger.e('Ton wallet send transaction jrpc',
+            error: err, stackTrace: st);
         completer.completeError(err!);
       });
 
@@ -482,7 +482,7 @@ class TonWalletsRepository {
             await tonWallet.refresh();
             await Future<void>.delayed(kIntensivePollingInterval);
           } catch (err, st) {
-            logger.e('Reliable polling error', err, st);
+            logger.e('Reliable polling error', error: err, stackTrace: st);
             break;
           }
         }
@@ -573,7 +573,7 @@ class TonWalletsRepository {
       // remove duplicate errors
       return errors.toSet().toList();
     } catch (err, st) {
-      logger.e('Error simulateTransactionTree', err, st);
+      logger.e('Error simulateTransactionTree', error: err, stackTrace: st);
       return [];
     }
   }
@@ -635,7 +635,7 @@ class TonWalletsRepository {
       }
       _tonWalletsSubject.add({...subscriptions});
     } catch (err, st) {
-      logger.e(err, err, st);
+      logger.e(err, error: err, stackTrace: st);
     }
   }
 
@@ -690,7 +690,7 @@ class TonWalletsRepository {
       }
       _tonWalletsSubject.add(subscriptions);
     } catch (err, st) {
-      logger.e(err, err, st);
+      logger.e(err, error: err, stackTrace: st);
     }
   }
 

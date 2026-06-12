@@ -8,7 +8,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'ton_wallet_transactions_bloc.freezed.dart';
 
-class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState> {
+class TonWalletTransactionsBloc
+    extends Bloc<_Event, TonWalletTransactionsState> {
   final TonWalletsRepository _tonWalletsRepository;
   final String _address;
   late final StreamSubscription _transactionsStreamSubscription;
@@ -60,12 +61,15 @@ class TonWalletTransactionsBloc extends Bloc<_Event, TonWalletTransactionsState>
 abstract class _Event {}
 
 @freezed
-class _InternalEvent with _$_InternalEvent implements _Event {
-  const factory _InternalEvent.update(List<TonWalletOrdinaryTransaction> transactions) = _Update;
+class _InternalEvent with _$InternalEvent implements _Event {
+  const factory _InternalEvent.update(
+      List<TonWalletOrdinaryTransaction> transactions) = _Update;
 }
 
 @freezed
-class TonWalletTransactionsEvent with _$TonWalletTransactionsEvent implements _Event {
+class TonWalletTransactionsEvent
+    with _$TonWalletTransactionsEvent
+    implements _Event {
   const factory TonWalletTransactionsEvent.preload(String from) = _Preload;
 }
 

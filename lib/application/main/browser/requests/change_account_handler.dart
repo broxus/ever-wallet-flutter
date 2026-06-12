@@ -16,7 +16,7 @@ Future<Map<String, dynamic>> changeAccountHandler({
   required ApprovalsRepository approvalsRepository,
 }) async {
   try {
-    logger.d('changeAccount', args);
+    logger.d('changeAccount, $args');
 
     final origin = await controller.getOrigin();
 
@@ -28,7 +28,8 @@ Future<Map<String, dynamic>> changeAccountHandler({
 
     final existingPermissionsList = [
       if (existingPermissions?.basic == null) Permission.basic,
-      if (existingPermissions?.accountInteraction == null) Permission.accountInteraction,
+      if (existingPermissions?.accountInteraction == null)
+        Permission.accountInteraction,
     ];
 
     final permissions = await approvalsRepository.changeAccount(
@@ -52,7 +53,7 @@ Future<Map<String, dynamic>> changeAccountHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('changeAccount', err, st);
+    logger.e('changeAccount', error: err, stackTrace: st);
     rethrow;
   }
 }

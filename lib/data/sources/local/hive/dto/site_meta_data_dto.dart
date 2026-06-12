@@ -6,8 +6,8 @@ part 'site_meta_data_dto.freezed.dart';
 part 'site_meta_data_dto.g.dart';
 
 @freezed
+@HiveType(typeId: 2)
 class SiteMetaDataDto with _$SiteMetaDataDto {
-  @HiveType(typeId: 2)
   const factory SiteMetaDataDto({
     @HiveField(0) required String url,
     @HiveField(1) String? title,

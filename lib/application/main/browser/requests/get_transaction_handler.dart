@@ -15,7 +15,7 @@ Future<Map<String, dynamic>> getTransactionHandler({
   required TransportRepository transportRepository,
 }) async {
   try {
-    logger.d('getTransaction', args);
+    logger.d('getTransaction, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = GetTransactionInput.fromJson(jsonInput);
@@ -24,7 +24,8 @@ Future<Map<String, dynamic>> getTransactionHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final transport = transportRepository.transport;
 
@@ -38,7 +39,7 @@ Future<Map<String, dynamic>> getTransactionHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('getTransaction', err, st);
+    logger.e('getTransaction', error: err, stackTrace: st);
     rethrow;
   }
 }

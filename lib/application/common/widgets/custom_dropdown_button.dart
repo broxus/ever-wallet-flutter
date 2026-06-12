@@ -40,15 +40,18 @@ class CustomDropdownButton<T> extends StatelessWidget {
             color: Colors.black,
           ),
           underline: const SizedBox(),
-          icon: const Icon(
-            Icons.arrow_drop_down,
-            color: Colors.black,
-          ),
           isExpanded: true,
-          offset: Offset.zero,
-          dropdownPadding: EdgeInsets.zero,
-          buttonDecoration: const BoxDecoration(
-            color: Colors.white,
+          iconStyleData: const IconStyleData(
+            icon: Icon(
+              Icons.arrow_drop_down,
+              color: Colors.black,
+            ),
+          ),
+          dropdownStyleData: const DropdownStyleData(
+            padding: EdgeInsets.zero,
+          ),
+          buttonStyleData: const ButtonStyleData(
+            decoration: BoxDecoration(color: Colors.white),
           ),
         ),
       );

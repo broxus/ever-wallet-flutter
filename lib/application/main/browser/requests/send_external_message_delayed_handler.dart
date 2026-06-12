@@ -26,7 +26,7 @@ Future<Map<String, dynamic>> sendExternalMessageDelayedHandler({
   required List<dynamic> args,
 }) async {
   try {
-    logger.d('sendExternalMessageDelayed', args);
+    logger.d('sendExternalMessageDelayed, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = SendExternalMessageDelayedInput.fromJson(jsonInput);
@@ -65,8 +65,9 @@ Future<Map<String, dynamic>> sendExternalMessageDelayedHandler({
     await unsignedMessage.refreshTimeout();
 
     final hash = unsignedMessage.hash;
-    final transport =
-        genericContractsRepository.genericContractByAddress(repackedRecipient).transport;
+    final transport = genericContractsRepository
+        .genericContractByAddress(repackedRecipient)
+        .transport;
 
     final signature = await keysRepository.sign(
       data: hash,
@@ -107,7 +108,7 @@ Future<Map<String, dynamic>> sendExternalMessageDelayedHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('sendExternalMessage', err, st);
+    logger.e('sendExternalMessage', error: err, stackTrace: st);
     rethrow;
   }
 }

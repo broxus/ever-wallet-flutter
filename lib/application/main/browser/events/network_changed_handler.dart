@@ -10,7 +10,7 @@ Future<void> networkChangedHandler({
   required NetworkChangedEvent event,
 }) async {
   try {
-    logger.d('NetworkChangedEvent', event);
+    logger.d('NetworkChangedEvent, $event');
 
     final jsonOutput = jsonEncode(event.toJson());
 
@@ -18,7 +18,7 @@ Future<void> networkChangedHandler({
       source: "window.__dartNotifications?.networkChanged('$jsonOutput')",
     );
   } catch (err, st) {
-    logger.e(err, err, st);
+    logger.e(err, error: err, stackTrace: st);
     rethrow;
   }
 }

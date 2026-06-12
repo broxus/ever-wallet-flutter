@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> packIntoCellHandler({
   required PermissionsRepository permissionsRepository,
 }) async {
   try {
-    logger.d('packIntoCell', args);
+    logger.d('packIntoCell, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = PackIntoCellInput.fromJson(jsonInput);
@@ -23,7 +23,8 @@ Future<Map<String, dynamic>> packIntoCellHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final boc = packIntoCell(
       params: input.structure,
@@ -38,7 +39,7 @@ Future<Map<String, dynamic>> packIntoCellHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('packIntoCell', err, st);
+    logger.e('packIntoCell', error: err, stackTrace: st);
     rethrow;
   }
 }

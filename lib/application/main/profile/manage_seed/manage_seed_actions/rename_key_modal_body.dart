@@ -52,7 +52,8 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
             autofocus: true,
             formatters: [LengthLimitingTextInputFormatter(50)],
             label: localization.name,
-            textStyle: themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
+            textStyle:
+                themeStyle.styles.basicStyle.copyWith(color: ColorsRes.text),
             cursorColor: ColorsRes.text,
           ),
           const SizedBox(height: 24),
@@ -68,15 +69,15 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
 
                         switch (widget.type) {
                           case RenameModalBodyType.key:
-                            await context
-                                .read<KeysRepository>()
-                                .renameKey(publicKey: widget.publicKey, name: value.text.trim());
+                            await context.read<KeysRepository>().renameKey(
+                                publicKey: widget.publicKey,
+                                name: value.text.trim());
                             flushTitle = localization.key_renamed;
                             break;
                           case RenameModalBodyType.seed:
-                            await context
-                                .read<KeysRepository>()
-                                .renameSeed(publicKey: widget.publicKey, name: value.text.trim());
+                            await context.read<KeysRepository>().renameSeed(
+                                publicKey: widget.publicKey,
+                                name: value.text.trim());
                             flushTitle = localization.seed_phrase_renamed;
                             break;
                         }
@@ -85,7 +86,7 @@ class _RenameKeyModalBodyState extends State<RenameKeyModalBody> {
 
                         await showFlushbar(context, message: flushTitle);
                       } catch (err, st) {
-                        logger.e(err, err, st);
+                        logger.e(err, error: err, stackTrace: st);
 
                         if (!mounted) return;
 

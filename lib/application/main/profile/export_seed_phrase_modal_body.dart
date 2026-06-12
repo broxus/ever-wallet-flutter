@@ -18,7 +18,8 @@ class ExportSeedPhraseModalBody extends StatefulWidget {
   });
 
   @override
-  _ExportSeedPhraseModalBodyState createState() => _ExportSeedPhraseModalBodyState();
+  _ExportSeedPhraseModalBodyState createState() =>
+      _ExportSeedPhraseModalBodyState();
 }
 
 class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
@@ -48,7 +49,7 @@ class _ExportSeedPhraseModalBodyState extends State<ExportSeedPhraseModalBody> {
               body: (_) => SeedPhraseExportSheet(phrase: phrase),
             );
           } catch (err, st) {
-            logger.e(err, err, st);
+            logger.e(err, error: err, stackTrace: st);
 
             await showFlushbar(
               context,

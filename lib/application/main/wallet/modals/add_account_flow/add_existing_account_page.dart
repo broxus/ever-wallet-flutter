@@ -28,7 +28,8 @@ class AddExistingAccountPage extends StatefulWidget {
   });
 
   @override
-  _NewSelectWalletTypePageState createState() => _NewSelectWalletTypePageState();
+  _NewSelectWalletTypePageState createState() =>
+      _NewSelectWalletTypePageState();
 }
 
 class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
@@ -191,7 +192,9 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
       );
 
   Future<void> onPressed() async {
-    final name = nameController.text.trim().isNotEmpty ? nameController.text.trim() : null;
+    final name = nameController.text.trim().isNotEmpty
+        ? nameController.text.trim()
+        : null;
 
     Navigator.of(widget.modalContext).pop();
 
@@ -202,7 +205,7 @@ class _NewSelectWalletTypePageState extends State<AddExistingAccountPage> {
             name: name,
           );
     } catch (err) {
-      logger.e(err, err);
+      logger.e(err, error: err);
 
       if (!mounted) return;
 

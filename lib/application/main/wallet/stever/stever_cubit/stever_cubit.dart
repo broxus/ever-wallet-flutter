@@ -89,13 +89,15 @@ class StEverCubit extends Cubit<StEverCubitState> {
 
   Future<void> _getTokensAndCurrencies() async {
     try {
-      _everWallet = await tonWalletsRepository.getTonWalletStream(accountAddress).first;
+      _everWallet =
+          await tonWalletsRepository.getTonWalletStream(accountAddress).first;
       await tokenWalletsRepository.updateSubscriptionIfAbsent(
         owner: accountAddress,
         rootTokenContract: stEverRootContract,
       );
       _stEverWallet = await tokenWalletsRepository
-          .tokenWalletStream(owner: accountAddress, rootTokenContract: stEverRootContract)
+          .tokenWalletStream(
+              owner: accountAddress, rootTokenContract: stEverRootContract)
           .first;
 
       _stEverWalletCurrency = await currencyLoader(stEverRootContract);
@@ -103,18 +105,26 @@ class StEverCubit extends Cubit<StEverCubitState> {
       final loadedApy = await stEverRepository.getAverageAPY();
       apy = (loadedApy * 100).toStringAsFixed(2);
       final details = await stEverRepository.getStEverDetails();
-      exchangeRate = double.parse(details.totalAssets) / double.parse(details.stEverSupply);
-      final time = Duration(seconds: int.tryParse(details.withdrawHoldTime) ?? 0).inHours;
+      exchangeRate = double.parse(details.totalAssets) /
+          double.parse(details.stEverSupply);
+      final time =
+          Duration(seconds: int.tryParse(details.withdrawHoldTime) ?? 0)
+              .inHours;
       if (0 <= time && time <= 24) {
         withdrawTime = time + 36;
       } else {
         withdrawTime = time + 18;
       }
-      accountPublicKey =
-          (await tonWalletsRepository.localCustodiansStream(accountAddress).first)?.first ?? '';
+      accountPublicKey = (await tonWalletsRepository
+                  .localCustodiansStream(accountAddress)
+                  .first)
+              ?.first ??
+          '';
 
       /// Do it last because if user don't have address, then method can throw error
-      _requestsSub = stEverRepository.withdrawRequestsStream(accountAddress).listen((requests) {
+      _requestsSub = stEverRepository
+          .withdrawRequestsStream(accountAddress)
+          .listen((requests) {
         _requests = requests;
         if (requests.isEmpty && state.type == StakeType.inProgress) {
           /// avoid ui lag
@@ -124,7 +134,7 @@ class StEverCubit extends Cubit<StEverCubitState> {
         }
       });
     } catch (e, t) {
-      logger.e('StEver init', e, t);
+      logger.e('StEver init', error: e, stackTrace: t);
     }
 
     // trigger updating of balances
@@ -140,10 +150,12 @@ class StEverCubit extends Cubit<StEverCubitState> {
       if (value.isNotEmpty && double.tryParse(value) != null) {
         switch (_localType) {
           case StakeType.stake:
-            receiveAmount = await stEverRepository.getDepositStEverAmount(value.toNanoTokens());
+            receiveAmount = await stEverRepository
+                .getDepositStEverAmount(value.toNanoTokens());
             break;
           case StakeType.unstake:
-            receiveAmount = await stEverRepository.getWithdrawEverAmount(value.toNanoTokens());
+            receiveAmount = await stEverRepository
+                .getWithdrawEverAmount(value.toNanoTokens());
             break;
           case StakeType.inProgress:
             // do nothing
@@ -151,13 +163,14 @@ class StEverCubit extends Cubit<StEverCubitState> {
         }
       }
     } catch (e, t) {
-      logger.e('Loading data after updating value', e, t);
+      logger.e('Loading data after updating value', error: e, stackTrace: t);
     }
 
     emit(stateWithData(value: value, receiveAmount: receiveAmount));
   }
 
-  StEverCubitState stateWithData({required String value, String? receiveAmount}) {
+  StEverCubitState stateWithData(
+      {required String value, String? receiveAmount}) {
     String? balance;
     String? enteredPrice;
     String attachedAmount;
@@ -167,27 +180,25 @@ class StEverCubit extends Cubit<StEverCubitState> {
         attachedAmount = stakeDepositAttachedFee.toTokensFull();
         balance = _everWallet?.contractState.balance.toTokensFull();
         if (_everWalletCurrency != null) {
-          enteredPrice = _zeroOrValue(value)
-              .toNanoTokens()
-              .balanceAsPrice(_everWalletCurrency!.price, _decimalsLength(value));
+          enteredPrice = _zeroOrValue(value).toNanoTokens().balanceAsPrice(
+              _everWalletCurrency!.price, _decimalsLength(value));
         }
         break;
       case StakeType.unstake:
         attachedAmount = stakeWithdrawAttachedFee.toTokensFull();
         balance = _stEverWallet?.balance.toTokensFull();
         if (_stEverWalletCurrency != null) {
-          enteredPrice = _zeroOrValue(value)
-              .toNanoTokens()
-              .balanceAsPrice(_stEverWalletCurrency!.price, _decimalsLength(value));
+          enteredPrice = _zeroOrValue(value).toNanoTokens().balanceAsPrice(
+              _stEverWalletCurrency!.price, _decimalsLength(value));
         }
         break;
       case StakeType.inProgress:
         attachedAmount = '0';
         break;
     }
-    final canPress =
-        double.parse(_zeroOrValue(value)) <= double.parse(_getPureAmount(balance ?? '0.0')) &&
-            double.parse(_zeroOrValue(value)) != 0.0;
+    final canPress = double.parse(_zeroOrValue(value)) <=
+            double.parse(_getPureAmount(balance ?? '0.0')) &&
+        double.parse(_zeroOrValue(value)) != 0.0;
 
     return StEverCubitState(
       type: _localType,
@@ -307,7 +318,8 @@ class StEverCubit extends Cubit<StEverCubitState> {
                 attachedAmount: stakeWithdrawAttachedFee,
                 resultBuilder: (modalContext) => StEverResultScreen(
                   title: context.localization.unstaking_progress,
-                  subtitle: context.localization.withdraw_hours_progress(withdrawTime),
+                  subtitle: context.localization
+                      .withdraw_hours_progress(withdrawTime),
                   modalContext: modalContext,
                 ),
               ),

@@ -15,7 +15,7 @@ Future<Map<String, dynamic>> runLocalHandler({
   required TransportRepository transportRepository,
 }) async {
   try {
-    logger.d('runLocal', args);
+    logger.d('runLocal, $args');
 
     final jsonInput = args.first as Map<String, dynamic>;
     final input = RunLocalInput.fromJson(jsonInput);
@@ -24,11 +24,13 @@ Future<Map<String, dynamic>> runLocalHandler({
 
     final existingPermissions = permissionsRepository.permissions[origin];
 
-    if (existingPermissions?.basic == null) throw Exception('Basic interaction not permitted');
+    if (existingPermissions?.basic == null)
+      throw Exception('Basic interaction not permitted');
 
     final transport = transportRepository.transport;
 
-    final contractState = input.cachedState ?? await transport.getFullContractState(input.address);
+    final contractState = input.cachedState ??
+        await transport.getFullContractState(input.address);
 
     if (contractState == null) throw Exception('Account not found');
 
@@ -48,7 +50,7 @@ Future<Map<String, dynamic>> runLocalHandler({
 
     return jsonOutput;
   } catch (err, st) {
-    logger.e('runLocal', err, st);
+    logger.e('runLocal', error: err, stackTrace: st);
     rethrow;
   }
 }

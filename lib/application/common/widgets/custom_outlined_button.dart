@@ -36,7 +36,10 @@ class CustomOutlinedButton extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   text,
-                  style: Theme.of(context).textTheme.button?.copyWith(color: CrystalColor.accent),
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(color: CrystalColor.accent),
                 ),
               ),
             ),
